@@ -11,6 +11,7 @@ class proxMineRaka extends Mine{
         $this->shipClass = "Raka Proximity Mine";
 			$this->occurence = "common";
         $this->isd = 1917;
+		$this->unofficial = true;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

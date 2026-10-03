@@ -9,8 +9,8 @@ class DalithornOSATEarly extends OSAT{
         $this->phpclass = "DalithornOSATEarly";
         $this->imagePath = "img/ships/Nexus/Dalithorn_CoilgunOSAT2.png";
 			$this->canvasSize = 90; //img has 100px per side
-        $this->shipClass = "Early Coilgun OSAT (1908)";
-			$this->variantOf = "Coilgun OSAT";
+        $this->shipClass = "Morthiden Early Coilgun OSAT (1908)";
+			$this->variantOf = "Morthiden Coilgun OSAT";
 			$this->occurence = "common";
 		$this->unofficial = true;
 		$this->isd = 1908;

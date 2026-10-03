@@ -9,8 +9,8 @@ class DalithornMissileCruiser extends HeavyCombatVessel{
         $this->phpclass = "DalithornMissileCruiser";
         $this->imagePath = "img/ships/Nexus/Dalithorn_MissileCruiser2.png";
 		$this->canvasSize = 125; //img has 200px per side
-        $this->shipClass = "Missile Cruiser";
-			$this->variantOf = "Flag Cruiser";
+        $this->shipClass = "Arenthor Missile Cruiser";
+			$this->variantOf = "Threvon Flag Cruiser";
 			$this->occurence = "rare";
 		$this->unofficial = true;
         $this->isd = 2058;

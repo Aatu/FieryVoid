@@ -5,7 +5,7 @@ class TrekFederationJClass extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 100;
-        $this->faction = "ZStarTrek (early) Federation";
+        $this->faction = "StarTrek (early) Federation";
         $this->phpclass = "TrekFederationJClass";
         $this->imagePath = "img/ships/StarTrek/JClassFreighter.png";
         $this->shipClass = "J-Class Freighter";

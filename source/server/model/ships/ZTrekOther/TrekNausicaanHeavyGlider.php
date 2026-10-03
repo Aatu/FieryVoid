@@ -5,7 +5,7 @@ class TrekNausicaanHeavyGlider extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 250;
-        $this->faction = "ZTrek Playtest Other Factions";
+        $this->faction = "Trek Playtest Other Factions";
         $this->phpclass = "TrekNausicaanHeavyGlider";
         $this->imagePath = "img/ships/StarTrek/NausicaanHeavyGlider.png";
         $this->shipClass = "Nausicaan Heavy Glider";

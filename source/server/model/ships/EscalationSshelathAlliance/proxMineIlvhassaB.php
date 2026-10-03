@@ -12,6 +12,7 @@ class proxMineIlvhassaB extends Mine{
 			$this->variantOf = "Ilvhassa-A Proximity Mine";
 			$this->occurence = "common";
         $this->isd = 1930;
+		$this->unofficial = true;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

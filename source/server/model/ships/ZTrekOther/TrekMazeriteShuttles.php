@@ -5,7 +5,7 @@ class TrekMazeriteShuttles extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 33 *6; //for 6
-        $this->faction = "ZTrek Playtest Other Factions";
+        $this->faction = "Trek Playtest Other Factions";
         $this->phpclass = "TrekMazeriteShuttles";
         $this->imagePath = "img/ships/StarTrek/MazeriteShuttle.png";
         $this->shipClass = "Mazerite Shuttles";

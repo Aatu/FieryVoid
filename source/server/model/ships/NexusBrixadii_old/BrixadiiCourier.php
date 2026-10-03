@@ -9,7 +9,7 @@ class BrixadiiCourier extends LCV{
         $this->phpclass = "BrixadiiCourier";
         $this->imagePath = "img/ships/Nexus/brixadii_police_frigate.png";
 			$this->canvasSize = 70; //img has 200px per side
-        $this->shipClass = "Brixadii Courier";
+        $this->shipClass = "Brixadii Nor'lix Courier";
 		//$this->variantOf = "Police Frigate";
 		$this->unofficial = true;
 			$this->isd = 1850;

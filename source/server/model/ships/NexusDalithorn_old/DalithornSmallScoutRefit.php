@@ -8,8 +8,8 @@ class DalithornSmallScoutRefit extends MediumShip{
         $this->faction = "Nexus Dalithorn Commonwealth (early)";
         $this->phpclass = "DalithornSmallScoutRefit";
         $this->imagePath = "img/ships/Nexus/Dalithorn_SmallScout2.png";
-        $this->shipClass = "Small Scout (2048)";
-			$this->variantOf = "Small Scout";
+        $this->shipClass = "Caldrus Small Scout (2048)";
+			$this->variantOf = "Caldrus Small Scout";
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 100;
@@ -29,7 +29,7 @@ class DalithornSmallScoutRefit extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(3, 10, 4, 4));
+        $this->addPrimarySystem(new ELINTScanner(3, 10, 4, 5));
         $this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
         $this->addPrimarySystem(new Hangar(1, 1, 1));
 		$this->addPrimarySystem(new Magazine(3, 10));

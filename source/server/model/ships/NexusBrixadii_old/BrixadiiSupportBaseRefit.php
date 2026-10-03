@@ -9,8 +9,8 @@ class BrixadiiSupportBaseRefit extends SmallStarBaseFourSections{
 		$this->smallBase = true;
 		$this->faction = "Nexus Brixadii Clans (early)";
 		$this->phpclass = "BrixadiiSupportBaseRefit";
-		$this->shipClass = "Support Base (2048)";
-			$this->variantOf = "Support Base";
+		$this->shipClass = "Morgexian Support Base (2048)";
+			$this->variantOf = "Morgexian Support Base";
 			$this->occurence = "common";
 		$this->imagePath = "img/ships/Nexus/brixadii_combat_station.png";
 		$this->canvasSize = 140; 

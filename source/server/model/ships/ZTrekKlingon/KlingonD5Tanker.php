@@ -5,7 +5,7 @@ class KlingonD5Tanker extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 355;
-        $this->faction = "ZStarTrek Klingon";
+        $this->faction = "StarTrek Klingon";
         $this->phpclass = "KlingonD5Tanker";
         $this->imagePath = "img/ships/StarTrek/KlingonD5Tanker.png";
         $this->shipClass = "Klingon D5 Tanker";

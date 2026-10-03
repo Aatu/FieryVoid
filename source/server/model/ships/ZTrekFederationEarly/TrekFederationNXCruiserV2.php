@@ -5,7 +5,7 @@ class TrekFederationNXCruiserV2 extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 300;
-        $this->faction = "ZStarTrek (early) Federation";
+        $this->faction = "StarTrek (early) Federation";
         $this->phpclass = "TrekFederationNXCruiserV2";
         $this->imagePath = "img/ships/StarTrek/EnterpriseNX.png";
         $this->shipClass = "NX Cruiser";

@@ -5,7 +5,7 @@ class zzftrUglyChirdaki extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 42*6;
-        $this->faction = "ZStarWars";
+        $this->faction = "StarWars";
         $this->phpclass = "zzftrUglyChirdaki";
         $this->shipClass = "Uglies Chirdaki Fighters";
         $this->variantOf = "Uglies TIE-X Fighters";

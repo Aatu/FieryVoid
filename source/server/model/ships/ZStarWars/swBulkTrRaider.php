@@ -5,7 +5,7 @@ class swBulkTrRaider extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 220;
-	$this->faction = "ZStarWars";
+	$this->faction = "StarWars";
         $this->phpclass = "swBulkTrRaider";
         $this->imagePath = "img/starwars/BulkTransport.png";
         $this->shipClass = "Action VI Raider Refit";

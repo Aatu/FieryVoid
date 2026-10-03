@@ -45,6 +45,18 @@ window.ReplayPhaseStrategy = function () {
         this.ewIconContainer.consumeGamedata(this.gamedata);
         this.shipWindowManager = shipWindowManager;
         gamedata.replay = true;
+
+        /* OPTIONS tab -> "Play Sound Effects" off: every replay starts muted. Here in activate,
+           NOT update - a new strategy is built on each replay ENTRY, while update runs on every
+           turn stepped inside one, and must not undo a player who turned the speaker back on.
+           ⚠️ On a page that opens straight into replay (observer, finished game) this runs
+           inside webglScene.init, BEFORE EwButtons mounts, so nobody hears the event - the
+           button reads gamedata.playAudio in its constructor for that case. */
+        if (window.gameOptions && !gameOptions.get("playSoundEffects") && gamedata.playAudio) {
+            gamedata.playAudio = false;
+            window.dispatchEvent(new CustomEvent("soundToggled"));
+        }
+
         this.createReplayUI();
 
         startReplayOrRequestGamedata.call(this);

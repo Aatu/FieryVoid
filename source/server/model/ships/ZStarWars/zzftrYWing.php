@@ -5,7 +5,7 @@ class zzftrywing extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 56*6;
-        $this->faction = "ZStarWars";
+        $this->faction = "StarWars";
         $this->phpclass = "zzftrywing";
         $this->shipClass = "Y-Wing Assault Fighters";
         $this->imagePath = "img/starwars/yWing.png";

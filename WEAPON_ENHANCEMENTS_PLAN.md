@@ -926,7 +926,7 @@ No open questions remain for v1. §11 and §12 are scoped follow-ups, not blocke
 * Any change to the existing ship-level enhancement dialogs or their pricing.
 * Refits bought or changed **in game** — lobby-only, exactly like pre-battle damage.
 * Retro-fitting the existing `GUNSIGHT` (Repeater Gunsights) onto the new per-system track. It is
-  ship-level, it works, and moving it buys nothing.
+  ship-level, it works, and moving it buys nothing. **Done after all, 2026-09-27 (user) - see §13.**
 * **Officers — §11.** Deferred, and deliberately **not** designed for: they are an ordinary
   ship-level enhancement and need nothing from this plan.
 * **True per-viewer masking of enhanced stats — §12**, deferred.
@@ -1012,3 +1012,33 @@ English, so sending it to an enemy defeats the badge entirely. Mask the marks, n
 
 Note the honest ceiling: a masked weapon reveals its enhanced fire control the first time it fires
 and its to-hit is logged. The masking buys pre-battle uncertainty, not secrecy.
+
+---
+
+## 13. FOLLOW-UP — Repeater Gunsights moved onto this track (`SYS_RGSGT`, user 2026-09-27)
+
+The ship-level `GUNSIGHT` bought split fire for **every** Particle Repeater on the hull at 12 each; the user wanted it per
+repeater. It is now the registry entry `SYS_RGSGT` "Repeater Gunsights" (9 chars, fits `enhid varchar(10)`): eligible on any
+`ParticleRepeater` of a Young / Middleborn hull, 12 points, limit 1, apply = the old rule per repeater (`canSplitShots` +
+`specialHitChanceCalculation`, **unless the repeater has taken any damage** - damage is loaded before `onConstructed`, so the test
+is live, pre-battle damage included), serialise = those two flags. `systemEnhancements.js` has the label and a preview case.
+It sits beside `SYS_GSGT` "Gunsights" (+1 fire control), which a repeater is still offered too - a different refit, hence the label.
+
+- **Ship-level `GUNSIGHT` is no longer OFFERED** (its block in `setEnhancementOptionsShip` is a comment now), but its `case`
+  in `setEnhancementsShip` and in `addSystemEnhancementsForJSON` stay: games already running were bought under it, and in game
+  ship-level enhancements come from `tac_enhancements`, not from the offer list. (That old case `break`s out of the WHOLE repeater
+  loop at the first damaged repeater, so later undamaged ones lose theirs too - left as it was, legacy only now.)
+- **Saved fleets**: an unmatched ship-level row would drop silently with its points still inside `pointCostEnh`, so
+  `Manager::loadSavedFleet` converts a stored `GUNSIGHT` into one `SYS_RGSGT` row per repeater
+  (`Enhancements::legacyRepeaterGunsightRows`), each claimed at 12 and counted into the stored system total - the existing bucket
+  split moves the points across, so the fleet costs what it did - and says so in the fleet notice.
+- **The Drazi DEW mine (`dewMineBR`) loses the offer**: mines take no system enhancements (D7), and a mine fires by range
+  allocation, so split shots gave it nothing. The ten Drazi hulls' `enhancementOptionsEnabled[] = 'GUNSIGHT'` lines were already
+  no-ops (the offer never read Enabled) and are untouched.
+- Help pages: `ammo-options-enhancements.php` lists it under Available Refits (the Drazi ship-level entry points there);
+  `factions-tiers.php` says per repeater.
+
+Verified: scratch `rgsgt.php` 15/15 (offers on exactly the 4 Guardhawk repeaters at 12, none ship-level, none on the mine; sanitise;
+apply incl. the damage rule; serialise; the legacy in-game path; a planted saved fleet with `GUNSIGHT` loads as 4 rows, Enh 0 + SysEnh
+48, with the notice - scratch list deleted); lobby `r17.mjs` (menu row beside Gunsights, +12, the preview flag, the fleet row's
+summary); replay harness 117 passed, 7 failed = the five known-bad games + 4255 / 4308 (the lobby plan's §12.16 faction rename).

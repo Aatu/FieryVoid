@@ -6,7 +6,7 @@ class swErrantVenture extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 925;
-	$this->faction = "ZStarWars";
+	$this->faction = "StarWars";
         $this->phpclass = "swErrantVenture";
         $this->imagePath = "img/starwars/ErrantVenture.png";
         $this->shipClass = "Errant Venture";

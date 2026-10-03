@@ -6,7 +6,7 @@ class swCorellianCorvetteEscortH extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 275;
-	$this->faction = "ZStarWars";
+	$this->faction = "StarWars";
         $this->phpclass = "swcorelliancorvetteescorth";
         $this->imagePath = "img/starwars/cr90.png";
 	    $this->canvasSize = 100;

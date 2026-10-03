@@ -9,8 +9,8 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
         $this->phpclass = "BrixadiiBattleDestroyerLeader2108";
         $this->imagePath = "img/ships/Nexus/brixadii_battle_destroyer_leader.png";
 			$this->canvasSize = 125; //img has 200px per side
-        $this->shipClass = "Battle Destroyer Leader (2108)";
-        $this->variantOf = "Battle Destroyer (2108)";
+        $this->shipClass = "Lanexii Battle Destroyer Leader (2108)";
+        $this->variantOf = "Draxen Battle Destroyer (2108)";
 			$this->occurence = "rare";
 			$this->unofficial = true;
         $this->isd = 2108;

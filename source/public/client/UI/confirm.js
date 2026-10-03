@@ -168,10 +168,15 @@ window.confirm = {
             return confirm.getTotalCostBulk();
         }
 
+        var totalCostSpan = $(".confirm .totalUnitCostAmount").first();
         var flightSize = parseInt($(".fighterAmount").html()) || 1;
+        //Per craft for a flight with a size selector; otherwise the whole unit's bare hull, which
+        //confirm.setBuyBase parks on the dialog's own total. (This used to read an UNSCOPED
+        //.totalUnitCostAmount and so, by document order, a hidden page template holding the base -
+        //the dialog's own span holds the running total, and reading that would compound.)
         var fighterCost = $(".fighterAmount").data("pV");
         if (!fighterCost) {
-            fighterCost = $(".totalUnitCostAmount").data("value") || 0;
+            fighterCost = totalCostSpan.data("baseCost") || 0;
         }
 
         var totalMissileCost = 0;
@@ -210,9 +215,10 @@ window.confirm = {
         totalCost += flightSize * enhCost;
         totalCost = Math.ceil(totalCost);
 
-        var totalCostSpan = $(".confirm .totalUnitCostAmount");
         totalCostSpan.data("value", totalCost);
         totalCostSpan.html(totalCost);
+
+        confirm.paintBuySummary(flightSize * fighterCost, flightSize);
     },
 
     getTotalCostBulk: function getTotalCostBulk() {
@@ -247,7 +253,8 @@ window.confirm = {
         var costPerUnitSpan = $(".confirm .costPerUnitSpan");
         if (costPerUnitSpan.length) {
             costPerUnitSpan.data("value", costPerUnit);
-            costPerUnitSpan.html(costPerUnit);
+            //shown to the cent: MINE_DMG is priced in halves, and a float sum can trail digits
+            costPerUnitSpan.html(Math.round(costPerUnit * 100) / 100);
         }
 
         var totalCostSpan = $(".confirm .totalBulkCostAmount");
@@ -258,6 +265,9 @@ window.confirm = {
             // Fallback
             $(".confirm .totalUnitCostAmount").first().html(totalCost);
         }
+
+        //per unit, like the figure it adds up to
+        confirm.paintBuySummary(baseCost, 1);
     },
 
     increaseFlightSize: function increaseFlightSize(e) {
@@ -265,7 +275,7 @@ window.confirm = {
 
         var flightSize = $(".fighterAmount");
         var current = flightSize.html();
-        var max = $(".totalUnitCostAmount").data("maxSize");
+        var max = flightSize.data("maxSize"); //confirm.addBuyFlightSizeRow
 
         if (current < max) {
             if (current < 6) { //allow 1-6 in flight, then by 3s!				
@@ -283,7 +293,6 @@ window.confirm = {
 
         var flightSize = $(".fighterAmount");
         var current = flightSize.html();
-        var max = $(".totalUnitCostAmount").data("maxSize");
 
         if (current > 6) { //allow 1-6 in flight, then by 3s!	
             flightSize.html(Math.floor(current) - 3);
@@ -396,8 +405,8 @@ window.confirm = {
         select.val(String(selected)); //option values are strings
 
         //a spinner is meaningless for a pick - drop the typing/wheel handlers the loop just attached.
-        //.enhChoiceItem (confirm.css) empties the +/- column and widens the value box over it, so the
-        //dropdown ends on the same right edge as the spinners of the counted rows around it.
+        //.enhChoiceItem (confirm.css) hides the - / + buttons and widens the value box over the
+        //row, so the dropdown still ends at the edge the counted rows' spinners end at.
         $(item).addClass("enhChoiceItem");
         target.off();
         target.attr("contenteditable", "false");
@@ -414,11 +423,10 @@ window.confirm = {
             confirm.getTotalCost();
         });
 
-        //the counted-enhancement label builder appends "(up to N levels, 0pts)", which is nonsense
-        //for a pick - restate it plainly
-        var label = enhancement[1];
-        if (enhancement[6]) label = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + label;
-        $(".selectText", item).html(label);
+        //the counted row's price note ("up to N levels, 0pts") is nonsense for a pick - the row is
+        //just its name. No "(OPTION)" prefix: it sits in the Options section, which says so.
+        $(".buyRowName", item).html(confirm.buyRowTitle(enhancement[1]));
+        $(".buyRowNote", item).empty();
 
         return true;
     },
@@ -467,20 +475,25 @@ window.confirm = {
         return step;
     },
 
-    /*The "(up to N levels, Xpts ...)" suffix on an enhancement row's label. Shared by the buy,
-      bulk-buy and edit dialogs so they cannot drift. A stepped enhancement is described in the
-      quantity its spinner now shows; everything else keeps the original wording verbatim.*/
-    expandEnhancementName: function expandEnhancementName(enhName, enhLimit, enhPrice, enhPriceStep, enhStep) {
-        var out = enhName + ' (';
+    /*The price note under an enhancement row's name - "up to 3 levels, 10pts plus 5pts per level".
+      Shared by the buy, bulk-buy and edit dialogs (confirm.addBuyEnhancementRows) so they cannot
+      drift. It is the old "(...)" name suffix, moved under the name: a stepped enhancement is
+      described in the quantity its spinner shows, and an ammunition row in rounds rather than
+      "levels" (isAmmo - its limit is how many fit the magazine). Otherwise the wording is as it was.*/
+    enhancementPriceNote: function enhancementPriceNote(enhLimit, enhPrice, enhPriceStep, enhStep, isAmmo) {
+        var out = '';
         if (enhStep > 1) {
             if (enhLimit > 1) out += 'up to ' + (enhLimit * enhStep) + ' capacity, ';
             out += enhPrice + 'pts per ' + enhStep;
+        } else if (isAmmo && enhPriceStep == 0) {
+            if (enhLimit > 1) out += 'up to ' + enhLimit + ', ';
+            out += enhPrice + 'pts each';
         } else {
             if (enhLimit > 1) out += 'up to ' + enhLimit + ' levels, ';
             out += enhPrice + 'pts';
             if ((enhPriceStep != 0) && (enhLimit > 1)) out += ' plus ' + enhPriceStep + 'pts per level';
         }
-        return out + ')';
+        return out;
     },
 
     // Helper function to select all text on focus
@@ -545,10 +558,11 @@ window.confirm = {
 
     // Helper function to prevent non-numeric input
     preventNonNumericInput: function preventNonNumericInput(e) {
-        // Allow only numbers, backspace, delete, arrows, and enter
+        // Allow only numbers, backspace, delete, arrows, and enter - and Tab / Escape, or the
+        // keyboard could neither leave the box nor close the dialog from it.
         if (
             (e.key >= "0" && e.key <= "9") ||
-            ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Enter"].includes(e.key)
+            ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Enter", "Tab", "Escape"].includes(e.key)
         ) {
             return;
         }
@@ -592,7 +606,7 @@ window.confirm = {
 
         var $elem = $(this);
         var current = parseInt($elem.text()) || 0;
-        var max = $(".totalUnitCostAmount").data("maxSize");
+        var max = $elem.data("maxSize"); //confirm.addBuyFlightSizeRow
         var direction = (e.originalEvent.deltaY < 0) ? 'up' : 'down';
 
         if (direction === 'up') {
@@ -648,249 +662,6 @@ window.confirm = {
         // recalc total cost / ammo
         confirm.getTotalCost();
     },
-
-    /*
-    showShipBuy: function showShipBuy(ship, callback) {
-        var e = $(this.whtml);
-
-        //variable flightsize
-        var variableSize = confirm.getVariableSize(ship);
-        var missileOptions = confirm.getMissileOptions(ship);
-
-        //if (variableSize || missileOptions.length > 0 || ship.superheavy) {
-        var totalTemplate = $(".totalUnitCost");
-        var totalItem = totalTemplate.clone(true).prependTo(e);
-
-        //allow maximum flight size pre-set in design...
-        if (ship.maxFlightSize != 0) {
-            $(".totalUnitCostAmount").data("maxSize", ship.maxFlightSize);
-        } else {
-            if (ship.jinkinglimit > 9) {
-                $(".totalUnitCostAmount").data("maxSize", 12);
-            } else $(".totalUnitCostAmount").data("maxSize", 9);
-        }
-
-        var pointCost = ship.pointCost;
-        if (ship.maxFlightSize == 3) { //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
-            //but for 3-strong flight cost is still set for 6-strong flight...
-            pointCost = pointCost / 2;
-        }
-
-        //ship.pointCost
-        $(".totalUnitCostText", totalItem).html("Total cost");
-        $(".totalUnitCostAmount", totalItem).html(pointCost);
-        $(".totalUnitCostAmount", totalItem).data("value", pointCost);
-
-        $(totalItem).show();
-
-        $(".totalUnitCostAmount").data("value", pointCost);
-        //}
-
-
-        //ship enhancements
-        for (var i in ship.enhancementOptions) {
-            //enhancementOption: ID,readableName,numberTaken,limit,price,priceStep	
-            var enhancement = ship.enhancementOptions[i];
-            var enhID = enhancement[0];
-            var enhName = enhancement[1];
-            var enhLimit = enhancement[3];
-            var enhPrice = enhancement[4];
-            var enhPriceStep = enhancement[5];
-            var enhIsOption = enhancement[6];
-
-            var template = $(".missileSelectItem");
-            var item = template.clone(true).prependTo(e);
-
-            var selectAmountItem = $(".selectAmount", item);
-
-            selectAmountItem.html("0");
-            selectAmountItem.attr("contenteditable", "true"); // Make it editable - DK 12.5.25
-            selectAmountItem.addClass("shpenh" + i);
-            selectAmountItem.data('enhID', enhID);
-            selectAmountItem.data('count', 0);
-            selectAmountItem.data('enhCost', 0);
-            selectAmountItem.data('min', 0);
-            selectAmountItem.data('max', enhLimit);
-            selectAmountItem.data('enhPrice', enhPrice);
-            selectAmountItem.data('enhPriceStep', enhPriceStep);
-            //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
-            //selectAmountItem.data("firingMode", i);
-
-            // New fucntions to allow player to free type/mousewheel in number fields for enhancements/ammo - DK 12.5.25
-            selectAmountItem.on("focus", confirm.selectAllTextOnFocus);
-
-            selectAmountItem.on("input", confirm.handleInputChange);
-
-            selectAmountItem.on("keydown", confirm.preventNonNumericInput);
-
-            selectAmountItem.on("wheel", confirm.handleMouseWheel);
-
-            var slotid = gamedata.selectedSlot;
-            var slot = playerManager.getSlotById(slotid);
-            //var deployTurn = Math.max(1, slot.depavailable); 
-
-            //Add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
-            if (enhIsOption) enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName;
-            //if(enhIsOption && enhID != 'DEPLOY') enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName;
-
-
-            const ammoTypes = ['(HEAVY AMMO)', '(MEDIUM AMMO)', '(LIGHT AMMO)', '(AMMO)'];
-            for (const type of ammoTypes) {
-                if (enhName.includes(type)) {
-                    enhName = enhName.replace(type, '').trim();
-                    enhName = ` <span style="color:rgb(106, 195, 255);">${type}</span> ` + enhName;
-                    break; // Assuming only one ammo type appears in the string
-                }
-            }
-
-            var nameExpanded = enhName;
-            //if(enhID != 'DEPLOY'){
-            nameExpanded = nameExpanded + ' (';
-            if (enhLimit > 1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
-            nameExpanded += enhPrice + 'pts';
-            //+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
-            if ((enhPriceStep != 0) && (enhLimit > 1)) {
-                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';
-            }
-            nameExpanded = nameExpanded + ')';
-            //}    
-            $(".selectText", item).html(nameExpanded);
-            $(item).show();
-
-            var plusButton = $(".plusButton", item);
-            plusButton.data("enhNo", i);
-            var minusButton = $(".minusButton", item);
-            minusButton.data("enhNo", i);
-
-
-            $(".plusButton", item).on("click", confirm.doOnPlusEnhancement);
-            $(".minusButton", item).on("click", confirm.doOnMinusEnhancement);
-
-            //a choice-valued option (Chameleon disguise) swaps the spinner for a dropdown; no-op otherwise
-            confirm.applyEnhancementChoiceWidget(item, enhancement);
-        }
-        $('<div class="missileselect"><label>Here you may select any available Ammo, Options, and Enhancements.<br><span>(NOTE - For fighter flights, all fighters in flight will be similarly outfitted)</span></label></div>').prependTo(e);
-
-        // Do lots of stuff to account for possible buying of missiles.
-        var missileOptions = confirm.getMissileOptions(ship);
-
-        // If it is a fighter, put the option in this pane.
-        // A ship will need some more tricks.
-        if (!mathlib.arrayIsEmpty(missileOptions)) {
-
-            for (var i in missileOptions) {
-                var missileOption = missileOptions[i];
-                var template = $(".missileSelectItem");
-                var item = template.clone(true).prependTo(e);
-
-                var selectAmountItem = $(".selectAmount", item);
-
-                selectAmountItem.html("0");
-                selectAmountItem.addClass(i);
-                selectAmountItem.data('value', 0);
-                selectAmountItem.data('initialValue', 0); // store initial value for diff calculation                
-                selectAmountItem.data('min', 0);
-
-
-                //if (ship.superheavy) {
-                if (ship.maxFlightSize < 3) { //here it's question of single vs multiple craft per flight, not of being superheavy
-                    $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
-                    $(item).show();
-
-                    selectAmountItem.data('max', Math.round(missileOption[1] / 6 / (missileOption[3] / 6)));
-                    selectAmountItem.data('cost', missileOption[2]);
-                    selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
-                    selectAmountItem.data("firingMode", i);
-                } else {
-                    $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
-                    $(item).show();
-
-                    selectAmountItem.data('max', Math.round(missileOption[1] / 6 / (missileOption[3] / 6)));
-                    selectAmountItem.data('cost', missileOption[2]);
-                    selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
-                    selectAmountItem.data("firingMode", i);
-                }
-
-                $(".selectText").data("firingMode", i);
-
-                var plusButton = $(".plusButton", item);
-                plusButton.data("firingMode", i);
-                $(".minusButton", item).data("firingMode", i);
-            }
-
-            $('<div class="missileselect"><label>This fighter type can carry fighter missiles.<br>\
-                    Please select the amount you wish to purchase PER MISSILE LAUNCHER.<br></label>').prependTo(e);
-
-            //$(".missileSelectItem .selectButtons .plusButton", e).on("click", confirm.doOnPlusMissile);
-            //$(".missileSelectItem .selectButtons .minusButton", e).on("click", confirm.doOnMinusMissile);
-            //change for enhancements:
-            $(".plusButton", item).on("click", confirm.doOnPlusMissile);
-            $(".minusButton", item).on("click", confirm.doOnMinusMissile);
-            // **NEW**: bind wheel to our new handler
-            selectAmountItem.on("wheel", confirm.handleMouseWheelMissile);
-        }
-
-        if (variableSize) {
-            var template = $(".missileSelectItem");
-            var item = template.clone(true).prependTo(e);
-            item.addClass("fighterSelectItem");
-
-            $(".selectText", item).html("Number of fighters in this flight:");
-            $(item).show();
-
-            var selectAmountItem = $(".selectAmount", item);
-            selectAmountItem.removeClass("selectAmount").addClass("fighterAmount");
-
-            //special treatment for flight size 3 - as it's less than default 6...
-            if (ship.maxFlightSize == 3) {
-                selectAmountItem.html("3");
-            } else {//default 
-                selectAmountItem.html("6");
-            }
-            selectAmountItem.data('pV', Math.floor(ship.pointCost / 6));
-
-            selectAmountItem.on("wheel", confirm.handleMouseWheelFighter);
-            $(".fighterSelectItem .selectButtons .plusButton", e).on("click", confirm.increaseFlightSize);
-            $(".fighterSelectItem .selectButtons .minusButton", e).on("click", confirm.decreaseFlightSize);
-        }
-
-
-        var nameCore = ship.shipClass;
-        var nameNumber = gamedata.lastShipNumber + 1;
-        var fullName = '';//by default: nameCore + ' #' + number ; name cannot be repeated!
-        var accepted = false;
-        var exists = false;
-        while (accepted != true) {
-            fullName = nameCore + ' #' + nameNumber;
-            //check whether such a name doesn't yet exist...
-            exists = false;
-            for (var i in gamedata.ships) {
-                var currShip = gamedata.ships[i];
-                if (currShip.name == fullName) exists = true;
-            }
-            if (exists == true) {
-                nameNumber++;
-            } else {
-                accepted = true;
-            }
-        }
-        gamedata.lastShipNumber = nameNumber;
-
-        $('<label>Name your new ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="' + fullName + '"></input><br>').prependTo(e);
-
-
-        //$('<div class="message"><span>Name your new '+ship.shipClass+'</span></div>').prependTo(e);
-        $(".confirmok", e).on("click", callback);
-        $(".confirmcancel", e).on("click", function () {
-            console.log("remove");
-            $(".confirm").remove();
-        });
-        $(".confirmok", e).data("shipclass", ship.phpclass);
-
-        var a = e.appendTo("body");
-        a.fadeIn(250);
-    },
-    */
 
     // Helper function to handle input changes (edit mode)
     handleInputChangeEdit: function handleInputChangeEdit(e) {
@@ -1003,536 +774,340 @@ window.confirm = {
         };
     },
 
-    showShipEdit: function showShipEdit(ship, callback) {
-        var e = $(this.whtml);
+    /* ── Buy / Edit / Bulk-Buy ship dialogs ───────────────────────────────────────────
+       CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md §10 (Stage 9). showShipBuy (a new ship or flight),
+       showShipEdit (a bought one, re-opened to edit OR to copy) and showBuyBulk (mines and OSATs:
+       buy, edit and copy) are all built from ONE shell and ONE set of row builders below, so the
+       sections, the totals and the cost plumbing are written once - this file has already carried
+       a stale copy of a dialog that drifted from its twin.
 
-        // Store the original ship state before any edits
-        let originalShipData = confirm.snapshotShip(ship);
+       The window is a head, a scrolling body - the unit's name / flight size / quantity, a Base
+       Hull line, then one accordion section per kind of purchase (Ammo & Ordnance, Enhancements,
+       Options) - and a foot that never scrolls, holding the total over the buttons. That foot is
+       the fix for the old dialog's buried total: every row used to be .prependTo()'d above it, so
+       on a well-equipped ship the running cost scrolled out of sight while it was being changed.
 
-        //variable flightsize
-        var variableSize = confirm.getVariableSize(ship);
-        var missileOptions = confirm.getMissileOptions(ship);
+       Accordion, not tabs (plan §10.2): each section's head carries a count + subtotal badge, so a
+       closed section still says what is bought in it, and Base Hull + the section subtotals add up
+       to the total shown.
 
-        //if (variableSize || missileOptions.length > 0 || ship.superheavy) {
-        var totalTemplate = $(".totalUnitCost");
-        var totalItem = totalTemplate.clone(true).prependTo(e);
+       A dialog with BUY_FILTER_AT rows or more also gets a filter box, just above the sections
+       (Stage 10, filterBuyRows) - it only ever HIDES rows, so what a hidden row holds is still
+       bought and still counted.
 
-        //allow maximum flight size pre-set in design...
-        if (ship.maxFlightSize != 0) {
-            $(".totalUnitCostAmount").data("maxSize", ship.maxFlightSize);
-        } else {
-            if (ship.jinkinglimit > 9) {
-                $(".totalUnitCostAmount").data("maxSize", 12);
-            } else $(".totalUnitCostAmount").data("maxSize", 9);
+       ⭐ The DOM gamelobby.js reads back is unchanged, and has to stay so:
+         .selectAmount.shpenh<N>          one per enhancementOptions[N]; data count / enhCost / enhPrice
+         .confirm .selectAmount           fighter missiles as well; data firingMode / value
+         .fighterAmount                   the flight size, as its text
+         .confirm .totalUnitCostAmount    ONE per dialog; data("value") is the ship dialog's total
+         #bulkQuantity                    the bulk dialog's quantity, as .val()
+         input[name=shipname]             the unit's name
+         .confirmok                       data shipclass / ship / originalShipData; `this` in the callback
+       getTotalCost / getTotalCostBulk work every figure out; paintBuySummary only shows them. */
+
+    //Top to bottom. A section no row is filed into is never shown - which is how Officers holds its
+    //place: plan §10.2 reserves the slot, the feature itself is not designed yet.
+    //Every section starts OPEN, however long (user, 2026-09-26 - plan §10.4's fold-past-8-rows default
+    //was dropped): the player folds one away by hand if they want it out of the road.
+    //`word` is what the filter box's placeholder calls the section: "Filter ammo, enhancements, options…".
+    BUY_SECTIONS: [
+        { key: 'ammo', title: 'Ammo &amp; Ordnance', word: 'ammo' },
+        { key: 'enhancements', title: 'Enhancements', word: 'enhancements' },
+        { key: 'options', title: 'Options', word: 'options' },
+        { key: 'officers', title: 'Officers', word: 'officers' }
+    ],
+
+    //The filter box shows from this many rows (in all sections together). A mine's three to seven
+    //rows or a flight's four read at a glance; nearly every ship has eight or more (median ten).
+    BUY_FILTER_AT: 8,
+
+    //An ammunition row names its magazine in a tag - "(AMMO) Basic Missile", "(HEAVY AMMO) Flash
+    //Shell" (each ammo class's enhancementDescription). The server files these as ENHANCEMENTS
+    //(enhIsOption false), so the tag is what sorts them.
+    BUY_AMMO_TAG: /\(((?:HEAVY |MEDIUM |LIGHT )?AMMO)\)/i,
+
+    //Extra shots for a fighter's gun: options by the server's flag, ammunition by what they are.
+    BUY_AMMO_IDS: ['EXT_AMMO', 'EXT_HAMMO'],
+
+    buySectionOf: function buySectionOf(enhancement) {
+        if (confirm.BUY_AMMO_TAG.test(enhancement[1]) || confirm.BUY_AMMO_IDS.indexOf(enhancement[0]) !== -1) {
+            return 'ammo';
         }
+        return enhancement[6] ? 'options' : 'enhancements';
+    },
 
-        //MUST be the bare hull: this dialog totals as base + enhancements. Falling back to
-        //ship.pointCost counted them twice, because doLoadFleet/doBuyShip have already folded them
-        //into it - see gamedata.getPristinePointCost. Unchanged when a blueprint is available.
-        var pointCost = gamedata.getPristinePointCost(ship);
-        /*
-        if (ship.maxFlightSize==3){ //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
-            //but for 3-strong flight cost is still set for 6-strong flight...
-            pointCost = pointCost/2;
-        }     
-        */
-        //ship.pointCost
-        $(".totalUnitCostText", totalItem).html("Total cost");
-        $(".totalUnitCostAmount", totalItem).html(pointCost);
-        $(".totalUnitCostAmount", totalItem).data("value", pointCost);
+    /* A row's title. The section already says what kind of row it is, so the old coloured "(OPTION)"
+       and "(AMMO)" prefixes are gone (plan §10.5: one colour for every row). Only a magazine SIZE is
+       still worth saying, since one ship can carry shells of several:
+       "(HEAVY AMMO) Basic Shell" -> "Heavy Ammo — Basic Shell", "(AMMO) Basic Missile" -> "Basic Missile". */
+    buyRowTitle: function buyRowTitle(enhName) {
+        var name = String(enhName);
+        var tag = confirm.BUY_AMMO_TAG.exec(name);
+        if (!tag) return name;
 
-        $(totalItem).show();
+        var rest = (name.slice(0, tag.index) + name.slice(tag.index + tag[0].length)).trim();
+        if (tag[1].toUpperCase() === 'AMMO') return rest;
 
-        $(".totalUnitCostAmount").data("value", pointCost);
-        //}
+        var size = tag[1].toLowerCase().replace(/\b[a-z]/g, function (c) { return c.toUpperCase(); });
+        return size + ' &mdash; ' + rest;
+    },
 
+    escapeBuyText: function escapeBuyText(value) {
+        return String(value === undefined || value === null ? '' : value)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    },
 
-        //ship enhancements
-        for (var i in ship.enhancementOptions) {
-            //enhancementOption: ID,readableName,numberTaken,limit,price,priceStep	
-            var enhancement = ship.enhancementOptions[i];
-            var enhID = enhancement[0];
-            var enhCount = enhancement[2];
-            var enhName = enhancement[1];
-            var enhLimit = enhancement[3];
-            var enhPrice = enhancement[4];
-            var enhPriceStep = enhancement[5];
-            var enhIsOption = enhancement[6];
+    //"25 pts"; "0.5 pts" (MINE_DMG is priced in halves); a real minus sign on a saving ("−15 pts").
+    formatBuyPts: function formatBuyPts(value) {
+        var n = Math.round((Number(value) || 0) * 100) / 100;
+        return (n < 0 ? '−' + Math.abs(n) : String(n)) + ' pts';
+    },
 
-            var template = $(".missileSelectItem");
-            var item = template.clone(true).prependTo(e);
+    /* The window, empty: head, body (unit block, Base Hull line, the sections) and foot (totals
+       over the buttons). opts: title, okLabel, bulk - the bulk dialog shows a Per Unit figure
+       beside its total. Cancel, the close box and Escape all just remove it, as Cancel always did. */
+    buyDialogShell: function buyDialogShell(ship, opts) {
+        var esc = confirm.escapeBuyText;
 
-            var selectAmountItem = $(".selectAmount", item);
-            selectAmountItem.attr("contenteditable", "true"); // Make it editable - DK 12.5.25
-            //Marked before the box is first written - a stepped enhancement shows the quantity its
-            //level buys, and this also switches typing off. Step 1 (everything but Extra Tendrils)
-            //leaves the row exactly as it was.
-            var enhStep = confirm.applyEnhancementStep(selectAmountItem, enhID);
-            confirm.enhShowLevel(selectAmountItem, enhCount);
-            selectAmountItem.addClass("shpenh" + i);
-            selectAmountItem.data('enhID', enhID);
-            selectAmountItem.data('count', enhCount);
+        var sub = [esc(ship.shipClass)];
+        if (ship.faction) sub.push(esc(ship.faction));
+        if (parseInt(ship.isd, 10) > 0) sub.push('ISD&nbsp;' + parseInt(ship.isd, 10)); //never wrapped apart
 
-            var initialEnhCost = 0;
-            for (let eCount = 0; eCount < enhCount; eCount++) {
-                initialEnhCost += enhPrice + (eCount * enhPriceStep);
-            }
-            selectAmountItem.data('enhCost', initialEnhCost);
-            if (enhIsOption) {
-                selectAmountItem.data('enhOptionCost', initialEnhCost);
-                selectAmountItem.data('enhIsOption', true);
-            }
+        var sections = confirm.BUY_SECTIONS.map(function (section) {
+            return '<section class="buySection" data-section="' + section.key + '" hidden>'
+                + '<button type="button" class="buySectionHead" aria-expanded="true" aria-controls="buySection-' + section.key + '">'
+                + '<span class="buyDisclosure" aria-hidden="true"></span>'
+                + '<span class="buySectionTitle">' + section.title + '</span>'
+                + '<span class="buySectionBadge"></span>'
+                + '</button>'
+                + '<div class="buySectionBody" id="buySection-' + section.key + '"></div>'
+                + '</section>';
+        }).join('');
 
-            selectAmountItem.data('min', 0);
-            selectAmountItem.data('max', enhLimit);
-            selectAmountItem.data('enhPrice', enhPrice);
-            selectAmountItem.data('enhPriceStep', enhPriceStep);
+        var total = function (label, modifier, amountClass) {
+            return '<span class="buyDialogTotal' + modifier + '">'
+                + '<span class="buyDialogTotalLabel">' + label + '</span>'
+                + '<span class="buyDialogTotalValue"><span class="' + amountClass + '">0</span> pts</span>'
+                + '</span>';
+        };
 
-            //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
-            //selectAmountItem.data("firingMode", i);
+        //ONE .totalUnitCostAmount per dialog - the figure the fleet is charged. The bulk dialog's
+        //per-unit figure deliberately does not carry that class.
+        var totals = opts.bulk
+            ? total('Per unit', ' buyDialogTotal--unit', 'costPerUnitSpan')
+                + total('Total cost', '', 'totalUnitCostAmount totalBulkCostAmount')
+            : total('Total cost', '', 'totalUnitCostAmount');
 
-            // New fucntions to allow player to free type in number fields for enhancements/ammo - DK 12.5.25
-            selectAmountItem.on("focus", confirm.selectAllTextOnFocus);
+        var e = $('<div class="confirm buyDialog">'
+            + '<div class="buyDialogFrame" role="dialog" aria-labelledby="buyDialogTitle">'
+            + '<div class="buyDialogHead">'
+            + '<div class="buyDialogHeading">'
+            + '<div class="buyDialogTitle" id="buyDialogTitle">' + opts.title + '</div>'
+            //+ '<div class="buyDialogSub">' + sub.join(' &middot; ') + '</div>'
+            + '</div>'
+            + '<button type="button" class="buyDialogClose" aria-label="Close">&times;</button>'
+            + '</div>'
+            + '<div class="buyDialogBody">'
+            + '<div class="buyDialogUnit"></div>'
+            //+ '<div class="buyDialogBase"><span class="buyDialogBaseLabel"></span><span class="buyDialogBaseCost"></span></div>'
+            //+ '<div class="buyDialogFilter" hidden>'
+            //+ '<input type="search" class="buyFilterInput" aria-label="Filter the rows below" autocomplete="off" spellcheck="false" enterkeyhint="next">'
+            //+ '</div>'
+            + '<div class="buyDialogSections">' + sections + '</div>'
+            + '<p class="buyFilterEmpty" hidden>Nothing here matches <q></q>.</p>'
+            + '</div>'
+            + '<div class="buyDialogFoot">'
+            + '<div class="buyDialogTotals">' + totals + '</div>'
+            + '<div class="ui">'
+            + '<button type="button" class="confirmok">' + opts.okLabel + '</button>'
+            + '<button type="button" class="confirmcancel">Cancel</button>'
+            + '</div>'
+            + '</div>'
+            + '</div>'
+            + '</div>');
 
-            selectAmountItem.on("input", confirm.handleInputChangeEdit);
-
-            selectAmountItem.on("keydown", confirm.preventNonNumericInput);
-
-            selectAmountItem.on("wheel", confirm.handleMouseWheel);
-
-            var slotid = gamedata.selectedSlot;
-            var slot = playerManager.getSlotById(slotid);
-
-            //add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
-            if (enhIsOption) enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName;
-
-            const ammoTypes = ['(HEAVY AMMO)', '(MEDIUM AMMO)', '(LIGHT AMMO)', '(AMMO)'];
-            for (const type of ammoTypes) {
-                if (enhName.includes(type)) {
-                    enhName = enhName.replace(type, '').trim();
-                    enhName = ` <span style="color:rgb(106, 195, 255);">${type}</span> ` + enhName;
-                    break; // Assuming only one ammo type appears in the string
-                }
-            }
-
-            $(".selectText", item).html(confirm.expandEnhancementName(enhName, enhLimit, enhPrice, enhPriceStep, enhStep));
-            $(item).show();
-
-            var plusButton = $(".plusButton", item);
-            plusButton.data("enhNo", i);
-            var minusButton = $(".minusButton", item);
-            minusButton.data("enhNo", i);
-
-
-            $(".plusButton", item).on("click", confirm.doOnPlusEnhancement);
-            $(".minusButton", item).on("click", confirm.doOnMinusEnhancement);
-
-            //a choice-valued option (Chameleon disguise) swaps the spinner for a dropdown; no-op otherwise
-            confirm.applyEnhancementChoiceWidget(item, enhancement);
-        }
-        $('<div class="missileselect"><label>Here you may select any available Ammo, Options, and Enhancements.<br><span>(NOTE - For fighter flights, all fighters in flight will be similarly outfitted)</span></label></div>').prependTo(e);
-
-        // Do lots of stuff to account for possible buying of missiles.
-        var missileOptions = confirm.getMissileOptions(ship);
-
-        // If it is a fighter, put the option in this pane.
-        // A ship will need some more tricks.
-        if (!mathlib.arrayIsEmpty(missileOptions)) {
-
-            for (var i in missileOptions) {
-                var missileOption = missileOptions[i];
-                var template = $(".missileSelectItem");
-                var item = template.clone(true).prependTo(e);
-
-                var selectAmountItem = $(".selectAmount", item);
-
-                // --- SET INITIAL MISSILE COUNT here ---
-                // missileOption[4] assumed to be initial missile count baked into fighter cost
-                var initialMissileCount = missileOption[4] || 0;
-
-                selectAmountItem.html(initialMissileCount); // show initial count in UI
-                selectAmountItem.addClass(i);
-                selectAmountItem.data('value', initialMissileCount);      // current value
-                selectAmountItem.data('initialValue', initialMissileCount); // store initial value for diff calculation
-                selectAmountItem.data('min', 0);
-
-                if (ship.maxFlightSize < 3) {
-                    $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
-                    $(item).show();
-
-                    selectAmountItem.data('max', Math.round(missileOption[1] / 6 / (missileOption[3] / 6)));
-                    selectAmountItem.data('cost', missileOption[2]);
-                    selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
-                    selectAmountItem.data("firingMode", i);
-                } else {
-                    $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
-                    $(item).show();
-
-                    selectAmountItem.data('max', Math.round(missileOption[1] / 6 / (missileOption[3] / 6)));
-                    selectAmountItem.data('cost', missileOption[2]);
-                    selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
-                    selectAmountItem.data("firingMode", i);
-                }
-
-                $(".selectText", item).data("firingMode", i);
-
-                var plusButton = $(".plusButton", item);
-                plusButton.data("firingMode", i);
-                $(".minusButton", item).data("firingMode", i);
-            }
-
-            $('<div class="missileselect"><label>This fighter type can carry fighter missiles.<br>\
-                    Please select the amount you wish to purchase PER MISSILE LAUNCHER.<br></label>').prependTo(e);
-
-            $(".plusButton", item).on("click", confirm.doOnPlusMissile);
-            $(".minusButton", item).on("click", confirm.doOnMinusMissile);
-            selectAmountItem.on("wheel", confirm.handleMouseWheelMissile);
-        }
-
-        if (variableSize) {
-            var template = $(".missileSelectItem");
-            var item = template.clone(true).prependTo(e);
-            item.addClass("fighterSelectItem");
-
-            $(".selectText", item).html("Number of fighters in this flight:");
-            $(item).show();
-
-            var selectAmountItem = $(".selectAmount", item);
-            selectAmountItem.removeClass("selectAmount").addClass("fighterAmount");
-
-            selectAmountItem.html(ship.flightSize);
-
-            //per-craft cost of the BARE hull, for the same reason as the total above
-            selectAmountItem.data('pV', Math.floor(gamedata.getPristinePointCost(ship) / 6));
-
-
-            selectAmountItem.on("wheel", confirm.handleMouseWheelFighter);
-            $(".fighterSelectItem .selectButtons .plusButton", e).on("click", confirm.increaseFlightSize);
-            $(".fighterSelectItem .selectButtons .minusButton", e).on("click", confirm.decreaseFlightSize);
-        }
-
-        $('<label>Edit your ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="' + ship.name + '"></input><br>').prependTo(e);
-
-        $(".confirmok", e).on("click", callback);
-
-        $(".confirmcancel", e).on("click", function () {
-            console.log("remove");
+        var cancel = function () {
             $(".confirm").remove();
+        };
+        $(".confirmcancel", e).on("click", cancel);
+        $(".buyDialogClose", e).on("click", cancel);
+        e.on("keydown", function (ev) {
+            if (ev.key === "Escape") cancel();
         });
 
-        $(".confirmok", e).data("ship", ship);
-        $(".confirmok", e).data("originalShipData", originalShipData);
+        //Any number open at once - this is not a tab switch, just a way to fold away what is not
+        //being changed.
+        e.on("click", ".buySectionHead", function () {
+            var section = $(this).closest(".buySection");
+            confirm.setBuySectionOpen(section, $(this).attr("aria-expanded") !== "true");
+        });
 
-
-
-        var a = e.appendTo("body");
-        confirm.getTotalCost();
-        a.fadeIn(250);
+        return e;
     },
 
-
-    getVariableSize: function getVariableSize(ship) {
-        //if (ship.flight && !ship.superheavy) { //superheavy is no longer a good marker
-        if (ship.flight && ship.maxFlightSize != 1) { //max flight size = 1 indicates single superheavy fighter
-            return true;
-        } else return false;
+    buySectionBody: function buySectionBody(e, key) {
+        return $('.buySection[data-section="' + key + '"] .buySectionBody', e);
     },
 
+    setBuySectionOpen: function setBuySectionOpen(section, open) {
+        $(".buySectionHead", section).attr("aria-expanded", open ? "true" : "false");
+        $(".buySectionBody", section).prop("hidden", !open);
+    },
 
-    showShipBuy: function showShipBuy(ship, callback) {
-        var e = $(this.whtml);
+    /* One row: name over a price note | the row's cost | − value +. The cost sits LEFT of the
+       spinner (user, 2026-09-26), so the spinners and dropdowns keep one right edge down the whole
+       window. The value box keeps the .selectAmount class every spinner handler and gamelobby.js
+       reader looks for. */
+    buyRow: function buyRow(nameHtml, noteHtml) {
+        return $('<div class="buyRow">'
+            + '<span class="selectText">'
+            + '<span class="buyRowName">' + nameHtml + '</span>'
+            + '<span class="buyRowNote">' + (noteHtml || '') + '</span>'
+            + '</span>'
+            + '<span class="buyRowCost"></span>'
+            + '<span class="buyRowQty">'
+            + '<button type="button" class="minusButton" aria-label="Decrease">&minus;</button>'
+            + '<span class="selectAmount"></span>'
+            + '<button type="button" class="plusButton" aria-label="Increase">+</button>'
+            + '</span>'
+            + '</div>');
+    },
 
-        //variable flightsize
-        var variableSize = confirm.getVariableSize(ship);
-        var missileOptions = confirm.getMissileOptions(ship);
-
-        //if (variableSize || missileOptions.length > 0 || ship.superheavy) {
-        var totalTemplate = $(".totalUnitCost");
-        var totalItem = totalTemplate.clone(true).prependTo(e);
-
-        //allow maximum flight size pre-set in design...
-        if (ship.maxFlightSize != 0) {
-            $(".totalUnitCostAmount").data("maxSize", ship.maxFlightSize);
-        } else {
-            if (ship.jinkinglimit > 9) {
-                $(".totalUnitCostAmount").data("maxSize", 12);
-            } else $(".totalUnitCostAmount").data("maxSize", 9);
-        }
-
-        var pointCost = ship.pointCost;
-        if (ship.maxFlightSize >= 2 && ship.maxFlightSize < 6) {
-            //design pointCost is set for a 6-strong flight (cost-per-craft * 6).
-            //For any fixed sub-six flight (e.g. 3-strong Breaching Pods, 2-strong BPs), scale down to actual flight size.
-            //maxFlightSize 1 is single superheavy with its own pointCost; 6+ already matches the stored cost.
-            pointCost = pointCost * ship.maxFlightSize / 6;
-        }
-
-
-        $(".totalUnitCostText", totalItem).html("Total cost");
-        $(".totalUnitCostAmount", totalItem).html(pointCost);
-        $(".totalUnitCostAmount", totalItem).data("value", pointCost);
-
-        $(totalItem).show();
-
-        $(".totalUnitCostAmount").data("value", pointCost);
-
-
-        //ship enhancements
-        for (var i in ship.enhancementOptions) {
-            //enhancementOption: ID,readableName,numberTaken,limit,price,priceStep	
-            var enhancement = ship.enhancementOptions[i];
-            var enhID = enhancement[0];
-            var enhName = enhancement[1];
-            var enhLimit = enhancement[3];
-            var enhPrice = enhancement[4];
-            var enhPriceStep = enhancement[5];
-            var enhIsOption = enhancement[6];
-
-            var template = $(".missileSelectItem");
-            var item = template.clone(true).prependTo(e);
-
-            var selectAmountItem = $(".selectAmount", item);
-
-            selectAmountItem.html("0");
-            selectAmountItem.attr("contenteditable", "true"); // Make it editable - DK 12.5.25
-            selectAmountItem.addClass("shpenh" + i);
-            selectAmountItem.data('enhID', enhID);
-            selectAmountItem.data('count', 0);
-            selectAmountItem.data('enhCost', 0);
-            selectAmountItem.data('min', 0);
-            selectAmountItem.data('max', enhLimit);
-            selectAmountItem.data('enhPrice', enhPrice);
-            selectAmountItem.data('enhPriceStep', enhPriceStep);
-            //Marked here so the row knows its step before any handler reads the box. A stepped
-            //enhancement shows the quantity its level buys (and cannot be typed into); step 1 -
-            //every enhancement but Extra Tendrils - leaves the row exactly as it was.
-            var enhStep = confirm.applyEnhancementStep(selectAmountItem, enhID);
-            //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
-            //selectAmountItem.data("firingMode", i);
-
-            // New fucntions to allow player to free type/mousewheel in number fields for enhancements/ammo - DK 12.5.25
-            selectAmountItem.on("focus", confirm.selectAllTextOnFocus);
-
-            selectAmountItem.on("input", confirm.handleInputChange);
-
-            selectAmountItem.on("keydown", confirm.preventNonNumericInput);
-
-            selectAmountItem.on("wheel", confirm.handleMouseWheel);
-
-            var slotid = gamedata.selectedSlot;
-            var slot = playerManager.getSlotById(slotid);
-
-            //Add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
-            if (enhIsOption) enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName;
-
-            const ammoTypes = ['(HEAVY AMMO)', '(MEDIUM AMMO)', '(LIGHT AMMO)', '(AMMO)'];
-            for (const type of ammoTypes) {
-                if (enhName.includes(type)) {
-                    enhName = enhName.replace(type, '').trim();
-                    enhName = ` <span style="color:rgb(106, 195, 255);">${type}</span> ` + enhName;
-                    break; // Assuming only one ammo type appears in the string
-                }
-            }
-
-            $(".selectText", item).html(confirm.expandEnhancementName(enhName, enhLimit, enhPrice, enhPriceStep, enhStep));
-            $(item).show();
-
-            var plusButton = $(".plusButton", item);
-            plusButton.data("enhNo", i);
-            var minusButton = $(".minusButton", item);
-            minusButton.data("enhNo", i);
-
-
-            $(".plusButton", item).on("click", confirm.doOnPlusEnhancement);
-            $(".minusButton", item).on("click", confirm.doOnMinusEnhancement);
-
-            //a choice-valued option (Chameleon disguise) swaps the spinner for a dropdown; no-op otherwise
-            confirm.applyEnhancementChoiceWidget(item, enhancement);
-        }
-        $('<div class="missileselect"><label>Here you may select any available Ammo, Options, and Enhancements.<br><span>(NOTE - For fighter flights, all fighters in flight will be similarly outfitted)</span></label></div>').prependTo(e);
-
-        // Do lots of stuff to account for possible buying of missiles.
-        var missileOptions = confirm.getMissileOptions(ship);
-
-        // If it is a fighter, put the option in this pane.
-        // A ship will need some more tricks.
-        if (!mathlib.arrayIsEmpty(missileOptions)) {
-
-            for (var i in missileOptions) {
-                var missileOption = missileOptions[i];
-                var template = $(".missileSelectItem");
-                var item = template.clone(true).prependTo(e);
-
-                var selectAmountItem = $(".selectAmount", item);
-
-                selectAmountItem.html("0");
-                selectAmountItem.addClass(i);
-                selectAmountItem.data('value', 0);
-                selectAmountItem.data('initialValue', 0); // store initial value for diff calculation                
-                selectAmountItem.data('min', 0);
-
-
-                //if (ship.superheavy) {
-                if (ship.maxFlightSize < 3) { //here it's question of single vs multiple craft per flight, not of being superheavy
-                    $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
-                    $(item).show();
-
-                    selectAmountItem.data('max', Math.round(missileOption[1] / 6 / (missileOption[3] / 6)));
-                    selectAmountItem.data('cost', missileOption[2]);
-                    selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
-                    selectAmountItem.data("firingMode", i);
-                } else {
-                    $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
-                    $(item).show();
-
-                    selectAmountItem.data('max', Math.round(missileOption[1] / 6 / (missileOption[3] / 6)));
-                    selectAmountItem.data('cost', missileOption[2]);
-                    selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
-                    selectAmountItem.data("firingMode", i);
-                }
-
-                $(".selectText", item).data("firingMode", i);
-
-                var plusButton = $(".plusButton", item);
-                plusButton.data("firingMode", i);
-                $(".minusButton", item).data("firingMode", i);
-            }
-
-            $('<div class="missileselect"><label>This fighter type can carry fighter missiles.<br>\
-                    Please select the amount you wish to purchase PER MISSILE LAUNCHER.<br></label>').prependTo(e);
-
-            //$(".missileSelectItem .selectButtons .plusButton", e).on("click", confirm.doOnPlusMissile);
-            //$(".missileSelectItem .selectButtons .minusButton", e).on("click", confirm.doOnMinusMissile);
-            //change for enhancements:
-            $(".plusButton", item).on("click", confirm.doOnPlusMissile);
-            $(".minusButton", item).on("click", confirm.doOnMinusMissile);
-            // **NEW**: bind wheel to our new handler
-            selectAmountItem.on("wheel", confirm.handleMouseWheelMissile);
-        }
-
-        if (variableSize) {
-            var template = $(".missileSelectItem");
-            var item = template.clone(true).prependTo(e);
-            item.addClass("fighterSelectItem");
-
-            $(".selectText", item).html("Number of fighters in this flight:");
-            $(item).show();
-
-            var selectAmountItem = $(".selectAmount", item);
-            selectAmountItem.removeClass("selectAmount").addClass("fighterAmount");
-
-            //for any fixed sub-six flight size, start at that size; otherwise default to 6
-            if (ship.maxFlightSize >= 2 && ship.maxFlightSize < 6) {
-                selectAmountItem.html(ship.maxFlightSize);
-            } else {//default
-                selectAmountItem.html("6");
-            }
-            selectAmountItem.data('pV', Math.floor(ship.pointCost / 6));
-
-            selectAmountItem.on("wheel", confirm.handleMouseWheelFighter);
-            $(".fighterSelectItem .selectButtons .plusButton", e).on("click", confirm.increaseFlightSize);
-            $(".fighterSelectItem .selectButtons .minusButton", e).on("click", confirm.decreaseFlightSize);
-        }
-
-        /* try to make default unit name other than nameless */
-        var nameCore = ship.shipClass;
+    /* "G'Quan Heavy Cruiser #3": the class and the next number no unit on the page already carries
+       - a name cannot be repeated. */
+    defaultShipName: function defaultShipName(ship) {
         var nameNumber = gamedata.lastShipNumber + 1;
-        var fullName = '';//by default: nameCore + ' #' + number ; name cannot be repeated!
-        var accepted = false;
-        var exists = false;
-        while (accepted != true) {
-            fullName = nameCore + ' #' + nameNumber;
-            //check whether such a name doesn't yet exist...
-            exists = false;
+        var isTaken = function (name) {
             for (var i in gamedata.ships) {
-                var currShip = gamedata.ships[i];
-                if (currShip.name == fullName) exists = true;
+                if (gamedata.ships[i].name == name) return true;
             }
-            if (exists == true) {
-                nameNumber++;
-            } else {
-                accepted = true;
-            }
+            return false;
+        };
+        while (isTaken(ship.shipClass + ' #' + nameNumber)) {
+            nameNumber++;
         }
         gamedata.lastShipNumber = nameNumber;
-        /*end of preparing default name*/
-        $('<label>Name your new ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="' + fullName + '"></input><br>').prependTo(e);
-
-        /* old, with Nameless default
-        $('<label>Name your new ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="Nameless"></input><br>').prependTo(e);
-        */
-        //$('<div class="message"><span>Name your new '+ship.shipClass+'</span></div>').prependTo(e);
-        $(".confirmok", e).on("click", callback);
-        $(".confirmcancel", e).on("click", function () {
-            console.log("remove");
-            $(".confirm").remove();
-        });
-        $(".confirmok", e).data("shipclass", ship.phpclass);
-
-        var a = e.appendTo("body");
-        confirm.getTotalCost();
-        a.fadeIn(250);
+        return ship.shipClass + ' #' + nameNumber;
     },
 
-    /* The bulk purchase dialog - quantity spinner, enhancements applied to every unit in
-       the row, and no name box (a bulk purchase is interchangeable units, named from the
-       ship class and numbered by BuyingGamePhase).
+    //Set with .val(), never concatenated in: a player-typed name is not markup.
+    addBuyNameRow: function addBuyNameRow(e, name) {
+        $('<div class="buyNameRow">'
+            + '<label class="buyFieldLabel" for="buyShipName">Enter Name</label>'
+            + '<input type="text" id="buyShipName" name="shipname" autocomplete="off" spellcheck="false">'
+            + '</div>')
+            .appendTo($(".buyDialogUnit", e))
+            .find("input").val(name);
+    },
 
-       ONE function serves both BUYING a new bulk row and EDITING one already in the fleet.
-       `existing` is what switches it: falsy for a fresh purchase off a store blueprint,
-       truthy when `ship` is a bought row being re-opened. Deliberately not a second
-       showBulkEdit copy - the two would have to be kept in step over the quantity field,
-       every enhancement widget and the cost plumbing, and this file already carries one
-       stale clone of a handler that drifted that way. */
-    showBuyBulk: function showBuyBulk(ship, callback, existing) {
-        var e = $(this.whtml);
+    //A flight's largest size: its design's own, else 9 - or 12 for a nimble fighter.
+    maxFlightSizeOf: function maxFlightSizeOf(ship) {
+        if (ship.maxFlightSize != 0) return ship.maxFlightSize;
+        return (ship.jinkinglimit > 9) ? 12 : 9;
+    },
 
-        /* ⚠️ MUST be the bare hull when re-opening a bought row: this dialog totals as base
-           + enhancements, and a bought row's pointCost ALREADY has its per-unit enhancements
-           folded in (the one pricing convention behind gamedata.rowPointCost). Feeding it
-           ship.pointCost would charge for them twice, and again on every subsequent edit.
-           Unchanged for a fresh purchase - a store blueprint's cost is pristine by
-           definition, and getPristinePointCost simply reads it back. */
-        var baseCost = existing ? gamedata.getPristinePointCost(ship) : ship.pointCost;
+    /* The flight-size spinner (1-6, then in threes). perCraft is what getTotalCost prices the flight
+       from; the maximum rides on the value box itself, where the three size handlers read it. */
+    addBuyFlightSizeRow: function addBuyFlightSizeRow(e, ship, size, perCraft) {
+        var item = confirm.buyRow('Flight size', 'All fighters in the flight are outfitted alike.');
+        item.addClass("fighterSelectItem");
 
-        // Added to support Enhancement select recalculations in getTotalCost()
-        var totalTemplate = $(".totalUnitCost");
-        var totalItem = totalTemplate.clone(true).prependTo(e);
+        var amount = $(".selectAmount", item).removeClass("selectAmount").addClass("fighterAmount");
+        amount.text(size);
+        amount.data("pV", perCraft);
+        amount.data("maxSize", confirm.maxFlightSizeOf(ship));
+        amount.on("wheel", confirm.handleMouseWheelFighter);
 
-        $(".totalUnitCostText", totalItem).html("Total Purchase Cost");
-        var totalCostAmountSpan = $(".totalUnitCostAmount", totalItem);
-        totalCostAmountSpan.html(baseCost);
-        totalCostAmountSpan.data("value", baseCost);
-        totalCostAmountSpan.data("baseCost", baseCost);
-        totalCostAmountSpan.addClass("totalBulkCostAmount");
-        $(totalItem).show();
+        $(".plusButton", item).on("click", confirm.increaseFlightSize);
+        $(".minusButton", item).on("click", confirm.decreaseFlightSize);
 
-        //ship enhancements
+        item.appendTo($(".buyDialogUnit", e));
+    },
+
+    /* The bulk quantity: typed, wheeled or stepped, never below 1. A text box rather than
+       type=number - the browser's own spinner is drawn in its own colours, white on this window. */
+    addBuyQuantityRow: function addBuyQuantityRow(e, quantity) {
+        var item = confirm.buyRow('<label for="bulkQuantity">Quantity</label>',
+            'Enhancements apply to every unit in this purchase.');
+        item.addClass("buyQtyRow");
+
+        var input = $('<input type="text" id="bulkQuantity" inputmode="numeric" pattern="[0-9]*" autocomplete="off">');
+        input.val(quantity);
+        $(".selectAmount", item).replaceWith(input);
+
+        var current = function () {
+            return parseInt(input.val(), 10) || 1;
+        };
+        var set = function (value) {
+            input.val(Math.max(1, value));
+            confirm.getTotalCost();
+        };
+
+        $(".plusButton", item).on("click", function (ev) {
+            ev.stopPropagation();
+            set(current() + 1);
+        });
+        $(".minusButton", item).on("click", function (ev) {
+            ev.stopPropagation();
+            set(current() - 1);
+        });
+        input.on("wheel", function (ev) {
+            ev.preventDefault();
+            set(current() + ((ev.originalEvent.deltaY < 0) ? 1 : -1));
+        });
+        //Digits only while typing; an emptied box is left alone until the player moves on.
+        input.on("input", function () {
+            var digits = input.val().replace(/[^0-9]/g, '');
+            if (digits !== input.val()) input.val(digits);
+            confirm.getTotalCost();
+        });
+        input.on("change", function () {
+            set(current());
+        });
+
+        item.appendTo($(".buyDialogUnit", e));
+    },
+
+    /* The bare hull the totals are priced from. It rides on the dialog's own total as
+       data("baseCost") - getTotalCost used to fish it off a hidden page template instead. */
+    setBuyBase: function setBuyBase(e, ship, baseCost, perUnit) {
+        $(".buyDialogBase", e).data("shipClass", ship.shipClass).data("perUnit", Boolean(perUnit));
+
+        var total = $(".totalUnitCostAmount", e);
+        total.data("baseCost", baseCost);
+        total.data("value", baseCost);
+        total.text(baseCost);
+
+        $(".costPerUnitSpan", e).data("value", baseCost).text(baseCost);
+    },
+
+    /* One row per ship.enhancementOptions entry, filed into its section. `seed` starts each row from
+       the count the unit already carries (an edit or a copy) rather than from zero; `onInput` is the
+       typing handler - the edit one adjusts by the DELTA from that seeded count, the buy one
+       recomputes from zero. */
+    addBuyEnhancementRows: function addBuyEnhancementRows(e, ship, seed, onInput) {
         for (var i in ship.enhancementOptions) {
+            //enhancementOption: ID, readableName, numberTaken, limit, price, priceStep, isOption[, choices]
             var enhancement = ship.enhancementOptions[i];
             var enhID = enhancement[0];
-            var enhName = enhancement[1];
             var enhLimit = enhancement[3];
             var enhPrice = enhancement[4];
             var enhPriceStep = enhancement[5];
             var enhIsOption = enhancement[6];
+            var section = confirm.buySectionOf(enhancement);
 
-            //Re-opening a bought row starts from what it already carries; a fresh purchase
-            //starts empty. numberTaken is in LEVELS, which is what every spinner, limit and
-            //cost sum here works in.
-            var enhCount = existing ? (parseInt(enhancement[2], 10) || 0) : 0;
+            //numberTaken is in LEVELS, which is what every spinner, limit and cost sum here works in.
+            var enhCount = seed ? (parseInt(enhancement[2], 10) || 0) : 0;
 
-            //The arithmetic series doOnPlusEnhancement/handleInputChange* maintain: level i
-            //(0-based) costs enhPrice + i*enhPriceStep. Seeded here so the running delta
-            //those handlers apply starts from the right place.
+            //The arithmetic series doOnPlusEnhancement / handleInputChange* maintain: level i
+            //(0-based) costs enhPrice + i*enhPriceStep. Seeded so their running delta starts right.
             var initialEnhCost = 0;
-            for (let eCount = 0; eCount < enhCount; eCount++) {
-                initialEnhCost += enhPrice + (eCount * enhPriceStep);
+            for (var level = 0; level < enhCount; level++) {
+                initialEnhCost += enhPrice + (level * enhPriceStep);
             }
 
-            var template = $(".missileSelectItem");
-            var item = template.clone(true).prependTo(e);
-
+            var item = confirm.buyRow(confirm.buyRowTitle(enhancement[1]), '');
             var selectAmountItem = $(".selectAmount", item);
 
             selectAmountItem.attr("contenteditable", "true");
@@ -1548,97 +1123,379 @@ window.confirm = {
             selectAmountItem.data('max', enhLimit);
             selectAmountItem.data('enhPrice', enhPrice);
             selectAmountItem.data('enhPriceStep', enhPriceStep);
-            //Marked here so the row knows its step before any handler reads the box. A stepped
-            //enhancement shows the quantity its level buys (and cannot be typed into); step 1 -
-            //every enhancement but Extra Tendrils - leaves the row exactly as it was.
+            //Marked before the box is first written: a stepped enhancement shows the quantity its
+            //level buys (and cannot be typed into); step 1 - every one but Extra Tendrils - leaves
+            //the row as it was.
             var enhStep = confirm.applyEnhancementStep(selectAmountItem, enhID);
             confirm.enhShowLevel(selectAmountItem, enhCount);
 
+            //Free typing and the mouse wheel in the value box - DK 12.5.25
             selectAmountItem.on("focus", confirm.selectAllTextOnFocus);
-            //The edit handler adjusts by the DELTA from the count already in the box, which is
-            //what a pre-populated row needs; the buy handler recomputes from zero.
-            selectAmountItem.on("input", existing ? confirm.handleInputChangeEdit : confirm.handleInputChange);
+            selectAmountItem.on("input", onInput);
             selectAmountItem.on("keydown", confirm.preventNonNumericInput);
             selectAmountItem.on("wheel", confirm.handleMouseWheel);
 
-            //Add (OPTION) at the beginning of name of options
-            if (enhIsOption) enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName;
+            $(".buyRowNote", item).html(confirm.enhancementPriceNote(enhLimit, enhPrice, enhPriceStep, enhStep, section === 'ammo'));
 
-            const ammoTypes = ['(HEAVY AMMO)', '(MEDIUM AMMO)', '(LIGHT AMMO)', '(AMMO)'];
-            for (const type of ammoTypes) {
-                if (enhName.includes(type)) {
-                    enhName = enhName.replace(type, '').trim();
-                    enhName = ` <span style="color:rgb(106, 195, 255);">${type}</span> ` + enhName;
-                    break; // Assuming only one ammo type appears in the string
-                }
-            }
+            $(".plusButton", item).data("enhNo", i).on("click", confirm.doOnPlusEnhancement);
+            $(".minusButton", item).data("enhNo", i).on("click", confirm.doOnMinusEnhancement);
 
-            $(".selectText", item).html(confirm.expandEnhancementName(enhName, enhLimit, enhPrice, enhPriceStep, enhStep));
-            $(item).show();
-
-            var plusButton = $(".plusButton", item);
-            plusButton.data("enhNo", i);
-            var minusButton = $(".minusButton", item);
-            minusButton.data("enhNo", i);
-
-            $(".plusButton", item).on("click", confirm.doOnPlusEnhancement);
-            $(".minusButton", item).on("click", confirm.doOnMinusEnhancement);
+            item.appendTo(confirm.buySectionBody(e, section));
 
             //a choice-valued option (Chameleon disguise) swaps the spinner for a dropdown; no-op otherwise
             confirm.applyEnhancementChoiceWidget(item, enhancement);
         }
+    },
 
-        if (ship.enhancementOptions && ship.enhancementOptions.length > 0) {
-            $('<div class="missileselect"><label>Here you may select enhancements (applied to ALL units in this purchase).</label></div>').prependTo(e);
+    /* A fighter flight's missiles, into Ammo & Ordnance - bought PER LAUNCHER, and every craft in the
+       flight is loaded alike. `seed` starts from what the flight already carries (an edit). */
+    addBuyMissileRows: function addBuyMissileRows(e, ship, seed) {
+        var missileOptions = confirm.getMissileOptions(ship);
+        if (mathlib.arrayIsEmpty(missileOptions)) return;
+
+        var body = confirm.buySectionBody(e, 'ammo');
+        $('<p class="buySectionNote">Missiles are bought <b>per missile launcher</b>.</p>').appendTo(body);
+
+        for (var i in missileOptions) {
+            //[name, maximum over the flight, cost each, launcher count, amount carried]
+            var missileOption = missileOptions[i];
+            var max = Math.round(missileOption[1] / 6 / (missileOption[3] / 6));
+            var initial = seed ? (missileOption[4] || 0) : 0;
+
+            var item = confirm.buyRow(missileOption[0], 'up to ' + max + ', ' + missileOption[2] + 'pts each');
+            item.addClass("buyMissileRow"); //the section note above speaks for these rows (filterBuyRows)
+            var selectAmountItem = $(".selectAmount", item);
+
+            selectAmountItem.text(initial);
+            selectAmountItem.addClass(i);
+            selectAmountItem.data('value', initial);
+            selectAmountItem.data('initialValue', initial); // store initial value for diff calculation
+            selectAmountItem.data('min', 0);
+            selectAmountItem.data('max', max);
+            selectAmountItem.data('cost', missileOption[2]);
+            selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
+            selectAmountItem.data("firingMode", i);
+            selectAmountItem.on("wheel", confirm.handleMouseWheelMissile);
+
+            //Bound per row. The old dialog bound these once, after its loop, so only the LAST
+            //missile type's buttons and wheel did anything.
+            $(".plusButton", item).data("firingMode", i).on("click", confirm.doOnPlusMissile);
+            $(".minusButton", item).data("firingMode", i).on("click", confirm.doOnMinusMissile);
+
+            item.appendTo(body);
+        }
+    },
+
+    /* Show the sections that were given rows - open, as buyDialogShell builds them; a section never
+       starts folded (BUY_SECTIONS) - and the filter box, if there are enough rows to want one. */
+    openBuySections: function openBuySections(e) {
+        var used = $(".buySection", e).filter(function () {
+            return $(".buyRow", this).length > 0;
+        });
+
+        used.prop("hidden", false);
+        $(".buyDialogSections", e).prop("hidden", used.length === 0);
+
+        confirm.addBuyFilter(e, used);
+    },
+
+    /* The filter box (plan §10.2, Stage 10), for "I know the name of the one I want" - which a B5W
+       player very often does. It sits just above the first section's head, under the Base Hull line
+       (user, 2026-09-26 - built first above the body, at the top of the window). Its
+       placeholder names the sections this unit actually has. */
+    addBuyFilter: function addBuyFilter(e, used) {
+        if ($(".buyRow", used).length < confirm.BUY_FILTER_AT) return;
+
+        var words = used.map(function () {
+            var key = this.getAttribute("data-section");
+            return confirm.BUY_SECTIONS.filter(function (s) { return s.key === key; })[0].word;
+        }).get();
+
+        var input = $(".buyFilterInput", e);
+        input.attr("placeholder", "Filter " + words.join(", ") + "…");
+
+        input.on("input", function () {
+            confirm.filterBuyRows(e);
+        });
+        input.on("keydown", function (ev) {
+            //Escape empties a filled box - it only closes the window from an empty one.
+            if (ev.key === "Escape" && input.val() !== "") {
+                ev.preventDefault();
+                ev.stopPropagation();
+                input.val("");
+                confirm.filterBuyRows(e);
+            } else if (ev.key === "Enter") {
+                //On to the first row it leaves (as Enter in the Faction Picker's search picks the
+                //first faction): its value box, its dropdown, or its + for a missile.
+                ev.preventDefault();
+                $(".buySection:not([hidden]) .buyRow:not(.is-filtered)", e).first()
+                    .find('[contenteditable="true"], select, .plusButton').first().trigger("focus");
+            }
+        });
+
+        $(".buyDialogFilter", e).prop("hidden", false);
+    },
+
+    //Lower case, accents off, and every run of punctuation one space: "K'Lan" and "Long-Range" are
+    //found by "k lan" and "long range", and "Heavy Ammo — Basic Shell" by "heavy shell".
+    buySearchText: function buySearchText(value) {
+        var text = String(value || '').toLowerCase();
+        if (text.normalize) text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return text.replace(/[^a-z0-9]+/g, ' ').trim();
+    },
+
+    /* Every word typed must be in a row's name, in any order. A row that does not match is only
+       hidden (.is-filtered): it stays in the dialog, so whatever it holds is still bought, counted
+       and read back by gamelobby.js.
+
+       While a filter is typed, every section with a match is shown OPEN - a match is never folded
+       away, as in the Faction Picker's search - and a section with none collapses itself: folded,
+       dimmed, its head disabled, its badge still saying what is bought in it. Emptying the box puts
+       every section back as the player had it before typing. */
+    filterBuyRows: function filterBuyRows(e) {
+        var query = String($(".buyFilterInput", e).val() || '');
+        var words = confirm.buySearchText(query).split(' ').filter(function (w) { return w !== ''; });
+        var filtering = words.length > 0;
+        var wasFiltering = e.hasClass("is-filtering");
+        var anyShown = false;
+
+        e.toggleClass("is-filtering", filtering);
+
+        $(".buySection", e).filter(function () { return !this.hidden; }).each(function () {
+            var section = $(this);
+            var rows = $(".buyRow", this);
+
+            rows.each(function () {
+                var name = confirm.buySearchText($(".buyRowName", this).text());
+                $(this).toggleClass("is-filtered", !words.every(function (w) { return name.indexOf(w) !== -1; }));
+            });
+            var shown = rows.not(".is-filtered");
+            anyShown = anyShown || shown.length > 0;
+
+            //:last-child cannot skip a hidden row, so the last one SHOWN drops its rule by class.
+            rows.removeClass("is-lastShown");
+            shown.last().addClass("is-lastShown");
+            //"Missiles are bought per missile launcher" goes with the missile rows.
+            $(".buySectionNote", this).prop("hidden", shown.filter(".buyMissileRow").length === 0);
+
+            if (filtering) {
+                if (!wasFiltering) section.data("openBeforeFilter", $(".buySectionHead", this).attr("aria-expanded") === "true");
+                confirm.setBuySectionOpen(section, shown.length > 0);
+            } else if (wasFiltering) {
+                confirm.setBuySectionOpen(section, section.data("openBeforeFilter") !== false);
+            }
+            $(".buySectionHead", this).prop("disabled", filtering && shown.length === 0);
+            confirm.paintBuyBadge(section);
+        });
+
+        $(".buyFilterEmpty", e).prop("hidden", !filtering || anyShown).find("q").text(query.trim());
+    },
+
+    /* Paint what getTotalCost / getTotalCostBulk worked out: the Base Hull line, each row's cost and
+       each section's count + subtotal. `base` is the hull figure they priced from, and `each` what an
+       enhancement's per-craft cost is multiplied by (the flight size; 1 otherwise), so Base Hull plus
+       every subtotal is the total. The bulk dialog works per unit: there that sum is the Per Unit
+       figure, and the total is it times the quantity. */
+    paintBuySummary: function paintBuySummary(base, each) {
+        var dialog = $(".confirm.buyDialog");
+        if (!dialog.length) return;
+
+        var baseLine = $(".buyDialogBase", dialog);
+        var label = confirm.escapeBuyText(baseLine.data("shipClass"));
+        var flightSize = $(".fighterAmount", dialog);
+        if (flightSize.length) label = (parseInt(flightSize.text(), 10) || 1) + ' &times; ' + label;
+        if (baseLine.data("perUnit")) label += ', each';
+        $(".buyDialogBaseLabel", dialog).html('' + label);
+        $(".buyDialogBaseCost", dialog).text(confirm.formatBuyPts(base));
+
+        $(".buySection", dialog).each(function () {
+            var rows = $(".buyRow", this);
+            var taken = 0;
+            var subtotal = 0;
+
+            rows.each(function () {
+                var amount = $(".selectAmount", this);
+                var isTaken = false;
+                var cost = 0;
+
+                if (typeof amount.data("enhPrice") !== 'undefined') {
+                    isTaken = amount.data("count") > 0;
+                    cost = (amount.data("enhCost") || 0) * each;
+                } else if (typeof amount.data("firingMode") !== 'undefined') {
+                    var value = amount.data("value") || 0;
+                    isTaken = value > 0;
+                    cost = value * (amount.data("cost") || 0) * (amount.data("launchers") || 0) * each;
+                }
+
+                if (isTaken) {
+                    taken++;
+                    subtotal += cost;
+                }
+                $(this).toggleClass("is-taken", isTaken);
+                $(".buyRowCost", this)
+                    .text(isTaken ? confirm.formatBuyPts(cost) : '')
+                    .toggleClass("is-saving", isTaken && cost < 0);
+            });
+
+            $(this).data("taken", taken).data("subtotal", subtotal);
+            confirm.paintBuyBadge($(this));
+        });
+    },
+
+    /* A section's badge: what is bought in it - "2 selected · 45 pts" - whenever anything is, filter
+       or no filter; otherwise its row count, or while a filter is typed how many of its rows match. */
+    paintBuyBadge: function paintBuyBadge(section) {
+        var rows = $(".buyRow", section);
+        var taken = section.data("taken") || 0;
+        var text = rows.length + ' available';
+
+        if (taken) {
+            text = taken + ' selected · ' + confirm.formatBuyPts(section.data("subtotal"));
+        } else if (section.closest(".buyDialog").hasClass("is-filtering")) {
+            var shown = rows.not(".is-filtered").length;
+            text = shown ? shown + ' of ' + rows.length + (shown === 1 ? ' matches' : ' match') : 'no match';
         }
 
-        var totalTemplate = $(".totalUnitCost");
-        var totalItem = totalTemplate.clone(true).prependTo(e);
+        $(".buySectionBadge", section).text(text).toggleClass("is-taken", taken > 0);
+    },
 
-        $(".totalUnitCostText", totalItem).html("Cost Per Unit");
-        var perUnitAmountSpan = $(".totalUnitCostAmount", totalItem);
-        perUnitAmountSpan.html(baseCost);
-        perUnitAmountSpan.data("value", baseCost);
-        perUnitAmountSpan.addClass("costPerUnitSpan");
+    /* Onto the page: priced, pinned, faded in. Shared by all three dialogs. */
+    openBuyDialog: function openBuyDialog(e) {
+        e.appendTo("body");
+        confirm.getTotalCost();
+        confirm.anchorBuyDialog(e);
+        e.fadeIn(250);
+    },
 
-        $(totalItem).show();
+    /* The window opens CENTRED, as every .confirm does - then its top is pinned where centring put it
+       (.is-anchored + --buy-top), so folding a section or filtering only moves the BOTTOM edge up
+       (user, 2026-09-26: centred, the whole window slid down to re-centre on every fold). It opens at
+       its tallest - every section open, nothing filtered - so it never needs to grow below that.
 
+       Measured in the containing block's own terms - the used `top` (50% of it) less half the border
+       box - so page scroll and a phone's zoomed-out visual viewport do not enter into it. It has to be
+       displayed for a moment to be measured, and is hidden again in the same task, before anything
+       paints; fadeIn then shows it. */
+    anchorBuyDialog: function anchorBuyDialog(e) {
+        var el = e[0];
+        el.style.display = "block";
+        var top = parseFloat(window.getComputedStyle(el).top) - el.offsetHeight / 2;
+        el.style.display = "";
+        el.style.setProperty("--buy-top", Math.max(0, Math.round(top)) + "px");
+        e.addClass("is-anchored");
+    },
 
-        // Unit Settings Fields
-        var html = '<div class="unitSettings">';
-        //html += '<div style="margin-bottom: 5px;">Mines will be placed randomly within the player\'s deployment zone boundaries based on the quantity specified. (NOTE: 10% class surcharge added separately to fleet total)</div>';
+    getVariableSize: function getVariableSize(ship) {
+        //if (ship.flight && !ship.superheavy) { //superheavy is no longer a good marker
+        if (ship.flight && ship.maxFlightSize != 1) { //max flight size = 1 indicates single superheavy fighter
+            return true;
+        } else return false;
+    },
+
+    /* A new ship or flight, off the Store. */
+    showShipBuy: function showShipBuy(ship, callback) {
+        var unit = ship.flight ? 'Flight' : 'Ship';
+        //"Buy G'Quan Heavy Cruiser" (user, 2026-09-26) - the head names the class, the button the act.
+        var e = confirm.buyDialogShell(ship, {
+            title: 'Buy ' + confirm.escapeBuyText(ship.shipClass),
+            okLabel: 'Buy ' + unit
+        });
+
+        var fixedSmallFlight = ship.maxFlightSize >= 2 && ship.maxFlightSize < 6;
+        var pointCost = ship.pointCost;
+        if (fixedSmallFlight) {
+            //design pointCost is set for a 6-strong flight (cost-per-craft * 6).
+            //For any fixed sub-six flight (e.g. 3-strong Breaching Pods, 2-strong BPs), scale down to actual flight size.
+            //maxFlightSize 1 is single superheavy with its own pointCost; 6+ already matches the stored cost.
+            pointCost = pointCost * ship.maxFlightSize / 6;
+        }
+
+        confirm.addBuyNameRow(e, confirm.defaultShipName(ship));
+        if (confirm.getVariableSize(ship)) {
+            //for any fixed sub-six flight size, start at that size; otherwise default to 6
+            confirm.addBuyFlightSizeRow(e, ship, fixedSmallFlight ? ship.maxFlightSize : 6, Math.floor(ship.pointCost / 6));
+        }
+        confirm.setBuyBase(e, ship, pointCost);
+        confirm.addBuyMissileRows(e, ship, false);
+        confirm.addBuyEnhancementRows(e, ship, false, confirm.handleInputChange);
+        confirm.openBuySections(e);
+
+        $(".confirmok", e).on("click", callback);
+        $(".confirmok", e).data("shipclass", ship.phpclass);
+
+        confirm.openBuyDialog(e);
+    },
+
+    /* A bought ship or flight re-opened: to EDIT it (gamedata.doEditShip), or with mode 'copy' to
+       buy a COPY of it starting from its fit (gamedata.doCopyShip). */
+    showShipEdit: function showShipEdit(ship, callback, mode) {
+        var unit = ship.flight ? 'Flight' : 'Ship';
+        var copy = (mode === 'copy');
+        var e = confirm.buyDialogShell(ship, {
+            title: (copy ? 'Copy ' : 'Edit ') + unit,
+            okLabel: copy ? 'Buy Copy' : 'Save Changes'
+        });
+
+        // Store the original ship state before any edits
+        var originalShipData = confirm.snapshotShip(ship);
+
+        //MUST be the bare hull: this dialog totals as base + enhancements. Falling back to
+        //ship.pointCost counted them twice, because doLoadFleet/doBuyShip have already folded them
+        //into it - see gamedata.getPristinePointCost. Unchanged when a blueprint is available.
+        var pointCost = gamedata.getPristinePointCost(ship);
+
+        confirm.addBuyNameRow(e, ship.name);
+        if (confirm.getVariableSize(ship)) {
+            //per-craft cost of the BARE hull, for the same reason as the total above
+            confirm.addBuyFlightSizeRow(e, ship, ship.flightSize, Math.floor(pointCost / 6));
+        }
+        confirm.setBuyBase(e, ship, pointCost);
+        confirm.addBuyMissileRows(e, ship, true);
+        confirm.addBuyEnhancementRows(e, ship, true, confirm.handleInputChangeEdit);
+        confirm.openBuySections(e);
+
+        $(".confirmok", e).on("click", callback);
+        $(".confirmok", e).data("ship", ship);
+        $(".confirmok", e).data("originalShipData", originalShipData);
+
+        confirm.openBuyDialog(e);
+    },
+
+    /* The bulk purchase dialog - quantity, enhancements applied to every unit in the row, and no
+       name box (a bulk purchase is interchangeable units, named from the ship class and numbered
+       by BuyingGamePhase).
+
+       ONE function serves BUYING a new bulk row, EDITING one already in the fleet and COPYING one.
+       `existing` switches the first two: falsy for a fresh purchase off a store blueprint, truthy
+       when `ship` is a bought row being re-opened; mode 'copy' only renames the window, since a
+       copy is re-opened exactly as an edit is. Deliberately not a second showBulkEdit copy - the
+       two would have to be kept in step over the quantity field, every enhancement widget and the
+       cost plumbing. */
+    showBuyBulk: function showBuyBulk(ship, callback, existing, mode) {
+        var copy = (mode === 'copy');
+        var e = confirm.buyDialogShell(ship, {
+            bulk: true,
+            title: copy ? 'Copy Purchase' : (existing ? 'Edit Purchase' : 'Bulk Buy'),
+            okLabel: copy ? 'Buy Copy' : (existing ? 'Save Changes' : 'Buy Units')
+        });
+
+        /* ⚠️ MUST be the bare hull when re-opening a bought row: this dialog totals as base
+           + enhancements, and a bought row's pointCost ALREADY has its per-unit enhancements
+           folded in (the one pricing convention behind gamedata.rowPointCost). Feeding it
+           ship.pointCost would charge for them twice, and again on every subsequent edit.
+           Unchanged for a fresh purchase - a store blueprint's cost is pristine by
+           definition, and getPristinePointCost simply reads it back. */
+        var baseCost = existing ? gamedata.getPristinePointCost(ship) : ship.pointCost;
 
         /* No name box, deliberately - for OSATs as well as mines (user request 2026-08-10).
            A bulk purchase is interchangeable units, so they are named from the ship class
            and numbered by BuyingGamePhase: "Gravitic Mine #1", "Sentry #2", ... */
-        var quantity = existing ? (parseInt(ship.bulkBuy, 10) || 1) : 1;
-        html += '<label>Quantity: <input type="number" id="bulkQuantity" value="' + quantity + '" min="1" style="width: 50px; text-align: center;"></label><br>';
-        html += '</div>';
-
-        var settingsBlock = $(html).prependTo(e);
-
-        // Add mousewheel scroll support to the input field
-        $('#bulkQuantity', settingsBlock).on('wheel', function (e) {
-            e.preventDefault();
-            var step = parseInt($(this).attr('step')) || 1;
-            var val = parseInt($(this).val()) || 1;
-
-            if (e.originalEvent.deltaY < 0) {
-                $(this).val(val + step);
-            } else {
-                var min = parseInt($(this).attr('min')) || 1;
-                if (val - step >= min) {
-                    $(this).val(val - step);
-                }
-            }
-            confirm.getTotalCost();
-        });
-
-        $('#bulkQuantity', settingsBlock).on('input', function () {
-            confirm.getTotalCost();
-        });
-
-        $('<label>' + (existing ? 'Edit your ' : 'Configure ') + ship.shipClass + ' Purchase:</label><br>').prependTo(e);
+        confirm.addBuyQuantityRow(e, existing ? (parseInt(ship.bulkBuy, 10) || 1) : 1);
+        confirm.setBuyBase(e, ship, baseCost, true);
+        //The edit handler adjusts by the DELTA from the count already in the box, which is what a
+        //pre-populated row needs; the buy handler recomputes from zero.
+        confirm.addBuyEnhancementRows(e, ship, Boolean(existing), existing ? confirm.handleInputChangeEdit : confirm.handleInputChange);
+        confirm.openBuySections(e);
 
         $(".confirmok", e).on("click", function () {
             var q = parseInt($('#bulkQuantity', e).val());
@@ -1664,10 +1521,6 @@ window.confirm = {
             callback(results, shipclass, editShip, editOriginal);
         });
 
-        $(".confirmcancel", e).on("click", function () {
-            $(".confirm").remove();
-        });
-
         /* shipclass is what a fresh purchase resolves its blueprint from; `ship` is what an
            edit rebuilds. BOTH are set on an edit because confirm.getMaxAmmoFit reads either
            to work out how much (AMMO) fits in the magazine, and a row loaded from a saved
@@ -1678,75 +1531,8 @@ window.confirm = {
             $(".confirmok", e).data("originalShipData", confirm.snapshotShip(ship));
         }
 
-        var a = e.appendTo("body");
-        confirm.getTotalCost();
-        a.fadeIn(250);
+        confirm.openBuyDialog(e);
     },
-    /*
-    // Helper function to handle input changes (edit mode)
-    handleInputChangeEdit: function handleInputChangeEdit(e) {
-        var currentText = $(this).text();
-        var value = parseInt(currentText) || 0;
-        var oldCount = $(this).data('count');
-
-        // Get the min and max limits
-        var min = $(this).data('min');
-        var max = $(this).data('max');
-
-        // Enforce min/max
-        if (value < min) value = min;
-        if (value > max) value = max;
-
-        // Update displayed value
-        $(this).text(value);
-        $(this).data('value', value);
-        $(this).data('count', value);
-
-        // Move cursor to end
-        var range = document.createRange();
-        var sel = window.getSelection();
-        range.selectNodeContents(this);
-        range.collapse(false);
-        sel.removeAllRanges();
-        sel.addRange(range);
-
-        var enhPrice = $(this).data('enhPrice');
-        var enhPriceStep = $(this).data('enhPriceStep');
-
-        // Compute old cost
-        var oldCost = 0;
-        for (let i = 0; i < oldCount; i++) {
-            oldCost += enhPrice + (i * enhPriceStep);
-        }
-
-        // Compute new cost
-        var newCost = 0;
-        for (let i = 0; i < value; i++) {
-            newCost += enhPrice + (i * enhPriceStep);
-        }
-
-        // Update cost data
-        var totalEnhCost = ($(this).data('enhCost') || 0) - oldCost + newCost;
-        $(this).data('enhCost', totalEnhCost);
-
-        // Same logic for enhancement options, if applicable
-        if ($(this).data("enhIsOption")) {
-            var oldOptionCost = 0;
-            var newOptionCost = 0;
-            for (let i = 0; i < oldCount; i++) {
-                oldOptionCost += enhPrice + (i * enhPriceStep);
-            }
-            for (let i = 0; i < value; i++) {
-                newOptionCost += enhPrice + (i * enhPriceStep);
-            }
-
-            var totalOptionCost = ($(this).data('enhOptionCost') || 0) - oldOptionCost + newOptionCost;
-            $(this).data('enhOptionCost', totalOptionCost);
-        }
-
-        confirm.getTotalCost();
-    },
-    */
 
     /* ── Saved-fleet dialogs ──────────────────────────────────────────────────────────
        The three fleet windows (save, load, result notice) share the .fleetDialog skin in
@@ -1778,7 +1564,14 @@ window.confirm = {
        generic confirm.warning so restyling the fleet family cannot reskin every warning
        in the game. */
     fleetNotice: function fleetNotice(msg, title) {
-        var e = confirm.fleetDialogShell(title || "Saved Fleets", "", '<p>' + msg + '</p>', "Close");
+        confirm.fleetNoticeHtml('<p>' + msg + '</p>', title);
+    },
+
+    /* fleetNotice with a body of the caller's own markup - several paragraphs, a list - rather
+       than one message in a <p>, which cannot hold a list. The saved-fleet load's "Units Not
+       Loaded" report is the first (gamedata.showLeftOutNotice; .fleetNotice* in confirm.css). */
+    fleetNoticeHtml: function fleetNoticeHtml(bodyHtml, title) {
+        var e = confirm.fleetDialogShell(title || "Saved Fleets", "", bodyHtml, "Close");
         $(".confirmcancel", e).remove();
 
         $(".confirmok", e).on("click", function () {
@@ -1901,8 +1694,12 @@ window.confirm = {
 
 
 
+    /* error / confirm / confirmOrSurrender carry .promptDialog: labelled buttons (green OK /
+       Confirm, red Cancel) in place of the ok.png / cancel.png icons, painted in confirm.css.
+       The hangar and allocation dialogs are .confirm.error too, which is why the buttons key
+       off their own class rather than off .error. */
     error: function error(msg, callback) {
-        var e = $('<div class="confirm error"><div class="ui"><div class="confirmok" style="margin:auto;"></div></div></div>');
+        var e = $('<div class="confirm error promptDialog"><div class="ui"><button type="button" class="confirmok">OK</button></div></div>');
         $('<span>' + msg + '</span>').prependTo(e);
         //$('<span>ERROR</span></br>').prependTo(e);
         //$('<div class="message"><span>Name your new '+ship.shipClass+'</span></div>').prependTo(e);
@@ -1918,7 +1715,7 @@ window.confirm = {
     },
 
     confirm: function confirm(msg, callback, cancelCallback) {
-        var e = $('<div class="confirm error"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        var e = $('<div class="confirm error promptDialog"><div class="ui"><button type="button" class="confirmok">Confirm</button><button type="button" class="confirmcancel">Cancel</button></div></div>');
         //var e = $('<div class="confirm error"><div class="ui"><div class="confirmok" style="margin:auto;"></div></div></div>');
         $('<span>' + msg + '</span>').prependTo(e);
         //$('<span>ERROR</span></br>').prependTo(e);
@@ -1980,7 +1777,7 @@ window.confirm = {
     },
 
     confirmOrSurrender: function confirmOrSurrender(msg, callbackCommit, callbackSurrender) {
-        var e = $('<div class="confirm error"><div class="ui"><div class="confirmok"></div><div class="surrender"></div><div class="confirmcancel"></div></div></div>');
+        var e = $('<div class="confirm error promptDialog"><div class="ui"><button type="button" class="confirmok">Confirm</button><div class="surrender"></div><button type="button" class="confirmcancel">Cancel</button></div></div>');
         $('<span>' + msg + '</span>').prependTo(e);
 
         $(".ok", e).on("click", callbackCommit);

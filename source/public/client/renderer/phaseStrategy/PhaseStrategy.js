@@ -1511,7 +1511,11 @@ window.PhaseStrategy = function () {
         if (PhaseStrategy.anyEdfNetPresent()) this.syncEdfNetPreview();
         //...and in Deployment, a unit stepping off its off-map marker onto the board starts drawing
         //its field disc (isOffBoardForEdf). Deployment only: no other phase has a unit on a 'start' row.
-        if (this.gamedata && this.gamedata.gamephase == -1) this.syncAllEdfFields();
+        if (this.gamedata && this.gamedata.gamephase == -1) {
+            this.syncAllEdfFields();
+            //Likewise a terrain unit being placed or turned: its footprint follows it (kicked below).
+            if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) this.ballisticIconContainer.refreshTerrainHexes(this.gamedata);
+        }
 
         // Mirror movement to attached units (e.g. pods) - DK 04/26
         if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {

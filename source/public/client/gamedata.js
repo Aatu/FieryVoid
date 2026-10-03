@@ -259,6 +259,19 @@ window.gamedata = {
         return null;
     },
 
+    /* Is there a Meteor Swarm on the map to defend against (METEOR_DEFENCE_PLAN.md D7)? A Meteor Swarm,
+       or the Triad's spawned meteoroids. Matched on phpclass, as BallisticIconContainer's field-terrain
+       list is: isMeteoroid reaches the client only through MeteorSwarm's static blueprint, and the
+       spawned Triad class is not in the statics at all (trap T13). */
+    hasMeteorSwarm: function hasMeteorSwarm() {
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            if (ship.phpclass !== 'MeteorSwarm' && ship.phpclass !== 'spawnMeteoroid') continue;
+            if (!shipManager.isDestroyed(ship)) return true;
+        }
+        return false;
+    },
+
     isMyShip: function isMyShip(ship) {
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid) && (gamedata.gamephase !== -1)) return false; //Players can purchase Terrain, and will need to select to deploy it.
         //if (ship.mine && (gamedata.gamephase !== -1)) return false;           

@@ -22,6 +22,15 @@ const SystemInfoTooltip = styled(Tooltip)`
       (same as #shipWindowsReact) - this menu is interactive, so it must opt back in.
       No-op in game.php, where the mount point has no pointer-events override.*/
     pointer-events: auto;
+    /*Lobby: the menu inside (ApplyDamageMenu) is a framed panel of its own, so this tooltip
+      draws nothing round it - no second border, padding or fill, and no element opacity.*/
+    ${props => props.$bare && `
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: none;
+        opacity: 1;
+    `}
 `;
 
 const Entry = styled(TooltipEntry)`
@@ -46,7 +55,8 @@ class SystemInfoMenu extends React.Component {
         }
 
         return (
-            <SystemInfoTooltip position={getPosition(boundingBox)} opacity={hasStyledMenu(ship, system) ? 0.95 : 0.8}>
+            <SystemInfoTooltip position={getPosition(boundingBox)} opacity={hasStyledMenu(ship, system) ? 0.95 : 0.8}
+                $bare={gamedata.gamephase === -2}>
                 <SystemInfoButtons {...this.props} />
             </SystemInfoTooltip>
         )

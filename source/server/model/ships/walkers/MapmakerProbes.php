@@ -28,8 +28,7 @@ class MapmakerProbes extends FighterFlight{
 		//<br> between notes, as every other hull in the tree does - without it the four lines ran
 		//together as one paragraph in the buy list.
 		$this->notes = "Does not require hangar space.";
-		$this->notes .= "Can use 3 EW points per turn (OEW and/or DEW).";
-		$this->notes .= "<br>Carries a Jump Engine.";
+		$this->notes .= "<br>Can use 3 EW points per turn.";
 
 		$this->forwardDefense = 5;
 		$this->sideDefense = 8;

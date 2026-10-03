@@ -8,7 +8,7 @@ class DalithornDreadnought extends BaseShip{
 	$this->faction = "Nexus Dalithorn Commonwealth (early)";
         $this->phpclass = "DalithornDreadnought";
         $this->imagePath = "img/ships/Nexus/Dalithorn_Dreadnought2.png";
-        $this->shipClass = "Dreadnought";
+        $this->shipClass = "Aldrethin Dreadnought";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 175; //img has 200px per side
 		$this->unofficial = true;

@@ -5,7 +5,7 @@ class swArquitensCommandCruiser extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 430;
-	$this->faction = "ZStarWars";
+	$this->faction = "StarWars";
         $this->phpclass = "swArquitensCommandCruiser";
         $this->imagePath = "img/starwars/ArquitensLightCruiser.png";
 	$this->canvasSize = 200;

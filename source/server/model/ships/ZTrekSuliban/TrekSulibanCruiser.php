@@ -5,7 +5,7 @@ class TrekSulibanCruiser extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 425;
-        $this->faction = "ZStarTrek (early) Suliban";
+        $this->faction = "StarTrek (early) Suliban";
         $this->phpclass = "TrekSulibanCruiser";
         $this->imagePath = "img/ships/StarTrek/SulibanCruiser.png";
         $this->shipClass = "Suliban Cruiser";

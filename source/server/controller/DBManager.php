@@ -1090,29 +1090,48 @@ class DBManager
         }
     }
 
+    /* Seat $userid in slot $slotid. Returns true, or false when the slot cannot be taken: there is no
+       such slot, the game has left its lobby, or ANOTHER player holds the slot. It used to overwrite
+       the slot's player unconditionally - the page only hides Take Slot on a taken slot, so a hand-made
+       slot.php POST could move a player out of their slot, in an ACTIVE game too (handing over their
+       fleet). Retaking a slot this player already holds is fine (a double click).
+       Order matters: the slot is CLAIMED first, by an UPDATE that only matches while it is still free,
+       so of two players taking it at once exactly one wins - and only then are this player's slots on
+       the other team given up, so a refused take never costs them the slot they had. */
     public function takeSlot($userid, $gameid, $slotid)
     {
-        $userid = $this->DBEscape($userid);
-        $gameid = $this->DBEscape($gameid);
-        $slotid = $this->DBEscape($slotid);
+        $userid = (int)$userid;
+        $gameid = (int)$gameid;
+        $slotid = (int)$slotid;
         try {
             $slot = $this->getSlotById($slotid, $gameid);
             if (!$slot)
                 return false;
 
-            //already in slot on other team?
-            $sql = "SELECT * FROM `tac_playeringame` WHERE gameid = $gameid AND teamid != " . $slot->team . " AND playerid = $userid";
-            if ($this->found($sql)) {
-                $this->leaveSlot($userid, $gameid);
+            $gRes = $this->query("SELECT status, rules FROM tac_game WHERE id = $gameid");
+            if (!$gRes || count($gRes) == 0 || $gRes[0]->status !== 'LOBBY')
+                return false;
+
+            $holder = (int)$slot->playerid; //NULL (a free slot) reads as 0
+            if ($holder > 0 && $holder !== $userid)
+                return false;
+
+            $this->update("UPDATE tac_playeringame SET playerid = $userid WHERE gameid = $gameid AND slot = $slotid AND (playerid IS NULL OR playerid <= 0 OR playerid = $userid)");
+            if ($this->connection->affected_rows < 1) {
+                //0 rows: already this player's (nothing changed) - or someone took it a moment ago
+                $now = $this->getSlotById($slotid, $gameid);
+                if (!$now || (int)$now->playerid !== $userid)
+                    return false;
             }
 
-            $sql = "UPDATE tac_playeringame SET playerid = $userid WHERE gameid = $gameid and slot = $slotid";
-            $this->update($sql);
-            
-            // Ladder Handicap Logic
-            $gSql = "SELECT rules FROM tac_game WHERE id = $gameid";
-            $gRes = $this->query($gSql);
-            
+            //Slots on the other team are given up: a player only ever sits on one team.
+            $others = $this->query("SELECT slot FROM `tac_playeringame` WHERE gameid = $gameid AND teamid != " . (int)$slot->team . " AND playerid = $userid");
+            foreach (($others ?: array()) as $other) {
+                $this->leaveSlot($userid, $gameid, (int)$other->slot);
+            }
+
+            // Ladder Handicap Logic (after the old slots are left: it takes the opponent to be
+            // whoever else holds a slot)
             if ($gRes && count($gRes) > 0) {
                 $rules = json_decode($gRes[0]->rules, true);
                 if (isset($rules['ladder']) && $rules['ladder']) {
@@ -1173,6 +1192,8 @@ class DBManager
                     }
                 }
             }
+
+            return true;
 
         } catch (Exception $e) {
             throw $e;
@@ -1321,7 +1342,14 @@ class DBManager
 */        
 
 
-    public function createGame($gamename, $background, $slots, $userid, $gamespace, $description, $rules = '{}')
+    /* $scenario: the validated Scenario Description JSON text (Manager::cleanScenario), or null
+       for a game created without one - the Fleet Builder, or an old cached createGame.js.
+       $inServiceDate: the In-Service Date cutoff year (Manager::cleanInServiceDate), or null.
+       $passwordHash: a private game's password_hash() (Manager::hashGamePassword), or null for a
+       public game. Written here and read back ONLY by getGameAccess - never by getTacGame.
+       ⚠️ Needs db/createGameRedesign.sql applied first: naming a column that does not exist
+       fails the whole INSERT, and with it every game creation. */
+    public function createGame($gamename, $background, $slots, $userid, $gamespace, $description, $rules = '{}', $scenario = null, $inServiceDate = null, $passwordHash = null)
     {
         //Name the columns explicitly: a column-less INSERT ... VALUES breaks at
         //prepare() time with "Column count doesn't match value count" the moment
@@ -1330,7 +1358,7 @@ class DBManager
             INSERT INTO
                 tac_game
                 (name, turn, phase, activeship, background, points, status,
-                 slots, creator, submitLock, gamespace, rules, description)
+                 slots, creator, submitLock, gamespace, rules, description, scenario, in_service_date, password_hash)
             VALUES
             (
                 ?,
@@ -1345,7 +1373,10 @@ class DBManager
                 null,
                 ?,
                 ?,
-		?
+		?,
+                ?,
+                ?,
+                ?
             )
         ");
 
@@ -1355,15 +1386,20 @@ class DBManager
             $background = $this->DBEscape($background);
             $slotnum = count($slots);
             $gamespace = $this->DBEscape($gamespace);
+            //A null $inServiceDate binds as SQL NULL (no cutoff), whatever the 'i'; likewise a
+            //null $passwordHash (a public game).
             $stmt->bind_param(
-                'ssiisss',
+                'ssiissssis',
                 $gamename,
                 $background,
                 $slotnum,
                 $userid,
                 $gamespace,
                 $rules,
-		$description
+		$description,
+                $scenario,
+                $inServiceDate,
+                $passwordHash
             );
             if ($stmt->execute())
                 $gameid = $this->getLastInstertID();
@@ -1491,7 +1527,12 @@ class DBManager
   		if (($fire->type == "ballistic") && ($phase != 1) &&  ($fire->addToDB != true)) //28 Sept 2023 - Amended to enable Multimissile to shows multiple shots in Combat Log.
                 continue;
 
-            if ($fire->type != "ballistic" && $phase == 1)
+            /* METEOR_DEFENCE_PLAN.md §2.1 - a Meteor Defence declaration is made in Initial Orders and
+               written THEN AND NEVER AGAIN. The client re-posts every order it holds in the Fire Phase
+               (trap T4), so without the second half it would be inserted a second time there. */
+            if ($fire->type == "meteorDefence") {
+                if ($phase != 1) continue;
+            } else if ($fire->type != "ballistic" && $phase == 1)
                 continue;
 
   		    if (($fire->type == "prefiring") && ($phase != 5))
@@ -2466,7 +2507,10 @@ class DBManager
         $asteroids = isset($r['asteroids']) ? (int)$r['asteroids'] : 0;
         $moons     = (isset($r['moons']) && is_array($r['moons'])) ? $r['moons'] : array();
         $moonCount = (int)($moons['small'] ?? 0) + (int)($moons['medium'] ?? 0) + (int)($moons['large'] ?? 0);
-        if ($asteroids > 0 || $moonCount > 0) $chips[] = 'TERRAIN';
+        $fields    = (isset($r['dustAndMeteors']) && is_array($r['dustAndMeteors'])) ? $r['dustAndMeteors'] : array();
+        $fieldCount = (int)($fields['dust'] ?? 0) + (int)($fields['meteors'] ?? 0);
+        $layoutCount = (isset($r['terrainLayout']['units']) && is_array($r['terrainLayout']['units'])) ? count($r['terrainLayout']['units']) : 0;
+        if ($asteroids > 0 || $moonCount > 0 || $fieldCount > 0 || $layoutCount > 0) $chips[] = 'TERRAIN';
 
         if (!empty($r['allowMines']))   $chips[] = 'MINES';
         if (!empty($r['allowReinforcements'])) $chips[] = 'REINF';
@@ -2624,13 +2668,15 @@ class DBManager
         //it used to build '<span style=...>LADDER: </span>' + name + '<br><span
         //class="gameRules">(...)</span>' and replace the name outright with
         //'Fleet Builder'. All three are presentation and now travel as flags.
-		$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, g.gamespace, g.rules, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers, (select count(*) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as occupiedSlots, (SELECT count(*) FROM tac_playeringame WHERE gameid = g.id AND playerid = ?) as userInGame from tac_game g WHERE  g.status = 'LOBBY';");
+        //isPrivate is only whether a password is SET - the hash itself never leaves the database
+        //except through getGameAccess (CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md Stage 8).
+		$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, g.gamespace, g.rules, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers, (select count(*) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as occupiedSlots, (SELECT count(*) FROM tac_playeringame WHERE gameid = g.id AND playerid = ?) as userInGame, (g.password_hash IS NOT NULL) as isPrivate from tac_game g WHERE  g.status = 'LOBBY';");
 
         $games = [];
 
         if ($stmt) {
             $stmt->bind_param("i", $userid);
-            $stmt->bind_result($id, $gameName, $slots, $gamespace, $rules, $playerCount, $occupiedSlots, $userInGame);
+            $stmt->bind_result($id, $gameName, $slots, $gamespace, $rules, $playerCount, $occupiedSlots, $userInGame, $isPrivate);
             $stmt->execute();
             while ($stmt->fetch()) {
                 $desc = $this->describeGameRules($rules, $gamespace);
@@ -2650,7 +2696,8 @@ class DBManager
                     "map"         => $desc["map"],
                     "rules"       => $desc["rules"],
                     "ladder"      => $desc["ladder"],
-                    "test"        => $desc["test"]
+                    "test"        => $desc["test"],
+                    "private"     => (bool)$isPrivate
                 ];
             }
             $stmt->close();
@@ -2697,6 +2744,52 @@ class DBManager
 
     }
     */        
+    /* tac_game.scenario as stored (JSON text) and tac_game.in_service_date, each null when unset,
+       as array('scenario' => ..., 'inServiceDate' => ...). See Manager::getGameScenario. */
+    public function getGameScenario($gameid)
+    {
+        $scenario = null;
+        $inServiceDate = null;
+
+        $stmt = $this->connection->prepare("SELECT scenario, in_service_date FROM tac_game WHERE id = ?");
+        if ($stmt) {
+            $stmt->bind_param('i', $gameid);
+            $stmt->bind_result($scenario, $inServiceDate);
+            $stmt->execute();
+            $stmt->fetch();
+            $stmt->close();
+        }
+
+        return array('scenario' => $scenario, 'inServiceDate' => $inServiceDate);
+    }
+
+    /* Who may open a game's lobby and take its slots (a private game - plan Stage 8), as
+       array('name', 'status', 'passwordHash' (null = public), 'member' (holds a slot)), or null
+       when there is no such game. The ONLY read of tac_game.password_hash: see Manager::getGameAccess,
+       which keeps the hash on the server. */
+    public function getGameAccess($gameid, $userid)
+    {
+        $row = null;
+
+        $stmt = $this->connection->prepare("SELECT g.name, g.status, g.password_hash, (SELECT COUNT(*) FROM tac_playeringame p WHERE p.gameid = g.id AND p.playerid = ?) FROM tac_game g WHERE g.id = ?");
+        if ($stmt) {
+            $stmt->bind_param('ii', $userid, $gameid);
+            $stmt->bind_result($name, $status, $passwordHash, $slotsHeld);
+            $stmt->execute();
+            if ($stmt->fetch()) {
+                $row = array(
+                    'name' => $name,
+                    'status' => $status,
+                    'passwordHash' => ($passwordHash === null || $passwordHash === '') ? null : $passwordHash,
+                    'member' => ($slotsHeld > 0)
+                );
+            }
+            $stmt->close();
+        }
+
+        return $row;
+    }
+
     public function getTacGame($gameid, $playerid)
     {
          $sql = "SELECT * FROM `tac_game` where id = $gameid";

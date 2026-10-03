@@ -4,7 +4,7 @@ class zzftrYT2400 extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 71*6;
-        $this->faction = "ZStarWars";
+        $this->faction = "StarWars";
         $this->phpclass = "zzftrYT2400";
         $this->shipClass = "YT-2400 Light Freighters";
         $this->imagePath = "img/starwars/YT2400.png";

@@ -5,7 +5,7 @@ class TrekNausicaanShefaFighter extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 33 *6;
-        $this->faction = "ZTrek Playtest Other Factions";
+        $this->faction = "Trek Playtest Other Factions";
         $this->phpclass = "TrekNausicaanShefaFighter";
         $this->shipClass = "Nausicaan Shefa Fighters";
 	    $this->imagePath = "img/ships/StarTrek/NausicaanShefalitayal.png";

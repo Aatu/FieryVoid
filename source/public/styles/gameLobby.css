@@ -1,0 +1,2486 @@
+/*
+ * gameLobby.css - gamelobby.php only. CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md Stage 4: the top of
+ * the page - the game's name, then one row of Map Preview | Scenario Description | Teams (plan
+ * §11.3), or, in a Fleet Builder lobby (no teams, map or scenario), the reference links alone.
+ *
+ * The same grammar as createGame.css - panel + micro-cap head bar, 3px rail, Consolas numerals -
+ * under an .lb- prefix, because the two pages are a pair and createGame.css is not linked here.
+ * Tokens only; tokens.css is the one :root. Linked after lobby.css and gamesNew.css, which it
+ * overrides where the two meet (the slot row, #mapPreview).
+ *
+ * Since §12.13 the page is two columns: MAIN (Map | Scenario over the Game Rules strip, then
+ * Purchase Fleet) and SIDE (Teams over Your Fleet, which stays in view). MOBILE: Scenario over Map
+ * at <= 1180px, then one column at <= 760px.
+ *
+ * Stage 5 added the Purchase Fleet panel (.lb-buy: Store | Fleet, the Store scoped to one
+ * faction), the two lobby windows (.lb-modal: the Faction Picker and the Fleet Correctness
+ * Report) and the chat panel's width, all at the bottom of this file. Stage 7 added the Faction
+ * Picker's footer, the faction randomiser (.lb-picker-random). Stage 8 added a private game's
+ * password form (.lb-gate), the page a player sees instead of the lobby until they enter it.
+ */
+
+/* ── Frame ─────────────────────────────────────────────────────────────────── */
+
+.lb-top {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-sizing: border-box;
+  /* .panel.large.lobby's 1400px plus its padding and border: the Purchase panel's outer edge, so
+     the two line up. Narrower screens keep Create Game's gutter. */
+  width: 1422px;
+  max-width: calc(100% - 20px);
+  margin: 4px auto 12px;
+}
+
+.lb-top *,
+.lb-top *::before,
+.lb-top *::after {
+  box-sizing: border-box;
+}
+
+.lb-titlebar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+/* font-family on each element itself, here and below: gamesNew.css's `* { font-family: Arial }`
+   matches every element directly, so an inherited display face would lose to it. */
+.lb-title {
+  min-width: 0;
+  margin: 0;
+  font-family: var(--fv-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: var(--fv-text-bright);
+  overflow-wrap: anywhere;
+}
+
+.lb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 8px 16px;
+  font-family: var(--fv-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--fv-text);
+  background: rgba(73, 103, 145, 0.25);
+  border: 1px solid var(--fv-line-scs);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+/* Leave Game keeps the red it has always had: it is the one control here that walks away from
+   the game. */
+.lb-btn--leave {
+  color: #f3dcd8;
+  background: rgba(122, 33, 33, 0.8);
+  border-color: #a77272;
+}
+
+.lb-btn--leave:hover {
+  background: #8e2a2a;
+}
+
+.lb-btn:focus-visible,
+.lb-pill:focus-visible,
+.lb-link:focus-visible {
+  outline: 2px solid var(--fv-accent);
+  outline-offset: 2px;
+}
+
+/* ── Panels (createGame.css's .cg-section) ─────────────────────────────────── */
+
+.lb-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: linear-gradient(180deg, rgba(27, 45, 62, 0.94), rgba(18, 32, 45, 0.94));
+  border: 1px solid #2a6b8f;
+  border-radius: 6px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(139, 202, 242, 0.1);
+  overflow: hidden;
+}
+
+.lb-panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 9px 16px 8px;
+  font-family: var(--fv-display);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.7px;
+  text-transform: uppercase;
+  color: var(--fv-text-accent);
+  background: linear-gradient(180deg, rgba(73, 103, 145, 0.58), rgba(73, 103, 145, 0.22));
+  border-bottom: 1px solid #2a6b8f;
+}
+
+.lb-panel-head span {
+  font-family: inherit;
+}
+
+.lb-panel-head .lb-panel-meta {
+  font-family: var(--fv-mono);
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  color: var(--fv-text-dim);
+  white-space: nowrap;
+}
+
+.lb-panel-body {
+  padding: 14px 16px;
+}
+
+.lb-empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--fv-text-dim);
+}
+
+/* ── The page: two rows (plan §12.13, reshaped by the user in §12.14) ────────────────────────
+   UPPER: Map Preview | Scenario Description over the Game Rules strip, beside Teams. LOWER:
+   Purchase Fleet | Your Fleet, their tops level, Your Fleet staying in view the length of the
+   Store. So the lower row starts at the same place however many teams there are. */
+.lb-upper {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 16px;
+  align-items: start;
+}
+
+/* Map Preview | Scenario Description at ONE height (user): the row stretches both - the map keeps
+   its picture at the top, the scenario its links at the foot. The Game Rules strip under both.
+   ONE container (user, §12.15): no gaps - the briefing wears the panel frame and the three panels
+   inside it only a dividing line each. */
+.lb-brief {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  background: linear-gradient(180deg, rgba(27, 45, 62, 0.94), rgba(18, 32, 45, 0.94));
+  border: 1px solid #2a6b8f;
+  border-radius: 6px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(139, 202, 242, 0.1);
+  overflow: hidden;
+}
+
+.lb-brief[hidden] {
+  display: none;
+}
+
+.lb-brief > .lb-panel {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.lb-brief > .lb-scenario {
+  border-left: 1px solid #2a6b8f;
+}
+
+.lb-scenario > .lb-links {
+  margin-top: auto;
+}
+
+.lb-brief > .lb-rules-panel {
+  grid-column: 1 / -1;
+  border-top: 1px solid #2a6b8f;
+}
+
+/* Teams at its own height but never taller than the briefing beside it (user): past that its list
+   scrolls. The slot is stretched to the row, and `contain: size` keeps Teams' own height out of the
+   row's - so the briefing alone decides it - and Teams is capped at 100% of the slot. */
+.lb-teams-slot {
+  align-self: stretch;
+  min-height: 0;
+  contain: size;
+}
+
+.lb-teams-slot > .lb-teams {
+  max-height: 100%;
+}
+
+.lb-teams > .lb-panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Map & Scenario folded away: nothing is left beside Teams to cap it, so it takes the row at its own
+   height, its teams side by side. */
+.lb-upper:has(> .lb-brief[hidden]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.lb-upper:has(> .lb-brief[hidden]) > .lb-teams-slot {
+  contain: none;
+}
+
+.lb-upper:has(> .lb-brief[hidden]) .lb-teams {
+  max-height: none;
+}
+
+.lb-upper:has(> .lb-brief[hidden]) .lb-teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: 14px 16px;
+}
+
+/* LOWER: Purchase Fleet no wider than its longest row needs (user, §12.15) - 732px is the widest
+   Store row of any faction, 676px (12 Colonies of Kobol's Marine Assault Raptor; Earth Alliance
+   (Early)'s Atlas flights 658), plus the Store's 52px of frame and 4 to spare - and Your Fleet the
+   rest. Narrower, the 55% it had as 1.25 : 1. Your Fleet is pinned 10px under the top of the window
+   as the Store scrolls, never taller than the window: its list scrolls inside, its tools stay put. */
+.lb-lower {
+  display: grid;
+  grid-template-columns: minmax(0, min(732px, 55%)) minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.lb-fleet-wrap {
+  position: sticky;
+  top: 10px;
+}
+
+/* Until a faction is chosen the Store is empty and there is nothing to pin Your Fleet against:
+   both panels take the row's height, so they open level at the foot as well as the top (user). */
+.lb-lower:has(#store:empty) {
+  align-items: stretch;
+}
+
+.lb-lower:has(#store:empty) > .buy > .lb-panel {
+  height: 100%;
+}
+
+/* The title bar's buttons: Map & Scenario, then Leave Game. */
+.lb-title-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The arrow Load a Fleet wears: up while the section is open (it folds up), down while folded. */
+.lb-brief-toggle::after {
+  content: "\25B2";
+  margin-left: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  color: var(--fv-text-dim);
+}
+
+.lb-brief-toggle[aria-expanded="false"]::after {
+  content: "\25BC";
+}
+
+.lb-brief-toggle:hover {
+  color: #fff;
+  background: rgba(198, 226, 255, 0.14);
+  border-color: var(--fv-accent);
+}
+
+/* ── Teams ─────────────────────────────────────────────────────────────────── */
+
+.lb-teams-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Three or more teams: two across where they fit (the mockup's multi-team panel). */
+.lb-teams-grid--multi {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  gap: 14px 16px;
+}
+
+/* --rail is the team's colour, set by gamedata.paintLobbyTeams - the VIEWER's colours
+   (own green / other red in a 2-team game they play in; by team number otherwise). */
+.lb-team {
+  --rail: var(--fv-accent);
+  min-width: 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--rail);
+}
+
+.lb-team-head {
+  margin: 0 0 7px;
+  font-family: var(--fv-display);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--rail);
+}
+
+.lb-team-head span {
+  font-family: inherit;
+}
+
+.lb-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* One slot. The .slot rules in lobby.css (5px radius, padding, span padding, .value blue) are the
+   old row's and are overridden here. */
+.lb-slot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  min-height: 44px;
+  margin: 0;
+  padding: 6px 10px;
+  color: var(--fv-text);
+  background: #081420;
+  border: 1px solid transparent;
+  border-radius: 2px;
+}
+
+/* An open slot is an outline, waiting to be filled. */
+.lb-slot:not(.taken) {
+  background: transparent;
+  border: 1px dashed var(--fv-line-scs);
+}
+
+/* The slot whose fleet the Purchase panel is showing - the viewer's own. No rail of its own: the
+   team's rail beside it is enough (user). Border and tint in the TEAM's colour (--rail), not the
+   page blue, which washed out Leave Slot's red; the tint is mixed into the slot's own dark fill,
+   so it stays as dark under the buttons as any other taken slot. */
+.lb-slot.selected {
+  background: color-mix(in srgb, var(--rail) 14%, #081420);
+  border-color: var(--rail);
+}
+
+.lb-slot span {
+  padding-right: 0;
+}
+
+/* 9rem: the most that leaves the viewer's own Ready badge + Leave Slot on the player's line in a
+   380px Teams panel. */
+.lb-slot-main {
+  flex: 1 1 9rem;
+  min-width: 0;
+}
+
+.lb-slot-player {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.lb-slot .playername {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fv-text-bright);
+}
+
+.lb-slot-open {
+  /*font-style: italic;*/
+  color: var(--fv-text-accent);
+}
+
+.lb-slot.taken .lb-slot-open {
+  display: none;
+}
+
+.lb-slot-meta {
+  margin-top: 2px;
+  font-family: var(--fv-mono);
+  font-size: 10.5px;
+  color: var(--fv-text-dim);
+  overflow-wrap: anywhere;
+}
+
+.lb-slot-meta span,
+.lb-slot-meta .value {
+  font-family: inherit;
+  color: inherit;
+}
+
+.lb-slot-sep {
+  margin: 0 3px;
+}
+
+/* Delayed Deployment: said only when the slot arrives after turn 1. */
+.lb-slot-late {
+  display: none;
+}
+
+.lb-slot--late .lb-slot-late {
+  display: inline;
+}
+
+.lb-slot-meta .lb-slot-late,
+.lb-slot-meta .lb-slot-late .value {
+  color: var(--fv-text);
+}
+
+.lb-slot-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.lb-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  margin: 0;
+  padding: 4px 9px;
+  font-family: var(--fv-display);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--fv-text-dim);
+  background: transparent;
+  border: 1px solid var(--fv-line-scs);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.lb-pill:hover {
+  color: var(--fv-text);
+  background: rgba(73, 103, 145, 0.3);
+}
+
+.lb-pill--take {
+  color: var(--fv-accent);
+  background: rgba(139, 202, 242, 0.2);
+  border-color: var(--fv-accent);
+}
+
+.lb-pill--take:hover {
+  color: var(--fv-text-bright);
+  background: rgba(139, 202, 242, 0.32);
+}
+
+.lb-pill--leave {
+  color: #e8b4ad;
+  border-color: #a77272;
+}
+
+.lb-pill--leave:hover {
+  color: #f3dcd8;
+  background: rgba(122, 33, 33, 0.6);
+}
+
+/* Which buttons a slot shows. Take Slot: only while it is open. Select: on the viewer's OTHER
+   slots - createSlots show()s and hide()s it on a taken slot, and an open slot never shows it
+   (the !important also beats a show() left over from before the slot was left). Leave Slot:
+   createSlots show()s it on the viewer's own slots and hide()s it everywhere else. */
+.lb-slot.taken .takeslot {
+  display: none;
+}
+
+.lb-slot .selectslot {
+  display: none;
+}
+
+.lb-slot.taken .selectslot {
+  display: inline-flex;
+}
+
+.lb-slot:not(.taken) .selectslot {
+  display: none !important;
+}
+
+.lb-slot.selected .selectslot {
+  display: none;
+}
+
+.lb-slot .status {
+  display: none;
+  align-items: center;
+  min-height: 22px;
+  padding: 3px 8px;
+  font-family: var(--fv-display);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--fv-own-signal);
+  background: rgba(82, 179, 82, 0.2);
+  border: 1px solid var(--fv-own-signal);
+  border-radius: 2px;
+}
+
+.lb-slot.ready .status {
+  display: inline-flex;
+}
+
+/* ── Scenario Description ──────────────────────────────────────────────────── */
+
+/* The reference links close the panel, straight after the facts. */
+.lb-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 16px 12px;
+  border-top: 1px solid var(--fv-line-soft);
+}
+
+.lb-links-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.lb-links-label,
+.lb-rules-label {
+  margin-right: 4px;
+  font-family: var(--fv-mono);
+  font-size: 10px;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--fv-text-dim);
+}
+
+/* game.php's USEFUL LINKS chips (.fv-log-chip--link): navigation, painted in the accent. */
+.lb-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 2px 9px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--fv-accent);
+  background: rgba(139, 202, 242, 0.14);
+  border: 1px solid rgba(139, 202, 242, 0.55);
+  border-radius: 2px;
+}
+
+.lb-link:hover {
+  color: var(--fv-text-bright);
+  background: rgba(139, 202, 242, 0.26);
+  border-color: var(--fv-accent);
+}
+
+/* Fleet Builder: the links are the whole panel, so they run in one row. */
+.lb-builder .lb-links {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  border-top: 0;
+}
+
+/* ── Map Preview ───────────────────────────────────────────────────────────── */
+
+/* No fill of its own: mapPreview.paint draws the map's well and rim, and sizes the canvas to the
+   map's proportions. The canvas is only SCALED to fit - nothing on it is clickable. lobby.css pins
+   #mapPreview to min-width: 480px, which alone would push a phone layout sideways. */
+.lb-map-frame {
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.lb-map #mapPreview {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 0;
+}
+
+.lb-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 10px;
+}
+
+.lb-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--fv-mono);
+  font-size: 10.5px;
+  color: var(--fv-text-dim);
+}
+
+.lb-swatch {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* Pre-placed terrain is drawn as grey discs (mapPreview.COLORS.terrain); the swatch's opacity is
+   set inline from mapPreview.TERRAIN_ALPHA / FIELD_TERRAIN_ALPHA so it matches the map. */
+.lb-swatch--terrain {
+  background: #5a6a76;
+  border-radius: 50%;
+}
+
+/* The Game Rules chips (scenarioCard.css): a strip under the Map Preview and Scenario Description,
+   its label on the left and the chips wrapping beside it. */
+.lb-rules {
+  display: flex;
+  align-items: baseline;
+  gap: 8px 12px;
+  padding: 10px 16px;
+}
+
+.lb-rules-label {
+  flex: none;
+}
+
+.lb-rules .fv-rule-chips {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* ── Narrower screens ──────────────────────────────────────────────────────── */
+
+/* A narrower Teams, and Scenario Description over Map Preview over the rules: side by side in what
+   is left, the scenario's facts would wrap line after line. */
+@media screen and (max-width: 1180px) {
+  .lb-upper {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+
+  .lb-brief {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lb-scenario {
+    order: -1;
+  }
+
+  /* Stacked, the dividing lines run across: under the scenario, under the map. */
+  .lb-brief > .lb-scenario {
+    border-left: 0;
+  }
+
+  .lb-brief > .lb-map {
+    border-top: 1px solid #2a6b8f;
+  }
+
+  /* The Store takes more of the width, so its rows keep to one line longer (as when Store | Fleet
+     were one panel). */
+  .lb-lower {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  }
+}
+
+/* One column: Teams (first - it is where a phone player takes a slot), Scenario Description, Map
+   Preview, Game Rules; then Your Fleet (with Load / Save / Check / Ready) over the Store. Teams
+   at its whole height again, and Your Fleet no longer pinned. */
+@media screen and (max-width: 760px) {
+  /* stretch: the rows' `start` would shrink Your Fleet to its content's width here (294 of 354px) */
+  .lb-upper,
+  .lb-lower {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .lb-teams-slot {
+    order: -1;
+    contain: none;
+  }
+
+  .lb-teams-slot > .lb-teams {
+    max-height: none;
+  }
+
+  .lb-fleet-wrap {
+    order: -1;
+    position: static;
+  }
+
+  .lb-panel-body,
+  .lb-rules {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .lb-rules {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lb-links {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .lb-title {
+    font-size: 15px;
+    letter-spacing: 1.4px;
+  }
+}
+
+@media (pointer: coarse) {
+  .lb-btn {
+    min-height: 44px;
+  }
+
+  .lb-pill,
+  .lb-link {
+    min-height: 36px;
+  }
+}
+
+/* ══ Purchase Fleet and Your Fleet (plan §4.3, Stage 5; §12.13) ═══════════════════════════════
+   Purchase Fleet, in the main column: two bars of Store filters, then the Store - ONE faction's
+   ships, picked in the Faction Picker (.lb-picker below), growing to fit them, no scroll box of its
+   own. Your Fleet, beside it: the points in its head, the fleet being bought, and the
+   fleet tools at its foot. Both inside .lb-top, whose box-sizing rule covers them. */
+
+.lb-buy-head {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.lb-buy-title {
+  margin: 0;
+  font-family: var(--fv-display);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.7px;
+  text-transform: uppercase;
+  color: var(--fv-text-accent);
+}
+
+/* ONE figure (user, §12.17): "3500 pts left", or for a slot with no limit "691 pts" spent -
+   gamedata.calculateFleet shows whichever applies. Fleet Builder puts its cap controls in front.
+   line-height 1: at the page's 1.5 its 13px line was taller
+   than the 10.5px title's and made this head 5px taller than Purchase Fleet's beside it (user). */
+.lb-buy-points {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 5px;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: none;
+  color: var(--fv-text-accent);
+}
+
+.lb-buy-points,
+.lb-buy-points * {
+  font-family: var(--fv-mono);
+}
+
+.lb-buy-dot {
+  color: var(--fv-text-dim);
+}
+
+/* The figure in the head's own bright --fv-text-accent (lobby.css paints .remaining its old #90b1ee). */
+.lb-buy-points .remaining-points-container .remaining,
+.lb-buy-points .remaining-points-container .remaining-points-units {
+  color: inherit;
+}
+
+/* calculateFleet's "Unlimited" - lobby.css sizes it for the old 20px readout. */
+.lb-buy-points .unlimited-points-text2 {
+  font-size: inherit;
+}
+
+/* Fleet Builder's cap. base.css nudges every checkbox 2px down; two classes outrank it. The box
+   overhangs the title's line by 3px each way (negative margin) rather than making the head taller
+   than Purchase Fleet's. */
+.lb-buy-points .max-points-input {
+  width: 76px;
+  height: 22px;
+  margin: -3px 0;
+  padding: 1px 4px;
+  font-size: 13px;
+  text-align: right;
+}
+
+.lb-buy-points .unlimited-points-toggle {
+  top: 0;
+  margin: 0 0 0 4px;
+  cursor: pointer;
+}
+
+/* ── The bars: ship filters, then the size categories ─────────────────────── */
+
+.lb-buy-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 24px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--fv-line-soft);
+}
+
+.lb-buy-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.lb-bar-sep {
+  color: var(--fv-line-scs);
+}
+
+.lb-bar-label,
+.lb-field > span {
+  font-size: 12px;
+  color: var(--fv-text-dim);
+  white-space: nowrap;
+}
+
+.lb-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.lb-input {
+  height: 28px;
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--fv-text);
+  background: #081420;
+  border: 1px solid var(--fv-line-soft);
+  border-radius: 2px;
+}
+
+.lb-input:focus {
+  outline: none;
+  border-color: var(--fv-accent);
+}
+
+.lb-input--name {
+  width: 130px;
+}
+
+.lb-input--num {
+  width: 58px;
+  text-align: right;
+}
+
+.lb-input--id {
+  width: 72px;
+  text-align: right;
+}
+
+/* The ISD filter when the game's In-Service Date fixes it (Stage 6, plan §4.4): readonly, in the
+   page's accent, with a padlock - the mockup's locked field. */
+.lb-field--locked .lb-input {
+  color: var(--fv-accent);
+  border-color: var(--fv-accent);
+  cursor: default;
+}
+
+.lb-lock {
+  font-size: 11px;
+  color: var(--fv-accent);
+}
+
+/* The saved-fleet menu button: lobby.css gives it its old 140 x 27 box and its arrow, which gets
+   room of its own here. */
+.lb-buy .fleet-dropdown-btn {
+  min-width: 0;
+  height: auto;
+  padding-right: 26px;
+}
+
+/* The saved-fleet menu under Load a Fleet (gamedata.populateFleetDropdown; the inline script in
+   gamelobby.php shows and hides it). The page's window look - dark panel, square rows, mono
+   figures, the chat scrollbar - where it used to be white rows styled inline. */
+#fleetDropdownList {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 1000;
+  width: 400px;
+  max-width: calc(100vw - 24px);
+  max-height: 320px;
+  padding: 4px 0;
+  overflow-y: auto;
+  font-size: 12.5px;
+  text-align: left;
+  color: var(--fv-text);
+  background: linear-gradient(180deg, rgba(27, 45, 62, 0.98), rgba(18, 32, 45, 0.98));
+  border: 1px solid #2a6b8f;
+  border-radius: 3px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.lb-fleetmenu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 4px 8px 4px 6px;
+  border-top: 1px solid #0c1a24;
+  cursor: pointer;
+}
+
+.lb-fleetmenu-item:first-child {
+  border-top: 0;
+}
+
+.lb-fleetmenu-item:hover {
+  background: var(--fv-card-hover);
+}
+
+/* A default fleet has no padlock and no delete cross: its name and points line up with a player's
+   fleet's all the same. */
+.lb-fleetmenu-item--default {
+  padding-left: 39px;
+  padding-right: 41px;
+}
+
+/* The padlock and the delete cross are buttons of their own inside the row. */
+.lb-fleetmenu-lock,
+.lb-fleetmenu-delete {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
+  font-size: 12px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.lb-fleetmenu-lock:hover,
+.lb-fleetmenu-delete:hover {
+  background: rgba(198, 226, 255, 0.1);
+}
+
+/* Private yellow, public green - as they were (orange / green), in the page's tokens. */
+.lb-fleetmenu-lock {
+  color: var(--fv-warn);
+}
+
+.lb-fleetmenu-lock.is-public {
+  color: var(--fv-own-signal);
+}
+
+.lb-fleetmenu-delete {
+  color: var(--fv-text-dim);
+}
+
+.lb-fleetmenu-delete:hover {
+  color: var(--fv-enemy-signal);
+}
+
+.lb-fleetmenu-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* The fleet's #id - what Load Fleet by #ID takes. */
+.lb-fleetmenu-id {
+  margin-left: 6px;
+  font-family: var(--fv-mono);
+  font-size: 11px;
+  color: var(--fv-text-dim);
+}
+
+/* The fleet list's pre-battle damage badge colour (lobby.css .shipDamagedBadge). */
+.lb-fleetmenu-damage {
+  flex: none;
+  font-size: 11px;
+  color: var(--fv-crit);
+}
+
+.lb-fleetmenu-points {
+  flex: none;
+  font-family: var(--fv-mono);
+  font-size: 11.5px;
+  white-space: nowrap;
+  color: var(--fv-text-accent);
+}
+
+/* "Default fleets": the picker's group-head type, over the fleets every player has. */
+.lb-fleetmenu-head {
+  margin-top: 4px;
+  padding: 8px 10px 5px;
+  font-family: var(--fv-display);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--fv-text-dim);
+  border-top: 1px solid var(--fv-line-soft);
+}
+
+.lb-fleetmenu-head:first-child {
+  margin-top: 0;
+  border-top: 0;
+}
+
+/* "Loading fleets…" / "No saved fleets available". */
+.lb-fleetmenu-note {
+  padding: 10px 12px;
+  font-size: 12px;
+  text-align: center;
+  color: var(--fv-text-dim);
+}
+
+/* Chips (the mockup's): Reset Filters, and the category chips - which size category of the
+   Store's faction shows (aria-pressed). */
+.lb-cat-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.lb-chip {
+  margin: 0;
+  padding: 4px 10px;
+  font-family: var(--fv-mono);
+  font-size: 10.5px;
+  white-space: nowrap;
+  color: var(--fv-text-dim);
+  background: transparent;
+  border: 1px solid var(--fv-line-soft);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.lb-chip:hover:not(:disabled) {
+  color: var(--fv-text);
+  border-color: var(--fv-line-scs);
+}
+
+.lb-chip[aria-pressed="true"] {
+  color: var(--fv-accent);
+  background: rgba(139, 202, 242, 0.18);
+  border-color: var(--fv-accent);
+}
+
+/* The Store's faction has none of this category (or no faction is chosen yet). */
+.lb-chip:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.lb-chip:focus-visible {
+  outline: 2px solid var(--fv-accent);
+  outline-offset: 2px;
+}
+
+/* The Faction Picker's tier / Custom chips and the Purchase bar's Custom, any number on at once: a
+   label round its checkbox, which stays the state every handler reads - hidden from sight, not from
+   the keyboard or a screen reader. Pressed while ticked; a Custom chip in the Custom Factions yellow. */
+.lb-chip--check {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  line-height: normal;
+  user-select: none;
+}
+
+.lb-chip--check > input[type="checkbox"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* .lb-chip twice over: the ticked state has to outrank .lb-chip:hover, or a chip under the pointer
+   would not show that the click just turned it on or off. */
+.lb-chip.lb-chip--check:has(> input:checked) {
+  color: var(--fv-accent);
+  background: rgba(139, 202, 242, 0.18);
+  border-color: var(--fv-accent);
+}
+
+.lb-chip.lb-chip--custom:has(> input:checked) {
+  color: var(--fv-warn);
+  background: rgba(225, 176, 0, 0.14);
+  border-color: var(--fv-warn);
+}
+
+.lb-chip--check:has(> input:focus-visible) {
+  outline: 2px solid var(--fv-accent);
+  outline-offset: 2px;
+}
+
+.lb-buy .fleet-dropdown-btn::after {
+  right: 10px;
+  font-size: 9px;
+  color: var(--fv-text-dim);
+}
+
+/* ── The Store ─────────────────────────────────────────────────────────────── */
+
+.lb-store {
+  padding: 12px 16px 14px;
+}
+
+/* The Store's faction, and the way to change it. Accent rail once one is chosen; yellow for a
+   custom faction, the picker's custom colour. */
+.lb-store-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-bottom: 10px;
+  padding: 9px 10px;
+  background: var(--fv-well);
+  border: 1px solid var(--fv-line-soft);
+  border-left: 3px solid var(--fv-line-scs);
+  border-radius: 3px;
+}
+
+.lb-store-bar--set {
+  border-left-color: var(--fv-accent);
+}
+
+.lb-store-bar--custom {
+  border-left-color: var(--fv-warn);
+}
+
+.lb-store-current {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.lb-store-name {
+  font-family: var(--fv-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--fv-text-bright);
+  overflow-wrap: anywhere;
+}
+
+.lb-store-bar:not(.lb-store-bar--set) .lb-store-name {
+  color: var(--fv-text-dim);
+}
+
+.lb-store-meta {
+  margin-top: 3px;
+  font-family: var(--fv-mono);
+  font-size: 10.5px;
+  color: var(--fv-text-dim);
+}
+
+.lb-btn--small {
+  min-height: 28px;
+  padding: 5px 12px;
+  font-size: 9px;
+}
+
+/* Nothing chosen yet: the button is the next step, so it reads as one (Take Slot's blue). */
+.lb-store-bar:not(.lb-store-bar--set) .lb-btn {
+  color: var(--fv-accent);
+  background: rgba(139, 202, 242, 0.2);
+  border-color: var(--fv-accent);
+}
+
+.lb-store-list {
+  background: var(--fv-well);
+  border: 1px solid var(--fv-line-soft);
+  border-radius: 3px;
+}
+
+.lb-store-list:empty {
+  display: none;
+}
+
+.lb-store-faction {
+  padding: 2px 8px 6px;
+}
+
+.lb-store-faction[hidden] {
+  display: none;
+}
+
+.lb-store-note {
+  margin: 8px 4px;
+  font-size: 12px;
+  color: var(--fv-text-dim);
+}
+
+/* A size category: disclosure, name, count. */
+.lb-cat-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  margin: 0;
+  padding: 8px 4px 6px;
+  font-family: var(--fv-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  text-align: left;
+  color: #d0dbec;
+  background: none;
+  border: 0;
+  border-top: 1px solid #0c1a24;
+  cursor: pointer;
+}
+
+.lb-store-faction > .lb-cat:first-child > .lb-cat-head {
+  border-top: 0;
+}
+
+/* Left out by a category chip, or emptied by the ship filters (applyCustomShipFilter). */
+.lb-cat[hidden],
+.lb-cat.is-empty {
+  display: none;
+}
+
+.lb-cat-head:hover {
+  color: var(--fv-text-bright);
+}
+
+.lb-cat-name,
+.lb-fgroup-name {
+  font-family: inherit;
+}
+
+.lb-cat-count,
+.lb-fgroup-count {
+  margin-left: auto;
+  font-family: var(--fv-mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--fv-text-dim);
+}
+
+/* The disclosure box, shared with the picker's groups: pointing down open, right closed. */
+.lb-disclosure {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--fv-line-scs);
+  border-radius: 2px;
+}
+
+.lb-disclosure::before {
+  content: "\25B8";
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  line-height: 1;
+  color: var(--fv-accent);
+}
+
+[aria-expanded="true"] > .lb-disclosure::before {
+  content: "\25BE";
+}
+
+/* One design. prepareClassName makes a base design's name bold and a variant's italic; the
+   variant row is indented under its base and keeps the deeper blue, and ONLY its name is
+   italic - the cost and the links are not (user, Stage 5). */
+/* Its own line height, not the page's 1.5: a row is 24px, was 29 (user, §12.15). */
+.lb-ship {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  padding: 3px 4px 3px 24px;
+  font-size: 13px;
+  line-height: 1.3;
+  border-bottom: 1px solid #0c1a24;
+}
+
+.lb-cat-body > .lb-ship:last-child {
+  border-bottom: 0;
+}
+
+.lb-ship:hover {
+  background: rgba(139, 202, 242, 0.05);
+}
+
+.lb-ship.variant {
+  padding-left: 42px;
+}
+
+.lb-ship-name {
+  flex: 1 1 14rem;
+  min-width: 0;
+  color: #90b1ee;
+}
+
+.lb-ship.variant .lb-ship-name {
+  color: #578bec;
+}
+
+.lb-ship .fightersize {
+  font-weight: 700;
+}
+
+/* Cost and links stay together, on the right - on the name's line while it fits, under it when
+   it does not. The links are the same width on every row, so the costs line up above them. The
+   cost stands well clear of Add to fleet, so it reads as its own column (user). */
+.lb-ship-cost {
+  flex: none;
+  margin-left: auto;
+  margin-right: 25px;
+  font-family: var(--fv-mono);
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--fv-text-accent);
+  white-space: nowrap;
+}
+
+.lb-ship-links {
+  display: inline-flex;
+  flex: none;
+  align-items: baseline;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* Add to fleet · Show details: the accent blue, as are the fleet rows' Details · Edit · Copy ·
+   Remove (lobby.css .store .ship .clickable) - one colour for every Purchase Fleet action (user). */
+.lb-linkbtn {
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  color: var(--fv-accent);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.lb-linkbtn:hover {
+  color: var(--fv-text-bright);
+  text-decoration: underline;
+}
+
+.lb-ship-sep {
+  color: var(--fv-line-scs);
+}
+
+/* ── Your Fleet ────────────────────────────────────────────────────────────── */
+
+/* Never taller than the window (less the 10px it is pinned at, top and bottom): the list scrolls
+   inside, the head and the tools stay. Not clipped at its edge, so the Load a Fleet menu can open
+   past it - the head and foot round their own corners instead. */
+.lb-fleetpanel {
+  max-height: calc(100vh - 20px);
+  overflow: visible;
+}
+
+.lb-fleetpanel > .lb-panel-head {
+  border-radius: 5px 5px 0 0;
+}
+
+.lb-fleet {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 10px 12px;
+  overflow-y: auto;
+}
+
+/* The fleet being bought: the Store's well. Its rows are lobby.css's, through .store. */
+.lb-fleet #fleet {
+  min-height: 48px;
+  margin-top: 0;
+  padding: 4px 6px;
+  background: var(--fv-well);
+  border: 1px solid var(--fv-line-soft);
+  border-radius: 3px;
+}
+
+/* A bought row in Your Fleet's width (lobby.css draws it; #fleet is right-aligned): the name,
+   then the class with the cost on the right - class and cost (one box, .boughtClassCost) dropping
+   to a line of their own together when they do not fit beside the name - and the enhancements and
+   the actions under them, full width. */
+.lb-fleet .ship.bought {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  text-align: left;
+}
+
+.lb-fleet .ship.bought .shipname {
+  margin-right: 10px;
+}
+
+.lb-fleet .ship.bought .boughtClassCost {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.lb-fleet .ship.bought .boughtShiptype {
+  flex: 1 1 auto;
+  margin-left: 0;
+}
+
+.lb-fleet .ship.bought .boughtPointCost {
+  margin-left: auto;
+  padding-left: 10px;
+  white-space: nowrap;
+}
+
+.lb-fleet .ship.bought .ship-enhancements,
+.lb-fleet .ship.bought .ship-actions {
+  flex-basis: 100%;
+}
+
+/* Nothing bought yet - and no MAIN FLEET / REINFORCEMENTS headers, which only a game with
+   reinforcements draws. */
+.lb-fleet #fleet:empty::before {
+  content: "No ships yet. Add to fleet in the Store puts them here.";
+  display: block;
+  padding: 12px 6px;
+  font-size: 12px;
+  text-align: left;
+  color: var(--fv-text-dim);
+}
+
+/* The tools at its foot: Load Fleet by #ID, then Load a Fleet · Save Fleet / Check · Ready. */
+.lb-fleet-tools {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  background: rgba(4, 22, 28, 0.7);
+  border-top: 1px solid var(--fv-line-soft);
+  border-radius: 0 0 5px 5px;
+  position: relative;
+}
+
+/* The box straight after its label, at .lb-field's own 6px (user) - not pushed to the far edge. */
+.lb-fleet-tools .lb-field {
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.lb-fleet-btns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.lb-fleet-btns .lb-btn {
+  width: 100%;
+  min-height: 30px;
+  padding: 6px 10px;
+}
+
+/* Static, so the saved-fleet menu is placed against the whole tools box (.lb-fleet-tools) rather
+   than the half-width button: it opens UPWARDS from there, over the fleet list, as wide as the
+   panel - the foot of a panel pinned to the window has nothing below it to open into. */
+.lb-fleet-btns .saved-fleet-wrapper {
+  position: static;
+  margin-left: 0;
+}
+
+.lb-fleet-tools #fleetDropdownList {
+  top: auto;
+  right: 0;
+  bottom: calc(100% + 4px);
+  left: 0;
+  width: auto;
+  max-width: none;
+}
+
+/* Check wears games.php's Recent Games colours (.fv-btn--recent), Save Fleet its fleet blue
+   (.fv-btn--fleet) and Ready Create Game's green (.fv-btn--create) - one family of buttons. */
+.lb-btn--check {
+  background: rgba(0, 77, 102, 0.692);
+  border-color: var(--fv-line-scs);
+}
+
+.lb-btn--save {
+  background: rgba(0, 77, 102, 0.692);
+  border-color: var(--fv-line-scs);
+}
+
+.lb-btn--ready {
+  color: #e6f4e6;
+  background: rgba(60, 122, 60, 0.671);
+  border-color: #66b266;
+}
+
+.lb-buy .lb-btn:hover,
+.lb-modal .lb-btn:hover {
+  color: #fff;
+    background: rgba(139, 202, 242, 0.14);
+    border-color: rgba(139, 202, 242, 0.55);
+}
+
+.lb-buy .lb-btn--ready:hover {
+  background: rgba(82, 179, 82, 0.5);
+  border-color: #8cd48c;
+}
+
+.lb-linkbtn:focus-visible,
+.lb-cat-head:focus-visible,
+.lb-fgroup-head:focus-visible,
+.lb-faction:focus-visible,
+.lb-modal-close:focus-visible {
+  outline: 2px solid var(--fv-accent);
+  outline-offset: -2px;
+}
+
+/* ══ Lobby windows: the Faction Picker and the Fleet Correctness Report ══════════════════════
+   A dimmed overlay with the window near the top of it; full screen on a phone. gamelobby.js
+   opens and closes them (openLobbyModal / closeLobbyModal) and locks the page's scroll meanwhile. */
+
+body.lb-modal-open {
+  overflow: hidden;
+}
+
+.lb-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6vh 16px 16px;
+  background: rgba(2, 6, 10, 0.72);
+  overflow-y: auto;
+}
+
+.lb-modal[hidden] {
+  display: none;
+}
+
+.lb-modal *,
+.lb-modal *::before,
+.lb-modal *::after {
+  box-sizing: border-box;
+}
+
+.lb-modal-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 720px;
+  max-height: 88vh;
+  color: var(--fv-text);
+  background: linear-gradient(180deg, rgba(27, 45, 62, 0.98), rgba(18, 32, 45, 0.98));
+  border: 1px solid #2a6b8f;
+  border-radius: 6px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.lb-modal-panel:focus {
+  outline: none;
+}
+
+.lb-modal-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 8px 6px 16px;
+  background: linear-gradient(180deg, rgba(73, 103, 145, 0.58), rgba(73, 103, 145, 0.22));
+  border-bottom: 1px solid #2a6b8f;
+}
+
+.lb-modal-title {
+  margin: 0;
+  font-family: var(--fv-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--fv-text-bright);
+}
+
+.lb-modal-close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  font-size: 26px;
+  line-height: 1;
+  color: #8296a8;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.lb-modal-close:hover {
+  color: #fff;
+}
+
+.lb-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 14px 16px 18px;
+  overflow-y: auto;
+}
+
+/* The site's dark-blue scrollbar (the chat panel's, chat.css) on everything in the windows that
+   scrolls. Firefox, which has no ::-webkit-scrollbar, gets the same colours the standard way -
+   only there, because a Chromium that sees scrollbar-color drops the pseudo-elements. */
+.lb-modal::-webkit-scrollbar,
+.lb-modal-body::-webkit-scrollbar,
+.lb-picker-list::-webkit-scrollbar,
+.lb-fleet::-webkit-scrollbar,
+.lb-teams > .lb-panel-body::-webkit-scrollbar,
+#fleetDropdownList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.lb-modal::-webkit-scrollbar-track,
+.lb-modal-body::-webkit-scrollbar-track,
+.lb-picker-list::-webkit-scrollbar-track,
+.lb-fleet::-webkit-scrollbar-track,
+.lb-teams > .lb-panel-body::-webkit-scrollbar-track,
+#fleetDropdownList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lb-modal::-webkit-scrollbar-thumb,
+.lb-modal-body::-webkit-scrollbar-thumb,
+.lb-picker-list::-webkit-scrollbar-thumb,
+.lb-fleet::-webkit-scrollbar-thumb,
+.lb-teams > .lb-panel-body::-webkit-scrollbar-thumb,
+#fleetDropdownList::-webkit-scrollbar-thumb {
+  background: var(--fv-scroll-thumb);
+  border-radius: 4px;
+}
+
+.lb-modal::-webkit-scrollbar-thumb:hover,
+.lb-modal-body::-webkit-scrollbar-thumb:hover,
+.lb-picker-list::-webkit-scrollbar-thumb:hover,
+.lb-fleet::-webkit-scrollbar-thumb:hover,
+.lb-teams > .lb-panel-body::-webkit-scrollbar-thumb:hover,
+#fleetDropdownList::-webkit-scrollbar-thumb:hover {
+  background: var(--fv-scroll-thumb-hover);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .lb-modal,
+  .lb-modal-body,
+  .lb-picker-list,
+  .lb-fleet,
+  .lb-teams > .lb-panel-body,
+  #fleetDropdownList {
+    scrollbar-width: thin;
+    scrollbar-color: var(--fv-scroll-thumb) transparent;
+  }
+}
+
+/* The report's sub-head: what it checks against, and the rules it checks (user, Stage 5: the
+   link lives here now, not in the Purchase panel). */
+.lb-modal-sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin: 0 0 14px;
+  font-size: 12px;
+  color: var(--fv-text-dim);
+}
+
+/* ── The Fleet Correctness Report (gamedata.checkChoices + fleetCheckRowsHtml) ── */
+
+.lb-fleetcheck-text {
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+/* The verdict first, as a band in its colour. */
+.fc-overall {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border: 1px solid;
+  border-left-width: 3px;
+  border-radius: 3px;
+}
+
+.fc-overall--ok {
+  color: var(--fv-own-signal);
+  background: rgba(82, 179, 82, 0.12);
+  border-color: rgba(82, 179, 82, 0.45);
+  border-left-color: var(--fv-own-signal);
+}
+
+.fc-overall--bad {
+  color: var(--fv-enemy-signal);
+  background: rgba(224, 72, 63, 0.12);
+  border-color: rgba(224, 72, 63, 0.45);
+  border-left-color: var(--fv-enemy-signal);
+}
+
+.fc-overall-label,
+.fc-overall-value,
+.fc-caution-head,
+.fc-section {
+  font-family: var(--fv-display);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.fc-overall-label {
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  color: var(--fv-text-dim);
+}
+
+.fc-overall-value {
+  font-size: 14px;
+  letter-spacing: 1.5px;
+}
+
+/* Anything the checker cannot vouch for: the caution block, under the verdict. */
+.fc-caution {
+  margin: 0 0 14px;
+  padding: 10px 12px 8px;
+  background: rgba(225, 176, 0, 0.08);
+  border: 1px solid rgba(225, 176, 0, 0.4);
+  border-left: 3px solid var(--fv-warn);
+  border-radius: 3px;
+}
+
+.fc-caution-head {
+  margin-bottom: 4px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--fv-warn);
+}
+
+.fc-caution .fc-line {
+  border-top: 0;
+}
+
+/* A section: the old underlined headings. */
+.fc-section {
+  margin: 18px 0 4px;
+  padding-bottom: 5px;
+  font-size: 10px;
+  letter-spacing: 1.3px;
+  color: var(--fv-text-accent);
+  border-bottom: 1px solid var(--fv-line-soft);
+}
+
+/* One check per row; its rail says how it went. */
+.fc-line {
+  padding: 4px 8px;
+  border-left: 2px solid transparent;
+}
+
+.fc-line + .fc-line {
+  border-top: 1px solid #0c1a24;
+}
+
+.fc-line--item {
+  padding-left: 20px;
+}
+
+/* A hull's name, over its variant counts. */
+.fc-line--hull {
+  margin-top: 6px;
+  font-weight: 700;
+  color: var(--fv-text-accent);
+}
+
+.fc-line--ok {
+  border-left-color: rgba(82, 179, 82, 0.55);
+}
+
+.fc-line--warn {
+  border-left-color: var(--fv-warn);
+}
+
+.fc-line--bad {
+  background: rgba(224, 72, 63, 0.08);
+  border-left-color: var(--fv-enemy-signal);
+}
+
+.fc-ok,
+.fc-bad,
+.fc-warn {
+  font-weight: 700;
+}
+
+.fc-ok {
+  color: var(--fv-own-signal);
+}
+
+.fc-bad {
+  color: var(--fv-enemy-signal);
+}
+
+.fc-warn {
+  color: var(--fv-warn);
+}
+
+/* ── The Faction Picker ────────────────────────────────────────────────────── */
+
+/* A fixed height, so the window does not jump about as the filters change what it lists. Wide
+   enough for three columns of groups (.lb-picker-cols). */
+.lb-picker-panel {
+  max-width: 1000px;
+  height: min(900px, 88vh);
+}
+
+.lb-picker-search {
+  flex: none;
+  padding: 12px 16px 8px;
+}
+
+.lb-picker-search .lb-input {
+  width: 100%;
+  height: 34px;
+  font-size: 13px;
+}
+
+/* "Filter factions…" in the dim label text of the filters under it. */
+.lb-picker-search .lb-input::placeholder {
+  color: var(--fv-text-dim);
+  opacity: 1;
+}
+
+.lb-picker-filters {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 6px;
+  padding: 4px 16px 12px;
+  border-bottom: 1px solid var(--fv-rule);
+}
+
+.lb-picker-filters .lb-bar-sep {
+  margin: 0 4px;
+}
+
+/* Shown by #toggleCustom's handler. Holds the Show Customs / Show Only Customs select and its ▼. */
+.lb-custom-mode {
+  display: none;
+  position: relative;
+}
+
+/* That select, dressed as the Load a Fleet button and its menu (user, Stage 5). Still a native
+   <select>: the keyboard and a phone's own picker work as before, and every handler still reads
+   #customSelect. A browser with customisable selects (appearance: base-select) draws its list as
+   the menu below; any other shows a dark native list. */
+.lb-select {
+  appearance: none;
+  min-height: 28px;
+  margin: 0;
+  padding: 5px 28px 5px 12px;
+  font-family: var(--fv-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--fv-text);
+  color-scheme: dark;
+  background: rgba(73, 103, 145, 0.25);
+  border: 1px solid var(--fv-line-scs);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.lb-select:hover {
+  color: #fff;
+  background: rgba(198, 226, 255, 0.14);
+  border-color: var(--fv-accent);
+}
+
+.lb-select:focus-visible {
+  outline: 2px solid var(--fv-accent);
+  outline-offset: 2px;
+}
+
+/* The Load a Fleet button's arrow (lobby.css .fleet-dropdown-btn::after, as gameLobby.css sizes it). */
+.lb-custom-mode::after {
+  content: "\25BC";
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  font-size: 9px;
+  color: var(--fv-text-dim);
+  pointer-events: none;
+}
+
+.lb-select option {
+  font-family: Arial, sans-serif;
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--fv-text);
+  background: #16283a;
+}
+
+@supports (appearance: base-select) {
+  .lb-select,
+  .lb-select::picker(select) {
+    appearance: base-select;
+  }
+
+  /* The chosen option's text, centred however tall a touch screen makes the button. */
+  .lb-select {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* The wrapper draws the arrow, as it does without base-select. */
+  .lb-select::picker-icon {
+    display: none;
+  }
+
+  /* The list: #fleetDropdownList's panel. */
+  .lb-select::picker(select) {
+    min-width: 200px;
+    margin-top: 4px;
+    padding: 4px 0;
+    color: var(--fv-text);
+    background: linear-gradient(180deg, rgba(27, 45, 62, 0.98), rgba(18, 32, 45, 0.98));
+    border: 1px solid #2a6b8f;
+    border-radius: 3px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Its rows: .lb-fleetmenu-item's. The chosen one reads in the accent. */
+  .lb-select option {
+    min-height: 34px;
+    padding: 4px 12px;
+    background: transparent;
+    border-top: 1px solid #0c1a24;
+  }
+
+  .lb-select option:first-child {
+    border-top: 0;
+  }
+
+  .lb-select option:hover,
+  .lb-select option:focus-visible {
+    background: var(--fv-card-hover);
+    outline: none;
+  }
+
+  .lb-select option:checked {
+    color: var(--fv-accent);
+  }
+
+  .lb-select option::checkmark {
+    display: none;
+  }
+}
+
+.lb-picker-list {
+  flex: 0 1 auto;
+  min-height: 0;
+  padding: 4px 10px 12px;
+  overflow-y: auto;
+}
+
+.lb-picker-empty {
+  margin: 14px 16px;
+  font-size: 12px;
+  color: var(--fv-text-dim);
+}
+
+.lb-picker-empty[hidden],
+.lb-fgroup[hidden],
+.lb-faction[hidden] {
+  display: none;
+}
+
+/* The groups in fixed columns - three on a desktop, one on a phone - dealt by
+   gamedata.layoutPickerColumns (--picker-cols), whole, and never moved between columns as groups
+   open or filters thin them (user). A column the filters empty stays, empty. The gap between two
+   groups is only there while a SHOWN group sits above - a hidden one would leave a gap at the top. */
+.lb-picker-cols {
+  display: grid;
+  grid-template-columns: repeat(var(--picker-cols, 1), minmax(0, 1fr));
+  column-gap: 24px;
+  align-items: start;
+}
+
+.lb-picker-col {
+  min-width: 0;
+}
+
+.lb-picker-col > .lb-fgroup:not([hidden]) ~ .lb-fgroup {
+  margin-top: 12px;
+}
+
+/* A group's header: the page's accent blue, so it stands apart from the near-white faction names
+   under it (user); Custom Factions and its sub-groups take the custom yellow instead. */
+.lb-fgroup-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 8px 6px;
+  font-family: var(--fv-display);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--fv-accent);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--fv-rule);
+  cursor: pointer;
+}
+
+.lb-fgroup.is-collapsed > .lb-fgroup-body {
+  display: none;
+}
+
+/* While a search is typed, every group shows its matches, closed or not. */
+.lb-picker-list.is-searching .lb-fgroup.is-collapsed > .lb-fgroup-body {
+  display: block;
+}
+
+/* Custom Factions: the yellow rail, on the group and on every custom row. */
+.lb-fgroup--custom > .lb-fgroup-head {
+  color: var(--fv-warn);
+  box-shadow: inset 3px 0 0 var(--fv-warn);
+}
+
+/* A Custom sub-group (Babylon 5 Wars, Nexus...): the group header's own type, in the custom yellow,
+   set in under Custom Factions (user). */
+.lb-fgroup--sub > .lb-fgroup-head {
+  padding-left: 23px;
+  color: var(--fv-warn);
+  box-shadow: inset 3px 0 0 var(--fv-warn);
+}
+
+.lb-faction {
+  --rail: var(--fv-line-scs);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 7px 8px 7px 23px;
+  font-size: 13px;
+  text-align: left;
+  color: var(--fv-text);
+  background: none;
+  border: 0;
+  border-radius: 2px;
+  box-shadow: inset 3px 0 0 var(--rail);
+  cursor: pointer;
+}
+
+.lb-faction:hover {
+  background: var(--fv-card-hover);
+}
+
+.lb-faction--custom {
+  --rail: var(--fv-warn);
+}
+
+.lb-fgroup--sub .lb-faction {
+  padding-left: 46px;
+}
+
+.lb-faction.is-current {
+  --rail: var(--fv-accent);
+  background: rgba(139, 202, 242, 0.1);
+}
+
+.lb-faction-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.lb-faction--custom .lb-faction-name {
+  color: var(--fv-custom);
+}
+
+.lb-faction-tag {
+  flex: none;
+  padding: 2px 6px;
+  font-family: var(--fv-display);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--fv-text-dim);
+  border: 1px solid currentColor;
+  border-radius: 2px;
+}
+
+.lb-faction-tag:empty {
+  display: none;
+}
+
+.lb-faction.is-current .lb-faction-tag {
+  color: var(--fv-accent);
+}
+
+/* The randomiser's roll (gamedata.showRolledFaction): the "yours" green, so it reads apart from
+   the current faction's blue and the custom yellow, with a flash as it lands. After is-current:
+   a roll of the Store's own faction shows as the roll. */
+.lb-faction.is-rolled {
+  --rail: var(--fv-mine);
+  background: rgba(82, 179, 82, 0.14);
+  animation: lb-roll-flash 0.9s ease-out;
+}
+
+.lb-faction.is-rolled .lb-faction-tag {
+  color: var(--fv-mine-soft);
+}
+
+@keyframes lb-roll-flash {
+  from {
+    background: rgba(82, 179, 82, 0.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lb-faction.is-rolled {
+    animation: none;
+  }
+}
+
+/* ── The randomiser (plan §4.5, Stage 7): the picker's footer, pinned to its foot however short
+   the filtered list is - the mockup's sticky "Randomise My Faction". Over the button, a line that
+   says what it rolls from and then what it rolled, beside Choose. ── */
+.lb-picker-random {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  padding: 10px 16px 12px;
+  background: rgba(4, 22, 28, 0.9);
+  border-top: 1px solid var(--fv-line-soft);
+}
+
+.lb-roll {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+}
+
+.lb-roll-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--fv-text-dim);
+}
+
+.lb-roll-name {
+  color: var(--fv-text-bright);
+}
+
+.lb-roll-name--custom {
+  color: var(--fv-custom);
+}
+
+.lb-roll-text .lb-faction-tag {
+  display: inline-block;
+  margin-left: 8px;
+  vertical-align: 1px;
+  color: var(--fv-mine-soft);
+}
+
+/* Choose takes the roll: Ready's green, the colour of the rolled row. */
+.lb-roll-choose {
+  flex: none;
+  color: #e6f4e6;
+  background: rgba(60, 122, 60, 0.671);
+  border-color: #66b266;
+}
+
+.lb-roll-choose[hidden] {
+  display: none;
+}
+
+.lb-modal .lb-roll-choose:hover {
+  color: #fff;
+  background: rgba(82, 179, 82, 0.5);
+  border-color: #8cd48c;
+}
+
+.lb-roll-btn {
+  gap: 8px;
+  width: 100%;
+}
+
+.lb-roll-btn .fa-dice {
+  font-size: 13px;
+}
+
+/* Every faction filtered out: nothing to roll. */
+.lb-roll-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ── The chat panel under it all: the same width, and a phone's width on a phone. ─────────── */
+
+.global-chat-wrapper.panel.large.lobby {
+  box-sizing: border-box;
+  width: 1422px;
+  max-width: calc(100% - 20px);
+}
+
+/* ── Purchase Fleet and the windows on narrower screens ────────────────────── */
+
+/* One column (the layout above puts Your Fleet over the Store): Your Fleet is no longer pinned, so
+   it grows to its whole list, and everything takes the phone gutter. */
+@media screen and (max-width: 760px) {
+  .lb-fleetpanel {
+    max-height: none;
+  }
+
+  .lb-fleet {
+    overflow-y: visible;
+  }
+
+  .lb-buy-bar,
+  .lb-store,
+  .lb-fleet,
+  .lb-fleet-tools {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* A phone: the windows take the whole screen. */
+@media screen and (max-width: 600px) {
+  .lb-modal {
+    padding: 0;
+  }
+
+  .lb-modal-panel,
+  .lb-picker-panel {
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .lb-ship {
+    padding-left: 12px;
+  }
+
+  .lb-ship.variant {
+    padding-left: 26px;
+  }
+
+  /* The name has the row's first line to itself; the cost and both links share the second, on
+     the right. */
+  .lb-ship-name {
+    flex-basis: 100%;
+  }
+
+  /* The picker's chips wrap onto two lines here, where a divider would dangle at a line's end. */
+  .lb-picker-filters .lb-bar-sep {
+    display: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .lb-faction,
+  .lb-fgroup-head {
+    min-height: 44px;
+  }
+
+  .lb-cat-head {
+    min-height: 40px;
+  }
+
+  .lb-modal-close {
+    width: 44px;
+    height: 44px;
+  }
+
+  .lb-linkbtn {
+    padding: 6px 0;
+  }
+
+  .lb-input {
+    height: 34px;
+  }
+
+  /* Your Fleet's buttons and the chips are compact on a desktop; a finger needs more. */
+  .lb-fleet-btns .lb-btn {
+    min-height: 40px;
+  }
+
+  .lb-select {
+    min-height: 36px;
+  }
+
+  .lb-chip {
+    min-height: 32px;
+  }
+
+  .lb-roll-choose {
+    min-height: 40px;
+  }
+}
+
+/* ══ A private game's password form (plan §3.2, Stage 8) ══════════════════════════════════════
+   What gamelobby.php prints INSTEAD of the lobby to a player who holds no slot in a private game
+   and has not entered its password this session: one panel, centred, in the lobby's grammar. */
+
+/* A short page: without this, a phone (where base.css scrolls the backdrop with the page) shows the
+   backdrop only as far down as the panel. The UA's 8px margin moves inside, so 100vh never scrolls. */
+.lb-gate-page {
+  box-sizing: border-box;
+  min-height: 100vh;
+  margin: 0;
+  padding: 8px;
+}
+
+.lb-gate {
+  box-sizing: border-box;
+  width: 440px;
+  max-width: calc(100% - 32px);
+  margin: 48px auto;
+}
+
+.lb-gate *,
+.lb-gate *::before,
+.lb-gate *::after {
+  box-sizing: border-box;
+}
+
+/* The Load a Fleet menu's private padlock, and the Private Game chip's yellow. */
+.lb-gate-lock {
+  margin-right: 8px;
+  color: var(--fv-warn);
+}
+
+.lb-gate-form {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.lb-gate-name {
+  margin: 0 0 6px;
+  font-family: var(--fv-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--fv-text-bright);
+  overflow-wrap: anywhere;
+}
+
+.lb-gate-text {
+  margin: 0 0 16px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--fv-text-dim);
+}
+
+.lb-gate-label {
+  margin-bottom: 6px;
+  font-size: 11.5px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--fv-text-dim);
+}
+
+.lb-gate-input {
+  width: 100%;
+  height: 36px;
+  font-size: 14px;
+}
+
+.lb-gate-input[aria-invalid="true"] {
+  border-color: var(--fv-enemy);
+}
+
+.lb-gate-error {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--fv-enemy);
+}
+
+.lb-gate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.lb-gate .lb-btn:hover {
+  color: #fff;
+  background: rgba(198, 226, 255, 0.14);
+  border-color: var(--fv-accent);
+}
+
+.lb-gate .lb-btn--ready:hover {
+  background: rgba(82, 179, 82, 0.5);
+  border-color: #8cd48c;
+}
+
+@media screen and (max-width: 600px) {
+  .lb-gate {
+    margin-top: 24px;
+  }
+
+  /* 16px: anything smaller and iOS Safari zooms the whole page when the field takes focus. */
+  .lb-gate-input {
+    font-size: 16px;
+  }
+}
+
+@media (pointer: coarse) {
+  .lb-gate-input {
+    height: 44px;
+  }
+}

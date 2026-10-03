@@ -84,6 +84,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <!-- The hex stack picker (client/UI/SelectFromShips.js). Its own namespace and its own
          file so it no longer shares .shipNameContainer with the hover tooltip above. -->
     <link href="<?php echo AssetLoader::getAssetUrl('styles/hexPicker.css'); ?>" rel="stylesheet" type="text/css">
+    <!-- The DATA ARCHIVE window (client/UI/docViewer.js, bundled below): FLEET INFO's USEFUL LINKS
+         open the FAQ, Ammo & Options and Factions documents over the battle instead of a new tab. -->
+    <link href="<?php echo AssetLoader::getAssetUrl('styles/docViewer.css'); ?>" rel="stylesheet" type="text/css">
 <!--	styles/helper.css was deleted (roadmap item 6, Stage 5) - it was dead, see helper.php -->
     <!-- jQuery + jQuery-UI self-hosted (same-origin HTTP/2 + cache-control, no 3rd-party TLS).
          Both kept SYNCHRONOUS: jQuery for the inline $(window).on("load") bootstrap below, and
@@ -385,6 +388,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/UI/infowindow.js"></script>
     <script defer src="client/UI/fleetList.js"></script>
 	<script defer src="client/UI/gameInfo.js"></script>
+    <script defer src="client/UI/docViewer.js"></script>
 	<script defer src="client/UI/confirm.js"></script>
 	<script defer src="client/model/ship.js"></script>
     <script defer src="client/model/shipSystem.js"></script>
@@ -877,17 +881,18 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
             <span class="fv-log-bar-spacer"></span>
             <!--<span class="fv-log-bar-meta" data-log-meta="info"></span>-->
             <span id="gameInfoButtons">
-                <!-- The three reference pages are NAVIGATION, not controls: they leave the
-                     game rather than change what the tab shows. The label says so before
-                     you click, and .fv-log-chip--link paints them in the accent so they do
-                     not read as three more filters sitting beside "On map only". -->
+                <!-- The three reference documents are NAVIGATION, not controls: they open the
+                     DATA ARCHIVE window over the battle (client/UI/docViewer.js reads
+                     data-fvdoc) rather than change what the tab shows. The label says so
+                     before you click, and .fv-log-chip--link paints them in the accent so they
+                     do not read as three more filters sitting beside "On map only". -->
                 <span class="fv-log-bar-meta">USEFUL LINKS:</span>
                 <button type="button" class="fv-log-chip fv-log-chip--link" title="Fiery Void FAQ"
-                        onclick="window.open('faq.php', '_blank');">FAQ</button>
+                        data-fvdoc="faq">FAQ</button>
                 <button type="button" class="fv-log-chip fv-log-chip--link" title="Ammo, Options &amp; Enhancements"
-                        onclick="window.open('ammo-options-enhancements.php', '_blank');">Ammo &amp; Options</button>
+                        data-fvdoc="ammo">Ammo &amp; Options</button>
                 <button type="button" class="fv-log-chip fv-log-chip--link" title="Factions &amp; Tiers Info"
-                        onclick="window.open('factions-tiers.php', '_blank');">Factions</button>
+                        data-fvdoc="factions">Factions</button>
             </span>
         </div>
         <!-- fleetList.js appends one .fleetlistentry per slot here. It used to append
@@ -919,9 +924,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
             <div id="fleetSavePanel">
                 <h4 class="fv-opt-heading">Save Fleet</h4>
                 <p>
-                    Saves your surviving ships, their enhancements, ammo, and their current battle
-                    damage and critical effects as a reusable fleet list. Load it from the game
-                    lobby to continue a campaign.
+                    Saves your current ships, enhancements, ammo, and battle
+                    damage. Load it from the game lobby.
                 </p>
                 <p id="fleetSaveSummary"></p>
                 <input type="button" id="fleetSaveButton" class="fv-log-chip fv-log-chip--link" value="Save Current Fleet">

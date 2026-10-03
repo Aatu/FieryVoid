@@ -25,6 +25,26 @@ class Firing
         //rather than failing the whole ship's submission (some callers throw on
         //false, which would abort turn processing over one bad shot).
         foreach ($fireOrders as $fire) {
+            /* METEOR_DEFENCE_PLAN.md §2.2 - a Meteor Defence declaration has legality rules of its
+               own, judged in Initial Orders only (see the method). Same reject convention as the
+               vortex declaration below. */
+            if ($fire->type === 'meteorDefence') {
+                self::validateMeteorDefenceDeclaration($fire, $gamedata, $fireOrders);
+                continue;
+            }
+
+            /* ...and a weapon that made one is committed for the WHOLE turn (D1): nothing else it
+               posts in Pre-Firing or the Fire Phase is written, a selfIntercept offer included. The
+               client never sends such an order - this is the server being the authority. Ahead of
+               the selfIntercept skip below on purpose. */
+            if (self::isFromMeteorDefenceWeapon($fire, $gamedata)) {
+                $fire->rejected = true;
+                Debug::log("validateFireOrders: rejecting order from a weapon committed to meteor defence "
+                    . "(game {$gamedata->id}, shooter {$fire->shooterid}, weaponid {$fire->weaponid}, "
+                    . "type {$fire->type}).");
+                continue;
+            }
+
             //A selfIntercept order is a permission marker with no targeting of its own - leave it
             //alone. An 'intercept' order DOES carry an ordinary positional weaponid (the
             //interceptor), so it runs the same stale-blueprint weapon check as every other order
@@ -107,6 +127,133 @@ class Firing
         }
 
         return true;
+    }
+
+    /* METEOR_DEFENCE_PLAN.md §1.1 / §2.2 - server-side legality for a Meteor Defence declaration.
+     *
+     * The same reject convention and the same two sources as validateVortexDeclaration below:
+     * $shooter and its weapon come from the REAL gamedata load - reloaded after this POST's power rows
+     * were written, so offline and boost are this turn's - while $fire and $fireOrders are the POST-side
+     * rebuild (trap T10). That is why "one per weapon" and "no other order this turn" read $fireOrders.
+     *
+     * Judged in Initial Orders only. The client re-posts the declaration in the Fire Phase, where
+     * DBManager::submitFireorders skips it anyway, and by then the weapon may be legitimately destroyed.
+     *
+     * A legal declaration is also NORMALISED, so what is written is the server's reckoning rather than
+     * the client's: the unit itself as target, nothing blocked yet, and ->shots = the weapon's guns in
+     * the declared mode - every gun is committed (D5), and each can take one meteor (§1.3). */
+    private static function validateMeteorDefenceDeclaration($fire, $gamedata, $fireOrders)
+    {
+        if ($gamedata->phase != 1) return;
+        if ($fire->turn != $gamedata->turn) return;
+
+        $shooter = $gamedata->getShipById($fire->shooterid);
+        $weapon = $shooter ? $shooter->getSystemById($fire->weaponid) : null;
+        $guns = 0;
+
+        $reason = self::getMeteorDefenceBlock($fire, $shooter, $weapon, $gamedata, $fireOrders, $guns);
+        if ($reason === null) {
+            $fire->targetid = $shooter->id;
+            $fire->calledid = -1;
+            $fire->x = "null";
+            $fire->y = "null";
+            $fire->needed = 0;
+            $fire->rolled = 0;
+            $fire->shots = $guns;
+            $fire->shotshit = 0;
+            $fire->damageclass = 'MeteorDefence';
+            return;
+        }
+
+        $fire->rejected = true;
+        Debug::log("validateFireOrders: rejecting meteor defence declaration "
+            . "(game {$gamedata->id}, shooter {$fire->shooterid}, weaponid {$fire->weaponid}, "
+            . "mode {$fire->firingMode}) - $reason.");
+    }
+
+    /* The rules themselves (plan §1.1): null when the declaration is legal, else a short reason for the
+     * log. The normal intercept identification - isValidInterceptor / validateManualIntercept - minus the
+     * consent rule, because the declaration IS the consent. $guns is filled in on success. */
+    private static function getMeteorDefenceBlock($fire, $shooter, $weapon, $gamedata, $fireOrders, &$guns)
+    {
+        if (!$shooter) return "shooterid does not resolve to a unit";
+        if ($shooter->userid != $gamedata->forPlayer) return "unit does not belong to the submitting player";
+        if ($shooter->isDestroyed()) return "unit is destroyed";
+        if (!($shooter instanceof FighterFlight) && (($shooter->unavailable === true) || $shooter->isDisabled())) {
+            return "unit cannot fight this turn"; //getUnassignedInterceptors' own test
+        }
+        //A docking rider may not fire, interception included (automateIntercept). A jumping Ancient's
+        //orders never get here: InitialOrdersGamePhase::dropFireOfJumpingShip drops them first.
+        if (HangarOps::bayCarrierAttachedTo($shooter, $gamedata) !== null) return "unit is riding a Docking Bay";
+        if (!self::isMeteorSwarmPresent($gamedata)) return "no Meteor Swarm on the map"; //D7
+
+        if (!($weapon instanceof Weapon)) {
+            return "weaponid resolves to " . ($weapon ? get_class($weapon) : "nothing") . ", not a Weapon";
+        }
+        if (!$weapon->getWeaponForIntercept()) return "weapon class cannot act as an interceptor";
+        if (!isset($weapon->firingModes[$fire->firingMode])) return "unknown firing mode " . $fire->firingMode;
+        if ($weapon->isDestroyed()) return "weapon is destroyed";
+        if ($shooter instanceof FighterFlight) {
+            $fighter = $shooter->getFighterBySystem($weapon->id);
+            if (!$fighter || $fighter->isDestroyed()) return "weapon's fighter is destroyed";
+        }
+        if ($weapon->isOfflineOnTurn($gamedata->turn)) return "weapon is offline this turn";
+        if ($weapon->stowed) return "weapon is stowed";
+        if ($weapon->getTurnsloaded() < $weapon->getLoadingTime()) {
+            return "weapon is not loaded (" . $weapon->getTurnsloaded() . "/" . $weapon->getLoadingTime() . ")";
+        }
+
+        //No other order on this weapon this turn - a missile rack cannot both launch and defend - and at
+        //most one declaration per weapon (the first one posted stands).
+        $position = array_search($fire, $fireOrders, true);
+        foreach ($fireOrders as $index => $other) {
+            if ($other === $fire || !empty($other->rejected)) continue;
+            if ($other->shooterid != $fire->shooterid || $other->weaponid != $fire->weaponid) continue;
+            if ($other->turn != $fire->turn) continue;
+            //a homing missile already in the air is not an order of this turn's (AmmoMissileRackS::firedOnTurn)
+            if ($other->damageclass === AmmoMissileHM::REATTACK_CLASS) continue;
+            if ($other->type !== 'meteorDefence') return "weapon also has a '" . $other->type . "' order this turn";
+            if ($position !== false && $index < $position) return "weapon has already been declared";
+        }
+
+        //What is left depends on the declared mode - an ammo launcher declares its Interceptor mode (the
+        //client's getInterceptModeFor) - so ask it in that mode and put the weapon back afterwards.
+        $originalMode = $weapon->firingMode;
+        if ($weapon->firingMode != $fire->firingMode) $weapon->changeFiringMode($fire->firingMode);
+        try {
+            if ($weapon->intercept < 1) return "weapon has no intercept rating in mode " . $fire->firingMode;
+            //an ammo launcher needs a round of that kind in its magazine (MissileLauncher::canInterceptAtAll)
+            if ($weapon->checkAmmoMagazine && !$weapon->canInterceptAtAll($gamedata, $fire, null, $shooter, $shooter, null)) {
+                return "no round for mode " . $fire->firingMode . " in the magazine";
+            }
+            $guns = max(1, (int)$weapon->guns);
+        } finally {
+            if ($weapon->firingMode != $originalMode) $weapon->changeFiringMode($originalMode);
+        }
+
+        return null;
+    }
+
+    /* D7 - Meteor Defence exists only while there is something to defend against: a Meteor Swarm, or
+       the Triad's spawned meteoroids. Both carry $isMeteoroid, which is what makes a unit collide as a
+       swarm in RammingAttack::beforePreFiringOrderResolution. */
+    public static function isMeteorSwarmPresent($gamedata)
+    {
+        foreach ($gamedata->ships as $ship) {
+            if (!empty($ship->isMeteoroid) && !$ship->isDestroyed()) return true;
+        }
+        return false;
+    }
+
+    /* Pre-Firing / Fire Phase: is this POSTed order from a weapon that declared Meteor Defence this
+       turn? Asked of the DB copy of the weapon, which is the one carrying the declaration. */
+    private static function isFromMeteorDefenceWeapon($fire, $gamedata)
+    {
+        if ($gamedata->phase != 3 && $gamedata->phase != 5) return false;
+        if ($fire->turn != $gamedata->turn) return false;
+        $shooter = $gamedata->getShipById($fire->shooterid);
+        $weapon = $shooter ? $shooter->getSystemById($fire->weaponid) : null;
+        return ($weapon instanceof Weapon) && $weapon->getMeteorDefenceOrder($gamedata->turn) !== null;
     }
 
     /* JUMP_POINTS_PLAN.md STAGE 2 - server-side legality for a vortex declaration.
@@ -733,8 +880,13 @@ class Firing
         } else { //proper ship
            
             if (!(($ship->unavailable === true) || $ship->isDisabled())) { //ship itself can fight this turn
-                foreach ($ship->systems as $weapon) {               	
-                    if ((!($weapon instanceof Weapon))) continue; //not a weapon, or a ballistic weapon         
+                foreach ($ship->systems as $weapon) {
+                    if ((!($weapon instanceof Weapon))) continue; //not a weapon, or a ballistic weapon
+                    /* Declared against meteors in Initial Orders, so committed for the whole turn
+                       (METEOR_DEFENCE_PLAN.md D1/D5, trap T6). firedOnTurn already keeps an ordinary
+                       weapon out, but the canSplitShots clause below lets a split-shot weapon past it and
+                       then counts the declaration as ONE spent gun - the rest would be offered here. */
+                    if ($weapon->getMeteorDefenceOrder($currTurn) !== null) continue;
                     /* ===== AUTO-INTERCEPTOR-MISSILES (1 of 3) - THE SWITCH ITSELF =============
                        THIS is where the server decides, on the player's behalf, that a missile
                        launcher will spend an Interceptor round this turn. Nothing else opts it in.
@@ -1010,6 +1162,7 @@ class Firing
         foreach ($allIncomingShots as $fireOrder) {
             if (($fireOrder->needed - $fireOrder->totalIntercept) <= 0) continue;//no chance of hitting
             if (($fireOrder->type == "selfIntercept") || ($fireOrder->type == "intercept")) continue; //interception shot
+            if (self::isDeclarationOnly($fireOrder)) continue; //a meteor defence declaration - nothing to intercept
             $shooter = $gamedata->getShipById($fireOrder->shooterid);
             $firingWeapon = $shooter->getSystemById($fireOrder->weaponid);            
             $firingWeapon->notActuallyHexTargeted($fireOrder);//Some weapons start hex targeted, but become normal e.g. BM Launcher - 4.3.24 DK
@@ -1087,6 +1240,10 @@ class Firing
             $reason = "weapon is not loaded (" . $weapon->getTurnsloaded() . "/" . $weapon->getLoadingTime() . ")";
         } else if ($weapon->intercept <= 0) {
             $reason = "weapon has no intercept rating in mode " . $fire->firingMode;
+        } else if ($weapon->getMeteorDefenceOrder($gamedata->turn) !== null) {
+            //Committed for the whole turn (METEOR_DEFENCE_PLAN.md D1). Step 3 would catch a non-split
+            //weapon, but it counts the declaration as ONE gun and a split-shot weapon is committed whole (D5).
+            $reason = "weapon is committed to meteor defence this turn";
         }
 
         //2. the shot being intercepted must exist, this turn, and be a real shot.
@@ -1094,7 +1251,7 @@ class Firing
             $intercepted = isset($ordersById[$fire->targetid]) ? $ordersById[$fire->targetid] : null;
             if (!$intercepted) {
                 $reason = "targetid " . $fire->targetid . " matches no fire order this turn";
-            } else if ($intercepted->type == "intercept" || $intercepted->type == "selfIntercept") {
+            } else if ($intercepted->type == "intercept" || $intercepted->type == "selfIntercept" || self::isDeclarationOnly($intercepted)) {
                 $reason = "targetid " . $fire->targetid . " is itself an " . $intercepted->type . " order";
             } else {
                 //isLegalIntercept dereferences both of these unguarded, as does the automated path.
@@ -1524,28 +1681,29 @@ class Firing
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (!($weapon instanceof Weapon)){ //this isn't a weapon after all...
                     continue;
-                }		
+                }
                 if (self::isHyperspaceLogOrder($fire)) continue; //not a shot - see the method
-               
+                if (self::isDeclarationOnly($fire)) continue; //not a shot - see the method
+
 		        $weapon->changeFiringMode($fire->firingMode); //For Chaff Missile
-		
-		    
+
+
                 $fire->priority = $weapon->priority;
 				//take different AF priority into account!
 				if($fire->targetid !== -1){ //actually directed at an unit!
-					$target = $gamedata->getShipById($fire->targetid); 
+					$target = $gamedata->getShipById($fire->targetid);
 					if ($target instanceof FighterFlight){
 						$fire->priority = $weapon->priorityAF;
 					}
-				}	
-				
+				}
+
                 if($weapon->isTargetAmbiguous($gamedata, $fire)){
                     $ambiguousFireOrders[] = $fire;
                 }else{
                     $weapon->calculateHitBase($gamedata, $fire);
                 }
             }
-                     
+
         }
 
         //calculate hit chances for ambiguous firing!
@@ -1555,7 +1713,7 @@ class Firing
             $weapon->calculateHitBase($gamedata, $fireOrder);
         }
 
-    }//endof function preparePreFiring	    
+    }//endof function preparePreFiring
 
 
 public static function firePreFiringWeapons($gamedata){	
@@ -1598,6 +1756,7 @@ public static function firePreFiringWeapons($gamedata){
                 if ($fire->type === "intercept" || $fire->type === "selfIntercept"  || $fire->type === "ballistic"){
                     continue;
                 }
+                if (self::isDeclarationOnly($fire)) continue; //not a shot - see the method
 
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (!($weapon instanceof Weapon)) continue; //...just in case...               
@@ -1640,6 +1799,7 @@ public static function firePreFiringWeapons($gamedata){
                 if ($fire->type === "intercept" || $fire->type === "selfIntercept"  || $fire->type === "ballistic"){
                     continue;
                 }
+                if (self::isDeclarationOnly($fire)) continue; //not a shot - see the method
 
                 $weapon = $ship->getSystemById($fire->weaponid);
 
@@ -1680,6 +1840,7 @@ public static function firePreFiringWeapons($gamedata){
                 if ($fire->type === "intercept" || $fire->type === "selfIntercept"  || $fire->type === "ballistic"){
                     continue;
                 }
+                if (self::isDeclarationOnly($fire)) continue; //not a shot - see the method
 
                 $weapon = $ship->getSystemById($fire->weaponid);
 
@@ -1733,6 +1894,18 @@ public static function firePreFiringWeapons($gamedata){
             || $fire->damageclass === 'JumpVortexExit';
     }
 
+    /* A METEOR DEFENCE DECLARATION IS NOT A SHOT EITHER (METEOR_DEFENCE_PLAN.md §2.3, trap T5).
+     *
+     * A 'meteorDefence' order is made in Initial Orders and says only "this weapon defends its own
+     * unit against meteors this turn". It names its own unit as target and has no hit chance of its
+     * own, and every gather here treats a type it does not know as a shot - so without this it would
+     * roll to hit against its own ship and "fire". The same four gathers consult it as consult
+     * isHyperspaceLogOrder, plus Firing::fire as the backstop. Its only reader is RammingAttack's
+     * MeteoroidCollision branch, which finds it on the struck unit's weapons. */
+    public static function isDeclarationOnly($fire){
+        return $fire->type === 'meteorDefence';
+    }
+
     public static function prepareFiring($gamedata, $dbManager = null){
 	//additional call for weapons needing extra preparation
         foreach ($gamedata->ships as $ship){
@@ -1784,8 +1957,9 @@ public static function firePreFiringWeapons($gamedata){
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (!($weapon instanceof Weapon)){ //this isn't a weapon after all...
                     continue;
-                }		
+                }
                 if (self::isHyperspaceLogOrder($fire)) continue; //not a shot - see the method
+                if (self::isDeclarationOnly($fire)) continue; //not a shot - see the method
                
 		        $weapon->changeFiringMode($fire->firingMode); //For Chaff Missile
 		
@@ -2133,6 +2307,7 @@ public static function firePreFiringWeapons($gamedata){
                 if ($fire->type === "intercept" || $fire->type === "selfIntercept" || $fire->type === "prefiring"){
                     continue;
                 }
+                if (self::isDeclarationOnly($fire)) continue; //not a shot - see the method
 
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (!($weapon instanceof Weapon)) continue; //...just in case...
@@ -2176,12 +2351,13 @@ public static function firePreFiringWeapons($gamedata){
                 if ($fire->turn != $gamedata->turn){
                     continue;
                 }
+                if (self::isDeclarationOnly($fire)) continue; //not a shot - see the method
 
                 $weapon = $ship->getSystemById($fire->weaponid);
 
                 //ramming attacks are already allocated!
                 if ($weapon->isRammingAttack) continue;
-                    
+
                 //ballistic weapons will still reach their targets, but direct fire from fighters previously destroyed will not happen
                 if ( (!$weapon->ballistic) && ($ship->getFighterBySystem($weapon->id)->isDestroyed()) ) continue;
 		        /* simplified above
@@ -2217,6 +2393,7 @@ public static function firePreFiringWeapons($gamedata){
                 if ($fire->turn != $gamedata->turn){
                     continue;
                 }
+                if (self::isDeclarationOnly($fire)) continue; //not a shot - see the method
 
                 $weapon = $ship->getSystemById($fire->weaponid);
 
@@ -2225,7 +2402,7 @@ public static function firePreFiringWeapons($gamedata){
 
                 //ballistic weapons will still reach their targets, but direct fire from fighters previously destroyed will not happen
                 if ( (!$weapon->ballistic) && ($ship->getFighterBySystem($weapon->id)->isDestroyed()) ) continue;
-                /*simplified above	
+                /*simplified above
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (($ship->getFighterBySystem($weapon->id)->isDestroyed() || $ship->isDestroyed())
                     && !$weapon->ballistic) {
@@ -2421,6 +2598,9 @@ public static function firePreFiringWeapons($gamedata){
         if ($fire->type == "intercept" || $fire->type == "selfIntercept")
             return;
 
+        if (self::isDeclarationOnly($fire))
+            return;
+
         if ($fire->rolled > 0)
             return;
 
@@ -2437,13 +2617,13 @@ public static function firePreFiringWeapons($gamedata){
         // - Terrain collisions: RammingAttack::beforePreFiringOrderResolution already creates
         //   a SEPARATE collision order for the host itself, so spilling the pod's order onto
         //   it as well made a host dragging a pod through an asteroid field take collision
-        //   damage twice.
+        //   damage twice. Every class of terrain hit, dust and meteors included.
         $spillsToHost = $target
             && !empty($target->attached)
             && $target instanceof FighterFlight
             && !$weapon->doesSkipAttachedHostHit()
-            && $fire->damageclass !== 'TerrainCollision'
-            && $fire->damageclass !== 'TerrainCrash';
+            && !in_array($fire->damageclass, array('TerrainCollision', 'TerrainCrash', 'DustCollision',
+                'MeteoroidCollision', 'WaveformCollision', 'SingularityCollision'), true);
 
         if ($spillsToHost) {
             $hostShipId = key($target->attached);

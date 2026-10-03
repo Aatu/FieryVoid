@@ -10,8 +10,8 @@ class dewMineLorun extends Mine{
         $this->imagePath = "img/ships/eaMine.png";
         $this->shipClass = "Lorun DEW Mine";
 		$this->occurence = "common";
-		//$this->variantOf = 'NONE';
         $this->isd = 1921;
+		$this->unofficial = true;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

@@ -1,0 +1,751 @@
+<!--
+  FIERY VOID DATA ARCHIVE - AMMO, OPTIONS & ENHANCEMENTS
+  Shown by client/UI/docViewer.js (the in-page window) and by ammo-options-enhancements.php (the
+  same viewer, filling the page). Edit the words here; nothing else needs to change.
+
+  Each <section> is one entry in the window's left-hand list:
+    data-key    the entry's id - also its link: ammo-options-enhancements.php#systemrefits. Keep it stable.
+    data-title  the entry's name in the list and its heading.
+    data-group  the list heading it sits under (consecutive entries share one heading).
+  Inside an entry: <h3> sub-headings are listed under the entry while it is open; data-anchor="x"
+  on any element makes ammo-options-enhancements.php#x land on it. Never use id= (the window is
+  dropped into other pages, whose ids it must not collide with).
+  Links: to another document href="faq.php#hangar"; within this one href="#systemrefits".
+  Pictures: <figure class="fvd-fig"><img src="img/docViewer/..." alt="..."><figcaption>..</figcaption></figure>.
+  A picture still to be supplied is a placeholder - fvd-fig--ph, the file it should become in
+  data-img, what it should show inside <div class="fvd-ph">. Swap it for the <img> when it arrives.
+  An enhancement is a card: <article class="fvd-card"><h4>Name</h4><dl class="fvd-spec">
+  <dt>Effect</dt><dd>..</dd> <dt>Cost</dt><dd>..</dd> <dt>Limit</dt><dd>..</dd> <dt>Notes</dt><dd>..</dd>
+  </dl></article>, inside a <div class="fvd-cards">. fvd-card--wide spans the full width.
+-->
+
+<!-- ═════════════════════════════════ ORDNANCE ══════════════════════════════ -->
+
+<section data-key="missiles" data-title="Missiles" data-group="Ordnance">
+  <p class="fvd-lede">Many factions use missiles. When you buy a missile-carrying ship in Fleet Selection, you can also
+    buy any missile ammunition its faction has available.</p>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/missile-buy.jpg" alt="A missile ship's buy window with its Ammo & Ordnance section">
+    <figcaption>Buying missiles along with the ship.</figcaption>
+  </figure>
+  <p>Ships generally come preloaded with basic ammunition for their launchers, and any missiles you buy are in addition
+    to these.</p>
+  <div class="fvd-note fvd-note--warn">
+    <span class="fvd-note-label">Variety, not quantity</span>
+    <p>The number of any one missile type you can buy is limited by magazine size, but the total number of missiles is
+      not. So your magazine may show more missiles than it can actually hold - but you cannot launch more than the
+      magazine's total. In short, extra missiles buy you variety, not extra missiles in the magazine!</p>
+  </div>
+  <p>Any missile in the magazine can be fired by any launcher able to fire it: missiles are not tied to particular
+    mounts. Weapons that store their ammunition on the mount itself are different, but they can usually only hold one
+    kind. That matters most for fighters, since a ship's cavernous magazine is unlikely to run out during a battle.</p>
+  <p>Fighters usually start with an empty magazine (although a missile entry is present, for technical reasons), and lose
+    a missile they are carrying if they take 2 or more damage from a single shot. They can dock on friendly carriers to
+    reload the missiles they started the game with, as long as the carrier has bought the Ordnance Reserve enhancement
+    (see <a href="#shipenhancements">Ship Enhancements</a>) and there are enough ordnance points to pay for the
+    replacements.</p>
+  <p>Missiles do not use the firing ship's OEW: their built-in guidance is usually folded into the weapon's fire control
+    rather than kept separate. Fighter missiles do benefit from the fighter's offensive bonus.</p>
+  <p>Ammunition listings usually give the year each missile type became available (its ISD); where there are two dates,
+    the first is for the Kor-Lyan only. Fiery Void does not enforce these, so players need to.</p>
+  <p>The tables below give each missile type's base stats. The launcher can modify them - an L-Rack Missile Launcher, for
+    example, adds +10 to the listed ranges.</p>
+
+  <h3 data-anchor="shipbornemissiles">Shipborne missiles</h3>
+  <table>
+    <thead>
+      <tr><th>Class</th><th>Missile</th><th class="fvd-num">ISD</th><th class="fvd-num">Range</th><th class="fvd-num">Damage</th><th class="fvd-num">Fire control<br>(ftr / med / cap)</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="fvd-num">B</td><td>Basic Missile</td><td class="fvd-num"></td><td class="fvd-num">20</td><td class="fvd-num">20</td><td class="fvd-num">+3/+3/+3</td><td></td></tr>
+      <tr><td class="fvd-num">A</td><td>Anti-fighter Missile</td><td class="fvd-num">2231</td><td class="fvd-num">15</td><td class="fvd-num">15</td><td class="fvd-num">+6/+3/+3</td><td></td></tr>
+      <tr><td class="fvd-num">C</td><td>Chaff Missile</td><td class="fvd-num">2230</td><td class="fvd-num">20</td><td class="fvd-num">0</td><td class="fvd-num">+3/+3/+3</td><td>-15% to non-ballistic shots from any target it hits.</td></tr>
+      <tr><td class="fvd-num">D</td><td>Light Missile</td><td class="fvd-num">2178</td><td class="fvd-num">15</td><td class="fvd-num">12</td><td class="fvd-num">+3/+3/+3</td><td></td></tr>
+      <tr><td class="fvd-num">F</td><td>Flash Missile</td><td class="fvd-num">2225</td><td class="fvd-num">20</td><td class="fvd-num">20</td><td class="fvd-num">+3/+3/+3</td><td>Deals Flash damage.</td></tr>
+      <tr><td class="fvd-num">H</td><td>Heavy Missile</td><td class="fvd-num">2225</td><td class="fvd-num">10</td><td class="fvd-num">30</td><td class="fvd-num">+0/+3/+3</td><td></td></tr>
+      <tr><td class="fvd-num">HM</td><td>Homing Missile</td><td class="fvd-num">2252</td><td class="fvd-num">20</td><td class="fvd-num">20</td><td class="fvd-num">+3/+3/+3</td><td>Kor-Lyan only. If it misses without being intercepted it stays in play and attacks again, launching from its target's previous hex, until it runs out of fuel.</td></tr>
+      <tr><td class="fvd-num">I</td><td>Interceptor Missile</td><td class="fvd-num">2250/2263</td><td class="fvd-num">0</td><td class="fvd-num">0</td><td class="fvd-num">-/-/-</td><td>Fires defensively, with a -30 intercept rating against ballistic weapons.</td></tr>
+      <tr><td class="fvd-num">L</td><td>Long Range Missile</td><td class="fvd-num">2225</td><td class="fvd-num">30</td><td class="fvd-num">15</td><td class="fvd-num">+3/+3/+3</td><td></td></tr>
+      <tr><td class="fvd-num">K</td><td>Starburst Missile</td><td class="fvd-num">2260/2264</td><td class="fvd-num">15</td><td class="fvd-num">10 &times; (D3+3)</td><td class="fvd-num">+3/+3/+3</td><td>Deals damage in Pulse mode.</td></tr>
+      <tr><td class="fvd-num">KK</td><td>Kinetic Missile</td><td class="fvd-num">1976</td><td class="fvd-num">60*</td><td class="fvd-num">18</td><td class="fvd-num">+3/+3/+3</td><td>Orieni only. Deals Matter damage. *-5% per hex of range penalty beyond 15 hexes.</td></tr>
+      <tr><td class="fvd-num">J</td><td>Jammer Missile</td><td class="fvd-num">2239</td><td class="fvd-num">15</td><td class="fvd-num">0</td><td class="fvd-num">-/-/-</td><td>Kor-Lyan only. Every ship within 5 hexes gets 2 points of Blanket DEW (BDEW).</td></tr>
+      <tr><td class="fvd-num">M</td><td>Multiwarhead Missile</td><td class="fvd-num">2256</td><td class="fvd-num">20</td><td class="fvd-num">10 &times; 6</td><td class="fvd-num">+3/-/-</td><td>Can only target fighters; splits into 6 submunitions.</td></tr>
+      <tr><td class="fvd-num">P</td><td>Piercing Missile</td><td class="fvd-num">2244</td><td class="fvd-num">20</td><td class="fvd-num">30</td><td class="fvd-num">-/+3/+3</td><td>Deals Piercing damage.</td></tr>
+      <tr><td class="fvd-num">S</td><td>Stealth Missile</td><td class="fvd-num">2252</td><td class="fvd-num">20</td><td class="fvd-num">20</td><td class="fvd-num">+3/+3/+3</td><td>Kor-Lyan only. The missile's target is not revealed to the enemy player.</td></tr>
+      <tr><td class="fvd-num">X</td><td>HARM Missile</td><td class="fvd-num">2248</td><td class="fvd-num">20</td><td class="fvd-num">0</td><td class="fvd-num">-/+3/+3</td><td>Hit chance +5% per point of OEW and CCEW the target is using; causes -1d6 scanner output next turn.</td></tr>
+      <tr><td class="fvd-num">Z</td><td>Antimine Missile</td><td class="fvd-num">2249</td><td class="fvd-num">20</td><td class="fvd-num">15</td><td class="fvd-num">-/-/-</td><td>Hex targeted. Attacks any mines within 3 hexes; +15% to hit a mine in the same hex.</td></tr>
+    </tbody>
+  </table>
+
+  <h3 data-anchor="fightermissiles">Fighter missiles</h3>
+  <table>
+    <thead>
+      <tr><th>Class</th><th>Missile</th><th class="fvd-num">ISD</th><th class="fvd-num">Range</th><th class="fvd-num">Damage</th><th class="fvd-num">Fire control<br>(ftr / med / cap)</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="fvd-num">FB</td><td>Basic Fighter Missile</td><td class="fvd-num">2165</td><td class="fvd-num">10</td><td class="fvd-num">10</td><td class="fvd-num">+3/+3/+3</td><td></td></tr>
+      <tr><td class="fvd-num">FD</td><td>Dropout Missile</td><td class="fvd-num">2221/2245</td><td class="fvd-num">10</td><td class="fvd-num">6</td><td class="fvd-num">+3/+1/+1</td><td>Increases the chance of dropout on fighters.</td></tr>
+      <tr><td class="fvd-num">FH</td><td>Heavy Fighter Missile</td><td class="fvd-num">2226/2245</td><td class="fvd-num">5</td><td class="fvd-num">15</td><td class="fvd-num">+1/+3/+3</td><td>Limited to 1 per fighter (2 per Super Heavy Fighter).</td></tr>
+      <tr><td class="fvd-num">FL</td><td>Long Range Fighter Missile</td><td class="fvd-num">2226/2245</td><td class="fvd-num">15</td><td class="fvd-num">8</td><td class="fvd-num">+3/+3/+3</td><td></td></tr>
+      <tr><td class="fvd-num">FY</td><td>Dogfight Missile</td><td class="fvd-num">2165</td><td class="fvd-num">8</td><td class="fvd-num">6</td><td class="fvd-num">+3/+3/+3</td><td>Cannot snap-fire in Fiery Void.</td></tr>
+      <tr><td class="fvd-num">DUM</td><td>Dummy Missile</td><td class="fvd-num">2145</td><td class="fvd-num">-</td><td class="fvd-num">-</td><td class="fvd-num">-</td><td>Does not fire, but is always the first missile lost to damage, preserving the real munitions.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section data-key="shells" data-title="Grome Shells" data-group="Ordnance">
+  <p class="fvd-lede">The Grome are unique in having several types of shell for their railguns. They are bought along
+    with a ship in Fleet Selection, just like missiles.</p>
+  <p>The damage a shell deals changes with the size of the railgun (Light, Medium or Heavy), but the bonus effect it
+    gives is always the same.</p>
+  <dl class="fvd-defs">
+    <dt>Flash Shell</dt>
+    <dd>Deals Plasma damage in Flash mode.</dd>
+    <dt>Scatter Shell</dt>
+    <dd>Gives the weapon Pulse properties - one shot by default, with a grouping bonus of 25: for each 25% the roll is
+      under the hit chance, an extra shot hits the target.</dd>
+    <dt>Heavy Shell</dt>
+    <dd>Deals extra damage.</dd>
+    <dt>Long Range Shell</dt>
+    <dd>Medium and Heavy Railguns only. Improves the range penalty, but lowers damage.</dd>
+    <dt>Ultra Long Range Shell</dt>
+    <dd>Heavy Railguns only. Increases range further, with even lower damage.</dd>
+  </dl>
+  <p>See the Grome Autocracy entry in <a href="factions-tiers.php#grome">Factions &amp; Tiers</a> for the rest of their
+    systems.</p>
+</section>
+
+<!-- ═══════════════════════════ UNIT ENHANCEMENTS ═══════════════════════════ -->
+
+<section data-key="enhancements" data-title="About Enhancements" data-group="Unit Enhancements">
+  <p class="fvd-lede">Unit enhancements are generally quite pricey, though not always. In pickup battles they are very
+    much optional - if the game description does not say, check with your opponent that they are OK to use.</p>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/enhancements.jpg" alt="The Enhancements section of a ship's buy window">
+    <figcaption>Choosing enhancements when buying a ship.</figcaption>
+  </figure>
+  <p>Their main uses are as an option in a scenario, as a campaign tool (representing units gaining experience, say), or
+    as a way of spending the last few points of your fleet.</p>
+  <p>Some represent regular unit options rather than true enhancements - fighter Navigators, for example, or Markab
+    Religious Fervor. And not every enhancement improves a unit: some, like Poor Crew, make it worse, and reduce its price
+    to compensate.</p>
+  <ul>
+    <li><a href="#shipenhancements">Ship Enhancements</a></li>
+    <li><a href="#fighterenhancements">Fighter Enhancements</a></li>
+    <li><a href="#mineEnhancements">Mine Enhancements</a></li>
+    <li><a href="#factionenhancements">Faction Enhancements</a> - options for one faction only.</li>
+    <li><a href="#systemenhancements">System Enhancements</a> - refits bought for a single system rather than the whole
+      unit.</li>
+  </ul>
+</section>
+
+<section data-key="shipenhancements" data-title="Ship Enhancements" data-group="Unit Enhancements">
+  <div class="fvd-cards">
+    <article class="fvd-card fvd-card--wide">
+      <h4>Elite Crew</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>+1 to hit with all weapons, +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -5% Defence Rating, -1
+            to critical results.</li>
+          <li>All weapons do +1 damage <i>per die</i>, although no die can exceed its maximum - a 9 on a d10 becomes a 10,
+            but a 10 is not improved. Weapons whose damage is a formula rather than a dice roll (the Antimatter
+            Converter's 4X+2, for instance) are unaffected.</li>
+          <li>Whenever the ship turns, its Turn Delay is reduced by 1, to a minimum of 1. This is a flat reduction to the
+            delay the turn actually costs, not a change to the ship's turn delay rate.</li>
+          <li>The ship's jump delay is reduced by 20% (fractions of 0.5 or more round up).</li>
+          <li>If the ship has any default shuttles, one is upgraded free to the cheapest armed shuttle in its faction's
+            listing - in effect a free Convert to Armed Shuttle. Factions with no armed shuttle of their own get the
+            Civilian armed shuttle instead. The upgraded shuttle starts the battle docked in the hangar and launches
+            normally; it takes a box the ship already had, so hangar capacity is unchanged.</li>
+        </ul></dd>
+        <dt>Cost</dt><dd>+40% of the ship's cost (a second time: +60%)</dd>
+        <dt>Limit</dt><dd>2</dd>
+        <dt>Notes</dt><dd>Every effect above is per level: a ship bought Elite Crew twice gets -2 Turn Delay (still to a
+          minimum of 1), +2 damage per die, a jump delay cut by 20% twice (to 64% of the original), and two upgraded
+          shuttles.</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h4>Poor Crew</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>-1 to hit with all weapons, -5 Initiative, -1 Engine, -1 Sensors, -1 Reactor power, +5% Defence Ratings, +2
+            to critical rolls.</li>
+          <li>Whenever the ship turns, its Turn Delay is increased by 1 - a turn delay of 3 hexes becomes 4.</li>
+          <li>Hangar launch / dock capacity is halved (rounded up). This is the bay's launch-and-land rate per turn; the
+            number of craft the hangar can HOLD is unchanged, so the ship keeps its full complement but cycles it half as
+            fast.</li>
+          <li>The ship's jump delay is increased by 20% (fractions of 0.5 or more round up).</li>
+          <li>The ship cannot carry armed shuttles. Its default shuttle slots do not count as armed-shuttle capacity in
+            the Fleet Checker, and it gets no free upgrade. It still gets its ordinary unarmed default shuttles.</li>
+        </ul></dd>
+        <dt>Cost</dt><dd>-15% of the ship's cost (-10% if chosen a second time)</dd>
+        <dt>Limit</dt><dd>2</dd>
+        <dt>Notes</dt><dd>Every effect above is per level: a ship bought Poor Crew twice gets +2 Turn Delay, a quartered
+          hangar rate, and a jump delay lengthened by 20% twice (to 144% of the original).</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card">
+      <h4>Ordnance Reserve</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>A pool of points used to restock the missiles and torpedoes of docked fighters (see
+          <a href="faq.php#hangar">Hangar Operations</a>).</dd>
+        <dt>Cost</dt><dd>Up to 200 pts can be bought; the cost of the missiles restocked to docked fighters is drawn from
+          this reserve.</dd>
+        <dt>Limit</dt><dd>200 pts</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card">
+      <h4>Extra Marines</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>A pool of extra marine units used to restock the Marines of Breaching Pods that dock back into
+          the carrier (1 marine per pod per turn while docked).</dd>
+        <dt>Cost</dt><dd>10 pts per contingent - each contingent is a single marine unit.</dd>
+        <dt>Limit</dt><dd>1% of the ship's base Combat Point value, rounded up (a 600-PV ship can buy up to 6
+          contingents).</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card">
+      <h4>Assault Shuttle / Fighter Hangar Conversions</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Converts a fighter slot into an assault shuttle slot, or vice versa.</dd>
+        <dt>Cost</dt><dd>5 pts per slot converted</dd>
+        <dt>Limit</dt><dd>The number of assault shuttle / fighter slots</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card">
+      <h4>Shuttle to Breaching Pod Conversion</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Converts one of the ship's default shuttle slots into a hangar slot that can hold a Breaching
+          Pod (replacing the shuttle).</dd>
+        <dt>Cost</dt><dd>10 pts per slot converted</dd>
+        <dt>Limit</dt><dd>The number of default shuttle slots</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card">
+      <h4>Shuttle to Minesweeping Shuttle Conversion</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Converts one of the ship's default shuttles into a minesweeping shuttle.</dd>
+        <dt>Cost</dt><dd>10 pts per shuttle converted</dd>
+        <dt>Limit</dt><dd>The number of default shuttles</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card">
+      <h4>Identify Friend or Foe (IFF)</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Stops ballistic mines attacking friendly units.</dd>
+        <dt>Cost</dt><dd>4 pts per Ballistic Mine Launcher</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Only for ships with Ballistic Mine Launchers.</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card">
+      <h4>Improved Engine</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 Thrust</dd>
+        <dt>Cost</dt><dd>12 + (4 / turn cost), rounded up</dd>
+        <dt>Limit</dt><dd>Engine thrust rating / 2</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card">
+      <h4>Improved Reactor</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 to +4 Power (depending on unit size, from MCV to Enormous)</dd>
+        <dt>Cost</dt><dd>10 &times; the power added (doubled if the ship has a power deficit)</dd>
+        <dt>Limit</dt><dd>1</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card">
+      <h4>Improved Sensors</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 Scanner rating</dd>
+        <dt>Cost</dt><dd>New Scanner rating &times; 5 (doubled for ELINT Sensors / Advanced Sensors)</dd>
+        <dt>Limit</dt><dd>1</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card">
+      <h4>Sluggish</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>-5 Initiative</dd>
+        <dt>Cost</dt><dd>-6 per step</dd>
+        <dt>Limit</dt><dd>7</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card">
+      <h4>Vulnerable to Criticals</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 to critical rolls</dd>
+        <dt>Cost</dt><dd>-4 per step</dd>
+        <dt>Limit</dt><dd>4</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<section data-key="fighterenhancements" data-title="Fighter Enhancements" data-group="Unit Enhancements">
+  <div class="fvd-note">
+    <p>All costs are per fighter: you pay for each fighter in the flight.</p>
+  </div>
+  <div class="fvd-cards">
+    <article class="fvd-card">
+      <h4>Expert Motivator</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>-2 to the flight's dropout rolls</dd>
+        <dt>Cost</dt><dd>10% of the craft's price (rounded up)</dd>
+        <dt>Limit</dt><dd>1</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Improved Targeting Computer</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 Offensive Bonus (OB)</dd>
+        <dt>Cost</dt><dd>New OB &times; 3</dd>
+        <dt>Limit</dt><dd>1</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Improved Thrust</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 thrust</dd>
+        <dt>Cost</dt><dd>New thrust rating</dd>
+        <dt>Limit</dt><dd>1</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Minesweeper Conversion</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Sets the Offensive Bonus to 4 and gives shuttles the minesweeper property, letting them use
+          their full Offensive Bonus for mine detection.</dd>
+        <dt>Cost</dt><dd>10, or 20% of the craft's cost, whichever is higher</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Shuttles only.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Navigator</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>360-degree missile guidance, +5 Initiative</dd>
+        <dt>Cost</dt><dd>10</dd>
+        <dt>Limit</dt><dd>1</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Poor Training</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>-5 Initiative, -1 thrust, -1 OB, +1 Defence Rating, +2 to dropout rolls</dd>
+        <dt>Cost</dt><dd>-10% of the craft's price (rounded up)</dd>
+        <dt>Limit</dt><dd>1</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Elite Pilot</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Pivot cost reduced by one thrust. Initiative +5. Offensive Bonus +1. Profile -1.</dd>
+        <dt>Cost</dt><dd>+40% of the craft's price (rounded up)</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Custom Star Wars faction only.</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<section data-key="mineEnhancements" data-title="Mine Enhancements" data-group="Unit Enhancements">
+  <div class="fvd-note">
+    <p>All costs are per mine: you pay for each mine individually. See <a href="faq.php#mines">Mines &amp;
+      Minesweeping</a> for how mines work.</p>
+  </div>
+  <div class="fvd-cards">
+    <article class="fvd-card fvd-card--wide">
+      <h4>Command Controller</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Lets you choose the mine's target by hand from the valid targets, overriding its automatic
+          targeting. Includes the Identify Friend or Foe (IFF) enhancement as well.</dd>
+        <dt>Cost</dt><dd>33%</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Proximity mines get a Pre-Firing phase in which you can target any ship that passed into range
+          during movement. If you choose not to target a unit by hand, the mine still attacks using its default
+          targeting.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Flexible Targeting</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Lets you set different ranges for different weapons during Deployment.</dd>
+        <dt>Cost</dt><dd>25%</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Only for DEW mines with more than one weapon.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Identify Friend or Foe (IFF)</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Stops mines attacking friendly units.</dd>
+        <dt>Cost</dt><dd>10%</dd>
+        <dt>Limit</dt><dd>1</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Improved Accuracy</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 Accuracy</dd>
+        <dt>Cost</dt><dd>10% for Captor mines, 20% for DEW mines</dd>
+        <dt>Limit</dt><dd>5</dd>
+        <dt>Notes</dt><dd>Captor &amp; DEW only.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Improved Armour</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 Armour</dd>
+        <dt>Cost</dt><dd>New armour rating</dd>
+        <dt>Limit</dt><dd>5</dd>
+        <dt>Notes</dt><dd>DEW only.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Improved Range</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 Range</dd>
+        <dt>Cost</dt><dd>Current range value</dd>
+        <dt>Limit</dt><dd>5</dd>
+        <dt>Notes</dt><dd>Captor &amp; DEW only.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Improved Signature</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 Signature</dd>
+        <dt>Cost</dt><dd>New signature value + 1</dd>
+        <dt>Limit</dt><dd>5</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<!-- ══════════════════════════ FACTION ENHANCEMENTS ══════════════════════════ -->
+
+<section data-key="factionenhancements" data-title="Faction Enhancements" data-group="Faction Enhancements">
+  <p class="fvd-lede">Enhancements only one faction can buy.</p>
+
+  <h3 data-anchor="ancients">Ancients</h3>
+  <div class="fvd-cards">
+    <article class="fvd-card">
+      <h4>Improved Self Repair</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 rating for every Self Repair system on the ship</dd>
+        <dt>Cost</dt><dd>New total output &times; 100</dd>
+        <dt>Limit</dt><dd>50% of the weakest Self Repair rating on the ship (rounded down)</dd>
+      </dl>
+    </article>
+  </div>
+
+  <h3 data-anchor="drazi">Drazi Freehold</h3>
+  <div class="fvd-cards">
+    <article class="fvd-card">
+      <h4>Repeater Gunsights</h4>
+      <p>A System Enhancement, bought for each Particle Repeater separately - see
+        <a href="#systemrefits">Available Refits</a>.</p>
+    </article>
+  </div>
+
+  <h3 data-anchor="ipsha">Ipsha Baronies</h3>
+  <div class="fvd-cards">
+    <article class="fvd-card">
+      <h4>Spark Curtain</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Ballistic hit chance reduced by 2 + any boost level of the Spark Field</dd>
+        <dt>Cost</dt><dd>40 + 10 per Spark Field</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Unofficial.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Essan Barony Refit</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Engine +1 thrust and +2 structure boxes, but Scanner -1 output and -2 structure boxes;
+          Structure +1 armour on all sections (to a maximum of 5)</dd>
+        <dt>Cost</dt><dd>0</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>An Essan Barony variant rather than a true enhancement.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Eethan Barony Refit</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+2 thrust, +25% available power, +0.1 turn delay, -5 Initiative, +4 critical roll modifier for
+          Reactor and Engine</dd>
+        <dt>Cost</dt><dd>10% of the ship's cost</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>An Eethan Barony variant rather than a true enhancement. It represents the Power Pod upgrade,
+          remade as a ship upgrade rather than an add-on system.</dd>
+      </dl>
+    </article>
+  </div>
+
+  <h3 data-anchor="kirishiaclords">Kirishiac Lords</h3>
+  <div class="fvd-cards">
+    <article class="fvd-card">
+      <h4>Improved Gravitic Converters</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Boosting the damage of the ship's Hypergraviton Blaster costs only 4 thrust.</dd>
+        <dt>Cost</dt><dd>150 pts + 50 pts per Hypergraviton Blaster</dd>
+        <dt>Limit</dt><dd>1</dd>
+      </dl>
+    </article>
+  </div>
+
+  <h3 data-anchor="markab">Markab Theocracy</h3>
+  <div class="fvd-cards">
+    <article class="fvd-card">
+      <h4>Religious Fervor</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 to hit with all weapons (+5 OB for fighters), +10 initiative, and fighters get -3 to
+          dropout; but defence ratings are increased by 10</dd>
+        <dt>Cost</dt><dd>0</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Should be taken when Desperate rules apply to the Markab player.</dd>
+      </dl>
+    </article>
+  </div>
+
+  <h3 data-anchor="mindriders">The Mindriders</h3>
+  <div class="fvd-cards">
+    <article class="fvd-card">
+      <h4>Improved Thought Shields</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 to every Thought Shield rating on the vessel</dd>
+        <dt>Cost</dt><dd>New total Thought Shield rating &times; 2</dd>
+        <dt>Limit</dt><dd>5</dd>
+      </dl>
+    </article>
+  </div>
+
+  <h3 data-anchor="shadows">Shadow Association</h3>
+  <div class="fvd-cards">
+    <article class="fvd-card">
+      <h4>Increased Diffusers</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 rating for every Diffuser on the ship</dd>
+        <dt>Cost</dt><dd>Total diffuser capacity &times; 2.5 (each further step costs 2.5 more per Diffuser)</dd>
+        <dt>Limit</dt><dd>5</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Integrated Fighter</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Buys an integrated Shadow Medium Fighter for this ship.</dd>
+        <dt>Cost</dt><dd>150 pts</dd>
+        <dt>Limit</dt><dd>The number of fighters the ship can carry</dd>
+      </dl>
+    </article>
+  </div>
+
+  <h3 data-anchor="thirdspace">Thirdspace</h3>
+  <div class="fvd-cards">
+    <article class="fvd-card">
+      <h4>Improved Psychic Field</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 range on the Psychic Field</dd>
+        <dt>Cost</dt><dd>300 pts</dd>
+        <dt>Limit</dt><dd>1</dd>
+      </dl>
+    </article>
+  </div>
+
+  <h3 data-anchor="vorlons">Vorlon Empire</h3>
+  <div class="fvd-cards">
+    <article class="fvd-card">
+      <h4>Amethyst Skin</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 Adaptive Armor (AA) point; the AA allowance per weapon type and the AA pre-assigned amount go
+          up on every even total</dd>
+        <dt>Cost</dt><dd>20% of the new AA total &times; the ship's total structure</dd>
+        <dt>Limit</dt><dd>50% of the base AA rating</dd>
+        <dt>Notes</dt><dd>Ships only.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Azure Skin</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 rating on all EM Shields</dd>
+        <dt>Cost</dt><dd>The unit's size factor &times; the new EM Shield rating &times; the number of shield emitters</dd>
+        <dt>Limit</dt><dd>50% of the base EM Shield rating</dd>
+        <dt>Notes</dt><dd>The size factor is 30 for Enormous units, 25 for Capitals and 20 for anything smaller.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Crimson Skin</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>The Power Capacitor gains +2 storage and +1 recharge</dd>
+        <dt>Cost</dt><dd>20 &times; the new Capacitor recharge rate</dd>
+        <dt>Limit</dt><dd>6</dd>
+      </dl>
+    </article>
+  </div>
+
+  <h3 data-anchor="walkers">Walkers of Sigma-957</h3>
+  <div class="fvd-cards">
+    <article class="fvd-card fvd-card--wide">
+      <h4>Extended Draining Field</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 hex of radius for every Energy Draining Field on the unit</dd>
+        <dt>Cost</dt><dd>300 &times; the new radius, for each field (50 points per hex of field gained - a hex of radius
+          adds 6 &times; radius new hexes)</dd>
+        <dt>Limit</dt><dd>3</dd>
+        <dt>Notes</dt><dd>On a <i>Variable</i> Energy Draining Field this raises the normal-power radius only - the
+          double-power radius does not move, so each hex bought is one hex less that double power is worth. Once the two
+          meet, boosting the field buys nothing further.</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<!-- ══════════════════════════ SYSTEM ENHANCEMENTS ══════════════════════════ -->
+
+<section data-key="systemenhancements" data-title="System Enhancements" data-group="System Enhancements">
+  <p class="fvd-lede">Everything else here is bought for a whole unit. <b>System enhancements</b> (or "refits") are
+    different: each one is bought for a <b>single system</b> on a single ship - so you can put Gunsights on one Twin Array
+    and leave the other three alone, or harden the armour on just the reactor.</p>
+  <p>They are bought from the ship window in Fleet Selection, rather than from the ship's buy window, and like the other
+    enhancements they are entirely optional - worth agreeing with your opponent before using them in a pickup battle.</p>
+  <p>Refits represent field modifications made by a younger race with the tools it actually has, so they are only
+    available to <b>Young and Middleborn ships</b>. Ancient and Primordial vessels cannot buy them, and neither can an
+    Ancient-technology weapon bolted onto a younger hull. The one exception is the Walkers' Wide-Beam Lightning Array
+    refit, which is for Ancient hulls only (see <a href="factions-tiers.php#widebeam">Factions &amp; Tiers</a>). Refits
+    are also for <b>ships only</b> - fighter flights, mines and terrain cannot be refitted.</p>
+
+  <h3 data-anchor="usingsystemenhancements">Buying and using them</h3>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/refit-menu.jpg" alt="A weapon's system menu in Fleet Selection with its gold Enhancements section">
+    <figcaption>Buying a refit for one system.</figcaption>
+  </figure>
+  <ol class="fvd-steps">
+    <li>Buy the ship in Fleet Selection as normal, then open its ship window from your fleet (your own bought ships, not
+      the Store list).</li>
+    <li>Click the system you want to refit. The same pop-up menu used for pre-battle damage appears, with its Damage
+      and Critical Effects sections.</li>
+    <li>The gold <b>Enhancements</b> section at the top of that menu lists every refit the system can take, each with
+      <b>[-] [ n ] [+]</b> controls. The price on a row is the cost of the <b>next</b> level, so it rises as you buy;
+      the running total spent on that system shows underneath as "Refits: n pts", and your fleet points update as you
+      click.</li>
+  </ol>
+  <ul>
+    <li>A system with no gold section at all simply has nothing to offer - the normal case for most systems on most
+      ships.</li>
+    <li>A refitted system gets a gold <b>&#10022;</b> star on its icon, and the ship's Enhancements box gains a
+      <b>"System Enhancements (n)"</b> line, where n is the number of systems refitted (a gun carrying two different
+      refits still counts once). Both markers are shown to your own side only.</li>
+    <li>What a system is actually carrying is shown in its own information tooltip, alongside its normal stats.</li>
+    <li>Refits are a Fleet Selection purchase only. They cannot be bought, changed or removed once the battle has begun,
+      and anything clicked after you press Ready is not submitted.</li>
+  </ul>
+</section>
+
+<section data-key="systemrefits" data-title="Available Refits" data-group="System Enhancements">
+  <div class="fvd-cards">
+    <article class="fvd-card fvd-card--wide">
+      <h4>Advanced Defensive Targeting</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 Interception rating on that weapon for every level bought (each point of Interception is -5%
+          to the hit chance of incoming ballistic attacks). The bonus applies in every firing mode the weapon has.</dd>
+        <dt>Cost</dt><dd>8 per gun on the mount &times; the rating you are upgrading from - so a single-gun weapon starting
+          at rating 1 pays 8, then 16, then 24, and a Twin Array at rating 2 pays 32, then 48.</dd>
+        <dt>Limit</dt><dd>The resulting rating cannot exceed 4, so a weapon already at 4 is not offered it at all.</dd>
+        <dt>Notes</dt><dd>Only weapons that already have an intercept rating can be improved.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Gunsights</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 Fire Control against every target class the weapon can already shoot at, in every firing
+          mode. A weapon that cannot target a size class at all (a Piercing missile against fighters, for instance) does
+          not gain the ability.</dd>
+        <dt>Cost</dt><dd>25% of the weapon's maximum damage (rounded up, minimum 4) &times; the number of guns on the
+          mount.</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Weapons only. A handful of utility mounts that roll no meaningful attack - the Abbai Shield
+          Projector, Aegis Sensor Pod, Combat Transporter, Grappling Claw, Gravitic Shifter and Grome Targeting Array - are
+          excluded, as the refit would do nothing for them.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Repeater Gunsights</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>That Particle Repeater may split its shots between targets within a 1-hex radius, and between
+          different fighters in a flight.</dd>
+        <dt>Cost</dt><dd>12 per Particle Repeater</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Particle Repeaters only (the Drazi Freehold). A repeater that has taken any damage at all loses
+          its gunsights. Not the same refit as Gunsights, which a Particle Repeater may take as well.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Hardened Shields</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 rating on that shield emitter: both the damage it absorbs and the to-hit penalty it gives
+          improve.</dd>
+        <dt>Cost</dt><dd>10 &times; the emitter's rating &times; the number of 60-degree arcs it covers (an all-round
+          emitter counts as 6).</dd>
+        <dt>Limit</dt><dd>1 per emitter - but each emitter on the ship is bought separately.</dd>
+        <dt>Notes</dt><dd>EM Shields and Gravitic Shields only. The Abbai Shield Projector is a support weapon rather than a
+          shield, and cannot take it.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Hardened Armour</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 Armour on that system.</dd>
+        <dt>Cost</dt><dd>The system's total structure boxes &times; its current armour, halved and rounded up (armour
+          counts as at least 2 for this).</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Any system that already has armour, Structure blocks included.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card">
+      <h4>Improved Thrust Rating</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 thrust rating on that thruster for every level bought.</dd>
+        <dt>Cost</dt><dd>Twice the combined thrust rating of every thruster on the ship facing the same direction, then +2
+          for each further level.</dd>
+        <dt>Limit</dt><dd>Up to double the thruster's original rating.</dd>
+        <dt>Notes</dt><dd>Thrusters only. Priced from the ship as designed, so buying Elite Crew (for example) does not
+          change what a thruster refit costs.</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<section data-key="systemenhancementnotes" data-title="Points, Damage &amp; Saved Fleets" data-group="System Enhancements">
+  <ul>
+    <li>Refits are charged against your fleet budget like anything else. If a refit would take you over, the purchase is
+      refused and put back as it was.</li>
+    <li>Pre-battle damage and refits share the same menu, so it is quite possible to wreck something you have just paid to
+      improve. <b>Damage wins</b>: destroying a system removes its refits and refunds the points immediately, with a
+      message naming what went. Destroying a Structure block takes every system in that location with it. This is
+      one-way - unticking Destroy does not bring the refit back; you simply buy it again.</li>
+    <li>Editing a ship keeps its refits; changing the ship to a different class clears them and refunds the points.
+      Copying a ship copies its refits as well.</li>
+    <li>Refits are saved with a fleet list. When the fleet is loaded again, every refit is re-checked against the ship as
+      it is designed <i>now</i> and re-priced, since ships are revised from time to time. If a refit has become more
+      expensive, cheaper, or is no longer possible at all, you are told what changed rather than it happening
+      silently.</li>
+    <li>Finally, be aware that the &#10022; star and the "System Enhancements (n)" line are hidden from your opponent, but
+      several of the improved values themselves are not: shield ratings, armour and thrust all have to reach the other
+      player for their own damage and movement displays to be correct. A careful opponent comparing a ship against its
+      published control sheet can still work out that something has been refitted.</li>
+  </ul>
+</section>

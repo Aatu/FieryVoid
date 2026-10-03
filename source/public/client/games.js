@@ -104,6 +104,9 @@ window.gamedata = {
 				//ranked?" (user 2026-07-26). Your Games still takes the gold rail, where
 				//there is no green to preserve.
 				classes.push("is-lobby");
+				//a password-protected game (Stage 8): still green - it CAN be joined, with the
+				//password, which gamelobby.php asks for - but it says so before the click
+				if (game.private) tags += this.privateTagHtml();
 				if (game.ladder) tags += this.tagHtml("ladder", "Ladder");
 			}
 		} else {
@@ -139,6 +142,15 @@ window.gamedata = {
 
 	tagHtml: function tagHtml(kind, label) {
 		return '<span class="fv-tag fv-tag--' + kind + '">' + this.escapeHtml(label) + "</span>";
+	},
+
+	//"Private" with a padlock drawn in the tag's own colour (no icon font on this page)
+	privateTagHtml: function privateTagHtml() {
+		return '<span class="fv-tag fv-tag--private" title="Needs a password to join">' +
+			'<svg class="fv-tag-icon" viewBox="0 0 10 12" aria-hidden="true" focusable="false">' +
+			'<path d="M2.6 5.2V3.6a2.4 2.4 0 0 1 4.8 0v1.6" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
+			'<rect x="1" y="5.2" width="8" height="6.3" rx="1" fill="currentColor"/></svg>' +
+			"Private</span>";
 	},
 
 	//"42x30" reads better as "42×30"; "OPEN" passes through untouched

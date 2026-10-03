@@ -56,8 +56,10 @@ const Tooltip = styled.div`
     box-sizing: border-box;
     /*Fill and frame shared with the ship and mine editors - see ../system/menuControls. No
       element opacity beside the fill's alpha: the two compound, and it faded the text.*/
-    background-color: ${MENU_CHROME.bg};
+    background: ${MENU_CHROME.bg};
     border: 1px solid ${MENU_CHROME.line};
+    border-radius: ${MENU_CHROME.radius};
+    box-shadow: ${MENU_CHROME.shadow};
 `;
 
 /* Header is MenuHeader from ../system/menuControls now, $sticky because this body scrolls.
@@ -79,12 +81,13 @@ const Row = styled.div`
     display: flex;
     align-items: center;
     gap: 5px;
-    padding: 3px 6px;
+    padding: 3px 8px 3px 10px;
     font-size: 11px;
     color: ${MENU_CHROME.text};
 
+    /*the lobby panel-head blue, faint*/
     &:hover {
-        background-color: rgba(51, 65, 79, 0.45);
+        background-color: rgba(73, 103, 145, 0.22);
     }
 `;
 
@@ -103,16 +106,19 @@ const MaxText = styled.span`
 
 const ActionButton = styled.div`
     width: 24px;
-    height: 18px;
+    height: 20px;
     flex: 0 0 24px;
+    box-sizing: border-box;
     background: ${MENU_CHROME.btnBg};
     border: 1px solid ${MENU_CHROME.line};
+    border-radius: 2px;
     color: ${MENU_CHROME.btnText};
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 10px;
+    font-size: 12px;
+    line-height: 1;
     opacity: 0.9;
     user-select: none;
 
@@ -132,8 +138,9 @@ const ActionButton = styled.div`
 const ValueInput = styled.input`
     flex: 0 0 40px;
     width: 40px;
-    height: 18px;
+    height: 20px;
     box-sizing: border-box;
+    margin: 0;
     padding: 0;
     text-align: center;
     font-family: ${theme.fonts.mono};
@@ -141,22 +148,32 @@ const ValueInput = styled.input`
     color: #ffffff;
     background-color: ${MENU_CHROME.well};
     border: 1px solid ${MENU_CHROME.line};
+    border-radius: 2px;
     outline: none;
 
     &:focus { border-color: ${MENU_CHROME.focus}; }
 `;
 
+/* The lobby's button: Orbitron caps, 2px corners (.lb-btn). */
 const PropagateButton = styled.div`
-    margin: 4px 6px 6px 6px;
-    height: 20px;
+    margin: 5px 8px 8px 10px;
+    min-height: 24px;
+    padding: 3px 8px;
+    box-sizing: border-box;
     background: ${MENU_CHROME.btnBg};
     border: 1px solid ${MENU_CHROME.line};
+    border-radius: 2px;
     color: ${MENU_CHROME.btnText};
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 11px;
+    text-align: center;
+    font-family: ${theme.fonts.display};
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
     user-select: none;
 
     &:hover { background: ${MENU_CHROME.line}; color: #ffffff; }

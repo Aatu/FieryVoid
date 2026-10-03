@@ -5,7 +5,7 @@ class zzftrTIEInterceptor extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 36*6;
-        $this->faction = "ZStarWars";
+        $this->faction = "StarWars";
         $this->phpclass = "zzftrtieinterceptor";
         $this->shipClass = "TIE Interceptors";
         $this->imagePath = "img/starwars/tieInterceptor.png";

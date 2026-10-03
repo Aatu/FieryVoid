@@ -338,6 +338,7 @@ class TacGamedata {
         foreach ($this->ships as $ship){
             $fireOrders = $ship->getAllFireOrders();
             foreach($fireOrders as $fire){
+                if (Firing::isDeclarationOnly($fire)) continue; //a rack's Meteor Defence declaration launches nothing
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (($this->phase >= 2) && $weapon->ballistic && $fire->turn == $this->turn){
                     $movement = $ship->getLastTurnMovement($fire->turn);
@@ -1680,7 +1681,16 @@ class TacGamedata {
             for ($i = sizeof($system->fireOrders)-1; $i>=0; $i--){
                 $fire = $system->fireOrders[$i];
                 $weapon = $ship->getSystemById($fire->weaponid);
-                
+
+                /* METEOR_DEFENCE_PLAN.md §2.5 - a Meteor Defence declaration is exempt from BOTH
+                   strips below, which remove current-turn orders from every viewer, its owner
+                   included. The owner's client has to keep seeing it: in the Fire Phase (trap T2) so
+                   the committed weapon is not offered for fire, and in Initial Orders on a missile
+                   rack (trap T3), which is a ballistic weapon. The re-insert risk the Initial Orders
+                   strip guards against does not apply - DBManager::submitFireorders writes this type
+                   in phase 1 only, and a player commits phase 1 once. Its own rule, D3, follows. */
+                $isMeteorDefence = ($fire->type === 'meteorDefence');
+
                 /* ⚠️ 'jumpexit' IS EXEMPT (user report 2026-09-11). A LEGACY drive's exit declaration
                    (Shadows and every Ancient special jump drive, arriving through a phase-in doorway)
                    sits on an engine markLegacy() has set $ballistic = false on, so this Firing-phase
@@ -1691,7 +1701,8 @@ class TacGamedata {
                    type-'ballistic' order on an engine whose $ballistic is false, and the announcement
                    must stay on the map through the Firing phase it resolves at the end of. */
                 if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3 && !$weapon->preFires
-                    && $fire->damageclass !== 'jumpexit' && $fire->damageclass !== JumpEngine::ABDUCTION_CLASS){
+                    && $fire->damageclass !== 'jumpexit' && $fire->damageclass !== JumpEngine::ABDUCTION_CLASS
+                    && !$isMeteorDefence){
                     if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'){ //RammingAttack isn't PreFire, but we want THESE fireorders to be passed to Front End for Replay.
                         unset($system->fireOrders[$i]);
                     }    
@@ -1720,7 +1731,16 @@ class TacGamedata {
                 if ($fire->turn == $this->turn && $this->phase == 1
                     && ($weapon->ballistic || $fire->type == 'ballistic')
                     && $fire->damageclass != 'PersistentEffectPlasma'
-                    && $fire->damageclass !== AmmoMissileHM::REATTACK_CLASS){
+                    && $fire->damageclass !== AmmoMissileHM::REATTACK_CLASS
+                    && !$isMeteorDefence){
+                    unset($system->fireOrders[$i]);
+                }
+
+                /* METEOR_DEFENCE_PLAN.md D3 - WHICH weapons a unit has held back for meteors is hidden
+                   from non-allies until Pre-Firing has resolved the swarms; the combat log then says
+                   what defended. Phase 3 follows Pre-Firing, so from there it flows to everyone. */
+                if ($isMeteorDefence && $fire->turn == $this->turn && !$isAlly
+                    && ($this->phase == 1 || $this->phase == 2 || $this->phase == 5)){
                     unset($system->fireOrders[$i]);
                 }
 

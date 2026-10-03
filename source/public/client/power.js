@@ -1374,6 +1374,8 @@ shipManager.power = {
 
 			//Stage 20 - same rule as onOfflineClicked: a deactivated jump drive's abduction is cancelled.
 			if (typeof array[i].getAbductionOrder === 'function' && array[i].getAbductionOrder()) array[i].removeAbductionOrder();
+			//...and a weapon's Meteor Defence declaration is withdrawn.
+			if (array[i].weapon && weaponManager.hasMeteorDefence(ship, array[i])) weaponManager.removeMeteorDefence(ship, array[i]);
 
 			shipManager.power.stopOverloading(ship, array[i]);
 		}
@@ -1433,6 +1435,10 @@ shipManager.power = {
 		if (system instanceof JumpEngine && typeof system.getAbductionOrder === 'function' && system.getAbductionOrder()) {
 			system.removeAbductionOrder();
 		}
+
+		//Same rule, same reason, for a weapon declared against meteors (METEOR_DEFENCE_PLAN.md): an
+		//offline weapon cannot defend, and the server would drop the declaration anyway.
+		if (system.weapon && weaponManager.hasMeteorDefence(ship, system)) weaponManager.removeMeteorDefence(ship, system);
 
 		//Add new warning for when people ignore tooltip and try to deactivate Jump Drive before they should - DK 10/24
 		if (system instanceof JumpEngine) {

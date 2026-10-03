@@ -5,7 +5,7 @@ class TrekFederationConstitutionCL extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 500;
-	$this->faction = "ZStarTrek (TOS) Federation";
+	$this->faction = "StarTrek (TOS) Federation";
         $this->phpclass = "TrekFederationConstitutionCL";
         $this->imagePath = "img/ships/StarTrek/Constitution.png";
         $this->shipClass = "Constitution Light Cruiser";

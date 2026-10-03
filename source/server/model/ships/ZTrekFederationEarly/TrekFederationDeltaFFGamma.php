@@ -5,7 +5,7 @@ class TrekFederationDeltaFFGamma extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 220;
-        $this->faction = "ZStarTrek (early) Federation";
+        $this->faction = "StarTrek (early) Federation";
         $this->phpclass = "TrekFederationDeltaFFGamma";
         $this->imagePath = "img/ships/StarTrek/DeltaClass.png";
         $this->shipClass = "Delta Frigate Gamma";

@@ -9,8 +9,8 @@ class BrixadiiSurveyor2057 extends HeavyCombatVessel{
         $this->phpclass = "BrixadiiSurveyor2057";
         $this->imagePath = "img/ships/Nexus/brixadii_surveyor.png";
 			$this->canvasSize = 125; //img has 200px per side
-        $this->shipClass = "Surveyor (2057)";
-			$this->variantOf = "Surveyor";
+        $this->shipClass = "Taxilon Surveyor (2057)";
+			$this->variantOf = "Taxilon Surveyor";
 			$this->occurence = "common";
 			$this->limited = 10;
 			$this->unofficial = true;
