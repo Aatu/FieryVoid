@@ -1014,6 +1014,18 @@ class TacGamedata {
         $this->calculateTurndelays();
         if (!$all) {
             $this->deleteHiddenData();
+        } else if (!self::$currentGameFinished) {
+            /* MINE_DETECTION_PLAN.md Stage 0 - THE ONE MASK THE HISTORY PATH KEEPS. $all is the
+               replay of a past turn (Manager::getReplayGameData is its only caller), and skipping
+               deleteHiddenData there is right for fire orders and EW, which are public once their
+               turn has resolved. A mine's position never becomes public with age: every past-turn
+               load carries each mine's deploy row, so an unfound enemy mine was readable straight
+               out of any earlier turn's replay. Mines do not move, so masking them at every turn
+               is always correct, and the test is the live path's own (the viewer's team in the
+               mine's `detected` list, as loaded for that turn - a mine found or fired that turn
+               stays visible). Mines only: the same hole for stealth SHIPS needs its own ruling
+               (arch_info_bleed_masking). A finished or surrendered game discloses everything. */
+            $this->hideStealthShipMovement(true);
         }
         $this->markJumpedDockedFlights(); //after deleteHiddenData: it reads the MASKED movement (see the method)
         /* Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 3.4) - the "Scanned by Walkers"
@@ -1977,7 +1989,8 @@ class TacGamedata {
         }
     }
 
-    private function hideStealthShipMovement() {
+    //$minesOnly: the replay of a past turn masks mines and nothing else - see prepareForPlayer.
+    private function hideStealthShipMovement($minesOnly = false) {
         $playerTeam = $this->getPlayerTeam();
 
         foreach ($this->ships as $ship) {
@@ -1986,6 +1999,10 @@ class TacGamedata {
             }
 
             if (!$ship->trueStealth) {
+                continue;
+            }
+
+            if ($minesOnly && !$ship->mine) {
                 continue;
             }
 
