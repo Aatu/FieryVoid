@@ -172,7 +172,26 @@
   --fv-ok: #427231;                   /* theme.colors.healthOk                   */
   --fv-warn: #e1b000;                 /* theme.colors.warning                    */
   --fv-crit: #ed6738;                 /* theme.colors.healthCrit                 */
-  --fv-custom: #cccc00;  
+  --fv-custom: #cccc00;
+
+  /* ── The gold set, and the buy dialog's three metals ───────────────────────
+     --fv-enh-* are the CSS twins of theme.colors.enh* - "this was bought, it is not
+     standard equipment". The ship window paints with the theme.js half and the buy
+     dialog's Enhancements head with these, so an enhancement looks the same in both.
+     Retune a pair together (sync contract above). --fv-enh-bg is a FILL with its own
+     alpha: never put element opacity on top of it (the alpha-compounding trap).
+     --fv-gunmetal / --fv-bronze / --fv-verdigris are the section-head bars of Ammo &
+     Ordnance, Enhancements and Options (SHIP_ENHANCEMENTS_PLAN.md §5.1). Bronze is the
+     gold set's bar; verdigris is the patina bronze turns. All three keep clear of the
+     colours that already mean something on these pages (allegiance, warning, mine
+     purple, hyperspace cyan). No theme.js twins: nothing in React paints them. */
+  --fv-enh-text: #d8be86;             /* theme.colors.enhText                    */
+  --fv-enh-title: #e8cf93;            /* theme.colors.enhTitle                   */
+  --fv-enh-bg: rgba(169, 128, 56, 0.30); /* theme.colors.enhBg                  */
+  --fv-enh-line: #8a6d3b;             /* theme.colors.enhLine                    */
+  --fv-gunmetal: #8e9aa6;
+  --fv-bronze: #b08d57;
+  --fv-verdigris: #4fa79a;
 
   /* ── Allegiance ────────────────────────────────────────────────────────────
      Whose unit is this? Signals, not chrome — same category as Status above, and

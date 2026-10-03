@@ -36,7 +36,9 @@ const theme = {
            a second file copying the literals is exactly how two gold surfaces drift apart -
            see [[project_visual_unification]]. Any new gold surface reads these four.
            ⚠️ enhBg is a FILL with its own alpha, never element opacity: element opacity would
-           fade the text as well, and stacking the two compounds. */
+           fade the text as well, and stacking the two compounds.
+           SYNC CONTRACT: styles/tokens.css carries the CSS twins (--fv-enh-text / -title / -bg /
+           -line), which the buy dialog's Enhancements head paints with. Retune a pair together. */
         enhText: "#d8be86",                     //Enhancements list body text
         enhTitle: "#e8cf93",                    //Enhancements section-bar title - a shade brighter
         enhBg: "rgba(169, 128, 56, 0.30)",      //Enhancements section-bar fill

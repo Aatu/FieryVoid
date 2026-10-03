@@ -1730,6 +1730,35 @@
     border: 1px solid var(--fv-line-soft);
     border-radius: 2px;
     overflow: hidden;
+    /* Each section wears its own metal (SHIP_ENHANCEMENTS_PLAN.md §5.1, palette A): the bar, the
+       wash's hue as an "r, g, b" triplet (the head builds every alpha from it, so a fill never meets
+       element opacity), the title and the icon tint. Scoped properties, not a second :root block.
+       The default is today's blue, which the reserved Officers section keeps. */
+    --buy-sec-bar: #90b1ee;
+    --buy-sec-rgb: 144, 177, 238;
+    --buy-sec-title: var(--fv-text-bright);
+    --buy-sec-icon: var(--fv-text-bright);
+}
+
+.confirm.buyDialog .buySection[data-section="ammo"] {          /* gunmetal */
+    --buy-sec-bar: var(--fv-gunmetal);
+    --buy-sec-rgb: 142, 154, 166;
+    --buy-sec-title: #eef2f5;
+    --buy-sec-icon: #c9d2da;
+}
+
+.confirm.buyDialog .buySection[data-section="enhancements"] {  /* bronze - the ship window's gold set */
+    --buy-sec-bar: var(--fv-bronze);
+    --buy-sec-rgb: 169, 128, 56;                                /* --fv-enh-bg's hue */
+    --buy-sec-title: var(--fv-enh-title);
+    --buy-sec-icon: var(--fv-enh-title);
+}
+
+.confirm.buyDialog .buySection[data-section="options"] {       /* verdigris */
+    --buy-sec-bar: var(--fv-verdigris);
+    --buy-sec-rgb: 79, 167, 154;
+    --buy-sec-title: #dcf3ee;
+    --buy-sec-icon: #8fd3c7;
 }
 
 .confirm.buyDialog .buySectionHead {
@@ -1746,25 +1775,26 @@
     text-transform: uppercase;
     text-align: left;
     /* The Purchase panel's MAIN FLEET band (lobby.css .fleet-group-header, user 2026-09-26): bright
-       title, a #90b1ee wash fading off the text, a solid accent bar flush against the title - on the
-       LEFT here, since these titles are left-aligned (MAIN FLEET's sits right, beside its right-
-       aligned text). The wash is background-IMAGE so hover can change the colour layer under it. */
-    color: var(--fv-text-bright);
+       title, a wash fading off the text, a solid accent bar flush against the title - on the LEFT
+       here, since these titles are left-aligned (MAIN FLEET's sits right, beside its right-aligned
+       text). The wash is background-IMAGE so hover can change the colour layer under it. The hue is
+       the section's own (--buy-sec-*, above); the strengths are the ones the blue band had. */
+    color: var(--buy-sec-title);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
-    background-color: rgba(144, 177, 238, 0.12);
-    background-image: linear-gradient(to right, rgba(144, 177, 238, 0.22), rgba(144, 177, 238, 0) 70%);
+    background-color: rgba(var(--buy-sec-rgb), 0.12);
+    background-image: linear-gradient(to right, rgba(var(--buy-sec-rgb), 0.22), rgba(var(--buy-sec-rgb), 0) 70%);
     border: 0;
-    border-left: 3px solid #90b1ee;
+    border-left: 3px solid var(--buy-sec-bar);
     border-radius: 0;
     cursor: pointer;
 }
 
 .confirm.buyDialog .buySectionHead:hover {
-    background-color: rgba(144, 177, 238, 0.22);
+    background-color: rgba(var(--buy-sec-rgb), 0.22);
 }
 
 .confirm.buyDialog .buySectionHead[aria-expanded="true"] {
-    border-bottom: 1px solid rgba(144, 177, 238, 0.45);
+    border-bottom: 1px solid rgba(var(--buy-sec-rgb), 0.45);
     margin-bottom: 3px;
 }
 
@@ -1779,18 +1809,61 @@
     cursor: default;
 }
 
-.confirm.buyDialog .buySectionHead:disabled .buyDisclosure {
+.confirm.buyDialog .buySectionHead:disabled .buyDisclosure,
+.confirm.buyDialog .buySectionHead:disabled .buySectionIcon {
     opacity: 0.45;
 }
 
+/* The title no longer grows: the icon sits straight after it, and the badge's auto margin holds the
+   right edge (with or without an icon - Officers has none). */
 .confirm.buyDialog .buySectionTitle {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-width: 0;
     font-family: inherit;
 }
 
+/* The section's icon, tinted to its colour: a CSS MASK, so one white-on-transparent PNG (64 px,
+   §5.4) takes any colour. Only where masks work - without one the span would paint a solid
+   coloured square. Image names are capitalised and live is case-sensitive; url() resolves from
+   styles/, hence ../img/. */
+.confirm.buyDialog .buySectionIcon {
+    display: none;
+}
+
+@supports (mask-image: url("")) or (-webkit-mask-image: url("")) {
+    .confirm.buyDialog .buySectionIcon {
+        display: inline-block;
+        flex: none;
+        width: 18px;
+        height: 18px;
+        background-color: var(--buy-sec-icon);
+        -webkit-mask-position: center;
+        mask-position: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+    }
+
+    .confirm.buyDialog .buySection[data-section="ammo"] .buySectionIcon {
+        -webkit-mask-image: url("../img/Ordnance.png");
+        mask-image: url("../img/Ordnance.png");
+    }
+
+    .confirm.buyDialog .buySection[data-section="enhancements"] .buySectionIcon {
+        -webkit-mask-image: url("../img/Enhancements.png");
+        mask-image: url("../img/Enhancements.png");
+    }
+
+    .confirm.buyDialog .buySection[data-section="options"] .buySectionIcon {
+        -webkit-mask-image: url("../img/Options.png");
+        mask-image: url("../img/Options.png");
+    }
+}
+
 .confirm.buyDialog .buySectionBadge {
     flex: none;
+    margin-left: auto;
     font-family: var(--fv-mono);
     font-size: 10.5px;
     font-weight: 400;
@@ -2205,6 +2278,11 @@
 
     .confirm.buyDialog .buySectionHead {
         min-height: 40px;
+    }
+
+    .confirm.buyDialog .buySectionIcon {
+        width: 20px;
+        height: 20px;
     }
 
     .confirm.buyDialog .buyDialogClose {

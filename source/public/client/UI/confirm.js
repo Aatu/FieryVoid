@@ -810,11 +810,14 @@ window.confirm = {
     //Every section starts OPEN, however long (user, 2026-09-26 - plan §10.4's fold-past-8-rows default
     //was dropped): the player folds one away by hand if they want it out of the road.
     //`word` is what the filter box's placeholder calls the section: "Filter ammo, enhancements, options…".
+    //`icon`: the head shows an icon after its title. WHICH image is confirm.css's business - each
+    //section's .buySectionIcon is masked with img/Ordnance.png, Enhancements.png or Options.png and
+    //tinted to the section's colour (SHIP_ENHANCEMENTS_PLAN.md §5). Officers has none yet.
     BUY_SECTIONS: [
-        { key: 'ammo', title: 'Ammo &amp; Ordnance', word: 'ammo' },
-        { key: 'enhancements', title: 'Enhancements', word: 'enhancements' },
-        { key: 'options', title: 'Options', word: 'options' },
-        { key: 'officers', title: 'Officers', word: 'officers' }
+        { key: 'ammo', title: 'Ammo &amp; Ordnance', word: 'ammo', icon: true },
+        { key: 'enhancements', title: 'Enhancements', word: 'enhancements', icon: true },
+        { key: 'options', title: 'Options', word: 'options', icon: true },
+        { key: 'officers', title: 'Officers', word: 'officers', icon: false }
     ],
 
     //The filter box shows from this many rows (in all sections together). A mine's three to seven
@@ -879,6 +882,7 @@ window.confirm = {
                 + '<button type="button" class="buySectionHead" aria-expanded="true" aria-controls="buySection-' + section.key + '">'
                 + '<span class="buyDisclosure" aria-hidden="true"></span>'
                 + '<span class="buySectionTitle">' + section.title + '</span>'
+                + (section.icon ? '<span class="buySectionIcon" aria-hidden="true"></span>' : '')
                 + '<span class="buySectionBadge"></span>'
                 + '</button>'
                 + '<div class="buySectionBody" id="buySection-' + section.key + '"></div>'

@@ -134,6 +134,55 @@ window.lobbyEnhancements = {
 		}
 	},
 
+	/* "The strongest system of a kind" (SHIP_ENHANCEMENTS_PLAN.md §4.2 R1): highest `field`,
+	   strictly (>), so on a tie the FIRST in construction order keeps it, and a system has to beat
+	   `floor` (default -1) to be picked at all. null when nothing qualifies; callers keep their own
+	   guard. Ask at the moment of application, never cache the answer - an earlier row can move the
+	   field.
+	   ⚠️ MIRROR PAIR with Enhancements::strongestSystem (PHP). */
+	strongestOf: function strongestOf(systems, field, floor) {
+		var best = null;
+		var bestValue = (floor === undefined) ? -1 : floor;
+		for (let system of systems) {
+			if (system[field] > bestValue) {
+				bestValue = system[field];
+				best = system;
+			}
+		}
+		return best;
+	},
+
+	/* Elite and Poor Crew's stat block, written once (§4.2 R2). `step` is +levels for Elite Crew and
+	   -levels for Poor Crew; `critMod` is the one asymmetry (Elite -1 per level, Poor +2 per level).
+	   ⚠️ MIRROR PAIR with Enhancements::applyCrewStats (PHP) - same lines, same numbers. Before
+	   R6/R7 the lobby had drifted on three of them: Elite's critical modifier (-2 per level here,
+	   -1 on the server), Poor's reactor (-1 here, -2 on the server) and Poor's thrusters (left
+	   alone here, -1 on the server). */
+	applyCrewStats: function applyCrewStats(ship, step, critMod) {
+		ship.forwardDefense -= step;
+		ship.sideDefense -= step;
+		ship.iniativebonus += step * 5;
+		ship.critRollMod += critMod;
+		ship.toHitBonus += step;
+
+		var scanner = this.strongestOf(shipManager.systems.getScannerList(ship), "output");
+		if (scanner && scanner.output > 0) scanner.output += step;
+
+		var engine = this.strongestOf(ship.systems.filter(function (s) { return s.name == "engine"; }), "output");
+		if (engine && engine.output > 0) {
+			engine.output += step * 2;
+			engine.data["Own thrust"] += step * 2;
+		}
+
+		//the biggest reactor rather than the strongest - any malus would be on the main reactor as well
+		var reactor = this.strongestOf(ship.systems.filter(function (s) { return s.name == "reactor"; }), "maxhealth", -1000);
+		if (reactor) reactor.output += step * 2;
+
+		for (let system of ship.systems) {
+			if (system.name == "thruster") system.output += step;
+		}
+	},
+
 	setEnhancementsShip: function setEnhancementsShip(ship) {
 
 		// Ammo magazine is necessary for some options
@@ -144,10 +193,22 @@ window.lobbyEnhancements = {
 				break;
 			}
 		}
-		var totalRounds = 0; //Counter to check and update total round used in magazine (where it matters).	
+		var totalRounds = 0; //Counter to check and update total round used in magazine (where it matters).
 		var totalRoundsInt = 0;
+		var crewJumpElite = 0; //crew levels for the jump-delay post-pass after the loop (§4.2 R3)
+		var crewJumpPoor = 0;
 
-		for (let entry of ship.enhancementOptions) {
+		/* Rows in the GAME's order - enhid ascending, the order a game loads tac_enhancements in -
+		   not the blueprint's display order (options first, then ID descending). Two rows that both
+		   pick "the strongest" system, with Poor Crew between them, otherwise picked DIFFERENT
+		   systems here and in game: Tratharti with Elite x2 + Poor x2 showed engines 2 / 8 in the
+		   lobby and 6 / 4 in game. Found by tests/replay/enhancementsDifferential.js (§4.2 R7).
+		   A copy, so the buy dialog's rows still render in enhancementOptions order. */
+		var rows = ship.enhancementOptions.slice().sort(function (a, b) {
+			return a[0] < b[0] ? -1 : (a[0] > b[0] ? 1 : 0);
+		});
+
+		for (let entry of rows) {
 			// ID, readableName, numberTaken, limit, price, priceStep
 			let enhID = entry[0];
 			let enhCount = entry[2];
@@ -197,68 +258,9 @@ window.lobbyEnhancements = {
 
 					case 'ELITE_CREW':
 						if (!ship.eliteEnh) {
-							ship.forwardDefense -= enhCount;
-							ship.sideDefense -= enhCount;
-							ship.iniativebonus += enhCount * 5;
-							ship.critRollMod -= enhCount * 2;
-							ship.toHitBonus += enhCount;
-
-							// System mods: Scanner
-							let strongestEScan = null;
-							let strongestEScanValue = -1;
-							for (let system of shipManager.systems.getScannerList(ship)) {
-								if (system.output > strongestEScanValue) {
-									strongestEScanValue = system.output;
-									strongestEScan = system;
-								}
-							}
-							if (strongestEScanValue > 0) {
-								strongestEScan.output += enhCount;
-							}
-
-							// System mods: Engine
-							let strongestEEngine = null;
-							let strongestEEngVal = -1;
-							for (let system of ship.systems) {
-								if (system.name == "engine") {
-									if (system.output > strongestEEngVal) {
-										strongestEEngVal = system.output;
-										strongestEEngine = system;
-									}
-								}
-							}
-							if (strongestEEngVal > 0) {
-								strongestEEngine.output += enhCount * 2;
-								strongestEEngine.data["Own thrust"] += enhCount * 2;
-							}
-
-							// System mods: Reactor
-							let strongestEReact = null;
-							let strongestEReactVal = -1000;
-							for (let system of ship.systems) {
-								if (system.name == "reactor") {
-									if (system.maxhealth > strongestEReactVal) {
-										strongestEReactVal = system.maxhealth;
-										strongestEReact = system;
-									}
-								}
-							}
-							if (strongestEReact != null) {
-								strongestEReact.output += enhCount * 2;
-							}
-
-							// Modify thruster ratings as well
-							for (let system of ship.systems) {
-								if (system.name == "thruster") {
-									system.output += enhCount;
-								}
-							}
-
-							// Jump delay -20% per level, rounding halves up (mirror of
-							// JumpEngine::applyCrewJumpDelayModifier). Compounding, like the
-							// server's loop - 0.8 twice is 0.64, not 0.6.
-							this.applyCrewJumpDelay(ship, enhCount);
-							//ship.notes += "<br>Elite Crew (" + enhCount + ")";
+							this.applyCrewStats(ship, enhCount, -enhCount);
+							// Jump delay -20% per level: the post-pass after this loop (§4.2 R3)
+							crewJumpElite += enhCount;
 						}
 						ship.eliteEnh = true;
 						break;
@@ -354,17 +356,8 @@ window.lobbyEnhancements = {
 
 					case 'IMPR_ENG':
 						if (!ship.engEnh) {
-							let strongestEng = null;
-							let strongestEngVal = -1;
-							for (let system of ship.systems) {
-								if (system.name == "engine") {
-									if (system.output > strongestEngVal) {
-										strongestEngVal = system.output;
-										strongestEng = system;
-									}
-								}
-							}
-							if (strongestEngVal > 0) {
+							let strongestEng = this.strongestOf(ship.systems.filter(function (s) { return s.name == "engine"; }), "output");
+							if (strongestEng && strongestEng.output > 0) {
 								strongestEng.output += enhCount;
 								strongestEng.data["Own thrust"] += enhCount;
 							}
@@ -386,17 +379,8 @@ window.lobbyEnhancements = {
 
 					case 'IMPR_REA':
 						if (!ship.reaEnh) {
-							let strongestReact = null;
-							let strongestReactValue = -1;
-							for (let system of ship.systems) {
-								if (system.name == "reactor") {
-									if (system.maxhealth > strongestReactValue) {
-										strongestReactValue = system.maxhealth;
-										strongestReact = system;
-									}
-								}
-							}
-							if (strongestReactValue > 0) {
+							let strongestReact = this.strongestOf(ship.systems.filter(function (s) { return s.name == "reactor"; }), "maxhealth");
+							if (strongestReact && strongestReact.maxhealth > 0) {
 								let addedPower = 0;
 								if (ship.Enormous === true) {
 									addedPower = 4;
@@ -411,15 +395,8 @@ window.lobbyEnhancements = {
 
 					case 'IMPR_SENS':
 						if (!ship.sensEnh) {
-							let strongestScan = null;
-							let strongestScanValue = -1;
-							for (let system of shipManager.systems.getScannerList(ship)) {
-								if (system.output > strongestScanValue) {
-									strongestScanValue = system.output;
-									strongestScan = system;
-								}
-							}
-							if (strongestScanValue > 0) {
+							let strongestScan = this.strongestOf(shipManager.systems.getScannerList(ship), "output");
+							if (strongestScan && strongestScan.output > 0) {
 								strongestScan.output += enhCount;
 							}
 						}
@@ -590,59 +567,9 @@ window.lobbyEnhancements = {
 
 					case 'POOR_CREW':
 						if (!ship.poorEnh) {
-							ship.forwardDefense += enhCount;
-							ship.sideDefense += enhCount;
-							ship.iniativebonus -= enhCount * 5;
-							ship.critRollMod += enhCount * 2;
-							ship.toHitBonus -= enhCount;
-
-							// System mods: Scanner
-							let strongestPScan = null;
-							let strongestPScanValue = -1;
-							for (let system of shipManager.systems.getScannerList(ship)) {
-								if (system.output > strongestPScanValue) {
-									strongestPScanValue = system.output;
-									strongestPScan = system;
-								}
-							}
-							if (strongestPScanValue > 0) {
-								strongestPScan.output -= enhCount;
-							}
-
-							// System mods: Engine
-							let strongestPEng = null;
-							let strongestPEngValue = -1;
-							for (let system of ship.systems) {
-								if (system.name == "engine") {
-									if (system.output > strongestPEngValue) {
-										strongestPEngValue = system.output;
-										strongestPEng = system;
-									}
-								}
-							}
-							if (strongestPEngValue > 0) {
-								strongestPEng.output -= enhCount * 2;
-								strongestPEng.data["Own thrust"] -= enhCount * 2;
-							}
-
-							// System mods: Reactor
-							let strongestPReact = null;
-							let strongestPReactValue = -1000;
-							for (let system of ship.systems) {
-								if (system.name == "reactor") {
-									if (system.maxhealth > strongestPReactValue) {
-										strongestPReactValue = system.maxhealth;
-										strongestPReact = system;
-									}
-								}
-							}
-							if (strongestPReact != null) {
-								strongestPReact.output -= enhCount;
-							}
-
-							// Jump delay +20% per level (mirror of
-							// JumpEngine::applyCrewJumpDelayModifier).
-							this.applyCrewJumpDelay(ship, -enhCount);
+							this.applyCrewStats(ship, -enhCount, enhCount * 2);
+							// Jump delay +20% per level: the post-pass after this loop (§4.2 R3)
+							crewJumpPoor += enhCount;
 
 							// Hangar launch/dock rate halved per level. A hangar's output is the
 							// shared launch+land budget per turn; its CAPACITY in boxes is
@@ -1179,6 +1106,13 @@ window.lobbyEnhancements = {
 			}//end of enhCount > 0 check
 
 		}//end of loop through enhancements.
+
+		/* THE JUMP-DELAY POST-PASS (§4.2 R3): Elite levels, then Poor levels, after every row, in the
+		   one written-down order. Every rule that scales the jump delay rounds it, so the order
+		   changes the answer. ⚠️ MIRROR PAIR with the post-pass at the end of
+		   Enhancements::setEnhancementsShip (PHP). */
+		this.applyCrewJumpDelay(ship, crewJumpElite);
+		this.applyCrewJumpDelay(ship, -crewJumpPoor);
 
 		// Insert update to Total Rounds here.
 		if (ammoMagazine != null) {
