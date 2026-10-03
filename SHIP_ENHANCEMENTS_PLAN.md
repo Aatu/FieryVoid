@@ -3,8 +3,8 @@
 Three new ship-level enhancements, a review of the enhancement code for efficiency, and distinct, iconed
 section headers in the buy, edit and copy dialogs.
 
-Status: **Stages 0-2 BUILT 2026-10-03, uncommitted** (§6.1 has the as-built notes and what Stage 1's
-differential test found). Stages 3-7 not started. D1-D20 ruled 2026-10-03 (§1). D21 (Elite Crew's price
+Status: **Stages 0-2 BUILT 2026-10-03, Stage 3 (Advanced Engine Module) BUILT 2026-10-04 - all
+uncommitted** (§6.1 has the as-built notes and what the tests found). Stages 4-7 not started. D1-D20 ruled 2026-10-03 (§1). D21 (Elite Crew's price
 and Poor Crew's documented numbers) is still open; Stage 1 built its default, "the code is right".
 
 ## Where it stands
@@ -111,6 +111,8 @@ set disables it):
   `(int)boostEfficiency > 1`. Measured from the static files over the 1,832 standard-set hulls with an
   Engine, by the strongest engine's efficiency: 878 at 3, 470 at 2, 340 at 4, 63 at 5, 25 at 6 or more,
   56 at 1 (not offered). No hull has its strongest engine at 1 and another above it.
+- **Not offered on a hull with Unreliable Engines** - any Engine with the `EngineFlux` special ability
+  (`markEngineFlux`). User ruling 2026-10-04; seven hulls today (§6.1).
 - `array('ADV_ENG', 'Advanced Engine Module', 0, 1, ceil($ship->pointCost * 0.1), 0, false)`.
 - Add `'ADV_ENG'` to the ship branch of `blockStandardEnhancements` (Enhancements.php:58). Its comment
   says "ADD ANY NEW STANDARD ENHANCEMENTS HERE!" for a reason: without the line, every blocked set
@@ -653,7 +655,7 @@ Coating is last because it is the only one touching hit chances on both ends. St
 three enhancements, so the docs never describe something players cannot buy yet. Stage 7 is optional
 and can be dropped without touching anything else.
 
-### 6.1 As built - Stages 0-2 (2026-10-03, uncommitted)
+### 6.1 As built - Stages 0-3 (2026-10-03/04, uncommitted)
 
 **Stage 0 - baseline and harness.**
 - `fvbuild.ps1 -Check` on the clean tree (HEAD `f2c3d0ab8`): autoload current, validator 0 new errors,
@@ -720,6 +722,51 @@ The other Stage 2 details:
   copy and bulk dialogs, at 1920 and at a true 390 px. Colours, bars and washes measured as §5.1. Icons
   are 18 px, or 20 px with `(pointer: coarse)`. Title, icon and badge sit on one line, with the badge
   flush right.
+- `img/Options.png` was redrawn by the user after Stage 2 (three bars). On 10-04 it was resized to
+  64 px (328 bytes) the same way as the others. In `C:\FV_env\art\buy-section-icons\`, `Options.png`
+  is now the new 512 px original and `Options-v1.png` the first design.
+
+**Stage 3 - Advanced Engine Module (2026-10-04).** As §2.1. Gates: harness 144/144, with 33 new
+module tests; the fingerprint change was additions only (0 lines removed; 11 offer lines and 36 new
+case blocks) and was then re-recorded at 10,979 lines; R7 231 cases, 0 differing, now including each
+engine's `boostEfficiency` and the lobby's `data["Efficiency"]`; replay byte-identical to Stage 0;
+validator 0 new errors.
+- Server: `Engine` gained protected `$advEngWatched` / `$advEngLostNote`, `markAdvEngWatched()`,
+  `hasLostAdvEng($turn)`, a phase-4 `generateIndividualNotes` and an `onIndividualNotesLoaded` reading
+  `AdvEngLost`. In Enhancements: the offer, the block-list line, the pick before the loop, the `case`
+  (with its own tooltip line), and the payload case. The Hyach Thruster Specialist is floored at 1
+  (D4).
+- Client: the lobby case plus its pick before the loop and its marker. In `HyachSpecialists`,
+  `doUse` floors at 1 and remembers what it took (`hyachThrusterCut`), and `doDecrease` gives back
+  exactly that. An allocation the page did not make keeps the old +1, because `canDecrease` also
+  accepts the server's `specAllocatedCount`.
+- **Offer, measured on the 89 freshly generated static files: 1,662 hulls.** 1,715 hulls get Improved
+  Engine. The 53 of those without the module all have their strongest engine at Efficiency 1, the
+  intended exclusion.
+- **Unreliable Engines are excluded (user ruling 2026-10-04).** The first build offered the module to
+  seven hulls whose ship files disable `IMPR_ENG` by hand: `talvanUpgrade`, `CircasianDolinar` (+P),
+  `gaimSkassa`, `GromeTrokanMargusAM`, `AttackFrigate` (Brakiri raiders) and `Jia`. Those seven are
+  exactly the hulls that call `Engine::markEngineFlux()`. So the offer now refuses any hull with an
+  Engine carrying the `EngineFlux` special ability: a rule, not seven ship-file lines, so a future flux
+  hull is excluded too. The harness checks all seven, and no hull now gets the module without Improved
+  Engine. §2.1.1's 1,776 / 56 were counted partly from 11 **orphaned static files** (renamed
+  factions: `ZStarTrek (TOS) Federation.json`, an empty-named `.json`, the "Escalation Warss" typos,
+  `StarTrek (Kelly).json`, ...). The generator no longer writes them and the lobby never asks for them,
+  but they still sit in `static/json` with old offers.
+- Judgement calls, all in code comments:
+  - `forInfo` criticals (Walker scan markers, EDF exposure counters, boarding markers) do not end the
+    module: the codebase defines them as display labels, "not a real crit".
+  - A TRANSIENT pre-battle critical (stamped turn 1, "turn 1 only") cannot be told from a real turn-1
+    critical, since a critical carries no phase. It ends the module from turn 2. A lasting pre-battle
+    critical (turn 0) ends it from turn 1, as D2 says.
+  - `MindriderEngine` overrides both note hooks without calling the parent. That is harmless: Mindriders
+    are on a blocked set and can never buy the module.
+- Since Stage 1 the lobby walks rows ascending, and `ADV_ENG` sorts before every row that moves an
+  output, so the pick before the loop now matters only for server paths that build rows in another
+  order. It is kept as planned because it costs nothing.
+- Still for local play (§7): buy it on an Efficiency-3 hull, check that a boost costs 2 power per
+  thrust, give an engine a critical, and check the next turn shows 3 again and `tac_individual_notes`
+  holds `AdvEngLost`.
 
 ## 7. Testing
 

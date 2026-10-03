@@ -208,6 +208,17 @@ window.lobbyEnhancements = {
 			return a[0] < b[0] ? -1 : (a[0] > b[0] ? 1 : 0);
 		});
 
+		/* Advanced Engine Module: its Engine is picked HERE, before any row has moved an output.
+		   ⚠️ MIRROR PAIR with the same pick in Enhancements::setEnhancementsShip (PHP) - same engine,
+		   same moment (SHIP_ENHANCEMENTS_PLAN.md §2.1.2). */
+		var advEngTarget = null;
+		for (let entry of rows) {
+			if (entry[0] === 'ADV_ENG' && entry[2] > 0) {
+				advEngTarget = this.strongestOf(ship.systems.filter(function (s) { return s.name == "engine"; }), "output");
+				break;
+			}
+		}
+
 		for (let entry of rows) {
 			// ID, readableName, numberTaken, limit, price, priceStep
 			let enhID = entry[0];
@@ -239,6 +250,20 @@ window.lobbyEnhancements = {
 					   reaches 0 the normal field has caught the boosted one up and double power
 					   buys nothing further, which is exactly what the rule describes. Harmless on
 					   a fixed field, whose bonus is never read. */
+					/* Advanced Engine Module: the picked engine boosts one Efficiency step cheaper, never
+					   below 1. The lobby has no "lost" state - an engine given a pre-battle critical still
+					   shows the module here (plan D2, not warned about - rare).
+					   ⚠️ MIRROR PAIR with Enhancements::setEnhancementsShip's ADV_ENG case (PHP). */
+					case 'ADV_ENG':
+						if (!ship.advEngEnh) {
+							if (advEngTarget && advEngTarget.boostable) {
+								advEngTarget.boostEfficiency = Math.max(1, (parseInt(advEngTarget.boostEfficiency, 10) || 0) - 1);
+								if (advEngTarget.data) advEngTarget.data["Efficiency"] = advEngTarget.boostEfficiency;
+							}
+						}
+						ship.advEngEnh = true;
+						break;
+
 					case 'EDF_RANGE':
 						if (!ship.edfRangeEnh) {
 							for (let system of ship.systems) {
@@ -1529,6 +1554,9 @@ window.lobbyEnhancements = {
 			let enhID = entry[0];
 			//We're just finding the relevant enh and reseting update marker, as during Edit process all systems stats will be reset to defaults.
 			switch (enhID) {
+				case 'ADV_ENG':
+					ship.advEngEnh = false;
+					break;
 				case 'EDF_RANGE':
 					ship.edfRangeEnh = false;
 					break;

@@ -62,6 +62,7 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'IMPR_THR'; 
 		$unit->enhancementOptionsDisabled[] = 'POOR_TRAIN'; 
 	  }else{ //enhancements for ships
+		$unit->enhancementOptionsDisabled[] = 'ADV_ENG';
 		$unit->enhancementOptionsDisabled[] = 'ELITE_CREW';
 		$unit->enhancementOptionsDisabled[] = 'HANG_F';
 		$unit->enhancementOptionsDisabled[] = 'HANG_AS';
@@ -514,6 +515,28 @@ class Enhancements{
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		}
 		    
+	  /* Advanced Engine Module (SHIP_ENHANCEMENTS_PLAN.md §2.1): the strongest Engine boosts one
+	     Efficiency step cheaper, never below 1; lost for good the first time ANY Engine takes a
+	     critical. Cost: 10% of the ship, limit 1. Offered only where the strongest Engine - Improved
+	     Engine's test - is boostable above Efficiency 1, i.e. where the module would do something.
+	     NOT offered on a hull with Unreliable Engines - any Engine marked with Engine Flux
+	     (Engine::markEngineFlux, which rolls an engine critical every turn). User ruling 2026-10-04;
+	     today that is exactly the seven hulls whose ship files also disable IMPR_ENG by hand. */
+	  $enhID = 'ADV_ENG';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+		  $unreliableEngines = false;
+		  foreach ($ship->systems as $system){
+			  if ($system instanceof Engine && in_array('EngineFlux', $system->specialAbilities, true)){
+				  $unreliableEngines = true;
+				  break;
+			  }
+		  }
+		  $engine = self::strongestSystem($ship, 'Engine', 'output');
+		  if(!$unreliableEngines && $engine !== null && $engine->boostable && (int)$engine->boostEfficiency > 1){
+			  $ship->enhancementOptions[] = array($enhID, 'Advanced Engine Module', 0, 1, ceil($ship->pointCost * 0.1), 0, false);
+		  }
+	  }
+
 	  //Improved Engine: +1 Thrust, cost: 12+4/turn cost, round up, limit: up to +50%
 	  $enhID = 'IMPR_ENG';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
@@ -2360,6 +2383,19 @@ class Enhancements{
 		$crewJumpElite = 0;
 		$crewJumpPoor = 0;
 
+		/* Advanced Engine Module: the Engine it improves is picked HERE, before any row has moved an
+		   output - the engine the offer looked at (§2.1.2). A deliberate exception to "ask at the
+		   moment of application": Poor Crew takes thrust off the same strongest engine, so on a hull
+		   with two equal engines the answer would depend on row order, and only game load pins that.
+		   ⚠️ MIRROR PAIR with the same pick in lobbyEnhancements.setEnhancementsShip (JS). */
+		$advEngTarget = null;
+		foreach($ship->enhancementOptions as $entry){
+			if($entry[0] === 'ADV_ENG' && $entry[2] > 0){
+				$advEngTarget = self::strongestSystem($ship, 'Engine', 'output');
+				break;
+			}
+		}
+
 	   	foreach($ship->enhancementOptions as $entry){
 			//ID,readableName,numberTaken,limit,price,priceStep
 			$enhID = $entry[0];
@@ -2369,8 +2405,8 @@ class Enhancements{
 				//CHAM_DISG is choice-valued, so enhDescription is a phpclass, not prose, and the count
 				//is an index - the generic line would read "kendariUpgraded (x7)". SHAD_TEND's count is
 				//a capacity in fives, so the generic line would read "(x2)" where the player bought a
-				//10-capacity tendril. Both write their own line below.
-				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'CHAM_DISG' && $enhID !== 'SHAD_TEND'){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
+				//10-capacity tendril. Both write their own line below. ADV_ENG says whether it is lost.
+				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'CHAM_DISG' && $enhID !== 'SHAD_TEND' && $enhID !== 'ADV_ENG'){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
 				if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
 				//if($enhID == 'DEPLOY'){ //Special type of Enhancement, clarify what it means.
 				//	$ship->enhancementTooltip .= "Ship deploys on Turn $enhCount";
@@ -2381,6 +2417,25 @@ class Enhancements{
 				}
 
 			        switch ($enhID) {
+
+					case 'ADV_ENG': //Advanced Engine Module: strongest Engine -1 Efficiency (min 1), until ANY Engine takes a critical (SHIP_ENHANCEMENTS_PLAN.md §2.1)
+						/* Limit 1, and the server trusts the client's count, so a count above 1 means
+						   nothing more: the effect is on or off. Every Engine is WATCHED, because a
+						   critical on any of them ends the module (Engine::generateIndividualNotes
+						   writes the permanent note); only the picked one is improved. */
+						$advEngLost = false;
+						foreach ($ship->systems as $system){
+							if ($system instanceof Engine){
+								$system->markAdvEngWatched();
+								if ($system->hasLostAdvEng(TacGamedata::$currentTurn)) $advEngLost = true;
+							}
+						}
+						if (!$advEngLost && $advEngTarget !== null && $advEngTarget->boostable){
+							$advEngTarget->boostEfficiency = max(1, (int)$advEngTarget->boostEfficiency - 1);
+						}
+						if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
+						$ship->enhancementTooltip .= $advEngLost ? "Advanced Engine Module (lost)" : "Advanced Engine Module";
+						break;
 
 					case 'DEPLOY':
 						//Amend value of turn that ship deploys on.
@@ -3171,8 +3226,18 @@ class Enhancements{
 				$enhID = $entry[0];
 				$enhCount = $entry[2];
 				$enhDescription = $entry[1];
-				if($enhCount > 0) {					
-					switch ($enhID) {	
+				if($enhCount > 0) {
+					switch ($enhID) {
+						case 'ADV_ENG': //Advanced Engine Module - the improved Engine's boost Efficiency
+							/* The static blueprint holds the unimproved value and ShipSystem::stripForJson
+							   never sends boostEfficiency, so without this the client prices boosts at the
+							   old rate (power.countBoostPowerUsed) and shows the old "Efficiency". Sent for
+							   EVERY Engine and in both states (improved, or lost and back to the blueprint
+							   value), so this case needs no knowledge of which engine was picked. */
+							if ($system instanceof Engine){
+								$strippedSystem->boostEfficiency = $system->boostEfficiency;
+							}
+							break;
 						case 'EDF_RANGE': //Extended Draining Field - moves an EDF's radius and its boost bonus
 							/* Both numbers are already published UNCONDITIONALLY by
 							   EnergyDrainingField::stripForJson, because the client builds a

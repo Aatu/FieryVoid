@@ -1555,16 +1555,82 @@ class Engine extends ShipSystem implements SpecialAbility {
     
     function __construct($armour, $maxhealth, $powerReq, $output, $boostEfficiency, $thrustused = 0 ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
-        
+
         $this->thrustused = (int)$thrustused;
         $this->boostEfficiency = (int)$boostEfficiency;
     }
-	
+
     public function setSystemDataWindow($turn){
-		parent::setSystemDataWindow($turn);   
+		parent::setSystemDataWindow($turn);
 		$this->data["Own thrust"] = $this->output;
     }
-	
+
+    /* ⭐ ADVANCED ENGINE MODULE (SHIP_ENHANCEMENTS_PLAN.md §2.1). The strongest Engine boosts one
+       Efficiency step cheaper, until ANY Engine on the hull takes a critical - then it is gone for
+       good, even if the critical is later repaired.
+       "For good" needs a note: a repaired critical drops out of the very next load
+       (DBManager::getCriticalsForShips keeps only turnend = 0 OR turnend >= turn), so the loaded
+       critical list cannot answer "has this engine EVER had one".
+         $advEngWatched  every Engine of a hull that bought the module. Set only by
+                         Enhancements::setEnhancementsShip, so a ship rebuilt from a POST - which
+                         never has enhancements applied - can never write the note.
+         $advEngLostNote an AdvEngLost note was loaded for this Engine.
+       Both PROTECTED: a public default would be written into every static blueprint. */
+    protected $advEngWatched = false;
+    protected $advEngLostNote = false;
+
+    public function markAdvEngWatched(){
+        $this->advEngWatched = true;
+    }
+
+    /* Has this Engine lost the module, as of the turn being loaded? Either the note says so, or it
+       carries a critical from an EARLIER turn (D3: a critical at the end of turn N ends the module
+       from N+1 - the turn-N load is the one that resolved turn N, with the module working).
+       forInfo criticals are display markers (Walker scans, EDF exposure counters, boarding status),
+       not hits, so they do not count; every real critical does, one-turn ones included (D2). */
+    public function hasLostAdvEng($turn){
+        if ($this->advEngLostNote) return true;
+        foreach ($this->criticals as $crit){
+            if (!$crit->forInfo && (int)$crit->turn < (int)$turn) return true;
+        }
+        return false;
+    }
+
+    /* Write AdvEngLost the first time a watched Engine carries a real critical.
+       ⚠️ PHASE 4 ONLY. Phase 4 exists only inside FireGamePhase::advance, which reloads the game
+       server-side and runs Criticals::setCriticals before this sweep - so this turn's criticals are
+       already in $this->criticals, and the note is written before a self-repair could take the
+       critical away again (the Chameleon suite's 'firing' checkpoint makes the same argument).
+       process() also calls this, on POST-side ships, in other phases; $advEngWatched is false there
+       anyway. */
+    public function generateIndividualNotes($gamedata, $dbManager){
+        parent::generateIndividualNotes($gamedata, $dbManager);
+
+        if ((int)$gamedata->phase !== 4) return;
+        if (!$this->advEngWatched || $this->advEngLostNote) return;
+        $hit = false;
+        foreach ($this->criticals as $crit){
+            if (!$crit->forInfo){ $hit = true; break; }
+        }
+        if (!$hit) return;
+        $ship = $this->getUnit();
+        if ($ship === null) return;
+
+        //notekey_human is varchar(40) - an overlong label aborts the whole submission
+        $this->individualNotes[] = new IndividualNote(-1, TacGamedata::$currentGameID, $gamedata->turn, $gamedata->phase,
+            $ship->id, $this->id, 'AdvEngLost', 'Advanced Engine Module lost', $gamedata->turn);
+        $this->advEngLostNote = true;
+    }
+
+    /* Notes load with turn <= the turn being viewed, so a replay of an earlier turn shows the module
+       as it was then. */
+    public function onIndividualNotesLoaded($gamedata){
+        foreach ($this->individualNotes as $note){
+            if ($note->notekey == 'AdvEngLost') $this->advEngLostNote = true;
+        }
+        parent::onIndividualNotesLoaded($gamedata); //clears the note list
+    }
+
 
     /* WALKERS OF SIGMA-957 - Energy Draining Field thrust drain (WALKERS_OF_SIGMA_PLAN.md 2.2).
        One EdfThrustDrain critical carries a whole roll in its param, so it is SUMMED, never
@@ -12604,8 +12670,10 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 						            $strongestSystem = $system;
 
 						            if ($strongestValue > 0) { // Engine actually exists to be enhanced!
-						                $strongestSystem->boostEfficiency -= 1;
-						            }	
+						                //never below 1 - with an Advanced Engine Module as well, an Efficiency-2
+						                //engine would otherwise boost for free (SHIP_ENHANCEMENTS_PLAN.md D4)
+						                $strongestSystem->boostEfficiency = max(1, $strongestSystem->boostEfficiency - 1);
+						            }
 								} 		
 							}
 						}

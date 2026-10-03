@@ -3382,7 +3382,12 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 				var system = ship.systems[i];
 
 				if (system instanceof Engine) {
-					system.boostEfficiency -= 1;
+					//Never below 1, as on the server (SHIP_ENHANCEMENTS_PLAN.md D4) - an Advanced Engine
+					//Module may already have taken one step off. What was actually taken is remembered,
+					//so doDecrease gives back exactly that and an engine already at 1 is not raised to 2.
+					var cut = (system.boostEfficiency > 1) ? 1 : 0;
+					system.boostEfficiency -= cut;
+					system.hyachThrusterCut = cut;
 				}
 				if (system instanceof Thruster) {
 					system.output += 50; //Increase by nominal amount, 50 allows for any amount of thrust
@@ -3532,7 +3537,10 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 				var system = ship.systems[i];
 
 				if (system instanceof Engine) {
-					system.boostEfficiency += 1;
+					//exactly what doUse took off; an allocation this page did not make (canDecrease also
+					//accepts a server-side specAllocatedCount) keeps the old +1
+					system.boostEfficiency += (system.hyachThrusterCut === undefined) ? 1 : system.hyachThrusterCut;
+					system.hyachThrusterCut = undefined;
 				}
 				if (system instanceof Thruster) {
 					system.output -= 50; //Increase by nominal amount, 50 allows for any amount of thrust
