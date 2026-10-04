@@ -53,6 +53,13 @@ class TacGamedata {
       DBManager::getSystemDataForShips clears it immediately before the note sweep that sets it
       (plan trap 1 - one request loads gamedata twice).*/
     public static $abductionPresent = false;
+    /*Stealth Coating gate (SHIP_ENHANCEMENTS_PLAN.md §2.2.4) - true once any ship's STEALTH_CT row
+      has resolved to a coverage this request (Enhancements::setEnhancementsShip). Read by
+      Weapon::calculateHitBase, so every ordinary game pays one false static read per shot.
+      ⚠️ NEVER RESET within a request, deliberately: FireGamePhase::advance builds gamedata twice, and a
+      reset in the wrong place would silently switch the coating off, whereas a stale true only costs
+      one method call per shot (BaseShip::getProfileCoatingReduction answers 0 for an uncoated ship).*/
+    public static $profileCoatingPresent = false;
     /*D15, second half: a FINISHED game drops every deception so the post-mortem shows what actually
       happened. Set from $this->status, read by applyChameleonDisguise() and maskChameleonArming().
       Deliberately NOT implemented by forcing the two gates above to false: maskChameleonFireOrders()

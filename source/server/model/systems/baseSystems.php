@@ -6078,6 +6078,16 @@ class JumpEngine extends Weapon{
      * its closing turn is no longer certain. Only the phase-in doorway is still one-shot. */
     protected $vortexIsPhaseIn = false;
 
+    /* ⭐ THE JUMP ACCELERATOR ENHANCEMENT (JUMP_ACC, SHIP_ENHANCEMENTS_PLAN.md §2.3) is fitted to this
+     * drive. Set by applyJumpAccelerator() from Enhancements::setEnhancementsShip, so it is true only on
+     * a real load of a ship that bought it - never on a POST-side ship or a static blueprint.
+     * What it changes: range +2 and powerReq x2 (applyJumpAccelerator), the jump delay x0.67
+     * (applyJumpAcceleratorDelay, from the post-pass) and the failure chance x2 on the turn the drive
+     * OPENS a jump point (getOpeningFailureMultiplier).
+     * Protected like $ancientJump: json_encode takes public properties only, so no blueprint key. The
+     * payload carries `jumpAccelerated` only when true (Enhancements::addSystemEnhancementsForJSON). */
+    protected $jumpAccelerated = false;
+
     //§5 R3 - "boost N => N+1 turns of charging, capped at 4 turns in any one turn".
     const CHARGE_BOOST_MAX = 3;
     //The note key, both columns - well inside notekey_human's varchar(40).
@@ -7275,6 +7285,77 @@ class JumpEngine extends Weapon{
         $this->delay       = $delay;
         $this->loadingtime = $delay;
         $this->turnsloaded = $delay;
+    }
+
+    /* ⭐ JUMP ACCELERATOR (JUMP_ACC, SHIP_ENHANCEMENTS_PLAN.md §2.3) - CAN THIS DRIVE TAKE ONE?
+     * Only a drive that OPENS jump points (D15): not legacy (the one-click Hyperdrive / FTL / Phasing
+     * Drive, which form no jump point, and every Ancient and Walker drive - markAncient() and
+     * markWalker() both call markLegacy()), not a fixed gate, and not the Trek Nacelle, whose 4th
+     * constructor argument is no jump delay at all. A public predicate because $hasJumpRecharge is
+     * protected. The offer adds the hull-level test (factionAge < 3) for the Vorlons' ordinary drives. */
+    public function canTakeJumpAccelerator()
+    {
+        return !$this->legacyJump && !$this->gateJump && $this->hasJumpRecharge;
+    }
+
+    public function isJumpAccelerated()
+    {
+        return $this->jumpAccelerated;
+    }
+
+    /* ⭐ FIT THE JUMP ACCELERATOR: range +2, power draw doubled. Returns the drive's ORIGINAL draw P, from
+     * which the caller works out the reactor's loss (user ruling 2026-10-04, §2.3.3: a deficit of P ON
+     * TOP OF the doubled draw, so the drive switched on costs 2P more than before on every hull). 0 when
+     * refused or already fitted, so a second row can never double the draw twice.
+     * The jump delay is NOT moved here - see applyJumpAcceleratorDelay, which runs in the post-pass.
+     * ⚠️ The +2 also lengthens the HOLD distance: getVortexClosureReason closes a jump point whose holder
+     * is more than $range hexes away, the same field (§2.3.5 - built as-is).
+     * ⚠️ MIRROR PAIR with the JUMP_ACC case in lobbyEnhancements.setEnhancementsShip (JS). */
+    public function applyJumpAccelerator()
+    {
+        if ($this->jumpAccelerated || !$this->canTakeJumpAccelerator()) return 0;
+        $this->jumpAccelerated = true;
+
+        $this->range += 2;
+        $draw = (int)$this->powerReq;
+        $this->powerReq = $draw * 2;
+        return $draw;
+    }
+
+    /* THE JUMP ACCELERATOR'S DELAY RULE, "-33%": x 0.67 with fractions of 0.5 or more rounding up (D13),
+     * in whole numbers so no float can round differently on the two ends. Floored at 1. Below 50 it is
+     * the same as x 2/3; at 50 it gives 34, at 65 44.
+     * ⚠️ MIRROR PAIR with lobbyEnhancements.acceleratedJumpDelay (JS) - same expression. */
+    public static function getAcceleratedJumpDelay($delay)
+    {
+        return max(1, intdiv((int)$delay * 67 + 50, 100));
+    }
+
+    /* The Jump Accelerator's delay, applied in Enhancements::setEnhancementsShip's post-pass AFTER the
+     * Elite and Poor Crew levels (D14: crew first, then the accelerator), and written exactly as
+     * applyCrewJumpDelayModifier writes it - $delay is the durable field, the other two are set to match.
+     * Skipped when $delay <= 0 (one hull passes 0; markLegacy and markGate never reach here). */
+    public function applyJumpAcceleratorDelay()
+    {
+        if (!$this->jumpAccelerated) return;
+
+        $delay = (int)$this->delay;
+        if ($delay <= 0) return;
+
+        $delay = self::getAcceleratedJumpDelay($delay);
+        $this->delay       = $delay;
+        $this->loadingtime = $delay;
+        $this->turnsloaded = $delay;
+    }
+
+    /* The Jump Accelerator doubles the chance of a damaged drive destroying its ship on the turn the drive
+     * OPENS a jump point - and only then (D17: a Maintain turn rolls the normal chance). Asked by
+     * openVortex (the quoted chance) and rollVortexJumpFailure (opening turn only), which cap the result
+     * at 100 after the Ancient halving and before the Walker zeroing. Not asked by doHyperspaceJump (the
+     * legacy boost path), rollAbductionJumpFailure or the gate rolls - none of those drives can take one. */
+    protected function getOpeningFailureMultiplier()
+    {
+        return $this->jumpAccelerated ? 2 : 1;
     }
 
     /* ================= STAGE 3 - THE VORTEX UNIT ==================================
@@ -9189,6 +9270,8 @@ class JumpEngine extends Weapon{
 		$missingHealthPercentage = round(($healthDiff / $this->maxhealth) * 100);
 		//Ancients have half the normal chance of Jump Engine failure. 
 		if($ship->factionAge >= 3) $missingHealthPercentage = round($missingHealthPercentage / 2);		
+		//Jump Accelerator: doubled on the opening turn, which this always is (SHIP_ENHANCEMENTS_PLAN.md §2.3.4)
+		$missingHealthPercentage = min(100, $missingHealthPercentage * $this->getOpeningFailureMultiplier());
 
         //WALKERS §3.17 rule 3 (plan trap 33) - the log line must quote the 0% a Walker drive
         //actually carries, or it contradicts rollVortexJumpFailure's outcome.
@@ -10395,6 +10478,10 @@ class JumpEngine extends Weapon{
 		$missingHealthPercentage = round(($healthDiff / $this->maxhealth) * 100);
 		//Ancieents have half the normal chance of Jump Engine failure. 
 		if($ship->factionAge >= 3) $missingHealthPercentage = round($missingHealthPercentage / 2);
+		//Jump Accelerator: doubled on the turn the jump point is OPENED, never on a Maintain turn (D17)
+		if ((int)$this->vortexOpenTurn === $turn){
+			$missingHealthPercentage = min(100, $missingHealthPercentage * $this->getOpeningFailureMultiplier());
+		}
 
 		/* WALKERS §3.17 rule 3 - no chance of destruction while a Walker drive is in use. ZEROED
 		   rather than returned early: the d100 below is then still drawn exactly when it always was
@@ -10547,6 +10634,13 @@ class JumpEngine extends Weapon{
         $this->data["Special"] .= $this->getAdvancedChargingText();
         $this->data["Special"] .= "<br>See FAQ for full rules for Jump Drives.";
         $this->data["Special"] .= "<br>SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
+        /* Jump Accelerator (SHIP_ENHANCEMENTS_PLAN.md §2.3.5). Range and power are already the enhanced
+           figures above and in the rows below; this states the two rules that show nowhere else.
+           LAST, so the lobby can append the same sentence. ⚠️ MIRROR PAIR with
+           lobbyEnhancements.JUMP_ACC_TEXT (JS) - same words. */
+        if ($this->jumpAccelerated){
+            $this->data["Special"] .= "<br>Jump Accelerator: jump delay reduced by 33%, range +2, power draw doubled, and the reactor loses power equal to the normal draw. On the turn it OPENS a jump point the chance of failure is doubled (max 100%).";
+        }
 		/* ShipSystem, not parent. Weapon::setSystemDataWindow appends a gun's tooltip block -
 		   Damage, Fire control, Resolution Priority - which would be meaningless (and mostly zero)
 		   on a jump engine. Same idiom LCVRail uses two classes up. Plan Stage 6 rewrites this

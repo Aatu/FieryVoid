@@ -61,6 +61,7 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'IMPR_OB'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_THR'; 
 		$unit->enhancementOptionsDisabled[] = 'POOR_TRAIN'; 
+		$unit->enhancementOptionsDisabled[] = 'STEALTH_CT'; //fighters and shuttles may buy it too (user, 2026-10-04)
 	  }else{ //enhancements for ships
 		$unit->enhancementOptionsDisabled[] = 'ADV_ENG';
 		$unit->enhancementOptionsDisabled[] = 'ELITE_CREW';
@@ -72,9 +73,11 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_REA'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_SENS'; 
+		$unit->enhancementOptionsDisabled[] = 'JUMP_ACC';
 		$unit->enhancementOptionsDisabled[] = 'MAR_CONT'; 			
 		$unit->enhancementOptionsDisabled[] = 'POOR_CREW'; 
 		$unit->enhancementOptionsDisabled[] = 'SLUGGISH'; 
+		$unit->enhancementOptionsDisabled[] = 'STEALTH_CT';
 		$unit->enhancementOptionsDisabled[] = 'VULN_CRIT'; 	
 	  }
   }
@@ -152,6 +155,8 @@ class Enhancements{
 		case 'Shuttles':
 			Enhancements::blockStandardEnhancements($unit);
 				$unit->enhancementOptionsEnabled[] = 'MAKE_MINE';			
+				//Stealth Coating: "This improvement can be added to fighters or shuttles" (user, 2026-10-04)
+				$unit->enhancementOptionsDisabled = array_values(array_diff($unit->enhancementOptionsDisabled, array('STEALTH_CT')));
 			break;		
 
 		case 'SystemFighter':
@@ -705,6 +710,23 @@ class Enhancements{
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//this is NOT an enhancement - rather an OPTION
 	  }  	
 
+	  /* Jump Accelerator (SHIP_ENHANCEMENTS_PLAN.md §2.3): jump delay -33% (x0.67, halves up), jump point
+	     range +2, the drive's power draw doubled, and double the failure chance on the turn it OPENS a
+	     jump point. Cost: 10% of the ship, limit 1. Only for a drive that opens jump points
+	     (JumpEngine::canTakeJumpAccelerator: not legacy - so not Ancient either - not a gate, not the Trek
+	     Nacelle), and not on a factionAge 3+ hull: the Vorlons' and The System's ordinary drives, which
+	     only their blocked sets keep out today (D15). Engines through getUnitJumpEngines, never a bare
+	     sweep of $ship->systems. */
+	  $enhID = 'JUMP_ACC';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled) && $ship->factionAge < 3){ //option is not disabled
+		  foreach (JumpEngine::getUnitJumpEngines($ship) as $jumpEngine){
+			  if ($jumpEngine->canTakeJumpAccelerator()){
+				  $ship->enhancementOptions[] = array($enhID, 'Jump Accelerator', 0, 1, ceil($ship->pointCost * 0.1), 0, false);
+				  break;
+			  }
+		  }
+	  }
+
 	  //Markab-specific - Enables 'Religious Fervor' refit to selected vessel which comes with some bonus and some penalties.
 	  $enhID = 'MARK_FERV';	  
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
@@ -957,6 +979,28 @@ class Enhancements{
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
 	  
+
+	  /* Stealth Coating (SHIP_ENHANCEMENTS_PLAN.md §2.2): -1 defence profile (5%) against a shot from a
+	     weapon that uses OEW, fired by a unit holding OEW >= 1 on this ship after disruption EW, arriving
+	     on a covered facing. A CHOICE, like CHAM_DISG: index 7 is the coverage list, numberTaken an index
+	     into it, and index 8 (new) the price of each choice. Absent index 8 means free, which is what
+	     keeps the Chameleon disguise exactly as it was.
+	     PRICE (user ruling 2026-10-04, the rules' own formula - D8's "1000" was only an example): the
+	     ship's cost / the average of its forward and side profiles, x 100% / 75% / 25% by coverage (D7),
+	     rounded up at the end - see profileCoatingPrices.
+	     ELIGIBLE (D11): every ship-path unit except bases, terrain and factionAge 3+. Terrain, mines and
+	     the Ancient sets block standard enhancements; the factionAge test guards future hulls. OSATs and
+	     Middleborn hulls can buy it. Fighters and shuttles have their own offer (setEnhancementOptionsFighter).
+	     Not gated on $offerChoiceLists: that gate exists for the Chameleon's ship enumeration, and this
+	     list is a literal. */
+	  $enhID = 'STEALTH_CT';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled) && !$ship->base && !$ship->mine && $ship->factionAge < 3){ //option is not disabled
+		  $prices = self::profileCoatingPrices($ship->pointCost, $ship->forwardDefense, $ship->sideDefense);
+		  if($prices !== null){
+			  $choices = self::profileCoatingChoices();
+			  $ship->enhancementOptions[] = array($enhID, 'Stealth Coating', 0, count($choices) - 1, $prices[1], 0, false, $choices, $prices);
+		  }
+	  }
 
 	//Vorlon Amethyst Skin (for ship). +1 Adaptive Armor point, AA maximum and available for pre-assignment increased as well for every even total.
 	//cost: ramming value (let's simplify to total structure) x number of point / 5; max. +50%
@@ -1786,6 +1830,22 @@ class Enhancements{
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
 	  
+	  /* Stealth Coating for fighters and shuttles (user ruling 2026-10-04, replacing D11's "fighters no"):
+	     "This improvement can be added to fighters or shuttles, using the same cost schedule". Priced PER
+	     CRAFT off one craft's cost, like every other fighter enhancement: a flight's pointCost is for six
+	     craft, a superheavy's is its own. Same choice list and the same effect as on a ship - the shooter
+	     needs OEW or CCEW >= 1 on the flight (CCEW counts against flights; BaseShip::getOEW).
+	     Standard: blocked on the Ancient, mine and Walker fighter sets; the Shuttles set gives it back. */
+	  $enhID = 'STEALTH_CT';
+	  if(!in_array($enhID, $flight->enhancementOptionsDisabled) && !$flight->mine && $flight->factionAge < 3){ //not the flight-shaped custom mines (MineClass), user 2026-10-04
+		  $craftCost = ($flight instanceof SuperHeavyFighter) ? $flight->pointCost : $flight->pointCost / 6;
+		  $prices = self::profileCoatingPrices($craftCost, $flight->forwardDefense, $flight->sideDefense);
+		  if($prices !== null){
+			  $choices = self::profileCoatingChoices();
+			  $flight->enhancementOptions[] = array($enhID, 'Stealth Coating', 0, count($choices) - 1, $prices[1], 0, false, $choices, $prices);
+		  }
+	  }
+
 	  //Shadow fighter deployed without carrier control: -2 OB, -3(15) Ini, cost: 0, limit: 1
 	  $enhID = 'SHAD_CTRL';
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
@@ -2090,7 +2150,66 @@ class Enhancements{
 			$index = (int)$enhancementEntry[2];
 			return isset($choices[$index][0]) ? $choices[$index][0] : '';
 		}
+		if($enhancementEntry[0] === 'STEALTH_CT'){ //the coverage KEY, from the server's own list (§2.2.3)
+			$choices = self::profileCoatingChoices();
+			$index = (int)$enhancementEntry[2];
+			return isset($choices[$index][0]) ? $choices[$index][0] : '';
+		}
 		return $enhancementEntry[1];
+	}
+
+	/* Stealth Coating's coverage choices, [key, label], index 0 = None. The ONE list the offer, the
+	   stored-name resolver and the tooltip all read (§2.2.1); its order is the numberTaken index.
+	   Keys are words, so JSON_NUMERIC_CHECK leaves them alone. */
+	public static function profileCoatingChoices(){
+		return array(array('', 'None'), array('all', 'All Sides'), array('fs', 'Front & Sides'), array('front', 'Front Only'));
+	}
+
+	/* Stealth Coating's price for each coverage choice, [None, All, Front & Sides, Front Only], or null
+	   when there is no profile to divide by. The rules (user, 2026-10-04): "the ship's price divided by
+	   the average of the forward/aft and starboard/port defense ratings (round fractions up after the
+	   calculations are finished, but retain them when averaging). For example, a ship with a cost of 1000
+	   and a defense rating average of 16.5 would pay 61 points ... a fighter with a cost of 42 and
+	   average defense rating of 6 would pay 7 points for the stealth coat per fighter in flight". Then
+	   x 100% / 75% / 25% by coverage (D7), still rounded up only at the end.
+	   $unitCost is ONE unit's cost: the ship's, or a single craft's for a fighter or shuttle flight.
+	   ⭐ IN WHOLE NUMBERS: cost in hundredths x pct / (profile sum in halves x 2500), rounded up by integer
+	   division - so an exact answer is never pushed up a point by a float (1000/15 x 0.75 is
+	   50.000000000000007 in floats).
+	   ⚠️ The lobby never recomputes it: the buy dialog reads the list from the offer tuple (index 8). */
+	public static function profileCoatingPrices($unitCost, $forwardDefense, $sideDefense){
+		$sumHalves = (int)round(($forwardDefense + $sideDefense) * 2);
+		if($sumHalves <= 0) return null;
+		$cents = max(0, (int)round($unitCost * 100));
+		$prices = array(0);
+		foreach(array(100, 75, 25) as $pct){
+			$den = $sumHalves * 2500;
+			$prices[] = intdiv($cents * $pct + $den - 1, $den);
+		}
+		return $prices;
+	}
+
+	/* A STEALTH_CT row resolved to its coverage key, or null for None / anything unresolvable - the
+	   resolveChameleonDisguise shape. In game the row is [id, enhname, numbertaken, 0,0,0], so the
+	   stored KEY is at index 1; in the lobby path index 1 is the label and the index is what counts.
+	   Name first, index second, and anything else is None: an unknown key never becomes a coating. */
+	private static function resolveProfileCoating($entry){
+		$choices = self::profileCoatingChoices();
+		$byName = isset($entry[1]) ? (string)$entry[1] : '';
+		foreach($choices as $choice){
+			if($choice[0] !== '' && $choice[0] === $byName) return $byName;
+		}
+		$index = (int)$entry[2];
+		if($index > 0 && isset($choices[$index][0])) return $choices[$index][0];
+		return null; //None
+	}
+
+	//The human label for a coverage key ('fs' -> 'Front & Sides').
+	public static function getProfileCoatingLabel($coverage){
+		foreach(self::profileCoatingChoices() as $choice){
+			if($choice[0] === $coverage) return $choice[1];
+		}
+		return '';
 	}
 
 	/*Resolve a stored CHAM_DISG entry to a phpclass, or null for "None" / anything unresolvable.
@@ -2136,7 +2255,7 @@ class Enhancements{
 			$enhCount = $entry[2];
 			$enhDescription = $entry[1];
 			if($enhCount > 0) {
-				if(!self::isAmmoEnhancement($enhID)){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
+				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'STEALTH_CT'){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
 				if($flight->enhancementTooltip != "") $flight->enhancementTooltip .= "<br>";
 				//if($enhID == 'DEPLOY' && $enhCount > 1){ //Special type of Enhancement, clarify what it means.
 				//	$flight->enhancementTooltip .= "Flight deploys on Turn $enhCount";
@@ -2222,6 +2341,15 @@ class Enhancements{
 						$flight->iniativebonus -= $enhCount*5;
 						$flight->forwardDefense += $enhCount;
 						$flight->sideDefense += $enhCount;
+						break;
+					case 'STEALTH_CT': //Stealth Coating on a fighter or shuttle flight - recorded exactly as on a ship
+						$coverage = self::resolveProfileCoating($entry);
+						if($coverage !== null && !$flight->mine && $flight->factionAge < 3){
+							$flight->setProfileCoating($coverage);
+							TacGamedata::$profileCoatingPresent = true;
+							if($flight->enhancementTooltip != "") $flight->enhancementTooltip .= "<br>";
+							$flight->enhancementTooltip .= "Stealth Coating: " . self::getProfileCoatingLabel($coverage);
+						}
 						break;
 					case 'SHAD_CTRL': //Shadow fighter deployed without carrier control: -2 OB, -3(15) Ini
 						$flight->offensivebonus -= $enhCount*2;
@@ -2379,9 +2507,11 @@ class Enhancements{
 			}
 		}
 
-		//crew levels for the jump-delay post-pass after the loop (§4.2 R3)
+		//crew levels for the jump-delay post-pass after the loop (§4.2 R3), and whether a Jump
+		//Accelerator was fitted (§2.3.2) - so a ship without one never sweeps its engines for it
 		$crewJumpElite = 0;
 		$crewJumpPoor = 0;
+		$jumpAccelerated = false;
 
 		/* Advanced Engine Module: the Engine it improves is picked HERE, before any row has moved an
 		   output - the engine the offer looked at (§2.1.2). A deliberate exception to "ask at the
@@ -2405,8 +2535,9 @@ class Enhancements{
 				//CHAM_DISG is choice-valued, so enhDescription is a phpclass, not prose, and the count
 				//is an index - the generic line would read "kendariUpgraded (x7)". SHAD_TEND's count is
 				//a capacity in fives, so the generic line would read "(x2)" where the player bought a
-				//10-capacity tendril. Both write their own line below. ADV_ENG says whether it is lost.
-				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'CHAM_DISG' && $enhID !== 'SHAD_TEND' && $enhID !== 'ADV_ENG'){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
+				//10-capacity tendril. Both write their own line below. ADV_ENG says whether it is lost;
+				//STEALTH_CT's count is a coverage index, so it names the coverage instead.
+				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'CHAM_DISG' && $enhID !== 'SHAD_TEND' && $enhID !== 'ADV_ENG' && $enhID !== 'STEALTH_CT'){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
 				if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
 				//if($enhID == 'DEPLOY'){ //Special type of Enhancement, clarify what it means.
 				//	$ship->enhancementTooltip .= "Ship deploys on Turn $enhCount";
@@ -2719,6 +2850,26 @@ class Enhancements{
 						}  	
 						break;			
 
+					case 'JUMP_ACC': //Jump Accelerator: range +2, power draw x2 and the reactor -P (SHIP_ENHANCEMENTS_PLAN.md §2.3)
+						/* Limit 1, and the server trusts the client's count, so a count above 1 means nothing
+						   more: applyJumpAccelerator refuses a second call and a drive that cannot take one.
+						   The factionAge test is the offer's, repeated so a row the offer would never make
+						   changes nothing. The jump DELAY is the post-pass's, after the crew levels (D14).
+						   REACTOR (D16 as re-ruled 2026-10-04, §2.3.3): a power deficit of P, the drive's
+						   normal draw, ON TOP OF the doubled draw - drive on costs 2P more on every hull. An
+						   ordinary reactor's output already nets the drive's draw out, so the extra draw has to
+						   come off it as well: -2P. A fixed-power (Mag-Grav) reactor subtracts every draw
+						   itself, so its doubled powerReq already charges the extra P: -P.
+						   ⚠️ MIRROR PAIR with lobbyEnhancements.setEnhancementsShip's JUMP_ACC case (JS). */
+						if ($ship->factionAge >= 3) break;
+						$reactor = $ship->getSystemByName("Reactor");
+						foreach (JumpEngine::getUnitJumpEngines($ship) as $jumpEngine){
+							$draw = $jumpEngine->applyJumpAccelerator();
+							if ($jumpEngine->isJumpAccelerated()) $jumpAccelerated = true;
+							if ($draw > 0 && $reactor !== null) $reactor->output -= $reactor->fixedPower ? $draw : 2 * $draw;
+						}
+						break;
+
 					case 'MARK_FERV': //Markab Religious Fervor: +1 to hit all weapons, +10 Initiative, +2 Defence Profiles
 							$ship->toHitBonus += $enhCount;
 							$ship->iniativebonus += $enhCount*10;
@@ -2852,6 +3003,20 @@ class Enhancements{
 						}  
 						break;
 						
+					case 'STEALTH_CT': //Stealth Coating: the facings it covers (SHIP_ENHANCEMENTS_PLAN.md §2.2)
+						/* Only RECORDS the coverage - the effect is conditional, so it is applied per shot
+						   (Weapon::calculateHitBase -> BaseShip::getProfileCoatingReduction). The offer's
+						   eligibility is repeated so a row the offer would never make changes nothing, and an
+						   unknown key resolves to None. The static gate is never reset (see its declaration). */
+						$coverage = self::resolveProfileCoating($entry);
+						if($coverage !== null && !$ship->base && !$ship->mine && $ship->factionAge < 3){
+							$ship->setProfileCoating($coverage);
+							TacGamedata::$profileCoatingPresent = true;
+							if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
+							$ship->enhancementTooltip .= "Stealth Coating: " . self::getProfileCoatingLabel($coverage);
+						}
+						break;
+
 					case 'SLUGGISH': //Sluggish: -1(5) Initiative
 						//fixed values
 						$ship->iniativebonus -= $enhCount*5;
@@ -3019,11 +3184,15 @@ class Enhancements{
 		   scales the jump delay rounds it, so the ORDER they apply in changes the answer, and the
 		   game (rows enhid ascending) and the lobby (ID descending) used to apply them in opposite
 		   orders. So they are applied here, after every row, in one written-down order: Elite
-		   levels, then Poor levels. Elite before Poor is the order a game already used, so no
+		   levels, then Poor levels, then the Jump Accelerator (D14 - a 20-turn delay with one level
+		   of Elite Crew is 16, then 11). Elite before Poor is the order a game already used, so no
 		   recorded game moves.
 		   ⚠️ MIRROR PAIR with the post-pass in lobbyEnhancements.setEnhancementsShip (JS). */
 		self::applyCrewJumpDelay($ship, $crewJumpElite);
 		self::applyCrewJumpDelay($ship, -$crewJumpPoor);
+		if ($jumpAccelerated){
+			foreach (JumpEngine::getUnitJumpEngines($ship) as $jumpEngine) $jumpEngine->applyJumpAcceleratorDelay();
+		}
 	   }//endof function setEnhancementsShip
 	   	  
 		  
@@ -3107,6 +3276,13 @@ class Enhancements{
 							}
 							break;
 							
+						case 'STEALTH_CT': //Stealth Coating: the covered facings, for the shooter's own hit-chance preview
+							if($ship->getProfileCoating() !== null){
+								$strippedShip->profileCoating = $ship->getProfileCoating();
+								$strippedShip->profileCoatingMod = BaseShip::PROFILE_COATING_MOD;
+							}
+							break;
+
 						case 'SHAD_CTRL': //Uncontrolled Shadow fighter: modify Initiative and OB
 							if($ship instanceof FighterFlight){
 								$strippedShip->offensivebonus = $ship->offensivebonus;
@@ -3179,6 +3355,16 @@ class Enhancements{
 							$strippedShip->crewTurnDelayMod = $ship->getCrewTurnDelayModifier();
 							break;							
 						
+						case 'STEALTH_CT': //Stealth Coating: the covered facings, for the shooter's own hit-chance preview
+							/* Public, like Elite Crew's profiles: weaponManager.calculateHitChange needs it to
+							   preview a shot at this ship (BaseShip::stripForJson states the rule). A disguised
+							   ship's payload is built from its simulacrum's sheet and never carries it. */
+							if($ship->getProfileCoating() !== null){
+								$strippedShip->profileCoating = $ship->getProfileCoating();
+								$strippedShip->profileCoatingMod = BaseShip::PROFILE_COATING_MOD;
+							}
+							break;
+
 						case 'SLUGGISH': //Sluggish: Initiative  modified
 							$strippedShip->iniativebonus = $ship->iniativebonus;
 							break;
@@ -3307,6 +3493,23 @@ class Enhancements{
 								$strippedSystem->armour = $system->armour ;
 							}
 							break;							
+
+						case 'JUMP_ACC': //Jump Accelerator - the drive's range, draw, flag and tooltip text (§2.3.5)
+							/* range: the server's declaration check reads the live engine, the client's
+							   targetHex / reach overlay / Maintain test read weapon.range - neither changes
+							   unless it is sent. powerReq: getReactorPower counts the doubled draw (the
+							   reactor's lowered output is always sent). data: rebuilt per load from the enhanced
+							   values, but it never reaches the client unless sent, and this replaces the static
+							   dict wholesale - safe, the same method builds both (arch_system_info_tooltip_data_flow).
+							   The jump delay needs nothing here: JumpEngine::stripForJson sends loadingtime from
+							   $delay. Only on the accelerated drive, so every other system is untouched. */
+							if ($system instanceof JumpEngine && $system->isJumpAccelerated()){
+								$strippedSystem->range = $system->range;
+								$strippedSystem->powerReq = $system->powerReq;
+								$strippedSystem->jumpAccelerated = true;
+								$strippedSystem->data = $system->data;
+							}
+							break;
 					
 						case 'MINE_ARM':
 							if ($system instanceof Structure) { //Improved Armour for Mines.

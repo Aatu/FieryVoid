@@ -3,8 +3,11 @@
 Three new ship-level enhancements, a review of the enhancement code for efficiency, and distinct, iconed
 section headers in the buy, edit and copy dialogs.
 
-Status: **Stages 0-2 BUILT 2026-10-03, Stage 3 (Advanced Engine Module) BUILT 2026-10-04 - all
-uncommitted** (§6.1 has the as-built notes and what the tests found). Stages 4-7 not started. D1-D20 ruled 2026-10-03 (§1). D21 (Elite Crew's price
+Status: **Stages 0-3 BUILT and committed** (0-2 on 2026-10-03, 3 = Advanced Engine Module on
+2026-10-04). **Stages 4-6 BUILT 2026-10-04, uncommitted**: 4 = Jump Accelerator (its power rule re-ruled
+the same day - D16), 5 = Stealth Coating, 6 = the player docs plus three lobby tasks the user added
+(faction columns, alphabetical buy rows, Grome shells by size). §6.1 has the as-built notes and what the
+tests found. Stage 7 (optional) not started. D1-D20 ruled 2026-10-03 (§1). D21 (Elite Crew's price
 and Poor Crew's documented numbers) is still open; Stage 1 built its default, "the code is right".
 
 ## Where it stands
@@ -40,7 +43,7 @@ and Poor Crew's documented numbers) is still open; Stage 1 built its default, "t
     ends one by setting `turnend` to the previous turn - so a repaired critical is gone from the very
     next load. "Has the engine ever had a critical?" cannot be read from the loaded list. The loss needs
     a one-time note (§2.1.3).
-- **The Jump Accelerator's reactor deficit applies to ordinary reactors and is skipped on Mag-Grav
+- **SUPERSEDED 2026-10-04 (D16 re-ruled - see the D16 row and §2.3.3).** The Jump Accelerator's reactor deficit applies to ordinary reactors and is skipped on Mag-Grav
   (fixed-power) reactors** (D16, ruled). An ordinary reactor already covers the drive's normal draw out
   of its output, which is why the extra draw has to show up as a deficit. A fixed-power reactor covers
   nothing for free: it already subtracts every powered system's draw, so the doubled draw is enough by
@@ -79,16 +82,16 @@ otherwise.
 | D5 | How many profile points does it remove? | **1 point (5%).** The plan writes 1 throughout. |
 | D6 | Which coverage options? The brief gave "Full / Rear and Sides / Rear" and "None / All / Front & Sides / Front Only". | **None / All / Front & Sides / Front Only** (the dropdown list). |
 | D7 | Price of partial coverage. "-25% per side not covered". | **Four facings: 100% / 75% / 25%.** Many hulls do not have four sections (`HeavyCombatVesselLeftRight`, `MediumShipLeftRight`, `BaseShipNoFwd`, six-section hulls), so the facing is read from the shooter's **bearing**, never from the section hit: 330-30 is the front, 150-210 the aft, anything else a side (§2.2.4). That gives every hull the same four facings, whatever sections it has. |
-| D8 | Rounding. Full price = 1000 ÷ ((forward + side profile) ÷ 2). | **`ceil()` per choice**, the convention for every percentage-priced enhancement. Profiles 15/17 give 63 / 47 / 16. |
+| D8 | Rounding. Full price = 1000 ÷ ((forward + side profile) ÷ 2). | **RE-RULED 2026-10-04 (user, quoting the rules): the "1000" was only an example. Price = the unit's cost ÷ the average of its forward and side profiles (fractions kept), x 100% / 75% / 25% (D7), rounded up only at the end** - a 1000-pt ship at 16.5 pays 61; a 42-pt fighter at 6 pays 7 per craft. Built in whole numbers (`Enhancements::profileCoatingPrices`). *Was:* **`ceil()` per choice**, the convention for every percentage-priced enhancement. Profiles 15/17 give 63 / 47 / 16. |
 | D9 | What counts as "an OEW lock"? | **Both conditions: the weapon uses OEW (`useOEW`) AND the shooter holds OEW ≥ 1 on the coated unit after disruption EW.** *Changed: the draft ignored `useOEW`.* Your summary: the coating cancels 1 point of OEW. It is built as D5's 1-point profile cut, so **it never removes the lock**. A shooter on exactly 1 OEW keeps its lock (no doubled range penalty) and its SOEW, and still loses the 5%. Never triggered by a `useOEW = false` weapon or a mine (lock assumed, no OEW). A fighter triggers it only with OEW of its own (a Walker Mapmaker flight). |
 | D10 | Advanced Sensors already ignore younger races' Jammers, BDEW and SDEW. The coating too? | **Yes.** It keeps the BDEW/SDEW test, target factionAge < 3 (`weapon.php:2104`). D11 makes that part always true, so in practice Advanced Sensors always ignore the coating. |
-| D11 | Which units can buy it? | **Every unit on the ship path except bases, terrain and factionAge ≥ 3.** It is a standard enhancement, offered unless a set disables it. *Changed from "ships only".* OSATs, MCVs and Middleborn (factionAge 2) hulls are included. Terrain and every ship-path factionAge ≥ 3 hull are already on sets that block standard enhancements (checked); the factionAge test stays as a guard for future hulls. Bases need an explicit `$ship->base` test. Mines and shuttles are on blocking sets. **Fighters are not offered it** - they have their own offer path, and the formula would price a profile-7 fighter at 143 points (§2.2.1). |
+| D11 | Which units can buy it? | **RE-RULED 2026-10-04 (user): fighters and shuttles CAN buy it** ("This improvement can be added to fighters or shuttles, using the same cost schedule"), priced per craft. Against a fighter a ship's CCEW counts toward the lock as well as its OEW (it already did: `BaseShip::getOEW` adds CCEW within 10 hexes of a flight). *Was:* **Every unit on the ship path except bases, terrain and factionAge ≥ 3.** It is a standard enhancement, offered unless a set disables it. *Changed from "ships only".* OSATs, MCVs and Middleborn (factionAge 2) hulls are included. Terrain and every ship-path factionAge ≥ 3 hull are already on sets that block standard enhancements (checked); the factionAge test stays as a guard for future hulls. Bases need an explicit `$ship->base` test. Mines and shuttles are on blocking sets. **Fighters are not offered it** - they have their own offer path, and the formula would price a profile-7 fighter at 143 points (§2.2.1). |
 | D12 | Ballistic shots? | **Judged from the launch point's bearing** - the same point the profile is already taken from. |
 | **Jump Accelerator** | | |
 | D13 | "Jump delay -33% (rounded)". | **-33%: delay × 0.67, fractions of 0.5 or more round up.** *Changed from × 2/3.* Computed in whole numbers, `intdiv(delay * 67 + 50, 100)` in PHP and `Math.floor((delay * 67 + 50) / 100)` in JS, so the two ends cannot round a float differently. Below delay 50 it is the same as × 2/3. It differs on the 12 hulls at delay 50 (34, not 33), the one at 65 (44, not 43), and a few Poor Crew combinations. |
 | D14 | Elite/Poor Crew also scale the jump delay, ±20% per level, rounding at each step. Which goes first? | **Crew first, then the accelerator, on both ends.** It matters: delay 20 with one level of Elite Crew is 11 one way and 10 the other. |
 | D15 | Which drives can take it? | **Drives that open jump points - not legacy and not Ancient drives.** Not the legacy one-click drives (Star Wars Hyperdrive, BSG FTL, Shadow Phasing Drive), which form no jump point, so the range and the opening roll mean nothing to them. Not gates or Trek nacelles. Ancient drives are already legacy (`markAncient` = `markLegacy` + `$ancientJump`, the same for `markWalker`). The Vorlons and the System Pursuit Leader carry ordinary drives on factionAge 3 hulls; their blocked sets keep them out today, and the offer also refuses factionAge ≥ 3 (§2.3.1). |
-| D16 | Power. | **Yes: double the drive's draw and take its normal draw off the reactor.** An ordinary reactor already covers the normal draw, so the extra draw has to be a real deficit. **On fixed-power reactors only the draw doubles** (§2.3.3): they cover no draw for free, so the same reasoning leaves no deficit. |
+| D16 | Power. | **RE-RULED 2026-10-04 (user, after playing game 4444): the deficit is 100% of the drive's normal draw P, ON TOP OF the doubled draw** - an Omega (draw 3) must show -6 with the drive on, not -3. So drive-on costs 2P more than before on every hull: an ordinary reactor loses 2P (it nets the drive's draw out, so the extra draw has to come off it too), a fixed-power reactor loses P (it subtracts the doubled draw itself). Switched off, the drive gives its doubled draw back and the -P deficit stays (§2.3.3). *The first build (the drafted reading: ordinary -P, fixed-power nothing) showed -3.* |
 | D17 | Is the failure chance doubled on Maintain turns too? | **No - only on the turn the jump point is opened.** Capped at 100%. |
 | **Review and headers** | | |
 | D18 | How much of item 4? | **R1-R7**, behaviour-identical plus the bug fixes. **O1-O3 become an optional Stage 7** (§4.3, §6). §4.4 is still unplanned. |
@@ -314,21 +317,23 @@ sweep of `$ship->systems` ([[project_jump_points]]). Price `ceil(10%)`. Add `'JU
   `max(1, intdiv($delay * 67 + 50, 100))` - × 0.67 with halves rounding up, in whole numbers (D13).
   Write `$delay`, `$loadingtime` and `$turnsloaded` exactly as `applyCrewJumpDelayModifier` does.
   Skipped when `$delay <= 0` (markLegacy and markGate zero it).
-- Reactor: `$reactor->output -= P` on the hull's Reactor, **unless `$reactor->fixedPower`**. No hull with
-  a Jump Engine has more than one Reactor (checked), so this is the one `getReactorPower` reads on the
-  client.
+- Reactor (D16 as re-ruled): `$reactor->output -= 2P` on the hull's Reactor, or `-= P` when
+  `$reactor->fixedPower`. No hull with a Jump Engine has more than one Reactor (checked), so this is the
+  one `getReactorPower` reads on the client.
 
 **2.3.3 Power - why this exact shape.** A standard reactor's `output` is the ship's spare power with
 everything switched on: the drive's normal draw P is already netted out of it, and switching a system
 off gives its draw back ([[arch_lazy_window_side_effects]]). A fixed-power reactor works the other way
 round: its `output` is total generation and every powered system subtracts its draw. In the table,
-"balance" is the figure the ship shows today with an ordinary drive switched on; the right answer is
-balance - P with the accelerated drive on, and balance + P with it off (the same as an ordinary drive off).
+"balance" is the figure the ship shows today with an ordinary drive switched on. **As re-ruled (D16,
+2026-10-04)** the right answer is balance - 2P with the accelerated drive on (the doubled draw's extra P
+plus the deficit P), and balance with it off (an ordinary drive off would give balance + P; the deficit
+stays).
 
-| | standard reactor: draw × 2, reactor - P | fixed-power: draw × 2 only | fixed-power: draw × 2, reactor - P |
+| | standard reactor: draw × 2, reactor - 2P (BUILT) | fixed-power: draw × 2, reactor - P (BUILT) | standard: draw × 2, reactor - P (first build) |
 |---|---|---|---|
-| drive on | balance - P ✓ | balance - P ✓ | balance - 2P ✗ |
-| drive off | balance + P ✓ | balance + P ✓ | balance ✗ |
+| drive on | balance - 2P ✓ | balance - 2P ✓ | balance - P ✗ |
+| drive off | balance ✓ | balance ✓ | balance + P ✗ |
 
 The client's power code needs no change. `getReactorPower` reads the reactor's `output` (always in the
 payload) and the drive's `powerReq` (sent by the `JUMP_ACC` payload case). `getRemainingFreeablePower`
@@ -363,7 +368,7 @@ then counts the doubled draw, and the Initial Orders commit gate works as it doe
 
 **2.3.6 Lobby mirror** - `case 'JUMP_ACC'` plus the post-pass: `loadingtime` and `turnsloaded` become
 `Math.max(1, Math.floor((delay * 67 + 50) / 100))` after the crew step (`applyCrewJumpDelay` moves out
-of the loop), range +2, `powerReq` × 2, reactor output - P unless fixed-power, and the `data` text.
+of the loop), range +2, `powerReq` × 2, reactor output - 2P (- P on a fixed-power reactor), and the `data` text.
 ⚠️ Mirror pair with `JumpEngine::applyJumpAccelerator`: the same whole-number arithmetic (exact on both
 ends, so no float can round differently) and the same order.
 
@@ -393,7 +398,9 @@ so the coating's price is written in it: 5000 ÷ the average Defence Rating in %
   - Jump delay reduced by 33% (fractions of 0.5 or more round up).
   - Jump Drive range +2 hexes (4 becomes 6): it can open a jump point up to 6 hexes away, and the jump
     point stays open while the ship ends its turns within 6 hexes of it.
-  - The Jump Drive's power draw is doubled. The extra comes out of the ship's spare power.
+  - The Jump Drive's power draw is doubled, and the reactor also loses power equal to the drive's normal
+    draw. A drive that normally draws 3 power leaves the ship 6 power short while it is switched on, and
+    3 short while it is switched off. *(As built in Stage 6, after the D16 re-ruling.)*
   - At the end of the turn the ship **opens** a jump point, the chance of a damaged drive destroying the
     ship is doubled (to a maximum of 100%). Turns spent maintaining it roll the normal chance.
 - **Cost:** 10% of the ship's cost (rounded up)
@@ -643,9 +650,9 @@ Each stage leaves the game working and can be committed on its own.
 | 1 | Item 4: R1-R7. | D18; D21 (default: keep the code) | `-Server` | Corpus byte-identical; fingerprints identical (see §7); R7 passes |
 | 2 | Item 5: headers, plus the 64 px icons (§5.4). | D19, D20 | `-Client` | Screenshots per §5.5 |
 | 3 | Advanced Engine Module. | D1-D4 | `-Server` | Corpus identical; harness; local play |
-| 4 | Jump Accelerator. | D13-D17 | `-Server` | Corpus identical; harness; client harness; local play |
-| 5 | Stealth Coating. | D5-D12 | `-Server` | Corpus identical; server and client harnesses agree; local play |
-| 6 | Player docs (§2.4): the three new cards in the "Ship Enhancements" entry of `docs/ammo-options.html`, and the D21 corrections to the Elite and Poor Crew cards. | Stages 3-5 built; D21 | - | Document viewer check (§2.4.5) |
+| 4 | Jump Accelerator. **BUILT 2026-10-04** (§6.1). | D13-D17 | `-Server` | Corpus identical; harness; client harness; local play |
+| 5 | Stealth Coating. **BUILT 2026-10-04** (§6.1). | D5-D12 | `-Server` | Corpus identical; server and client harnesses agree; local play |
+| 6 | Player docs (§2.4): the three new cards in the "Ship Enhancements" entry of `docs/ammo-options.html`, and the D21 corrections to the Elite and Poor Crew cards. **Plus three lobby tasks added by the user 2026-10-04**: Ancients under Minor Factions in the picker's second column; the buy dialogs' Ordnance, Enhancements and Options rows alphabetical; Grome shells Light, then Medium, then Heavy, alphabetical within. **BUILT 2026-10-04** (§6.1). | Stages 3-5 built; D21 | `yarn build:legacy` | Document viewer check (§2.4.5); lobby screenshots |
 | 7 | **Optional** (D18): O1-O3 (§4.3), each on its own. | Stages 0-6 | `-Server` for O1/O2 (statics must come out identical); none for O3 (lobby JS, watched) | Fingerprints and corpus identical; R7 passes |
 
 All decisions are ruled, so nothing blocks any stage. Stage 1 goes first because the Jump Accelerator
@@ -655,7 +662,7 @@ Coating is last because it is the only one touching hit chances on both ends. St
 three enhancements, so the docs never describe something players cannot buy yet. Stage 7 is optional
 and can be dropped without touching anything else.
 
-### 6.1 As built - Stages 0-3 (2026-10-03/04, uncommitted)
+### 6.1 As built - Stages 0-6 (2026-10-03/04; Stages 4-6 uncommitted)
 
 **Stage 0 - baseline and harness.**
 - `fvbuild.ps1 -Check` on the clean tree (HEAD `f2c3d0ab8`): autoload current, validator 0 new errors,
@@ -768,6 +775,123 @@ validator 0 new errors.
   thrust, give an engine a critical, and check the next turn shows 3 again and `tac_individual_notes`
   holds `AdvEngLost`.
 
+**Stage 4 - Jump Accelerator (2026-10-04).** As §2.3. Gates: harness 186/186, with 42 new
+assertions; the fingerprint change was additions only (0 lines removed; 8 offer lines and 48 new case
+blocks - `jacc`, `jacc+elite1`, `jacc+poor2`, `jacc+rea` on the 12 hulls) and was then re-recorded at
+13,019 lines (re-recorded again after the D16 re-ruling: only the 32 reactor lines of those cases moved,
+each by -P, plus their payload md5); R7 263 cases, 0 differing, now also comparing each jump engine's `range`, `powerReq` and
+its `Range` / `Power Used` / `Special` tooltip rows, plus 909 delays (0-100 x Elite 0-2 x Poor 0-2)
+through the real methods on both ends, 0 differing (negative control: × 2/3 in the lobby gave 172
+differing, a reworded sentence 32); replay 127 / 5, the same five Kelly Phaser games as Stage 0;
+validator 0 new findings.
+- Server, `JumpEngine`: protected `$jumpAccelerated`; `canTakeJumpAccelerator()` (not legacy, not a
+  gate, has a jump recharge); `applyJumpAccelerator()` (range +2, powerReq ×2, returns the old draw,
+  refuses a second call); static `getAcceleratedJumpDelay($d)` = `max(1, intdiv(d*67+50, 100))`;
+  `applyJumpAcceleratorDelay()` (writes `$delay` / `$loadingtime` / `$turnsloaded`, skipped at delay 0);
+  protected `getOpeningFailureMultiplier()`, used in `openVortex` (the quoted chance) and in
+  `rollVortexJumpFailure` only when `vortexOpenTurn` is this turn, both `min(100, ...)` after the
+  Ancient halving and before the Walker zeroing; one tooltip sentence, appended LAST to the vortex
+  `Special` text so the lobby can append the same words.
+- Server, `Enhancements`: the block-list line; the offer (`factionAge < 3` and any engine from
+  `getUnitJumpEngines` passing the predicate); the `case` (repeats the `factionAge` test; reactor =
+  `getSystemByName("Reactor")`, `-2P`, or `-P` when `fixedPower` - D16 as re-ruled); the post-pass after the crew levels, run only
+  when a drive was fitted; the payload case (`range`, `powerReq`, `jumpAccelerated`, `data`) on the
+  accelerated drive only. The tooltip uses the generic line ("Jump Accelerator").
+- Client, `lobbyEnhancements`: the `JUMP_ACC` case (a legacy drive is told apart by `range` 0, since its
+  flag never reaches a blueprint), `acceleratedJumpDelay`, `applyJumpAcceleratorDelay`, `JUMP_ACC_TEXT`,
+  the post-pass line and the marker. Nothing in game needed changing: `getReactorPower`,
+  `targetHex`, the reach overlay and `canMaintainVortex` all read the sent fields.
+- **Offer, measured on the 89 freshly generated static files: 515 hulls.** Every one has a vortex drive
+  and factionAge < 3. Refused, and each checked in the harness: legacy drives (BSG `KobolAdamant`), Trek
+  Nacelles, the jump gate (a base on a standard set - the predicate's gate test is what refuses it),
+  Vorlon hulls (blocked set AND factionAge), and an Omega with its factionAge forced to 3.
+- Judgement calls:
+  - **Drazi `Jumphawk`**: its delay of 0 was a typo, corrected by the user to 36 (2026-10-04); it now
+    gets the full benefit, 36 -> 24 (harness-checked).
+  - Server-side, the declaration range test (`Firing::getVortexDeclarationBlock`) runs on the real
+    `getTacGamedata` load in `InitialOrdersGamePhase::process`, so +2 is honoured there; no server path
+    decides anything about the accelerator on a POST-side ship.
+- Still for local play (§7): buy it on an Omega, declare a jump point 6 hexes away, check the reactor
+  shows -6 with the drive on and 0 with it off, and the Jump Engine reads 13 turns. Then damage the
+  drive and open a jump point - the log should quote double the chance. (Game 4444, Omega #2, is the
+  user's test: it read -3 under the first build.)
+
+**Stage 5 - Stealth Coating (2026-10-04).** As §2.2. Gates: harness 235/235, with 49 new assertions -
+most of them through the REAL `Weapon::calculateHitBase` on an in-memory gamedata (coated minus
+uncoated `needed`: -5 or 0); the fingerprint change was additions only (11 offer lines) and was
+re-recorded at 13,030 lines; new client harness `tests/replay/profileCoatingClientHarness.js`, 2,897
+checks, 0 failed (negative controls: a widened front arc failed 52, `oew > 1` for the lock failed 4); R7
+unchanged (263, 0 differing); replay 127 / 5 as before; validator 0 new findings.
+- Server: `TacGamedata::$profileCoatingPresent` (never reset); `BaseShip`: protected `$profileCoating`,
+  `PROFILE_COATING_MOD` (1), `getProfileCoatingFacing` (bearing arcs 330-30 / 150-210) and
+  `getProfileCoatingReduction`; `weapon.php`: `$coatingLock` captured straight after the DIST
+  subtraction, cleared for an `ignoreAllEW` weapon, and `$defence -= reduction` after `$defenceFake`,
+  before ProfileIncreased and the flat-profile override. `Enhancements`: block-list line, the offer, the
+  `profileCoatingChoices` list, `getStoredEnhancementName` (the key), `resolveProfileCoating` (name,
+  then index, else None), the `case` with its own tooltip line, the payload case.
+- Client: `weaponManager.getShipDefenceFacing(Pos)` on one `getShipDefenceFacingFromHeading`, with
+  `getShipDefenceValue(Pos)` rebuilt on it (the harness proves the old arcs give the same profile on all
+  960 fixtures); `getProfileCoatingReduction`; `computeOEW` returns `coatingLock`; `calculateHitChange`
+  takes the row off the goal and lists "Stealth Coating" under Base Defense. `confirm.js`: the priced
+  choice widget (index 8), labels "Front & Sides (45 pts)", sets enhCost on build and change. The lobby
+  needs nothing else - `describeTaken` already prints a choice.
+- **PRICE (re-ruled 2026-10-04, D8): the unit's cost ÷ the average profile, x 100% / 75% / 25%, rounded up
+  at the end** - `Enhancements::profileCoatingPrices($unitCost, $fwd, $side)`, in whole numbers (cost in
+  hundredths, profile sum in halves) because in floats 1000/15 x 0.75 is 50.000000000000007 and rounds UP
+  to 51. The first build used the plan's "1000 ÷ average" (an Omega paid 59 / 45 / 15; now 55 / 41 / 14).
+- **Offer, measured on fresh statics: 1,841 ship-path hulls** (no base, mine or factionAge 3+) **and, since
+  the D11 re-ruling, 365 flights** - fighters and shuttles (the Shuttles set blocks standard
+  enhancements and gives this one back). The eight flight-shaped custom MINES in Custom Ships (EkosA,
+  Ocara-A..D, MCmine, testMine - MineClass, not on the Mines set) are EXCLUDED by a !mine test in the
+  offer and the apply case, on both paths (user, 2026-10-04); a forged row on one changes nothing. Static growth about 253 KB raw for ships.
+- **Fighters (re-ruled 2026-10-04, D11):** offer in `setEnhancementOptionsFighter`, priced per craft off
+  pointCost / 6 (a superheavy's own pointCost); blocked on the Ancient, mine and Walker fighter sets via
+  `blockStandardEnhancements`; `case` in `setEnhancementsFighter` and in `addFighterEnhancementsForJSON`.
+  Nothing else changed: the hit calculation and the client preview already read `getOEW` / `getTargetingEW`,
+  which count CCEW against a flight. Tests: a fighter and a superheavy priced, shuttle and fighter offered,
+  Vorlon and Mapmaker flights refused, CCEW 2 / CCEW 1 / OEW 2 / nothing / CCEW at 15 hexes / a fighter
+  shooter against a coated flight through the real `calculateHitBase`, and the client harness compares
+  the CCEW cases through the real `ew.getTargetingEW` (2,901 checks).
+- ⚠️ **Harness hygiene, found here:** `new TacGamedata(...)` in the coating tests writes
+  `TacGamedata::$currentForPlayer`, `$currentPhase` and `$currentGameID`, and every payload the fingerprint
+  hashes after them came out 25 bytes different - the Stage 5 baseline had been recorded that way. The
+  test now restores them, the baseline was re-recorded, and `check` mode now equals a standalone
+  `fingerprint` byte for byte. (Proved first: with the leaked statics set by hand, the only difference was
+  the ten STEALTH_CT price lines.)
+- Judgement calls, in code comments:
+  - **A weapon that ignores all EW holds no lock** (`$coatingLock` cleared with the rest of the EW, the
+    client's `oewSuppressed` the same). The plan did not say; a weapon that ignores EW is not using OEW.
+  - **Walkers' Mapmaker flights carry Advanced Sensors**, so in practice they never trigger a coating
+    (D10). The harness proves their lock works with the sensors taken away.
+  - A ballistic's launch hex is checked at the method level (`getProfileCoatingReduction($shooter,
+    $launchPos)`), not through a whole ballistic shot.
+  - Only the standard `calculateHitBase` applies it: a weapon class that overrides `calculateHitBase`
+    entirely (special weapons) ignores the coating, on both ends alike.
+- Still for local play (§7): buy Front Only, take shots from the front and the side with and without
+  OEW, and compare the `needed` values in `tac_fireorder`.
+
+**Stage 6 - player docs and the lobby tasks (2026-10-04).**
+- Docs: the three cards as §2.4 drafted them, the Jump Accelerator's power line rewritten for D16 as
+  re-ruled, and the Advanced Engine card also names Unreliable Engines. D21 under its default (the code is
+  right): Elite +50% / +75%, Poor -2 Engine / -2 Reactor - **and two more found while editing the same
+  cards**: Poor Crew's PRICE (docs -15% / -10%; code -25%, then -15%, -40% in all) and the THRUSTERS (+1 /
+  -1 on every Thruster per level, in the code, missing from both cards). Both corrected to the code; say
+  if either should go the other way.
+- Faction picker: `gamedata.pickerKeepWithPrevious = ["Ancients"]` - a group that never starts a column.
+  `layoutPickerColumns` deals UNITS, the kept group joined to the one above. Result: 3 columns [Major,
+  League] [Minor, Ancients] [Other, Custom]; 2 columns [Major, League] [Minor, Ancients, Other, Custom].
+- Buy dialogs (buy, edit, copy, bulk - one builder): `confirm.buyRowOrder` lists each section's rows
+  alphabetically, sized ammunition by size first (unsized, Light, Medium, Heavy), alphabetical within.
+  Only the DOM order changes; each row keeps its `.shpenh<index>` class. Flight missile rows the same.
+- **Found while verifying:** at a true 390 px the priced dropdown truncated ("Front & Sides (45 p…"). A
+  choice row now wraps under 600 px - name and cost above, the dropdown on its own full-width line
+  (confirm.css) - which also helps the Chameleon disguise's long ship names.
+- Verified on the real local lobby (game 4438, player 211, every non-GET blocked) at 1920 and a true
+  390 px: the columns, the rows, the dropdown (None / All (59 pts) / Front & Sides (45 pts) / Front Only
+  (15 pts) on an Omega), +45 on the total in the buy AND the edit dialog (the series seed is
+  overwritten), the Grome Mahkgar's twelve shells in size order, and the three cards in the in-page
+  window and on `ammo-options-enhancements.php`, with no horizontal scroll.
+
 ## 7. Testing
 
 - **Stage 1 fingerprint.** For about 10 hulls × {Elite 1 and 2, Poor 1 and 2, Improved
@@ -814,12 +938,13 @@ validator 0 new errors.
 | `source/server/model/weapons/weapon.php` (`calculateHitBase`) | 5 |
 | `source/server/model/TacGamedata.php` (`$profileCoatingPresent`) | 5 |
 | `source/public/client/lobbyEnhancements.js` | 1, 3, 4, 5 |
-| `source/public/client/UI/confirm.js` (priced choice widget; header markup) | 2, 5 |
-| `source/public/styles/confirm.css`, `source/public/styles/tokens.css` | 2 |
+| `source/public/client/UI/confirm.js` (priced choice widget; header markup; alphabetical buy rows) | 2, 5, 6 |
+| `source/public/client/gamelobby.js` (faction picker: Ancients kept with Minor Factions) | 6 |
+| `source/public/styles/confirm.css`, `source/public/styles/tokens.css` | 2 (confirm.css also 6: a choice row wraps under 600 px) |
 | `source/public/client/UI/reactJs/styled/theme.js` (sync comment only) | 2 |
 | `source/public/client/weaponManager.js` (facing helper; `computeOEW`'s `coatingLock`; coating row) | 5 |
 | `source/public/client/model/system/baseSystems.js` (Hyach Specialist floor) | 3 |
 | `source/public/docs/ammo-options.html` (three new cards; Elite/Poor Crew corrections) | 6 |
 | `source/public/img/Ordnance.png`, `Enhancements.png`, `Options.png` (yours, untracked today; replaced by 64 px copies, originals kept outside the repo) | 2 |
 | Stage 7 (optional): `Enhancements.php` (O1, O2), `lobbyEnhancements.js` (O2, O3) | 7 |
-| `tests/replay/enhancementsHarness.php`, plus a Node harness | 0-5 |
+| `tests/replay/enhancementsHarness.php`, `enhancementsDifferential.js`, `profileCoatingClientHarness.js` (local-only, /tests is gitignored) | 0-5 |

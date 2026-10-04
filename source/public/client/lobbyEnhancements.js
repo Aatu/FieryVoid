@@ -134,6 +134,32 @@ window.lobbyEnhancements = {
 		}
 	},
 
+	/* JUMP ACCELERATOR - the delay rule, "-33%": x 0.67 with fractions of 0.5 or more rounding up,
+	   in whole numbers, floored at 1 (SHIP_ENHANCEMENTS_PLAN.md D13).
+	   ⚠️ MIRROR PAIR with JumpEngine::getAcceleratedJumpDelay (PHP) - the same integer expression, so
+	   the two ends cannot round differently. */
+	acceleratedJumpDelay: function acceleratedJumpDelay(delay) {
+		return Math.max(1, Math.floor(((parseInt(delay, 10) || 0) * 67 + 50) / 100));
+	},
+
+	/* The Jump Accelerator's delay, run by the post-pass AFTER the crew levels (D14), on the drives the
+	   JUMP_ACC case fitted. Written to loadingtime/turnsloaded like applyCrewJumpDelay; skipped on a
+	   delay of 0 or less, as the server skips it.
+	   ⚠️ MIRROR PAIR with JumpEngine::applyJumpAcceleratorDelay (PHP). */
+	applyJumpAcceleratorDelay: function applyJumpAcceleratorDelay(ship) {
+		for (let system of ship.systems) {
+			if (system.name != "jumpEngine" || !system.jumpAccelerated) continue;
+			var delay = parseInt(system.loadingtime, 10) || 0;
+			if (delay <= 0) continue;
+			system.loadingtime = this.acceleratedJumpDelay(delay);
+			system.turnsloaded = system.loadingtime;
+		}
+	},
+
+	/* The sentence the server appends to an accelerated drive's tooltip (JumpEngine::setSystemDataWindow).
+	   ⚠️ MIRROR PAIR - same words, so the lobby shows what the game will. */
+	JUMP_ACC_TEXT: "<br>Jump Accelerator: jump delay reduced by 33%, range +2, power draw doubled, and the reactor loses power equal to the normal draw. On the turn it OPENS a jump point the chance of failure is doubled (max 100%).",
+
 	/* "The strongest system of a kind" (SHIP_ENHANCEMENTS_PLAN.md §4.2 R1): highest `field`,
 	   strictly (>), so on a tie the FIRST in construction order keeps it, and a system has to beat
 	   `floor` (default -1) to be picked at all. null when nothing qualifies; callers keep their own
@@ -197,6 +223,7 @@ window.lobbyEnhancements = {
 		var totalRoundsInt = 0;
 		var crewJumpElite = 0; //crew levels for the jump-delay post-pass after the loop (§4.2 R3)
 		var crewJumpPoor = 0;
+		var jumpAccelerated = false; //a Jump Accelerator was fitted - its delay is the post-pass's too (§2.3.2)
 
 		/* Rows in the GAME's order - enhid ascending, the order a game loads tac_enhancements in -
 		   not the blueprint's display order (options first, then ID descending). Two rows that both
@@ -503,6 +530,39 @@ window.lobbyEnhancements = {
 							//ship.notes += "<br>Essan Refit";
 						}
 						ship.essanEnh = true;
+						break;
+
+					/* Jump Accelerator (SHIP_ENHANCEMENTS_PLAN.md §2.3): range +2, power draw doubled, the
+					   reactor -2P (-P on a fixed-power reactor, whose doubled draw already charges the extra
+					   P - §2.3.3), and the drive's tooltip rows. The jump delay is the
+					   post-pass's, after the crew levels (D14). A legacy drive's range is 0 (markLegacy), which
+					   is how one is told apart here - its server flag never reaches a blueprint.
+					   ⚠️ MIRROR PAIR with Enhancements::setEnhancementsShip's JUMP_ACC case and
+					   JumpEngine::applyJumpAccelerator / setSystemDataWindow (PHP). */
+					case 'JUMP_ACC':
+						if (!ship.jumpAccEnh && !(ship.factionAge >= 3)) {
+							let reactor = ship.systems.find(function (s) { return s.name == "reactor"; });
+							for (let system of ship.systems) {
+								if (system.name != "jumpEngine" || !(system.range > 0)) continue;
+								let oldRange = parseInt(system.range, 10) || 0;
+								let draw = parseInt(system.powerReq, 10) || 0;
+								system.jumpAccelerated = true; //the flag the server's payload carries
+								system.range = oldRange + 2;
+								system.powerReq = draw * 2;
+								if (reactor) reactor.output -= reactor.fixedPower ? draw : 2 * draw;
+								if (system.data) {
+									system.data["Range"] = system.range;
+									system.data["Power Used"] = system.powerReq > 0 ? system.powerReq : 'None';
+									if (typeof system.data["Special"] === 'string') {
+										system.data["Special"] = system.data["Special"]
+											.replace("within " + oldRange + " hexes", "within " + system.range + " hexes")
+											+ this.JUMP_ACC_TEXT;
+									}
+								}
+								jumpAccelerated = true;
+							}
+						}
+						ship.jumpAccEnh = true;
 						break;
 
 					case 'MARK_FERV':
@@ -1132,12 +1192,13 @@ window.lobbyEnhancements = {
 
 		}//end of loop through enhancements.
 
-		/* THE JUMP-DELAY POST-PASS (§4.2 R3): Elite levels, then Poor levels, after every row, in the
-		   one written-down order. Every rule that scales the jump delay rounds it, so the order
-		   changes the answer. ⚠️ MIRROR PAIR with the post-pass at the end of
-		   Enhancements::setEnhancementsShip (PHP). */
+		/* THE JUMP-DELAY POST-PASS (§4.2 R3): Elite levels, then Poor levels, then the Jump
+		   Accelerator (D14), after every row, in the one written-down order. Every rule that scales
+		   the jump delay rounds it, so the order changes the answer. ⚠️ MIRROR PAIR with the post-pass
+		   at the end of Enhancements::setEnhancementsShip (PHP). */
 		this.applyCrewJumpDelay(ship, crewJumpElite);
 		this.applyCrewJumpDelay(ship, -crewJumpPoor);
+		if (jumpAccelerated) this.applyJumpAcceleratorDelay(ship);
 
 		// Insert update to Total Rounds here.
 		if (ammoMagazine != null) {
@@ -1635,6 +1696,10 @@ window.lobbyEnhancements = {
 
 				case 'IPSH_ESSAN':
 					ship.essanEnh = false;
+					break;
+
+				case 'JUMP_ACC':
+					ship.jumpAccEnh = false;
 					break;
 
 				case 'MARK_FERV':

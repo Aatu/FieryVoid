@@ -2046,7 +2046,7 @@
 /* Choice-valued option (the Chameleon disguise, confirm.applyEnhancementChoiceWidget): a dropdown
    in place of the spinner, widened across the - / + buttons it hides so it ends where they do. */
 .confirm.buyDialog .enhChoiceItem .buyRowQty {
-    flex: 0 1 50%;
+    flex: 0 1 30%;
     min-width: 0;
 }
 
