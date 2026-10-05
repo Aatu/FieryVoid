@@ -1062,6 +1062,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
             <div class="lb-slot-main">
                 <div class="lb-slot-player">
                     <span class="playername"></span><!--<span class="lb-slot-open">[OPEN]</Open></span>-->
+                    <span class="status">Ready</span>
                 </div>
                 <div class="lb-slot-meta">
                     <span class="value name"></span>
@@ -1071,7 +1072,6 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
                 </div>
             </div>
             <div class="lb-slot-actions">
-                <span class="status">Ready</span>
                 <button type="button" class="takeslot lb-pill lb-pill--take">Take Slot</button>
                 <button type="button" class="selectslot lb-pill">Select</button>
                 <button type="button" class="leaveslot lb-pill lb-pill--leave">Leave Slot</button>
