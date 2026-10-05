@@ -1022,6 +1022,15 @@ class DBManager
                     $this->update("DELETE FROM `$table` WHERE shipid IN ($idList)");
                 }
 
+                /* Live sweeping (MINE_DETECTION_PLAN.md T16). A slot is only left in the lobby, before
+                   any Movement, so there is never a row - but it is keyed by ship id like the tables
+                   above. Guarded: a database without db/mineSweep.sql must still let a player leave. */
+                try {
+                    $this->update("DELETE FROM `tac_minesweep` WHERE shipid IN ($idList)");
+                } catch (Throwable $e) {
+                    Debug::error($e);
+                }
+
                 /* Rows that POINT AT a removed ship rather than belonging to it. A slot can only be
                    left from the lobby, so in practice there are none - but the recycled-id problem
                    above would mis-attribute them just as readily if that ever changes. */
@@ -4869,6 +4878,15 @@ class DBManager
                 } catch (Throwable $e) {
                     Debug::error($e);
                 }
+
+                //Live sweeping (MINE_DETECTION_PLAN.md T16) - guarded for the same reason, until
+                //db/mineSweep.sql has reached the database.
+                try {
+                    $stmt = $this->connection->prepare("DELETE FROM tac_minesweep WHERE gameid = ?");
+                    $this->executeGameDeleteStatement($stmt, $ids);
+                } catch (Throwable $e) {
+                    Debug::error($e);
+                }
             }
 
         } catch (Exception $e) {
@@ -4965,6 +4983,158 @@ class DBManager
         $stmt->bind_param('ii', $gameid, $playerid);
         $stmt->execute();
         $stmt->close();
+    }
+
+    /* ------------------------------------------------------------------------------------
+       Live sweeping (MINE_DETECTION_PLAN.md §1.4.3) - one tac_minesweep row per game, turn and
+       unit, written by Manager::sweepMines: the hexes the server has made FINAL for that unit
+       this turn, the plotted rows that reach them (for a reload, §1.4.6) and the mines found
+       from the last of them (to resend a reply that was lost). Read by the commit, which must
+       keep those hexes (§1.4.4); deleted when Movement ends.
+         hexes  JSON [[q, r], ...] - the hexes entered, in order; the start hex is not listed.
+         moves  JSON - this turn's rows up to the one entering the last final hex, as posted.
+         found  JSON [mine id, ...] - found from the LAST final hex; [] when nothing was.
+       ------------------------------------------------------------------------------------ */
+
+    /* Who owns a unit of this game - the player id, or null. */
+    public function getShipOwner($gameid, $shipid)
+    {
+        $owner = null;
+        $stmt = $this->connection->prepare("SELECT playerid FROM tac_ship WHERE id = ? AND tacgameid = ?");
+        if ($stmt) {
+            $stmt->bind_param('ii', $shipid, $gameid);
+            $stmt->bind_result($playerid);
+            $stmt->execute();
+            if ($stmt->fetch()) $owner = ($playerid === null) ? null : (int)$playerid;
+            $stmt->close();
+        }
+        return $owner;
+    }
+
+    /* One unit's row as ['hexes' => [[q, r], ...], 'found' => [id, ...]], or null. */
+    public function getMineSweep($gameid, $turn, $shipid)
+    {
+        $row = null;
+        $stmt = $this->connection->prepare("SELECT hexes, found FROM tac_minesweep WHERE gameid = ? AND turn = ? AND shipid = ?");
+        if (!$stmt) throw new Exception("Prepare failed: " . $this->connection->error);
+
+        $stmt->bind_param('iii', $gameid, $turn, $shipid);
+        $stmt->bind_result($hexes, $found);
+        $stmt->execute();
+        if ($stmt->fetch()) {
+            $decodedHexes = json_decode($hexes, true);
+            $decodedFound = json_decode($found, true);
+            $row = array(
+                'hexes' => is_array($decodedHexes) ? $decodedHexes : array(),
+                'found' => is_array($decodedFound) ? array_map('intval', $decodedFound) : array()
+            );
+        }
+        $stmt->close();
+
+        return $row;
+    }
+
+    /* Every unit's final hexes this turn, by unit id - what a commit must keep. */
+    public function getMineSweepFinalHexes($gameid, $turn)
+    {
+        $out = array();
+        $stmt = $this->connection->prepare("SELECT shipid, hexes FROM tac_minesweep WHERE gameid = ? AND turn = ?");
+        if (!$stmt) throw new Exception("Prepare failed: " . $this->connection->error);
+
+        $stmt->bind_param('ii', $gameid, $turn);
+        $stmt->bind_result($shipid, $hexes);
+        $stmt->execute();
+        while ($stmt->fetch()) {
+            $decoded = json_decode($hexes, true);
+            if (is_array($decoded) && count($decoded) > 0) $out[(int)$shipid] = $decoded;
+        }
+        $stmt->close();
+
+        return $out;
+    }
+
+    /* This turn's rows for one player's units - game.php's restore data. Each is
+       ['shipid', 'hexes' => [[q, r], ...], 'moves' => the stored JSON text]. */
+    public function getMineSweepsForPlayer($gameid, $turn, $playerid)
+    {
+        $rows = array();
+        $stmt = $this->connection->prepare(
+            "SELECT m.shipid, m.hexes, m.moves FROM tac_minesweep m
+            JOIN tac_ship s ON s.id = m.shipid AND s.tacgameid = m.gameid
+            WHERE m.gameid = ? AND m.turn = ? AND s.playerid = ?"
+        );
+        if (!$stmt) throw new Exception("Prepare failed: " . $this->connection->error);
+
+        $stmt->bind_param('iii', $gameid, $turn, $playerid);
+        $stmt->bind_result($shipid, $hexes, $moves);
+        $stmt->execute();
+        while ($stmt->fetch()) {
+            $decoded = json_decode($hexes, true);
+            $rows[] = array(
+                'shipid' => (int)$shipid,
+                'hexes' => is_array($decoded) ? $decoded : array(),
+                'moves' => $moves
+            );
+        }
+        $stmt->close();
+
+        return $rows;
+    }
+
+    /* Insert or overwrite a unit's row. $hexes, $moves and $found are JSON text. */
+    public function saveMineSweep($gameid, $turn, $shipid, $hexes, $moves, $found)
+    {
+        $stmt = $this->connection->prepare(
+            "INSERT INTO tac_minesweep (gameid, turn, shipid, hexes, moves, found)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                hexes = VALUES(hexes),
+                moves = VALUES(moves),
+                found = VALUES(found)"
+        );
+        if (!$stmt) throw new Exception("Prepare failed: " . $this->connection->error);
+
+        $stmt->bind_param('iiisss', $gameid, $turn, $shipid, $hexes, $moves, $found);
+        if (!$stmt->execute()) {
+            $error = $stmt->error;
+            $stmt->close();
+            throw new Exception("Execute failed: " . $error);
+        }
+        $stmt->close();
+    }
+
+    /* Every row of a game - Movement is over (MovementGamePhase::advance). */
+    public function deleteMineSweeps($gameid)
+    {
+        $stmt = $this->connection->prepare("DELETE FROM tac_minesweep WHERE gameid = ?");
+        if (!$stmt) throw new Exception("Prepare failed: " . $this->connection->error);
+
+        $stmt->bind_param('i', $gameid);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    /* The mines a team has found: every mine with a 'detected' note naming that team - written by
+       the Movement checks, by firing, and by the live sweep itself (MineStealth::onIndividualNotesLoaded
+       reads the same notes into $detected). Read fresh for every sweep request, never cached. */
+    public function getMinesFoundByTeam($gameid, $team)
+    {
+        $ids = array();
+        $teamValue = (string)$team;
+        $stmt = $this->connection->prepare(
+            "SELECT DISTINCT shipid FROM tac_individual_notes WHERE gameid = ? AND notekey = 'detected' AND notevalue = ?"
+        );
+        if (!$stmt) throw new Exception("Prepare failed: " . $this->connection->error);
+
+        $stmt->bind_param('is', $gameid, $teamValue);
+        $stmt->bind_result($shipid);
+        $stmt->execute();
+        while ($stmt->fetch()) {
+            $ids[] = (int)$shipid;
+        }
+        $stmt->close();
+
+        return $ids;
     }
 
     public function removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn)

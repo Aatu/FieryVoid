@@ -1461,6 +1461,11 @@ window.gamedata = {
         }
 
         else if (gamedata.gamephase == 2) {
+            /* MINE_DETECTION_PLAN.md §1.4.2 - steps still waiting to be swept for mines are sent first,
+               and the commit waits for every answer. It comes back here once they are in - unless one
+               brought a find, which stops the commit so the player can react to the mine. */
+            if (window.mineSweep && !mineSweep.readyToCommit(function () { gamedata.onCommitClicked(e); })) return;
+
             var zeroSpeedShips = [];
             var leavingBattle = [];
             var extendingTurn = [];

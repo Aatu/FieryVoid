@@ -1473,11 +1473,43 @@
     <li>the distance to the hidden enemy mine;</li>
     <li>the mine's signature.</li>
   </ul>
-  <p>Detection happens at the END of each committed Movement segment - not <i>during</i> a unit's movement, so that
-    players cannot detect a mine and then take their moves back. A mine is revealed if your Detect Mines EW plus
-    Minesweeper Bonus is GREATER THAN the distance to the mine plus the mine's signature.</p>
+  <p>A mine is revealed if your Detect Mines EW plus Minesweeper Bonus is GREATER THAN the distance to the mine plus the
+    mine's signature, and no terrain blocks the line between them. A Minesweeper Bonus counts on its own: a minesweeper
+    detects mines even with no Detect Mines EW assigned.</p>
+  <p>Detection works throughout a unit's movement, not just where it ends up. Every unit is checked from the hex it
+    starts the Movement phase in, then from every hex it enters - so a unit that passes close to a mine finds it even if
+    it ends its move out of range.</p>
   <p>Detecting a mine does not tell you what type it is: to find out, scan it with at least 1 OEW after it has been
     detected.</p>
+
+  <h3 data-anchor="minesweeping">Minesweeping Mode</h3>
+  <p>A unit that can detect mines - one with Detect Mines EW or a Minesweeper Bonus - shows a purple Minesweeping Mode
+    icon behind it during Movement, while the enemy still has a mine you have not found. You choose, unit by unit and turn
+    by turn:</p>
+  <ul>
+    <li><b>Off</b> (the icon faint, as it starts): the unit plots as usual, with free undo, and what it finds shows when
+      you commit its move.</li>
+    <li><b>On</b> (the icon glowing): the unit sweeps as you plot. Each time it enters a hex, that hex is checked, and a
+      mine it finds appears on the map at once - so a scout's finds show while the rest of its movement group is still
+      being plotted, and the others can steer around them.</li>
+  </ul>
+  <p><b>Choose before the unit moves.</b> A unit makes its whole move in Minesweeping Mode or none of it. The icon can be
+    clicked until the unit first moves into a new hex - speed changes, turns and pivots before that are fine. After that
+    it stays as it is for the rest of the move: glowing if it is on, and fainter still if it is off. To switch a unit
+    that has already moved into the mode, cancel its moves back to its starting hex first.</p>
+  <p>While Minesweeping Mode is on:</p>
+  <ul>
+    <li><b>Swept steps are final.</b> A step into a hex cannot be undone - even when nothing was found there, and even
+      after a mis-click. Otherwise a sweeper could test a direction, take it back and try another. Turns, pivots and
+      other manoeuvres after the last swept step can still be cancelled as usual.</li>
+    <li><b>Set your speed first.</b> Speed changes must come before a unit's first move, and once that first step has
+      been swept the speed is fixed for the turn.</li>
+    <li><b>A find stops the move.</b> If a mine is detected partway through a multi-hex move (right-clicking the move
+      arrow), the unit stops at the hex the mine was detected from, with the rest of its movement still to plot - turn
+      away, slide, or carry on.</li>
+    <li>Committing waits for the last checks to come back. If one of them finds a mine, the commit stops so you can react
+      to it - even on the last hex, where the unit may still be able to turn or pivot.</li>
+  </ul>
 
   <h3>Shooting at mines</h3>
   <p>On top of the usual modifiers, a few apply only to mines:</p>

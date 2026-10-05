@@ -60,6 +60,16 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         && in_array((int)$serverdata->phase, array(-1, 1, 2, 5, 3), true)) {
         $savedOrdersJSON = Manager::getSavedOrdersJSON($serverdata->id, $thisplayer, $serverdata->turn, $serverdata->phase);
     }
+
+    /* Live sweeping (MINE_DETECTION_PLAN.md §1.4.6): the hexes this player's units have already
+       swept this turn, and the plotted rows that reach them - inlined as window.fvMineSweep and put
+       back, locked, by client/mineSweep.js when Movement activates, so a reload mid-move cannot
+       take a swept step back. Same gate as the draft above, Movement only. Never throws. */
+    $mineSweepJSON = 'null';
+    if ($serverdata !== null && $thisplayer > 0 && isset($serverdata->id, $serverdata->turn, $serverdata->phase)
+        && empty($serverdata->waiting) && ($serverdata->status ?? '') === 'ACTIVE' && (int)$serverdata->phase === 2) {
+        $mineSweepJSON = Manager::getMineSweepJSON($serverdata->id, $thisplayer, $serverdata->turn, $serverdata->phase);
+    }
 ?>
 
 
@@ -166,6 +176,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
         //Save Orders (see the prologue): {savedAt, draft} or null. Already script-safe.
         echo '<script>window.fvSavedOrders = ' . $savedOrdersJSON . ';</script>';
+
+        //Live sweeping (see the prologue): {turn, ships} or null. Already script-safe. And whether
+        //live sweeping is on at all - the switch is MineSweep::$liveSweeping, server side only.
+        echo '<script>window.fvMineSweep = ' . $mineSweepJSON . ';</script>';
+        echo '<script>window.fvLiveMineSweeping = ' . (MineSweep::$liveSweeping ? 'true' : 'false') . ';</script>';
     ?>
     <script>
         window.Config = {
@@ -395,6 +410,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <!-- SAVE_ORDERS_PLAN.md - the floppy beside the commit tick, and the OPTIONS tab's Saved
          Orders block. Everything it calls is runtime-only, so its place in the list is free. -->
     <script defer src="client/savedOrders.js"></script>
+    <!-- MINE_DETECTION_PLAN.md §1.4 - live sweeping: asks the server what a unit finds as it enters
+         each hex, locks the swept steps, draws a find and interrupts the move there. Runtime-only
+         calls into savedOrders.js and movement.js, so its place in the list is free. -->
+    <script defer src="client/mineSweep.js"></script>
 	<script defer src="client/power.js"></script>
     <script defer src="client/UI/shipMovement.js"></script>
     <!-- MUST stay after shipMovement.js: that file ASSIGNS window.UI, so loading this one first
@@ -768,6 +787,12 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         
         <div id="cancel" class="movement-icon" data-movement-type="Cancel Last Move">
             <canvas id="cancelcanvas" width="30" height="30"></canvas>
+        </div>
+
+        <!-- MINE_DETECTION_PLAN.md Q7 - Minesweeping Mode: shown for a unit that can detect mines; while on,
+             the unit sweeps each hex as it enters it (client/mineSweep.js). Label set by UI/shipMovement.js. -->
+        <div id="minesweep" class="movement-icon" data-movement-type="Start Minesweeping Mode">
+            <canvas id="minesweepcanvas" width="40" height="40"></canvas>
         </div>
         
         <div id="detach" class="movement-icon" data-movement-type="Detach" style="filter: hue-rotate(200deg) scaleX(-1);">

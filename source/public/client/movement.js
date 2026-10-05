@@ -236,9 +236,27 @@ shipManager.movement = {
     },
 
 
+    /* MINE_DETECTION_PLAN.md §1.4.1 - is the row deleteMove would remove one the live sweep has made
+       FINAL? A step the server has swept for mines cannot be taken back, a mis-click included (D11):
+       the unit's committed path must pass through it. The lock is a PREFIX of the turn's rows
+       (client/mineSweep.js, T13), so testing the LAST row is the whole test. */
+    isLastMoveFinal: function isLastMoveFinal(ship) {
+        return !!(window.mineSweep && mineSweep.isLastRowLocked(ship));
+    },
+
+    /* The Cancel button and its right-click "undo all" loop. NOT folded into hasDeletableMovements,
+       which also answers "has this unit plotted anything" for the initiative list's moved styling
+       (gamedata.drawIniGUI) and for canDetach - a fully swept move must still read as moved there.
+       A unit in Minesweeping Mode cannot cancel a step into a hex even before it is swept (mineSweep.js). */
+    canCancelMove: function canCancelMove(ship) {
+        return shipManager.movement.hasDeletableMovements(ship) && !shipManager.movement.isLastMoveFinal(ship)
+            && !(window.mineSweep && mineSweep.isLastRowSweptStep(ship));
+    },
+
     deleteMove: function deleteMove(ship) {
         var movement = ship.movement[ship.movement.length - 1];
         if (movement.type == "attached") return; // Cannot delete mirrored moves
+        if (shipManager.movement.isLastMoveFinal(ship)) return; // Swept for mines - final (MINE_DETECTION_PLAN.md D11)
 
         if (!movement.preturn && !movement.forced && movement.turn == gamedata.turn) {
             if (gamedata.gamephase == 3 && (movement.value != "combatpivot" || movement.type != "pivotleft" && movement.type != "pivotright")) return;
@@ -264,6 +282,8 @@ shipManager.movement = {
 
 
     deleteSpeedChange: function deleteSpeedChange(ship, accel) {
+        //It removes the LAST row whichever speed change it matched, so that is the row to test (T13).
+        if (shipManager.movement.isLastMoveFinal(ship)) return false;
         var curheading = shipManager.movement.getLastCommitedMove(ship).heading;
         for (var i in ship.movement) {
             var movement = ship.movement[i];
@@ -2004,6 +2024,10 @@ shipManager.movement = {
            cancellation row is forced (EXTENDED_TURNS_PLAN.md T5). On the turn of the begin itself
            that loop already does the job, because the begin is an ordinary player row. */
         if (shipManager.movement.getOwedExtendedTurn(ship)) return false;
+        /* A swept step fixes the speed for the turn (MINE_DETECTION_PLAN.md §1.4.1). The "speed changes
+           come first" loop below already refuses once any step exists; this says so outright, and
+           keeps changeSpeed from adding a row when deleteSpeedChange refuses a final one. */
+        if (window.mineSweep && mineSweep.hasLockedRows(ship)) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.movement.checkHasUncommitted(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;

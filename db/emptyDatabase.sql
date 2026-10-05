@@ -520,6 +520,25 @@ CREATE TABLE `tac_savedorders` (
 
 
 --
+-- Table structure for table `tac_minesweep`
+-- Mine detection: the hexes each unit has swept this turn, which its commit must keep.
+-- See db/mineSweep.sql.
+--
+
+DROP TABLE IF EXISTS `tac_minesweep`;
+
+CREATE TABLE `tac_minesweep` (
+  `gameid`  int(11)    NOT NULL,
+  `turn`    int(11)    NOT NULL,
+  `shipid`  int(11)    NOT NULL,
+  `hexes`   text       NOT NULL,
+  `moves`   mediumtext NOT NULL,
+  `found`   text       NOT NULL,
+  PRIMARY KEY (`gameid`, `turn`, `shipid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+--
 -- Table structure for table `tac_saved_list`
 --
 

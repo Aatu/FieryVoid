@@ -662,66 +662,143 @@ class MineStealth extends ShipSystem implements SpecialAbility{
 		return $toReturn;
 	}	
 
+	/* MINE_DETECTION_PLAN.md §1.1 (Stage 1) - EVERY HEX COUNTS. "Detection EW remains active
+	   throughout the turn, and works throughout a unit's movement." Each enemy unit is tested from
+	   every hex it has been in this turn - where it started, then each hex it entered - instead of
+	   only the hex it ends in, so a unit that passes in range and ends out of range finds the mine.
+
+	   The rule itself is in getDetectionRating and canDetectFrom below, shared with the start of
+	   Movement (InitialOrdersGamePhase::advance) and the live sweep (MineSweep). */
 	public function isMineDetectedMovement($mine, $gameData){
 
 		// Mines are stationary — their position is always their deploy-move position.
 		// We deliberately avoid getHexPos() because mines have no subsequent movement
 		// records and getHexPos() would crash on a null movement.
-		$pos = null;
-		foreach ($mine->movement as $move) {
-			if ($move->type === 'deploy') {
-				$pos = $move->position;
-				break;
-			}
-		}
+		$pos = self::getMinePosition($mine);
 		if ($pos === null) return array(); // Mine has no deploy move yet, can't be detected
 
-		$blockedHexes = $gameData->blockedHexes;
 		$detectingTeams = array();
 
 		foreach ($gameData->ships as $otherShip) {
 			// Skip friendly ships
-			if($otherShip->team === $mine->team) continue; 
-			if($otherShip instanceof Terrain) continue; //Ignore Terrain
-			if($otherShip instanceof Mine) continue; //Ignore other mines			
-			if($otherShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
-	
-			$totalDetection = 0;
-	
-			if(!$otherShip instanceof FighterFlight){
-				if($otherShip->isDisabled()) continue;
-				// Not a fighter — use scanner systems
-				foreach($otherShip->systems as $system){
-					if($system instanceof Scanner){
-						if(!$system->isDestroyed() && !$system->isOfflineOnTurn()){ //Has functioning scanner!
-							$totalDetection += $otherShip->getEWByType("Detect Mines", $gameData->turn);
-							break; //No need ot look further.
-						}
-					}	
-				}					
-				//Apply mineSweeper bonus	
-				if($otherShip->minesweeperbonus > 0) $totalDetection += $otherShip->minesweeperbonus;					
-			} else{
-				//$totalDetection = ceil($otherShip->offensivebonus / 2);
-				$totalDetection += $otherShip->getEWByType("Detect Mines", $gameData->turn);
-				
-			}		
- 
-			// Use explicit OffsetCoordinates for distance/LoS so we never call getHexPos() on the mine
-			$otherPos = $otherShip->getHexPos();
-			$distance = mathlib::getDistanceHex($pos, $otherPos);
-			$noLoS = !empty($blockedHexes) && Mathlib::isLoSBlocked($pos, $otherPos, $blockedHexes);
-	
-			// If within detection range, and LoS not blocked the mine is detected
-			if (($totalDetection > $distance + $mine->signature) && !$noLoS) { 	
-				if (!in_array($otherShip->team, $detectingTeams)) {
+			if($otherShip->team === $mine->team) continue;
+			if(in_array($otherShip->team, $detectingTeams)) continue; //This team has found it already.
+
+			/* 0 for terrain, mines, destroyed, disabled and not-yet-deployed units. Skipping 0 is not
+			   a rule change: below 1, "rating > distance + signature" needs a negative signature,
+			   which only an ACTIVATED DEW mine has - and a DEW mine activates by firing, which has
+			   already marked it detected by every enemy team (generateIndividualNotes, case 4). */
+			$rating = self::getDetectionRating($otherShip, $gameData);
+			if ($rating <= 0) continue;
+
+			foreach (Movement::getHexesEntered($otherShip, $gameData->turn) as $hex) {
+				if (self::canDetectFrom($mine, $hex, $rating, $gameData)) {
 					$detectingTeams[] = $otherShip->team;
+					break;
 				}
 			}
-		}	
+		}
 
 		return $detectingTeams;
 
+	}
+
+	/* MINE_DETECTION_PLAN.md §1.1 - a unit's Detect Mines RATING, lifted out of
+	   isMineDetectedMovement unchanged except for the not-yet-deployed line.
+	   - A ship that is not disabled counts its Detect Mines EW, but only while it has a working,
+	     online scanner, PLUS its Minesweeper Bonus. ⚠️ The bonus counts on its own - with no EW
+	     assigned, and even with the scanner down - so a minesweeper detects with no EW at all (D12).
+	   - A flight counts its Detect Mines EW (bought with Offensive Bonus).
+	   - 0 for anything that cannot detect: terrain, mines, a destroyed or disabled unit, and a unit
+	     that is not on the board yet (the old end-of-move check tested such a unit at its 'start' or
+	     early-placed deploy row, so it could find mines from a hex it had never reached). */
+	public static function getDetectionRating($unit, $gameData){
+		if($unit instanceof Terrain) return 0;
+		if($unit instanceof Mine) return 0;
+		if($unit->isDestroyed()) return 0;
+		if($unit->getTurnDeployed($gameData) > $gameData->turn) return 0;
+
+		$totalDetection = 0;
+
+		if(!$unit instanceof FighterFlight){
+			if($unit->isDisabled()) return 0;
+			// Not a fighter — use scanner systems
+			foreach($unit->systems as $system){
+				if($system instanceof Scanner){
+					if(!$system->isDestroyed() && !$system->isOfflineOnTurn()){ //Has functioning scanner!
+						$totalDetection += $unit->getEWByType("Detect Mines", $gameData->turn);
+						break; //No need ot look further.
+					}
+				}
+			}
+			//Apply mineSweeper bonus
+			if($unit->minesweeperbonus > 0) $totalDetection += $unit->minesweeperbonus;
+		} else{
+			//$totalDetection = ceil($otherShip->offensivebonus / 2);
+			$totalDetection += $unit->getEWByType("Detect Mines", $gameData->turn);
+		}
+
+		return $totalDetection;
+	}
+
+	/* Where a mine sits: its deploy row (null before it has one). Mines never move, and getHexPos()
+	   is avoided on purpose - see isMineDetectedMovement. */
+	public static function getMinePosition($mine){
+		$move = self::getMineDeployMove($mine);
+		return $move ? Movement::toOffset($move->position) : null;
+	}
+
+	public static function getMineDeployMove($mine){
+		if (!is_array($mine->movement)) return null;
+		foreach ($mine->movement as $move) {
+			if ($move->type === 'deploy') return $move;
+		}
+		return null;
+	}
+
+	/* MINE_DETECTION_PLAN.md §1.1: can a unit with Detect Mines rating $rating, standing in $pos,
+	   detect $mine? Its rating must beat distance + the mine's signature, and no terrain may block
+	   the line between them. */
+	public static function canDetectFrom($mine, $pos, $rating, $gameData){
+		$minePos = self::getMinePosition($mine);
+		if ($minePos === null) return false;
+		return self::canDetectAt($minePos, $mine->signature, $pos, $rating, $gameData->blockedHexes);
+	}
+
+	/* The same rule on plain values, for MineSweep's cached turn context, which holds no gamedata.
+	   Distance first: the line-of-sight test, the expensive part, only runs for a mine in range. */
+	public static function canDetectAt(OffsetCoordinate $minePos, $signature, OffsetCoordinate $pos, $rating, $blockedHexes){
+		$distance = mathlib::getDistanceHex($minePos, $pos);
+		if (!($rating > $distance + $signature)) return false;
+		if (!empty($blockedHexes) && Mathlib::isLoSBlocked($minePos, $pos, $blockedHexes)) return false; //LoS blocked
+		return true;
+	}
+
+	/* Run every mine's Movement-phase check (generateIndividualNotes, case 2) against $gameData and
+	   save what it finds. ⚠️ $gameData must hold every unit's FULL movement - this turn's rows AND the
+	   last row before them, which is where the path walk starts - so it must be a real load, never
+	   ships rebuilt from a POST. Called when Movement begins (InitialOrdersGamePhase::advance), after
+	   every movement commit (MovementGamePhase::process) and after the server moves units itself
+	   (MovementGamePhase::advance). Phase 2 must be set: the notes are dispatched on it. */
+	public static function checkMovementDetection($gameData, $dbManager){
+		foreach ($gameData->ships as $ship) {
+			if (!$ship->mine) continue;
+			$ship->generateIndividualNotes($gameData, $dbManager);
+			$ship->saveIndividualNotes($dbManager);
+		}
+	}
+
+	/* Is there a mine on the board at all - deployed and not destroyed, anyone's? The gate for the
+	   start-of-Movement check. Deliberately NOT TacGamedata::$areMinesPresent, which only says
+	   whether the player the gamedata was loaded for has ENEMY mines (MINE_DETECTION_PLAN.md T3). */
+	public static function anyMineOnBoard($gameData){
+		foreach ($gameData->ships as $ship) {
+			if (!$ship instanceof Mine) continue;
+			if ($ship->isDestroyed()) continue;
+			if ($ship->getTurnDeployed($gameData) > $gameData->turn) continue;
+			return true;
+		}
+		return false;
 	}
 
 	//Runs at end of Initial Orers and Firing Phases.

@@ -105,6 +105,10 @@ window.phaseDirector = function () {
            than be added to (trap T3). One site for all three phase strategies; the draft is spent on
            first use. Also keeps the OPTIONS block in step with replay, waiting and phase changes. */
         if (window.savedOrders) savedOrders.onStrategyActivated(gamedata, this.phaseStrategy);
+
+        /* Live sweeping (MINE_DETECTION_PLAN.md §1.4.6): the steps this player's units have already
+           swept come back, locked - AFTER the draft above, which replaces this turn's rows (T14). */
+        if (window.mineSweep) mineSweep.onStrategyActivated(gamedata, this.phaseStrategy);
     }
 
     return phaseDirector;

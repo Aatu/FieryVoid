@@ -14,6 +14,16 @@ window.UI = {
            whose art is itself slightly see-through. Applies to the icons only, not the panel text. */
         extendedTurnOpacity: 0.7,
 
+        /* ⭐ THE MINESWEEPING MODE ICON (MINE_DETECTION_PLAN.md Q7, §6.8): the art, how faint it is while
+           the mode is OFF (0-1), and the purple glow around it while it is ON. Change them here. */
+        minesweepIcon: "img/mineIcon.png",
+        minesweepOffOpacity: 0.8,
+        minesweepGlowColour: "#b77df0",
+        //...and fainter still once the unit has moved into a hex with the mode off, when it can no longer be turned on.
+        minesweepUnavailableOpacity: 0.3,
+        //...and the space in px between it and the roll icon / jink + astern of it.
+        minesweepGap: 12,
+
         iniated: false,
         moveElement: null,
         turnleftElement: null,
@@ -80,6 +90,7 @@ window.UI = {
             UI.shipMovement.lessjinkElement = $("#lessjink", ui);
             UI.shipMovement.cancelElement = $("#cancel", ui);
             UI.shipMovement.detachElement = $("#detach", ui);
+            UI.shipMovement.minesweepElement = $("#minesweep", ui);
 
             UI.shipMovement.halfphaseElement = $("#halfphase", ui);
 
@@ -90,6 +101,7 @@ window.UI = {
 
             UI.shipMovement.cancelElement.on("click touchstart contextmenu", UI.shipMovement.cancelCallback);
             UI.shipMovement.detachElement.on("click touchstart contextmenu", UI.shipMovement.detachCallback);
+            UI.shipMovement.minesweepElement.on("click touchstart", UI.shipMovement.minesweepCallback);
             UI.shipMovement.moveElement.on("click touchstart contextmenu", UI.shipMovement.moveCallback);
 
             UI.shipMovement.turnrightElement.on("click touchstart", UI.shipMovement.turnrightCallback);
@@ -169,6 +181,12 @@ window.UI = {
 
         detachCallback: function detachCallback(e) {
             UI.shipMovement.callbackHandler.detachCallback(e);
+        },
+
+        minesweepCallback: function minesweepCallback(e) {
+            //A tap can arrive as touchstart AND click: one toggle, not two that cancel out.
+            if (UI.shipMovement.checkUITimeout()) return false;
+            UI.shipMovement.callbackHandler.minesweepCallback(e);
         },
 
         morejinkCallback: function morejinkCallback(e) {
@@ -592,6 +610,16 @@ window.UI = {
             var checkHeading = shipManager.getShipDoMAngle(ship);
             dis += 30; // Increment distance only once.
 
+            /* MINESWEEPING MODE (MINE_DETECTION_PLAN.md Q7) - first astern, in the slot the roll icon
+               (ships) or the jink stack (flights) would start in; everything astern of it steps back.
+               40 is its hit box: the roll icon's centre moves out by that, and a flight's jink + by
+               just enough to clear it, since that stack already starts further out - each plus
+               minesweepGap. (dis is in units of 1/1.4 px.) */
+            if (UI.shipMovement.drawMinesweepIcon(ship, pos, dis * 1.4, angle)) {
+                var gap = UI.shipMovement.minesweepGap / 1.4;
+                dis += ship.flight ? 10 + gap : 40 / 1.4 + gap;
+            }
+
             if (shipManager.movement.canRoll(ship)) {
                 icon = "img/rotate.png";
                 emergencyroll.hide();
@@ -670,9 +698,9 @@ window.UI = {
                 halfphase.hide();
             }
 
-            //CANCEL MOVEMENT
+            //CANCEL MOVEMENT - hidden once only steps swept for mines remain (MINE_DETECTION_PLAN.md §1.4.2)
             var cancel = UI.shipMovement.cancelElement;
-            if (shipManager.movement.hasDeletableMovements(ship) && weaponManager.canCombatTurn(ship)) {
+            if (shipManager.movement.canCancelMove(ship) && weaponManager.canCombatTurn(ship)) {
                 dis += 26;
                 UI.shipMovement.drawUIElement(cancel, pos.x, pos.y, 30, dis * 1.4, angle, "img/cancel.png", "cancelcanvas", 0);
             } else {
@@ -743,6 +771,42 @@ window.UI = {
             }
         },
 
+        /* The purple Minesweeping Mode icon (MINE_DETECTION_PLAN.md Q7, §6.8), for a unit that can sweep
+           for mines: faint while off, glowing while on, and clickable only until the unit's first step
+           into a hex - then it glows on for good, or fades further and stays off (mineSweep.getModeState).
+           The art has an up, so reposition counter-rotates its canvas as it does the speed figure.
+           Returns whether it was drawn, so the icons astern of it can make room. */
+        drawMinesweepIcon: function drawMinesweepIcon(ship, pos, dis, angle) {
+            var icon = UI.shipMovement.minesweepElement;
+            var state = window.mineSweep ? mineSweep.getModeState(ship) : null;
+            if (!state) {
+                icon.hide();
+                return false;
+            }
+
+            var labels = {
+                off: "Start Minesweeping",
+                on: "Stop Minesweeping",
+                locked: "Minesweeping - Each move is locked",
+                unavailable: "Minesweeping - Activate before first move"
+            };
+            var lit = state === 'on' || state === 'locked';
+            var opacities = { off: UI.shipMovement.minesweepOffOpacity, unavailable: UI.shipMovement.minesweepUnavailableOpacity };
+            //Both: moveTooltip reads the label with .data(), which caches the attribute on its first read.
+            icon.attr("data-movement-type", labels[state]).data("movement-type", labels[state]);
+            //A label already showing (the pointer is still on the icon after a click) says the new state too.
+            if (icon.is(":hover")) $("#movetooltip .movementType").text(labels[state]);
+            icon.css({
+                opacity: lit ? 1 : opacities[state],
+                cursor: state === 'off' || state === 'on' ? "pointer" : "default"
+            });
+            var glow = UI.shipMovement.minesweepGlowColour;
+            $("#minesweepcanvas").css("filter", lit ? "drop-shadow(0 0 3px " + glow + ") drop-shadow(0 0 2px " + glow + ")" : "none");
+
+            UI.shipMovement.drawUIElement(icon, pos.x, pos.y, 34, dis, angle, UI.shipMovement.minesweepIcon, "minesweepcanvas", 0, 40);
+            return true;
+        },
+
         reposition: function reposition(position, heading) {
             var element = UI.shipMovement.uiElement;
 
@@ -760,6 +824,9 @@ window.UI = {
 
             //align contraction value with player:
             jQuery(".contractionvalue.value").css("transform", "rotate(" + -heading + "deg)").css("display", "block");
+
+            //...and the Minesweeping Mode art, which has an up:
+            jQuery("#minesweepcanvas").css("transform", "rotate(" + -heading + "deg)");
 
             UI.shipMovement.currentPosition = position;
             UI.shipMovement.currentHeading = heading;

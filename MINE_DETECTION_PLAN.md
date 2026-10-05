@@ -10,14 +10,16 @@ time it moves:
 This plan makes every hex count, and shows what a unit finds while its move is still being plotted, so
 the unit can react to it - and so can the rest of its simultaneous group.
 
-Status: **Stage 0 (the replay leaks - mine positions, and the hex a launched mine came to rest on) BUILT
-2026-10-03, uncommitted, verified - §6.** Stage 1 (the server walks every committed path) is unchanged
-and ready to build. **Stage 2 was redesigned the same day after a second review (D9): live sweeping** -
-as a unit enters a hex, the client asks the server about it and the server answers. It replaces the
-proposal to commit a simultaneous group one unit at a time. **Q4-Q6 were ruled the same day (D10-D12):**
-the server decides, a hex is final the moment the unit enters it, and every unit with a Detect Mines
-rating above 0 sweeps. A find interrupts a multi-hex move at the hex it was made from (D13). Stage 2
-can be built once Stage 1 is in.
+Status: **Stage 0 (the replay leaks) BUILT 2026-10-03 and committed. Stages 1, 2 and 3 BUILT 2026-10-04,
+uncommitted, verified short of play-testing - §6.3-§6.6.** Stage 1: the server walks every unit's whole
+path - at each commit, when Movement begins, and after the server moves units itself. Stage 2: live
+sweeping, OPT-IN per unit through a purple Minesweeping Mode icon (D14, §6.8) - as a unit in that mode
+enters a hex, the client asks the server, the hex becomes final, and a find shows at once and stops the
+move there (D10-D13). Stage 3: the FAQ and the starter guide. What is left is the play-test half of §4, which is the user's (create a fresh game per test).
+⚠️ **Deploy: apply `db/mineSweep.sql` to the live database BEFORE uploading the PHP** (T16; the PHP
+survives a missing table, but nothing can be swept until it is there).
+**Off switch** (user request, 2026-10-04): `MineSweep::$liveSweeping` turns live sweeping off everywhere
+and keeps Stage 1 - §6.7.
 
 ## Where it stands
 
@@ -57,13 +59,14 @@ can be built once Stage 1 is in.
 | D11 | Q5: when does a swept hex become final? | When the unit ENTERS it, because that is the moment the tabletop detects a mine. (The earlier recommendation, "when the unit moves on from it", is just as hard to probe, because the hex that is checked is the hex that is locked, at the same moment. But under it a find arrives one step late, and seeing what a hex reveals before turning there takes a step out and an undo.) The cost: a sweeping unit cannot take back a step once it has been asked about, a mis-click included (§1.4.1). |
 | D12 | Q6: which units sweep live? | Every unit with a Detect Mines rating above 0, as recommended. On the user's request, the reading "only units with some Detect Mines EW" was checked (§1.4.1). A ship's Minesweeper Bonus detects on its own, with no EW assigned, so the gate is the rating, not the EW. |
 | D13 | A multi-hex move (a right-click on Move) passes a find partway. Does the unit stop there? | Yes. The move is interrupted at the hex the mine is detected from. Every step plotted after it is taken back, and the unit stands on that hex with its remaining movement still to plot. That hex and every step before it are final, as usual (D11). |
+| D14 | (2026-10-04, after Stage 2 was built) Q7 - should a sweeping unit be able to keep its undo? | Yes, by OPTING IN: a purple Minesweeping Mode icon (the MDEW art) in the movement UI of a unit with a Detect Mines rating above 0. Off (the default), the unit plots as before and its finds show at the commit; on, it sweeps live. Once on and a hex has been swept, it cannot be turned off. "Lock only after a find" was weighed and not chosen: it leaks clear corridors (T20). A global off switch was added the same day (§6.7). |
 
 ## Open questions
 
 | # | Question | Recommendation |
 |---|---|---|
 | Q4-Q6 | Who decides; when a swept hex is final; which units sweep live. | **Ruled 2026-10-03** - D10-D12. |
-| Q7 | A per-unit switch to hold sweeping: the unit plots with free undo, and its finds show at the commit (like Battle for Wesnoth's "Delay Shroud Updates", §0.7). | **Not now.** Build Stage 2 without it. It is the first thing to add if play-testers find the lost undo painful. |
+| Q7 | A per-unit switch to hold sweeping: the unit plots with free undo, and its finds show at the commit (like Battle for Wesnoth's "Delay Shroud Updates", §0.7). | **Ruled and BUILT 2026-10-04 (D14)** - as an opt-in Minesweeping Mode, §6.8. |
 | Q1, Q2 | Commit a simultaneous group one unit at a time; a "Move this unit now" action. | **Withdrawn** - superseded by live sweeping (§1.7). |
 | Q3 | Laid mines (§0.2): is a launched mine's landing hex meant to stay secret once its turn is over? | **Ruled yes (2026-10-03)** - built into Stage 0 (§6.2). |
 
@@ -395,6 +398,8 @@ Its one advantage is no request per step.
 
 **Stage 0 - the replay leak (D7). BUILT 2026-10-03 - §6.**
 
+**Stages 1-3 BUILT 2026-10-04 - §6.3-§6.6.** What follows is the plan as written.
+
 **Stage 1 - every hex counts at the commit (D4, D5, D8).** §1.1-§1.3. Server only, no new state.
 Unchanged by D9, and the base Stage 2 builds on: it is the authority, and it provides the helpers.
 Verify with scratch PHP on games 4247 and 4255 (ongoing, with unfound mines) - a unit that passes in
@@ -434,7 +439,9 @@ Then §4.
   objects or arrays (the hydration block in `process()`; `project_replay_harness` hit the same thing).
 - **T5. A riding pod's rows are all type `attached`,** so "entered a hex" tests never see them
   (`arch_attached_movement_mirror`). The host's walk covers where the formation goes; a pod's own Detect
-  Mines EW is not used while it rides. The same is true today.
+  Mines EW is not used while it rides. The same is true today. **⚠️ Corrected in the build (§6.3):** it
+  was not true - the old end-of-move check read the pod's LAST row, i.e. the host's END hex, so a pod's
+  own rating did count there. The walk counts an `attached` row that lands in a new hex as entering it.
 - **T6. The `advance()` fallback moves units with no mine check after it** (§1.3).
 - T7-T9 belonged to the withdrawn one-unit-at-a-time proposal (§1.7).
 - **T10. An active client does not poll, and a refresh would replace the rows being plotted.** A find
@@ -455,7 +462,9 @@ Then §4.
   the LAST row. With a lock on just the hex-entering rows, an unlocked turn between two of them keeps
   the first saying yes while the second refuses, and the loop spins forever. Since D13, the same loop
   runs inside a reply handler. Test the last row against the prefix in both, and make every loop stop
-  if `deleteMove` removed nothing.
+  if `deleteMove` removed nothing. **As built (§6.5):** `hasDeletableMovements` is NOT changed - it also
+  feeds the initiative list's "moved" styling and `canDetach`. The Cancel button and the right-click
+  loop ask a new `canCancelMove` instead.
 - **T14. Stage 7 restores first and REPLACES this turn's rows; the final rows are reconciled after it**
   (§1.4.6). Restored rows carry sparse `assignedThrust` - go through `applyPlottedMoves` (Stage 7 T16).
 - **T15. The turn context holds every mine's real hex.** Server only: never in a reply, an error
@@ -471,7 +480,9 @@ Then §4.
 - **T18. A riding pod never asks** (T5); a pod that detaches plots its own rows and sweeps like any
   unit.
 - **T19. The cached blocked hexes assume no terrain moves during Movement.** Confirm that before relying
-  on the cache; the commit walk loads fresh data either way.
+  on the cache; the commit walk loads fresh data either way. **Checked (§6.4): it does not hold.** Terrain
+  stays put, but an Enormous SHIP blocks line of sight too and moves (the Explorer, the Kraken...). Every
+  Movement commit bumps a generation counter, and a context built before it is rebuilt.
 - **T20. Every hex walked becomes final, even when nothing is found** - that is the rule that stops
   probing. Do not "optimise" it into marking only the hexes with a find.
 - **T21. A reply that brings a find takes back every step after the find hex, including the steps
@@ -532,22 +543,29 @@ Then §4.
 
 ## 5. Files
 
+As built (2026-10-04). Departures from the planned list are marked *.
+
 | File | Stage | Change |
 |---|---|---|
-| `source/server/model/TacGamedata.php` | 0 | BUILT: mine and laid-mine launch masking on the history path |
-| `source/server/model/systems/baseSystems.php` | 1 | `MineStealth` helpers; path loop in `isMineDetectedMovement` |
-| `source/server/handlers/movement.php` | 1 | `Movement::getHexesEntered` |
+| `source/server/model/TacGamedata.php` | 0 | mine and laid-mine launch masking on the history path |
+| `source/server/model/systems/baseSystems.php` | 1 | `MineStealth::getDetectionRating`, `canDetectFrom`/`canDetectAt`, `getMinePosition`, `checkMovementDetection`, `anyMineOnBoard`; path loop in `isMineDetectedMovement` |
+| `source/server/handlers/movement.php` | 1, 2 | `Movement::getHexesEntered` / `getHexesEnteredFrom`, `toOffset`, `rowField`; `readSweepPath` (the endpoint's strict reading) |
 | `source/server/Phase/InitialOrdersGamePhase.php` | 1, 2 | start-of-Movement check; prime the turn context |
-| `source/server/Phase/MovementGamePhase.php` | 1, 2 | mine check after the `advance()` fallback; final-hex check in `process()`; clear `tac_minesweep` on advance |
+| `source/server/Phase/MovementGamePhase.php` | 1, 2 | the walk on the fresh load in `process()`; the final-hex check; the walk after the `advance()` fallback; clear `tac_minesweep` on advance |
+| `source/server/handlers/MineSweep.php` * | 2 | new: the turn context (build, prime, cache, generation), the walk, the commit check, the clean-up - kept out of Manager |
 | `source/public/mineSweep.php` | 2 | new endpoint |
-| `source/server/controller/Manager.php` | 2 | `sweepMines`, the turn context, the inline restore data |
-| `source/server/controller/DBManager.php` | 2 | `tac_minesweep` reads, writes and deletes; found-mine read; `deleteGames`/`leaveSlot` |
+| `source/server/controller/Manager.php` | 2 | `sweepMines`, `getMineSweepJSON` (inline restore data); the generation bump after a Movement commit * |
+| `source/server/controller/DBManager.php` | 2 | `tac_minesweep` reads, writes and deletes; `getMinesFoundByTeam`; `getShipOwner`; `deleteGames`/`leaveSlot` |
+| `source/autoload.php` * | 2 | regenerated (`fvbuild -Autoload`) for `MineSweep` |
 | `db/mineSweep.sql`, `db/emptyDatabase.sql` | 2 | the table |
 | `source/public/game.php` | 2 | inline restore data; script tag for `mineSweep.js` |
-| `source/public/client/mineSweep.js` | 2 | new: gate, trigger, lock, reveal, interrupt, restore |
-| `source/public/client/movement.js` | 2 | delete paths respect the lock |
-| `source/public/client/renderer/phaseStrategy/MovementPhaseStrategy.js` | 2 | hook in `onShipMovementChanged`; restore on activate |
-| commit path (`gamedata.js` / `ajaxInterface.js`) | 2 | wait for a request in flight |
+| `source/public/client/mineSweep.js` | 2 | new: gate, trigger, lock, reveal, interrupt, commit wait, restore |
+| `source/public/client/movement.js` | 2 | `isLastMoveFinal`, `canCancelMove`; `deleteMove`, `deleteSpeedChange`, `canChangeSpeed` respect the lock |
+| `source/public/client/ShipMovementCallbacks.js` * | 2 | right-click undo-all asks `canCancelMove` and stops when nothing was removed; `minesweepCallback` (D14) |
+| `source/public/client/UI/shipMovement.js` * | 2 | the Cancel icon asks `canCancelMove`; the Minesweeping Mode icon (D14) |
+| `source/public/client/renderer/phaseStrategy/MovementPhaseStrategy.js` | 2 | hook in `onShipMovementChanged` |
+| `source/public/client/renderer/PhaseDirector.js` * | 2 | the restore hook, after Save Orders' |
+| `source/public/client/gamedata.js` | 2 | `onCommitClicked` (Movement) waits for every answer |
 | `source/public/docs/faq.html`, `starter-guide.html` | 3 | text |
 
 ## 6. Build notes
@@ -601,3 +619,220 @@ Then §4.
     masked;
   - the mine-position check (§6.1) still reads 68 views, 0 wrong; replay harness 132 passed, 0 failed;
     `php -l` clean.
+
+### 6.3 Stage 1 - every hex counts (built 2026-10-04)
+- **The rule, in one place.** `MineStealth::getDetectionRating` is the old inline rating, unchanged but
+  for one line: a unit not on the board yet (`getTurnDeployed > turn`) rates 0. The old end-of-move
+  check tested such a unit at its `start` or early-placed deploy row, so it could find mines from a hex it
+  had never reached. `canDetectFrom` / `canDetectAt` hold "rating > distance + signature, line of sight
+  clear" (distance first). `isMineDetectedMovement` skips a rating of 0: below 1 the inequality needs a
+  negative signature, which only an activated DEW mine has, and a DEW mine activates by firing, which
+  has already marked it detected by every enemy team - so this changes nothing.
+- **The path.** `Movement::getHexesEntered` = the start hex (`getLastTurnMovement`, so a unit deployed
+  this turn starts on its deploy row and a unit not on the board has none) plus every hex entered this
+  turn. ⚠️ `start` rows are skipped, as `getLastTurnMovement` skips them: every unit has one dated TURN 1
+  at the centre of its deployment box (686 of the corpus's turn-1 unit-turns carry one), so on turn 1 the
+  walk would otherwise trace a trip out to the box and back - and the sweep's strict reader would refuse
+  every turn-1 request. Found against real rows; no synthetic test had one. Two departures from §1.1,
+  both found in the code:
+  - **D8's drift is one `end` row `speed` hexes away** (`AutomatedMovement::buildDriftMove` writes no
+    `move` rows), so any other row that lands somewhere new counts the line of travel - along its
+    heading when that arrives, the straight hex line otherwise.
+  - **T5 was wrong about today:** the old check read a riding pod's LAST row - its host's END hex - so the
+    pod's own rating did count there. An `attached` row that lands in a new hex now counts as entering
+    it, so a pod's rating applies along its host's whole path. Live sweeping is unaffected: a rider
+    never asks (T18).
+- **The commit walk runs on `process()`'s FRESH load, before its hydration loop.** That loop cuts the
+  ships' movement down to this turn's rows, which loses the start hex; the old mine loop ran on
+  `$gameData` after it and so only ever saw where each unit ended. The loop itself is untouched.
+- **D4:** `InitialOrdersGamePhase::advance` runs the mines' phase-2 check (`checkMovementDetection`)
+  when `anyMineOnBoard`, after the Chameleon checkpoint and before the vortex sweeps. Mine systems write
+  no other notes in phase 2 (checked: CaptorMine, ProximityMine and MineControllerDEW act in -1 / 1).
+- **D8:** `MovementGamePhase::advance` walks again only when its fallback actually moved a unit
+  (`generateAndSubmit` puts the rows on the in-memory ship too, so no reload is needed).
+- **Verified** (scratch PHP on game 4255, in memory only, 31 checks): the old end-hex rule misses a unit
+  that passes beside a mine and ends out of range, the walk finds it; own team never; start hex in range
+  is found with nothing plotted; a 6-hex drift and an off-heading jump become connected lines; `attached`
+  rows count; a `start`-only unit has no hexes; ratings for D12 (a bonus of 3 with no EW rates 3). No
+  unit in the local corpus has a Detect Mines rating, so every rated case is synthetic.
+- **Verified on real rows:** every turn of every corpus game, loaded AS OF that turn (⚠️ `getMovesForShips`
+  loads only turn 1, the previous turn and the current one - a walk of an older turn from a later load
+  reads its start from turn 1, which is a test artefact, not a live case): 140 games, 392 loads, 2,237
+  unit-turns, 215 with moves - every walk starts on the unit's real start hex and steps one hex at a
+  time, and the strict sweep reader accepts all 215 recorded paths as the client would post them.
+
+### 6.4 Stage 2a - live sweeping, server (built 2026-10-04)
+- **`MineSweep` (handlers/MineSweep.php)** holds the turn context, the walk, the commit check and the
+  clean-up; `Manager::sweepMines` is the façade (validation, lock, transaction, writes, reply). The plan
+  put the context in Manager; a handler keeps Manager lean, at the cost of an autoload regeneration.
+- **T19 does not hold** - Enormous ships move. Every Movement commit bumps a generation key in APCu
+  (`MineSweep::onMovementCommitted`, from `Manager::submitTacGamedata` AFTER its transaction), and a
+  context stored under an older generation is rebuilt. Built under an `apcu_add` lock; a request that
+  finds the lock taken waits up to 3s for the builder, then builds its own without storing it.
+- **The sweep takes the player's commit lock** (`getPlayerSubmitLock`), so a sweep and a commit by the
+  same player never interleave; a request refused for it answers `busy`.
+- **A lost reply is given again.** The client posts `known` (its count of final hexes). `tac_minesweep`
+  has a `found` column - the mines found from the LAST final hex - and when `known` is behind the server
+  and that list is not empty, the reply repeats the find without walking further (T21). Without it, a
+  find whose reply was lost would never be drawn: the mine is in `detected` by then, so no later walk
+  reports it again.
+- **Refusals** carry a flag the client acts on: `stale` (wrong game state, turn, unit, owner, or already
+  moved - stop asking), `busy`, `reload` (the posted path does not begin with the final hexes), and
+  `noRating`. The path is read STRICTLY (`Movement::readSweepPath`): from the context's start hex, every
+  hex a neighbour entered by a move or slip, nothing else changing the hex. Bound (T22): no more hexes
+  than the start speed plus one per posted speed change. Server exceptions answer a fixed message (T15).
+- **The commit check** (`process()`, before every validator) refuses a path that does not begin with the
+  unit's final hexes, using the authoritative ship's start hex - its stored movement is still intact at
+  that point. `getFinalHexesForCommit` never throws, so a database without the table cannot cost a
+  commit.
+- **Verified** against game 4255 through `Manager::sweepMines` with a test-mode DBManager, everything in
+  one rolled-back transaction (33 checks; row counts identical before and after): refusals for another
+  player's unit, a past turn, a unit not moving, unreadable rows; `noRating` with nothing stored; a path
+  too long or not starting at the start hex; a find writes the row, the notes (team, phase 2) and the
+  reply; a lost reply is resent; nothing new; out of step -> reload; a speed change allows a second hex;
+  the commit check passes and refuses; the inline restore data; a sweep after the unit moved is refused;
+  `forgetGame`. Replay harness: 127 passed, 5 failed - exactly the known Kelly Phaser five
+  (`arch_replay_corpus_known_failures`), every diff a min/maxDamage key.
+
+### 6.5 Stage 2b - live sweeping, client (built 2026-10-04)
+- **`hasDeletableMovements` is unchanged** (T13 as planned would have changed it): it also answers "has
+  this unit plotted anything" for `drawIniGUI`'s moved styling and for `canDetach` - with it false, a
+  detached pod whose steps were all swept would offer Detach again. `movement.isLastMoveFinal` and
+  `canCancelMove` carry the lock instead: `deleteMove` and `deleteSpeedChange` refuse a final last row,
+  the Cancel icon and the right-click loop ask `canCancelMove`, and the loop breaks when nothing was
+  removed. `canChangeSpeed` refuses once anything is locked.
+- **The lock is a hex COUNT** (final, or sent while a request is out) turned into a prefix on demand - the
+  row that entered that hex and everything before it. `doJink(-1)` and `doContraction(-1)` splice rows
+  out of the middle; a stored row count would have drifted, a hex count cannot. Off outside phase 2, so
+  Fire-phase combat pivots are untouched.
+- **An uncommitted slip has not been entered yet** - its thrust panel can still cancel it. It is asked
+  about once its thrust is confirmed.
+- **One request at a time for ALL the player's units**, not per unit: the server serialises them on the
+  player's lock anyway.
+- **Failures** keep the lock where the request left it (the server may have made those hexes final) and
+  retry - after 2.5s up to three times, then with the next step or the commit. A commit never waits on a
+  failure: it goes ahead, and its walk reports what it finds at the end of the move (D5).
+- **The reveal assigns a FRESH `detected` array.** The server sends `detected` only when it is
+  non-empty, so an unfound mine's is the static blueprint's, shared by every mine of its class
+  (`arch_client_system_shared_reference`) - a push would have shown them all.
+- The passive notice and the commit overlay reuse Save Orders' (`savedOrders.showNotice` /
+  `showOverlay`, "SWEEPING FOR MINES...").
+- **Verified:** a vm harness with the real model, `movement.js`, `ew.js`, `savedOrders.js` and
+  `ShipMovementCallbacks.js` (71 checks: gate incl. D12 and own-team mines; debounce, one request, the
+  lock in flight and after; right-click undo-all stops and does not spin; a turn after the lock stays
+  free; move-fully interrupted at the find; the reveal, and the shared array untouched; T21 and T23 with
+  the thrust panel open; a step queued behind a clean reply sent at once; the commit wait, a find on the
+  last hex stopping it, a failure letting it through; retries; noRating; stale; reload; a jink removed
+  inside the prefix; the restore with no draft, an extending draft, a contradicting draft, stale data;
+  no lock in phase 3). Five injected regressions each caught. Then end to end on the real local
+  `game.php` (game 4255, player 211, every commit POST blocked): one real round trip to `mineSweep.php`
+  answered `noRating` and wrote nothing; canned replies then drove a move-fully interrupted at the find
+  hex, the mine drawn at its hex while its sister mine stayed hidden, the next step asked with
+  `known=1`, the commit gate, and the restore - no page errors, database row counts unchanged.
+
+### 6.6 Stage 3 - docs (built 2026-10-04)
+- FAQ, Mines: the "detection happens at the END of each committed Movement segment" paragraph is
+  replaced (every hex counts; line of sight; the Minesweeper Bonus counts on its own), and a new
+  "Sweeping as you move" subsection (`data-anchor="minesweeping"`): finds show at once and while the group
+  is plotted, swept steps are final, set speed first, a find stops the move, the commit waits.
+- Starter guide, Movement: a bullet beside Cancel Move linking `faq.php#minesweeping`, and a sentence
+  under Adjusting speed.
+- Not changed, noted: the FAQ says flights buy Detect Mines at "10 OB per point"; the client charges 2
+  OB per point (1 for a minesweeper flight).
+
+### 6.7 The off switch (user request, 2026-10-04)
+Asked for in case play-testers dislike what live sweeping costs a sweeping unit (no undo of swept steps,
+speed fixed by the first one).
+- **`MineSweep::$liveSweeping`** (source/server/handlers/MineSweep.php, default true), the same kind of
+  switch as `Movement::$enforceThrustValidation`. Off:
+  - `mineSweep.php` answers `{"disabled": true}` before touching the database;
+  - the commit check (§1.4.4) binds nobody - `getFinalHexesForCommit` returns nothing, so a hex swept
+    before the flip cannot refuse a commit;
+  - game.php inlines no restore data and `window.fvLiveMineSweeping = false`, so the client never asks,
+    locks or restores - units plot exactly as before Stage 2;
+  - Movement does not prime a context.
+  **Stage 1 stays on** (every hex of the committed path counts, the start-of-Movement check): it changes no
+  controls, only what is found, and finds show when a unit commits (D5).
+- **Flipping it needs one PHP file uploaded and no client rebuild.** A page opened before the flip learns
+  at its next sweep request: it unlocks everything, redraws the player's units (the Cancel icon comes
+  back), lets a waiting commit through, and shows a passive notice.
+- ⚠️ The FAQ's "Sweeping as you move" section and the starter guide's Movement bullet describe live
+  sweeping - edit them out while it is off.
+- **Verified:** vm harness 84 checks (13 for the switch: off at load - no requests, free undo, no restore;
+  flipped mid-page - unlocked, commit released, notice, redraw, no further requests; a regression that
+  ignores the switch fails 9 of them); scratch PHP on 4255, rolled back (disabled reply, no commit check,
+  no restore data); the real game.php in both modes, row counts unchanged.
+
+### 6.8 Minesweeping Mode - Q7 ruled (D14, built 2026-10-04)
+Live sweeping is now OPT-IN, per unit and per turn. All client; the server is unchanged, because it only
+ever answers what it is asked.
+- **The icon.** `#minesweep` in game.php's movement UI, drawn by `UI.shipMovement.drawMinesweepIcon`:
+  the `img/mineIcon.png` art, FIRST ASTERN (user 2026-10-05): straight behind the unit at 84px, the slot
+  the roll icon (ships) or the jink stack (flights) used to start in. When it is drawn everything astern
+  steps back - a ship's roll from 84 to 136px, a flight's jink + from 98 to 124px, i.e. clear of its 40px
+  hit box plus `minesweepGap` (12px, a constant beside the others) - and the jink stack and Cancel follow
+  through the shared `dis` chain. Its canvas is counter-rotated in `reposition` so the
+  art stays upright. Faint while off, a purple glow while on; the art, the faint opacity and the glow
+  colour are constants at the top of UI/shipMovement.js (`minesweepIcon`, `minesweepOffOpacity`,
+  `minesweepGlowColour`). Hover labels: "Start Minesweeping Mode", "Stop Minesweeping Mode",
+  "Minesweeping - Each move is final" (set through `.data()` as well as the attribute - moveTooltip
+  reads `.data()`, which caches). (First built stern-right at 140 degrees / 105px, clear of the stack.)
+- **The movement UI follows the lock (`mineSweep.redrawUI`, fixed 2026-10-05).** The lock moves with no
+  row changing - when a request leaves (`send`) and when its answer lands (`onReply`) - so no
+  ShipMovementChanged fired, and the Cancel icon drawn during the 0.4s delay stayed on screen over a
+  step that had just become final: clicking it did nothing (deleteMove refuses). `redrawUI` calls the
+  strategy's `redrawMovementUI` at both points, which redraws the selected unit's ring only. ⚠️ Never
+  under an open thrust panel / an uncommitted row (the earlier hide dropped `strategy.movementUI`, so a
+  redraw would put the ring over the panel) or a confirm dialog (drawShipMovementUI refuses and the
+  strategy loses track of the ring) - closing either redraws anyway.
+- **No Cancel on a sweeping unit's hex step, ever (user 2026-10-05).** Even inside the 0.4s delay, before
+  the request leaves - a Cancel that worked for a moment and then didn't read as misleading. `canCancelMove`
+  also asks `mineSweep.isLastRowSweptStep` (the unit is a sweeper and its last row entered a hex), which
+  covers the icon and the right-click undo-all. ⚠️ The BUTTON only: `deleteMove` / `isLastRowLocked`
+  still take an unsent step, because the find interrupt (D13) takes back steps plotted behind a find that
+  were never sent (T21) - folding it into the lock breaks that (harness MUTATE=lockunsent). A turn or
+  pivot after the step still cancels; a unit not in the mode (or whose request was refused) undoes freely.
+  The FAQ's "a step taken back within a moment has not been checked" sentence is gone.
+- **Who is offered it** - `mineSweep.canSweep`, the old gate: own active unit, not riding, Detect Mines
+  rating above 0 (`ew.getDetectMEW`, the figure the purple MDEW overlay draws - a minesweeper's bonus
+  with no EW counts, D12), an enemy mine still unfound, live sweeping switched on. `isSweeper` is now
+  `canSweep` AND the unit's mode.
+- **A unit moves wholly in the mode or wholly out of it (user 2026-10-05).** The icon is clickable - on
+  and off - only while the unit has no step INTO a hex this turn (`hexRows` empty); speed changes, turns,
+  pivots and the like first are fine, the same line Cancel draws. The first hex step fixes it for the
+  move: on -> locked at once (before its request leaves - this also closed the 0.4s window in which on
+  could still be turned off), off -> `unavailable`. A unit that moved with it off can cancel back to its
+  starting hex and turn it on then. So `toggleMode` never has plotted steps to sweep or unsent ones to
+  drop. (Replaces "turning it on part-way through a move sweeps the hexes already plotted".)
+- **States** (`mineSweep.getModeState`): off (default, faint, clickable) / on (glowing, clickable) /
+  locked (glowing, cursor default - on with a hex plotted or asked about) / unavailable (fainter still,
+  `minesweepUnavailableOpacity` 0.35, cursor default, label "Minesweeping - Before first move only" - off
+  with a hex plotted). Locked stays even once nothing is left to find, so the player can see why those
+  steps will not undo. A reload that restores swept steps restores the mode on, locked. A Save Orders
+  draft does not carry the mode: a draft with hex steps comes back unavailable.
+- **Off, the unit is exactly the old behaviour:** finds at the commit (Stage 1's walk); every unit's
+  starting hex is still checked when Movement begins (D4).
+- Docs: the FAQ section is now "Minesweeping Mode" (same `data-anchor="minesweeping"`), and the starter
+  guide's Movement notes say the mode is opt-in.
+- **Verified:** vm harness 101 checks (17 for the mode: default off with free undo and no requests; on
+  then off inside the delay sends nothing; the icon's callback; on part-way sweeps the plotted hexes;
+  locked refuses off; the locked icon outlives the last mine; restore comes back locked; the off switch
+  hides it), every injected regression caught (two new: the mode ignored, the mode turned off after a
+  sweep). On the real game.php with REAL mouse clicks on the icon (game 4255, commits blocked, sweeps
+  answered in the driver): hidden without a rating, faint when offered, glowing when on, off again, a
+  move-fully interrupted at the find with the icon locked, a click on the locked icon changes nothing,
+  the hover label follows each click; no page errors, database row counts unchanged. Screenshots:
+  mode_off / mode_on / mode_locked.png in session e8454487's scratchpad.
+  2026-10-05 refinements: harness 112 checks (redrawUI - no Cancel in the delay, none after the request
+  leaves or the answer, back after a refusal; no redraw under a thrust panel, an uncommitted row or a
+  confirm; a turn after an unsent step cancels, then Cancel goes; deleteMove still takes an unsent step;
+  a unit not in the mode is offered Cancel), MUTATE=noredraw / unguardedredraw / delaycancel /
+  lockunsent each caught. Real page: with the mode off a move offers Cancel and a real click on it
+  takes the move back; with it on, no Cancel 0.1s after the move or after the sweep.
+  Whole-move rule: harness 118 checks (on/off freely after a speed change and a turn, no request with no
+  hex; locked the moment the first hex is plotted; unavailable after a hex with it off, the icon's
+  callback refused, offered again only back at the starting hex, then swept), MUTATE=midmove (the old
+  getModeState) fails 11. Real page with real clicks: moved off -> faded, click ignored, Cancel to start
+  -> clickable -> on -> moved -> locked at once, click ignored, swept once. Real game.php 4447 (read-only, sweeps answered in the driver) as both players:
+  Seltat ship and Sentri / Koist flights at the new spot, Cancel visible in the delay and gone after
+  the sweep, the Kuach's restored swept hexes locked with no Cancel; no page errors.

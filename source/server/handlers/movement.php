@@ -240,6 +240,158 @@
         }
 
 
+        /* ================ EVERY HEX A UNIT HAS BEEN IN THIS TURN ===========================
+         * MINE_DETECTION_PLAN.md §1.1. Mine detection tests a unit from each of these hexes, and
+         * the live sweep (MineSweep) makes them final one by one.
+         *
+         * Rows can arrive as MovementOrders (a load), or as arrays or plain objects (a POST, or
+         * rows a client sent) - trap T4 - so nothing here touches ->position directly. */
+
+        /* A row's position as a fresh OffsetCoordinate, or null when it has none. Unlike
+           `new OffsetCoordinate($p)`, safe for a plain object as well as an array. */
+        public static function toOffset($position){
+            if ($position instanceof OffsetCoordinate) return new OffsetCoordinate($position->q, $position->r);
+            if (is_array($position) && isset($position['q'], $position['r'])) return new OffsetCoordinate((int)$position['q'], (int)$position['r']);
+            if (is_object($position) && isset($position->q, $position->r)) return new OffsetCoordinate((int)$position->q, (int)$position->r);
+            return null;
+        }
+
+        /* One field of a row of any of the three shapes. */
+        public static function rowField($move, $field){
+            if (is_array($move)) return $move[$field] ?? null;
+            if (is_object($move)) return $move->$field ?? null;
+            return null;
+        }
+
+        /* The hexes $unit has been in on $turn, in order: the hex it started the turn in, then each
+         * hex it entered. [] for a unit with no row before this turn - it is not on the board.
+         *
+         * The start is the last row before this turn (getLastTurnMovement), which is also the
+         * deploy row of a unit placed this turn. See getHexesEnteredFrom for what counts as
+         * entering a hex. */
+        public static function getHexesEntered($unit, $turn){
+            $start = $unit->getLastTurnMovement($turn);
+            if (!$start) return array();
+
+            return self::getHexesEnteredFrom(self::toOffset($start->position), $unit->movement, $turn);
+        }
+
+        /* The same, from a known start hex and a list of rows (only $turn's are read).
+         * - ⚠️ 'start' rows are skipped, as getLastTurnMovement skips them: every unit has one dated
+         *   turn 1 at the centre of its DEPLOYMENT BOX, and on turn 1 it would otherwise read as a trip
+         *   out to the box and back.
+         * - 'move', 'slipleft' and 'slipright' enter the hex they name. Turns, pivots, rolls, speed
+         *   changes and jinks never change the hex.
+         * - Any other row that lands somewhere new got there by travelling, and the hexes on the way
+         *   count too. That is how the server's own movement reads: an Uncontrolled HK's drift is a
+         *   single 'end' row `speed` hexes along its heading (AutomatedMovement::buildDriftMove,
+         *   D8), and a unit riding a host has only 'attached' rows, each a step of the host's path
+         *   (the start hex alone would test a breaching pod where its host STARTED, where the old
+         *   end-of-move check tested it where the host ended). The line follows the row's heading
+         *   when that reaches it, and is the straight hex line otherwise. */
+        public static function getHexesEnteredFrom($start, $rows, $turn){
+            if (!($start instanceof OffsetCoordinate)) return array();
+
+            $hexes = array($start);
+            $current = $start;
+            if (!is_array($rows)) return $hexes;
+
+            foreach ($rows as $move){
+                if (self::rowField($move, 'turn') != $turn) continue;
+
+                $type = self::rowField($move, 'type');
+                if ($type === 'start') continue;
+
+                $pos = self::toOffset(self::rowField($move, 'position'));
+                if ($pos === null) continue;
+
+                if ($type === 'move' || $type === 'slipleft' || $type === 'slipright'){
+                    $hexes[] = $pos;
+                    $current = $pos;
+                    continue;
+                }
+
+                if ($pos->equals($current)) continue;
+
+                foreach (self::getLineOfTravel($current, $pos, (int)self::rowField($move, 'heading')) as $hex) $hexes[] = $hex;
+                $current = $pos;
+            }
+
+            return $hexes;
+        }
+
+        /* The hexes after $from up to and including $to: along $heading if that arrives exactly,
+           otherwise the straight hex line between them. */
+        private static function getLineOfTravel(OffsetCoordinate $from, OffsetCoordinate $to, $heading){
+            $distance = (int)$from->distanceTo($to);
+            $heading = (($heading % 6) + 6) % 6;
+
+            $line = array();
+            $step = $from;
+            for ($i = 0; $i < $distance; $i++){
+                $step = $step->moveToDirection($heading);
+                $line[] = $step;
+            }
+            if (!empty($line) && end($line)->equals($to)) return $line;
+
+            $line = array();
+            $a = $from->toCube();
+            $b = $to->toCube();
+            for ($i = 1; $i <= $distance; $i++){
+                $t = $i / $distance;
+                //A hair off the exact midpoint, so a line along a hex edge always rounds the same way.
+                $x = $a->x + ($b->x - $a->x) * $t + 1e-6;
+                $y = $a->y + ($b->y - $a->y) * $t + 2e-6;
+                $z = $a->z + ($b->z - $a->z) * $t - 3e-6;
+                $line[] = self::roundCube($x, $y, $z)->toOffset();
+            }
+            return $line;
+        }
+
+        private static function roundCube($x, $y, $z){
+            $rx = round($x); $ry = round($y); $rz = round($z);
+            $dx = abs($rx - $x); $dy = abs($ry - $y); $dz = abs($rz - $z);
+            if ($dx > $dy && $dx > $dz) $rx = -$ry - $rz;
+            else if ($dy > $dz) $ry = -$rx - $rz;
+            else $rz = -$rx - $ry;
+            return new CubeCoordinate((int)$rx, (int)$ry, (int)$rz);
+        }
+
+        /* MINE_DETECTION_PLAN.md §1.4.3 - the STRICT reading the live sweep applies to rows a client
+         * posts: from the unit's start hex, every hex must be entered by a 'move' or a slip, each one
+         * a neighbour of the last, and nothing else may change the hex ('start' rows aside - see
+         * getHexesEnteredFrom; the client posts this turn's rows, and on turn 1 that includes one).
+         * Returns one entry per hex entered (the start hex is not listed) - ['hex' => OffsetCoordinate,
+         * 'row' => index of the row that entered it] - or null when the rows do not make such a path.
+         *
+         * Legality is NOT judged here (T22): the commit does that, as it always has. */
+        public static function readSweepPath(OffsetCoordinate $start, $rows, $turn){
+            if (!is_array($rows)) return null;
+
+            $path = array();
+            $current = $start;
+            foreach (array_values($rows) as $index => $move){
+                if (self::rowField($move, 'turn') != $turn) continue;
+
+                $type = self::rowField($move, 'type');
+                if ($type === 'start') continue;
+
+                $pos = self::toOffset(self::rowField($move, 'position'));
+                if ($pos === null) return null;
+
+                if ($type === 'move' || $type === 'slipleft' || $type === 'slipright'){
+                    if ($current->distanceTo($pos) != 1) return null;
+                    $path[] = array('hex' => $pos, 'row' => $index);
+                    $current = $pos;
+                } else if (!$pos->equals($current)) {
+                    return null;
+                }
+            }
+
+            return $path;
+        }
+
+
         /* ================ JUMPING OUT THROUGH A VORTEX ==================================
          * JUMP_POINTS_PLAN.md Stage 4, sections 2.2 and 2.5.
          *

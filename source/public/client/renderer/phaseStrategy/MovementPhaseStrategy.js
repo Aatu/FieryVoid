@@ -288,6 +288,9 @@ window.MovementPhaseStrategy = function () {
         });
 
         this.gamedata.drawIniGUI();
+
+        //MINE_DETECTION_PLAN.md §1.4.2 - a unit that sweeps asks the server about every hex it enters.
+        if (window.mineSweep && payload && payload.ship) mineSweep.onMovementChanged(payload.ship, this);
     };
 
     MovementPhaseStrategy.prototype.showAppropriateEW = function () {
