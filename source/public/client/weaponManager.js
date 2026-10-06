@@ -3384,12 +3384,23 @@ window.weaponManager = {
 
         //Same call - and therefore the same number - the row's headline and the grouping key use.
         //fireOrder carried so a homing re-attack resolves its own launch hex (see getFiringHex).
-        return weaponManager.calculataBallisticHitChange({
-            weaponid: ball.weapon.id,
-            targetid: ball.fireOrder.targetid,
-            shooterid: shooter.id,
-            fireOrder: ball.fireOrder
-        });
+        //⚠️ Priced in the mode the SHOT was declared in, on THIS shot's own launcher. A grouped row
+        //("4x Class-L Missile Rack (Antifighter)") is keyed on weapon NAME, so its members are
+        //usually separate racks - and the row only switches its representative's rack, so every
+        //other member was priced in whatever mode its rack was left in (game 4451: 75% / 60% /
+        //60% / 60%). The greedy fill calls this from a click, after the row has restored even the
+        //representative. A no-op when the caller has already switched this weapon.
+        var restoreMode = weaponManager.setModeForFireOrder(ball.weapon, ball.fireOrder);
+        try {
+            return weaponManager.calculataBallisticHitChange({
+                weaponid: ball.weapon.id,
+                targetid: ball.fireOrder.targetid,
+                shooterid: shooter.id,
+                fireOrder: ball.fireOrder
+            });
+        } finally {
+            weaponManager.restoreFiringMode(ball.weapon, restoreMode);
+        }
     },
 
     /* Hit chance left on a shot once this side's declared interception is subtracted. NOT floored
