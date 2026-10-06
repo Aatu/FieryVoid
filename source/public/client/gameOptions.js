@@ -28,7 +28,7 @@ window.gameOptions = (function () {
     var OPTIONS = [
         {
             key: "showIniOverlay",
-            label: "Show Initiative Overlay",
+            label: "Show Initiative Overlay during Movement phase",
             title: "The movement-group number drawn over every unit that has not moved yet",
             def: true,
             onChange: repaintIniOverlay
