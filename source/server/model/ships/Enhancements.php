@@ -3977,14 +3977,32 @@ class Enhancements{
 		return $intercept;
 	}
 
-	/* maxDamage is 0 on many weapons - variable-damage ones carry maxDamageArray and support
-	   weapons genuinely deal none - so take the largest of both before applying the price floor. */
+	/* The most damage ONE firing of the mount can deal, across its firing modes.
+	   maxDamage is 0 on many weapons - variable-damage ones carry maxDamageArray and support
+	   weapons genuinely deal none - so take the largest of both before applying the price floor.
+	   ⚠️ On a Pulse mode maxDamage is ONE pulse: a Heavy Pulse Cannon is 15 x 6 pulses = 90, not 15. */
 	private static function sysEnhMaxDamage($system){
-		$dmg = isset($system->maxDamage) ? (int)$system->maxDamage : 0;
+		$dmg = self::sysEnhVolleyDamage($system, isset($system->maxDamage) ? $system->maxDamage : 0, null);
 		if(!empty($system->maxDamageArray) && is_array($system->maxDamageArray)){
-			foreach($system->maxDamageArray as $d) $dmg = max($dmg, (int)$d);
+			foreach($system->maxDamageArray as $mode => $d) $dmg = max($dmg, self::sysEnhVolleyDamage($system, $d, $mode));
 		}
 		return $dmg;
+	}
+
+	/* One mode's max damage, multiplied out by that mode's OWN pulse cap if the mode deals damage
+	   in Pulse mode. Never by the largest cap: UltraPulseCannon trades damage for pulses (24x6 /
+	   16x9 / 12x12), so every mode is 144, not 24x12. $mode null = the mount's current fields.
+	   changeFiringMode copies damageTypeArray / maxpulsesArray over the live fields only where an
+	   entry exists, so a missing entry falls back to the live field the same way. */
+	private static function sysEnhVolleyDamage($system, $damage, $mode){
+		$type = ($mode !== null && isset($system->damageTypeArray[$mode]))
+			? $system->damageTypeArray[$mode]
+			: (isset($system->damageType) ? $system->damageType : '');
+		if($type !== 'Pulse') return (int)$damage;
+		$pulses = ($mode !== null && isset($system->maxpulsesArray[$mode]))
+			? $system->maxpulsesArray[$mode]
+			: (isset($system->maxpulses) ? $system->maxpulses : 1);
+		return (int)$damage * max(1, (int)$pulses);
 	}
 
 	/* Arcs a shield covers, in 60-degree steps.
@@ -4079,7 +4097,7 @@ class Enhancements{
 		return false;
 	}
 
-	/* max(4, ceil(maxDamage * 0.25)) per gun. */
+	/* max(4, ceil(maxDamage * 0.25)) per gun, where a Pulse weapon's maxDamage is the full volley. */
 	private static function sysEnhPriceGSGT($ship, $system, $level){
 		return (int)max(4, ceil(self::sysEnhMaxDamage($system) * 0.25)) * self::sysEnhGuns($system);
 	}
