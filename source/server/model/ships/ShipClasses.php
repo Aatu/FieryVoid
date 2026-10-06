@@ -185,6 +185,12 @@ class BaseShip {
 	
     public $enabledSpecialAbilities = array();
 
+	/* Stealth Coating (STEALTH_CT, SHIP_ENHANCEMENTS_PLAN.md §2.2): the facings it covers - 'all', 'fs'
+	   (front and sides) or 'front' - or null for none. Set only by Enhancements::setEnhancementsShip, so
+	   a POST-side ship and a static blueprint never carry one. PROTECTED: a public default would be
+	   written into every static blueprint. The client learns it from the payload (profileCoating). */
+	protected $profileCoating = null;
+
 	//Chameleon Sensor Suite: phpclass of the simulacrum this ship projects, chosen at purchase.
 	//null / '' means "None" - no disguise - which is the default and the fallback for anything
 	//unresolvable. NEVER serialize this: it is the secret the whole feature protects.
@@ -3576,6 +3582,53 @@ public function getAllEWExceptDEW($turn){
             }
         }
         return round($relativeBearing); //round to full degrees - otherwise there were sometimes problems!!!
+    }
+
+    /* ================= STEALTH COATING (SHIP_ENHANCEMENTS_PLAN.md §2.2) ================= */
+
+    //How much a coating takes off the defence profile, in d20 points (D5: 1 point, 5%).
+    const PROFILE_COATING_MOD = 1;
+
+    public function setProfileCoating($coverage){
+        $this->profileCoating = $coverage;
+    }
+
+    public function getProfileCoating(){
+        return $this->profileCoating;
+    }
+
+    /* Which facing a shot arrives on: 'front' (relative bearing 330-30), 'aft' (150-210) or 'side'.
+       ⭐ FROM THE BEARING, NEVER FROM A SECTION NUMBER (§2.2.4): HeavyCombatVesselLeftRight,
+       MediumShipLeftRight and BaseShipNoFwd have no front section, and getHitSection answers 0 once a
+       section is destroyed - either would switch a Front Only coating off. These are exactly the arcs
+       the client's weaponManager.getShipDefenceValue tests, and a roll mirrors the bearing (360 - b),
+       which maps both arcs onto themselves, so a rolled hull answers the same.
+       $launchPos (a ballistic's launch hex) is where the bearing is taken from when given (D12).
+       ⚠️ MIRROR PAIR with weaponManager.getShipDefenceFacing / getShipDefenceFacingPos (JS). */
+    public function getProfileCoatingFacing($shooter, $launchPos = null){
+        $bearing = ($launchPos !== null) ? $this->getBearingOnPos($launchPos) : $this->getBearingOnUnit($shooter);
+        if (mathlib::isInArc($bearing, 330, 30)) return 'front';
+        if (mathlib::isInArc($bearing, 150, 210)) return 'aft';
+        return 'side';
+    }
+
+    /* The defence-profile points a Stealth Coating removes from this shot: 0 or PROFILE_COATING_MOD.
+       The caller (Weapon::calculateHitBase) has already settled the LOCK (D9: a weapon that uses OEW,
+       fired by a unit holding OEW >= 1 on this ship after disruption EW); this answers the rest:
+         - the ship carries a coating that covers the facing the shot arrives on;
+         - the shooter lacks Advanced Sensors, which ignore it on a target of factionAge < 3 - the same
+           test the BDEW/SDEW waiver uses (D10). Coated ships are all factionAge < 3 (D11).
+       ⚠️ MIRROR PAIR with weaponManager.getProfileCoatingReduction (JS). */
+    public function getProfileCoatingReduction($shooter, $launchPos = null){
+        if ($this->profileCoating === null) return 0;
+        if ($shooter === null) return 0;
+        if ($this->factionAge < 3 && $shooter->hasSpecialAbility("AdvancedSensors")) return 0;
+
+        $facing = $this->getProfileCoatingFacing($shooter, $launchPos);
+        $covered = ($this->profileCoating === 'all')
+            || ($this->profileCoating === 'fs' && $facing !== 'aft')
+            || ($this->profileCoating === 'front' && $facing === 'front');
+        return $covered ? self::PROFILE_COATING_MOD : 0;
     }
 
 

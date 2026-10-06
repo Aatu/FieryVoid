@@ -22,6 +22,8 @@ class MovementGamePhase implements Phase
            movement; process() has already refused anything a tampered client tried to bank. */
         Movement::resolveJumpOuts($latestgameData, $dbManager);
 
+        $serverMovedUnits = false; //set when the fallback below moves a unit itself - see the mine check after the loop
+
         foreach ($latestgameData->ships as $ship) {
             // Track slots that have pre-firing ships ready to shoot
             // Checked BEFORE skipping bases/mines to ensure mines with command control get a Pre-Firing Phase
@@ -60,7 +62,7 @@ class MovementGamePhase implements Phase
                 // findNearestEnemy scans up-to-date enemy positions rather than the stale
                 // pre-phase $gameData snapshot.
                 if (!$dbManager->isMovementAlreadySubmitted($gameData->id, $ship->id, $gameData->turn)) {
-                    AutomatedMovement::generateAndSubmit($ship, $latestgameData, $dbManager);
+                    if (AutomatedMovement::generateAndSubmit($ship, $latestgameData, $dbManager)) $serverMovedUnits = true;
                 }
             } else {
                 // Submit a dummy "end" move so the ship has a completed movement order for this turn
@@ -96,11 +98,23 @@ class MovementGamePhase implements Phase
 
         }
 
+        /* MINE_DETECTION_PLAN.md §1.3 (D8) - a unit the fallback above moved has had no mine check:
+           process() runs one after every commit, and nothing commits these. generateAndSubmit put
+           the new rows on the ship in memory as well as in the database, so $latestgameData already
+           holds every path of the turn. Only when the fallback moved something - otherwise every
+           path was walked at its own commit. */
+        if ($serverMovedUnits && MineStealth::anyMineOnBoard($latestgameData)) {
+            MineStealth::checkMovementDetection($latestgameData, $dbManager);
+        }
+
         // Update game phase to Pre-Firing
         $gameData->setPhase(5);
         $gameData->setActiveship(-1);
         $dbManager->updateGamedata($gameData);
         $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);
+
+        //Live sweeping (MINE_DETECTION_PLAN.md T16): Movement is over, and with it every unit's swept hexes.
+        MineSweep::forgetGame($dbManager, $gameData->id);
 
         // Identify slots that have no pre-firing ships
         $preFiringSlotIds = array_keys($preFiringSlots);
@@ -182,6 +196,10 @@ class MovementGamePhase implements Phase
 		$submittedShipIds = array();
 		foreach ($ships as $s) if (!empty($s->movement)) $submittedShipIds[$s->id] = true;
 
+		/* MINE_DETECTION_PLAN.md §1.4.4 - the hexes the live sweep has made FINAL for each unit this
+		   turn. A unit's commit must pass through them, in order, or the sweep could be taken back. */
+		$sweptHexes = MineSweep::getFinalHexesForCommit($dbManager, $gameData->id, $gameData->turn);
+
 		$activeShips = $gameData->getMyActiveShips();
 		foreach ($ships as $ship) {
 			foreach ($activeShips as $activeShip) {
@@ -200,6 +218,19 @@ class MovementGamePhase implements Phase
 						break;
 					}
 
+					/* LIVE SWEEPING (MINE_DETECTION_PLAN.md §1.4.4): checked on the movement exactly as
+					   submitted, before any validator below can reshape it. The start hex comes from the
+					   AUTHORITATIVE ship - its stored movement is still intact at this point - because
+					   the POST carries this turn's rows only. A path that skips or reorders a swept hex
+					   is refused outright: the client never lets it be plotted, so this is a second tab
+					   that is out of step, or a tampered client. */
+					if (isset($sweptHexes[$activeShip->id])) {
+						$sweepStart = $activeShip->getLastTurnMovement($gameData->turn);
+						if (!$sweepStart || !MineSweep::pathKeepsFinalHexes($sweptHexes[$activeShip->id], Movement::toOffset($sweepStart->position), $ship->movement, $gameData->turn)) {
+							throw new Exception("A unit's movement no longer passes through the hexes it has already swept for mines. Reload the game and plot it again.");
+						}
+					}
+
 					// Authoritative server-side thrust validation. The client normally
 					// blocks committing an underpaid maneuver, but a tampered/buggy client
 					// can POST one anyway (the server otherwise trusts submitted movement
@@ -210,6 +241,13 @@ class MovementGamePhase implements Phase
 					// movement so orientation-dependent checks (pivots) see the plotted
 					// path, run the validator, then keep only the sanitised result.
 					$activeShipMovementBackup = $activeShip->movement;
+
+					// EXTENDED TURNS (EXTENDED_TURNS_PLAN.md §2.3) - FIRST, on the movement exactly as
+					// the client submitted it, so validateThrustPayment then judges payment on what
+					// survives (T12). The stored movement is passed alongside because the turn being
+					// completed was begun LAST turn, and the POST carries this turn only.
+					$ship->movement = Movement::validateExtendedTurn($activeShip, $ship->movement, $activeShipMovementBackup, $gameData->turn);
+
 					$activeShip->movement = $ship->movement;
 					$ship->movement = Movement::validateThrustPayment($activeShip, $gameData->turn);
 					$activeShip->movement = $activeShipMovementBackup;
@@ -333,13 +371,22 @@ class MovementGamePhase implements Phase
 			}
 		}
 
-        if($gameData->areMinesPresent){ //There are mines in the game, check if any have been detected.        
+        if($gameData->areMinesPresent){ //There are mines in the game, check if any have been detected.
+            $fullGamedata = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
+
+            /* MINE_DETECTION_PLAN.md §1.1 (Stage 1) - EVERY HEX COUNTS. Each unit is tested from every
+               hex it has been in this turn, and only this FRESH load can say where those were: it has
+               the moves stored a moment ago AND every unit's earlier rows, which is where the walk
+               starts. ⚠️ BEFORE the hydration below, which cuts the ships' movement down to this
+               turn's rows. The mines' check used to run on $gameData after that hydration, so it only
+               ever saw where each unit ended up. */
+            MineStealth::checkMovementDetection($fullGamedata, $dbManager);
+
             // --- HYDRATE MOVEMENT RECORDS ---
             // During the interval between phase changes, empty movement instructions or single
             // newly-created instructions might be stored as `stdClass` objects or associative arrays.
             // We MUST hydrate them into full MovementOrder and OffsetCoordinate objects before
             // Mine detection or other backend systems loop through getHexPos().
-            $fullGamedata = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
             //$gameData->ships = $fullGamedata->ships;
 
             foreach ($fullGamedata->ships as $gdShip) {                 
@@ -421,14 +468,7 @@ class MovementGamePhase implements Phase
                     }
                 }
             }
-
-            foreach ($gameData->ships as $ship) {
-                if ($ship->mine) {
-                    $ship->generateIndividualNotes($gameData, $dbManager);
-                    $ship->saveIndividualNotes($dbManager);
-                }
-            }
-        }    
+        }
 
 		//Added August 2024 for Mindrider Contraction.       
 		foreach ($ships as $ship){ //generate system-specific information if necessary    

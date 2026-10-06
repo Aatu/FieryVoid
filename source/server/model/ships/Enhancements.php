@@ -61,7 +61,9 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'IMPR_OB'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_THR'; 
 		$unit->enhancementOptionsDisabled[] = 'POOR_TRAIN'; 
+		$unit->enhancementOptionsDisabled[] = 'STEALTH_CT'; //fighters and shuttles may buy it too (user, 2026-10-04)
 	  }else{ //enhancements for ships
+		$unit->enhancementOptionsDisabled[] = 'ADV_ENG';
 		$unit->enhancementOptionsDisabled[] = 'ELITE_CREW';
 		$unit->enhancementOptionsDisabled[] = 'HANG_F';
 		$unit->enhancementOptionsDisabled[] = 'HANG_AS';
@@ -71,9 +73,11 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_REA'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_SENS'; 
+		$unit->enhancementOptionsDisabled[] = 'JUMP_ACC';
 		$unit->enhancementOptionsDisabled[] = 'MAR_CONT'; 			
 		$unit->enhancementOptionsDisabled[] = 'POOR_CREW'; 
 		$unit->enhancementOptionsDisabled[] = 'SLUGGISH'; 
+		$unit->enhancementOptionsDisabled[] = 'STEALTH_CT';
 		$unit->enhancementOptionsDisabled[] = 'VULN_CRIT'; 	
 	  }
   }
@@ -151,6 +155,8 @@ class Enhancements{
 		case 'Shuttles':
 			Enhancements::blockStandardEnhancements($unit);
 				$unit->enhancementOptionsEnabled[] = 'MAKE_MINE';			
+				//Stealth Coating: "This improvement can be added to fighters or shuttles" (user, 2026-10-04)
+				$unit->enhancementOptionsDisabled = array_values(array_diff($unit->enhancementOptionsDisabled, array('STEALTH_CT')));
 			break;		
 
 		case 'SystemFighter':
@@ -226,8 +232,8 @@ class Enhancements{
 	*/
   public static function setEnhancementOptionsShip($ship){
 
-	  //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
-	  //cost: +40% of ship cost (second time: +60%)
+	  //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, +1 Thrusters, -1 Profile, -1 to critical results (per level)
+	  //cost: +50% of ship cost (second time: +75%, 125% for both)
 	  //all Hangar-related advantages of original Elite Crew are skipped, and so is turn shortening
 	  //what's more important, weapons-related advantages are gone
 	  //Initiative bonus is added, critical bonus is increased
@@ -514,23 +520,38 @@ class Enhancements{
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		}
 		    
+	  /* Advanced Engine Module (SHIP_ENHANCEMENTS_PLAN.md §2.1): the strongest Engine boosts one
+	     Efficiency step cheaper, never below 1; lost for good the first time ANY Engine takes a
+	     critical. Cost: 10% of the ship, limit 1. Offered only where the strongest Engine - Improved
+	     Engine's test - is boostable above Efficiency 1, i.e. where the module would do something.
+	     NOT offered on a hull with Unreliable Engines - any Engine marked with Engine Flux
+	     (Engine::markEngineFlux, which rolls an engine critical every turn). User ruling 2026-10-04;
+	     today that is exactly the seven hulls whose ship files also disable IMPR_ENG by hand. */
+	  $enhID = 'ADV_ENG';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+		  $unreliableEngines = false;
+		  foreach ($ship->systems as $system){
+			  if ($system instanceof Engine && in_array('EngineFlux', $system->specialAbilities, true)){
+				  $unreliableEngines = true;
+				  break;
+			  }
+		  }
+		  $engine = self::strongestSystem($ship, 'Engine', 'output');
+		  if(!$unreliableEngines && $engine !== null && $engine->boostable && (int)$engine->boostEfficiency > 1){
+			  $ship->enhancementOptions[] = array($enhID, 'Advanced Engine Module', 0, 1, ceil($ship->pointCost * 0.1), 0, false);
+		  }
+	  }
+
 	  //Improved Engine: +1 Thrust, cost: 12+4/turn cost, round up, limit: up to +50%
 	  $enhID = 'IMPR_ENG';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Engine';
 		  //find strongest engine.. which don't need to be called Engine!
-		  $strongestValue = -1;	  
-		  foreach ($ship->systems as $system){
-			if ($system instanceof Engine){
-				if($system->output > $strongestValue) {
-					$strongestValue = $system->output;
-				}
-			}
-		  }  
-		  if($strongestValue > 0){ //Engine actually exists to be enhanced!
-			  $enhPrice = ceil(12+(4/($ship->turncost)));	  
-			  $enhPriceStep = 0; 
-			  $enhLimit = ceil($strongestValue/2);	  
+		  $engine = self::strongestSystem($ship, 'Engine', 'output');
+		  if($engine !== null && $engine->output > 0){ //Engine actually exists to be enhanced!
+			  $enhPrice = ceil(12+(4/($ship->turncost)));
+			  $enhPriceStep = 0;
+			  $enhLimit = ceil($engine->output/2);
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  }
@@ -558,18 +579,10 @@ class Enhancements{
 	  $enhID = 'IMPR_REA';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Reactor';
-		  //find strongest reactor.. which don't need to be called Reactor! also, determine strength by size rather than output (main reactor may well have negative output while secondary has 0)	
-		  $strongestValue = -1000;	 
-			$actualOutput = 0;
-		  foreach ($ship->systems as $system){
-			if ($system instanceof Reactor){
-				if($system->maxhealth > $strongestValue) {
-					$strongestValue = $system->maxhealth;
-					$actualOutput = $system->output;
-				}
-			}
-		  }  
-		  if($strongestValue > 0){ //Reactor actually exists to be enhanced! ...although it'd better!
+		  //find strongest reactor.. which don't need to be called Reactor! also, determine strength by size rather than output (main reactor may well have negative output while secondary has 0)
+		  $reactor = self::strongestSystem($ship, 'Reactor', 'maxhealth', -1000);
+		  $actualOutput = ($reactor !== null) ? $reactor->output : 0;
+		  if($reactor !== null && $reactor->maxhealth > 0){ //Reactor actually exists to be enhanced! ...although it'd better!
 				$addedPower = 0;
 			  if($ship->Enormous == true){
 				  $addedPower = 4;
@@ -590,9 +603,13 @@ class Enhancements{
 	  $enhID = 'IMPR_SENS';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Sensors';
-		  $enhLimit = 1;	  
+		  $enhLimit = 1;
 		  //find strongest sensors... which don't need to be called Sensors!
-		  $strongestValue = -1;	  
+		  /* ⚠️ Deliberately NOT on strongestSystem() (SHIP_ENHANCEMENTS_PLAN.md §4.2 R1): $elint and
+		     $advanced are set by ANY scanner that was the running maximum along the way, not only by
+		     the final strongest one, so an earlier, weaker ELINT scanner still doubles the price.
+		     Rewriting it on the helper would re-price those hulls; the refactor is behaviour-identical. */
+		  $strongestValue = -1;
 		  $multiplier = 1;
 		  $elint = false;
 		  $advanced = false;
@@ -692,6 +709,23 @@ class Enhancements{
 		  $enhPriceStep = 0;
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//this is NOT an enhancement - rather an OPTION
 	  }  	
+
+	  /* Jump Accelerator (SHIP_ENHANCEMENTS_PLAN.md §2.3): jump delay -33% (x0.67, halves up), jump point
+	     range +2, the drive's power draw doubled, and double the failure chance on the turn it OPENS a
+	     jump point. Cost: 10% of the ship, limit 1. Only for a drive that opens jump points
+	     (JumpEngine::canTakeJumpAccelerator: not legacy - so not Ancient either - not a gate, not the Trek
+	     Nacelle), and not on a factionAge 3+ hull: the Vorlons' and The System's ordinary drives, which
+	     only their blocked sets keep out today (D15). Engines through getUnitJumpEngines, never a bare
+	     sweep of $ship->systems. */
+	  $enhID = 'JUMP_ACC';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled) && $ship->factionAge < 3){ //option is not disabled
+		  foreach (JumpEngine::getUnitJumpEngines($ship) as $jumpEngine){
+			  if ($jumpEngine->canTakeJumpAccelerator()){
+				  $ship->enhancementOptions[] = array($enhID, 'Jump Accelerator', 0, 1, ceil($ship->pointCost * 0.1), 0, false);
+				  break;
+			  }
+		  }
+	  }
 
 	  //Markab-specific - Enables 'Religious Fervor' refit to selected vessel which comes with some bonus and some penalties.
 	  $enhID = 'MARK_FERV';	  
@@ -945,6 +979,28 @@ class Enhancements{
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
 	  
+
+	  /* Stealth Coating (SHIP_ENHANCEMENTS_PLAN.md §2.2): -1 defence profile (5%) against a shot from a
+	     weapon that uses OEW, fired by a unit holding OEW >= 1 on this ship after disruption EW, arriving
+	     on a covered facing. A CHOICE, like CHAM_DISG: index 7 is the coverage list, numberTaken an index
+	     into it, and index 8 (new) the price of each choice. Absent index 8 means free, which is what
+	     keeps the Chameleon disguise exactly as it was.
+	     PRICE (user ruling 2026-10-04, the rules' own formula - D8's "1000" was only an example): the
+	     ship's cost / the average of its forward and side profiles, x 100% / 75% / 25% by coverage (D7),
+	     rounded up at the end - see profileCoatingPrices.
+	     ELIGIBLE (D11): every ship-path unit except bases, terrain and factionAge 3+. Terrain, mines and
+	     the Ancient sets block standard enhancements; the factionAge test guards future hulls. OSATs and
+	     Middleborn hulls can buy it. Fighters and shuttles have their own offer (setEnhancementOptionsFighter).
+	     Not gated on $offerChoiceLists: that gate exists for the Chameleon's ship enumeration, and this
+	     list is a literal. */
+	  $enhID = 'STEALTH_CT';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled) && !$ship->base && !$ship->mine && $ship->factionAge < 3){ //option is not disabled
+		  $prices = self::profileCoatingPrices($ship->pointCost, $ship->forwardDefense, $ship->sideDefense);
+		  if($prices !== null){
+			  $choices = self::profileCoatingChoices();
+			  $ship->enhancementOptions[] = array($enhID, 'Stealth Coating', 0, count($choices) - 1, $prices[1], 0, false, $choices, $prices);
+		  }
+	  }
 
 	//Vorlon Amethyst Skin (for ship). +1 Adaptive Armor point, AA maximum and available for pre-assignment increased as well for every even total.
 	//cost: ramming value (let's simplify to total structure) x number of point / 5; max. +50%
@@ -1774,6 +1830,22 @@ class Enhancements{
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
 	  
+	  /* Stealth Coating for fighters and shuttles (user ruling 2026-10-04, replacing D11's "fighters no"):
+	     "This improvement can be added to fighters or shuttles, using the same cost schedule". Priced PER
+	     CRAFT off one craft's cost, like every other fighter enhancement: a flight's pointCost is for six
+	     craft, a superheavy's is its own. Same choice list and the same effect as on a ship - the shooter
+	     needs OEW or CCEW >= 1 on the flight (CCEW counts against flights; BaseShip::getOEW).
+	     Standard: blocked on the Ancient, mine and Walker fighter sets; the Shuttles set gives it back. */
+	  $enhID = 'STEALTH_CT';
+	  if(!in_array($enhID, $flight->enhancementOptionsDisabled) && !$flight->mine && $flight->factionAge < 3){ //not the flight-shaped custom mines (MineClass), user 2026-10-04
+		  $craftCost = ($flight instanceof SuperHeavyFighter) ? $flight->pointCost : $flight->pointCost / 6;
+		  $prices = self::profileCoatingPrices($craftCost, $flight->forwardDefense, $flight->sideDefense);
+		  if($prices !== null){
+			  $choices = self::profileCoatingChoices();
+			  $flight->enhancementOptions[] = array($enhID, 'Stealth Coating', 0, count($choices) - 1, $prices[1], 0, false, $choices, $prices);
+		  }
+	  }
+
 	  //Shadow fighter deployed without carrier control: -2 OB, -3(15) Ini, cost: 0, limit: 1
 	  $enhID = 'SHAD_CTRL';
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
@@ -2078,7 +2150,66 @@ class Enhancements{
 			$index = (int)$enhancementEntry[2];
 			return isset($choices[$index][0]) ? $choices[$index][0] : '';
 		}
+		if($enhancementEntry[0] === 'STEALTH_CT'){ //the coverage KEY, from the server's own list (§2.2.3)
+			$choices = self::profileCoatingChoices();
+			$index = (int)$enhancementEntry[2];
+			return isset($choices[$index][0]) ? $choices[$index][0] : '';
+		}
 		return $enhancementEntry[1];
+	}
+
+	/* Stealth Coating's coverage choices, [key, label], index 0 = None. The ONE list the offer, the
+	   stored-name resolver and the tooltip all read (§2.2.1); its order is the numberTaken index.
+	   Keys are words, so JSON_NUMERIC_CHECK leaves them alone. */
+	public static function profileCoatingChoices(){
+		return array(array('', 'None'), array('all', 'All Sides'), array('fs', 'Front & Sides'), array('front', 'Front Only'));
+	}
+
+	/* Stealth Coating's price for each coverage choice, [None, All, Front & Sides, Front Only], or null
+	   when there is no profile to divide by. The rules (user, 2026-10-04): "the ship's price divided by
+	   the average of the forward/aft and starboard/port defense ratings (round fractions up after the
+	   calculations are finished, but retain them when averaging). For example, a ship with a cost of 1000
+	   and a defense rating average of 16.5 would pay 61 points ... a fighter with a cost of 42 and
+	   average defense rating of 6 would pay 7 points for the stealth coat per fighter in flight". Then
+	   x 100% / 75% / 25% by coverage (D7), still rounded up only at the end.
+	   $unitCost is ONE unit's cost: the ship's, or a single craft's for a fighter or shuttle flight.
+	   ⭐ IN WHOLE NUMBERS: cost in hundredths x pct / (profile sum in halves x 2500), rounded up by integer
+	   division - so an exact answer is never pushed up a point by a float (1000/15 x 0.75 is
+	   50.000000000000007 in floats).
+	   ⚠️ The lobby never recomputes it: the buy dialog reads the list from the offer tuple (index 8). */
+	public static function profileCoatingPrices($unitCost, $forwardDefense, $sideDefense){
+		$sumHalves = (int)round(($forwardDefense + $sideDefense) * 2);
+		if($sumHalves <= 0) return null;
+		$cents = max(0, (int)round($unitCost * 100));
+		$prices = array(0);
+		foreach(array(100, 75, 25) as $pct){
+			$den = $sumHalves * 2500;
+			$prices[] = intdiv($cents * $pct + $den - 1, $den);
+		}
+		return $prices;
+	}
+
+	/* A STEALTH_CT row resolved to its coverage key, or null for None / anything unresolvable - the
+	   resolveChameleonDisguise shape. In game the row is [id, enhname, numbertaken, 0,0,0], so the
+	   stored KEY is at index 1; in the lobby path index 1 is the label and the index is what counts.
+	   Name first, index second, and anything else is None: an unknown key never becomes a coating. */
+	private static function resolveProfileCoating($entry){
+		$choices = self::profileCoatingChoices();
+		$byName = isset($entry[1]) ? (string)$entry[1] : '';
+		foreach($choices as $choice){
+			if($choice[0] !== '' && $choice[0] === $byName) return $byName;
+		}
+		$index = (int)$entry[2];
+		if($index > 0 && isset($choices[$index][0])) return $choices[$index][0];
+		return null; //None
+	}
+
+	//The human label for a coverage key ('fs' -> 'Front & Sides').
+	public static function getProfileCoatingLabel($coverage){
+		foreach(self::profileCoatingChoices() as $choice){
+			if($choice[0] === $coverage) return $choice[1];
+		}
+		return '';
 	}
 
 	/*Resolve a stored CHAM_DISG entry to a phpclass, or null for "None" / anything unresolvable.
@@ -2124,7 +2255,7 @@ class Enhancements{
 			$enhCount = $entry[2];
 			$enhDescription = $entry[1];
 			if($enhCount > 0) {
-				if(!self::isAmmoEnhancement($enhID)){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
+				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'STEALTH_CT'){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
 				if($flight->enhancementTooltip != "") $flight->enhancementTooltip .= "<br>";
 				//if($enhID == 'DEPLOY' && $enhCount > 1){ //Special type of Enhancement, clarify what it means.
 				//	$flight->enhancementTooltip .= "Flight deploys on Turn $enhCount";
@@ -2210,6 +2341,15 @@ class Enhancements{
 						$flight->iniativebonus -= $enhCount*5;
 						$flight->forwardDefense += $enhCount;
 						$flight->sideDefense += $enhCount;
+						break;
+					case 'STEALTH_CT': //Stealth Coating on a fighter or shuttle flight - recorded exactly as on a ship
+						$coverage = self::resolveProfileCoating($entry);
+						if($coverage !== null && !$flight->mine && $flight->factionAge < 3){
+							$flight->setProfileCoating($coverage);
+							TacGamedata::$profileCoatingPresent = true;
+							if($flight->enhancementTooltip != "") $flight->enhancementTooltip .= "<br>";
+							$flight->enhancementTooltip .= "Stealth Coating: " . self::getProfileCoatingLabel($coverage);
+						}
 						break;
 					case 'SHAD_CTRL': //Shadow fighter deployed without carrier control: -2 OB, -3(15) Ini
 						$flight->offensivebonus -= $enhCount*2;
@@ -2299,16 +2439,93 @@ class Enhancements{
 		   }
 	   }
 
+	   /* ⭐ "THE STRONGEST SYSTEM OF A KIND" - one copy of the loop that used to be written out at
+	      eight apply sites and two offer sites (SHIP_ENHANCEMENTS_PLAN.md §4.2 R1).
+	      Highest $field wins, strictly (>), so on a tie the FIRST in construction order keeps it -
+	      exactly what every hand-written loop did. $floor is those loops' starting value: a system
+	      has to beat it to be picked at all (-1 for the output picks, -1000 for the reactor-by-size
+	      picks). Returns null when nothing qualifies; each caller keeps its own guard.
+	      ⚠️ ASK AT THE MOMENT OF APPLICATION, NEVER CACHE THE ANSWER. An earlier row can move the
+	      field: with two equal scanners A and B, Poor Crew takes A down, so a later Improved Sensors
+	      picks B. A winner remembered from before the loop would still pick A.
+	      ⚠️ MIRROR PAIR with lobbyEnhancements.strongestOf (JS). */
+	   private static function strongestSystem($ship, $class, $field, $floor = -1){
+		   $best = null;
+		   $bestValue = $floor;
+		   foreach ($ship->systems as $system){
+			   if ($system instanceof $class && $system->$field > $bestValue){
+				   $bestValue = $system->$field;
+				   $best = $system;
+			   }
+		   }
+		   return $best;
+	   }
+
+	   /* ⭐ ELITE AND POOR CREW'S STAT BLOCK, written once (§4.2 R2). $step is +levels for Elite
+	      Crew and -levels for Poor Crew, and every line moves by it, so the two blocks that used to
+	      be written out separately cannot drift apart. The one asymmetry, the critical roll
+	      modifier, is passed in: Elite -1 per level, Poor +2 per level.
+	          profiles        -1 / +1        strongest Scanner  +1 / -1
+	          initiative      +5 / -5        strongest Engine   +2 / -2
+	          to-hit          +1 / -1        biggest Reactor    +2 / -2
+	          every Thruster  +1 / -1
+	      ⚠️ MIRROR PAIR with lobbyEnhancements.applyCrewStats (JS). */
+	   private static function applyCrewStats($ship, $step, $critMod){
+		   $ship->forwardDefense -= $step;
+		   $ship->sideDefense -= $step;
+		   $ship->iniativebonus += $step*5;
+		   $ship->critRollMod += $critMod;
+		   $ship->toHitBonus += $step;
+
+		   $scanner = self::strongestSystem($ship, 'Scanner', 'output');
+		   if($scanner !== null && $scanner->output > 0) $scanner->output += $step; //Scanner actually exists to be enhanced!
+		   $engine = self::strongestSystem($ship, 'Engine', 'output');
+		   if($engine !== null && $engine->output > 0) $engine->output += $step*2;
+		   //Reactor: the biggest rather than the strongest, as eg. any malus would be on the main reactor as well
+		   $reactor = self::strongestSystem($ship, 'Reactor', 'maxhealth', -1000);
+		   if($reactor !== null) $reactor->output += $step*2;
+		   //thruster ratings as well - of all thrusters
+		   foreach ($ship->systems as $system){
+			   if ($system instanceof Thruster) $system->output += $step;
+		   }
+	   }
+
 	   /*enhancements for ships - actual applying of chosen enhancements
 	   */
 	   private static function setEnhancementsShip($ship){
-		//ammo magazine is necessary for some options
+		//ammo magazine is necessary for some options - looked for only when an ammunition row is
+		//bought, rather than swept on every ship on every load (§4.2 R4). isAmmoEnhancement matches
+		//every ID whose case below loads the magazine.
 		$ammoMagazine = null;
-		foreach($ship->systems as $magazine) if($magazine->name == 'ammoMagazine'){
-			  $ammoMagazine = $magazine;
-			  break; //foreach
+		foreach($ship->enhancementOptions as $entry){
+			if($entry[2] > 0 && self::isAmmoEnhancement($entry[0])){
+				foreach($ship->systems as $magazine) if($magazine->name == 'ammoMagazine'){
+					  $ammoMagazine = $magazine;
+					  break; //foreach
+				}
+				break;
+			}
 		}
-		   
+
+		//crew levels for the jump-delay post-pass after the loop (§4.2 R3), and whether a Jump
+		//Accelerator was fitted (§2.3.2) - so a ship without one never sweeps its engines for it
+		$crewJumpElite = 0;
+		$crewJumpPoor = 0;
+		$jumpAccelerated = false;
+
+		/* Advanced Engine Module: the Engine it improves is picked HERE, before any row has moved an
+		   output - the engine the offer looked at (§2.1.2). A deliberate exception to "ask at the
+		   moment of application": Poor Crew takes thrust off the same strongest engine, so on a hull
+		   with two equal engines the answer would depend on row order, and only game load pins that.
+		   ⚠️ MIRROR PAIR with the same pick in lobbyEnhancements.setEnhancementsShip (JS). */
+		$advEngTarget = null;
+		foreach($ship->enhancementOptions as $entry){
+			if($entry[0] === 'ADV_ENG' && $entry[2] > 0){
+				$advEngTarget = self::strongestSystem($ship, 'Engine', 'output');
+				break;
+			}
+		}
+
 	   	foreach($ship->enhancementOptions as $entry){
 			//ID,readableName,numberTaken,limit,price,priceStep
 			$enhID = $entry[0];
@@ -2318,8 +2535,9 @@ class Enhancements{
 				//CHAM_DISG is choice-valued, so enhDescription is a phpclass, not prose, and the count
 				//is an index - the generic line would read "kendariUpgraded (x7)". SHAD_TEND's count is
 				//a capacity in fives, so the generic line would read "(x2)" where the player bought a
-				//10-capacity tendril. Both write their own line below.
-				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'CHAM_DISG' && $enhID !== 'SHAD_TEND'){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
+				//10-capacity tendril. Both write their own line below. ADV_ENG says whether it is lost;
+				//STEALTH_CT's count is a coverage index, so it names the coverage instead.
+				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'CHAM_DISG' && $enhID !== 'SHAD_TEND' && $enhID !== 'ADV_ENG' && $enhID !== 'STEALTH_CT'){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
 				if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
 				//if($enhID == 'DEPLOY'){ //Special type of Enhancement, clarify what it means.
 				//	$ship->enhancementTooltip .= "Ship deploys on Turn $enhCount";
@@ -2330,6 +2548,25 @@ class Enhancements{
 				}
 
 			        switch ($enhID) {
+
+					case 'ADV_ENG': //Advanced Engine Module: strongest Engine -1 Efficiency (min 1), until ANY Engine takes a critical (SHIP_ENHANCEMENTS_PLAN.md §2.1)
+						/* Limit 1, and the server trusts the client's count, so a count above 1 means
+						   nothing more: the effect is on or off. Every Engine is WATCHED, because a
+						   critical on any of them ends the module (Engine::generateIndividualNotes
+						   writes the permanent note); only the picked one is improved. */
+						$advEngLost = false;
+						foreach ($ship->systems as $system){
+							if ($system instanceof Engine){
+								$system->markAdvEngWatched();
+								if ($system->hasLostAdvEng(TacGamedata::$currentTurn)) $advEngLost = true;
+							}
+						}
+						if (!$advEngLost && $advEngTarget !== null && $advEngTarget->boostable){
+							$advEngTarget->boostEfficiency = max(1, (int)$advEngTarget->boostEfficiency - 1);
+						}
+						if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
+						$ship->enhancementTooltip .= $advEngLost ? "Advanced Engine Module (lost)" : "Advanced Engine Module";
+						break;
 
 					case 'DEPLOY':
 						//Amend value of turn that ship deploys on.
@@ -2379,78 +2616,22 @@ class Enhancements{
 						}
 						break;
 
-					case 'ELITE_CREW': //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -1 to critical results, +1 to hit all weapons
+					case 'ELITE_CREW': //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, +1 Thrusters, -1 Profile, -1 to critical results, +1 to hit all weapons (all per level)
 						/* ⭐ THE FOUR ORIGINAL-B5W CLAUSES THIS PORT USED TO SKIP (added 2026-09-20).
 						   All four scale per level, like every other Elite Crew effect here:
 						     1. turn delay -1 per level, floored at 1 .... $crewQuality, read by
 						        Movement::calculateTurndelay and movement.js applyCrewTurnDelay;
 						     2. +1 damage per DIE per level, capped at the die's face ... $crewQuality,
 						        read by Weapon::getFinalDamage via Dice::$perDieBonus;
-						     3. jump delay -20% per level ................ applied right here, once,
-						        to the hull's jump engines;
+						     3. jump delay -20% per level ................ the post-pass after this
+						        loop (§4.2 R3), to the hull's jump engines;
 						     4. one default shuttle per level upgraded to the faction's armed shuttle
 						        ... HangarOps::crewArmedShuttleUpgrades, at hangar population time.
-						   Only 3 is done in this block; 1, 2 and 4 are derivations of $crewQuality,
-						   which is set below. */
+						   1, 2 and 4 are derivations of $crewQuality, which is set below. */
 						$ship->addCrewQuality($enhCount);
-						self::applyCrewJumpDelay($ship, $enhCount);
-
-						//fixed values
-						$ship->forwardDefense -= $enhCount;
-						$ship->sideDefense -= $enhCount;
-						$ship->iniativebonus += $enhCount*5;
-						$ship->critRollMod -= $enhCount;
-						$ship->toHitBonus += $enhCount;						
-						
-						//system mods: Scanner						
-						$strongestSystem = null;
-						$strongestValue = -1;	  
-						foreach ($ship->systems as $system){
-							if ($system instanceof Scanner){
-								if($system->output > $strongestValue) {
-									$strongestValue = $system->output;
-									$strongestSystem = $system;
-								}
-							}
-						}  
-						if($strongestValue > 0){ //Scanner actually exists to be enhanced!
-							$strongestSystem->output += $enhCount;
-						}
-						//system mods: Engine	
-						$strongestSystem = null;
-						$strongestValue = -1;	  
-						foreach ($ship->systems as $system){
-							if ($system instanceof Engine){
-								if($system->output > $strongestValue) {
-									$strongestValue = $system->output;
-									$strongestSystem = $system;
-								}
-							}
-						}  
-						if($strongestValue > 0){ //Engine actually exists to be enhanced!
-							$strongestSystem->output += $enhCount*2;
-						}
-						//system mods: Reactor (here I assume main reactor is the biggest one! - ot the strongest, as eg. any malus would be on main reactor as well)
-						$strongestSystem = null;
-						$strongestValue = -1000;
-						foreach ($ship->systems as $system){
-							if ($system instanceof Reactor){
-								if($system->maxhealth > $strongestValue) {
-									$strongestValue = $system->maxhealth;
-									$strongestSystem = $system;
-								}
-							}
-						}  
-						if($strongestSystem != null){ //Reactor actually exists to be enhanced! although it has to ;)
-							$strongestSystem->output += $enhCount*2;
-						}						
-						//modify thruster ratings as well! - of all thrusters
-						foreach ($ship->systems as $system){
-							if ($system instanceof Thruster){
-								$system->output += $enhCount;
-							}
-						} 						
-						break;						
+						$crewJumpElite += $enhCount;
+						self::applyCrewStats($ship, $enhCount, -$enhCount);
+						break;
 
 					case 'ELT_MRN'://Elite marines, mark every Marines system as Elite.
 						foreach ($ship->systems as $system){
@@ -2567,18 +2748,9 @@ class Enhancements{
 						break;
 
 					case 'IMPR_ENG': //Improved Engine: +1 Engine output (strongest Engine), may be taken multiple times
-						$strongestSystem = null;
-						$strongestValue = -1;	  
-						foreach ($ship->systems as $system){
-							if ($system instanceof Engine){
-								if($system->output > $strongestValue) {
-									$strongestValue = $system->output;
-									$strongestSystem = $system;
-								}
-							}
-						}  
-						if($strongestValue > 0){ //Engine actually exists to be enhanced!
-							$strongestSystem->output += $enhCount;
+						$engine = self::strongestSystem($ship, 'Engine', 'output');
+						if($engine !== null && $engine->output > 0){ //Engine actually exists to be enhanced!
+							$engine->output += $enhCount;
 						}
 						break;
 
@@ -2591,42 +2763,24 @@ class Enhancements{
 						break;
 
 					case 'IMPR_REA': //Improved Reactor: more power output (depending on ship size
-						$strongestSystem = null;
-						$strongestValue = -1;	  
-						foreach ($ship->systems as $system){
-							if ($system instanceof Reactor){
-								if($system->maxhealth > $strongestValue) {
-									$strongestValue = $system->maxhealth;
-									$strongestSystem = $system;
-								}
-							}
-						}  
-						if($strongestValue > 0){ //Reactor actually exists to be enhanced!
+						$reactor = self::strongestSystem($ship, 'Reactor', 'maxhealth');
+						if($reactor !== null && $reactor->maxhealth > 0){ //Reactor actually exists to be enhanced!
 							$addedPower = 0;
 							if($ship->Enormous == true){
 							  $addedPower = 4;
 							}else{
 							  $addedPower = $ship->shipSizeClass; //+1 for MCV, +2 for HCV, +3 for Capital
-							}		  
-							$strongestSystem->output += $enhCount*$addedPower;
-						}
-						break;		
-						
-					case 'IMPR_SENS': //Improved Scanner: +1 Scanner output (strongest Scanner)
-						$strongestSystem = null;
-						$strongestValue = -1;	  
-						foreach ($ship->systems as $system){
-							if ($system instanceof Scanner){
-								if($system->output > $strongestValue) {
-									$strongestValue = $system->output;
-									$strongestSystem = $system;
-								}
 							}
-						}  
-						if($strongestValue > 0){ //Scanner actually exists to be enhanced!
-							$strongestSystem->output += $enhCount;
+							$reactor->output += $enhCount*$addedPower;
 						}
-						break;					
+						break;
+
+					case 'IMPR_SENS': //Improved Scanner: +1 Scanner output (strongest Scanner)
+						$scanner = self::strongestSystem($ship, 'Scanner', 'output');
+						if($scanner !== null && $scanner->output > 0){ //Scanner actually exists to be enhanced!
+							$scanner->output += $enhCount;
+						}
+						break;
 
 					case 'IMPR_SR': //Improved Self Repair: +1 Output for each Self Repair
 						foreach ($ship->systems as $system){
@@ -2695,6 +2849,26 @@ class Enhancements{
 							}
 						}  	
 						break;			
+
+					case 'JUMP_ACC': //Jump Accelerator: range +2, power draw x2 and the reactor -P (SHIP_ENHANCEMENTS_PLAN.md §2.3)
+						/* Limit 1, and the server trusts the client's count, so a count above 1 means nothing
+						   more: applyJumpAccelerator refuses a second call and a drive that cannot take one.
+						   The factionAge test is the offer's, repeated so a row the offer would never make
+						   changes nothing. The jump DELAY is the post-pass's, after the crew levels (D14).
+						   REACTOR (D16 as re-ruled 2026-10-04, §2.3.3): a power deficit of P, the drive's
+						   normal draw, ON TOP OF the doubled draw - drive on costs 2P more on every hull. An
+						   ordinary reactor's output already nets the drive's draw out, so the extra draw has to
+						   come off it as well: -2P. A fixed-power (Mag-Grav) reactor subtracts every draw
+						   itself, so its doubled powerReq already charges the extra P: -P.
+						   ⚠️ MIRROR PAIR with lobbyEnhancements.setEnhancementsShip's JUMP_ACC case (JS). */
+						if ($ship->factionAge >= 3) break;
+						$reactor = $ship->getSystemByName("Reactor");
+						foreach (JumpEngine::getUnitJumpEngines($ship) as $jumpEngine){
+							$draw = $jumpEngine->applyJumpAccelerator();
+							if ($jumpEngine->isJumpAccelerated()) $jumpAccelerated = true;
+							if ($draw > 0 && $reactor !== null) $reactor->output -= $reactor->fixedPower ? $draw : 2 * $draw;
+						}
+						break;
 
 					case 'MARK_FERV': //Markab Religious Fervor: +1 to hit all weapons, +10 Initiative, +2 Defence Profiles
 							$ship->toHitBonus += $enhCount;
@@ -2769,76 +2943,21 @@ class Enhancements{
 						if($ship->mineType == 'DEW') $ship->detectedSignature += $enhCount;
 						break;								
 
-					case 'POOR_CREW': //Poor Crew: -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results, -5 Initiative, -1 to hit all weapons
+					case 'POOR_CREW': //Poor Crew: -2 Engine, -1 Sensors, -2 Reactor power, -1 Thrusters, +1 Profile, +2 to critical results, -5 Initiative, -1 to hit all weapons (all per level)
 						/* ⭐ THE FOUR ORIGINAL-B5W CLAUSES THIS PORT USED TO SKIP (added 2026-09-20),
 						   the mirror of the Elite Crew block above and scaling per level the same way:
 						     1. turn delay +1 per level ................. $crewQuality (negative);
 						     2. hangar launch/dock rate halved per level  applied right here;
-						     3. jump delay +20% per level ............... applied right here;
+						     3. jump delay +20% per level ............... the post-pass after this loop
+						        (§4.2 R3);
 						     4. no armed shuttles, bought or berthed .... $crewQuality, read by
 						        HangarOps::crewBlocksArmedShuttles and the lobby's Fleet Checker.
 						   ⚠ Poor Crew has NO damage clause - getCrewDieDamageBonus() clamps at 0 so
 						   the negative level can never become a penalty per die. */
 						$ship->addCrewQuality(-$enhCount);
-						self::applyCrewJumpDelay($ship, -$enhCount);
+						$crewJumpPoor += $enhCount;
 						self::halveHangarRate($ship, $enhCount);
-
-						//fixed values
-						$ship->forwardDefense += $enhCount;
-						$ship->sideDefense += $enhCount;
-						$ship->iniativebonus -= $enhCount*5;
-						$ship->critRollMod += $enhCount*2;
-						$ship->toHitBonus -= $enhCount;								
-						
-						//system mods: Scanner						
-						$strongestSystem = null;
-						$strongestValue = -1;	  
-						foreach ($ship->systems as $system){
-							if ($system instanceof Scanner){
-								if($system->output > $strongestValue) {
-									$strongestValue = $system->output;
-									$strongestSystem = $system;
-								}
-							}
-						}  
-						if($strongestValue > 0){ //Scanner actually exists to be enhanced!
-							$strongestSystem->output -= $enhCount;
-						}
-						//system mods: Engine	
-						$strongestSystem = null;
-						$strongestValue = -1;	  
-						foreach ($ship->systems as $system){
-							if ($system instanceof Engine){
-								if($system->output > $strongestValue) {
-									$strongestValue = $system->output;
-									$strongestSystem = $system;
-								}
-							}
-						}  
-						if($strongestValue > 0){ //Engine actually exists to be enhanced!
-							$strongestSystem->output -= $enhCount*2;
-						}
-						//system mods: Reactor (here I assume main reactor is the biggest one! - ot the strongest, as eg. any malus would be on main reactor as well)
-						$strongestSystem = null;
-						$strongestValue = -1000;
-						foreach ($ship->systems as $system){
-							if ($system instanceof Reactor){
-								if($system->maxhealth > $strongestValue) {
-									$strongestValue = $system->maxhealth;
-									$strongestSystem = $system;
-								}
-							}
-						}  
-						if($strongestSystem != null){ //Reactor actually exists to be enhanced! although it has to ;)
-							$strongestSystem->output -= $enhCount*2;
-						}		
-						
-						//modify thruster ratings as well! - of all thrusters
-						foreach ($ship->systems as $system){
-							if ($system instanceof Thruster){
-								$system->output -= $enhCount;
-							}
-						} 						
+						self::applyCrewStats($ship, -$enhCount, $enhCount*2);
 						break;
 						
 					case 'MINE_MULTI': //Flexible Targeting for Mines
@@ -2884,6 +3003,20 @@ class Enhancements{
 						}  
 						break;
 						
+					case 'STEALTH_CT': //Stealth Coating: the facings it covers (SHIP_ENHANCEMENTS_PLAN.md §2.2)
+						/* Only RECORDS the coverage - the effect is conditional, so it is applied per shot
+						   (Weapon::calculateHitBase -> BaseShip::getProfileCoatingReduction). The offer's
+						   eligibility is repeated so a row the offer would never make changes nothing, and an
+						   unknown key resolves to None. The static gate is never reset (see its declaration). */
+						$coverage = self::resolveProfileCoating($entry);
+						if($coverage !== null && !$ship->base && !$ship->mine && $ship->factionAge < 3){
+							$ship->setProfileCoating($coverage);
+							TacGamedata::$profileCoatingPresent = true;
+							if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
+							$ship->enhancementTooltip .= "Stealth Coating: " . self::getProfileCoatingLabel($coverage);
+						}
+						break;
+
 					case 'SLUGGISH': //Sluggish: -1(5) Initiative
 						//fixed values
 						$ship->iniativebonus -= $enhCount*5;
@@ -3039,12 +3172,26 @@ class Enhancements{
 					case 'SHELL_MLR': //Long Range Ammo for Medium Railgun						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMShellLRange(), $enhCount, true); //do notify dependent weapons, too!
 						break;
-					case 'SHELL_HULR': //Long Range Ammo for Heavy Railgun						
+					case 'SHELL_HULR': //Long Range Ammo for Heavy Railgun
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoHShellULRange(), $enhCount, true); //do notify dependent weapons, too!
-						break;							
+						break;
 				}
 			}
-			
+
+		}
+
+		/* ⭐ THE JUMP-DELAY POST-PASS (SHIP_ENHANCEMENTS_PLAN.md §4.2 R3). Every enhancement that
+		   scales the jump delay rounds it, so the ORDER they apply in changes the answer, and the
+		   game (rows enhid ascending) and the lobby (ID descending) used to apply them in opposite
+		   orders. So they are applied here, after every row, in one written-down order: Elite
+		   levels, then Poor levels, then the Jump Accelerator (D14 - a 20-turn delay with one level
+		   of Elite Crew is 16, then 11). Elite before Poor is the order a game already used, so no
+		   recorded game moves.
+		   ⚠️ MIRROR PAIR with the post-pass in lobbyEnhancements.setEnhancementsShip (JS). */
+		self::applyCrewJumpDelay($ship, $crewJumpElite);
+		self::applyCrewJumpDelay($ship, -$crewJumpPoor);
+		if ($jumpAccelerated){
+			foreach (JumpEngine::getUnitJumpEngines($ship) as $jumpEngine) $jumpEngine->applyJumpAcceleratorDelay();
 		}
 	   }//endof function setEnhancementsShip
 	   	  
@@ -3129,6 +3276,13 @@ class Enhancements{
 							}
 							break;
 							
+						case 'STEALTH_CT': //Stealth Coating: the covered facings, for the shooter's own hit-chance preview
+							if($ship->getProfileCoating() !== null){
+								$strippedShip->profileCoating = $ship->getProfileCoating();
+								$strippedShip->profileCoatingMod = BaseShip::PROFILE_COATING_MOD;
+							}
+							break;
+
 						case 'SHAD_CTRL': //Uncontrolled Shadow fighter: modify Initiative and OB
 							if($ship instanceof FighterFlight){
 								$strippedShip->offensivebonus = $ship->offensivebonus;
@@ -3201,6 +3355,16 @@ class Enhancements{
 							$strippedShip->crewTurnDelayMod = $ship->getCrewTurnDelayModifier();
 							break;							
 						
+						case 'STEALTH_CT': //Stealth Coating: the covered facings, for the shooter's own hit-chance preview
+							/* Public, like Elite Crew's profiles: weaponManager.calculateHitChange needs it to
+							   preview a shot at this ship (BaseShip::stripForJson states the rule). A disguised
+							   ship's payload is built from its simulacrum's sheet and never carries it. */
+							if($ship->getProfileCoating() !== null){
+								$strippedShip->profileCoating = $ship->getProfileCoating();
+								$strippedShip->profileCoatingMod = BaseShip::PROFILE_COATING_MOD;
+							}
+							break;
+
 						case 'SLUGGISH': //Sluggish: Initiative  modified
 							$strippedShip->iniativebonus = $ship->iniativebonus;
 							break;
@@ -3248,8 +3412,18 @@ class Enhancements{
 				$enhID = $entry[0];
 				$enhCount = $entry[2];
 				$enhDescription = $entry[1];
-				if($enhCount > 0) {					
-					switch ($enhID) {	
+				if($enhCount > 0) {
+					switch ($enhID) {
+						case 'ADV_ENG': //Advanced Engine Module - the improved Engine's boost Efficiency
+							/* The static blueprint holds the unimproved value and ShipSystem::stripForJson
+							   never sends boostEfficiency, so without this the client prices boosts at the
+							   old rate (power.countBoostPowerUsed) and shows the old "Efficiency". Sent for
+							   EVERY Engine and in both states (improved, or lost and back to the blueprint
+							   value), so this case needs no knowledge of which engine was picked. */
+							if ($system instanceof Engine){
+								$strippedSystem->boostEfficiency = $system->boostEfficiency;
+							}
+							break;
 						case 'EDF_RANGE': //Extended Draining Field - moves an EDF's radius and its boost bonus
 							/* Both numbers are already published UNCONDITIONALLY by
 							   EnergyDrainingField::stripForJson, because the client builds a
@@ -3270,13 +3444,13 @@ class Enhancements{
 								$strippedSystem->output = $system->output;
 							}
 							break;
-						case 'GUNSIGHT': //improved Thought Shield
+						case 'GUNSIGHT': //Repeater Gunsights (legacy): Particle Repeaters may split their shots
 							if ($system instanceof ParticleRepeater){
 								$strippedSystem->canSplitShots = $system->canSplitShots ;
 								$strippedSystem->specialHitChanceCalculation = $system->specialHitChanceCalculation ;						
 							}													
 							break;								
-						case 'IMPR_PSY': //Spark Curtain - affects output of Spark Field
+						case 'IMPR_PSY': //Improved Psychic Field - extends each Psychic Field's range
 							if($system instanceof PsychicField){
 								$strippedSystem->range = $system->range;
 							}
@@ -3307,17 +3481,6 @@ class Enhancements{
 								$strippedSystem->critRollMod = $system->critRollMod ;
 							}
 							break;
-							
-							
-						foreach ($ship->systems as $system){
-							if ($system instanceof MagGravReactor){ //Reactor - tailored for Mag-Gravitic
-								$system->output = ceil($system->output*1.25);//+25%
-								$system->critRollMod += 4;
-							}else if ($system instanceof Engine){ //Engine
-								$system->output = $system->output +2;
-								$system->critRollMod += 4;
-							}
-						}  	
 
 						case 'IPSH_ESSAN': //modifies output and structure of Engine and Sensor, and armor of Structure
 							if ($system instanceof Scanner){ //Scanner
@@ -3330,6 +3493,23 @@ class Enhancements{
 								$strippedSystem->armour = $system->armour ;
 							}
 							break;							
+
+						case 'JUMP_ACC': //Jump Accelerator - the drive's range, draw, flag and tooltip text (§2.3.5)
+							/* range: the server's declaration check reads the live engine, the client's
+							   targetHex / reach overlay / Maintain test read weapon.range - neither changes
+							   unless it is sent. powerReq: getReactorPower counts the doubled draw (the
+							   reactor's lowered output is always sent). data: rebuilt per load from the enhanced
+							   values, but it never reaches the client unless sent, and this replaces the static
+							   dict wholesale - safe, the same method builds both (arch_system_info_tooltip_data_flow).
+							   The jump delay needs nothing here: JumpEngine::stripForJson sends loadingtime from
+							   $delay. Only on the accelerated drive, so every other system is untouched. */
+							if ($system instanceof JumpEngine && $system->isJumpAccelerated()){
+								$strippedSystem->range = $system->range;
+								$strippedSystem->powerReq = $system->powerReq;
+								$strippedSystem->jumpAccelerated = true;
+								$strippedSystem->data = $system->data;
+							}
+							break;
 					
 						case 'MINE_ARM':
 							if ($system instanceof Structure) { //Improved Armour for Mines.

@@ -195,6 +195,14 @@ CaptorMine.prototype.doIndividualNotesTransfer = function () { //prepare individ
 	return true;
 };
 
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4, Stage 6): the ranges, and the 'player has set them' flag the
+//Deployment commit warning reads. Ranges are set on the turn the mine is placed.
+CaptorMine.prototype.draftStateKeys = ['allocatedRanges', 'mineSet'];
+CaptorMine.prototype.draftStatePhases = [-1];
+CaptorMine.prototype.afterDraftRestore = function () {
+	this.refreshData();
+};
+
 
 var ProximityMine = function ProximityMine(json, ship) {
 	Aoe.call(this, json, ship);
@@ -364,6 +372,13 @@ ProximityMine.prototype.doIndividualNotesTransfer = function () { //prepare indi
 		}
 	}
 	return true;
+};
+
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4, Stage 6): which unit types it attacks, and the 'set' flag.
+ProximityMine.prototype.draftStateKeys = ['allocatedShipTypes', 'mineSet'];
+ProximityMine.prototype.draftStatePhases = [-1];
+ProximityMine.prototype.afterDraftRestore = function () {
+	this.refreshData();
 };
 
 var AsteroidSalvo = function AsteroidSalvo(json, ship) {

@@ -73,7 +73,15 @@
   <ul>
     <li><b>Snap turns</b> are made as consecutive but separate turns. The turn delay is taken from the first turn only,
       so shorten the first turn to shorten the snap turn.</li>
-    <li><b>Extended turns</b> - turns spread across several game turns - are not implemented.</li>
+    <li><b>Extended turns</b> - a ship (not a fighter) that cannot afford a turn, or would overthrust to pay for it, may
+      spread the turn over two game turns. Where the turn arrow cannot be offered, an orange arrow begins an extended
+      turn; on a turn you can afford, tick <i>Make Extended Turn</i> on the thrust panel instead. Pay at least a quarter
+      of the turn cost now, and never all of it. The ship keeps its facing and may not turn, pivot or roll again that
+      turn. At the start of its next movement, before any other order, click the orange arrow to pay the rest: the ship
+      turns in the hex where it starts, and the turn delay counts from there. Extra thrust paid then shortens the
+      delay as usual. The ship cannot change speed on that turn. If the rest can no longer be paid (thrusters lost,
+      not enough thrust, or the engine shorted), the turn is cancelled automatically and the thrust already spent is
+      lost. A cancellation is never voluntary.</li>
   </ul>
 
   <h3>Firing and weapons</h3>
@@ -195,7 +203,7 @@
 <section data-key="infopanel" data-title="Info Panel" data-group="Interface &amp; Site">
   <p class="fvd-lede">The Info Panel is the tabbed panel along the bottom-left of the battle screen. Its six tabs share
     one body, so only one is on screen at a time: <b>COMBAT LOG</b>, <b>FLEET INFO</b>, <b>GAME CHAT</b>, <b>CHAT</b>,
-    <b>DECLARATIONS</b> and <b>SAVE FLEET</b>.</p>
+    <b>DECLARATIONS</b> and <b>OPTIONS</b>.</p>
   <figure class="fvd-fig">
     <img src="img/docViewer/info-panel.jpg" alt="The Info Panel with the combat log open">
     <figcaption>The Info Panel, on the COMBAT LOG tab.</figcaption>
@@ -298,10 +306,47 @@
       earlier than the rest of the interface does.</li>
   </ul>
 
-  <h3>SAVE FLEET</h3>
-  <p>Saves your surviving ships - with their enhancements, remaining ammunition, battle damage and critical effects - as
-    a reusable fleet list. Load it in Fleet Selection to carry a campaign on into the next battle. See
-    <a href="#savedfleets">Battle Damage &amp; Saving Fleets</a> for exactly what is and is not carried over.</p>
+  <h3>OPTIONS</h3>
+  <p>Your own settings for this screen, and two things you can save.</p>
+  <ul>
+    <li><b>Show Initiative Overlay</b> - the movement-group number drawn over every unit that has not moved yet.</li>
+    <li><b>Play sound during Replay</b> - when off, every replay starts muted; the speaker button on the map still turns
+      the sound on for that replay. Both settings are kept on your device.</li>
+    <li><b>Saved Orders</b> - shows whether you have orders saved for the current phase, and lets you discard them. See
+      <a href="#savedorders">Saving Orders for Later</a>.</li>
+    <li><b>Save Fleet</b> - saves your surviving ships, with their enhancements, remaining ammunition, battle damage and
+      critical effects, as a reusable fleet list. Load it in Fleet Selection to carry a campaign on into the next
+      battle. See <a href="#savedfleets">Battle Damage &amp; Saving Fleets</a> for exactly what is and is not carried
+      over.</li>
+  </ul>
+</section>
+
+<section data-key="savedorders" data-title="Saving Orders for Later" data-group="Interface &amp; Site">
+  <p class="fvd-lede">Halfway through a big phase and need to stop? The <b>floppy-disk button</b> beside the green tick
+    saves the orders you have given so far <i>without</i> committing them. Open the game again later - on this device or
+    any other - and your orders are put back exactly as you left them, ready to finish and commit as normal.</p>
+  <ul>
+    <li>It works in every phase you give orders in: <b>Deployment</b> (and Pre-Turn Orders), <b>Initial Orders</b>,
+      <b>Movement</b>, <b>Pre-Firing Orders</b> and <b>Fire Orders</b>. In Deployment and Movement the Save button is
+      there from the start, before every unit has been placed or has finished moving.</li>
+    <li>A save keeps everything you have ordered in that phase: where you have placed your units, with their facing,
+      speed and a base's rotation; the moves, turns, pivots, rolls, slips, speed changes and jinking you have plotted,
+      with the thrust each one used; power, EW, fire orders and firing modes, combat pivots, the Jump Manifest; and
+      the settings of special systems such as Adaptive Armor, Self-Repair priorities, Specialists, shield energy, mine
+      ranges, cloaking and shading, and hangar launches and docking - including units set to start the battle
+      aboard a carrier.</li>
+    <li>In Movement a save belongs to the ships you are moving right now, and keeps every manoeuvre that has its
+      thrust paid. One you are still paying for, with the thrust panel open, is not kept.</li>
+    <li>It covers <b>the current phase only</b>. Each save replaces the one before, and nothing is kept once the phase
+      is over.</li>
+    <li>Saving is not committing: the game still waits for you, and your opponents never see your saved orders.</li>
+    <li>When you come back, a line under the phase banner tells you when the restored orders were saved. Pointing at the
+      Save button shows the time of your last save as well.</li>
+    <li><b>Committing clears your saved copy</b>, so the next phase always starts fresh.</li>
+    <li>To throw a save away, open the <b>OPTIONS</b> tab at the bottom of the screen and click <b>Discard Saved
+      Orders</b>. This resets every order you have given this phase that is not yet committed - including anything
+      you have not saved - and reloads the game.</li>
+  </ul>
 </section>
 
 <section data-key="ruler" data-title="Ruler Tool" data-group="Interface &amp; Site">
@@ -454,14 +499,14 @@
 
   <h3>Saving a fleet from a game in progress</h3>
   <figure class="fvd-fig">
-    <img src="img/docViewer/save-fleet-tab.jpg" alt="The Save Fleet tab of the Info Panel">
+    <img src="img/docViewer/save-fleet-tab.jpg" alt="The Save Fleet section of the Info Panel">
     <figcaption>Saving a fleet's survivors from the battle screen.</figcaption>
   </figure>
-  <p>In any game, open the <b>SAVE FLEET</b> tab of the Info Panel (beside COMBAT LOG, DECLARATIONS and the chats). It
-    tells you how many of your units will be saved, and <b>Save Current Fleet</b> saves them as a normal saved fleet -
-    but with all their accumulated damage and critical effects attached.</p>
+  <p>In any game, open the <b>OPTIONS</b> tab of the Info Panel (beside COMBAT LOG, DECLARATIONS and the chats). Its
+    <b>Save Fleet</b> section tells you how many of your units will be saved, and <b>Save Current Fleet</b> saves them as
+    a normal saved fleet - but with all their accumulated damage and critical effects attached.</p>
   <ul>
-    <li>The tab is available in <b>every phase</b>, and in finished games and replays too, so you can go back to a
+    <li>Save Fleet is available in <b>every phase</b>, and in finished games and replays too, so you can go back to a
       completed battle and save the winning side's survivors.</li>
     <li>Only <b>survivors</b> are saved. Destroyed ships, ships that docked into a hangar and left the battle, and mines
       you have already laid are all left out; the summary line says how many were excluded.</li>
@@ -1428,11 +1473,43 @@
     <li>the distance to the hidden enemy mine;</li>
     <li>the mine's signature.</li>
   </ul>
-  <p>Detection happens at the END of each committed Movement segment - not <i>during</i> a unit's movement, so that
-    players cannot detect a mine and then take their moves back. A mine is revealed if your Detect Mines EW plus
-    Minesweeper Bonus is GREATER THAN the distance to the mine plus the mine's signature.</p>
+  <p>A mine is revealed if your Detect Mines EW plus Minesweeper Bonus is GREATER THAN the distance to the mine plus the
+    mine's signature, and no terrain blocks the line between them. A Minesweeper Bonus counts on its own: a minesweeper
+    detects mines even with no Detect Mines EW assigned.</p>
+  <p>Detection works throughout a unit's movement, not just where it ends up. Every unit is checked from the hex it
+    starts the Movement phase in, then from every hex it enters - so a unit that passes close to a mine finds it even if
+    it ends its move out of range.</p>
   <p>Detecting a mine does not tell you what type it is: to find out, scan it with at least 1 OEW after it has been
     detected.</p>
+
+  <h3 data-anchor="minesweeping">Minesweeping Mode</h3>
+  <p>A unit that can detect mines - one with Detect Mines EW or a Minesweeper Bonus - shows a purple Minesweeping Mode
+    icon behind it during Movement, while the enemy still has a mine you have not found. You choose, unit by unit and turn
+    by turn:</p>
+  <ul>
+    <li><b>Off</b> (the icon faint, as it starts): the unit plots as usual, with free undo, and what it finds shows when
+      you commit its move.</li>
+    <li><b>On</b> (the icon glowing): the unit sweeps as you plot. Each time it enters a hex, that hex is checked, and a
+      mine it finds appears on the map at once - so a scout's finds show while the rest of its movement group is still
+      being plotted, and the others can steer around them.</li>
+  </ul>
+  <p><b>Choose before the unit moves.</b> A unit makes its whole move in Minesweeping Mode or none of it. The icon can be
+    clicked until the unit first moves into a new hex - speed changes, turns and pivots before that are fine. After that
+    it stays as it is for the rest of the move: glowing if it is on, and fainter still if it is off. To switch a unit
+    that has already moved into the mode, cancel its moves back to its starting hex first.</p>
+  <p>While Minesweeping Mode is on:</p>
+  <ul>
+    <li><b>Swept steps are final.</b> A step into a hex cannot be undone - even when nothing was found there, and even
+      after a mis-click. Otherwise a sweeper could test a direction, take it back and try another. Turns, pivots and
+      other manoeuvres after the last swept step can still be cancelled as usual.</li>
+    <li><b>Set your speed first.</b> Speed changes must come before a unit's first move, and once that first step has
+      been swept the speed is fixed for the turn.</li>
+    <li><b>A find stops the move.</b> If a mine is detected partway through a multi-hex move (right-clicking the move
+      arrow), the unit stops at the hex the mine was detected from, with the rest of its movement still to plot - turn
+      away, slide, or carry on.</li>
+    <li>Committing waits for the last checks to come back. If one of them finds a mine, the commit stops so you can react
+      to it - even on the last hex, where the unit may still be able to turn or pivot.</li>
+  </ul>
 
   <h3>Shooting at mines</h3>
   <p>On top of the usual modifiers, a few apply only to mines:</p>

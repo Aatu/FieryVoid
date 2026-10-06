@@ -4,6 +4,7 @@ import PlayerSettings from "./playerSettings/PlayerSettings";
 import ShipThrust from "./shipThrust/ShipThrust";
 import FullScreen from "./fullScreen/FullScreen";
 import Surrender from "./surrender/Surrender";
+import BackToLobby from "./backToLobby/BackToLobby";
 import EwButtons from "./ewButtons/EwButtons";
 import WeaponList from "./system/WeaponList";
 import SystemInfo from "./system/SystemInfo";
@@ -52,6 +53,11 @@ class UIManager {
     Surrender(args) {
         const root = this.getRoot("#surrender");
         if (root) root.render(<Surrender {...args} />);
+    }
+
+    BackToLobby(args) {
+        const root = this.getRoot("#backToLobby");
+        if (root) root.render(<BackToLobby {...args} />);
     }
 
     PlayerSettings(args) {

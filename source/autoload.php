@@ -2027,6 +2027,7 @@ spl_autoload_register(
                 'mineff' => '/server/model/ships/drazi/mineFF.php',
                 'minehff' => '/server/model/ships/hurr/mineHFF.php',
                 'minestealth' => '/server/model/systems/baseSystems.php',
+                'minesweep' => '/server/handlers/MineSweep.php',
                 'minesweepingflyer' => '/server/model/ships/Shuttle.php',
                 'minesweepingflyerprotectorate' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttle' => '/server/model/ships/Shuttle.php',

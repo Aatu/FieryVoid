@@ -239,6 +239,9 @@
   </figure>
   <p>When you have finished a phase for all your ships - or finished moving one ship or flight - click the green tick in
     the title bar at the top of the screen. A box pops up to confirm or cancel: click its green tick to confirm.</p>
+  <p>Need to stop part-way through a phase? The floppy-disk button beside the tick
+    saves your orders without committing them, and they come back the next time you open the game, on any device - see
+    the <a href="faq.php#savedorders">FAQ</a>.</p>
 </section>
 
 <section data-key="preturn-phase" data-title="Pre-Turn Orders" data-group="Playing a Turn">
@@ -340,7 +343,7 @@
   <p class="fvd-lede">Ships move one at a time, in initiative order. When it is your ship's turn, green arrows appear
     around it for each move it can make - point at one to see what it does.</p>
   <figure class="fvd-fig">
-    <img src="img/docViewer/movement-arrows.jpg" alt="A ship surrounded by its green movement arrows, with the thrust window open">
+    <img src="img/docViewer/movement-arrows.jpg" alt="A ship surrounded by its green movement arrows">
     <figcaption>A ship's movement options.</figcaption>
   </figure>
   <p>The ship's tooltip shows its current movement figures too: turn cost, turn delay, pivot cost, roll cost,
@@ -348,14 +351,22 @@
   <ul>
     <li>A ship must always move exactly its Speed in hexes - no more, no less. The large green arrow at its front
       disappears once it has.</li>
-    <li>Anything that needs thrust (everything except moving straight forward) opens a window at the bottom of the
-      screen, where the thrust is assigned to your thrusters. Usually the game assigns it for you and you just click the
-      green arrow in the box - or the red cancel circle to think again.</li>
+    <li>Anything that needs thrust (everything except moving straight forward) opens a small window beside the ship,
+      with the ship's thrusters laid out around it. Usually the game assigns the thrust for you and you just click
+      <b>Confirm</b> - or <b>Cancel</b> to think again.</li>
+    <li>Click a thruster to put a point of thrust through it; right-click it (or press and hold) to take one back. A
+      thruster outlined in orange will take a point the manoeuvre still needs; one outlined in green will take extra
+      thrust, which on a turn shortens the turn delay.</li>
     <li>Sometimes you must assign the thrust yourself, usually because there is a choice of thrusters (pivoting,
       rolling), because some thrusters are damaged or destroyed, or because you are overthrusting - putting more thrust
       through a thruster than its rating, which may critically damage it at the end of the turn.</li>
     <li>Click the red Cancel Move icon behind your ship to take back your moves one at a time; right-click it to undo
       the whole move.</li>
+    <li>When the enemy has mines out, a unit that can detect them (Detect Mines EW, or a Minesweeper Bonus) shows a
+      purple Minesweeping Mode icon behind it. Turn it on before the unit's first move and it sweeps each hex as it
+      enters it: a mine it finds appears at once and stops a multi-hex move there - but a swept step cannot be taken
+      back, so set the unit's speed first. Left off, the unit moves as usual and its finds show when you commit. See
+      <a href="faq.php#minesweeping">Minesweeping Mode</a>.</li>
   </ul>
   <p>When the move is complete, a green tick appears in the title bar. Click it and confirm: the title shows Waiting for
     turn, and the next ship in the initiative order takes its move.</p>
@@ -367,7 +378,8 @@
     <li>You cannot decelerate if your bow thrusters are destroyed, or accelerate if your aft thrusters are destroyed.
       Pivoting can help, but it is not an easy manoeuvre to get right.</li>
     <li>Once you make any manoeuvre (moving forward included) the + and - disappear, and you cannot change speed again
-      this turn - unless you take back all your moves with the Cancel Move icon and start again.</li>
+      this turn - unless you take back all your moves with the Cancel Move icon and start again. In Minesweeping Mode a
+      swept step cannot be taken back, so the speed is fixed once the unit's first move is swept.</li>
     <li>After adjusting speed you may move, slide, turn, pivot and/or roll.</li>
   </ul>
 
@@ -394,6 +406,11 @@
     <li>You cannot turn if the opposite side thruster is destroyed. If all your aft thrusters are destroyed, you can only
       turn when your speed is low enough for the turn cost to be 1 (paid with the opposite side thruster).</li>
     <li>When moving backwards, use your bow thrusters in place of the aft thrusters for turning.</li>
+    <li>A ship that cannot afford a turn may make an <b>extended turn</b> instead, paying for it over two game turns:
+      an orange arrow appears where the turn arrow would be. Pay at least a quarter of the cost now; the ship keeps its
+      facing for the rest of the turn. At the start of next turn's movement, click the orange arrow first to pay the
+      rest and turn. You cannot change speed on that turn. On a turn you can afford, ticking Make Extended Turn on the
+      thrust panel does the same, which is useful to avoid overthrusting.</li>
   </ul>
 
   <h3 data-anchor="pivoting">Pivoting</h3>

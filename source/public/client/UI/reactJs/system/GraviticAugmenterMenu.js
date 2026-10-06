@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import theme from '../styled/theme';
 
 /* Green-styled control menu for the Gravitic Augmenter (3 firing modes).
  *
@@ -22,15 +23,15 @@ const Container = styled.div`
     width: 100%;
     min-width: 180px;
     opacity: 0.95 !important;
-    background-color: rgba(8, 28, 12, 0.92);
-    border: 1px solid #3f8a3f;
+    background-color: ${theme.colors.greenBg};
+    border: 1px solid ${theme.colors.greenLine};
 `;
 
 const Header = styled.div`
     padding: 3px;
-    background-color: #16401b;
-    border: 1px solid #3f8a3f;
-    color: #e6ffe6;
+    background-color: ${theme.colors.greenTitleBg};
+    border: 1px solid ${theme.colors.greenLine};
+    color: ${theme.colors.greenText};
     text-align: center;
     font-size: 11px;
     margin-bottom: 2px;
@@ -43,9 +44,9 @@ const HeaderRow = styled.div`
     align-items: center;
     justify-content: space-between;
     padding: 3px;
-    background-color: #16401b;
-    border: 1px solid #3f8a3f;
-    color: #e6ffe6;
+    background-color: ${theme.colors.greenTitleBg};
+    border: 1px solid ${theme.colors.greenLine};
+    color: ${theme.colors.greenText};
     font-size: 11px;
     font-weight: bold;
     margin-bottom: 2px;
@@ -55,9 +56,9 @@ const HeaderRow = styled.div`
 const HeaderArrow = styled.div`
     width: 20px;
     height: 18px;
-    background: #1b5e20;
-    border: 1px solid #2e7d32;
-    color: #e6ffe6;
+    background: ${theme.colors.greenBtnBg};
+    border: 1px solid ${theme.colors.greenBtnLine};
+    color: ${theme.colors.greenText};
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -65,15 +66,15 @@ const HeaderArrow = styled.div`
     user-select: none;
 
     &:hover {
-        background: #2e7d32;
-        border: 1px solid #66bb6a;
+        background: ${theme.colors.greenBtnLine};
+        border: 1px solid ${theme.colors.greenBtnLineHover};
         color: #ffffff;
     }
 
     ${props => props.disabled && `
         opacity: 0.3;
         cursor: not-allowed;
-        &:hover { background: #1b5e20; border: 1px solid #2e7d32; color: #e6ffe6; }
+        &:hover { background: ${theme.colors.greenBtnBg}; border: 1px solid ${theme.colors.greenBtnLine}; color: ${theme.colors.greenText}; }
     `}
 `;
 
@@ -85,7 +86,7 @@ const HeaderLabel = styled.div`
 
 const SubLabel = styled.div`
     text-align: center;
-    color: #bdf0bd;
+    color: ${theme.colors.greenLabel};
     font-size: 10px;
     padding: 2px 4px 0 4px;
 `;
@@ -101,16 +102,16 @@ const Row = styled.div`
 const RowLabel = styled.div`
     width: 70px;
     font-size: 10px;
-    color: #bdf0bd;
+    color: ${theme.colors.greenLabel};
     user-select: none;
 `;
 
 const ActionButton = styled.div`
     flex: 1;
     height: 20px;
-    background: #1b5e20;
-    border: 1px solid #2e7d32;
-    color: #e6ffe6;
+    background: ${theme.colors.greenBtnBg};
+    border: 1px solid ${theme.colors.greenBtnLine};
+    color: ${theme.colors.greenText};
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -121,16 +122,16 @@ const ActionButton = styled.div`
     user-select: none;
 
     &:hover {
-        background: #2e7d32;
-        border: 1px solid #66bb6a;
+        background: ${theme.colors.greenBtnLine};
+        border: 1px solid ${theme.colors.greenBtnLineHover};
         color: #ffffff;
         opacity: 1;
     }
 
     ${props => props.$active && `
-        background: #2e7d32;
-        border: 1px solid #66bb6a;
-        box-shadow: 0 0 5px #4caf50;
+        background: ${theme.colors.greenBtnLine};
+        border: 1px solid ${theme.colors.greenBtnLineHover};
+        box-shadow: 0 0 5px ${theme.colors.greenGlow};
         color: #ffffff;
         opacity: 1;
     `}
@@ -138,7 +139,7 @@ const ActionButton = styled.div`
     ${props => props.disabled && `
         opacity: 0.3;
         cursor: not-allowed;
-        &:hover { background: #1b5e20; border: 1px solid #2e7d32; color: #e6ffe6; }
+        &:hover { background: ${theme.colors.greenBtnBg}; border: 1px solid ${theme.colors.greenBtnLine}; color: ${theme.colors.greenText}; }
     `}
 `;
 

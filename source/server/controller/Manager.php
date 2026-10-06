@@ -1490,46 +1490,67 @@ class Manager{
         return $out;
     }
 
-    public static function deleteSavedFleet($id) {
+    /* Delete one of $userid's own saved fleets. Returns JSON: {listId, success: true}, or an error
+       object when the id is not one of that player's fleets (nothing is deleted then). */
+    public static function deleteSavedFleet($id, $userid) {
         try {
-            self::initDBManager(); 
+            if (!is_numeric($id) || !is_numeric($userid) || (int)$userid <= 0)
+                throw new Exception("Fleet ID missing");
+
+            self::initDBManager();
             self::$dbManager->startTransaction();
 
-            self::$dbManager->deleteSavedFleet($id);
+            $deleted = self::$dbManager->deleteSavedFleet((int)$id, (int)$userid);
 
             self::$dbManager->endTransaction(false);
+
+            if ($deleted < 1)
+                throw new Exception("That fleet is not one of your saved fleets.");
+
             return json_encode([
-                'id' => $id,
+                'listId' => (int)$id,
                 'success' => true
             ]);
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             $logid = Debug::error($e);
-            return [];
+            return json_encode([
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'logid' => $logid
+            ]);
         }
-    }   
+    }
 
-    public static function changeAvailabilityFleet($id): array {
+    /* Toggle one of $userid's own saved fleets between shared and private. */
+    public static function changeAvailabilityFleet($id, $userid): array {
         try {
-            self::initDBManager(); 
+            if (!is_numeric($id) || !is_numeric($userid) || (int)$userid <= 0)
+                throw new Exception("Fleet ID missing");
+
+            self::initDBManager();
             self::$dbManager->startTransaction();
 
-            $newStatus = self::$dbManager->changeAvailabilityFleet($id);
+            $newStatus = self::$dbManager->changeAvailabilityFleet((int)$id, (int)$userid);
 
             self::$dbManager->endTransaction(false);
+
+            if ($newStatus === null)
+                throw new Exception("That fleet is not one of your saved fleets.");
+
             return [
-                'id'        => $id,
+                'id'        => (int)$id,
                 'success'   => true,
                 'newStatus' => $newStatus
             ];
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             $logid = Debug::error($e);
             return [
                 'id'      => $id,
                 'success' => false,
-                'error'   => 'Failed to toggle fleet availability.'
+                'error'   => $e->getMessage()
             ];
         }
     }
@@ -1618,6 +1639,378 @@ class Manager{
         return $ships;
     }
 
+
+    /* ======================================================================================
+       SAVE ORDERS (SAVE_ORDERS_PLAN.md §2, Stage 1) - park a half-finished phase and finish
+       it later, on any device.
+
+       A draft is an opaque client snapshot. Nothing on the server interprets it: saveOrders
+       validates WHO may store one and WHEN, getSavedOrdersJSON hands it back to its author
+       only, and the client applies it only to that author's own ships. The commit path is
+       untouched and still validates every order, so a forged draft can do nothing a forged
+       commit POST could not already attempt.
+
+       A draft is valid for exactly one (game, player, turn, phase). Within that window
+       nothing on the server can change the player's own ships - the phase cannot advance
+       without their commit - and outside it the row is ignored (plan §0.6), so a stale row
+       left behind by a failed cleanup is harmless. Movement commits one ACTIVATION at a
+       time, so a Movement draft also names the activation it belongs to, and the client
+       ignores it in any other (Stage 7).
+       ====================================================================================== */
+
+    /** Phases a draft can be saved in: Initial Orders, Pre-Firing and Firing (ruling D2),
+        Deployment / Pre-Turn Orders (Stages 5-6) and Movement (Stage 7). */
+    private static $savedOrdersPhases = array(-1, 1, 2, 5, 3);
+
+    /** The largest draft accepted, in bytes of JSON text. */
+    private static $savedOrdersMaxBytes = 1048576;
+
+    /* Store the player's draft for the current phase, overwriting any earlier one (D4).
+       $orders is the draft as JSON TEXT, exactly as the client wrote it. Returns JSON:
+       {"savedAt": <unix time>} or an error object. No touchGame - nobody else needs to know. */
+    public static function saveOrders($gameid, $userid, $turn, $phase, $orders) {
+        try {
+            //1. getTacGame interpolates the id straight into its SQL.
+            if (!is_numeric($gameid) || !is_numeric($userid))
+                throw new Exception("Omitting required data");
+            $gameid = (int)$gameid;
+            $userid = (int)$userid;
+            if ($gameid <= 0 || $userid <= 0)
+                throw new Exception("Omitting required data");
+
+            self::initDBManager();
+
+            //2. The game exists and is being played.
+            $game = self::$dbManager->getTacGame($gameid, $userid);
+            if (!$game || $game->status !== "ACTIVE")
+                throw new Exception("This game is not in progress.");
+
+            //3. The player holds a slot. Slots only, no ship load - hasAlreadySubmitted below
+            //   reads nothing else.
+            $game->slots = self::$dbManager->getSlotsInGame($gameid);
+            if (count($game->getSlotsByPlayerId($userid)) == 0)
+                throw new Exception("You are not playing in this game.");
+
+            //4. The orders belong to the phase the game is in, and it is one that can be saved.
+            if (!is_numeric($turn) || !is_numeric($phase)
+                || (int)$turn !== (int)$game->turn || (int)$phase !== (int)$game->phase)
+                throw new Exception("The game has moved on since these orders were given, so they cannot be saved.");
+            if (!in_array((int)$game->phase, self::$savedOrdersPhases, true))
+                throw new Exception("Orders cannot be saved in this phase.");
+
+            //5. Nothing left to save once the phase is committed.
+            if ($game->hasAlreadySubmitted($userid))
+                throw new Exception("Your orders for this phase are already committed.");
+
+            /* 5b. Movement: hasAlreadySubmitted never fires there (a slot's lastphase stays at
+               Initial Orders until the phase ends), so ask instead whether this player holds the
+               activation. Movement clears `waiting` for exactly the players whose units are
+               active (setNextActiveShip, SimultaneousMovementRule::setActiveShipPlayersNotWaiting)
+               and sets it again when they commit - the same flag game.php reads before inlining a
+               draft, and already loaded with the slots above. */
+            if ((int)$game->phase === 2 && !self::holdsMovementActivation($game, $userid))
+                throw new Exception("You can save your movement only while it is your turn to move.");
+
+            //6. A JSON object of a sane size. Decoded as OBJECTS, not as an associative array:
+            //   that keeps every empty {} an object on the way back out, where an array decode
+            //   would re-encode it as [] (arch_php_empty_array_json).
+            if (!is_string($orders) || $orders === '' || strlen($orders) > self::$savedOrdersMaxBytes)
+                throw new Exception("The saved orders are missing or too large.");
+            $draft = json_decode($orders);
+            if (!is_object($draft))
+                throw new Exception("The saved orders could not be read.");
+
+            /* Re-encoded with json_encode's DEFAULT flags, which keep the stored text pure ASCII
+               (\uXXXX escapes): the connection charset is 3-byte utf8 (db/createGameRedesign.sql).
+               Never JSON_UNESCAPED_UNICODE, and never JSON_NUMERIC_CHECK, which would rewrite
+               any numeric-looking string inside the draft. */
+            $json = json_encode($draft);
+            if ($json === false)
+                throw new Exception("The saved orders could not be read.");
+
+            $savedAt = time();
+            self::$dbManager->saveOrders($gameid, $userid, (int)$game->turn, (int)$game->phase, $savedAt, $json);
+
+            return json_encode(array("savedAt" => $savedAt));
+        } catch (Throwable $e) {
+            $logid = Debug::error($e);
+            return json_encode(array("error" => $e->getMessage(), "code" => $e->getCode(), "logid" => $logid));
+        }
+    }
+
+    /* Movement (Stage 7): does this player hold the activation - is one of their slots NOT
+       waiting? Reads only the slots saveOrders has already loaded. A NULL `waiting` (the
+       column defaults to TRUE and nothing writes NULL) is treated as waiting, so a slot this
+       cannot read refuses the save rather than allowing it. */
+    private static function holdsMovementActivation($game, $userid) {
+        foreach ($game->getSlotsByPlayerId($userid) as $slot) {
+            if ($slot->waiting !== null && !$slot->waiting) return true;
+        }
+        return false;
+    }
+
+    /* Delete the player's draft - the OPTIONS tab's "Discard Saved Orders" (plan §1.8).
+       Allowed whatever the phase, so a stray row can always be removed. */
+    public static function clearSavedOrders($gameid, $userid) {
+        try {
+            if (!is_numeric($gameid) || !is_numeric($userid) || (int)$gameid <= 0 || (int)$userid <= 0)
+                throw new Exception("Omitting required data");
+
+            self::initDBManager();
+            self::$dbManager->deleteSavedOrders((int)$gameid, (int)$userid);
+
+            return json_encode(array("cleared" => true));
+        } catch (Throwable $e) {
+            $logid = Debug::error($e);
+            return json_encode(array("error" => $e->getMessage(), "code" => $e->getCode(), "logid" => $logid));
+        }
+    }
+
+    /* game.php's inline `window.fvSavedOrders` (plan §1.6): {"savedAt": <unix time>, "draft": {...}}
+       when the player has a draft for exactly this turn and phase, otherwise the literal 'null'.
+       Returns text that is safe to print inside a <script> element.
+
+       ⚠️ NEVER THROWS (plan trap T6). A missing table - the live DB before db/savedOrders.sql
+       is applied - or a corrupt row must cost the player their draft, never the game screen. */
+    public static function getSavedOrdersJSON($gameid, $userid, $turn, $phase) {
+        try {
+            if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase))
+                return 'null';
+            if ((int)$gameid <= 0 || (int)$userid <= 0 || !in_array((int)$phase, self::$savedOrdersPhases, true))
+                return 'null';
+
+            self::initDBManager();
+            $row = self::$dbManager->getSavedOrders((int)$gameid, (int)$userid);
+            if (!$row || $row['turn'] !== (int)$turn || $row['phase'] !== (int)$phase)
+                return 'null';
+
+            //Objects, not an associative array, for the same {} -> [] reason as saveOrders.
+            $draft = json_decode($row['orders']);
+            if (!is_object($draft))
+                return 'null';
+
+            //The JSON_HEX_* flags keep "</script>" and quotes inside the draft from ending the
+            //inline <script> early.
+            $json = json_encode(array("savedAt" => $row['savedat'], "draft" => $draft),
+                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+
+            return ($json === false) ? 'null' : $json;
+        } catch (Throwable $e) {
+            Debug::error($e);
+            return 'null';
+        }
+    }
+
+    /* Housekeeping after a commit or a surrender: the player's draft is obsolete. Swallows any
+       failure on purpose - it runs after the commit's transaction has closed, and a row left
+       behind can never be applied (see the block comment above saveOrders). */
+    private static function deleteSavedOrdersQuietly($gameid, $userid) {
+        try {
+            self::$dbManager->deleteSavedOrders((int)$gameid, (int)$userid);
+        } catch (Throwable $e) {
+            Debug::error($e);
+        }
+    }
+
+
+    /* ======================================================================================
+       LIVE SWEEPING (MINE_DETECTION_PLAN.md §1.4.3, Stage 2) - mineSweep.php.
+
+       A unit with a Detect Mines rating has just entered one or more hexes. The client posts this
+       turn's plotted rows up to the last of them; the server walks every hex not yet final against
+       every enemy mine the unit's team has not found, stops after the first hex with a find, and
+       records it. Every hex walked becomes FINAL, found or not (T20): the commit must pass through
+       them, in order (MovementGamePhase::process). The rules of the walk are in MineSweep.
+
+       Reply: {"final": n, "found": [{id, q, r, f}]} - n = how many of the unit's hexes this turn
+       are now final, and only the mines just found (T15). {"final": n, "noRating": true} when the
+       unit cannot detect anything. {"error": ...} otherwise, with "stale" (stop asking for this
+       unit), "busy" (try again) or "reload" (this page is out of step with the server).
+       ====================================================================================== */
+
+    /** The largest plotted movement accepted, in bytes of JSON text and in rows. */
+    private static $mineSweepMaxBytes = 262144;
+    private static $mineSweepMaxRows = 400;
+
+    public static function sweepMines($gameid, $userid, $turn, $shipid, $known, $moves) {
+        //The switch (MineSweep::$liveSweeping): a page opened before it was turned off learns it here.
+        if (!MineSweep::$liveSweeping)
+            return json_encode(array("error" => "Live mine sweeping is switched off.", "disabled" => true));
+
+        $locked = false;
+        try {
+            if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($shipid))
+                throw new Exception("Omitting required data");
+            $gameid = (int)$gameid;
+            $userid = (int)$userid;
+            $turn = (int)$turn;
+            $shipid = (int)$shipid;
+            $known = is_numeric($known) ? (int)$known : 0;
+            if ($gameid <= 0 || $userid <= 0 || $shipid <= 0)
+                throw new Exception("Omitting required data");
+
+            /* The rows travel as a JSON STRING inside the body (T12) - the body is decoded as an
+               array, which would turn every {} into [] - and are decoded here as OBJECTS, so what is
+               stored for a reload re-encodes exactly as the client wrote it. */
+            if (!is_string($moves) || $moves === '' || strlen($moves) > self::$mineSweepMaxBytes)
+                return json_encode(array("error" => "The plotted movement is missing or too large."));
+            $rows = json_decode($moves);
+            if (!is_array($rows) || count($rows) > self::$mineSweepMaxRows)
+                return json_encode(array("error" => "The plotted movement could not be read."));
+
+            self::initDBManager();
+
+            //1. The game is in this turn's Movement phase. Small indexed reads only until the unit
+            //   is known to be one that may ask - a refused question never costs a gamedata load.
+            $game = self::$dbManager->getTacGame($gameid, $userid);
+            if (!$game || $game->status !== "ACTIVE" || (int)$game->turn !== $turn || (int)$game->phase !== 2)
+                return json_encode(array("error" => "The game has moved on since this move was plotted.", "stale" => true));
+
+            //2. The unit is moving now. T11: activeship is one id in sequential movement and a list
+            //   under simultaneous movement.
+            $active = is_array($game->activeship) ? $game->activeship : array($game->activeship);
+            if (!in_array($shipid, array_map('intval', $active), true))
+                return json_encode(array("error" => "This unit is not moving now.", "stale" => true));
+
+            //3. It is this player's...
+            if (self::$dbManager->getShipOwner($gameid, $shipid) !== $userid)
+                return json_encode(array("error" => "This unit is not yours.", "stale" => true));
+
+            //4. ...and has not committed. A question arriving after the commit is refused (T17); the
+            //   commit's own walk has recorded anything it would have found.
+            if (self::$dbManager->isMovementAlreadySubmitted($gameid, $shipid, $turn))
+                return json_encode(array("error" => "This unit has already moved.", "stale" => true));
+
+            //5. The lock a commit takes, so a sweep and a commit by the same player never interleave.
+            if (!self::$dbManager->getPlayerSubmitLock($gameid, $userid))
+                return json_encode(array("error" => "The server is busy with your orders.", "busy" => true));
+            $locked = true;
+
+            self::$dbManager->startTransaction();
+            $reply = self::sweepPath($gameid, $userid, $turn, $shipid, $known, $rows);
+            self::$dbManager->endTransaction(false);
+
+            self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+            $locked = false;
+
+            //Waiting players refresh and see the mine's new state; nothing changed for anyone otherwise.
+            if (!empty($reply['found'])) self::touchGame($gameid);
+
+            return json_encode($reply);
+        } catch (Throwable $e) {
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
+            if ($locked && self::$dbManager !== null) self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+            $logid = Debug::error($e);
+            //A fixed message, never $e->getMessage(): nothing that touched the turn context may reach the player (T15).
+            return json_encode(array("error" => "The mine sweep failed.", "code" => $e->getCode(), "logid" => $logid));
+        }
+    }
+
+    /* The sweep proper, inside the transaction and the player's lock. Returns the reply as an array. */
+    private static function sweepPath($gameid, $userid, $turn, $shipid, $known, $rows) {
+        $context = MineSweep::getContext(self::$dbManager, $gameid, $turn, $userid);
+        if ($context === null)
+            return array("error" => "The game has moved on since this move was plotted.", "stale" => true);
+
+        $stored = self::$dbManager->getMineSweep($gameid, $turn, $shipid);
+        $final = $stored ? $stored['hexes'] : array();
+        $finalCount = count($final);
+
+        /* No rating, nothing to bind (§1.4.3): an answer that can never be "found" teaches nothing,
+           so no hex becomes final and the client stops asking for this unit - typically a ship
+           whose scanner is down. A rating that cannot beat any signature left is NOT answered this
+           way: saying so would tell the player what kinds of mine are out there. */
+        $unit = $context['units'][$shipid] ?? null;
+        if (!$unit || $unit['rating'] <= 0)
+            return array("final" => $finalCount, "noRating" => true);
+
+        $path = Movement::readSweepPath(new OffsetCoordinate($unit['q'], $unit['r']), $rows, $turn);
+        if ($path === null)
+            return array("error" => "The plotted movement does not make a path from where the unit started.");
+
+        /* A generous bound, not legality (T22): no more hexes than the unit's speed at the start of
+           the turn plus one for each speed change in the rows. The commit judges the rest. */
+        $speedChanges = 0;
+        foreach ($rows as $row) {
+            if (Movement::rowField($row, 'type') === 'speedchange' && Movement::rowField($row, 'turn') == $turn) $speedChanges++;
+        }
+        if (count($path) > max(0, $unit['speed']) + $speedChanges)
+            return array("error" => "The plotted movement is longer than this unit can fly.");
+
+        //The path must begin with the hexes already final - otherwise this page is out of step with
+        //the server (a second tab, say), and a reload puts the final rows back (§1.4.6).
+        for ($i = 0; $i < $finalCount; $i++) {
+            if (!isset($path[$i]) || $path[$i]['hex']->q !== (int)$final[$i][0] || $path[$i]['hex']->r !== (int)$final[$i][1])
+                return array("error" => "This page is out of step with the server. Reload the game.", "reload" => true);
+        }
+
+        /* The client never saw the reply that brought the last find - its count of final hexes is
+           behind ours. Say it again and walk nothing further: everything after the find was plotted
+           before the player could see it, and is taken back unsent (T21). */
+        if ($known < $finalCount && !empty($stored['found']))
+            return array("final" => $finalCount, "found" => MineSweep::describeFound($context, $stored['found']));
+
+        $new = array_slice($path, $finalCount);
+        if (empty($new))
+            return array("final" => $finalCount, "found" => array());
+
+        $hexes = array();
+        foreach ($new as $step) $hexes[] = $step['hex'];
+        $foundIds = self::$dbManager->getMinesFoundByTeam($gameid, $unit['team']);
+        list($stop, $found) = MineSweep::walk($context, $unit, $hexes, $foundIds);
+
+        //Every hex walked becomes final, found or not (T20) - up to and including the find hex.
+        $walked = ($stop === null) ? count($new) : $stop + 1;
+        $finalPath = array_slice($path, 0, $finalCount + $walked);
+        $lastStep = end($finalPath);
+
+        $finalHexes = array();
+        foreach ($finalPath as $step) $finalHexes[] = array($step['hex']->q, $step['hex']->r);
+        $foundHere = array();
+        foreach ($found as $mine) $foundHere[] = $mine['id'];
+
+        //Default flags (no JSON_NUMERIC_CHECK, no unescaped unicode): the text is stored and given back as is.
+        $kept = array_slice(array_values($rows), 0, $lastStep['row'] + 1);
+        self::$dbManager->saveMineSweep($gameid, $turn, $shipid, json_encode($finalHexes), json_encode($kept), json_encode($foundHere));
+
+        //Straight to the database (T1): queued notes would be lost to onIndividualNotesLoaded.
+        foreach ($found as $mine) {
+            self::$dbManager->insertIndividualNote(new IndividualNote(-1, $gameid, $turn, 2, $mine['id'], $mine['sys'], 'detected', 'Mine detected', $unit['team']));
+        }
+
+        return array("final" => count($finalHexes), "found" => MineSweep::describeFound($context, $foundHere));
+    }
+
+    /* game.php's inline `window.fvMineSweep` (§1.4.6): this player's swept units this turn, so a
+       reload mid-move puts their final rows back - {"turn": T, "ships": {"<id>": {"hexes": n,
+       "moves": [...]}}} - or the literal 'null'. Movement only. Script-safe text.
+       ⚠️ NEVER THROWS, like getSavedOrdersJSON: a missing table (db/mineSweep.sql not applied) or a
+       corrupt row costs the player the restore, never the game screen. */
+    public static function getMineSweepJSON($gameid, $userid, $turn, $phase) {
+        try {
+            if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase))
+                return 'null';
+            if ((int)$gameid <= 0 || (int)$userid <= 0 || (int)$phase !== 2 || !MineSweep::$liveSweeping)
+                return 'null';
+
+            self::initDBManager();
+            $ships = array();
+            foreach (self::$dbManager->getMineSweepsForPlayer((int)$gameid, (int)$turn, (int)$userid) as $row) {
+                $moves = json_decode($row['moves']); //objects, so every {} stays one
+                if (!is_array($moves) || count($row['hexes']) === 0) continue;
+                $ships[(string)$row['shipid']] = array("hexes" => count($row['hexes']), "moves" => $moves);
+            }
+            if (empty($ships)) return 'null';
+
+            $json = json_encode(array("turn" => (int)$turn, "ships" => (object)$ships),
+                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+
+            return ($json === false) ? 'null' : $json;
+        } catch (Throwable $e) {
+            Debug::error($e);
+            return 'null';
+        }
+    }
 
     public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships, $status, $slotid = 0){
         try {
@@ -1763,6 +2156,7 @@ class Manager{
 
                 self::$dbManager->endTransaction(false);
                 self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+                self::deleteSavedOrdersQuietly($gameid, $userid); //Save Orders: nothing left to finish
                 self::touchGame($gameid);
 
                 if (class_exists('DiscordNotifier')) DiscordNotifier::flush(self::$dbManager, $gdS, $userid);
@@ -1801,9 +2195,18 @@ class Manager{
             }
                         
             self::$dbManager->endTransaction(false);
-            
+
             self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
-            
+
+            //Save Orders (SAVE_ORDERS_PLAN.md §2): the committed orders supersede the player's
+            //draft. After the transaction on purpose - housekeeping must never fail a commit.
+            self::deleteSavedOrdersQuietly($gameid, $userid);
+
+            //Live sweeping (MINE_DETECTION_PLAN.md T19): the units just stored may include an
+            //Enormous one, which moves the line-of-sight blockers - see MineSweep. After the
+            //transaction, so a sweep can never cache a context loaded before it was visible.
+            if ($phase instanceof MovementGamePhase) MineSweep::onMovementCommitted($gameid, $gdS->turn);
+
             //Debug("GAME: $gameid Player: $userid SUBMIT OK");
             
             self::touchGame($gameid);

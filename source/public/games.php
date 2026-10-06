@@ -113,7 +113,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   <section class="news-panel">
     <div class="fv-panel-head">
       <span>MISSION BRIEFING</span>
-      <span class="fv-panel-meta">Aug 2026</span>
+      <span class="fv-panel-meta">Oct 2026</span>
     </div>
 
     <h2>Welcome to <strong>Fiery Void!</strong></h2>
@@ -157,10 +157,10 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <ul class="updates-list">
         <!--<li style="--update-colour: #e05b52;"><span class="update-title">Merry Christmas from Fiery Void!</span></li>-->
         <li><span class="update-title">Create Game/Fleet Selection Redesign</span>Improvements to UI and features in Create Game and Fleet Selections screens.</li>        
-        <li><span class="update-title">Walker of Sigma-957</span>Search the galaxy and explore new ways to destroy your opponents with this new Ancient faction!</li>         
-        <li><span class="update-title">The Triad</span>New bizarre and terrifying Ancient faction for you to enjoy, courtesy of Geoffrey (with thanks also to PaulUK for images).</li> 
-        <li><span class="update-title">Nexus: Mine Warfare</span>Mines and minesweepers added for the Nexus Brixadii, Dalithorn, Makar, and Velrax factions (thanks to Geoffrey).</li>             
-        <li><span class="update-title">Hyperspace Mechanics</span>A wide number of improvements made to a number of Hyperspace Reinforcements mechanics, more details in FAQ.</li>                                   
+        <li><span class="update-title">Saved Orders</span>Halfway through a big phase and need to stop? The floppy-disk button beside the green Commit tick saves your orders so you can come back later.</li>         
+        <li><span class="update-title">Extended Turns</span>Ships now have the option of making extended turns, where they pay the thrust cost of a turn over two consecutive movement phases.</li> 
+        <li><span class="update-title">Minesweeping Mode</span>Units can now search for mines in real-time during their Movement phase, at the cost of not being able to cancel moves!</li>             
+        <li><span class="update-title">New Ship Enhancements</span>Advanced Engine Module, Jump Accelerator and Stealth Coating are now available to purchase as enhancements.</li>                                   
         <li><span class="update-title">Discord Notifications</span>You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>
         <!--<li><span class="update-title">General Fixes</span>Many other small bug fixes/updates. Thanks for the reports!</li>-->
       </ul>

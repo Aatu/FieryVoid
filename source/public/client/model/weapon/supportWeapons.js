@@ -128,12 +128,19 @@ ShieldReinforcement.prototype.doIndividualNotesTransfer = function () { //prepar
 
 		    for (var i = 0; i < count; i++) {
 		        shipManager.power.unsetBoost(null, this);
-		    }					
+		    }
 		}
-	
-		
+
+
 	return true;
 };
+
+/* Save Orders (SAVE_ORDERS_PLAN.md §1.4): the amount the transfer above sends. It is re-derived
+   from the boost entries whenever the system is initialised, but nothing guarantees that happens
+   between a restore and the commit, so it is kept as it was. The boosts themselves come back with
+   the power entries, and the order with the fire orders. */
+ShieldReinforcement.prototype.draftStateKeys = ['reinforceAmount'];
+ShieldReinforcement.prototype.draftStatePhases = [1];
 
 var ShadeModulator = function ShadeModulator(json, ship) {
     Weapon.call(this, json, ship); 

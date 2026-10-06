@@ -386,6 +386,10 @@ FtrGravShield.prototype.doIndividualNotesTransfer = function () {
 	}
 };
 
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the flight-wide "dropped" marker, kept per fighter as it is set.
+FtrGravShield.prototype.draftStateKeys = ['active'];
+FtrGravShield.prototype.draftStatePhases = [1];
+
 var HeavyInterceptorBattery = function HeavyInterceptorBattery(json, ship) {
 	InterceptorMkI.call(this, json, ship);
 };
@@ -518,6 +522,15 @@ ThirdspaceShield.prototype.doIndividualNotesTransfer = function () { //prepare i
 	}
 
 	return true;
+};
+
+/* Save Orders (SAVE_ORDERS_PLAN.md §1.4): where this shield's strength ends up - the transfer above
+   sends its difference from the start of the phase. The generator keeps its own half of each move
+   (ThirdspaceShieldGenerator.draftStateKeys). ThoughtShield inherits both. */
+ThirdspaceShield.prototype.draftStateKeys = ['currentHealth'];
+ThirdspaceShield.prototype.draftStatePhases = [1];
+ThirdspaceShield.prototype.afterDraftRestore = function () {
+	this.initializationUpdate();   //outputDisplay
 };
 
 

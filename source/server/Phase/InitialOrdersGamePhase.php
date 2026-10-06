@@ -66,6 +66,18 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
         }
     }
 
+    /* MINE_DETECTION_PLAN.md §1.2 (D4) - every unit's STARTING hex is tested now, before anyone
+       plots, so a mine already in range shows from the first moment of Movement. Until now the
+       first commit of the phase did this for everyone. advanceGameState loaded this gamedata fresh,
+       after every player's Initial Orders, so each unit's Detect Mines EW is in it; and the phase
+       already reads 2 - the mines' check is dispatched on it. Gated on there being a mine on the
+       board at all: $areMinesPresent only describes the advancing player's enemies (T3).
+       Stage 2 builds its turn context from the same load (§1.4.3). */
+    if (MineStealth::anyMineOnBoard($gameData)) {
+        MineStealth::checkMovementDetection($gameData, $dbManager);
+        MineSweep::primeContext($gameData);
+    }
+
     // JUMP_POINTS_PLAN.md Stage 3: every vortex declared in the Initial Orders that just closed
     // FORMS here - a SpawnJumpPoint terrain unit goes onto the board at the declared hex, facing
     // the declared way, visible to everyone from Movement onward. Same reason as the Chameleon

@@ -2035,12 +2035,18 @@ window.weaponManager = {
     computeOEW: function computeOEW(shooter, target, weapon, sPosTarget, defensiveEw) {
         var oew = 0;
         var soew = 0;
+        /* Stealth Coating's LOCK (SHIP_ENHANCEMENTS_PLAN.md D9): a weapon that uses OEW, fired by a
+           unit holding OEW >= 1 on the target after disruption EW. Captured straight after the DIST
+           subtraction, before the flight branch below turns oew into the offensive bonus.
+           ⚠️ MIRROR PAIR with $coatingLock in Weapon::calculateHitBase (PHP). */
+        var coatingLock = false;
 
         if (weapon.useOEW) {
             oew = ew.getTargetingEW(shooter, target);
             soew = ew.getSupportedOEW(shooter, target);
             var dist = ew.getDistruptionEW(shooter);
             oew -= dist;
+            coatingLock = (oew >= 1);
             if (oew < 1) soew = 0;
             if (oew < 0) oew = 0;
         }
@@ -2106,7 +2112,7 @@ window.weaponManager = {
             if (oew == 0) soew = 0;
         }
 
-        return { oew: oew, soew: soew };
+        return { oew: oew, soew: soew, coatingLock: coatingLock };
     },
 
     // Computes jammer + no-lock penalties as a combined pair.
@@ -2453,10 +2459,12 @@ window.weaponManager = {
         //called shot at a system with a flat target profile ("targeted as if they were fighters" -
         //Kirishiac Orbitals): the system's own profile replaces the ship's bearing profile entirely
         //(computeShotModifiers skips the called-shot penalty/bonus for the same case)
+        var flatProfile = false;
         if (calledid > 0) {
             var calledProfileSystem = shipManager.systems.getSystem(target, calledid);
             if (calledProfileSystem && calledProfileSystem.targetProfile != null) {
                 defence = calledProfileSystem.targetProfile;
+                flatProfile = true;
             }
         }
 
@@ -2472,8 +2480,14 @@ window.weaponManager = {
         var ewLock = weaponManager.computeOEW(shooter, target, weapon, sPosTarget, baseBreakdown.defensiveEwBeforeWaiver);
         var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon, target, calledid, fireOrder);
         var jammer = weaponManager.computeJammerNoLock(shooter, target, weapon, ewLock.oew, distance, rangePenalty, calledid, fireOrder);
-        if (jammer.oewSuppressed) { ewLock.oew = 0; ewLock.soew = 0; }
+        if (jammer.oewSuppressed) { ewLock.oew = 0; ewLock.soew = 0; ewLock.coatingLock = false; }
         else if (jammer.soewSuppressed) ewLock.soew = 0;
+        /* Stealth Coating (SHIP_ENHANCEMENTS_PLAN.md §2.2.6): -1 profile on a covered facing, given the
+           lock. Never under a flat called-shot profile, which replaces the bearing profile on the server
+           AFTER the coating is taken off. A weapon that ignores all EW (oewSuppressed) holds no lock.
+           ⚠️ MIRROR PAIR with the coating line in Weapon::calculateHitBase (PHP). */
+        var profileCoating = (!flatProfile && ewLock.coatingLock)
+            ? weaponManager.getProfileCoatingReduction(shooter, target, sPosLaunch) : 0;
         var fireControl = weaponManager.computeFireControl(shooter, target, weapon, sPosTarget, calledid);
         //sPosLaunch threaded in for the same reason as above: the server passes $launchPos to
         //getHitChanceMod as $posmod, and it is what decides which ARC-LIMITED defensive systems
@@ -2501,6 +2515,7 @@ window.weaponManager = {
         //full value and adding the reduction back reproduces the adapted total exactly. It is here
         //only so the breakdown can show the two separately; it is 0 in every game with no scan.
         var goal = baseBreakdown.total
+                 - profileCoating
                  - jammer.jammermod - jammer.noLockMod
                  - rangePenalty
                  + ewLock.oew + ewLock.soew + fireControl
@@ -2517,6 +2532,7 @@ window.weaponManager = {
             if (value !== 0) modifiers.push({ key: key, label: label, value: value });
         }
         pushIfNonZero('base',             'Base Defense',      baseBreakdown.base);
+        pushIfNonZero('profileCoating',   'Stealth Coating',   -profileCoating);
         pushIfNonZero('fireControl',      'Fire Control',      fireControl);     
         pushIfNonZero('oew',              'OEW',               ewLock.oew);
         pushIfNonZero('soew',             'Supported OEW',     ewLock.soew);           
@@ -2812,31 +2828,53 @@ window.weaponManager = {
     },
 
 
+    /* WHICH FACING A SHOT ARRIVES ON - 'front' (330-30 off the bow), 'aft' (150-210) or 'side' -
+       from the compass heading of the shooter (or of a ballistic's launch hex) as seen from the target.
+       The one place these arcs live on the client: the defence value below is built on it, and so is
+       the Stealth Coating's covered-facing test, so the two cannot disagree about a facing.
+       ⚠️ MIRROR PAIR with BaseShip::getProfileCoatingFacing (PHP), which tests the same arcs on the
+       relative bearing (SHIP_ENHANCEMENTS_PLAN.md §2.2.4/§2.2.6). */
+    getShipDefenceFacingFromHeading: function getShipDefenceFacingFromHeading(shooterCompassHeading, target) {
+        var targetFacing = shipManager.getShipHeadingAngle(target);
+        if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(330, targetFacing), mathlib.addToDirection(30, targetFacing))) {
+            return 'front';
+        } else if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(150, targetFacing), mathlib.addToDirection(210, targetFacing))) {
+            return 'aft';
+        }
+        return 'side';
+    },
+
+    getShipDefenceFacing: function getShipDefenceFacing(shooter, target) {
+        return weaponManager.getShipDefenceFacingFromHeading(mathlib.getCompassHeadingOfShip(target, shooter), target);
+    },
+
+    // 'position' should be in HEX coordinate
+    getShipDefenceFacingPos: function getShipDefenceFacingPos(position, target) {
+        var targetPos = shipManager.getShipPosition(target);
+        return weaponManager.getShipDefenceFacingFromHeading(mathlib.getCompassHeadingOfPoint(targetPos, position), target);
+    },
+
     // 'position' should be in HEX coordinate
     getShipDefenceValuePos: function getShipDefenceValuePos(position, target) {
-        var targetFacing = shipManager.getShipHeadingAngle(target);
-        var targetPos = shipManager.getShipPosition(target);
+        return (weaponManager.getShipDefenceFacingPos(position, target) === 'side') ? target.sideDefense : target.forwardDefense;
+    },
 
-        var shooterCompassHeading = mathlib.getCompassHeadingOfPoint(targetPos, position);
+    /* STEALTH COATING (SHIP_ENHANCEMENTS_PLAN.md §2.2.6) - the profile points the target's coating takes
+       off this shot, 0 or profileCoatingMod. The caller has settled the lock (computeOEW's coatingLock)
+       and that no flat called-shot profile replaces the bearing profile. profileCoating rides the payload
+       only on a coated ship ('all' / 'fs' / 'front'). sPosLaunch is a ballistic's launch hex (D12).
+       ⚠️ MIRROR PAIR with BaseShip::getProfileCoatingReduction (PHP). */
+    getProfileCoatingReduction: function getProfileCoatingReduction(shooter, target, sPosLaunch) {
+        var coverage = target.profileCoating;
+        if (!coverage) return 0;
+        if (shooter && (target.factionAge < 3) && shipManager.hasSpecialAbility(shooter, "AdvancedSensors")) return 0;
 
-        //console.log("getShipDefenceValue targetFacing: " + targetFacing + " shooterCompassHeading: " +shooterCompassHeading);
-
-        //console.log("ship degree: " +delta);
-        if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(330, targetFacing), mathlib.addToDirection(30, targetFacing))) {
-            //console.log("hitting front 1");
-            return target.forwardDefense;
-        } else if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(150, targetFacing), mathlib.addToDirection(210, targetFacing))) {
-            //console.log("hitting rear 2");
-            return target.forwardDefense;
-        } else if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(210, targetFacing), mathlib.addToDirection(330, targetFacing))) {
-            //console.log("hitting port 3");
-            return target.sideDefense;
-        } else if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(30, targetFacing), mathlib.addToDirection(150, targetFacing))) {
-            //console.log("hitting starboard 4");
-            return target.sideDefense;
-        }
-
-        return target.sideDefense;
+        var facing = sPosLaunch ? weaponManager.getShipDefenceFacingPos(sPosLaunch, target)
+                                : weaponManager.getShipDefenceFacing(shooter, target);
+        var covered = (coverage === 'all')
+            || (coverage === 'fs' && facing !== 'aft')
+            || (coverage === 'front' && facing === 'front');
+        return covered ? (Number(target.profileCoatingMod) || 1) : 0;
     },
 
     getShipHittingSide: function getShipHittingSide(shooter, target) {
@@ -2858,31 +2896,10 @@ window.weaponManager = {
 
 
     getShipDefenceValue: function getShipDefenceValue(shooter, target) {
-        var targetFacing = shipManager.getShipHeadingAngle(target);
-        var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target, shooter);
-
         if (target.base) {
             return target.forwardDefense;
         }
-
-        //console.log("getShipDefenceValue targetFacing: " + targetFacing + " shooterCompassHeading: " +shooterCompassHeading);
-
-        //console.log("ship degree: " +delta);
-        if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(330, targetFacing), mathlib.addToDirection(30, targetFacing))) {
-            //console.log("hitting front 1");
-            return target.forwardDefense;
-        } else if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(150, targetFacing), mathlib.addToDirection(210, targetFacing))) {
-            //console.log("hitting rear 2");
-            return target.forwardDefense;
-        } else if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(210, targetFacing), mathlib.addToDirection(330, targetFacing))) {
-            //console.log("hitting port 3");
-            return target.sideDefense;
-        } else if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(30, targetFacing), mathlib.addToDirection(150, targetFacing))) {
-            //console.log("hitting starboard 4");
-            return target.sideDefense;
-        }
-
-        return target.sideDefense;
+        return (weaponManager.getShipDefenceFacing(shooter, target) === 'side') ? target.sideDefense : target.forwardDefense;
     },
 
     /* ==== MANUAL INTERCEPTION =================================================================
