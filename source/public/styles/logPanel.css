@@ -1656,6 +1656,23 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     font-size: 12px;
 }
 
+/* Each block's action button with its status line to its RIGHT rather than on a row of its
+   own above it (user, 2026-10-06) - one line of the panel saved per block. The status wraps
+   in its own column beside the button, never under it.
+   ⚠️ The selector has to out-rank `#savedOrdersPanel p` (1,0,1) above, or that rule's 8px
+   bottom margin survives and pushes the text off-centre against the button. */
+.fv-opt-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#savedOrdersPanel .fv-opt-action p,
+#fleetSavePanel .fv-opt-action p {
+    margin: 0;
+    min-width: 0;
+}
+
 /* THE PANEL'S ONE ACTION, IN THE BAR'S OWN GRAMMAR (user, 2026-08-31). This was a bespoke
    13px button with its own fill, border, padding and radius - the only control anywhere in
    the log panel that did not look like the rest of it. It carries .fv-log-chip now, so it
@@ -1679,7 +1696,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
    the same way, so it shares both rules; savedOrders.js disables it while nothing is saved. */
 #savedOrdersDiscard,
 #fleetSaveButton {
-    margin-top: 2px;
+    flex: 0 0 auto;
 }
 
 #savedOrdersDiscard:disabled,
