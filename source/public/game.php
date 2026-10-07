@@ -1009,8 +1009,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
                     Keeps the orders you have given this phase so you can finish them
                     later. Committing clears them.
                 </p>
-                <p id="savedOrdersStatus"></p>
-                <input type="button" id="savedOrdersDiscard" class="fv-log-chip fv-log-chip--link" value="Discard Saved Orders" disabled>
+                <div class="fv-opt-action">
+                    <input type="button" id="savedOrdersDiscard" class="fv-log-chip fv-log-chip--link" value="Discard Saved Orders" disabled>
+                    <p id="savedOrdersStatus"></p>
+                </div>
             </div>
 
             <div id="fleetSavePanel">
@@ -1019,8 +1021,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
                     Saves your current ships, enhancements, ammo, and battle
                     damage. Load it from the game lobby.
                 </p>
-                <p id="fleetSaveSummary"></p>
-                <input type="button" id="fleetSaveButton" class="fv-log-chip fv-log-chip--link" value="Save Current Fleet">
+                <div class="fv-opt-action">
+                    <input type="button" id="fleetSaveButton" class="fv-log-chip fv-log-chip--link" value="Save Current Fleet">
+                    <p id="fleetSaveSummary"></p>
+                </div>
             </div>
         </div>
     </div>

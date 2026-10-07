@@ -103,7 +103,26 @@ window.FirePhaseStrategy = function () {
             && window.ew && ew.isLateEwWindowOpen(this.selectedShip)
             && (shipManager.isElint(this.selectedShip) || shipManager.hasSpecialAbility(this.selectedShip, "alliedEW"));
 
-        if (canSourceLateEw) {
+        /* MANUAL INTERCEPTION (MANUAL_INTERCEPTION_PLAN.md §19, user report 2026-10-06): A FLIGHT
+           KEEPS THE SELECTION WHILE ITS SELECTED WEAPONS CAN COVER THE SHIP IT IS ESCORTING.
+
+           The INCOMING list takes its interceptor from this.selectedShip, and clicking one of my own
+           ships re-selected it - so an escorted ship's list only ever offered the ship's own weapons,
+           and the flight the escort rule exists for (canInterceptBallistic's ship.flight branch,
+           isLegalIntercept on the server) could never be hand-assigned. The re-select also threw
+           the flight's weapon selection away. §17.3 recorded it and left escorts to the automation.
+
+           NARROWED DELIBERATELY, like the ELINT branch above: only while a SELECTED weapon on the
+           flight could take at least one shot aimed at this ship - the same predicate the row's
+           click declares on. With nothing selected, or nothing in reach, the click selects the ship
+           exactly as it always has, and "Select ship" is the escape hatch. */
+        var canEscortIntercept = this.selectedShip && ship !== this.selectedShip
+            && this.selectedShip.flight
+            && weaponManager.getAllBallisticsAgainst(ship).some(function (ball) {
+                return weaponManager.getSelectedInterceptorsFor(this.selectedShip, ball).length > 0;
+            }, this);
+
+        if (canSourceLateEw || canEscortIntercept) {
             var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
             var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
             menu.addButton("selectShip",
