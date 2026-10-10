@@ -1485,6 +1485,9 @@ automation places them exactly as before — and both are reachable when friendl
 The FAQ says covering someone else is normally left to the automation rather than describing a flow
 that does not exist.
 
+> **Escort half FIXED 2026-10-06 — see §19.** The `freeintercept` half is still automation-only
+> outside friendly-fire games.
+
 ### 17.4 Verification
 
 * `node --check` clean on `ShipTooltipBallisticsMenu.js`; both legacy bundles rebuilt.
@@ -1590,4 +1593,45 @@ not accumulation, so a manual intercept costs no more than the self-intercept ma
 * CSS only — the added selector is weight 6 against the weight-5 hover rule it corrects, so it wins
   on specificity rather than on source order.
 * No JS touched, so no bundle rebuild is required for this change.
+* Not play-tested.
+
+---
+
+## 19. Escorting fighters can now be hand-assigned (2026-10-06)
+
+Reported: *"fighters which are escorting a ship (e.g. isEscorting) cannot contribute to the manual
+interception aimed at that ship."*
+
+**This was §17.3's escort half, and it was a selection problem, not a rules one.** Both predicates
+already accepted the order: client `canInterceptBallistic`'s `ship.flight` branch (ballistic only, no
+flight-on-flight, `sharesHexNowAndAtStartOfTurn`) and the server's `isLegalIntercept` `FighterFlight`
+branch. What the player could not do was get a tooltip whose INCOMING list used the FLIGHT as its
+interceptor: the list takes `this.selectedShip`, and in an ordinary game `FirePhaseStrategy.selectShip`
+re-selected any own ship clicked — which also threw the flight's weapon selection away. The hex-stack
+picker routes through the same `onShipClicked → selectShip`, so picking the ship there did the same.
+
+**Fix — one branch in [FirePhaseStrategy.js](source/public/client/renderer/phaseStrategy/FirePhaseStrategy.js)
+`selectShip`, sharing the ELINT late-EW branch's body.** When the selected unit is a flight and at least
+one SELECTED weapon on it passes `getSelectedInterceptorsFor` against at least one shot in
+`getAllBallisticsAgainst(clickedShip)`, the flight keeps the selection; the clicked ship's tooltip opens
+with a `ShipTooltipBallisticsMenu` built on the flight, plus the usual *Select ship* escape hatch.
+Otherwise the click selects the ship exactly as before. The gate is the same predicate the row's own
+click declares on, so a click that keeps the flight selected always lands on a row that will accept it.
+
+Deliberately NOT done: the `freeintercept` half of §17.3 (a ship's free-intercept weapon covering a
+friendly). Dropping the `.flight` test from the gate would extend the same behaviour to it — left out
+because only the escort case was asked for.
+
+Known edge (inherited, not new): the branch participates in the existing double-click-to-select at the
+top of `selectShip`, so clicking the escorted ship a SECOND time selects it — the same rule the ELINT
+and friendly-fire branches already live with.
+
+**Docs:** [faq.html](source/public/docs/faq.html) *What can be intercepted* — the escort bullet now says
+how to do it by hand.
+
+### 19.1 Verification
+
+* `node --check` clean on `FirePhaseStrategy.js`; legacy bundles rebuilt (`node scripts/bundle-legacy.js`
+  — the watcher was not running).
+* `faq.html` still CRLF throughout.
 * Not play-tested.

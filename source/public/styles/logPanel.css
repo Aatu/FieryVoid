@@ -729,32 +729,36 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 
 /* The panels' scroll panes. tactical.css still styles #gameinfo / #combatLogContainer /
    #declarationsContainer scrollbars, but none of those three is the scroller any more —
-   these four are. Same tokens, so they look identical. */
+   these five are. Same tokens, so they look identical. */
 #logLive::-webkit-scrollbar,
 #LogActual::-webkit-scrollbar,
 #fleetListBody::-webkit-scrollbar,
-#declarationsActual::-webkit-scrollbar {
+#declarationsActual::-webkit-scrollbar,
+#gameOptionsPanel::-webkit-scrollbar {
     width: 10px;
 }
 
 #logLive::-webkit-scrollbar-track,
 #LogActual::-webkit-scrollbar-track,
 #fleetListBody::-webkit-scrollbar-track,
-#declarationsActual::-webkit-scrollbar-track {
+#declarationsActual::-webkit-scrollbar-track,
+#gameOptionsPanel::-webkit-scrollbar-track {
     background: var(--fv-scroll-track);
 }
 
 #logLive::-webkit-scrollbar-thumb,
 #LogActual::-webkit-scrollbar-thumb,
 #fleetListBody::-webkit-scrollbar-thumb,
-#declarationsActual::-webkit-scrollbar-thumb {
+#declarationsActual::-webkit-scrollbar-thumb,
+#gameOptionsPanel::-webkit-scrollbar-thumb {
     background: var(--fv-scroll-thumb);
 }
 
 #logLive::-webkit-scrollbar-thumb:hover,
 #LogActual::-webkit-scrollbar-thumb:hover,
 #fleetListBody::-webkit-scrollbar-thumb:hover,
-#declarationsActual::-webkit-scrollbar-thumb:hover {
+#declarationsActual::-webkit-scrollbar-thumb:hover,
+#gameOptionsPanel::-webkit-scrollbar-thumb:hover {
     background: var(--fv-scroll-thumb-hover);
 }
 
@@ -1558,15 +1562,24 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     overflow: hidden;
 }
 
+/* The pane spans the full panel width so its scrollbar sits on the panel's right edge, like
+   the fleet list's and the declarations'. The 640px reading-width cap is on its CHILDREN -
+   on the pane itself it parked the scrollbar mid-panel. */
 #gameOptionsPanel {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 8px 12px;
     font-size: 13px;
     font-style: normal;
     color: var(--fv-text);
-    max-width: 640px;
+}
+
+#gameOptionsList,
+#savedOrdersPanel,
+#fleetSavePanel {
+    max-width: 616px;
 }
 
 /* ── The checkbox rows ─────────────────────────────────────────────────────────────
@@ -1619,21 +1632,45 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 }
 
 /* First child only in the degenerate case where the options list is empty - the divider
-   would otherwise sit at the very top of the panel with nothing above it to divide. */
-#gameOptionsList:empty+#fleetSavePanel .fv-opt-heading {
+   would otherwise sit at the very top of the panel with nothing above it to divide.
+   ⚠️ AN ADJACENT-SIBLING RULE, so it names whatever section comes straight after the list.
+   That is the Saved Orders block now (SAVE_ORDERS_PLAN.md §1.8, trap T11); it used to be
+   #fleetSavePanel, and left pointing there it would have silently stopped matching. */
+#gameOptionsList:empty+#savedOrdersPanel .fv-opt-heading {
     margin-top: 0;
     padding-top: 0;
     border-top: 0;
 }
 
+/* The Saved Orders block (between the switches and Save Fleet) is built exactly like the
+   Save Fleet block, so the two share every rule below. */
+#savedOrdersPanel p,
 #fleetSavePanel p {
     margin: 0 0 8px 0;
     line-height: 1.4;
 }
 
+#savedOrdersStatus,
 #fleetSaveSummary {
     color: var(--fv-text-dim);
     font-size: 12px;
+}
+
+/* Each block's action button with its status line to its RIGHT rather than on a row of its
+   own above it (user, 2026-10-06) - one line of the panel saved per block. The status wraps
+   in its own column beside the button, never under it.
+   ⚠️ The selector has to out-rank `#savedOrdersPanel p` (1,0,1) above, or that rule's 8px
+   bottom margin survives and pushes the text off-centre against the button. */
+.fv-opt-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#savedOrdersPanel .fv-opt-action p,
+#fleetSavePanel .fv-opt-action p {
+    margin: 0;
+    min-width: 0;
 }
 
 /* THE PANEL'S ONE ACTION, IN THE BAR'S OWN GRAMMAR (user, 2026-08-31). This was a bespoke
@@ -1653,11 +1690,16 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 
    Disabled stays: savedFleets.js disables this whenever there is nothing saveable, and the
    chip grammar dims nothing on its own (it only declines to repaint the label, via
-   .fv-log-chip:hover:not(:disabled)). */
+   .fv-log-chip:hover:not(:disabled)).
+
+   Discard Saved Orders (SAVE_ORDERS_PLAN.md §1.8) is the panel's second action and is built
+   the same way, so it shares both rules; savedOrders.js disables it while nothing is saved. */
+#savedOrdersDiscard,
 #fleetSaveButton {
-    margin-top: 2px;
+    flex: 0 0 auto;
 }
 
+#savedOrdersDiscard:disabled,
 #fleetSaveButton:disabled {
     opacity: 0.4;
     cursor: not-allowed;

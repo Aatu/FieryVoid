@@ -73,6 +73,53 @@ ShipSystem.prototype.doIndividualNotesTransfer = function () { //prepare individ
 	return false;
 };
 
+/* SAVE ORDERS (SAVE_ORDERS_PLAN.md §1.4, Stage 3) - the settings a system holds OUTSIDE the arrays
+   client/savedOrders.js captures by itself (power, fireOrders): an Adaptive Armor allocation, a
+   hangar's launch queue, a toggled disguise. Opt-in per class, so a class that lists nothing
+   behaves exactly as before:
+     Foo.prototype.draftStateKeys = ['fieldA', 'fieldB'];   //the fields the commit reads
+     Foo.prototype.draftStatePhases = [1];                   //phases they are kept in (null = all)
+     Foo.prototype.afterDraftRestore = function () { ... }; //optional: rebuild derived display
+   A class whose setting cannot simply be assigned back (its own action has side effects elsewhere)
+   overrides getDraftState / applyDraftState instead - see HyachSpecialists.
+
+   ⚠️ doIndividualNotesTransfer is NEVER called from here: several overrides are destructive (a
+   Hangar empties its queues as it serialises them). See arch_commit_time_client_side_effects. */
+ShipSystem.prototype.draftStateKeys = null;
+ShipSystem.prototype.draftStatePhases = null;
+
+ShipSystem.prototype.getDraftState = function (phase) {
+	var keys = this.draftStateKeys;
+	if (!keys || !keys.length) return null;
+	if (this.draftStatePhases && this.draftStatePhases.indexOf(phase) === -1) return null;
+
+	var state = {};
+	var any = false;
+	for (var i = 0; i < keys.length; i++) {
+		if (this[keys[i]] === undefined) continue;
+		state[keys[i]] = this[keys[i]];   //copied by savedOrders.capture's JSON pass
+		any = true;
+	}
+	return any ? state : null;
+};
+
+/* Only the keys this class lists are ever written, and every object or array goes in as a FRESH
+   copy: some system fields are shared between same-class instances through the static blueprint,
+   and a restored value must never be one of those shared objects (plan trap T8,
+   arch_client_system_shared_reference). */
+ShipSystem.prototype.applyDraftState = function (state, phase) {
+	var keys = this.draftStateKeys;
+	if (!state || !keys) return;
+
+	for (var i = 0; i < keys.length; i++) {
+		if (!Object.prototype.hasOwnProperty.call(state, keys[i])) continue;
+		var value = state[keys[i]];
+		this[keys[i]] = (value !== null && typeof value === 'object') ? JSON.parse(JSON.stringify(value)) : value;
+	}
+
+	if (typeof this.afterDraftRestore === 'function') this.afterDraftRestore(phase);
+};
+
 var Fighter = function Fighter(json, staticFighter, ship) {
 
 	Object.keys(staticFighter).forEach(function (key) {

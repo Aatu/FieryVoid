@@ -2580,7 +2580,8 @@ window.gamedata = {
 			if (entries.length === 0) continue;
 			entries.sort((a, b) => a.faction.localeCompare(b.faction));
 
-			const group = factionGroup(groupName, false).toggleClass("lb-fgroup--custom", groupName === "Custom Factions");
+			const group = factionGroup(groupName, false).toggleClass("lb-fgroup--custom", groupName === "Custom Factions")
+				.toggleClass("lb-fgroup--keep", gamedata.pickerKeepWithPrevious.indexOf(groupName) !== -1);
 			const body = group.children(".lb-fgroup-body");
 
 			if (groupName !== "Custom Factions") {
@@ -2622,6 +2623,10 @@ window.gamedata = {
 	   width does (1 column on a phone, 2, 3): it is dealt again when that count changes. */
 	pickerColumnCount: 0,
 
+	//Groups that never start a column: each is dealt together with the group listed above it (user,
+	//2026-10-04: "Ancient sits underneath Minor Factions in the second column").
+	pickerKeepWithPrevious: ["Ancients"],
+
 	pickerColumnsWanted: function pickerColumnsWanted() {
 		if (!window.matchMedia) return 1;
 		if (window.matchMedia("(min-width: 860px)").matches) return 3;
@@ -2636,19 +2641,26 @@ window.gamedata = {
 		if (count === gamedata.pickerColumnCount) return;
 		gamedata.pickerColumnCount = count;
 
-		//In list order, whichever column each sits in now.
-		var groups = holder.find(".lb-fgroup").filter(function () { return !$(this).hasClass("lb-fgroup--sub"); }).get();
+		//In list order, whichever column each sits in now - as UNITS: a .lb-fgroup--keep group joins the
+		//unit of the group above it (pickerKeepWithPrevious), so no split can put a column top between them.
+		var units = [];
+		holder.find(".lb-fgroup").filter(function () { return !$(this).hasClass("lb-fgroup--sub"); }).each(function () {
+			if ($(this).hasClass("lb-fgroup--keep") && units.length) units[units.length - 1].push(this);
+			else units.push([this]);
+		});
 		//A group's height in rows: its header (with the gap above it) and its rows as it opens.
-		var weights = groups.map(function (group) {
-			var subs = $(group).find(".lb-fgroup--sub").length;
-			return 1.5 + (subs ? subs * 1.1 : $(group).find(".lb-faction").length);
+		var weights = units.map(function (unit) {
+			return unit.reduce(function (height, group) {
+				var subs = $(group).find(".lb-fgroup--sub").length;
+				return height + 1.5 + (subs ? subs * 1.1 : $(group).find(".lb-faction").length);
+			}, 0);
 		});
 
 		//The split into `count` runs, in order, whose tallest run is shortest - and of those, the most
 		//even (least sum of squares). Six groups and three columns at most, so every pair of cut
 		//points is simply tried.
 		var sum = function (from, to) { var s = 0; for (var i = from; i < to; i++) s += weights[i]; return s; };
-		var n = groups.length, best = null;
+		var n = units.length, best = null;
 		var consider = function (ends) {
 			var from = 0, tallest = 0, squares = 0;
 			ends.forEach(function (end) { var h = sum(from, end); tallest = Math.max(tallest, h); squares += h * h; from = end; });
@@ -2669,7 +2681,7 @@ window.gamedata = {
 
 		var start = 0;
 		var made = best.map(function (end) {
-			var column = $('<div class="lb-picker-col"></div>').append(groups.slice(start, end));
+			var column = $('<div class="lb-picker-col"></div>').append([].concat.apply([], units.slice(start, end)));
 			start = end;
 			return column;
 		});
@@ -5269,7 +5281,7 @@ window.gamedata = {
 				gamedata.populateFleetDropdown(cachedFleets);
 				confirm.fleetNotice("Fleet availability changed to " + setting + ".");
 			} else {
-				console.error("Load failed:", ships);
+				console.error("Availability change failed:", response);
 				confirm.fleetNotice("Failed to change fleet availability.");
 			}
 		});

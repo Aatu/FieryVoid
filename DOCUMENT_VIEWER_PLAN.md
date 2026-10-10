@@ -464,10 +464,11 @@ braces are unchanged and `php -l` is clean.
 
 ## 12. Out of scope: noticed, not touched
 
-- **The client `ew.getDistruptionEW` has no 30-hex range check** (the server has one). An enemy
+- ~~**The client `ew.getDistruptionEW` has no 30-hex range check** (the server has one). An enemy
   ELINT that ends movement more than 30 hexes from the shooter still counts in the hit-chance
   preview but not at resolution. It is a preview-only mismatch, much rarer than the bug fixed in
-  §10.
+  §10.~~ **Fixed 2026-10-01:** the client now skips an ELINT more than 30 hexes away
+  (`ew.checkInELINTDistance`), before the LoS test, in the same order as the server.
 - The Factions & Tiers ship images load the `.png`, not the `.webp` that `mass_optimizer.php`
   makes alongside it. They are lazy and one per entry, so this is minor.
 - The five pages' login check sends a `Location` header without `exit`, as the originals did, so

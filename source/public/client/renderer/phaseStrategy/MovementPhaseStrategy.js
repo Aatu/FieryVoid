@@ -236,7 +236,12 @@ window.MovementPhaseStrategy = function () {
 
         var icon = this.shipIconContainer.getByShip(this.shipThrustUIState.ship);
         var position = window.coordinateConverter.fromGameToViewPort(icon.getPosition());
-        jQuery("#thrustUIContainer").css({ left: position.x + 'px', top: position.y + 'px' })
+        var container = jQuery("#thrustUIContainer").css({ left: position.x + 'px', top: position.y + 'px' })[0];
+
+        //Tells the React panel (shipThrust/ShipThrust.js, THRUST_RELAYOUT_EVENT) that it has moved:
+        //on a zoom the thruster ring is resized to hug the ship, and the panel is placed against it.
+        //Fired even when the position is unchanged - a ship at the centre of a zoom does not move.
+        if (container) container.dispatchEvent(new CustomEvent('fv-thrust-relayout'));
 
         return true;
     }
@@ -251,6 +256,12 @@ window.MovementPhaseStrategy = function () {
     function doForcedMovementForActiveShip() {
         gamedata.getMyActiveShips().forEach(function (ship) {
             shipManager.movement.doForcedPivot(ship, true);
+
+            /* EXTENDED_TURNS_PLAN.md §5.4 - an extended turn owed from last turn that can no longer be
+               paid is cancelled here, with no pop-up (D5). Idempotent, like doForcedPivot.
+               ⚠️ AFTER doForcedPivot (T19): its payability dry run must see the facing a gravitic
+               ship's continuing pivot leaves. */
+            shipManager.movement.doForcedExtendedTurnCancel(ship);
 
             if (ship.base && (!ship.nonRotating)) {
                 shipManager.movement.doRotate(ship, true);
@@ -277,6 +288,9 @@ window.MovementPhaseStrategy = function () {
         });
 
         this.gamedata.drawIniGUI();
+
+        //MINE_DETECTION_PLAN.md §1.4.2 - a unit that sweeps asks the server about every hex it enters.
+        if (window.mineSweep && payload && payload.ship) mineSweep.onMovementChanged(payload.ship, this);
     };
 
     MovementPhaseStrategy.prototype.showAppropriateEW = function () {

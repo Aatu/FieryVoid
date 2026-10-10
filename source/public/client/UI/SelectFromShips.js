@@ -1391,8 +1391,9 @@ window.SelectFromShips = function () {
 
         var key = event.key;
 
+        //No stopPropagation: Esc carries on to webglScene's window keydown, where
+        //Settings.CloseAllWindows closes the ship windows and tooltip along with the card.
         if (key === 'Escape' || key === 'Esc') {
-            event.stopPropagation();
             event.preventDefault();
             this.close();
             return;

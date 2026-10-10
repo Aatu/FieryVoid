@@ -1797,11 +1797,20 @@ public function getFullStartLoading()
         $dewFake = ($disguisedDEW !== null) ? $disguisedDEW : $dew;
         $bdew = EW::getBlanketDEW($gamedata, $target);
         $sdew = EW::getSupportedDEW($gamedata, $target);
+        /* STEALTH COATING - THE LOCK (SHIP_ENHANCEMENTS_PLAN.md D9, §2.2.4): a weapon that uses OEW,
+           fired by a unit holding OEW >= 1 on the target after disruption EW. Captured HERE, straight
+           after the DIST subtraction: further down a fighter's $oew becomes its offensive bonus
+           (the FighterFlight branch), and reading it there would let every fighter "lock" through
+           its OB. A Mapmaker flight locks through its own OEW, a mine allocates none. The coating
+           never touches $oew itself - a shooter on exactly 1 OEW keeps its lock and its SOEW.
+           ⚠️ MIRROR PAIR with the coatingLock weaponManager.computeOEW returns (JS). */
+        $coatingLock = false;
         if ($this->useOEW) {
             $oew = $shooter->getOEW($target, $gamedata->turn);
             $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
 			$dist = EW::getDistruptionEW($gamedata, $shooter);
             $oew -= $dist;
+            $coatingLock = ($oew >= 1);
             if ($oew < 1) { //less than required for a lock-on
 				$oew = max(0,$oew); //OEW cannot be negative
 				$soew = 0; //no lock-on negates SOEW, if any
@@ -2008,6 +2017,7 @@ public function getFullStartLoading()
 			$sdew = 0;
 			$oew = 0;
 			$soew = 0;
+			$coatingLock = false; //a weapon that ignores EW holds no lock for a coating to spoil
 		}
 
         //Special to-hit bonuses when shooting mines
@@ -2145,6 +2155,16 @@ public function getFullStartLoading()
           - a Dargan (side 16) wearing a Demos (14) must still be hit as a Dargan.*/
         $disguisedProfile = $target->getDisguisedProfileFor($shooter, $this->ballistic ? $launchPos : null);
         $defenceFake = ($disguisedProfile !== null) ? $disguisedProfile : $defence;
+
+        /* STEALTH COATING (SHIP_ENHANCEMENTS_PLAN.md §2.2.4): -1 profile on a covered facing, judged
+           from the launch hex for a ballistic (D12). Gated on the static, so an ordinary game pays one
+           false read per shot. BEFORE the ProfileIncreased block and the flat-profile override below,
+           so a called shot at a system with its own profile (Kirishiac orbitals) still replaces it.
+           $defenceFake is left alone: the coating is on the real hull, not on the simulacrum.
+           ⚠️ MIRROR PAIR with the 'Stealth Coating' row in weaponManager.calculateHitChange (JS). */
+        if (TacGamedata::$profileCoatingPresent && $coatingLock) {
+            $defence -= $target->getProfileCoatingReduction($shooter, $this->ballistic ? $launchPos : null);
+        }
 
 
         //This section added to count new critical that raises Defence profiles and add to hit chance - June 2024 DK

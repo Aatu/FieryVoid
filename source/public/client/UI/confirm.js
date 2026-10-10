@@ -378,9 +378,16 @@ window.confirm = {
     },
 
 
-    /*Choice-valued enhancement widget - currently only the Chameleon disguise.
-      An enhancementOption whose index 7 is a list of [phpclass, label] pairs is a PICK, not a count:
+    /*Choice-valued enhancement widget - the Chameleon disguise and the Stealth Coating.
+      An enhancementOption whose index 7 is a list of [key, label] pairs is a PICK, not a count:
       numberTaken is an index into that list and index 0 is always "None" (= not taken = no DB row).
+
+      PRICED CHOICES (SHIP_ENHANCEMENTS_PLAN.md §2.2.2): an optional index 8 is the price of each
+      choice, by the same index. Each option is labelled with its price and data('enhCost') is the
+      picked one's - on build AND on every change. Absent means free, which is the Chameleon disguise.
+      ⚠️ The build MUST overwrite enhCost: addBuyEnhancementRows seeds it from the arithmetic series
+      for "count" levels, and for a choice the count is an index, so an edited coated ship would be
+      charged price x index on top.
 
       It deliberately reuses the very same .selectAmount.shpenh<N> element the +/- spinner uses, and
       keeps the same data('count') / data('enhCost') / data('enhPrice') contract, so every read-back
@@ -398,9 +405,21 @@ window.confirm = {
         var selected = parseInt(enhancement[2], 10);
         if (!(selected > 0) || selected >= choices.length) selected = 0;
 
+        var prices = Array.isArray(enhancement[8]) ? enhancement[8] : null;
+        var isOption = Boolean(enhancement[6]);
+        var priceOf = function (idx) {
+            return prices ? (Number(prices[idx]) || 0) : 0;
+        };
+        var setCost = function (idx) {
+            target.data('enhCost', priceOf(idx));
+            target.data('enhOptionCost', isOption ? priceOf(idx) : 0);
+        };
+
         var select = $('<select class="enhChoiceSelect"></select>');
         for (var j = 0; j < choices.length; j++) {
-            $('<option></option>').attr("value", j).text(choices[j][1]).appendTo(select);
+            var label = choices[j][1];
+            if (prices && j > 0) label += ' (' + confirm.formatBuyPts(prices[j]) + ')'; //"Front & Sides (47 pts)"
+            $('<option></option>').attr("value", j).text(label).appendTo(select);
         }
         select.val(String(selected)); //option values are strings
 
@@ -412,14 +431,12 @@ window.confirm = {
         target.attr("contenteditable", "false");
         target.empty().append(select);
         target.data('count', selected);
-        target.data('enhCost', 0);
-        target.data('enhOptionCost', 0);
+        setCost(selected); //0 for a free choice; overwrites the series seed either way
 
         select.on("change", function () {
             var idx = parseInt($(this).val(), 10) || 0;
             target.data('count', idx);
-            target.data('enhCost', 0);        //choices are free; keep the cost loops happy
-            target.data('enhOptionCost', 0);
+            setCost(idx);
             confirm.getTotalCost();
         });
 
@@ -810,11 +827,14 @@ window.confirm = {
     //Every section starts OPEN, however long (user, 2026-09-26 - plan §10.4's fold-past-8-rows default
     //was dropped): the player folds one away by hand if they want it out of the road.
     //`word` is what the filter box's placeholder calls the section: "Filter ammo, enhancements, options…".
+    //`icon`: the head shows an icon after its title. WHICH image is confirm.css's business - each
+    //section's .buySectionIcon is masked with img/Ordnance.png, Enhancements.png or Options.png and
+    //tinted to the section's colour (SHIP_ENHANCEMENTS_PLAN.md §5). Officers has none yet.
     BUY_SECTIONS: [
-        { key: 'ammo', title: 'Ammo &amp; Ordnance', word: 'ammo' },
-        { key: 'enhancements', title: 'Enhancements', word: 'enhancements' },
-        { key: 'options', title: 'Options', word: 'options' },
-        { key: 'officers', title: 'Officers', word: 'officers' }
+        { key: 'ammo', title: 'Ammo &amp; Ordnance', word: 'ammo', icon: true },
+        { key: 'enhancements', title: 'Enhancements', word: 'enhancements', icon: true },
+        { key: 'options', title: 'Options', word: 'options', icon: true },
+        { key: 'officers', title: 'Officers', word: 'officers', icon: false }
     ],
 
     //The filter box shows from this many rows (in all sections together). A mine's three to seven
@@ -852,6 +872,36 @@ window.confirm = {
         return size + ' &mdash; ' + rest;
     },
 
+    /* The order rows are listed in, within each section: alphabetical (user, 2026-10-04), except that
+       sized ammunition goes by magazine size first - every Light shell, then every Medium, then every
+       Heavy, each alphabetical (the Grome railgun shells). Unsized ordnance comes before them.
+       Returns the enhancementOptions INDICES in that order. Only the DOM order changes: each row keeps
+       its .shpenh<index> class, which is all confirm.getTotalCost and gamelobby.js read back by. */
+    BUY_SIZE_RANK: { 'LIGHT AMMO': 1, 'MEDIUM AMMO': 2, 'HEAVY AMMO': 3 },
+
+    buyRowSortKey: function buyRowSortKey(enhName) {
+        var name = String(enhName);
+        var tag = confirm.BUY_AMMO_TAG.exec(name);
+        if (!tag) return { rank: 0, name: name };
+        var rest = (name.slice(0, tag.index) + name.slice(tag.index + tag[0].length)).trim();
+        return { rank: confirm.BUY_SIZE_RANK[tag[1].toUpperCase()] || 0, name: rest };
+    },
+
+    compareBuyRowNames: function compareBuyRowNames(nameA, nameB) {
+        var a = confirm.buyRowSortKey(nameA), b = confirm.buyRowSortKey(nameB);
+        if (a.rank !== b.rank) return a.rank - b.rank;
+        return a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true });
+    },
+
+    buyRowOrder: function buyRowOrder(enhancementOptions) {
+        var indices = [];
+        for (var i in enhancementOptions) indices.push(i);
+        return indices.sort(function (a, b) {
+            return confirm.compareBuyRowNames(enhancementOptions[a][1], enhancementOptions[b][1])
+                || (Number(a) - Number(b));
+        });
+    },
+
     escapeBuyText: function escapeBuyText(value) {
         return String(value === undefined || value === null ? '' : value)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -879,6 +929,7 @@ window.confirm = {
                 + '<button type="button" class="buySectionHead" aria-expanded="true" aria-controls="buySection-' + section.key + '">'
                 + '<span class="buyDisclosure" aria-hidden="true"></span>'
                 + '<span class="buySectionTitle">' + section.title + '</span>'
+                + (section.icon ? '<span class="buySectionIcon" aria-hidden="true"></span>' : '')
                 + '<span class="buySectionBadge"></span>'
                 + '</button>'
                 + '<div class="buySectionBody" id="buySection-' + section.key + '"></div>'
@@ -1087,7 +1138,10 @@ window.confirm = {
        typing handler - the edit one adjusts by the DELTA from that seeded count, the buy one
        recomputes from zero. */
     addBuyEnhancementRows: function addBuyEnhancementRows(e, ship, seed, onInput) {
-        for (var i in ship.enhancementOptions) {
+        //Listed alphabetically within each section (buyRowOrder); i is still the option's own index.
+        var order = confirm.buyRowOrder(ship.enhancementOptions);
+        for (var n = 0; n < order.length; n++) {
+            var i = order[n];
             //enhancementOption: ID, readableName, numberTaken, limit, price, priceStep, isOption[, choices]
             var enhancement = ship.enhancementOptions[i];
             var enhID = enhancement[0];
@@ -1156,7 +1210,12 @@ window.confirm = {
         var body = confirm.buySectionBody(e, 'ammo');
         $('<p class="buySectionNote">Missiles are bought <b>per missile launcher</b>.</p>').appendTo(body);
 
-        for (var i in missileOptions) {
+        //Alphabetical, like every other row (buyRowOrder); i is still the firing mode it buys for.
+        var missileOrder = Object.keys(missileOptions).sort(function (a, b) {
+            return confirm.compareBuyRowNames(missileOptions[a][0], missileOptions[b][0]);
+        });
+        for (var n = 0; n < missileOrder.length; n++) {
+            var i = missileOrder[n];
             //[name, maximum over the flight, cost each, launcher count, amount carried]
             var missileOption = missileOptions[i];
             var max = Math.round(missileOption[1] / 6 / (missileOption[3] / 6));

@@ -662,66 +662,143 @@ class MineStealth extends ShipSystem implements SpecialAbility{
 		return $toReturn;
 	}	
 
+	/* MINE_DETECTION_PLAN.md §1.1 (Stage 1) - EVERY HEX COUNTS. "Detection EW remains active
+	   throughout the turn, and works throughout a unit's movement." Each enemy unit is tested from
+	   every hex it has been in this turn - where it started, then each hex it entered - instead of
+	   only the hex it ends in, so a unit that passes in range and ends out of range finds the mine.
+
+	   The rule itself is in getDetectionRating and canDetectFrom below, shared with the start of
+	   Movement (InitialOrdersGamePhase::advance) and the live sweep (MineSweep). */
 	public function isMineDetectedMovement($mine, $gameData){
 
 		// Mines are stationary — their position is always their deploy-move position.
 		// We deliberately avoid getHexPos() because mines have no subsequent movement
 		// records and getHexPos() would crash on a null movement.
-		$pos = null;
-		foreach ($mine->movement as $move) {
-			if ($move->type === 'deploy') {
-				$pos = $move->position;
-				break;
-			}
-		}
+		$pos = self::getMinePosition($mine);
 		if ($pos === null) return array(); // Mine has no deploy move yet, can't be detected
 
-		$blockedHexes = $gameData->blockedHexes;
 		$detectingTeams = array();
 
 		foreach ($gameData->ships as $otherShip) {
 			// Skip friendly ships
-			if($otherShip->team === $mine->team) continue; 
-			if($otherShip instanceof Terrain) continue; //Ignore Terrain
-			if($otherShip instanceof Mine) continue; //Ignore other mines			
-			if($otherShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
-	
-			$totalDetection = 0;
-	
-			if(!$otherShip instanceof FighterFlight){
-				if($otherShip->isDisabled()) continue;
-				// Not a fighter — use scanner systems
-				foreach($otherShip->systems as $system){
-					if($system instanceof Scanner){
-						if(!$system->isDestroyed() && !$system->isOfflineOnTurn()){ //Has functioning scanner!
-							$totalDetection += $otherShip->getEWByType("Detect Mines", $gameData->turn);
-							break; //No need ot look further.
-						}
-					}	
-				}					
-				//Apply mineSweeper bonus	
-				if($otherShip->minesweeperbonus > 0) $totalDetection += $otherShip->minesweeperbonus;					
-			} else{
-				//$totalDetection = ceil($otherShip->offensivebonus / 2);
-				$totalDetection += $otherShip->getEWByType("Detect Mines", $gameData->turn);
-				
-			}		
- 
-			// Use explicit OffsetCoordinates for distance/LoS so we never call getHexPos() on the mine
-			$otherPos = $otherShip->getHexPos();
-			$distance = mathlib::getDistanceHex($pos, $otherPos);
-			$noLoS = !empty($blockedHexes) && Mathlib::isLoSBlocked($pos, $otherPos, $blockedHexes);
-	
-			// If within detection range, and LoS not blocked the mine is detected
-			if (($totalDetection > $distance + $mine->signature) && !$noLoS) { 	
-				if (!in_array($otherShip->team, $detectingTeams)) {
+			if($otherShip->team === $mine->team) continue;
+			if(in_array($otherShip->team, $detectingTeams)) continue; //This team has found it already.
+
+			/* 0 for terrain, mines, destroyed, disabled and not-yet-deployed units. Skipping 0 is not
+			   a rule change: below 1, "rating > distance + signature" needs a negative signature,
+			   which only an ACTIVATED DEW mine has - and a DEW mine activates by firing, which has
+			   already marked it detected by every enemy team (generateIndividualNotes, case 4). */
+			$rating = self::getDetectionRating($otherShip, $gameData);
+			if ($rating <= 0) continue;
+
+			foreach (Movement::getHexesEntered($otherShip, $gameData->turn) as $hex) {
+				if (self::canDetectFrom($mine, $hex, $rating, $gameData)) {
 					$detectingTeams[] = $otherShip->team;
+					break;
 				}
 			}
-		}	
+		}
 
 		return $detectingTeams;
 
+	}
+
+	/* MINE_DETECTION_PLAN.md §1.1 - a unit's Detect Mines RATING, lifted out of
+	   isMineDetectedMovement unchanged except for the not-yet-deployed line.
+	   - A ship that is not disabled counts its Detect Mines EW, but only while it has a working,
+	     online scanner, PLUS its Minesweeper Bonus. ⚠️ The bonus counts on its own - with no EW
+	     assigned, and even with the scanner down - so a minesweeper detects with no EW at all (D12).
+	   - A flight counts its Detect Mines EW (bought with Offensive Bonus).
+	   - 0 for anything that cannot detect: terrain, mines, a destroyed or disabled unit, and a unit
+	     that is not on the board yet (the old end-of-move check tested such a unit at its 'start' or
+	     early-placed deploy row, so it could find mines from a hex it had never reached). */
+	public static function getDetectionRating($unit, $gameData){
+		if($unit instanceof Terrain) return 0;
+		if($unit instanceof Mine) return 0;
+		if($unit->isDestroyed()) return 0;
+		if($unit->getTurnDeployed($gameData) > $gameData->turn) return 0;
+
+		$totalDetection = 0;
+
+		if(!$unit instanceof FighterFlight){
+			if($unit->isDisabled()) return 0;
+			// Not a fighter — use scanner systems
+			foreach($unit->systems as $system){
+				if($system instanceof Scanner){
+					if(!$system->isDestroyed() && !$system->isOfflineOnTurn()){ //Has functioning scanner!
+						$totalDetection += $unit->getEWByType("Detect Mines", $gameData->turn);
+						break; //No need ot look further.
+					}
+				}
+			}
+			//Apply mineSweeper bonus
+			if($unit->minesweeperbonus > 0) $totalDetection += $unit->minesweeperbonus;
+		} else{
+			//$totalDetection = ceil($otherShip->offensivebonus / 2);
+			$totalDetection += $unit->getEWByType("Detect Mines", $gameData->turn);
+		}
+
+		return $totalDetection;
+	}
+
+	/* Where a mine sits: its deploy row (null before it has one). Mines never move, and getHexPos()
+	   is avoided on purpose - see isMineDetectedMovement. */
+	public static function getMinePosition($mine){
+		$move = self::getMineDeployMove($mine);
+		return $move ? Movement::toOffset($move->position) : null;
+	}
+
+	public static function getMineDeployMove($mine){
+		if (!is_array($mine->movement)) return null;
+		foreach ($mine->movement as $move) {
+			if ($move->type === 'deploy') return $move;
+		}
+		return null;
+	}
+
+	/* MINE_DETECTION_PLAN.md §1.1: can a unit with Detect Mines rating $rating, standing in $pos,
+	   detect $mine? Its rating must beat distance + the mine's signature, and no terrain may block
+	   the line between them. */
+	public static function canDetectFrom($mine, $pos, $rating, $gameData){
+		$minePos = self::getMinePosition($mine);
+		if ($minePos === null) return false;
+		return self::canDetectAt($minePos, $mine->signature, $pos, $rating, $gameData->blockedHexes);
+	}
+
+	/* The same rule on plain values, for MineSweep's cached turn context, which holds no gamedata.
+	   Distance first: the line-of-sight test, the expensive part, only runs for a mine in range. */
+	public static function canDetectAt(OffsetCoordinate $minePos, $signature, OffsetCoordinate $pos, $rating, $blockedHexes){
+		$distance = mathlib::getDistanceHex($minePos, $pos);
+		if (!($rating > $distance + $signature)) return false;
+		if (!empty($blockedHexes) && Mathlib::isLoSBlocked($minePos, $pos, $blockedHexes)) return false; //LoS blocked
+		return true;
+	}
+
+	/* Run every mine's Movement-phase check (generateIndividualNotes, case 2) against $gameData and
+	   save what it finds. ⚠️ $gameData must hold every unit's FULL movement - this turn's rows AND the
+	   last row before them, which is where the path walk starts - so it must be a real load, never
+	   ships rebuilt from a POST. Called when Movement begins (InitialOrdersGamePhase::advance), after
+	   every movement commit (MovementGamePhase::process) and after the server moves units itself
+	   (MovementGamePhase::advance). Phase 2 must be set: the notes are dispatched on it. */
+	public static function checkMovementDetection($gameData, $dbManager){
+		foreach ($gameData->ships as $ship) {
+			if (!$ship->mine) continue;
+			$ship->generateIndividualNotes($gameData, $dbManager);
+			$ship->saveIndividualNotes($dbManager);
+		}
+	}
+
+	/* Is there a mine on the board at all - deployed and not destroyed, anyone's? The gate for the
+	   start-of-Movement check. Deliberately NOT TacGamedata::$areMinesPresent, which only says
+	   whether the player the gamedata was loaded for has ENEMY mines (MINE_DETECTION_PLAN.md T3). */
+	public static function anyMineOnBoard($gameData){
+		foreach ($gameData->ships as $ship) {
+			if (!$ship instanceof Mine) continue;
+			if ($ship->isDestroyed()) continue;
+			if ($ship->getTurnDeployed($gameData) > $gameData->turn) continue;
+			return true;
+		}
+		return false;
 	}
 
 	//Runs at end of Initial Orers and Firing Phases.
@@ -1555,16 +1632,82 @@ class Engine extends ShipSystem implements SpecialAbility {
     
     function __construct($armour, $maxhealth, $powerReq, $output, $boostEfficiency, $thrustused = 0 ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
-        
+
         $this->thrustused = (int)$thrustused;
         $this->boostEfficiency = (int)$boostEfficiency;
     }
-	
+
     public function setSystemDataWindow($turn){
-		parent::setSystemDataWindow($turn);   
+		parent::setSystemDataWindow($turn);
 		$this->data["Own thrust"] = $this->output;
     }
-	
+
+    /* ⭐ ADVANCED ENGINE MODULE (SHIP_ENHANCEMENTS_PLAN.md §2.1). The strongest Engine boosts one
+       Efficiency step cheaper, until ANY Engine on the hull takes a critical - then it is gone for
+       good, even if the critical is later repaired.
+       "For good" needs a note: a repaired critical drops out of the very next load
+       (DBManager::getCriticalsForShips keeps only turnend = 0 OR turnend >= turn), so the loaded
+       critical list cannot answer "has this engine EVER had one".
+         $advEngWatched  every Engine of a hull that bought the module. Set only by
+                         Enhancements::setEnhancementsShip, so a ship rebuilt from a POST - which
+                         never has enhancements applied - can never write the note.
+         $advEngLostNote an AdvEngLost note was loaded for this Engine.
+       Both PROTECTED: a public default would be written into every static blueprint. */
+    protected $advEngWatched = false;
+    protected $advEngLostNote = false;
+
+    public function markAdvEngWatched(){
+        $this->advEngWatched = true;
+    }
+
+    /* Has this Engine lost the module, as of the turn being loaded? Either the note says so, or it
+       carries a critical from an EARLIER turn (D3: a critical at the end of turn N ends the module
+       from N+1 - the turn-N load is the one that resolved turn N, with the module working).
+       forInfo criticals are display markers (Walker scans, EDF exposure counters, boarding status),
+       not hits, so they do not count; every real critical does, one-turn ones included (D2). */
+    public function hasLostAdvEng($turn){
+        if ($this->advEngLostNote) return true;
+        foreach ($this->criticals as $crit){
+            if (!$crit->forInfo && (int)$crit->turn < (int)$turn) return true;
+        }
+        return false;
+    }
+
+    /* Write AdvEngLost the first time a watched Engine carries a real critical.
+       ⚠️ PHASE 4 ONLY. Phase 4 exists only inside FireGamePhase::advance, which reloads the game
+       server-side and runs Criticals::setCriticals before this sweep - so this turn's criticals are
+       already in $this->criticals, and the note is written before a self-repair could take the
+       critical away again (the Chameleon suite's 'firing' checkpoint makes the same argument).
+       process() also calls this, on POST-side ships, in other phases; $advEngWatched is false there
+       anyway. */
+    public function generateIndividualNotes($gamedata, $dbManager){
+        parent::generateIndividualNotes($gamedata, $dbManager);
+
+        if ((int)$gamedata->phase !== 4) return;
+        if (!$this->advEngWatched || $this->advEngLostNote) return;
+        $hit = false;
+        foreach ($this->criticals as $crit){
+            if (!$crit->forInfo){ $hit = true; break; }
+        }
+        if (!$hit) return;
+        $ship = $this->getUnit();
+        if ($ship === null) return;
+
+        //notekey_human is varchar(40) - an overlong label aborts the whole submission
+        $this->individualNotes[] = new IndividualNote(-1, TacGamedata::$currentGameID, $gamedata->turn, $gamedata->phase,
+            $ship->id, $this->id, 'AdvEngLost', 'Advanced Engine Module lost', $gamedata->turn);
+        $this->advEngLostNote = true;
+    }
+
+    /* Notes load with turn <= the turn being viewed, so a replay of an earlier turn shows the module
+       as it was then. */
+    public function onIndividualNotesLoaded($gamedata){
+        foreach ($this->individualNotes as $note){
+            if ($note->notekey == 'AdvEngLost') $this->advEngLostNote = true;
+        }
+        parent::onIndividualNotesLoaded($gamedata); //clears the note list
+    }
+
 
     /* WALKERS OF SIGMA-957 - Energy Draining Field thrust drain (WALKERS_OF_SIGMA_PLAN.md 2.2).
        One EdfThrustDrain critical carries a whole roll in its param, so it is SUMMED, never
@@ -6012,6 +6155,16 @@ class JumpEngine extends Weapon{
      * its closing turn is no longer certain. Only the phase-in doorway is still one-shot. */
     protected $vortexIsPhaseIn = false;
 
+    /* ⭐ THE JUMP ACCELERATOR ENHANCEMENT (JUMP_ACC, SHIP_ENHANCEMENTS_PLAN.md §2.3) is fitted to this
+     * drive. Set by applyJumpAccelerator() from Enhancements::setEnhancementsShip, so it is true only on
+     * a real load of a ship that bought it - never on a POST-side ship or a static blueprint.
+     * What it changes: range +2 and powerReq x2 (applyJumpAccelerator), the jump delay x0.67
+     * (applyJumpAcceleratorDelay, from the post-pass) and the failure chance x2 on the turn the drive
+     * OPENS a jump point (getOpeningFailureMultiplier).
+     * Protected like $ancientJump: json_encode takes public properties only, so no blueprint key. The
+     * payload carries `jumpAccelerated` only when true (Enhancements::addSystemEnhancementsForJSON). */
+    protected $jumpAccelerated = false;
+
     //§5 R3 - "boost N => N+1 turns of charging, capped at 4 turns in any one turn".
     const CHARGE_BOOST_MAX = 3;
     //The note key, both columns - well inside notekey_human's varchar(40).
@@ -7209,6 +7362,77 @@ class JumpEngine extends Weapon{
         $this->delay       = $delay;
         $this->loadingtime = $delay;
         $this->turnsloaded = $delay;
+    }
+
+    /* ⭐ JUMP ACCELERATOR (JUMP_ACC, SHIP_ENHANCEMENTS_PLAN.md §2.3) - CAN THIS DRIVE TAKE ONE?
+     * Only a drive that OPENS jump points (D15): not legacy (the one-click Hyperdrive / FTL / Phasing
+     * Drive, which form no jump point, and every Ancient and Walker drive - markAncient() and
+     * markWalker() both call markLegacy()), not a fixed gate, and not the Trek Nacelle, whose 4th
+     * constructor argument is no jump delay at all. A public predicate because $hasJumpRecharge is
+     * protected. The offer adds the hull-level test (factionAge < 3) for the Vorlons' ordinary drives. */
+    public function canTakeJumpAccelerator()
+    {
+        return !$this->legacyJump && !$this->gateJump && $this->hasJumpRecharge;
+    }
+
+    public function isJumpAccelerated()
+    {
+        return $this->jumpAccelerated;
+    }
+
+    /* ⭐ FIT THE JUMP ACCELERATOR: range +2, power draw doubled. Returns the drive's ORIGINAL draw P, from
+     * which the caller works out the reactor's loss (user ruling 2026-10-04, §2.3.3: a deficit of P ON
+     * TOP OF the doubled draw, so the drive switched on costs 2P more than before on every hull). 0 when
+     * refused or already fitted, so a second row can never double the draw twice.
+     * The jump delay is NOT moved here - see applyJumpAcceleratorDelay, which runs in the post-pass.
+     * ⚠️ The +2 also lengthens the HOLD distance: getVortexClosureReason closes a jump point whose holder
+     * is more than $range hexes away, the same field (§2.3.5 - built as-is).
+     * ⚠️ MIRROR PAIR with the JUMP_ACC case in lobbyEnhancements.setEnhancementsShip (JS). */
+    public function applyJumpAccelerator()
+    {
+        if ($this->jumpAccelerated || !$this->canTakeJumpAccelerator()) return 0;
+        $this->jumpAccelerated = true;
+
+        $this->range += 2;
+        $draw = (int)$this->powerReq;
+        $this->powerReq = $draw * 2;
+        return $draw;
+    }
+
+    /* THE JUMP ACCELERATOR'S DELAY RULE, "-33%": x 0.67 with fractions of 0.5 or more rounding up (D13),
+     * in whole numbers so no float can round differently on the two ends. Floored at 1. Below 50 it is
+     * the same as x 2/3; at 50 it gives 34, at 65 44.
+     * ⚠️ MIRROR PAIR with lobbyEnhancements.acceleratedJumpDelay (JS) - same expression. */
+    public static function getAcceleratedJumpDelay($delay)
+    {
+        return max(1, intdiv((int)$delay * 67 + 50, 100));
+    }
+
+    /* The Jump Accelerator's delay, applied in Enhancements::setEnhancementsShip's post-pass AFTER the
+     * Elite and Poor Crew levels (D14: crew first, then the accelerator), and written exactly as
+     * applyCrewJumpDelayModifier writes it - $delay is the durable field, the other two are set to match.
+     * Skipped when $delay <= 0 (one hull passes 0; markLegacy and markGate never reach here). */
+    public function applyJumpAcceleratorDelay()
+    {
+        if (!$this->jumpAccelerated) return;
+
+        $delay = (int)$this->delay;
+        if ($delay <= 0) return;
+
+        $delay = self::getAcceleratedJumpDelay($delay);
+        $this->delay       = $delay;
+        $this->loadingtime = $delay;
+        $this->turnsloaded = $delay;
+    }
+
+    /* The Jump Accelerator doubles the chance of a damaged drive destroying its ship on the turn the drive
+     * OPENS a jump point - and only then (D17: a Maintain turn rolls the normal chance). Asked by
+     * openVortex (the quoted chance) and rollVortexJumpFailure (opening turn only), which cap the result
+     * at 100 after the Ancient halving and before the Walker zeroing. Not asked by doHyperspaceJump (the
+     * legacy boost path), rollAbductionJumpFailure or the gate rolls - none of those drives can take one. */
+    protected function getOpeningFailureMultiplier()
+    {
+        return $this->jumpAccelerated ? 2 : 1;
     }
 
     /* ================= STAGE 3 - THE VORTEX UNIT ==================================
@@ -9123,6 +9347,8 @@ class JumpEngine extends Weapon{
 		$missingHealthPercentage = round(($healthDiff / $this->maxhealth) * 100);
 		//Ancients have half the normal chance of Jump Engine failure. 
 		if($ship->factionAge >= 3) $missingHealthPercentage = round($missingHealthPercentage / 2);		
+		//Jump Accelerator: doubled on the opening turn, which this always is (SHIP_ENHANCEMENTS_PLAN.md §2.3.4)
+		$missingHealthPercentage = min(100, $missingHealthPercentage * $this->getOpeningFailureMultiplier());
 
         //WALKERS §3.17 rule 3 (plan trap 33) - the log line must quote the 0% a Walker drive
         //actually carries, or it contradicts rollVortexJumpFailure's outcome.
@@ -10329,6 +10555,10 @@ class JumpEngine extends Weapon{
 		$missingHealthPercentage = round(($healthDiff / $this->maxhealth) * 100);
 		//Ancieents have half the normal chance of Jump Engine failure. 
 		if($ship->factionAge >= 3) $missingHealthPercentage = round($missingHealthPercentage / 2);
+		//Jump Accelerator: doubled on the turn the jump point is OPENED, never on a Maintain turn (D17)
+		if ((int)$this->vortexOpenTurn === $turn){
+			$missingHealthPercentage = min(100, $missingHealthPercentage * $this->getOpeningFailureMultiplier());
+		}
 
 		/* WALKERS §3.17 rule 3 - no chance of destruction while a Walker drive is in use. ZEROED
 		   rather than returned early: the d100 below is then still drawn exactly when it always was
@@ -10481,6 +10711,13 @@ class JumpEngine extends Weapon{
         $this->data["Special"] .= $this->getAdvancedChargingText();
         $this->data["Special"] .= "<br>See FAQ for full rules for Jump Drives.";
         $this->data["Special"] .= "<br>SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
+        /* Jump Accelerator (SHIP_ENHANCEMENTS_PLAN.md §2.3.5). Range and power are already the enhanced
+           figures above and in the rows below; this states the two rules that show nowhere else.
+           LAST, so the lobby can append the same sentence. ⚠️ MIRROR PAIR with
+           lobbyEnhancements.JUMP_ACC_TEXT (JS) - same words. */
+        if ($this->jumpAccelerated){
+            $this->data["Special"] .= "<br>Jump Accelerator: jump delay reduced by 33%, range +2, power draw doubled, and the reactor loses power equal to the normal draw. On the turn it OPENS a jump point the chance of failure is doubled (max 100%).";
+        }
 		/* ShipSystem, not parent. Weapon::setSystemDataWindow appends a gun's tooltip block -
 		   Damage, Fire control, Resolution Priority - which would be meaningless (and mostly zero)
 		   on a jump engine. Same idiom LCVRail uses two classes up. Plan Stage 6 rewrites this
@@ -12604,8 +12841,10 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 						            $strongestSystem = $system;
 
 						            if ($strongestValue > 0) { // Engine actually exists to be enhanced!
-						                $strongestSystem->boostEfficiency -= 1;
-						            }	
+						                //never below 1 - with an Advanced Engine Module as well, an Efficiency-2
+						                //engine would otherwise boost for free (SHIP_ENHANCEMENTS_PLAN.md D4)
+						                $strongestSystem->boostEfficiency = max(1, $strongestSystem->boostEfficiency - 1);
+						            }
 								} 		
 							}
 						}

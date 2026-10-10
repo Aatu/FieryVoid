@@ -1894,6 +1894,15 @@ LightningArray.prototype.doIndividualNotesTransfer = function () {
 	return true;
 };
 
+/* Save Orders (SAVE_ORDERS_PLAN.md §1.4): the wide-beam arm. The standing shots come back already
+   priced for it with the fire orders, so only the readouts need rebuilding - not the re-pricing
+   onWideBeamToggled does on a live click. */
+LightningArray.prototype.draftStateKeys = ['active'];
+LightningArray.prototype.draftStatePhases = [3];
+LightningArray.prototype.afterDraftRestore = function () {
+	this.initializationUpdate();
+};
+
 /* "Combined" / "Single" while the array is firing normally, "Combined-Wide" / "Single-Wide" while
    it is armed - the INCOMING list's row for the shot, and its per-shot sub-rows.
    ⭐ The suffix comes from the LIVE arm rather than from anything stored on the order, and that is

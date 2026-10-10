@@ -2294,3 +2294,58 @@ The head's "0 / 3500 pts · 3500 pts left" wrapped; it now shows ONE figure in t
 controls IN FRONT of the figure: "Unlimited [x] · 691 pts", or "[3500] pts [ ] · 2809 pts left". `.lb-buy-slash` rules deleted.
 Head still 33.8px = Purchase Fleet's in all four cases on desktop; on a phone Fleet Builder with the cap field showing still wraps.
 Verified with `r17.mjs` (desktop 13/13, phone 12/12 - it also covers WEAPON_ENHANCEMENTS_PLAN.md §13, Repeater Gunsights).
+
+### 12.18 Slot buttons pass + Store rows on a phone (user, 2026-10-05)
+
+`styles/gameLobby.css` only.
+
+- **Slot buttons, one family** (user: the green Take Slot clashed with the Ready chips). The user's 2026-10-01 green
+  (borrowed from the Ready button, its text colour an undefined `--fv-greenText`) is gone, and NO slot button wears
+  allegiance or Ready green - the team rails and the own slot's tint are already green / red / a team colour. Take
+  Slot = the only FILLED one: Your Fleet's Save / Check teal (`rgba(0, 77, 102, 0.692)`, games.php's Fleet button)
+  with an `--fv-accent` edge, brighter teal on hover. Select and Leave Slot = a pair of outlines: page blue
+  (`--fv-text`, was the dim that looked disabled) and Leave Game's red, filling only on hover - the user's 0.3 red
+  fill went brown over the team tint. The 90px `min-width` is kept. Five candidates were shot side by side in the
+  live lobby; the accent-blue Take Slot of Stage 4 read paler and weaker than the teal.
+- **Ready is a lamp, not a chip**: a 7px `--fv-own-signal` dot with a glow, then the word in `--fv-mine-soft`, no box
+  or fill - so a state can never be taken for a button. Green stays: it is what the Ready button leaves behind.
+- **Store rows <= 600px** (user: cost under the name on a phone): as in landscape, name + cost share line 1 and Add to
+  fleet · Show details take line 2 (`.lb-ship-name` basis 0, `.lb-ship-links` basis 100%). The cost goes flush
+  right there (`margin-right: 0`, level with the category counts - my call, the name needs the room). The name's
+  3px lead-in moved from lobby.css's inline `.shiptype` (`!important`, indents a wrapped name's FIRST line only) to
+  the `.lb-ship-name` block, so a wrapped name's lines start level at every width; single-line rows unchanged.
+
+**Verified** (real local site over CDP, seeded lobbies 4448 = 2 teams / 4449 = 4 teams with every slot state):
+desktop, phone and spectator Teams shots plus forced `:hover`; Store rows at 320 / 390 / 600 phone, 844 landscape
+and 1600 desktop - cost on the name's line 50/50 Narn, 19/19 12 Colonies, fighters included; the 1600 and Narn
+landscape shots are byte-identical to before; no JS errors. Unchanged by design: Leave Slot still shows on a Ready
+slot, where clicking it only raises "You have already confirmed your fleet".
+
+### 12.19 Two refinements (user, 2026-10-05)
+
+- **Add to fleet level with the ship's name**: the name's 3px lead-in moved off `.lb-ship-name` onto the row's
+  left padding (27 / 45 variant, 15 / 29 on a phone), so the links start under the name's first letter when they
+  drop to their own line (phone and landscape). Desktop rows are byte-identical to before.
+- **Smaller slot buttons**: 8px type, 0.5px tracking, `3px 7px` padding, 24px tall (36 on touch, unchanged); the
+  Ready lamp's word follows at 8px. `min-width` 90 → 82 = Leave Slot's own width, so Take Slot and Leave Slot still
+  line up down the right edge; Select (only ever beside Leave Slot) keeps its natural ~57px. Room for the slot's
+  name beside Select + Leave Slot in the 420px Teams: 22 characters on one line, was 14 (all three at 82px would
+  give 17). At <= 1180px and on a phone the pair still drops under the name (`.lb-slot-main`'s 9rem minimum), where
+  the name has the full width anyway.
+
+### 12.20 Leave Slot in steel (user, 2026-10-05)
+
+The red outline fought the own slot's green tint. Leave Slot only ever sits on that green slot or a plain one, so
+those were the reference: five colours were shot on both (and on a 4-team game's orange own slot), at rest and on
+hover - red (clash), steel, amber (the page's Custom / enhancement colour already), white (louder than the card),
+dim ghost (read as disabled). Steel won: `--fv-gunmetal` edge, `#c3ccd6` text, a grey wash on hover. Select stays
+the page blue, so the pair still differs.
+
+### 12.21 Ready beside the player's name (user, 2026-10-05)
+
+`gamelobby.php` slot template + `styles/gameLobby.css`. The `.status` span moved from `.lb-slot-actions` into
+`.lb-slot-player`, after `.playername` (still in the cloned template, class unchanged - only `.lb-slot.ready .status`
+shows it, no script finds it by position). `.lb-slot-player` is a wrapping flex row, the lamp centred on the name,
+its 22px `min-height` gone so the name's line keeps its height; a name too long for both puts Ready on a line of its
+own. The buttons now have the right-hand side to themselves: a Ready own slot with Select + Leave Slot no longer drops
+its buttons under the name (4-team lobby), and on a phone the Ready own slot keeps Leave Slot on its line.

@@ -218,7 +218,7 @@ starts at the right tier for one starting at 2 or 3 — the current rating *is* 
 | Eligible | `$system instanceof Weapon` and at least one entry of `fireControl` is not `null` |
 | Effect | every **non-null** entry of `fireControl` +1, **and** every non-null entry of **every mode** in `fireControlArray` +1 |
 | Limit | 1 |
-| Price | `max(4, ceil($maxDamage * 0.25)) * $guns` |
+| Price | `max(4, ceil($maxDamage * 0.25)) * $guns` — a Pulse mode's `$maxDamage` is per pulse, so it is multiplied by that mode's `maxpulses` first (user, 2026-10-06) |
 | Step | 0 |
 
 > ### ⚠️ The single most important trap in this feature

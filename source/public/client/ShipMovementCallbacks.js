@@ -9,9 +9,14 @@ window.ShipMovementCallbacks = function () {
 
     ShipMovementCallbacks.prototype.cancelCallback = function (e) {
         e.stopPropagation();
-        shipManager.movement.deleteMove(this.ship);		
-		if (event.which == 3) while (shipManager.movement.hasDeletableMovements(this.ship)){//r-click
-			shipManager.movement.deleteMove(this.ship);	
+        shipManager.movement.deleteMove(this.ship);
+		/* r-click: undo all. Stops at the first step the mine sweep has made final (canCancelMove), and
+		   whenever deleteMove removes nothing - a loop on "anything deletable?" alone spins forever when
+		   that row is not the one deleteMove would take (MINE_DETECTION_PLAN.md T13). */
+		if (event.which == 3) while (shipManager.movement.canCancelMove(this.ship)){
+			var rowsBefore = this.ship.movement.length;
+			shipManager.movement.deleteMove(this.ship);
+			if (this.ship.movement.length === rowsBefore) break;
 		}
         this.updateCallback({ ship: this.ship });
     };
@@ -19,6 +24,13 @@ window.ShipMovementCallbacks = function () {
     ShipMovementCallbacks.prototype.detachCallback = function (e) {
         e.stopPropagation();
         shipManager.movement.doDetach(this.ship);
+        this.updateCallback({ ship: this.ship });
+    };
+
+    //Minesweeping Mode on / off (MINE_DETECTION_PLAN.md Q7). The update redraws the icon in its new state.
+    ShipMovementCallbacks.prototype.minesweepCallback = function (e) {
+        e.stopPropagation();
+        if (window.mineSweep) mineSweep.toggleMode(this.ship);
         this.updateCallback({ ship: this.ship });
     };
 
@@ -154,6 +166,17 @@ window.ShipMovementCallbacks = function () {
 
     ShipMovementCallbacks.prototype.turnCallback = function (e, right) {
         shipManager.movement.doTurn(this.ship, right);
+        this.updateCallback({ ship: this.ship });
+    };
+
+    //EXTENDED_TURNS_PLAN.md §5.3 - both open the thrust panel on the new row.
+    ShipMovementCallbacks.prototype.extendTurnCallback = function (e, right) {
+        shipManager.movement.doBeginExtendedTurn(this.ship, right);
+        this.updateCallback({ ship: this.ship });
+    };
+
+    ShipMovementCallbacks.prototype.completeExtendTurnCallback = function (e) {
+        shipManager.movement.doCompleteExtendedTurn(this.ship);
         this.updateCallback({ ship: this.ship });
     };
 

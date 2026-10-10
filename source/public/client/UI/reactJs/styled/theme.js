@@ -36,11 +36,28 @@ const theme = {
            a second file copying the literals is exactly how two gold surfaces drift apart -
            see [[project_visual_unification]]. Any new gold surface reads these four.
            ⚠️ enhBg is a FILL with its own alpha, never element opacity: element opacity would
-           fade the text as well, and stacking the two compounds. */
+           fade the text as well, and stacking the two compounds.
+           SYNC CONTRACT: styles/tokens.css carries the CSS twins (--fv-enh-text / -title / -bg /
+           -line), which the buy dialog's Enhancements head paints with. Retune a pair together. */
         enhText: "#d8be86",                     //Enhancements list body text
         enhTitle: "#e8cf93",                    //Enhancements section-bar title - a shade brighter
         enhBg: "rgba(169, 128, 56, 0.30)",      //Enhancements section-bar fill
         enhLine: "#8a6d3b",                     //Enhancements border / divider - bronze
+        /* THE GREEN SET - the control-menu look the Gravitic Augmenter menu introduced, and the
+           thrust panel (shipThrust/ShipThrust.js) took on by user request 2026-10-01. Extracted
+           from GraviticAugmenterMenu.js's literals when the second surface needed it, for the same
+           reason as the gold set above: two files copying hex values is how two surfaces drift.
+           ⚠️ greenBg is a FILL with its own alpha. Never add element opacity on top of it - it
+           would fade the text as well, and the two compound. */
+        greenBg: "rgba(8, 28, 12, 0.92)",       //panel body
+        greenLine: "#3f8a3f",                   //panel frame, title border, dividers
+        greenTitleBg: "#16401b",                //title bar fill
+        greenText: "#e6ffe6",                   //title and button text
+        greenLabel: "#bdf0bd",                  //row labels, sub-labels
+        greenBtnBg: "#1b5e20",                  //button fill
+        greenBtnLine: "#2e7d32",                //button border; also the hover / active FILL
+        greenBtnLineHover: "#66bb6a",           //button border on hover / active
+        greenGlow: "#4caf50",                   //active button glow
         custom: "#cccc00",
 
         //HISTORICAL - the 2011 map-overlay skin. Stage 4 converged every surface that wore
@@ -100,9 +117,17 @@ const theme = {
     //be sized independently and came out 35 / 35 / 46. Change btn/btnSmall and you must
     //change those tokens - and --fv-hud-strip, which reserves the row's width so the
     //header cannot grow underneath these buttons.
+    //
+    //`gap` is the space between neighbouring buttons in the top-right row; every `right:`
+    //offset in FullScreen / BackToLobby / Surrender is arithmetic on btn + gap. The small
+    //gap is tighter than the desktop one because Back to Lobby made the row four buttons
+    //wide, which is a squeeze beside the phase header on a portrait phone. Change either
+    //gap and --fv-hud-strip / --fv-hud-strip-small must follow.
     hud: {
         btn: "36px",                            //button box, desktop
         btnSmall: "25px",                       //button box, phones + short landscape
+        gap: "10px",                            //space between top-right row buttons, desktop
+        gapSmall: "5px",                        //the same, phones + short landscape
         icon: "26px",                           //inline SVG inside the box (~58%)
         iconSmall: "17px",
         glyph: "30px",                          //text glyph inside the box (~71% - see above)

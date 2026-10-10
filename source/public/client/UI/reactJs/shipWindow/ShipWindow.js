@@ -2300,6 +2300,17 @@ const getStatusBanners = (ship) => {
         });
     }
 
+    /*EXTENDED_TURNS_PLAN.md Stage 5 (§6): the map tooltip's green "Making Extended Turn (side)" while
+      the turn is in progress (D8), and - here only - an amber note for the rest of the turn an owed
+      turn was cancelled in, since that happens automatically with no pop-up (D5).
+      shipManager.movement.getExtendedTurnStatus is the reader the tooltip shares.*/
+    const extendedTurn = ship.flight ? null : shipManager.movement.getExtendedTurnStatus(ship);
+    if (extendedTurn) {
+        banners.push(extendedTurn.cancelled
+            ? { key: 'extendedTurn', color: theme.colors.statusAlert, bg: 'rgba(255, 165, 0, 0.10)', text: extendedTurn.text }
+            : { key: 'extendedTurn', color: theme.colors.statusOk, bg: 'rgba(50, 205, 50, 0.08)', text: extendedTurn.text });
+    }
+
     /*WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20, user request 2026-09-13): an Extra-Dimensional Jump Drive
       abduction standing against this unit, as of the last resolved turn. The same reader and the same
       purple as the map tooltip's "Being abducted" line and the "Abduction" hex marker.*/

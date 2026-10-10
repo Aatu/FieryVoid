@@ -236,9 +236,27 @@ shipManager.movement = {
     },
 
 
+    /* MINE_DETECTION_PLAN.md §1.4.1 - is the row deleteMove would remove one the live sweep has made
+       FINAL? A step the server has swept for mines cannot be taken back, a mis-click included (D11):
+       the unit's committed path must pass through it. The lock is a PREFIX of the turn's rows
+       (client/mineSweep.js, T13), so testing the LAST row is the whole test. */
+    isLastMoveFinal: function isLastMoveFinal(ship) {
+        return !!(window.mineSweep && mineSweep.isLastRowLocked(ship));
+    },
+
+    /* The Cancel button and its right-click "undo all" loop. NOT folded into hasDeletableMovements,
+       which also answers "has this unit plotted anything" for the initiative list's moved styling
+       (gamedata.drawIniGUI) and for canDetach - a fully swept move must still read as moved there.
+       A unit in Minesweeping Mode cannot cancel a step into a hex even before it is swept (mineSweep.js). */
+    canCancelMove: function canCancelMove(ship) {
+        return shipManager.movement.hasDeletableMovements(ship) && !shipManager.movement.isLastMoveFinal(ship)
+            && !(window.mineSweep && mineSweep.isLastRowSweptStep(ship));
+    },
+
     deleteMove: function deleteMove(ship) {
         var movement = ship.movement[ship.movement.length - 1];
         if (movement.type == "attached") return; // Cannot delete mirrored moves
+        if (shipManager.movement.isLastMoveFinal(ship)) return; // Swept for mines - final (MINE_DETECTION_PLAN.md D11)
 
         if (!movement.preturn && !movement.forced && movement.turn == gamedata.turn) {
             if (gamedata.gamephase == 3 && (movement.value != "combatpivot" || movement.type != "pivotleft" && movement.type != "pivotright")) return;
@@ -264,6 +282,8 @@ shipManager.movement = {
 
 
     deleteSpeedChange: function deleteSpeedChange(ship, accel) {
+        //It removes the LAST row whichever speed change it matched, so that is the row to test (T13).
+        if (shipManager.movement.isLastMoveFinal(ship)) return false;
         var curheading = shipManager.movement.getLastCommitedMove(ship).heading;
         for (var i in ship.movement) {
             var movement = ship.movement[i];
@@ -289,6 +309,7 @@ shipManager.movement = {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.extendedTurnForbids(ship, 'jink')) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!
         if (!ship.flight && ship.jinkinglimit <= 0) return false;
         if (accel == 0) return true;
@@ -373,6 +394,7 @@ shipManager.movement = {
                 value: accel
             };
             if (!ship.flight) {
+                shipManager.movement.autoAssignThrust(ship); //pre-fill on open: the thrust panel has no AUTO button
                 shipManager.movement.updateAssignThrust(ship);
             }
         }
@@ -382,6 +404,7 @@ shipManager.movement = {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.extendedTurnForbids(ship, 'roll')) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
 
@@ -409,6 +432,7 @@ shipManager.movement = {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.extendedTurnForbids(ship, 'roll')) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (ship.flight || ship.osat) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
@@ -456,6 +480,7 @@ shipManager.movement = {
             forced: false,
             value: 'thisTurn'
         };
+        shipManager.movement.autoAssignThrust(ship); //pre-fill on open: the thrust panel has no AUTO button
         shipManager.movement.updateAssignThrust(ship);
         ship.rolling = true;
 
@@ -487,6 +512,7 @@ shipManager.movement = {
             forced: false,
             value: 'emergencyRoll'
         };
+        shipManager.movement.autoAssignThrust(ship); //pre-fill on open: the thrust panel has no AUTO button
         shipManager.movement.updateAssignThrust(ship);
         ship.rolling = true;
 
@@ -580,6 +606,9 @@ shipManager.movement = {
 
     canMove: function canMove(ship) {
         if (gamedata.gamephase != 2) return false;
+        //'move' is never on the blocked list; this only stops a ship moving before it has completed
+        //(or cancelled) the extended turn it owes from last turn.
+        if (shipManager.movement.extendedTurnForbids(ship, 'move')) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!       
 
         if (shipManager.isDestroyed(ship)) return false;
@@ -1057,6 +1086,7 @@ shipManager.movement = {
         //An attached pod leaves with its host and never decides for itself (plan section 5 trap 7).
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false;
         if (shipManager.movement.hasJumpedOut(ship)) return false;
+        if (shipManager.movement.extendedTurnForbids(ship, 'jumpout')) return false;
         //An unpayable manoeuvre still dangling would be dropped by the server's thrust validation,
         //taking the path that reached the vortex with it. Make the player resolve it first.
         if (shipManager.movement.checkHasUncommitted(ship)) return false;
@@ -1102,6 +1132,7 @@ shipManager.movement = {
 
     canDetach: function canDetach(ship) {
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.extendedTurnForbids(ship, 'detach')) return false;
         if (Object.keys(ship.attached).length === 0) return false;
         if (shipManager.movement.hasDeletableMovements(ship)) return false;
         return true;
@@ -1141,6 +1172,7 @@ shipManager.movement = {
 
     canSlip: function canSlip(ship, right) {
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.extendedTurnForbids(ship, right ? 'slipright' : 'slipleft')) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
 
@@ -1317,6 +1349,7 @@ shipManager.movement = {
     canPivot: function canPivot(ship, right) {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
+        if (shipManager.movement.extendedTurnForbids(ship, right ? 'pivotright' : 'pivotleft')) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
@@ -1570,6 +1603,7 @@ shipManager.movement = {
         if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (ship.halfPhaseThrust == 0) return false; //ship is not capable of half phasing
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.extendedTurnForbids(ship, 'halfPhase')) return false;
         if (shipManager.movement.isHalfPhased(ship)) return false;
 
         //needs to have appropriate thrust left 
@@ -1650,6 +1684,7 @@ shipManager.movement = {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.extendedTurnForbids(ship, 'contract')) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
 
         var canContract = false;
@@ -1743,6 +1778,7 @@ shipManager.movement = {
                 value: value
             };
 
+            shipManager.movement.autoAssignThrust(ship); //pre-fill on open: the thrust panel has no AUTO button
             shipManager.movement.updateAssignThrust(ship);
         }
 
@@ -1798,6 +1834,7 @@ shipManager.movement = {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.extendedTurnForbids(ship, right ? 'turnright' : 'turnleft')) return false;
         //if (ship.agile) returnVal = false; //agile ship should be able to turn into pivot all right...
         if (ship.flight) return false; //Every turn is a turn into pivot for fighters/shuttles, no need for extra movement type.
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
@@ -1889,6 +1926,7 @@ shipManager.movement = {
         };
 
         if (!ship.flight) {
+            shipManager.movement.autoAssignThrust(ship); //pre-fill on open: the thrust panel has no AUTO button
             shipManager.movement.updateAssignThrust(ship);
         }
 
@@ -1979,6 +2017,17 @@ shipManager.movement = {
         if (gamedata.gamephase != 2) {
             return false;
         }
+        /* EXTENDED TURNS (R4, D6): no acceleration or deceleration at any point of the turn after
+           an extended turn was begun, whether it has been completed, cancelled, or not yet either.
+           Not a blocked-list test - it covers the WHOLE turn. ⚠️ It is also what stops a speed change
+           after a cancellation: the "speed changes come first" loop below skips forced rows, and the
+           cancellation row is forced (EXTENDED_TURNS_PLAN.md T5). On the turn of the begin itself
+           that loop already does the job, because the begin is an ordinary player row. */
+        if (shipManager.movement.getOwedExtendedTurn(ship)) return false;
+        /* A swept step fixes the speed for the turn (MINE_DETECTION_PLAN.md §1.4.1). The "speed changes
+           come first" loop below already refuses once any step exists; this says so outright, and
+           keeps changeSpeed from adding a row when deleteSpeedChange refuses a final one. */
+        if (window.mineSweep && mineSweep.hasLockedRows(ship)) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.movement.checkHasUncommitted(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
@@ -2523,8 +2572,18 @@ shipManager.movement = {
         var stillReq = shipManager.movement.calculateThrustStillReq(ship, movement);
 
         var done = true;
-        for (var i in stillReq) {
-            if (stillReq[i] > 0) done = false;
+        if (shipManager.movement.isExtendedTurnStart(movement)) {
+            //EXTENDED TURNS: a begin is NEVER fully paid. It commits when at least a quarter is paid
+            //and at least one point is still owed (D2 - assignThrust already refuses the last point;
+            //this is the backstop). What is owed is snapshotted BY ROLE into `value` here, because
+            //recomputing it next turn would read next turn's criticals (T2, T10).
+            var payment = shipManager.movement.getExtendedTurnStartPayment(ship, movement);
+            done = payment.valid;
+            if (done) movement.value = JSON.stringify(payment.owed);
+        } else {
+            for (var i in stillReq) {
+                if (stillReq[i] > 0) done = false;
+            }
         }
 
         if (done) {
@@ -2570,6 +2629,13 @@ shipManager.movement = {
         if (thrustReq[system.direction] <= 0 && thrustReq[0] <= 0 && !isTurn) {
             return false;
         }
+        //EXTENDED TURNS (D2): the begin may never be paid in full, so refuse the point that would
+        //leave nothing owed. Each click adds exactly ONE effective point (HalfEfficiency and
+        //FirstThrustIgnored step the raw count instead), so "owed <= 1" is exact.
+        if (shipManager.movement.isExtendedTurnStart(movement)
+            && shipManager.movement.getExtendedTurnOwedTotal(thrustReq) <= 1) {
+            return false;
+        }
         if (thrustReq[system.direction] <= 0 && thrustReq[0] <= 0 && isTurn && turndelay - 1 < 1) {
             return false;
         }
@@ -2611,6 +2677,29 @@ shipManager.movement = {
 
 
         return true;
+    },
+
+    /* Would a click on this thruster be accepted right now? The thrust panel outlines the thrusters it
+       would accept (orange where the point pays what is still needed, green where it is extra thrust).
+       A dry run of the real assignThrust, so there is no second copy of its rules to drift: the point
+       is assigned, and the row is then put back exactly as it was - the entry, its absence, and the
+       array's length, which a new id past the end would otherwise leave stretched. */
+    wouldAcceptThrust: function wouldAcceptThrust(ship, system) {
+        var movement = ship.movement[ship.movement.length - 1];
+        if (!movement || movement.commit || !movement.assignedThrust) return false;
+
+        var assigned = movement.assignedThrust;
+        var had = Object.prototype.hasOwnProperty.call(assigned, system.id);
+        var before = assigned[system.id];
+        var length = assigned.length;
+        var wasted = system.thrustwasted;
+        try {
+            return shipManager.movement.assignThrust(ship, system) === true;
+        } finally {
+            if (had) assigned[system.id] = before; else delete assigned[system.id];
+            if (Array.isArray(assigned)) assigned.length = length;
+            system.thrustwasted = wasted;
+        }
     },
 
 
@@ -2697,7 +2786,11 @@ shipManager.movement = {
         return false;
     },
 
-    canTurn: function canTurn(ship, right) {
+    /* ignoreThrustCost (EXTENDED_TURNS_PLAN.md §3.2): skip only the "is there enough engine thrust
+       for the whole turn" test, so canBeginExtendedTurn can reuse every structural condition here
+       (rolling, pivoting, alignment, the gravitic exceptions) instead of copying them. Existing
+       callers leave it off and are unchanged. */
+    canTurn: function canTurn(ship, right, ignoreThrustCost = false) {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (ship.mine) return false;
@@ -2711,6 +2804,7 @@ shipManager.movement = {
         if (gamedata.gamephase == -1 && shipManager.isArrivingReinforcement(ship)) return false;
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.extendedTurnForbids(ship, right ? 'turnright' : 'turnleft')) return false;
         if (ship.osat && (!ship.flight)) { //OSAT but not MicroSAT
             for (var i = 0; i < ship.systems.length; i++) {
                 var system = ship.systems[i];
@@ -2735,7 +2829,10 @@ shipManager.movement = {
         var turndelay = shipManager.movement.calculateCurrentTurndelay(ship);
         var previous = shipManager.movement.getLastCommitedMove(ship);
         if (turndelay > 0) {
-            if (!(ship.agile && previous && previous.turn == gamedata.turn && shipManager.movement.isTurn(previous))) {
+            //An agile ship's snap turn may follow straight on from a turn - but not from the
+            //completion of an extended turn, which is a single 60° turn (D7).
+            if (!(ship.agile && previous && previous.turn == gamedata.turn && shipManager.movement.isTurn(previous)
+                && !shipManager.movement.isExtendedTurnCompletion(previous))) {
                 return false;
             }
         }
@@ -2747,7 +2844,7 @@ shipManager.movement = {
         turncost = Math.max(1, turncost);//turn cost may never be less than 1!
         turncost += shipManager.movement.getDockedLcvTurnSurcharge(ship);//LCV Rails: +1 thrust/turn per docked LCV
 
-        if (shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
+        if (!ignoreThrustCost && shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
             return false;
         }
         var pivoting = shipManager.movement.isPivoting(ship);
@@ -2849,6 +2946,7 @@ shipManager.movement = {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.extendedTurnForbids(ship, right ? 'turnright' : 'turnleft')) return false;
         if (!ship.gravitic) return false;
         if (!ship.flight) return false; //Fighters only for now.
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;          
@@ -2894,10 +2992,544 @@ shipManager.movement = {
     },
 
 
-    autoAssignThrust: function autoAssignThrust(ship) {
+    /* ===== EXTENDED TURNS (EXTENDED_TURNS_PLAN.md Stage 2, section 3) ===============================
+       A ship that cannot (or should not) pay for a whole turn pays at least a quarter of it on turn N
+       and names the side, keeps flying straight, and completes the turn as the FIRST order of turn N+1,
+       paying the rest. Three movement rows carry it:
+
+         begin         turn N    extendTurnLeft / extendTurnRight. Facing and heading unchanged.
+                                 requiredThrust = the full turn; value = what is still owed, BY ROLE,
+                                 as JSON {"any":a,"rear":r,"side":s}, written at CONFIRM.
+         completion    turn N+1  an ordinary turnleft / turnright on the same side, value
+                                 'extendedTurn' - so turn delay (counted from HERE, R5), shortening,
+                                 payment validation and replay all treat it as the turn it is.
+         cancellation  turn N+1  extendTurnCancel, forced, when completion is physically impossible.
+                                 value = 'thrusters' | 'thrust' | 'engineShorted'.
+
+       The server half is Movement::validateExtendedTurn (source/server/handlers/movement.php).
+
+       ⚠️ Never cache any of this on the ship object (T8): ship objects are replaced on every poll that
+       carries ship data, so every answer below is derived from the rows each time. Turn N's begin is
+       present at N+1 only because the server loads turn T-1's rows; nothing may look for it at N+2. */
+
+    /* D4 (user ruling 2026-10-01): the row types a ship may NOT add between beginning an extended
+       turn and the end of that turn. "A manoeuvre is a turn, pivot or roll." Edit this list to change
+       the ruling - every gate asks it with the row type it would create, including the gates the list
+       does not name today, so adding 'slipleft', 'slipright' (or 'jink', 'halfPhase', 'contract') is
+       a one-line change. 'move' must never be listed: the whole point is that the ship keeps moving.
+       ⚠️ MIRROR PAIR with Movement::$extendedTurnBlockedTypes (source/server/handlers/movement.php).
+       Change one and not the other and the client will offer an order the server logs as illegal, or
+       refuse one it would accept. */
+    extendedTurnBlockedTypes: ['turnleft', 'turnright', 'pivotleft', 'pivotright', 'roll', 'extendTurnLeft', 'extendTurnRight'],
+
+    isExtendedTurnStart: function isExtendedTurnStart(move) {
+        return !!move && (move.type === 'extendTurnLeft' || move.type === 'extendTurnRight');
+    },
+
+    isExtendedTurnCompletion: function isExtendedTurnCompletion(move) {
+        return !!move && shipManager.movement.isTurn(move) && move.value === 'extendedTurn';
+    },
+
+    //This turn's begin row (committed or not), or null.
+    getExtendedTurnStart: function getExtendedTurnStart(ship) {
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move.turn == gamedata.turn && shipManager.movement.isExtendedTurnStart(move)) return move;
+        }
+        return null;
+    },
+
+    //LAST turn's begin row - the extended turn owed this turn - or null.
+    getOwedExtendedTurn: function getOwedExtendedTurn(ship) {
+        var owed = null;
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move.turn == gamedata.turn - 1 && shipManager.movement.isExtendedTurnStart(move)) owed = move;
+        }
+        return owed;
+    },
+
+    //This turn's cancellation row, or null.
+    getExtendedTurnCancel: function getExtendedTurnCancel(ship) {
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move.turn == gamedata.turn && move.type === 'extendTurnCancel') return move;
+        }
+        return null;
+    },
+
+    //A turn is owed from last turn, and this turn has neither a COMMITTED completion nor a cancellation.
+    isExtendedTurnOutstanding: function isExtendedTurnOutstanding(ship) {
+        if (!shipManager.movement.getOwedExtendedTurn(ship)) return false;
+        if (shipManager.movement.getExtendedTurnCancel(ship)) return false;
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move.turn == gamedata.turn && move.commit && shipManager.movement.isExtendedTurnCompletion(move)) return false;
+        }
+        return true;
+    },
+
+    /* ⭐ THE ONE PREDICATE EVERY MANOEUVRE GATE ASKS, with the row type that gate would create (T9).
+       True while a turn is outstanding, whatever the type: on N+1 the completion comes before
+       everything ("immediately", R3), so nothing else is offered until it is completed or cancelled.
+       Otherwise true when a begin exists this turn and the type is on the D4 list. */
+    extendedTurnForbids: function extendedTurnForbids(ship, type) {
+        if (shipManager.movement.isExtendedTurnOutstanding(ship)) return true;
+        return shipManager.movement.getExtendedTurnStart(ship) !== null
+            && shipManager.movement.extendedTurnBlockedTypes.indexOf(type) >= 0;
+    },
+
+    //Total thrust a requirement asks for (C in the plan).
+    getExtendedTurnCost: function getExtendedTurnCost(requiredThrust) {
+        var cost = 0;
+        for (var i in requiredThrust) {
+            if (requiredThrust[i] > 0) cost += requiredThrust[i];
+        }
+        return cost;
+    },
+
+    //At least a quarter, rounded up (D3).
+    getExtendedTurnMinimum: function getExtendedTurnMinimum(cost) {
+        return Math.ceil(cost / 4);
+    },
+
+    //Thrust still owed on a row, from calculateThrustStillReq's output.
+    getExtendedTurnOwedTotal: function getExtendedTurnOwedTotal(stillReq) {
+        var owed = 0;
+        for (var i in stillReq) {
+            if (stillReq[i] > 0) owed += stillReq[i];
+        }
+        return owed;
+    },
+
+    /* What is still owed BY ROLE: the "either" slot, the aft pair (slots 1+2) and the side pair
+       (slots 3+4). A turn's requirement only ever uses one slot of each pair, so the pair sums do not
+       care which way round the ship was - which is the whole point (D10, T10): a gravitic ship's roll
+       or pivot can complete between the two turns and change which thrusters do each job. */
+    getExtendedTurnRoles: function getExtendedTurnRoles(stillReq) {
+        var owed = function (slot) { return Math.max(0, stillReq[slot] || 0); };
+        return { any: owed(0), rear: owed(1) + owed(2), side: owed(3) + owed(4) };
+    },
+
+    /* The amount owed by a begin row, by role: the snapshot written into `value` at CONFIRM (T2). Only
+       if that does not read is it recomputed from the row's own arrays - which reads today's criticals,
+       so it is a fallback, never the rule. The server has already bounded the figure. */
+    getExtendedTurnRemainder: function getExtendedTurnRemainder(ship, begin) {
+        var snapshot = begin.value;
+        if (typeof snapshot === 'string') {
+            try { snapshot = JSON.parse(snapshot); } catch (e) { snapshot = null; }
+        }
+        if (snapshot && typeof snapshot === 'object') {
+            var read = function (role) { return Math.max(0, parseInt(snapshot[role], 10) || 0); };
+            if (['any', 'rear', 'side'].every(function (role) { return snapshot[role] !== undefined; })) {
+                return { any: read('any'), rear: read('rear'), side: read('side') };
+            }
+        }
+        return shipManager.movement.getExtendedTurnRoles(shipManager.movement.calculateThrustStillReq(ship, begin));
+    },
+
+    /* The state of a begin row on the thrust panel: cost, what is paid and owed, the minimum, and
+       whether it may be confirmed (at least a quarter paid, at least one point still owed - D2). */
+    getExtendedTurnStartPayment: function getExtendedTurnStartPayment(ship, movement) {
+        var stillReq = shipManager.movement.calculateThrustStillReq(ship, movement);
+        var cost = shipManager.movement.getExtendedTurnCost(movement.requiredThrust);
+        var owed = shipManager.movement.getExtendedTurnRoles(stillReq);
+        var paid = cost - (owed.any + owed.rear + owed.side);
+        var minimum = shipManager.movement.getExtendedTurnMinimum(cost);
+        return { cost: cost, paid: paid, minimum: minimum, owed: owed, valid: paid >= minimum && paid <= cost - 1 };
+    },
+
+    /* Everything canBeginExtendedTurn asks EXCEPT whether a normal turn is affordable (D1-A). The
+       Make Extended Turn box on a normal turn's panel (D1-C) asks this; the map icon asks the full
+       test, so the icon only ever appears in place of a turn arrow the ship cannot afford. */
+    qualifiesForExtendedTurn: function qualifiesForExtendedTurn(ship, right) {
+        if (gamedata.gamephase != 2) return false;
+        //Ships only (R1): not flights, nor units that do not turn by spending thrust.
+        if (ship.flight || ship.osat || ship.base || ship.mine) return false;
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return false;
+        //canTurn's own rolling / pivoting / alignment rules, with the gravitic exceptions (D10).
+        if (!shipManager.movement.canTurn(ship, right, true)) return false;
+        if (shipManager.movement.extendedTurnForbids(ship, right ? 'extendTurnRight' : 'extendTurnLeft')) return false;
+        //A single 60° turn (D7): the delay must be satisfied outright - no agile snap exception.
+        if (shipManager.movement.calculateCurrentTurndelay(ship) > 0) return false;
+
+        var cost = shipManager.movement.getExtendedTurnCost(shipManager.movement.calculateRequiredThrust(ship, right));
+        if (cost < 2) return false; //D3
+        return shipManager.movement.getRemainingEngineThrust(ship) >= shipManager.movement.getExtendedTurnMinimum(cost);
+    },
+
+    //The map icon (D1-A): offered in the turn arrow's place when the whole turn is unaffordable.
+    canBeginExtendedTurn: function canBeginExtendedTurn(ship, right) {
+        return shipManager.movement.qualifiesForExtendedTurn(ship, right)
+            && !shipManager.movement.canTurn(ship, right);
+    },
+
+    /* Appends the begin row and opens the thrust panel on it, paying as much as it can by default:
+       engine thrust left over on turn N has little else to buy. Capped at the engine thrust left (T6)
+       and one point short of the whole cost (D2). */
+    doBeginExtendedTurn: function doBeginExtendedTurn(ship, right) {
+        if (!shipManager.movement.canBeginExtendedTurn(ship, right)) return false;
+
+        var requiredThrust = shipManager.movement.calculateRequiredThrust(ship, right);
+        var cost = shipManager.movement.getExtendedTurnCost(requiredThrust);
+        var lastMovement = ship.movement[ship.movement.length - 1];
+
+        ship.movement[ship.movement.length] = {
+            id: -1,
+            type: right ? 'extendTurnRight' : 'extendTurnLeft',
+            position: lastMovement.position,
+            xOffset: lastMovement.xOffset,
+            yOffset: lastMovement.yOffset,
+            facing: lastMovement.facing,
+            heading: lastMovement.heading,
+            speed: lastMovement.speed,
+            animating: false,
+            animated: true,
+            animationtics: 0,
+            requiredThrust: requiredThrust,
+            assignedThrust: Array(),
+            commit: false,
+            preturn: false,
+            at_initiative: shipManager.getIniativeOrder(ship),
+            turn: gamedata.turn,
+            forced: false,
+            value: 0
+        };
+
+        shipManager.movement.autoAssignThrust(ship, Math.min(shipManager.movement.getRemainingEngineThrust(ship), cost - 1));
+        shipManager.movement.updateAssignThrust(ship);
+        return true;
+    },
+
+    /* Runs fn with the last (uncommitted) row lifted off the ship, so the gates see the ship as it was
+       before that row was added. Always puts it back. */
+    withoutLastMove: function withoutLastMove(ship, fn) {
+        var row = ship.movement.pop();
+        try {
+            return fn();
+        } finally {
+            ship.movement.push(row);
+        }
+    },
+
+    /* The Make Extended Turn box on the thrust panel (D1-C, D2). Returns null when there is no box,
+       otherwise { checked, enabled, hint }:
+       - on an uncommitted PLAIN turn (not a turn into pivot) by a ship that would qualify for a begin
+         apart from the thrust test: unticked, enabled;
+       - on an uncommitted begin: ticked; untickable only when a normal turn is affordable, which is
+         never the case for a begin made from the map icon - that is why its icon appeared. */
+    getExtendedTurnToggle: function getExtendedTurnToggle(ship, move) {
+        if (!move || move.commit || move !== ship.movement[ship.movement.length - 1]) return null;
+
+        if (shipManager.movement.isExtendedTurnStart(move)) {
+            var right = move.type === 'extendTurnRight';
+            var affordable = shipManager.movement.withoutLastMove(ship, function () {
+                return shipManager.movement.canTurn(ship, right);
+            });
+            return { checked: true, enabled: affordable, hint: affordable ? '' : 'Not enough thrust for a normal turn' };
+        }
+
+        if (shipManager.movement.isTurn(move) && !move.value) {
+            var turnRight = move.type === 'turnright';
+            var qualifies = shipManager.movement.withoutLastMove(ship, function () {
+                return shipManager.movement.qualifiesForExtendedTurn(ship, turnRight);
+            });
+            return qualifies ? { checked: false, enabled: true, hint: '' } : null;
+        }
+
+        return null;
+    },
+
+    /* Ticks (on = true) or unticks the Make Extended Turn box: converts the last row between a plain
+       turn and a begin, both ways.
+       - Ticking restores the facing and heading the turn had changed. If the turn was already paid
+         in full it gives back points - always from the thruster carrying the most - until one is
+         owed, which keeps the split the player made by hand (avoiding overthrust is exactly when they
+         set it by hand).
+       - Unticking rotates the facing and heading again, as doNormalTurn does; the payment stays. */
+    setExtendedTurn: function setExtendedTurn(ship, on) {
+        var move = ship.movement[ship.movement.length - 1];
+        var toggle = shipManager.movement.getExtendedTurnToggle(ship, move);
+        if (!toggle || !toggle.enabled || toggle.checked === on) return false;
+
+        var previous = ship.movement[ship.movement.length - 2];
+        if (on) {
+            var right = move.type === 'turnright';
+            move.type = right ? 'extendTurnRight' : 'extendTurnLeft';
+            move.facing = previous.facing;
+            move.heading = previous.heading;
+            move.animated = true;
+
+            var guard = 100;
+            while (guard-- > 0 && shipManager.movement.getExtendedTurnOwedTotal(shipManager.movement.calculateThrustStillReq(ship, move)) < 1) {
+                var heaviest = null;
+                for (var id in move.assignedThrust) {
+                    if (!(move.assignedThrust[id] > 0)) continue;
+                    if (heaviest === null || move.assignedThrust[id] > move.assignedThrust[heaviest]) heaviest = id;
+                }
+                var thruster = heaviest === null ? null : shipManager.systems.getSystem(ship, parseInt(heaviest, 10));
+                var before = heaviest === null ? undefined : move.assignedThrust[heaviest];
+                if (!thruster || !shipManager.movement.unAssignThrust(ship, thruster)) break;
+                if (move.assignedThrust[heaviest] === before) break; //nothing came off - stop rather than spin
+            }
+        } else {
+            var turnRight = move.type === 'extendTurnRight';
+            var step = turnRight ? 1 : -1;
+            move.type = turnRight ? 'turnright' : 'turnleft';
+            move.facing = mathlib.addToHexFacing(previous.facing, step);
+            move.heading = mathlib.addToHexFacing(previous.heading, step);
+            move.animated = false;
+        }
+
+        /* Re-opens the panel on the converted row, and nothing else. Deliberately NO
+           ShipMovementChanged: the map's movement icons are already hidden while the panel is open,
+           and that event would redraw them (PhaseStrategy.redrawMovementUI only hides them when they
+           are showing) - letting the player click other orders under an open panel. Nothing else
+           needs it while the row is uncommitted: ship icons consume committed rows only, and CONFIRM
+           and CANCEL both fire it. */
+        shipManager.movement.updateAssignThrust(ship);
+        return true;
+    },
+
+    /* The completion's requirement: the role snapshot mapped onto the thrusters doing each job NOW,
+       through the same two thrusterDirectionRequired calls calculateRequiredThrust makes. After a
+       roll has completed the side role lands on the other side's thrusters, and so on (D10). */
+    getExtendedTurnCompletionRequirement: function getExtendedTurnCompletionRequirement(ship, owed) {
+        var roles = shipManager.movement.getExtendedTurnRemainder(ship, owed);
+        var right = owed.type === 'extendTurnRight';
+        var requiredThrust = Array(null, null, null, null, null);
+
+        requiredThrust[0] = roles.any;
+        requiredThrust[shipManager.movement.thrusterDirectionRequired(ship, "main", false, true)] = roles.rear;
+        //turning to starboard needs the port thrusters, and vice versa
+        requiredThrust[shipManager.movement.thrusterDirectionRequired(ship, right ? "port" : "stbd", false, true)] = roles.side;
+
+        return requiredThrust;
+    },
+
+    /* Has the engine shorted since the begin (D9)? Engine Shorted ALWAYS takes the engine offline,
+       and on a high roll also writes a preturn speedchange (Movement::doStuckEngine) - so the
+       critical itself is the test, with the row as a second witness. */
+    hasEngineShortedSince: function hasEngineShortedSince(ship, beginTurn) {
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move.turn == gamedata.turn && move.preturn && move.type === 'speedchange') return true;
+        }
+        for (var j in ship.systems) {
+            var system = ship.systems[j];
+            if (!system || system.name !== 'engine') continue;
+            for (var k in system.criticals) {
+                var crit = system.criticals[k];
+                if (crit.phpclass === 'EngineShorted' && crit.turn >= beginTurn) return true;
+            }
+        }
+        return false;
+    },
+
+    /* ⭐ THE PAYABILITY TEST is a dry run of the real assignThrust, not a capacity formula, so it meets
+       exactly the limits the player would: the overthrust ceiling (twice a thruster's rating),
+       critical steps, the engine. A scratch row is pushed, paid greedily - directional slots first,
+       then the "either" slot, cheapest thrusters first so a damaged one never spends engine thrust a
+       clean one could have saved - and spliced out again in a `finally` (T13): a throw must never
+       leave a phantom uncommitted row behind to block the Commit button. assignThrust never touches
+       thruster.channeled (only autoAssignThrust does), so the splice is all the cleanup needed. */
+    canPayRequirement: function canPayRequirement(ship, requiredThrust) {
+        var lastMovement = ship.movement[ship.movement.length - 1];
+        var row = {
+            id: -1,
+            type: 'extendTurnCheck',
+            position: lastMovement.position,
+            xOffset: lastMovement.xOffset,
+            yOffset: lastMovement.yOffset,
+            facing: lastMovement.facing,
+            heading: lastMovement.heading,
+            speed: lastMovement.speed,
+            animating: false,
+            animated: true,
+            animationtics: 0,
+            requiredThrust: requiredThrust.slice(),
+            assignedThrust: Array(),
+            commit: false,
+            preturn: false,
+            at_initiative: lastMovement.at_initiative,
+            turn: gamedata.turn,
+            forced: false,
+            value: 0
+        };
+
+        var cost = function (thruster) {
+            var c = 0;
+            if (shipManager.criticals.hasCritical(thruster, "FirstThrustIgnored")) c += 1;
+            if (shipManager.criticals.hasCritical(thruster, "HalfEfficiency")) c += 2;
+            return c;
+        };
+        var thrusters = [];
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            if (system && system.name == "thruster" && !shipManager.systems.isDestroyed(ship, system)) thrusters.push(system);
+        }
+        thrusters.sort(function (a, b) { return cost(a) - cost(b); });
+
+        ship.movement.push(row);
+        try {
+            for (var guard = 0; guard < 500; guard++) {
+                var stillReq = shipManager.movement.calculateThrustStillReq(ship, row);
+                if (shipManager.movement.getExtendedTurnOwedTotal(stillReq) <= 0) return true;
+
+                var paid = false;
+                for (var d = 0; d < thrusters.length && !paid; d++) {
+                    if (stillReq[thrusters[d].direction] > 0) paid = shipManager.movement.assignThrust(ship, thrusters[d]);
+                }
+                for (var a = 0; a < thrusters.length && !paid && stillReq[0] > 0; a++) {
+                    paid = shipManager.movement.assignThrust(ship, thrusters[a]);
+                }
+                if (!paid) return false;
+            }
+            return false;
+        } finally {
+            var index = ship.movement.indexOf(row);
+            if (index >= 0) ship.movement.splice(index, 1);
+        }
+    },
+
+    /* Why the owed turn cannot be completed, or null if it can: 'engineShorted' first (D9, T17),
+       then the dry run, then which of the two it was - not enough engine thrust left for what is
+       owed, or the thrusters themselves (lost, crippled, or capped by their overthrust ceiling). */
+    getExtendedTurnCancelReason: function getExtendedTurnCancelReason(ship) {
+        var owed = shipManager.movement.getOwedExtendedTurn(ship);
+        if (!owed) return null;
+
+        if (shipManager.movement.hasEngineShortedSince(ship, owed.turn)) return 'engineShorted';
+
+        var requiredThrust = shipManager.movement.getExtendedTurnCompletionRequirement(ship, owed);
+        if (shipManager.movement.canPayRequirement(ship, requiredThrust)) return null;
+
+        var roles = shipManager.movement.getExtendedTurnRemainder(ship, owed);
+        var total = roles.any + roles.rear + roles.side;
+        return shipManager.movement.getRemainingEngineThrust(ship) < total ? 'thrust' : 'thrusters';
+    },
+
+    /* The completion icon. Deliberately does NOT call canTurn: the turn-delay and thrust gates
+       belonged to the begin. */
+    canCompleteExtendedTurn: function canCompleteExtendedTurn(ship) {
+        if (gamedata.gamephase != 2) return false;
+        if (!shipManager.movement.isExtendedTurnOutstanding(ship)) return false;
+        if (shipManager.movement.checkHasUncommitted(ship)) return false;
+        return shipManager.movement.getExtendedTurnCancelReason(ship) === null;
+    },
+
+    //doNormalTurn's geometry on the begin's side, asking for what was owed, then the thrust panel.
+    doCompleteExtendedTurn: function doCompleteExtendedTurn(ship) {
+        if (!shipManager.movement.canCompleteExtendedTurn(ship)) return false;
+
+        var owed = shipManager.movement.getOwedExtendedTurn(ship);
+        var right = owed.type === 'extendTurnRight';
+        var step = right ? 1 : -1;
+        var requiredThrust = shipManager.movement.getExtendedTurnCompletionRequirement(ship, owed);
+        var lastMovement = ship.movement[ship.movement.length - 1];
+
+        ship.movement[ship.movement.length] = {
+            id: -1,
+            type: right ? 'turnright' : 'turnleft',
+            position: lastMovement.position,
+            xOffset: lastMovement.xOffset,
+            yOffset: lastMovement.yOffset,
+            facing: mathlib.addToHexFacing(lastMovement.facing, step),
+            heading: mathlib.addToHexFacing(lastMovement.heading, step),
+            speed: lastMovement.speed,
+            animating: false,
+            animated: false,
+            animationtics: 0,
+            requiredThrust: requiredThrust,
+            assignedThrust: Array(),
+            commit: false,
+            preturn: false,
+            at_initiative: shipManager.getIniativeOrder(ship),
+            turn: gamedata.turn,
+            forced: false,
+            value: 'extendedTurn'
+        };
+
+        shipManager.movement.autoAssignThrust(ship);
+        shipManager.movement.updateAssignThrust(ship);
+        return true;
+    },
+
+    /* Cancels an owed extended turn that can no longer be completed (R6) - automatically, with no
+       pop-up (D5); the ship window's status banner carries the note. Called on every update for each
+       active ship, like doForcedPivot, so it is idempotent: once the row exists the turn is no longer
+       outstanding. ⚠️ Must run AFTER doForcedPivot (T19): a gravitic ship's continuing pivot is applied
+       at activation, and the dry run has to see the orientation that pivot leaves. Never cancels while
+       a row is still being paid (the completion's own panel may be open). */
+    doForcedExtendedTurnCancel: function doForcedExtendedTurnCancel(ship) {
+        if (gamedata.gamephase != 2) return false;
+        if (!shipManager.movement.isExtendedTurnOutstanding(ship)) return false;
+        if (shipManager.movement.checkHasUncommitted(ship)) return false;
+
+        var reason = shipManager.movement.getExtendedTurnCancelReason(ship);
+        if (!reason) return false;
+
+        var lastMovement = ship.movement[ship.movement.length - 1];
+        ship.movement[ship.movement.length] = {
+            id: -1,
+            type: 'extendTurnCancel',
+            position: lastMovement.position,
+            xOffset: lastMovement.xOffset,
+            yOffset: lastMovement.yOffset,
+            facing: lastMovement.facing,
+            heading: lastMovement.heading,
+            speed: lastMovement.speed,
+            animating: false,
+            animated: true,
+            animationtics: 0,
+            requiredThrust: Array(null, null, null, null, null),
+            assignedThrust: Array(),
+            commit: true,
+            preturn: false,
+            at_initiative: shipManager.getIniativeOrder(ship),
+            turn: gamedata.turn,
+            forced: true,
+            value: reason
+        };
+        return true;
+    },
+
+    /* EXTENDED_TURNS_PLAN.md Stage 5 (§6) - THE ONE READER behind the map tooltip's note and the ship
+       window's banners, so the two can never disagree. Returns null, or:
+         { cancelled: false, text: 'Making Extended Turn (starboard)' }  from the begin until the
+             completion is committed or the turn is cancelled (D8). Public: an opponent sees it once
+             the begin is revealed, and loses it once the completion is (both are masked like any
+             other move until their bracket resolves).
+         { cancelled: true, text: 'Extended Turn Cancelled - ...' }  for the rest of the turn the
+             cancellation was made in (D5). The ship window shows it; the tooltip does not.
+       Derived from the rows each time (T8). */
+    getExtendedTurnStatus: function getExtendedTurnStatus(ship) {
+        var cancel = shipManager.movement.getExtendedTurnCancel(ship);
+        if (cancel) {
+            var reasons = { thrusters: 'Thrusters Lost', thrust: 'Not Enough Thrust', engineShorted: 'Engine Shorted' };
+            return {
+                cancelled: true,
+                text: 'Extended Turn Cancelled — ' + (reasons[cancel.value] || 'Cannot Be Completed') + ' · No speed change this turn'
+            };
+        }
+
+        var begin = shipManager.movement.getExtendedTurnStart(ship);
+        if (!begin && shipManager.movement.isExtendedTurnOutstanding(ship)) begin = shipManager.movement.getOwedExtendedTurn(ship);
+        if (!begin) return null;
+        return { cancelled: false, text: 'Making Extended Turn (' + (begin.type === 'extendTurnRight' ? 'Starboard' : 'Port') + ')' };
+    },
+
+
+    /* maxTotal (optional): assign at most this many points in all. Left undefined it behaves exactly
+       as it always has. Needed by the extended-turn begin (EXTENDED_TURNS_PLAN.md T6), because this
+       function never checks engine thrust - for an ordinary turn canTurn has already guaranteed
+       enough of it - and a begin must also stop one point short of the whole cost (D2). */
+    autoAssignThrust: function autoAssignThrust(ship, maxTotal) {
         var move = ship.movement[ship.movement.length - 1];
         var needArray = move.requiredThrust;
         var thrusterLoc = 0;
+        var budget = (maxTotal === undefined) ? Infinity : maxTotal;
+        if (budget <= 0) return;
 
         //Marcin Sawicki: no auto assignment for pivots!
         if (move.type == "pivotright" || move.type == "pivotleft") {
@@ -2966,6 +3598,8 @@ shipManager.movement = {
                         thrusters[j].channeled++;
                         toDo--;
                     }
+
+                    if (--budget <= 0) return;
 
                     if (toDo < 1) {
                         break;

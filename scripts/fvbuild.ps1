@@ -8,10 +8,19 @@
     1. Autoload map    phpab via autoload.sh, inside the php container  [-Autoload]
     2. Static ships    generateStaticShipFile.php, inside the container [-Statics]
     3. Client bundles  yarn build, on the host                          [-Client]
+    4. Served copy     refresh the code the local site serves           [-Sync]
 
   With no flags all three run. -Server = steps 1+2 only - the everyday choice
   while yarn watch / yarn watch:legacy are running, because a full yarn build
   MINIFIES the legacy bundles that watch:legacy keeps readable.
+
+  -Sync refreshes the code the local site actually serves. nginx/php-fpm run
+  from /usr/src/fieryvoid, a copy of the repo the container makes at start and
+  then keeps in step by watching for file changes - but edits made from Windows
+  often send no change notice into the container, so the site can go on serving
+  old PHP/JS/CSS until the container restarts. -Sync makes that copy on demand.
+  It runs alone, or LAST after other steps (-Client -Sync) so it picks up what
+  they wrote. Not run by default, and not part of -Check.
 
   -Check is the pre-deploy gate and writes nothing: it regenerates the
   autoload map to a temp file and byte-compares it against the committed one,
@@ -33,6 +42,8 @@
   .\FieryVoid\scripts\fvbuild.ps1 -Server      # autoload + statics (daily driver)
   .\FieryVoid\scripts\fvbuild.ps1 -Autoload    # just the class map
   .\FieryVoid\scripts\fvbuild.ps1 -Check       # pre-deploy gate, writes nothing
+  .\FieryVoid\scripts\fvbuild.ps1 -Sync        # make the local site serve the current code
+  .\FieryVoid\scripts\fvbuild.ps1 -Client -Sync   # rebuild the bundles, then serve them
   .\FieryVoid\scripts\fvbuild.ps1 -Server -Container my-php   # non-compose container
 #>
 [CmdletBinding()]
@@ -42,6 +53,7 @@ param(
     [switch]$Client,
     [switch]$Server,
     [switch]$Check,
+    [switch]$Sync,
     [string]$Container = $env:FV_PHP_CONTAINER
 )
 
@@ -53,18 +65,19 @@ function Fail([string]$msg) {
 }
 
 # ---- which steps run
-$anyFlag    = $Autoload -or $Statics -or $Client -or $Server -or $Check
+$anyFlag    = $Autoload -or $Statics -or $Client -or $Server -or $Check -or $Sync
 $doAutoload = $Autoload -or $Server -or (-not $anyFlag)
 $doStatics  = $Statics  -or $Server -or (-not $anyFlag)
 $doClient   = $Client   -or (-not $anyFlag)
-if ($Check) { $doAutoload = $false; $doStatics = $false; $doClient = $false }
+$doSync     = $Sync
+if ($Check) { $doAutoload = $false; $doStatics = $false; $doClient = $false; $doSync = $false }
 
 # ---- preflight: the PHP steps need the container
 #
 # Ask compose from $RepoRoot rather than hardcoding a name: the project name
 # follows the checkout directory, and scoping the lookup to this repo also
 # means a sibling checkout's container can never be built into by accident.
-if ($doAutoload -or $doStatics -or $Check) {
+if ($doAutoload -or $doStatics -or $doSync -or $Check) {
     if (-not $Container) {
         Push-Location $RepoRoot
         try {
@@ -128,6 +141,18 @@ if ($doClient) {
     } finally {
         Pop-Location
     }
+}
+
+# ---- 4. served copy
+#
+# The same rsync the container's start.sh runs at boot and its inotify loop runs on each
+# change, with the same .dockerignore - so a sync never serves anything a restart would not.
+# --delete drops files removed from the repo. Last, so it carries steps 1-3's output with it.
+if ($doSync) {
+    Write-Host "`n=== served copy (/usr/src/current -> /usr/src/fieryvoid) ===" -ForegroundColor Cyan
+    docker exec $Container sh -c 'rsync -a --delete --exclude-from /usr/src/current/.dockerignore /usr/src/current/ /usr/src/fieryvoid/'
+    if ($LASTEXITCODE -ne 0) { Fail 'sync failed - see the rsync output above' }
+    Write-Host 'the local site now serves the current code.'
 }
 
 # ---- pre-deploy gate (writes nothing)

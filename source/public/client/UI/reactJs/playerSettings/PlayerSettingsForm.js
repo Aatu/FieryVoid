@@ -69,6 +69,7 @@ class PlayerSettingsForm extends React.Component {
                     <InputAndLabel label={"Toggle RULER tool"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ToggleLoS")} value={this.getKey.call(this, "ToggleLoS")} />
                     <InputAndLabel label={"Toggle HEX numbers"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ToggleHexNumbers")} value={this.getKey.call(this, "ToggleHexNumbers")} />
                     <InputAndLabel label={"Toggle MAP background"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ToggleBackground")} value={this.getKey.call(this, "ToggleBackground")} />
+                    <InputAndLabel label={"Close all SHIP WINDOWS and tooltips"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "CloseAllWindows")} value={this.getKey.call(this, "CloseAllWindows")} />
 
                     <SectionLabel>Replay</SectionLabel>
                     <InputAndLabel label={"Play / pause Replay"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "TogglePlayPause")} value={this.getKey.call(this, "TogglePlayPause")} />
@@ -268,6 +269,7 @@ const Disclaimer = styled.p`
 `;
 
 const keyCodes = {
+    27: "esc",
     32: "space",
     48: "0",
     49: "1",

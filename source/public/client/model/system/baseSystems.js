@@ -176,6 +176,10 @@ ChameleonSensors.prototype.doIndividualNotesTransfer = function () {
 	return true;
 };
 
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the toggle, in the one phase it can be changed.
+ChameleonSensors.prototype.draftStateKeys = ['active'];
+ChameleonSensors.prototype.draftStatePhases = [1];
+
 var Engine = function Engine(json, ship) {
 	ShipSystem.call(this, json, ship);
 };
@@ -429,6 +433,24 @@ Hangar.prototype.doIndividualNotesTransfer = function () {
 	this.pendingLaunchOrdersDirty = false;
 	this.pendingDockOrdersDirty = false;
 	this.pendingDeployStartOrdersDirty = false;
+};
+
+/* Save Orders (SAVE_ORDERS_PLAN.md §1.4): the Firing-phase queues and their dirty flags - read
+   straight off the fields, never through the transfer above, which EMPTIES them. A Docking Bay's
+   whole-ship queues ride along; a plain hangar simply has no such fields, and undefined keys are
+   skipped. Deployment adds the deploy-start queues (Stage 6). Catapults, Fighter Rails and Shadow
+   hangars inherit all of this; a Docking Collar lists its own LCV queues instead. */
+Hangar.prototype.draftStateKeys = [
+	'pendingLaunchOrders', 'pendingDockOrders', 'pendingLaunchOrdersDirty', 'pendingDockOrdersDirty',
+	'pendingBayShipDockOrders', 'pendingBayShipLaunchOrders', 'pendingBayShipDockOrdersDirty', 'pendingBayShipLaunchOrdersDirty',
+	//Deployment (Stage 6): the units queued to START the battle aboard. Their own markers
+	//(pendingDeployDock / pendingLcvDeployDock) are kept on the unit by savedOrders.js.
+	'pendingDeployStartOrders', 'pendingDeployStartOrdersDirty',
+	'pendingBayShipDeployStartOrders', 'pendingBayShipDeployStartOrdersDirty'
+];
+Hangar.prototype.draftStatePhases = [-1, 3];
+Hangar.prototype.afterDraftRestore = function () {
+	this.refreshHangarTooltip();   //the "(Launching)" / "(Recovering)" projection of the queues
 };
 
 // "Carrying" and "Stored Craft" lines are recomputed from the live $hangarUsage
@@ -1071,6 +1093,13 @@ DockingCollar.prototype.doIndividualNotesTransfer = function () {
 	this.pendingLcvLaunchOrdersDirty = false;
 	this.pendingLcvDeployStartOrdersDirty = false;
 };
+
+//Save Orders: a collar's OWN Firing-phase queues, replacing the fighter ones it would otherwise
+//inherit from Hangar. afterDraftRestore is inherited, and runs this class's refreshHangarTooltip.
+DockingCollar.prototype.draftStateKeys = [
+	'pendingLcvDockOrders', 'pendingLcvLaunchOrders', 'pendingLcvDockOrdersDirty', 'pendingLcvLaunchOrdersDirty',
+	'pendingLcvDeployStartOrders', 'pendingLcvDeployStartOrdersDirty'   //Deployment (Stage 6)
+];
 
 // LCV rails hold one LCV; capacity is "occupied / 1", not box count. The occupant
 // is known from the server-sent lcvDocked link, adjusted by any pending order.
@@ -2290,6 +2319,13 @@ KirishiacOrbital.prototype.doIndividualNotesTransfer = function () {
 	}
 };
 
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the pending dock/deploy order, in both phases it can be given.
+KirishiacOrbital.prototype.draftStateKeys = ['active'];
+KirishiacOrbital.prototype.draftStatePhases = [-1, 3];
+KirishiacOrbital.prototype.afterDraftRestore = function () {
+	this.updateDockingStatus();
+};
+
 //lighter Orbital variant (Kirishiac Conqueror) - identical client behaviour
 var KirishiacOrbitalLight = function KirishiacOrbitalLight(json, ship){
 	KirishiacOrbital.call(this, json, ship);
@@ -2781,6 +2817,18 @@ AdaptiveArmorController.prototype.doIndividualNotesTransfer = function () { //pr
 	}
 	return true;
 };
+
+/* Save Orders (SAVE_ORDERS_PLAN.md §1.4): everything doIncrease / doDecrease move, not just the two
+   the commit reads - the pools and counters decide what the panel lets the player do next.
+   pressignedReset too: initializationUpdate resets the pre-assigned counter ONCE per page on the
+   deploy turn, and must not run that reset again over counters restored from after it. */
+AdaptiveArmorController.prototype.draftStateKeys = [
+	'availableAA', 'allocatedAA', 'currchangedAA', 'AAtotal_used', 'AApreallocated_used', 'pressignedReset'
+];
+AdaptiveArmorController.prototype.draftStatePhases = [1];
+AdaptiveArmorController.prototype.afterDraftRestore = function () {
+	this.refreshData();
+};
 //Returns the list of damage types the player can actually act on for this controller:
 //unlocked types (availableAA) that are still carried by a currently-alive board unit
 //(or are already allocated/changed this turn). This is the SINGLE SOURCE OF TRUTH for both
@@ -2993,6 +3041,13 @@ HyachComputer.prototype.doIndividualNotesTransfer = function () { //prepare indi
 		for (var j = 0; j < this.allocatedBFCP[currType]; j++) this.individualNotesTransfer.push(currType); //Passes a equal number of currType notes as the value of each FC Type in allocatedBFCP
 	}
 	return true;
+};
+
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the allocation and its running total.
+HyachComputer.prototype.draftStateKeys = ['allocatedBFCP', 'BFCPtotal_used'];
+HyachComputer.prototype.draftStatePhases = [1];
+HyachComputer.prototype.afterDraftRestore = function () {
+	this.refreshData();
 };
 HyachComputer.prototype.canIncreaseAnything = function () { //returns true if any BFCP points can currently be allocated
 	var toReturn = false;
@@ -3327,7 +3382,12 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 				var system = ship.systems[i];
 
 				if (system instanceof Engine) {
-					system.boostEfficiency -= 1;
+					//Never below 1, as on the server (SHIP_ENHANCEMENTS_PLAN.md D4) - an Advanced Engine
+					//Module may already have taken one step off. What was actually taken is remembered,
+					//so doDecrease gives back exactly that and an engine already at 1 is not raised to 2.
+					var cut = (system.boostEfficiency > 1) ? 1 : 0;
+					system.boostEfficiency -= cut;
+					system.hyachThrusterCut = cut;
 				}
 				if (system instanceof Thruster) {
 					system.output += 50; //Increase by nominal amount, 50 allows for any amount of thrust
@@ -3477,7 +3537,10 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 				var system = ship.systems[i];
 
 				if (system instanceof Engine) {
-					system.boostEfficiency += 1;
+					//exactly what doUse took off; an allocation this page did not make (canDecrease also
+					//accepts a server-side specAllocatedCount) keeps the old +1
+					system.boostEfficiency += (system.hyachThrusterCut === undefined) ? 1 : system.hyachThrusterCut;
+					system.hyachThrusterCut = undefined;
 				}
 				if (system instanceof Thruster) {
 					system.output -= 50; //Increase by nominal amount, 50 allows for any amount of thrust
@@ -3571,6 +3634,53 @@ HyachSpecialists.prototype.doIndividualNotesTransfer = function () {
 	return true;
 };
 
+/* Save Orders (SAVE_ORDERS_PLAN.md §1.4) - NOT the field-copy every other system uses. Using a
+   Specialist changes the SHIP as well as this system (doUse: defence, reactor, scanner and engine
+   output, the to-hit bonus, weapon damage readouts), so assigning `currAllocatedSpec` back would
+   commit the Specialist while the client went on computing EW, power and hit chances without it.
+   The draft therefore records WHICH Specialists were used this phase - exactly what the commit
+   sends (`allocated`, code 2) - and the restore replays doUse() for each, behind canUse(), so every
+   side effect lands the way the player's own click put it there. Initial Orders, Movement and
+   Firing: the phases whose commit writes the notes (Pre-Firing's process() saves none). Movement
+   (Stage 7) is where Engine, Maneuvering and Thruster may be used, and an Engine Specialist's thrust
+   is what the restored moves were paid with.
+   Deployment (Stage 6) keeps the PICKS instead - `selected`, code 1, the Deployment commit refuses
+   without them - and replays doSelect() behind canSelect() the same way. */
+HyachSpecialists.prototype.draftStatePhases = [-1, 1, 2, 3];
+
+HyachSpecialists.prototype.getDraftState = function (phase) {
+	if (this.draftStatePhases.indexOf(phase) === -1) return null;
+
+	var field = (phase === -1) ? this.currSelectedSpec : this.currAllocatedSpec;
+	var marker = (phase === -1) ? 'selected' : 'allocated';
+	var types = [];
+	for (var type in field) {
+		if (field[type] === marker) types.push(type);
+	}
+	if (!types.length) return null;
+	return (phase === -1) ? { selected: types } : { used: types };
+};
+
+HyachSpecialists.prototype.applyDraftState = function (state) {
+	if (!state) return;
+
+	var shownClass = this.specCurrClass;   //doSelect / doUse act on the class the panel is showing
+	var i, type;
+	for (i = 0; Array.isArray(state.selected) && i < state.selected.length; i++) {
+		type = state.selected[i];
+		if (this.currSelectedSpec[type] === 'selected') continue;   //already picked
+		this.specCurrClass = type;
+		if (this.canSelect()) this.doSelect();
+	}
+	for (i = 0; Array.isArray(state.used) && i < state.used.length; i++) {
+		type = state.used[i];
+		if (this.currAllocatedSpec[type] === 'allocated') continue;   //already in effect
+		this.specCurrClass = type;
+		if (this.canUse()) this.doUse();
+	}
+	this.specCurrClass = shownClass;
+};
+
 HyachSpecialists.prototype.canSelectAnything = function () { //returns true if any AA points can currently be allocated
 	var toReturn = false;
 	var startingFrom = this.getCurrClass(); //so we know where we should stop checking
@@ -3632,6 +3742,10 @@ SelfRepair.prototype.doIndividualNotesTransfer = function () { //prepare individ
 SelfRepair.prototype.setOverride = function (systemID, overrideValue) { //set override of repair priority value of a system
 	this.priorityChanges[systemID] = overrideValue;
 }
+
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the player's repair-priority overrides.
+SelfRepair.prototype.draftStateKeys = ['priorityChanges'];
+SelfRepair.prototype.draftStatePhases = [1];
 SelfRepair.prototype.getCurrSystem = function () { //gets system ID of currently displayed system 
 	if (this.currentlyDisplayedSystem == -1) { //not searched yet!
 		this.getNextSystem();//currentlyDisplayedSystem will be updated inside
@@ -4046,6 +4160,13 @@ ThirdspaceShieldGenerator.prototype.initializationUpdate = function () {
 };
 
 
+/* Save Orders (SAVE_ORDERS_PLAN.md §1.4): the energy not yet given to a shield. Every point a
+   ThirdspaceShield takes or gives back moves through here (defensive.js doIncrease / doDecrease),
+   so restoring the shields without it would leave the commit's "unallocated shield energy" check
+   reading the load-time figure. ThoughtShieldGenerator inherits it. */
+ThirdspaceShieldGenerator.prototype.draftStateKeys = ['storedCapacity'];
+ThirdspaceShieldGenerator.prototype.draftStatePhases = [1];
+
 ThirdspaceShieldGenerator.prototype.hasMaxBoost = function () {
 	if (this.maxBoostLevel > 0) {
 		return true;
@@ -4424,6 +4545,11 @@ ShadingField.prototype.doIndividualNotesTransfer = function () {
 	}
 };
 
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4, Stage 6): the Pre-Turn toggle (flight-wide on fighters, kept per
+//fighter as it is set).
+ShadingField.prototype.draftStateKeys = ['active'];
+ShadingField.prototype.draftStatePhases = [-1];
+
 ShadingField.prototype.getOutput = function (ship, system) {
 	if (!system) {
 		console.log("ERROR: getOutput system missing");
@@ -4693,13 +4819,17 @@ FtrPetals.prototype.doDeactivate = function () {
 FtrPetals.prototype.doIndividualNotesTransfer = function () {
 
 	if (gamedata.gamephase == 1) {
-		var active = this.active; //Was shaded this turn.		
+		var active = this.active; //Was shaded this turn.
 		this.individualNotesTransfer = Array();
 		if (active) {
 			this.individualNotesTransfer.push(1);
 		}
 	}
 };
+
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the flight-wide toggle, kept per fighter as it is set.
+FtrPetals.prototype.draftStateKeys = ['active'];
+FtrPetals.prototype.draftStatePhases = [1];
 
 
 var MineControllerDEW = function MineControllerDEW(json, ship) {
@@ -4952,6 +5082,14 @@ MineControllerDEW.prototype.doIndividualNotesTransfer = function () { //prepare 
 	return true;
 };
 
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4, Stage 6): the ranges - flat, or per weapon on a multi-target
+//controller - and the 'set' flag. refreshData rebuilds the readouts and the weapons' ranges from them.
+MineControllerDEW.prototype.draftStateKeys = ['allocatedRanges', 'mineSet'];
+MineControllerDEW.prototype.draftStatePhases = [-1];
+MineControllerDEW.prototype.afterDraftRestore = function () {
+	this.refreshData();
+};
+
 // === MINE_MULTI: Multiple Targets enhancement helpers ===
 
 MineControllerDEW.prototype.hasMultiTarget = function () {
@@ -5126,6 +5264,10 @@ StructureSelfRepair.prototype.doIndividualNotesTransfer = function () {
     }
     return true;
 };
+
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the player's block order.
+StructureSelfRepair.prototype.draftStateKeys = ['repairOrder'];
+StructureSelfRepair.prototype.draftStatePhases = [1];
 
 StructureSelfRepair.prototype.hasMaxBoost = function () {
     return (this.maxBoostLevel > 0);

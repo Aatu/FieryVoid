@@ -15,6 +15,7 @@ window.Settings = (function () {
             ToggleBackground: settings.ToggleBackground || { keyCode: 77, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
             ToggleSound: settings.ToggleSound || { keyCode: 83, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
             TogglePlayPause: settings.TogglePlayPause || { keyCode: 32, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
+            CloseAllWindows: settings.CloseAllWindows || { keyCode: 27, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
             ZoomLevelToStrategic: 0.2
         };
 

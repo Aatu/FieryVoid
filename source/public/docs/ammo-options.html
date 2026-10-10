@@ -146,8 +146,8 @@
       <dl class="fvd-spec">
         <dt>Effect</dt>
         <dd><ul>
-          <li>+1 to hit with all weapons, +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -5% Defence Rating, -1
-            to critical results.</li>
+          <li>+1 to hit with all weapons, +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, +1 to every Thruster,
+            -5% Defence Rating, -1 to critical results.</li>
           <li>All weapons do +1 damage <i>per die</i>, although no die can exceed its maximum - a 9 on a d10 becomes a 10,
             but a 10 is not improved. Weapons whose damage is a formula rather than a dice roll (the Antimatter
             Converter's 4X+2, for instance) are unaffected.</li>
@@ -159,7 +159,7 @@
             Civilian armed shuttle instead. The upgraded shuttle starts the battle docked in the hangar and launches
             normally; it takes a box the ship already had, so hangar capacity is unchanged.</li>
         </ul></dd>
-        <dt>Cost</dt><dd>+40% of the ship's cost (a second time: +60%)</dd>
+        <dt>Cost</dt><dd>+50% of the ship's cost (a second time: +75%)</dd>
         <dt>Limit</dt><dd>2</dd>
         <dt>Notes</dt><dd>Every effect above is per level: a ship bought Elite Crew twice gets -2 Turn Delay (still to a
           minimum of 1), +2 damage per die, a jump delay cut by 20% twice (to 64% of the original), and two upgraded
@@ -172,8 +172,8 @@
       <dl class="fvd-spec">
         <dt>Effect</dt>
         <dd><ul>
-          <li>-1 to hit with all weapons, -5 Initiative, -1 Engine, -1 Sensors, -1 Reactor power, +5% Defence Ratings, +2
-            to critical rolls.</li>
+          <li>-1 to hit with all weapons, -5 Initiative, -2 Engine, -1 Sensors, -2 Reactor power, -1 to every Thruster,
+            +5% Defence Ratings, +2 to critical rolls.</li>
           <li>Whenever the ship turns, its Turn Delay is increased by 1 - a turn delay of 3 hexes becomes 4.</li>
           <li>Hangar launch / dock capacity is halved (rounded up). This is the bay's launch-and-land rate per turn; the
             number of craft the hangar can HOLD is unchanged, so the ship keeps its full complement but cycles it half as
@@ -182,10 +182,37 @@
           <li>The ship cannot carry armed shuttles. Its default shuttle slots do not count as armed-shuttle capacity in
             the Fleet Checker, and it gets no free upgrade. It still gets its ordinary unarmed default shuttles.</li>
         </ul></dd>
-        <dt>Cost</dt><dd>-15% of the ship's cost (-10% if chosen a second time)</dd>
+        <dt>Cost</dt><dd>-25% of the ship's cost (a second time: -15%)</dd>
         <dt>Limit</dt><dd>2</dd>
         <dt>Notes</dt><dd>Every effect above is per level: a ship bought Poor Crew twice gets +2 Turn Delay, a quartered
           hangar rate, and a jump delay lengthened by 20% twice (to 144% of the original).</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h4>Stealth Coating</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>-5% to be hit (1 point of Defence Rating) against a shot from a weapon that uses OEW, fired by a
+          unit holding at least 1 point of lock-on EW on this unit (after Disruption EW) - its OEW, or against fighters
+          its CCEW as well - when the shot comes in on a covered facing. The front is the 60&deg; ahead of the bow
+          (30&deg; either side), the aft the 60&deg; behind the stern, and everything else is a side. This holds whatever
+          sections the ship has. A ballistic shot is judged from where it was launched.</dd>
+        <dt>Coverage</dt><dd>Picked from a drop-down when buying the unit - All Sides, Front &amp; Sides, or Front Only.</dd>
+        <dt>Cost</dt><dd>The unit's cost &divide; the average of its forward and side Defence Ratings in profile points
+          (the % &divide; 5; fractions are kept), then
+          <ul>
+            <li>All Sides: 100%</li>
+            <li>Front &amp; Sides: 75%</li>
+            <li>Front Only: 25%</li>
+          </ul>
+          each rounded up at the end. A ship costing 1000 with an average of 16.5 (82.5%) pays 61 / 46 / 16. Fighters and
+          shuttles pay per craft, from one craft's cost: a 42-point fighter with an average of 6 (30%) pays 7 / 6 / 2 per
+          fighter in the flight.</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>No effect against weapons that do not use OEW or that ignore EW, against mines, against fighters
+          with no OEW of their own, or against a shooter with Advanced Sensors. It does not break a lock-on: a shooter on
+          exactly 1 OEW keeps its lock and still takes the -5%. Ships, OSATs, fighters and shuttles can carry it; bases,
+          terrain and Ancient units cannot.</dd>
       </dl>
     </article>
 
@@ -259,6 +286,20 @@
     </article>
 
     <article class="fvd-card">
+      <h4>Advanced Engine Module</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>The ship's strongest Engine gets 1 better Efficiency - the power each extra point of thrust costs
+          when you boost it - to a minimum of 1. An Efficiency 3 Engine boosts for 2 power per thrust.</dd>
+        <dt>Cost</dt><dd>10% of the ship's cost (rounded up)</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Lost for good the first time ANY of the ship's Engines suffers a critical of any kind. It stops
+          working from the following turn, and repairing the critical does not bring it back. Not offered if the strongest
+          Engine is already Efficiency 1, or on a ship with Unreliable Engines (Engine Flux). Hyach Thruster Specialists
+          cannot take an Engine below Efficiency 1 either.</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card">
       <h4>Improved Reactor</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 to +4 Power (depending on unit size, from MCV to Enormous)</dd>
@@ -273,6 +314,27 @@
         <dt>Effect</dt><dd>+1 Scanner rating</dd>
         <dt>Cost</dt><dd>New Scanner rating &times; 5 (doubled for ELINT Sensors / Advanced Sensors)</dd>
         <dt>Limit</dt><dd>1</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card">
+      <h4>Jump Accelerator</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd><ul>
+          <li>Jump delay reduced by 33% (fractions of 0.5 or more round up).</li>
+          <li>Jump Drive range +2 hexes (4 becomes 6): it can open a jump point up to 6 hexes away, and the jump point
+            stays open while the ship ends its turns within 6 hexes of it.</li>
+          <li>The Jump Drive's power draw is doubled, and the reactor also loses power equal to the drive's normal draw.
+            A drive that normally draws 3 power leaves the ship 6 power short while it is switched on, and 3 short while
+            it is switched off.</li>
+          <li>At the end of the turn the ship <b>opens</b> a jump point, the chance of a damaged drive destroying the
+            ship is doubled (to a maximum of 100%). Turns spent maintaining it roll the normal chance.</li>
+        </ul></dd>
+        <dt>Cost</dt><dd>10% of the ship's cost (rounded up)</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Only for Jump Drives that open jump points - not the one-click drives (Star Wars Hyperdrive, BSG
+          FTL, Shadow Phasing Drive), and not Ancient drives. With Elite or Poor Crew, the crew change is applied first: a
+          20-turn delay with Elite Crew becomes 16, then 11.</dd>
       </dl>
     </article>
 
@@ -675,7 +737,8 @@
           mode. A weapon that cannot target a size class at all (a Piercing missile against fighters, for instance) does
           not gain the ability.</dd>
         <dt>Cost</dt><dd>25% of the weapon's maximum damage (rounded up, minimum 4) &times; the number of guns on the
-          mount.</dd>
+          mount. A Pulse weapon's maximum damage is a full volley - damage per pulse &times; maximum pulses - so a Heavy
+          Pulse Cannon (15 &times; 6 = 90) pays 23.</dd>
         <dt>Limit</dt><dd>1</dd>
         <dt>Notes</dt><dd>Weapons only. A handful of utility mounts that roll no meaningful attack - the Abbai Shield
           Projector, Aegis Sensor Pod, Combat Transporter, Grappling Claw, Gravitic Shifter and Grome Targeting Array - are

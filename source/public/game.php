@@ -47,6 +47,29 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     } else {
         $serverdata = $decoded; // Valid game data
     }
+
+    /* Save Orders (SAVE_ORDERS_PLAN.md §1.6): the player's parked draft for THIS turn and phase,
+       inlined below as window.fvSavedOrders and applied once by client/savedOrders.js after the
+       phase strategy activates. Only for a logged-in player who still has orders to give in a
+       phase that can be saved - anyone else gets null without a query.
+       getSavedOrdersJSON never throws (trap T6): a missing table or a corrupt row costs the
+       player their draft, never this page. */
+    $savedOrdersJSON = 'null';
+    if ($serverdata !== null && $thisplayer > 0 && isset($serverdata->id, $serverdata->turn, $serverdata->phase)
+        && empty($serverdata->waiting) && ($serverdata->status ?? '') === 'ACTIVE'
+        && in_array((int)$serverdata->phase, array(-1, 1, 2, 5, 3), true)) {
+        $savedOrdersJSON = Manager::getSavedOrdersJSON($serverdata->id, $thisplayer, $serverdata->turn, $serverdata->phase);
+    }
+
+    /* Live sweeping (MINE_DETECTION_PLAN.md §1.4.6): the hexes this player's units have already
+       swept this turn, and the plotted rows that reach them - inlined as window.fvMineSweep and put
+       back, locked, by client/mineSweep.js when Movement activates, so a reload mid-move cannot
+       take a swept step back. Same gate as the draft above, Movement only. Never throws. */
+    $mineSweepJSON = 'null';
+    if ($serverdata !== null && $thisplayer > 0 && isset($serverdata->id, $serverdata->turn, $serverdata->phase)
+        && empty($serverdata->waiting) && ($serverdata->status ?? '') === 'ACTIVE' && (int)$serverdata->phase === 2) {
+        $mineSweepJSON = Manager::getMineSweepJSON($serverdata->id, $thisplayer, $serverdata->turn, $serverdata->phase);
+    }
 ?>
 
 
@@ -150,6 +173,14 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         $time_getShipsByClass = microtime(true) - $t2;
 
         echo '<script>window.staticShips = ' . $staticShipsJson . ';</script>';
+
+        //Save Orders (see the prologue): {savedAt, draft} or null. Already script-safe.
+        echo '<script>window.fvSavedOrders = ' . $savedOrdersJSON . ';</script>';
+
+        //Live sweeping (see the prologue): {turn, ships} or null. Already script-safe. And whether
+        //live sweeping is on at all - the switch is MineSweep::$liveSweeping, server side only.
+        echo '<script>window.fvMineSweep = ' . $mineSweepJSON . ';</script>';
+        echo '<script>window.fvLiveMineSweeping = ' . (MineSweep::$liveSweeping ? 'true' : 'false') . ';</script>';
     ?>
     <script>
         window.Config = {
@@ -206,6 +237,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
                 window.UIManagerInstance = new window.UIManager($("body")[0]);
                 window.UIManagerInstance.PlayerSettings(window.Settings);
+                window.UIManagerInstance.BackToLobby();                
                 window.UIManagerInstance.FullScreen();
                 window.UIManagerInstance.Surrender();
                 window.UIManagerInstance.EwButtons();
@@ -375,6 +407,13 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/battleDamage.js"></script>
     <script defer src="client/systemEnhancements.js"></script>
     <script defer src="client/savedFleets.js"></script>
+    <!-- SAVE_ORDERS_PLAN.md - the floppy beside the commit tick, and the OPTIONS tab's Saved
+         Orders block. Everything it calls is runtime-only, so its place in the list is free. -->
+    <script defer src="client/savedOrders.js"></script>
+    <!-- MINE_DETECTION_PLAN.md §1.4 - live sweeping: asks the server what a unit finds as it enters
+         each hex, locks the swept steps, draws a find and interrupts the move there. Runtime-only
+         calls into savedOrders.js and movement.js, so its place in the list is free. -->
+    <script defer src="client/mineSweep.js"></script>
 	<script defer src="client/power.js"></script>
     <script defer src="client/UI/shipMovement.js"></script>
     <!-- MUST stay after shipMovement.js: that file ASSIGNS window.UI, so loading this one first
@@ -436,6 +475,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         <span class="turn value"></span><span class="phase value"></span><span class="activeship value"></span><span class="waiting value"></span><span class="finished value">GAME OVER</span><span class="notlogged value">NOT LOGGED IN</span>
         <table class="uitable">
             <tr>
+            <!-- Save Orders (SAVE_ORDERS_PLAN.md §1.5): shown and hidden with the tick by
+                 gamedata.showCommitButton / hideCommitButton (and, in Deployment and Movement, by
+                 savedOrders.syncButton, so it shows before the tick does). -->
+            <td class="saveturn" style="display:none"><div class="save" title="Save orders"></div></td>
             <td class="committurn" style="display:none"><div class="ok" ></div></td>
             <td class="cancelturn" style="display:none"><div class="cancel" ></div></td>
             </tr>
@@ -453,6 +496,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 <h2></h2>
 <div class="container"></div>
 </div>
+
+<!-- Save Orders' passive notice ("Saved orders from 14:32 restored.") - a SIBLING of the phase
+     banner, not a line inside it: #infowindow is reused by informFire during replays. Fades on
+     its own and takes no clicks (client/savedOrders.js showNotice). -->
+<div id="savedOrdersNotice" aria-live="polite"></div>
 
 <div id="systemtemplatecontainer" style="display:none;">
     
@@ -556,8 +604,13 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 <div id="systemInfoReact"></div>
 <div id="weaponList"></div>
 <div id="showEwButtons"></div>
-<div id="surrender"></div>
+<!-- The top-right HUD row, in screen order left to right. The order matters only for the
+     drop shadows: they fall down-right, and a later mount paints over an earlier one's, so
+     each button has to come after its left-hand neighbour or that neighbour's shadow lands
+     on it - visible on phones, where the gap is only a few pixels. -->
+<div id="backToLobby"></div>
 <div id="fullScreen"></div>
+<div id="surrender"></div>
 <div id="playerSettings"></div>
 <div id="shipThrust"></div>
 <div id="pagecontainer" oncontextmenu="return false;">
@@ -603,7 +656,27 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         <div id="turnleft" class="movement-icon" data-movement-type="Turn Left">
             <canvas id="turnleftcanvas" width="40" height="40"></canvas>
         </div>
-        
+
+        <!-- EXTENDED_TURNS_PLAN.md §5.1 - drawn in the turn arrows' places, with the turn arrows'
+             art painted in UI.shipMovement.extendedTurnColour (shipMovement.js). Four elements rather
+             than relabelled turn arrows: moveTooltip.js reads data-movement-type through jQuery
+             .data(), which caches it. -->
+        <div id="extendTurnRight" class="movement-icon" data-movement-type="Begin Extended Turn">
+            <canvas id="extendTurnRightCanvas" width="40" height="40"></canvas>
+        </div>
+
+        <div id="extendTurnLeft" class="movement-icon" data-movement-type="Begin Extended Turn">
+            <canvas id="extendTurnLeftCanvas" width="40" height="40"></canvas>
+        </div>
+
+        <div id="completeExtendTurnRight" class="movement-icon" data-movement-type="Complete Extended Turn">
+            <canvas id="completeExtendTurnRightCanvas" width="40" height="40"></canvas>
+        </div>
+
+        <div id="completeExtendTurnLeft" class="movement-icon" data-movement-type="Complete Extended Turn">
+            <canvas id="completeExtendTurnLeftCanvas" width="40" height="40"></canvas>
+        </div>
+
         <div id="turnIntoPivotLeft" class="movement-icon" data-movement-type="Turn Into Pivot">
             <canvas id="turnIntoPivotLeftCanvas" width="40" height="40"></canvas>
         </div>
@@ -714,6 +787,12 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         
         <div id="cancel" class="movement-icon" data-movement-type="Cancel Last Move">
             <canvas id="cancelcanvas" width="30" height="30"></canvas>
+        </div>
+
+        <!-- MINE_DETECTION_PLAN.md Q7 - Minesweeping Mode: shown for a unit that can detect mines; while on,
+             the unit sweeps each hex as it enters it (client/mineSweep.js). Label set by UI/shipMovement.js. -->
+        <div id="minesweep" class="movement-icon" data-movement-type="Start Minesweeping Mode">
+            <canvas id="minesweepcanvas" width="40" height="40"></canvas>
         </div>
         
         <div id="detach" class="movement-icon" data-movement-type="Detach" style="filter: hue-rotate(200deg) scaleX(-1);">
@@ -921,14 +1000,31 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
             <!-- gameOptions.js appends one .fv-opt-row per registered option here. -->
             <div id="gameOptionsList"></div>
 
+            <!-- Saved Orders (SAVE_ORDERS_PLAN.md §1.8). Hidden until client/savedOrders.js
+                 refreshPanel finds a player who can save right now (any phase but Movement, not
+                 waiting, not in replay). Discard deletes the saved copy, then reloads. -->
+            <div id="savedOrdersPanel" style="display:none;">
+                <h4 class="fv-opt-heading">Saved Orders</h4>
+                <p>
+                    Keeps the orders you have given this phase so you can finish them
+                    later. Committing clears them.
+                </p>
+                <div class="fv-opt-action">
+                    <input type="button" id="savedOrdersDiscard" class="fv-log-chip fv-log-chip--link" value="Discard Saved Orders" disabled>
+                    <p id="savedOrdersStatus"></p>
+                </div>
+            </div>
+
             <div id="fleetSavePanel">
                 <h4 class="fv-opt-heading">Save Fleet</h4>
                 <p>
                     Saves your current ships, enhancements, ammo, and battle
                     damage. Load it from the game lobby.
                 </p>
-                <p id="fleetSaveSummary"></p>
-                <input type="button" id="fleetSaveButton" class="fv-log-chip fv-log-chip--link" value="Save Current Fleet">
+                <div class="fv-opt-action">
+                    <input type="button" id="fleetSaveButton" class="fv-log-chip fv-log-chip--link" value="Save Current Fleet">
+                    <p id="fleetSaveSummary"></p>
+                </div>
             </div>
         </div>
     </div>

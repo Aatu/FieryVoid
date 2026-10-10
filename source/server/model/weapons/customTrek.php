@@ -3799,7 +3799,7 @@ public $name = "TrekShieldProjection";
 
 
 //New version of Phaser so it can be adjusteted in KellyTrek without affecting existing Trek units
-class TrekPhaserKelly extends TrekPhaser{
+class TrekPhaserKelly extends TrekPhaserBase{
 		public $name = "TrekPhaser";
         public $displayName = "Type 6 Phaser";
         public $iconPath = "TrekPhaserM.png"; 
@@ -3813,8 +3813,8 @@ class TrekPhaserKelly extends TrekPhaser{
 		
         public $loadingtime = 1;
 		public $normalload = 2;
-		public $guns = 2;		
-		public $gunsArray = array( 1 => 2, 2=> 3);		
+		public $guns = 0;		
+		public $gunsArray = array( 1 => 0, 2=> 0);		
         public $rangePenalty = 0.3; //1.5 per hex.
         public $rangePenaltyArray = array(1=> 0.3, 2=> 1);		
         public $fireControl = array(3, 3, 3);
@@ -3827,11 +3827,26 @@ class TrekPhaserKelly extends TrekPhaser{
 		public $uninterceptable = true;
 		private $damageRolled = null;
 
+        public $boostable = true;
+        public $boostEfficiency = 0;
+        public $maxBoostLevel = 6;		
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $guns = 2){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 7;
+			if ( $powerReq == 0 ) $powerReq = 5;
+			$this->guns = $guns;
+			$this->boostEfficiency = $guns;			
+			$gunsAF = $guns * 3;
+			$this->gunsArray = array(1=>$guns, 2=>$gunsAF);			
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
 	 	public function getInterceptRating($turn){
 			return 2;
 		}
 
         public function setSystemDataWindow($turn){
+            $boost = $this->getExtraDicebyBoostlevel($turn); 			
             parent::setSystemDataWindow($turn);			
 			if (!isset($this->data["Special"])) {
 				$this->data["Special"] = '';
@@ -3839,16 +3854,60 @@ class TrekPhaserKelly extends TrekPhaser{
 				$this->data["Special"] .= '<br>';
 			}
 				$this->data["Special"] .= "<br>Cannot be intercepted.";
+				$this->data["Special"] .= '<br>Can be boosted for increased dmg output (+1d6 each hit per 2 power added, up to ' . $this->boostEfficiency . ' times).';
+				$this->data["Boostlevel"] = $boost;				
 			}
 	
+        private function getExtraDicebyBoostlevel($turn){
+            $add = 0;
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $add = 1;
+                    break;
+                case 2:
+                    $add = 2;
+                    break;
+                case 3:
+                    $add = 3;
+                    break;
+                case 4:
+                    $add = 4;
+                    break;
+                case 5:
+                    $add = 5;
+                    break;
+                case 6:
+                    $add = 6;
+                    break;											
+                default:
+                    break;
+            }
+            return $add;
+        }
+
+         private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+
 		public function getDamage($fireOrder){
+            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
+		
 			if($fireOrder->firingMode == 1){
 				switch($this->turnsloaded){
 					case 0:
 					case 1:
-						return Dice::d(10)+4;
+						return Dice::d(6, 3 + $add);
 					default:
-						return Dice::d(10,2)+14;
+						return Dice::d(6, 6 + $add);
 				}
 			}else if($fireOrder->firingMode == 2){
 
@@ -3857,29 +3916,39 @@ class TrekPhaserKelly extends TrekPhaser{
 					switch($this->turnsloaded){
 						case 0:
 						case 1:
-							$this->damageRolled = Dice::d(10) + 4;
+							$this->damageRolled = Dice::d(12, 3 + $add);;
 							break;
 
 						default:
-							$this->damageRolled = Dice::d(10, 2) + 14;
+							$this->damageRolled = Dice::d(12, 6 + $add);
 							break;
 					}
 				}
 
-				return round($this->damageRolled / 3);
+				return round($this->damageRolled / 6);
 
 			}else{
 				return 0; // Safety check.
 			}
 		}
 
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }		
+
  		public function setMinDamage(){
             switch($this->turnsloaded){
                 case 1:
-                    $this->minDamage = 5 ;
+                    $this->minDamage = 3 ;
                     break;
                 default:
-                    $this->minDamage = 16 ;  
+                    $this->minDamage = 6 ;  
                     break;
             }
 		}
@@ -3887,18 +3956,28 @@ class TrekPhaserKelly extends TrekPhaser{
         public function setMaxDamage(){
             switch($this->turnsloaded){
                 case 1:
-                    $this->maxDamage = 14 ;
+                    $this->maxDamage = 18 ;
                     break;
                 default:
-                    $this->maxDamage = 34 ;  
+                    $this->maxDamage = 36 ;  
                     break;
             }
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
 		}
 
 }//end of class TrekPhaserKelly
 
 
-class TrekPhaserKellyType7 extends TrekPhaserKelly{
+class TrekPhaserKellyType7 extends TrekPhaserBase{
 		public $name = "TrekPhaserKellyType7";
         public $displayName = "Type 7 Phaser";
         public $iconPath = "TrekPhaserH.png"; 
@@ -3912,8 +3991,8 @@ class TrekPhaserKellyType7 extends TrekPhaserKelly{
 		public $normalload = 0;
 		public $guns = 1; //One gun, two shots.		
 		public $gunsArray = array( 1 => 1, 2=> 1);	
-		public $shots = 2;	
-        public $defaultShots = 2;		
+		public $shots = 0;	
+        public $defaultShots = 0;		
         public $rangePenalty = 0.3; //1.5 per hex.
         public $rangePenaltyArray = array(1=> 0.3, 2=> 1);		
         public $fireControl = array(3, 3, 3);
@@ -3932,6 +4011,19 @@ class TrekPhaserKellyType7 extends TrekPhaserKelly{
         public $overloadshots = 2;
         private $sustainedTarget = array(); //To track for next turn which ship was fired at in Sustained Mode and whether it was hit.
         private $sustainedSystemsHit = array(); //For tracking systems that were hit and how much armour they should be reduced by following turn if hit again.
+
+        public $boostable = true;
+        public $boostEfficiency = 0;
+        public $maxBoostLevel = 7;			
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $shots = 2){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 7;
+			if ( $powerReq == 0 ) $powerReq = 5;
+			$this->shots = $shots;
+			$this->defaultShots = $shots;
+			$this->boostEfficiency = $shots;			
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
 
         public function isOverloadingOnTurn($turn = null){
             return true;
@@ -4095,24 +4187,97 @@ class TrekPhaserKellyType7 extends TrekPhaserKelly{
 			return false;    
 		}       		
 
-        public function stripForJson(){
-            $strippedSystem = parent::stripForJson();
+        public function setSystemDataWindow($turn){
+            $boost = $this->getExtraDicebyBoostlevel($turn); 			
+            parent::setSystemDataWindow($turn);			
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+				$this->data["Special"] .= "<br>Cannot be intercepted.";
+				$this->data["Special"] .= "<br>Default firing mode is sustained, can be fired as a normal shot using Firing Mode 2.";				
+				$this->data["Special"] .= '<br>Can be boosted for increased dmg output (+1d6 each hit per 2 power added, up to ' . $this->boostEfficiency . ' times).';
+				$this->data["Boostlevel"] = $boost;				
+			}
+	
+        private function getExtraDicebyBoostlevel($turn){
+            $add = 0;
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $add = 1;
+                    break;
+                case 2:
+                    $add = 2;
+                    break;
+                case 3:
+                    $add = 3;
+                    break;
+                case 4:
+                    $add = 4;
+                    break;
+                case 5:
+                    $add = 5;
+                    break;
+                case 6:
+                    $add = 6;
+                    break;	
+               case 7:
+                    $add = 7;
+                    break;																
+                default:
+                    break;
+            }
+            return $add;
+        }
+
+         private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;	
             if (isset($this->sustainedTarget) && !empty($this->sustainedTarget)) {
                 $strippedSystem->sustainedTarget = $this->sustainedTarget;
-            }                   			
-            return $strippedSystem;
-        }    		
+            }  						
+			return $strippedSystem;
+		}
 
 		public function getDamage($fireOrder){
 			return Dice::d(10,2)+14;
 		}
 
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }		
+
  		public function setMinDamage(){
-            $this->minDamage = 16 ;  
+            $this->minDamage = 7 ;  
 		}
              
         public function setMaxDamage(){
-        	$this->maxDamage = 34 ;  
+        	$this->maxDamage = 42 ;  
 		}
 
 }
