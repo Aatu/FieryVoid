@@ -202,23 +202,32 @@ window.confirm = {
 
         var totalCost = (flightSize * fighterCost) + totalMissileCost;
 
-        // Add enhancement cost	   
-        var enhCost = 0;
+        // Add enhancement cost - per craft for a flight, except an officer charged per flight (enhRowCost)
         var enhNo = 0;
         var target = $(".selectAmount.shpenh" + enhNo);
         while (typeof target.data("enhPrice") != 'undefined') { //as long as there are enhancements defined...
-            enhCost += target.data("enhCost");
+            totalCost += confirm.enhRowCost(target, flightSize);
             //go to next enhancement
             enhNo++;
             target = $(".selectAmount.shpenh" + enhNo);
         }
-        totalCost += flightSize * enhCost;
         totalCost = Math.ceil(totalCost);
 
         totalCostSpan.data("value", totalCost);
         totalCostSpan.html(totalCost);
 
         confirm.paintBuySummary(flightSize * fighterCost, flightSize);
+    },
+
+    /* What one enhancement row's spinner costs the unit: its enhCost, times the flight size for a flight
+       (1 for anything else) - unless it is a fighter officer priced per FLIGHT, whose price is charged
+       once plus his per-craft part (officers.flightCost, the one rule; perCraftExtra was worked out when
+       the row was built). gamelobby.js's doBuyShip / doCopyShip / doEditShip read rows back through this
+       too, so the dialog and the fleet can never charge differently. */
+    enhRowCost: function enhRowCost(target, flightSize) {
+        if (!window.officers) return (target.data("enhCost") || 0) * flightSize;
+        return officers.flightCost(target.data("enhID"), target.data("count"), target.data("enhCost"),
+            flightSize, target.data("perCraftExtra"));
     },
 
     getTotalCostBulk: function getTotalCostBulk() {
@@ -326,6 +335,7 @@ window.confirm = {
                 return;
             }
         }
+        if (noTaken < 1 && confirm.officerBlocked(target)) return; //D9: one officer per flight
 
         if (noTaken < enhLimit) { //increase possible
             var newCount = noTaken + 1;
@@ -542,6 +552,7 @@ window.confirm = {
             var maxFit = confirm.getMaxAmmoFit(ship, enhID);
             if (value > maxFit) value = Math.max(0, maxFit);
         }
+        if (value > 0 && confirm.officerBlocked($(this))) value = 0; //D9: one officer per flight
 
         // Update the displayed and stored value
         confirm.enhShowLevel($(this), value);
@@ -700,6 +711,7 @@ window.confirm = {
             var maxFit = confirm.getMaxAmmoFit(ship, enhID);
             if (value > maxFit) value = Math.max(0, maxFit);
         }
+        if (value > 0 && confirm.officerBlocked($(this))) value = 0; //D9: one officer per flight
 
         // Update displayed value
         confirm.enhShowLevel($(this), value);
@@ -1192,6 +1204,8 @@ window.confirm = {
             selectAmountItem.data('max', enhLimit);
             selectAmountItem.data('enhPrice', enhPrice);
             selectAmountItem.data('enhPriceStep', enhPriceStep);
+            //a per-flight officer's per-craft part (the Missileer's missiles), for enhRowCost - 0 otherwise
+            selectAmountItem.data('perCraftExtra', window.officers ? officers.perCraftExtra(ship, enhID) : 0);
             //Marked before the box is first written: a stepped enhancement shows the quantity its
             //level buys (and cannot be typed into); step 1 - every one but Extra Tendrils - leaves
             //the row as it was.
@@ -1204,7 +1218,9 @@ window.confirm = {
             selectAmountItem.on("keydown", confirm.preventNonNumericInput);
             selectAmountItem.on("wheel", confirm.handleMouseWheel);
 
-            $(".buyRowNote", item).html(confirm.enhancementPriceNote(enhLimit, enhPrice, enhPriceStep, enhStep, section === 'ammo'));
+            var officerNote = window.officers ? officers.priceNote(ship, enhancement) : null;
+            $(".buyRowNote", item).html(officerNote !== null ? officerNote
+                : confirm.enhancementPriceNote(enhLimit, enhPrice, enhPriceStep, enhStep, section === 'ammo'));
 
             $(".plusButton", item).data("enhNo", i).on("click", confirm.doOnPlusEnhancement);
             $(".minusButton", item).data("enhNo", i).on("click", confirm.doOnMinusEnhancement);
@@ -1214,6 +1230,38 @@ window.confirm = {
             //a choice-valued option (Chameleon disguise) swaps the spinner for a dropdown; no-op otherwise
             confirm.applyEnhancementChoiceWidget(item, enhancement);
         }
+        confirm.addOfficerLimitNote(e, ship);
+    },
+
+    /* D9: a flight carries ONE officer in total. Its Officers section says so up front, and a second one
+       is refused (officerBlocked) with that line flashing - a passive notice, never a dialog
+       (feedback_passive_notices). A ship may carry one of each, so it gets no line. The server does not
+       trust the dialog: Officers::pickPosts serves only the first officer row on a flight. */
+    OFFICER_LIMIT_NOTE: 'A flight may carry only one officer.',
+
+    addOfficerLimitNote: function addOfficerLimitNote(e, ship) {
+        if (!ship || !ship.flight) return;
+        var body = confirm.buySectionBody(e, 'officers');
+        if (!$(".buyRow", body).length) return;
+        $('<p class="buySectionNote buyOfficerNote"></p>').text(confirm.OFFICER_LIMIT_NOTE).prependTo(body);
+    },
+
+    /* Would raising this row's count put a SECOND officer on a flight? True for a fighter officer's row
+       while another officer row of the same dialog is already bought. */
+    officerBlocked: function officerBlocked(target) {
+        if (!window.officers || !officers.isFighterOfficer(target.data("enhID"))) return false;
+        var dialog = target.closest(".confirm");
+        var taken = $(".selectAmount", dialog).filter(function () {
+            var other = $(this);
+            return this !== target[0] && officers.isOfficerId(other.data("enhID")) && (other.data("count") || 0) > 0;
+        });
+        if (!taken.length) return false;
+        var note = $(".buyOfficerNote", dialog);
+        //restart the flash: drop the class, force a reflow, add it back
+        note.removeClass("is-flash");
+        if (note.length) void note[0].offsetWidth;
+        note.addClass("is-flash");
+        return true;
     },
 
     /* A fighter flight's missiles, into Ammo & Ordnance - bought PER LAUNCHER, and every craft in the
@@ -1386,8 +1434,9 @@ window.confirm = {
             //:last-child cannot skip a hidden row, so the last one SHOWN drops its rule by class.
             rows.removeClass("is-lastShown");
             shown.last().addClass("is-lastShown");
-            //"Missiles are bought per missile launcher" goes with the missile rows.
-            $(".buySectionNote", this).prop("hidden", shown.filter(".buyMissileRow").length === 0);
+            //"Missiles are bought per missile launcher" goes with the missile rows (the officer limit
+            //line goes with its section, so it is left alone).
+            $(".buySectionNote", this).not(".buyOfficerNote").prop("hidden", shown.filter(".buyMissileRow").length === 0);
 
             if (filtering) {
                 if (!wasFiltering) section.data("openBeforeFilter", $(".buySectionHead", this).attr("aria-expanded") === "true");
@@ -1404,9 +1453,10 @@ window.confirm = {
 
     /* Paint what getTotalCost / getTotalCostBulk worked out: the Base Hull line, each row's cost and
        each section's count + subtotal. `base` is the hull figure they priced from, and `each` what an
-       enhancement's per-craft cost is multiplied by (the flight size; 1 otherwise), so Base Hull plus
-       every subtotal is the total. The bulk dialog works per unit: there that sum is the Per Unit
-       figure, and the total is it times the quantity. */
+       enhancement's per-craft cost is multiplied by (the flight size; 1 otherwise - enhRowCost, so a
+       per-flight officer is charged once), so Base Hull plus every subtotal is the total. The bulk
+       dialog works per unit: there that sum is the Per Unit figure, and the total is it times the
+       quantity. */
     paintBuySummary: function paintBuySummary(base, each) {
         var dialog = $(".confirm.buyDialog");
         if (!dialog.length) return;
@@ -1431,7 +1481,7 @@ window.confirm = {
 
                 if (typeof amount.data("enhPrice") !== 'undefined') {
                     isTaken = amount.data("count") > 0;
-                    cost = (amount.data("enhCost") || 0) * each;
+                    cost = confirm.enhRowCost(amount, each);
                 } else if (typeof amount.data("firingMode") !== 'undefined') {
                     var value = amount.data("value") || 0;
                     isTaken = value > 0;

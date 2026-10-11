@@ -2087,8 +2087,9 @@ window.weaponManager = {
 
             if (weapon.ballistic) {
                 //A ballistic's bonus is a CONDITIONAL GRANT, not a lock, and flight OEW plays no
-                //part in it - the server sets $oew = 0 and then re-grants $effectiveOB alone.
-                oew = effectiveOB;
+                //part in it - the server sets $oew = 0 and then re-grants $effectiveOB alone, 1 more
+                //with an Expert Missileer aboard (⚠️ MIRROR PAIR with $ballisticOB in weapon.php).
+                oew = effectiveOB + (window.officers ? officers.missileObBonus(shooter) : 0);
 
                 var shooterLoSBlocked = false;
                 var blockedLosHex = gamedata.blockedHexes;

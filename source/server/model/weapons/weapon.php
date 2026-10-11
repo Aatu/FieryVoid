@@ -1931,6 +1931,10 @@ public function getFullStartLoading()
                 //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
             } else { //ballistics use of OB is more complicated
                 $oew = 0;
+                /* The OB a launch gets when it gets one: an Expert Missileer adds 1 (OFFICERS_PLAN.md
+                   Stage 4). ⚠️ MIRROR PAIR with weaponManager's two fighter-ballistic branches. */
+                $ballisticOB = $effectiveOB;
+                if (TacGamedata::$officersPresent) $ballisticOB += Officers::missileObBonus($shooter);
                 $shooterlosBlocked  = $this->isLoSBlocked($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
                 //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
                 if (!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())) {
@@ -1945,14 +1949,14 @@ public function getFullStartLoading()
                     }
 
                     if ($shooter->hasNavigator && !$shooterlosBlocked && !$isSkindancing) {// Fighter has navigator and Line of Sight. Flight always benefits from offensive bonus.
-                        $oew = $effectiveOB;
+                        $oew = $ballisticOB;
                     } else { // Check if target is in current weapon arc
                         $relativeBearing = $shooter->getBearingOnUnit($target);
                         if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc) && !$shooterlosBlocked && !$isSkindancing) {
                             // Target is in current launcher arc and has Line of Sight and is NOT skindancing. Flight benefits from offensive bonus.
                             // Now check if the fighter is not firing any non-ballistic weapons
                             if (!$this->isFtrFiringNonBallisticWeapons($shooter, $fireOrder)) {
-								$oew = $effectiveOB;
+								$oew = $ballisticOB;
 							}
                         }
                     }

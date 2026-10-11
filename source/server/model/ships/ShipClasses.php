@@ -179,11 +179,13 @@ class BaseShip {
 
 	/* OFFICERS_PLAN.md - the officers aboard, as Officers keeps them: array('id', 'post', 'out',
 	   'how') each. Rebuilt at every load by Officers::pickPosts / ::apply; only Officers writes it.
-	   $officerKills is officer id => turn, read off the OffKilled notes by DBManager's note loop.
-	   Both PROTECTED for $crewQuality's reason: a public empty default would put a dead key on every
+	   $officerKills is officer id => turn, read off the OffKilled notes by DBManager's note loop, and
+	   $officerMoves likewise off the OffMoved notes (a fighter officer who left this row with his fighter).
+	   All PROTECTED for $crewQuality's reason: a public empty default would put a dead key on every
 	   static blueprint. */
 	protected $officers = array();
 	protected $officerKills = array();
+	protected $officerMoves = array();
 
 	
 	public $halfPhaseThrust = 0; //needed for half phasing; equal to thrust from two BioThrusters on a given ship; 0 for ships that cannot half phase, eg. vast majority
@@ -1873,6 +1875,19 @@ class BaseShip {
 		$turn = (int)$turn;
 		if (!isset($this->officerKills[$officerId]) || $turn < $this->officerKills[$officerId]){
 			$this->officerKills[$officerId] = $turn;
+		}
+	}
+
+	public function getOfficerMoves(){
+		return $this->officerMoves;
+	}
+
+	//one OffMoved note (Officers::followFighter): the earliest turn wins, as for a kill
+	public function recordOfficerMove($officerId, $turn){
+		$officerId = (string)$officerId;
+		$turn = (int)$turn;
+		if (!isset($this->officerMoves[$officerId]) || $turn < $this->officerMoves[$officerId]){
+			$this->officerMoves[$officerId] = $turn;
 		}
 	}
 

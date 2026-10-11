@@ -136,7 +136,8 @@
     <li><a href="#factionenhancements">Faction Enhancements</a> - options for one faction only.</li>
     <li><a href="#systemenhancements">System Enhancements</a> - refits bought for a single system rather than the whole
       unit.</li>
-    <li><a href="#officers">Officers</a> - specialists posted in one of a ship's systems.</li>
+    <li><a href="#officers">Officers</a> - specialists posted in one of a ship's systems, or in a fighter flight's first
+      fighter.</li>
   </ul>
 </section>
 
@@ -362,16 +363,9 @@
 <section data-key="fighterenhancements" data-title="Fighter Enhancements" data-group="Unit Enhancements">
   <div class="fvd-note">
     <p>All costs are per fighter: you pay for each fighter in the flight.</p>
+    <p>The Expert Motivator is an officer now: see <a href="#fighterofficers">Fighter Officers</a>.</p>
   </div>
   <div class="fvd-cards">
-    <article class="fvd-card">
-      <h4>Expert Motivator</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>-2 to the flight's dropout rolls</dd>
-        <dt>Cost</dt><dd>10% of the craft's price (rounded up)</dd>
-        <dt>Limit</dt><dd>1</dd>
-      </dl>
-    </article>
     <article class="fvd-card">
       <h4>Improved Targeting Computer</h4>
       <dl class="fvd-spec">
@@ -853,18 +847,21 @@
 <!-- ═════════════════════════════════ OFFICERS ══════════════════════════════ -->
 
 <section data-key="officers" data-title="About Officers" data-group="Officers">
-  <p class="fvd-lede">Expert officers are specialists a ship can carry. Each one works from a particular system - their
-    <b>post</b> - and gives their bonus for as long as they are able to serve.</p>
+  <p class="fvd-lede">Expert officers are specialists a ship or a fighter flight can carry. Each one works from a
+    particular system - their <b>post</b> - and gives their bonus for as long as they are able to serve.</p>
   <p>Like enhancements, officers are optional: worth agreeing with your opponent before using them in a pickup battle.</p>
 
   <h3 data-anchor="buyingofficers">Buying officers</h3>
   <ul>
-    <li>Officers are bought with the ship in Fleet Selection, in the <b>Officers</b> section at the bottom of its buy
+    <li>Officers are bought with the unit in Fleet Selection, in the <b>Officers</b> section at the bottom of its buy
       window.</li>
-    <li>A ship may carry several officers, but only one of each type.</li>
-    <li>An officer's price is a percentage of the ship's base cost, rounded up.</li>
-    <li>A ship is only offered an officer whose post it has - no C&amp;C, no Helmsman. Ancient hulls, OSATs, mines and
-      terrain cannot carry officers at all.</li>
+    <li>A ship may carry several officers, but only one of each type. A fighter flight may carry only <b>one officer in
+      total</b>: once one is bought, the buy window refuses a second.</li>
+    <li>A ship officer's price is a percentage of the ship's base cost, rounded up. A fighter officer's is a percentage of
+      one fighter's cost - paid once for the whole flight, or for every fighter in it, as each card says.</li>
+    <li>A unit is only offered an officer whose post it has - no C&amp;C, no Helmsman. Ancient units, OSATs, MicroSATs,
+      mines, terrain and remotely controlled craft such as Orieni Hunter-Killers (they have no pilots) cannot carry officers
+      at all.</li>
   </ul>
 
   <h3 data-anchor="losingofficers">Losing an officer</h3>
@@ -877,17 +874,24 @@
     <li>Either way, the officer still serves for the rest of the turn it happens, and is gone from the next turn.</li>
     <li>An officer whose post is destroyed by pre-battle damage never serves at all. Fleet Selection warns you, and you can
       remove the officer by editing the ship.</li>
+    <li><b>Fighter officers</b> fly in the flight's first fighter and are lost only with it: when it is destroyed or drops
+      out. There is no kill roll, and docking never loses them.</li>
+    <li>If the flight splits in two - part of it launched or docked on its own, or escaping a lost hangar as a separate
+      "Split" flight - the officer <b>goes with his fighter</b>: the part that has it gets his bonus, and carries his cost in
+      the fleet list, from the next turn; the rest of the flight does not.</li>
   </ul>
 
   <h3 data-anchor="seeingofficers">Seeing your officers</h3>
   <ul>
-    <li>A gold double-chevron insignia marks the post's icon in the ship window. It turns grey once the officer is out of
-      action, with a red slash through it if they were killed.</li>
-    <li>The post's information tooltip names the officer and what they do, and says how and when they were lost.</li>
-    <li>The ship window's gold box lists every officer aboard and the system each one is posted in.</li>
+    <li>A gold double-chevron insignia marks the post's icon in the ship window - for a fighter officer, the flight's first
+      fighter. It turns grey once the officer is out of action, with a red slash through it if they were killed.</li>
+    <li>The post's information tooltip names the officer and what they do, and says how and when they were lost. A fighter
+      officer is named in the flight's own tooltip, shown when you hover over a fighter.</li>
+    <li>The ship window's gold Enhancements box counts the officers aboard, as <b>Officers (2)</b>.</li>
     <li>Your opponent sees none of these until the game is over. Some effects do show, though, because they change numbers
-      everyone can read: a Helmsman's initiative, a Geneticist's profiles, a Technician's reactor power and a Matter
-      Weapons Expert's fire control. The opponent sees the number, not who is behind it.</li>
+      everyone can read: a Helmsman's or a Dogfighter's initiative, a Geneticist's profiles, a Technician's reactor power,
+      a Matter Weapons Expert's fire control and an Evader's offensive bonus. The opponent sees the number, not who is
+      behind it.</li>
   </ul>
 </section>
 
@@ -989,6 +993,74 @@
         <dd>10% of the ship's base cost.</dd>
         <dt>Limit</dt>
         <dd>1 per ship. Only offered to ships carrying at least one Matter weapon.</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<section data-key="fighterofficers" data-title="Fighter Officers" data-group="Officers">
+  <p class="fvd-lede">Officers for fighter flights. A flight may carry only one of them, and he flies in its first
+    fighter: he is lost if that fighter is destroyed or drops out, and goes with it if it is split off from the flight
+    (see <a href="#losingofficers">Losing an officer</a>).</p>
+  <div class="fvd-cards">
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Dogfighter</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The flight's first fighter.</dd>
+        <dt>Effect</dt>
+        <dd>+5 Initiative for the flight.</dd>
+        <dt>Cost</dt>
+        <dd>50% of one fighter's cost, once for the whole flight.</dd>
+        <dt>Limit</dt>
+        <dd>1 officer per flight.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Missileer</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The flight's first fighter.</dd>
+        <dt>Effect</dt>
+        <dd>+5 Offensive Bonus (+5%) on the flight's missile and torpedo launches - whenever a launch gets the flight's
+          Offensive Bonus at all (a Navigator aboard, or the target in the launcher's arc).</dd>
+        <dt>Cost</dt>
+        <dd>50% of one fighter's cost, once for the whole flight, plus 1 point for every missile the flight can carry -
+          so a flight of six fighters carrying four missiles each pays 24 more.</dd>
+        <dt>Limit</dt>
+        <dd>1 officer per flight. Only offered to flights that carry missiles.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Evader</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The flight's first fighter.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>-5 Offensive Bonus (-5% to hit) on all of the flight's weapons.</li>
+          <li>-1 damage from every hit on the flight.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>100% of one fighter's cost, for every fighter in the flight.</dd>
+        <dt>Limit</dt>
+        <dd>1 officer per flight.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Motivator</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The flight's first fighter.</dd>
+        <dt>Effect</dt>
+        <dd>-2 to the flight's dropout rolls.</dd>
+        <dt>Cost</dt>
+        <dd>10% of one fighter's cost (rounded up), for every fighter in the flight.</dd>
+        <dt>Limit</dt>
+        <dd>1 officer per flight.</dd>
+        <dt>Notes</dt>
+        <dd>Formerly a fighter enhancement, with the same effect and price. As an officer he now counts as the flight's one
+          officer, is lost with the flight's first fighter, and is hidden from your opponent.</dd>
       </dl>
     </article>
   </div>

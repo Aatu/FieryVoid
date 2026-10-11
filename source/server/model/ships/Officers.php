@@ -14,30 +14,41 @@
 
    THE ONE RUNTIME LIST. $ship->getOfficers() holds array('id', 'post', 'out', 'how') per officer:
    'post' is the post's system id, 'out' the turn he left action (null while he has not), 'how'
-   'disabled' or 'killed'. He serves on turn T while out === null or out >= T. Every effect, the
-   payload and (Stage 2) the insignia read that list and nothing else (§7, "two tracks drift").
+   'disabled' or 'killed' - or 'moved' for a fighter officer who left this flight row with his fighter
+   (followFighter; stored as one OffMoved note). He serves on turn T while out === null or out >= T.
+   Every effect, the payload and (Stage 2) the insignia read that list and nothing else (§7, "two
+   tracks drift").
 
    ⚠️ POST-side ships (Manager::getShipsFromJSON) never run onConstructed, so their list is empty:
    nothing in a phase's process() may ask about officers ([[arch_post_side_ship_reconstruction]]).
 
-   Track 1 only so far (fixed-post ship officers, ship-level OFF_* rows): the Helmsman (Stage 1) and the
-   Scanner, Technician, Geneticist and C&C Matter Weapons Expert (Stage 3). Placed officers (track 2,
-   Stage 8) and fighter officers (Stage 4) are not built yet. */
+   Track 1 only so far (fixed-post officers, ship-level rows): the Helmsman (Stage 1); the Scanner,
+   Technician, Geneticist and C&C Matter Weapons Expert (Stage 3); and the fighter officers (Stage 4):
+   Dogfighter, Missileer, Evader and the Expert Motivator, which was a fighter enhancement until then
+   and keeps its old id. Placed officers (track 2, Stage 8) are not built yet. */
 class Officers{
 
 	const ID_PREFIX = 'OFF_';
 	const KILL_NOTE = 'OffKilled'; //tac_individual_notes.notekey, varchar(40)
+	const MOVE_NOTE = 'OffMoved';  //a fighter officer left this row with his fighter (followFighter)
 	const KILL_ROLL = 20;          //"a '20' or greater (including any modifications)"
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
 	     label    the name in the buy dialog, the stored enhname and the kill note's notekey_human
 	     post     a key into findPost()
-	     pct      price in percent of the hull's blueprint pointCost, rounded up (D8)
+	     pct      price in percent of the hull's blueprint pointCost, rounded up (D8) - of ONE CRAFT for
+	              a fighter officer
 	     apply    the static method that applies his stat changes while he serves, or null when every
 	              rule he carries is asked for elsewhere (isActive)
 	     publish  (optional) ship fields his apply moves that every viewer is sent while he serves: a
 	              displayed stat is public, only the officer is hidden (user ruling 2026-10-10)
-	     needs    (optional) a further test the hull must pass to be offered him, beyond having the post */
+	     needs    (optional) a further test the hull must pass to be offered him, beyond having the post
+	   Fighter officers (Stage 4) also carry:
+	     flight      true: offered to flights only (and every other officer to ships only)
+	     per         'flight' = charged ONCE whatever the flight's size; 'craft' = per craft, which the
+	                 lobby multiplies by the flight size like every other fighter enhancement (D8)
+	     perMissile  (optional) points added PER CRAFT for every missile one craft can carry, on top of a
+	                 per-flight price (the Missileer) */
 	private static $registry = array(
 		/* Expert Helmsman: +5 initiative (FV units, QX1), wins initiative ties, and -1 on the die he
 		   rolls on a meteor swarm's impact chart (user, 2026-10-10). The tie-break is
@@ -62,10 +73,47 @@ class Officers{
 		   +1 damage on every Matter-class weapon, per firing mode. Only for hulls carrying one. */
 		'OFF_MWE'  => array('label' => 'Matter Weapons Expert', 'post' => 'cnc', 'pct' => 10, 'apply' => 'applyMatterExpert',
 			'needs' => 'hasMatterWeapon'),
+
+		/* FIGHTER OFFICERS (Stage 4). A flight carries ONE officer in total (D9), posted on its first
+		   craft. He is lost with that craft - destroyed, or dropped out - and never by a dock, a partial
+		   dock or a split launch: he stays on the flight row he was bought on, and a "- Split" row never
+		   carries him. No kill roll: a craft has no d20 critical roll, only the d10 dropout test (user
+		   rulings 2026-10-11). Priced off one craft (D8). */
+		/* Expert Dogfighter: +5 initiative (FV units, QX1). 50% of a craft, once per flight. */
+		'OFF_DOG'  => array('label' => 'Expert Dogfighter', 'post' => 'craft', 'flight' => true, 'pct' => 50, 'per' => 'flight',
+			'apply' => 'applyDogfighter', 'publish' => array('iniativebonus')),
+		/* Expert Missileer: "+5 OB for missiles" = +1 OB (the +5 is FV's displayed %) on every ballistic
+		   launch that gets the flight's OB - Weapon::calculateHitBase's fighter-ballistic branch and its
+		   weaponManager twins. "50% of a fighter + 1 per missile the flight CAN take": half a craft once,
+		   plus 1 point per craft for each missile one craft carries, so the price grows with the flight
+		   (user ruling 2026-10-11). Only for flights that carry missiles. */
+		'OFF_MSL'  => array('label' => 'Expert Missileer', 'post' => 'craft', 'flight' => true, 'pct' => 50, 'per' => 'flight',
+			'perMissile' => 1, 'apply' => null, 'needs' => 'hasMissiles'),
+		/* Expert Evader: "-1 to hit with the flight's own weapons, -1 damage on all incoming fire",
+		   always on (user ruling 2026-10-11). -1 OB, which is what every fighter to-hit path reads on
+		   both ends (the client never reads a flight's toHitBonus), and +1 in FighterFlight::getDamageMod.
+		   "100% of a fighter x number of fighters" is the per-craft shape every fighter enhancement has. */
+		'OFF_EVAD' => array('label' => 'Expert Evader', 'post' => 'craft', 'flight' => true, 'pct' => 100, 'per' => 'craft',
+			'apply' => 'applyEvader', 'publish' => array('offensivebonus')),
+		/* Expert Motivator: -2 on the flight's dropout rolls. A fighter ENHANCEMENT until Stage 4, when the
+		   user ruled it an officer (2026-10-11). ⚠️ It keeps its OLD id, EXP_MOTIV - live games and saved
+		   fleets carry rows under it, and a withdrawn id drops a saved row silently while its cost stays
+		   in pointCostEnh ([[arch_retiring_ship_enhancement]]) - and its old price, 10% of a craft per
+		   craft. Withheld, as before, by the nonstandard fighter sets (blockStandardEnhancements). */
+		'EXP_MOTIV' => array('label' => 'Expert Motivator', 'post' => 'craft', 'flight' => true, 'pct' => 10, 'per' => 'craft',
+			'apply' => 'applyMotivator'),
 	);
 
+	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV) - so the
+	   OFF_ test alone would let the Motivator back into the public tooltip. ⚠️ MIRROR PAIR with
+	   officers.isOfficerId (JS). */
 	public static function isOfficerId($enhID){
-		return strpos((string)$enhID, self::ID_PREFIX) === 0;
+		$enhID = (string)$enhID;
+		return strpos($enhID, self::ID_PREFIX) === 0 || isset(self::$registry[$enhID]);
+	}
+
+	public static function isFighterOfficer($id){
+		return !empty(self::$registry[$id]['flight']);
 	}
 
 	public static function getRegistry(){
@@ -78,28 +126,42 @@ class Officers{
 
 	/* D9: never on Ancient hulls, OSATs (mines extend OSAT) or terrain - one shared test in front of
 	   every officer, not something each entry repeats. Bases, LCVs and the rest only where the post
-	   exists, which findPost() decides. Flights wait for the fighter framework (Stage 4). */
+	   exists, which findPost() decides. Flights too (Stage 4), except the flight-shaped mines
+	   (MineClass, $mine), MicroSATs ($osat), the OSATs of the fighter world, and anything remotely
+	   controlled ($remoteControl - the Orieni Hunter-Killers): "they have no pilots" (user ruling
+	   2026-10-11). The Hunter-Killers were offered the Expert Motivator while it was an enhancement,
+	   so a saved fleet can still hold one - Manager::loadSavedFleet refunds it (rowPrice). */
 	public static function mayCarryOfficers($ship){
-		if ($ship instanceof FighterFlight) return false;
 		if ((int)$ship->factionAge >= 3) return false;
-		if ($ship instanceof OSAT) return false;
+		if ($ship instanceof OSAT || !empty($ship->osat)) return false;
 		if (!empty($ship->mine)) return false;
+		if (!empty($ship->remoteControl)) return false;
 		if ($ship->isTerrain()) return false;
 		return true;
 	}
 
 	/* ------------------------------------------------------------------ offers */
 
-	/* Called at the end of Enhancements::setEnhancementOptionsShip, so the offers land in the static
-	   blueprints (fvbuild -Statics follows any change here). Limit 1: "one of each type" (D9). */
+	/* Called at the end of Enhancements::setEnhancementOptionsShip and ::setEnhancementOptionsFighter,
+	   so the offers land in the static blueprints (fvbuild -Statics follows any change here). Limit 1:
+	   "one of each type" (D9); a flight's "one officer in total" is the buy dialog's to enforce, and
+	   pickPosts' to defend. */
 	public static function addOffers($ship){
 		if (!self::mayCarryOfficers($ship)) return;
 		foreach (self::$registry as $id => $officer){
 			if (in_array($id, $ship->enhancementOptionsDisabled)) continue;
 			if (!self::isEligible($ship, $officer)) continue;
-			$price = self::price($ship->pointCost, $officer['pct']);
-			$ship->enhancementOptions[] = array($id, $officer['label'], 0, 1, $price, 0, false);
+			$ship->enhancementOptions[] = array($id, $officer['label'], 0, 1, self::offerPrice($ship, $officer), 0, false);
 		}
+	}
+
+	/* The offer's price. A ship officer: pct% of the hull. A fighter officer: pct% of ONE craft - per
+	   flight or per craft by his `per` (the buy dialog multiplies a 'craft' price by the flight size,
+	   as it does every fighter enhancement's). The Missileer's per-missile part is not in it: it grows
+	   with the flight, so the lobby adds it at buy time (officers.flightCost, perCraftExtra). */
+	private static function offerPrice($ship, $officer){
+		if (empty($officer['flight'])) return self::price($ship->pointCost, $officer['pct']);
+		return self::craftPrice($ship, $officer['pct']);
 	}
 
 	/* ceil(pct% of the blueprint cost), in whole numbers: 0.07 x 100 is 7.000000000000001 in floats,
@@ -107,6 +169,32 @@ class Officers{
 	public static function price($pointCost, $pct){
 		$hundredths = max(0, (int)round($pointCost * 100));
 		return intdiv($hundredths * (int)$pct + 9999, 10000);
+	}
+
+	/* ceil(pct% of ONE craft), in whole numbers. A flight's pointCost is for six craft whatever size it
+	   is bought at (the lobby prices a craft as pointCost / 6); a superheavy's is its own - the
+	   convention every fighter enhancement prices by. For EXP_MOTIV this is exactly the old
+	   ceil(pointCost / 60) and ceil(pointCost / 10). */
+	public static function craftPrice($flight, $pct){
+		$crafts = ($flight instanceof SuperHeavyFighter) ? 1 : 6;
+		$hundredths = max(0, (int)round($flight->pointCost * 100));
+		$den = 10000 * $crafts;
+		return intdiv($hundredths * (int)$pct + $den - 1, $den);
+	}
+
+	/* Missiles one craft can carry: its magazine's capacity (rounds, not salvoes) plus every legacy
+	   launcher's own load (FighterMissileRack, and FighterTorpedoLauncher, which extends it). The
+	   Missileer's per-missile price and his `needs`. ⚠️ MIRROR PAIR with officers.missilesPerCraft. */
+	public static function missilesPerCraft($flight){
+		if (!($flight instanceof FighterFlight)) return 0;
+		$craft = self::firstCraft($flight);
+		if ($craft === null) return 0;
+		$total = 0;
+		foreach ($craft->systems as $system){
+			if ($system instanceof AmmoMagazine) $total += (int)$system->capacity;
+			else if ($system instanceof FighterMissileRack) $total += (int)$system->maxAmount;
+		}
+		return $total;
 	}
 
 	/* ------------------------------------------------------------------ posts */
@@ -119,10 +207,14 @@ class Officers{
 	              Poor Crew and Improved Sensors move, so they agree on a hull with two.
 	     reactor  the biggest Reactor by maxhealth - Elite Crew's rule (a malus would sit on the main
 	              reactor too); Mag-Grav reactors included.
+	     craft    a flight's first craft (Stage 4): the lobby's one fighter card, and the sample fighter
+	              getSampleFighter() answers - id 1, whether or not it is still flying.
 	   ⚠️ Asked BEFORE any enhancement moves an output (D2): Poor Crew takes a point off the strongest
 	   scanner, so on a hull with two equal ones asking afterwards would pick the other. */
 	private static function findPost($ship, $post){
 		switch ($post){
+			case 'craft':
+				return ($ship instanceof FighterFlight) ? self::firstCraft($ship) : null;
 			case 'cnc':
 				$any = null;
 				foreach ($ship->systems as $system){
@@ -152,8 +244,18 @@ class Officers{
 		return $best;
 	}
 
-	//the hull has the post, and passes the officer's own test if he has one
+	//the first craft by construction order: systems are keyed by id, and the first craft is id 1
+	private static function firstCraft($flight){
+		foreach ($flight->systems as $craft){
+			if ($craft instanceof Fighter) return $craft;
+		}
+		return null;
+	}
+
+	//a fighter officer for a flight and every other officer for a ship; the hull has the post, and
+	//passes the officer's own test if he has one
 	private static function isEligible($ship, $officer){
+		if (!empty($officer['flight']) !== ($ship instanceof FighterFlight)) return false;
 		if (self::findPost($ship, $officer['post']) === null) return false;
 		if (empty($officer['needs'])) return true;
 		$needs = $officer['needs'];
@@ -163,7 +265,8 @@ class Officers{
 	/* D2: posts are picked at the top of BaseShip::onConstructed, BEFORE any enhancement moves an
 	   output, from the bought rows. A count above 1 still means one officer (D9), and a row the hull
 	   would not have been offered (no post, or the officer's own test fails) buys nothing - the
-	   server trusts the client's rows, so a doctored payload is answered here. */
+	   server trusts the client's rows, so a doctored payload is answered here. So is a flight's second
+	   officer row (D9: one officer in total): only the first in registry order serves. */
 	public static function pickPosts($ship){
 		$list = array();
 		if (self::hasOfficerRow($ship) && self::mayCarryOfficers($ship)){
@@ -172,6 +275,7 @@ class Officers{
 				if (!self::isEligible($ship, $officer)) continue;
 				$post = self::findPost($ship, $officer['post']);
 				$list[] = array('id' => $id, 'post' => (int)$post->id, 'out' => null, 'how' => null);
+				if ($ship instanceof FighterFlight) break;
 			}
 		}
 		$ship->setOfficers($list);
@@ -201,16 +305,23 @@ class Officers{
 		$list = $ship->getOfficers();
 		if (empty($list)) return;
 		$kills = $ship->getOfficerKills();
+		$moves = $ship->getOfficerMoves();
 		foreach ($list as $i => $entry){
 			$post = $ship->getSystemById($entry['post']);
-			$disabled = ($post !== null) ? self::disabledTurn($ship, $post) : 0; //a vanished post never served
-			$killed = isset($kills[$entry['id']]) ? (int)$kills[$entry['id']] : null;
-			if ($killed !== null && ($disabled === null || $killed <= $disabled)){
-				$list[$i]['out'] = $killed;
-				$list[$i]['how'] = 'killed'; //both in one turn reads as killed (§4.4)
-			} else if ($disabled !== null){
-				$list[$i]['out'] = $disabled;
-				$list[$i]['how'] = 'disabled';
+			/* The earliest wins; on a tie the first of these (both in one turn reads as killed, §4.4). A
+			   fighter officer who MOVED with his fighter (followFighter) left this row: a move beats the
+			   DisengagedFighter bookkeeping that retires the row he left on the same turn. */
+			$candidates = array(
+				'killed'   => isset($kills[$entry['id']]) ? (int)$kills[$entry['id']] : null,
+				'moved'    => isset($moves[$entry['id']]) ? (int)$moves[$entry['id']] : null,
+				'disabled' => ($post !== null) ? self::disabledTurn($ship, $post) : 0, //a vanished post never served
+			);
+			foreach ($candidates as $how => $out){
+				if ($out === null) continue;
+				if ($list[$i]['out'] === null || $out < $list[$i]['out']){
+					$list[$i]['out'] = $out;
+					$list[$i]['how'] = $how;
+				}
 			}
 		}
 		$ship->setOfficers($list);
@@ -245,6 +356,7 @@ class Officers{
 	   does not bring an officer back. The block's fall turn is the officer's out turn, which is right:
 	   isDestroyed() lets a system fall off one turn AFTER its block, so he serves the turn it falls. */
 	private static function disabledTurn($ship, $post){
+		if ($post instanceof Fighter) return self::craftLostTurn($post);
 		$turn = self::firstDestroyedTurn($post);
 		if (!($post instanceof Structure) && !$post->getSurvivesStructureDestruction()){
 			$blocks = $post->getStructureSystem();
@@ -276,6 +388,18 @@ class Officers{
 		return $turn;
 	}
 
+	/* A fighter officer's craft (§4.4 rule 3; user ruling 2026-10-11): lost when it is destroyed - the
+	   earliest damage row that destroyed it - or drops out - its DisengagedFighter critical, which is
+	   permanent and so loads every turn. ⚠️ NOT DockedFighter or SplitLaunchedFighter, although
+	   Fighter::isDestroyed() reports both as destroyed: a dock or a split launch never loses him. */
+	private static function craftLostTurn($craft){
+		$turn = self::firstDestroyedTurn($craft);
+		foreach ($craft->criticals as $critical){
+			if ($critical instanceof DisengagedFighter) $turn = self::earlier($turn, (int)$critical->turn);
+		}
+		return $turn;
+	}
+
 	private static function firstDestroyedTurn($system){
 		$first = null;
 		foreach ($system->damage as $damage){
@@ -302,7 +426,9 @@ class Officers{
 	   same formula is rolled here.
 	   ⚠️ Writes straight through Manager::insertIndividualNote - a sweep inside advance()
 	   ([[arch_individual_notes_and_phase_hooks]]) - and updates the in-memory list, so anything later
-	   in this request reads him as killed. */
+	   in this request reads him as killed.
+	   A fighter officer never rolls (user ruling 2026-10-11): his craft has no d20 critical roll, and
+	   rolling the ship formula for it here would kill him on any hit worth 20. */
 	public static function rollKills($ships, $gamedata){
 		$turn = (int)$gamedata->turn;
 		foreach ($ships as $ship){
@@ -310,6 +436,7 @@ class Officers{
 			if (empty($list)) continue;
 			$byPost = array();
 			foreach ($list as $i => $entry){
+				if (self::isFighterOfficer($entry['id'])) continue;
 				if ($entry['how'] === 'killed') continue;
 				if ($entry['out'] !== null && $entry['out'] < $turn) continue; //out on an earlier turn
 				$byPost[$entry['post']][] = $i;
@@ -355,6 +482,11 @@ class Officers{
 	//DBManager's bulk note loop hands every OffKilled note here instead of to its system (§4.4)
 	public static function isKillNote($note){
 		return $note->notekey === self::KILL_NOTE;
+	}
+
+	//...and every OffMoved note (followFighter), for the same reason
+	public static function isMoveNote($note){
+		return $note->notekey === self::MOVE_NOTE;
 	}
 
 	/* ------------------------------------------------------------------ effects */
@@ -468,6 +600,130 @@ class Officers{
 		return $fireControl;
 	}
 
+	/* ------------------------------------------------------------------ fighter officers (Stage 4) */
+
+	//Expert Dogfighter: +5 initiative, ELITE_SW's line
+	private static function applyDogfighter($ship, $entry, $turn){
+		$ship->iniativebonus += 5;
+	}
+
+	/* Expert Missileer: +1 OB on a ballistic launch that gets the flight's OB at all (navigator, or the
+	   target in the launcher's arc - Weapon::calculateHitBase). Behind $officersPresent there. */
+	public static function missileObBonus($flight){
+		return self::isActive($flight, 'OFF_MSL') ? 1 : 0;
+	}
+
+	//"Only for flights with missiles"
+	private static function hasMissiles($ship){
+		return self::missilesPerCraft($ship) > 0;
+	}
+
+	/* Expert Evader, to hit: -1 OB, which every fighter to-hit path on both ends reads (and the
+	   published stat the shooter's own preview needs). */
+	private static function applyEvader($ship, $entry, $turn){
+		$ship->offensivebonus -= 1;
+	}
+
+	/* Expert Evader, damage: 1 point off every hit on the flight - FighterFlight::getDamageMod, the
+	   flight's defensive choke point (Weapon::getFinalDamage subtracts it), behind $officersPresent.
+	   No client mirror: no client damage preview exists. */
+	public static function evaderDamageReduction($flight){
+		return self::isActive($flight, 'OFF_EVAD') ? 1 : 0;
+	}
+
+	//Expert Motivator: -2 on dropout rolls, Fighter::testCritical's flight critRollMod (as EXP_MOTIV always was)
+	private static function applyMotivator($ship, $entry, $turn){
+		$ship->critRollMod -= 2;
+	}
+
+	/* ------------------------------------------------------------------ a fighter officer follows his fighter */
+
+	/* What one bought officer row cost the unit, by the lobby's rule (officers.flightCost): a ship
+	   officer pct% of the hull; a fighter officer pct% of one craft, once per flight or per craft by his
+	   `per`, plus the Missileer's 1 per missile a craft carries, per craft. $flight->flightSize is the
+	   size the row was bought or spawned at. Used to refund a saved row the hull is no longer offered
+	   (Manager::loadSavedFleet) and to keep an officer's cost with him when HangarOps splits a flight. */
+	public static function rowPrice($ship, $id){
+		if (!isset(self::$registry[$id])) return 0;
+		$officer = self::$registry[$id];
+		if (empty($officer['flight'])) return self::price($ship->pointCost, $officer['pct']);
+		$crafts = max(1, (int)$ship->flightSize);
+		$price = self::craftPrice($ship, $officer['pct']);
+		if (($officer['per'] ?? 'craft') !== 'flight') return $price * $crafts;
+		if (!empty($officer['perMissile'])) $price += (int)$officer['perMissile'] * self::missilesPerCraft($ship) * $crafts;
+		return $price;
+	}
+
+	/* The fighter officer this flight row holds (not one who has already left it with his fighter), or null. */
+	private static function fighterOfficerAboard($flight){
+		if (!($flight instanceof FighterFlight)) return null;
+		foreach ($flight->getOfficers() as $entry){
+			if (self::isFighterOfficer($entry['id']) && $entry['how'] !== 'moved') return $entry;
+		}
+		return null;
+	}
+
+	/* The share of a flight's enhancement value HangarOps gives $k of its $n craft when it splits the
+	   row in two - proportional to the craft, as it always was, EXCEPT a fighter officer's own price,
+	   which goes whole to the side that has him (user ruling 2026-10-11: his cost moves with him).
+	   $withOfficer: does this side have him? With no officer aboard this is exactly round($total * $k / $n),
+	   the split every caller made before. */
+	public static function shareWithCraft($flight, $total, $k, $n, $withOfficer){
+		if ($n <= 0) return 0;
+		$entry = self::fighterOfficerAboard($flight);
+		$cost = $entry ? max(0, min((float)$total, (float)self::rowPrice($flight, $entry['id']))) : 0;
+		$share = (int)round(((float)$total - $cost) * $k / $n);
+		return $withOfficer ? $share + (int)round($cost) : $share;
+	}
+
+	/* The serving fighter officer whose post (craft) is among $crafts - the craft leaving the row - or null. */
+	private static function travellingOfficer($flight, array $crafts, $turn){
+		$entry = self::fighterOfficerAboard($flight);
+		if ($entry === null || !self::serves($entry, $turn)) return null;
+		foreach ($crafts as $craft){
+			if ($craft instanceof Fighter && (int)$craft->id === (int)$entry['post']) return $entry;
+		}
+		return null;
+	}
+
+	//Is this flight's fighter officer among the craft leaving it? (HangarOps, for shareWithCraft)
+	public static function officerAmong($flight, array $crafts, $turn){
+		return self::travellingOfficer($flight, $crafts, $turn) !== null;
+	}
+
+	/* ⭐ A FIGHTER OFFICER FOLLOWS HIS FIGHTER (user ruling 2026-10-11). Called by HangarOps wherever craft
+	   leave one flight row for a new one, just before their state is copied across in the order of
+	   $crafts (a partial launch, a partial dock's fragment, a rail escape, a carrier-death escape, a
+	   catapult's stash extraction). If the officer's craft is among them:
+	     - it is moved to the FRONT of $crafts, so its state lands in the new row's first craft - his post
+	       there, by the same rule as anywhere (findPost 'craft');
+	     - the new row buys his row (tac_enhancements), mirrored in memory as copyFlightAmmoEnhancements
+	       does for ammunition;
+	     - the old row gets one OffMoved note on his old post, intercepted at load like OffKilled, so from
+	       the next turn he is gone from it ('moved') - he still serves this turn, the next-turn rule.
+	   Returns whether he moved. His cost follows him through shareWithCraft, which the callers apply. */
+	public static function followFighter($source, $target, array &$crafts, $gamedata){
+		if (!($source instanceof FighterFlight) || !($target instanceof FighterFlight)) return false;
+		$entry = self::travellingOfficer($source, $crafts, $gamedata->turn);
+		if ($entry === null) return false;
+
+		$ordered = array();
+		foreach ($crafts as $craft) if ((int)$craft->id === (int)$entry['post']) $ordered[] = $craft;
+		foreach ($crafts as $craft) if ((int)$craft->id !== (int)$entry['post']) $ordered[] = $craft;
+		$crafts = $ordered;
+
+		$label = self::getLabel($entry['id']);
+		Manager::insertSingleEnhancement($gamedata, $target->id, $entry['id'], 1, $label);
+		$target->enhancementOptions[] = array($entry['id'], $label, 1, 0, 0, 0);
+		self::pickPosts($target);
+
+		/* Read at the NEXT load. The old row's in-memory list is left alone: he serves it to the end of
+		   this turn, and shareWithCraft, called after this, still has to see him there to price the split. */
+		Manager::insertIndividualNote(new IndividualNote(-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+			$source->id, (int)$entry['post'], self::MOVE_NOTE, substr($label . ' left with his fighter', 0, 40), $entry['id']));
+		return true;
+	}
+
 	/* ------------------------------------------------------------------ payload */
 
 	/* BaseShip::stripForJson, after the enhancement fields.
@@ -492,12 +748,19 @@ class Officers{
 		$out = array();
 		foreach ($list as $entry){
 			$row = array('id' => $entry['id'], 'post' => $entry['post']);
+			/* An officer who moved with his fighter is not out of action - he is on another row now:
+			   listed here as serving up to the turn he left, and not at all afterwards. */
+			if ($entry['how'] === 'moved'){
+				if (self::serves($entry, TacGamedata::$currentTurn)) $out[] = $row;
+				continue;
+			}
 			if ($entry['out'] !== null){
 				$row['out'] = $entry['out'];
 				$row['how'] = $entry['how'];
 			}
 			$out[] = $row;
 		}
+		if (empty($out)) return;
 		$strippedShip->officers = $out;
 	}
 }

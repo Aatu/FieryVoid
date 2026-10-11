@@ -3805,6 +3805,11 @@ class DBManager
 					$ship->recordOfficerKill($currNote->notevalue, $currNote->turn);
 					continue;
 				}
+				//...and so is a fighter officer's move with his fighter to another flight row (Stage 4)
+				if (Officers::isMoveNote($currNote)){
+					$ship->recordOfficerMove($currNote->notevalue, $currNote->turn);
+					continue;
+				}
 				$system = $ship->getSystemById($currNote->systemid);
                 if ($system) // Robustness check
 				    $system->addIndividualNote($currNote);

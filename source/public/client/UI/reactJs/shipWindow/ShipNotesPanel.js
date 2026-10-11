@@ -64,6 +64,10 @@ const Block = styled.div`
       2026-07-18) so the whole panel reads as the gold-accented one*/
     border: 1px dotted ${props => props.$gold ? theme.colors.enhLine : theme.colors.line};
     padding: 0 8px 3px;
+    /*$gold: the enhancement lines in the gold body text on every window (user request 2026-10-11).
+      The grid's EnhancementsPanel got it from its EnhArea wrapper, but a flight's block sits in
+      the blue Rail and read blue; set here, both read the same.*/
+    ${props => props.$gold ? `color: ${theme.colors.enhText};` : ''}
 `;
 
 const BlockTitle = styled.div`
@@ -92,11 +96,6 @@ const BlockTitle = styled.div`
 
 const Row = styled.div`
     padding: 1px 0;
-`;
-
-//an officer out of action reads dimmed (OFFICERS_PLAN.md D11)
-const OfficerRow = styled(Row)`
-    ${props => props.$out ? `color: ${theme.colors.textDim};` : ''}
 `;
 
 const CustomFlag = styled.div`
@@ -255,6 +254,9 @@ const EnhArea = styled.div`
 //legacy parity: TC/TD to two decimals, Profile as defense * 5, Ini raw
 const fix2 = (value) => (typeof value === 'number' ? value.toFixed(2) : value);
 
+//a stat as the window shows it: a lobby officer's change is added at read time (officers.displayStat)
+const statOf = (ship, field) => (window.officers ? officers.displayStat(ship, field) : ship[field]);
+
 const profileText = (front, side) => (front * 5) + '/' + (side * 5);
 
 //"<thrust> (<rate>)" - the ship tooltip's turn-cost format
@@ -377,42 +379,25 @@ export const ManoeuvreStats = ({ ship, live, bare }) => {
 //grid there)
 export const EnhancementsPanel = ({ ship }) => {
     const enhLines = splitHtmlLines(ship.enhancementTooltip);
-    const officerLines = officerLinesFor(ship);
-    if (enhLines.length === 0 && officerLines.length === 0) return null;
+    const officerLine = officerSummaryLine(ship);
+    if (enhLines.length === 0 && !officerLine) return null;
     return (
         <EnhArea>
             <Block $gold>
-                {enhLines.length > 0 && <EnhTitle>Enhancements</EnhTitle>}
+                <EnhTitle>Enhancements</EnhTitle>
                 {enhLines.map((line, i) => <Row key={`enh-${i}`}>{line}</Row>)}
-                {officerLines.length > 0 && <EnhTitle>Officers</EnhTitle>}
-                {officerLines.map(line => <OfficerRow key={`off-${line.id}`} $out={line.out}>{line.text}</OfficerRow>)}
+                {officerLine && <Row key="officers">{officerLine}</Row>}
             </Block>
         </EnhArea>
     );
 };
 
-/* OFFICERS_PLAN.md §4.7 - the ship-level list: each officer and the system he is posted on, which for
-   a random-post officer is the only place to read it off at a glance. Own team only, through
-   officers.listFor (D4). A fallen officer stays listed, dimmed, with how and when. */
-export const officerLinesFor = (ship) => {
-    if (!window.officers || !ship) return [];
-    const turn = officers.currentTurn();
-    return officers.listFor(ship).map(entry => {
-        const post = findSystem(ship, entry.post);
-        const state = officers.stateText(entry);
-        return {
-            id: entry.id,
-            out: !officers.serves(entry, turn),
-            text: officers.label(entry.id) + (post ? ' - ' + post.displayName : '') + (state ? ' ' + state : '')
-        };
-    });
-};
-
-//by id over either shape of ship.systems (an array in game, keyed by id on a lobby blueprint)
-const findSystem = (ship, id) => {
-    const systems = Array.isArray(ship.systems) ? ship.systems : Object.values(ship.systems || {});
-    return systems.find(system => system && String(system.id) === String(id)) || null;
-};
+/* OFFICERS_PLAN.md §4.7 - the officers' ONE line in the gold Enhancements box, "Officers (2)", the way the
+   per-system refits get "System Enhancements (n)" (user request 2026-10-11, replacing a list of names
+   under a sub-title of their own): who they are and how they fare is on each post's own tooltip and
+   insignia. Last, after the enhancement lines. Own team only, through officers.listFor (D4) - so, unlike
+   the refit line, it never needs taking back out of anything the server sends an enemy. */
+export const officerSummaryLine = (ship) => ((window.officers && ship) ? officers.summaryLine(ship) : null);
 
 const splitHtmlLines = (text) =>
     (text || '')
@@ -430,6 +415,7 @@ class ShipNotesPanel extends React.Component {
         const complement = buildComplement(ship);
         const noteLines = splitHtmlLines(ship.notes);
         const enhLines = hideEnhancements ? [] : splitHtmlLines(ship.enhancementTooltip);
+        const officerLine = hideEnhancements ? null : officerSummaryLine(ship);
 
         const meta = [];
         if (ship.limited && ship.limited != 0) meta.push("Limited: " + ship.limited + "%");
@@ -453,7 +439,7 @@ class ShipNotesPanel extends React.Component {
                     <Block>
                         <BlockTitle>Flight Stats</BlockTitle>
                         <StatRow><StatLabel>Armor F/S/A</StatLabel><StatValue>{shipManager.systems.getFlightArmour(ship)}</StatValue></StatRow>
-                        <StatRow><StatLabel>Offensive bonus</StatLabel><StatValue>{ship.offensivebonus * 5}</StatValue></StatRow>
+                        <StatRow><StatLabel>Offensive bonus</StatLabel><StatValue>{statOf(ship, 'offensivebonus') * 5}</StatValue></StatRow>
                         {/*flights carry forwardDefense/sideDefense exactly like ships (the
                            lobby resets them from the blueprint on edit, and FtrPetals-style
                            systems mutate them live), so the profile reads the same way as
@@ -462,7 +448,7 @@ class ShipNotesPanel extends React.Component {
                         <StatRow><StatLabel>Thrust</StatLabel><StatValue>{ship.freethrust}</StatValue></StatRow>
                         <StatRow><StatLabel>Turn Cost / Delay</StatLabel><StatValue>{ship.turncost} / {ship.turndelaycost == 0 ? 0 : ship.turndelaycost}</StatValue></StatRow>
                         {<StatRow><StatLabel>Accel. / Pivot / Roll</StatLabel><StatValue>{ship.accelcost} / {ship.pivotcost} / {ship.rollcost}</StatValue></StatRow>}                                            
-                        <StatRow><StatLabel>Initiative</StatLabel><StatValue>{ship.iniativebonus}</StatValue></StatRow>
+                        <StatRow><StatLabel>Initiative</StatLabel><StatValue>{statOf(ship, 'iniativebonus')}</StatValue></StatRow>
                     </Block>
                 )}
 
@@ -482,10 +468,11 @@ class ShipNotesPanel extends React.Component {
                     </Block>
                 )}
 
-                {enhLines.length > 0 && (
+                {(enhLines.length > 0 || officerLine) && (
                     <Block $gold>
                         <EnhTitle>Enhancements</EnhTitle>
                         {enhLines.map((line, i) => <Row key={`enh-${i}`}>{line}</Row>)}
+                        {officerLine && <Row key="officers">{officerLine}</Row>}
                     </Block>
                 )}
             </Rail>

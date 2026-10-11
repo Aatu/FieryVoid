@@ -49,25 +49,33 @@ export const Entry = styled(TooltipEntry)`
 
 export const Header = styled.span`
     color: white;
-	font-style:italic;
 	font-size: 11px;
+    font-weight: bold;
 `;
 
 const ShipNameHeader = styled.span`
     color: #C6E2FF;
 `;
 
-//the Officers block (OFFICERS_PLAN.md D12) wears the gold set, like every other enhancement surface
+/* The Officers block (OFFICERS_PLAN.md D12) wears the gold set, like every other enhancement surface.
+   Exported for ShipInfo's flight OFFICERS block, so a craft's officer reads like a system's. The
+   colours are tripled-class (&&&) to win over ShipInfo's compact mode, which recolours every Entry and
+   Header through a descendant selector (two classes). */
 const OfficerHeader = styled(InfoHeader)`
     color: ${theme.colors.enhTitle};
 `;
 
-const OfficerEntry = styled(Entry)`
-    color: ${props => props.$out ? theme.colors.textDim : theme.colors.enhText};
+export const OfficerEntry = styled(Entry)`
+    &&& { color: ${props => props.$out ? theme.colors.textDim : theme.colors.enhText}; }
 `;
 
-const OfficerName = styled.span`
-    color: ${theme.colors.enhTitle};
+export const OfficerName = styled.span`
+    &&& { color: ${theme.colors.enhTitle}; }
+`;
+
+//ShipInfo's "OFFICERS:" heading, in its own heading shape but gold
+export const OfficerHeading = styled(Header)`
+    &&& { color: ${theme.colors.enhTitle}; }
 `;
 
 class SystemInfo extends React.Component {
@@ -108,7 +116,8 @@ class SystemInfo extends React.Component {
         var specialName = 'Special';
         var reactKey = 0; //needed for react so each line has unique key!
 
-        let displayOffensiveBonus = ship.offensivebonus;
+        //an Expert Evader's -1 in the lobby, added as it is shown (officers.displayStat; in game the server applied it)
+        let displayOffensiveBonus = window.officers ? officers.displayStat(ship, 'offensivebonus') : ship.offensivebonus;
         if (ship.flight && gamedata.areMinesPresent) {
 			if(ship.minesweeper){
 				displayOffensiveBonus -= window.ew.getDetectMEW(ship);

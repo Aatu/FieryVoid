@@ -1,13 +1,17 @@
 # Officers — Implementation Plan
 
-Status: **Stages 0, 1, 2 and 2a BUILT and committed (`7800ab827`); Stage 3 BUILT 2026-10-10, uncommitted**
-(§9). Written against `dab951bf5`. The user
+Status: **Stages 0–2a committed (`7800ab827`), Stage 3 committed (`1714c3651`); Stage 4 BUILT 2026-10-11,
+uncommitted** (§9.6). Written against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
 a third Helmsman effect (−1 on the meteor impact chart) and play-tested Stage 1 in game 4457 (confirmed
-correct), then ruled the Scanner, Technician and Geneticist questions for Stage 3 (§6). Each officer's own
-rules questions still only need ruling when that officer's stage starts. Next step: Stage 4 (the fighter
-framework).
+correct), then ruled the Scanner, Technician and Geneticist questions for Stage 3 (§6). On 2026-10-11 they
+ruled the fighter-officer questions (§6), made the old fighter enhancement **Expert Motivator** an officer,
+and asked for the ship window's officers as one **"Officers (n)"** row in the gold Enhancements block
+(§9.6). The same day they ruled out officers on remotely controlled craft (the Hunter-Killers) and had a
+fighter officer **follow his fighter** onto a split-off flight row, cost included (§9.7). Each officer's own
+rules questions still only need ruling when that officer's stage starts. Next
+step: Stage 5 (Engineer and Scavenger).
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -293,7 +297,9 @@ values, **before** `lobbyEnhancements.apply` ([[arch_lobby_ship_objects]]: duck-
 
 Two states, both permanent and both effective from the next turn (D3). Each runtime entry carries
 `out` (the turn) and `how` (`'disabled'` or `'killed'`). He serves on turn T if
-`out === null || out >= T`. When both happen in one turn, `how` is `'killed'`.
+`out === null || out >= T`. When both happen in one turn, `how` is `'killed'`. *A third `how`,
+`'moved'`, was added in §9.7: a fighter officer who left this flight row with his fighter. He is not out of
+action, only on another row, so he serves this row to the end of that turn and is not listed on it after.*
 
 **Disabled: derived at every load, nothing stored.** `out` is the earliest of:
 
@@ -406,7 +412,8 @@ masking: individual notes never reach any client.
   `officers.listFor(ship)` filtered to this post.
 - **Ship-level.** An own-team **Officers** list in `ShipInfo` and in the ship window's gold
   Enhancements box. Cheap, and it is the only place a random-post officer's post can be read off at a
-  glance.
+  glance. *Changed 2026-10-11 (user request): the gold box shows one **"Officers (n)"** row, like
+  "System Enhancements (n)"; the names live on each post's insignia and tooltip (§9.6).*
 - **Buy dialog (D10).** `buySectionOf` returns `'officers'` for an `OFF_` id. Optionally, an icon:
   the user's art as `img/Officers.png`, masked like the other three sections
   (SHIP_ENHANCEMENTS_PLAN.md §5).
@@ -453,7 +460,8 @@ masking: individual notes never reach any client.
   [gamelobby.js:4203, 4209, 4414, 4420, 4634, 4640](source/public/client/gamelobby.js#L4203). Use
   one predicate, `officers.isPerFlight(row)`, at all seven sites, never seven copies of an id test.
 - Hangar split-launch can carry the lead craft onto a "- Split" row. §6 (Fighter officers) decides
-  whether he goes with it.
+  whether he goes with it. *Ruled 2026-10-11: he does not; he stays on the row he was bought on (§9.6).
+  Re-ruled the same day: he **follows his fighter**, and his cost goes with him (§9.7).*
 
 ### 4.12 Buy-dialog filter chips (D13)
 
@@ -518,7 +526,7 @@ committed.
 | **2a** | Buy-dialog filter chips (D13), independent of everything else here, so it can go first. **BUILT 2026-10-10** (§9.4) | Every buy, edit and bulk dialog: chips only for sections with rows, none at all with a single section; a picked chip shows its section's colours; hiding a section changes no total and no saved row (buy with **Enhancements** picked, then reload the fleet); 360 px wrap. Headless |
 | **2** | Client framework. **BUILT 2026-10-10** (§9.3) | Lobby: buy a Helmsman, the Officers section shows, points move, the insignia lands on the C&C, the tooltip line appears. Destroy the C&C in the pre-battle editor → the warning shows. Game: own team sees the insignia in all three looks (serving, disabled, killed), an enemy browser sees nothing, a finished game shows all. Headless, driving the real site ([[howto_headless_chrome_phone_width]]) |
 | **3** | Easy ship officers: Scanner, Technician, Matter Weapons Expert (C&C), Geneticist. **BUILT 2026-10-10** (§9.5) | Scanner: the late-EW window opens on a ship with no EW Detector on the board. MWE: switch modes and back, the +1 stays. Technician: power balance after a system dies |
-| **4** | Fighter framework; Dogfighter, Missileer, Evader | A per-flight price is identical across buy, edit, copy and save/reload on 1-, 3- and 6-craft flights. A second officer on one flight is refused in the dialog, and a doctored payload with two serves only one. A lead-craft dropout loses him; a dock does not |
+| **4** | Fighter framework; Dogfighter, Missileer, Evader; the Expert Motivator made an officer. **BUILT 2026-10-11** (§9.6) | A per-flight price is identical across buy, edit, copy and save/reload on 1-, 3- and 6-craft flights. A second officer on one flight is refused in the dialog, and a doctored payload with two serves only one. A lead-craft dropout loses him; a dock does not |
 | **5** | Repair pass: Engineer and Scavenger | Deterministic pick; the C&C d20; no repair of this turn's crits (if so ruled); no revival of a destroyed system; runs after Self Repair |
 | **6** | Navigator | Server and client thrust agree on every cost change; the ship window shows the new numbers own-team only |
 | **7** | Jump Officer | Range +1 (with and without the Jump Accelerator); failure −20 at all three sites through one helper; arrival scatter and initiative |
@@ -565,7 +573,7 @@ committed.
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? |
 | Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). |
 | Gunner | Size caps for LCVs and bases? Which weapons are eligible: any with fire control, ballistics too? Does he stack with Gunsights? |
-| Fighter officers | Post = the first craft? A craft has no d20 critical roll (its test is a d10 dropout), so: no kill roll at all, or a d20 + damage roll on any damage to his craft, 20+ kills? (Default: none; he is lost with his craft.) Does he go with that craft on a split-launch? Missileer's "+5 OB": is that +1 OB (5 %)? Evader: always on, or toggled like jinking? Coordinator's "180°+" = three combat pivots in one turn? |
+| Fighter officers | Post = the first craft? A craft has no d20 critical roll (its test is a d10 dropout), so: no kill roll at all, or a d20 + damage roll on any damage to his craft, 20+ kills? (Default: none; he is lost with his craft.) Does he go with that craft on a split-launch? Missileer's "+5 OB": is that +1 OB (5 %)? Evader: always on, or toggled like jinking? Coordinator's "180°+" = three combat pivots in one turn? **RULED 2026-10-11:** the post is the first craft; he is lost **with his craft** (destroyed or dropped out), with **no kill roll**; a dock, a partial dock or a split launch never loses him, and he **stays on the flight row he was bought on** (a "- Split" row never carries him). Missileer: **+1 OB** on a launch that gets the flight's OB, priced **half a craft once, plus 1 per missile the whole flight can carry**. Evader: **always on**. Expert Motivator: **a full officer** (one per flight, lost with his craft, hidden), under his old id, effect and price. Coordinator: Stage 9. **RE-RULED 2026-10-11 (round 2, §9.7):** a **remotely controlled** unit (`$remoteControl`, the Orieni Hunter-Killers) carries no officer of any kind - "they have no pilots". An officer's abilities apply only to the part of the flight that holds his fighter, so when the flight splits **he follows his fighter**: the new row gets him, posted in its first craft, and his cost; the old row loses him from the next turn. The Evader's −1 OB also lowering mine detection is accepted. |
 
 ---
 
@@ -886,3 +894,192 @@ Scanner and 416 Matter Weapons Expert offers across 2,670 hulls.
 3. On a base, `getReactorPower` reads only the first reactor's `output`; if the biggest reactor (the
    Technician's post) is not first, his bonus is invisible client-side. Elite Crew and Improved Reactor have the
    same exposure today.
+
+### 9.6 Stage 4: fighter officers, and the Expert Motivator made one
+
+**Rulings (user, 2026-10-11, §6).** The post is the flight's first craft. He is lost **with his craft**
+(destroyed or dropped out), with **no kill roll**; a dock, a partial dock or a split launch never loses him,
+and he stays on the flight row he was bought on (*re-ruled in §9.7: he follows his fighter*). Missileer: **+1 OB** on a launch that gets the flight's OB,
+priced **half a craft once, plus 1 per missile the whole flight can carry**. Evader: **always on**. Two
+requests with them: the fighter enhancement **Expert Motivator** is an officer (a full one: one per flight,
+lost with his craft, hidden from the opponent), and the ship window shows its officers as **one "Officers
+(n)" row** in the gold Enhancements block, like "System Enhancements (n)".
+
+Built with defaults, not ruled (stated to the user before building): **eligibility** is D9 read literally -
+every flight except Ancient ones (factionAge ≥ 3), flight-shaped mines (MineClass) and MicroSATs (`$osat`),
+so shuttles, breaching pods and the Orieni Hunter-Killers are offered the new three; the Motivator keeps his
+old availability (*the Hunter-Killers were then ruled out, §9.7*). The Dogfighter is priced half a craft **once**. Every fighter ballistic launch counts as a
+"missile" (torpedo launchers too). The Evader's "−1 to hit" is **−1 OB**, not `toHitBonus`: the client's
+flight hit-chance path never reads a flight's `toHitBonus`, and OB is what every fighter to-hit path shares.
+
+**Files.** Server: `Officers.php` (four fighter registry entries with `flight`, `per`, `perMissile`;
+`isOfficerId` takes registry ids, so EXP_MOTIV; `mayCarryOfficers` lets flights in; `craftPrice`;
+`missilesPerCraft`; post `craft`; one officer per flight in `pickPosts`; `craftLostTurn`; no kill roll; the
+effects), `Enhancements.php` (EXP_MOTIV's offer, effect and JSON case removed - the registry owns them;
+`Officers::addOffers` at the end of `setEnhancementOptionsFighter`), `FighterFlight.php` (`getDamageMod`: the
+Evader, behind `$officersPresent`), `weapon.php` (`$ballisticOB` in the fighter-ballistic branch). Client:
+`officers.js` (the registry mirror; `firstCraft`, `missilesPerCraft`, the `craft` post, flight lists of one,
+`isPerFlight` / `perCraftExtra` / `flightCost` / `priceNote`, `missileObBonus`, `summaryLine`), `confirm.js`
+(`enhRowCost`; each row's `perCraftExtra` and price note; the one-officer line and `officerBlocked`),
+`confirm.css` (the line's flash), `gamelobby.js` (the six read-backs and `enhancementLines`),
+`lobbyEnhancements.js` (the Motivator's notes line gone), `weaponManager.js` (`computeOEW`), and React:
+`FighterIcon` (the card's insignia), `SystemIcon` (`OfficerInsignia` exported), `ShipInfo` (the flight's
+OFFICERS lines; OB and initiative as shown), `SystemInfo` (OB as shown), `ShipNotesPanel` ("Officers (n)" in
+both gold blocks; the flight stats as shown; `officerLinesFor` removed), `ShipWindow`. Docs: Ship Options
+gains **Fighter Officers** (four cards; the Motivator's card moved there, with a pointer left in Fighter
+Enhancements) and About Officers covers flights. Statics and bundles rebuilt; no new class, autoload unchanged.
+
+**As built:**
+- **Prices.** `craftPrice` = ceil(pct % of one craft) in whole numbers, a craft being pointCost / 6 (a
+  superheavy's pointCost is its own) - the convention every fighter enhancement uses, and exactly the
+  Motivator's old ceil(pointCost / 60) and ceil(pointCost / 10). `per: 'flight'` officers (Dogfighter,
+  Missileer) are charged once, `per: 'craft'` ones (Evader, Motivator) per craft. The Missileer's offer carries
+  only his per-flight part; the lobby adds 1 per missile a craft carries, per craft, when it prices the row
+  (`officers.perCraftExtra`, the mirror of `Officers::missilesPerCraft`: magazine capacity plus legacy launchers'
+  `maxAmount`). ⭐ **One rule, `officers.flightCost`, at every lobby site that turns a fighter row into points**:
+  `confirm.getTotalCost` and `paintBuySummary` (through `confirm.enhRowCost`), `doBuyShip`, `doCopyShip` and
+  `doEditShip` (both buckets each, through `confirm.enhRowCost`), and `enhancementLines` (the fleet list) - nine
+  sites, not §4.10's seven: `paintBuySummary` and `enhancementLines` had been missed. Save / reload re-prices
+  nothing (`enhvalue` is stored); an edit re-prices from the reloaded offer, by the same rule.
+- **One officer per flight.** On a flight the Officers section opens with "A flight may carry only one
+  officer."; **+** on a second one, a count typed into one, or the mouse wheel (it fires `input`) is refused and
+  the line flashes in the warning yellow - passive, never a dialog. `pickPosts` serves only the first row in
+  registry order (Dogfighter, Missileer, Evader, Motivator), so a doctored payload buys one.
+- **Lost with his craft.** `craftLostTurn`: the craft's earliest destroyed damage row, or its DisengagedFighter
+  critical (permanent, so loaded every turn) - never DockedFighter or SplitLaunchedFighter, which
+  `Fighter::isDestroyed()` also reports. A spawned "- Split" row gets only the ammo rows
+  (`HangarOps::copyFlightAmmoEnhancements`), so he stays where he was bought, as ruled. `rollKills` skips
+  fighter officers: `rollFor` would otherwise roll the ship formula for a craft.
+- **Effects.** Dogfighter: +5 `iniativebonus`, published. Evader: −1 `offensivebonus`, published, and +1 in
+  `FighterFlight::getDamageMod`. Motivator: −2 `critRollMod`, as EXP_MOTIV always was (unpublished, as before).
+  Missileer: +1 on `$ballisticOB`, the OB a fighter launch gets when it gets one at all, and its twin in
+  `weaponManager.computeOEW`.
+- **The Motivator.** EXP_MOTIV is kept, since live games and saved fleets hold rows under it. Being an officer
+  id, it leaves both public tooltips (the server's FLIGHT skip list and `lobbyEnhancements`), lands in the
+  Officers buy section, and loses its lobby notes line. No local game or saved fleet held one, so the replay
+  corpus is untouched.
+- **UI.** The insignia sits on the first craft's card, on the card's own top-left corner (just inside it, it
+  sat on the first weapon icon and read as that gun's). Hovering a craft shows the flight's `ShipInfo`, which
+  gets an OFFICERS line per officer with his state. ⭐ Both gold blocks (the ship window's `EnhancementsPanel`
+  and the lobby flight rail) show one **"Officers (n)"** row after the enhancement lines - every officer aboard,
+  fallen ones included - in place of Stage 2's "Officers" sub-title and per-officer lines.
+
+**Measured.** Statics +35,862 B (+0.02 %): 359 Dogfighter, 359 Evader and 84 Missileer offers; the 342
+Motivator offers are byte-identical to before (17 Shuttles-set flights still have none).
+
+**Verified.**
+- `officersHarness.php` 261 / 0 (244 with `--no-db`): offers and prices (Aurora; Gamma's legacy racks;
+  Thunderbolt's magazine; a superheavy; the Ancient, mine and MicroSAT flights; the Shuttles set), the post,
+  one officer on a doctored payload, rows that buy nothing, lost with the first craft (destroyed, dropped out)
+  and not (docked, split-launched, another craft), pre-battle, no kill roll, every effect - including the real
+  `Weapon::calculateHitBase` (a Missileer launch 105 % against 100 %, nothing for a target out of arc) and a
+  real dropout roll on its threshold - the payload per viewer, and the FLIGHT tooltip skip (the Stage 1
+  mutation nothing could catch). Three DB round trips, rolled back: a real flight loading EXP_MOTIV, the Jump
+  Engine note (its game scan used to give up after the first game whenever more than 40 were active, so it
+  had been skipping), and a saved fleet reloaded through the real `Manager::loadSavedFleet` - the exit test's
+  save / reload. Mutation-tested: 25 breaks, all caught.
+- `officersClientHarness.js` 85 / 0: the derived flight list, `missilesPerCraft`, `flightCost` and `priceNote`,
+  `confirm.enhRowCost`, the stats as shown, `missileObBonus`, `FighterIcon`, `ShipInfo`, both gold blocks and the
+  real `weaponManager.computeOEW`. Mutation-tested: 24 breaks, 23 caught; the 24th is the "fighter officer only
+  on a flight" guard in `listFor`, which nothing can trip (a ship has no first craft, a flight no C&C) - like
+  its server twin in `isEligible`.
+- `enhancementsHarness` 265 / 0, fingerprint unchanged (its hulls are ships). `enhancementsDifferential`: 443
+  cases (35 new flight cases), 0 differing; it now compares a flight's OB and `critRollMod` as shown. Two drift
+  mutations caught.
+- `fvbuild -Check`: autoload up to date, validator clean, replay corpus 140 / 0.
+- Real site, headless (`tests/replay/officersE2E/`): the new `lobby4.mjs` 27 / 27 (buy dialog, prices at 6 / 3
+  / 1 craft, the limit, buy / copy / edit, the card insignia, "Officers (1)" and "(2)", the Evader's OB, the
+  Motivator's notes line gone); `lobby` 25 / 25 and `game` 18 / 18 per player (both now expect "Officers (1)");
+  `lobby3` 19 / 19; `docs` 14 / 14.
+
+**Observations, not changed** (*1-3 answered in round 2, §9.7*):
+1. A split launch moves a proportional share of the flight's `pointCostEnh` onto the "- Split" row
+   (HangarOps Stage 21.5), the officer's included, although he stays behind. Fleet-list valuation only.
+   *§9.7: his cost now goes whole with him, and he goes with his fighter.*
+2. The Evader's −1 OB also trims what a flight can spend on mine detection, which OB funds. *Accepted.*
+3. Shuttles, breaching pods and the unmanned Orieni Hunter-Killers are offered the Dogfighter and the Evader
+   (D9 read literally), while the Shuttles fighter set still withholds the Motivator. Rule it if they should not be.
+   *§9.7: remotely controlled units carry none; shuttles and breaching pods keep theirs.*
+4. Not run: a real-site game.php check of a flight officer, since no local game holds one. The client harness
+   renders the in-game card and tooltip from the server's payload shape, and the server harness checks that
+   payload.
+
+### 9.7 Refinements round 2 (user, 2026-10-11): no officers on remote-controlled craft; he follows his fighter
+
+**Rulings.** "Hunter-Killers should be excluded from all Officer options, as they have no pilots. So anything
+with `$remoteControl = true` should be excluded." "The officer's abilities should only affect the part of the
+flight containing the fighter they are based in, not any fighters that are split off." Asked what happens
+when that first fighter is itself split off: **he follows his fighter** - the new row gets him, posted in its
+first fighter, and his cost; the old row loses him from the next turn. The Evader's −1 OB lowering mine
+detection: "Ok, since the OB is lower."
+
+**Files.** `Officers.php` (`mayCarryOfficers`: `$remoteControl`; the `'moved'` state; `rowPrice`,
+`shareWithCraft`, `officerAmong`, `followFighter`; the payload), `ShipClasses.php` (`$officerMoves`,
+`recordOfficerMove`, `getOfficerMoves` - the twin of the kill list), `DBManager.php` (the `OffMoved`
+interception beside `OffKilled`), `HangarOps.php` (five spawn sites, three value splits), `Manager.php`
+(`loadSavedFleet`'s refund), `gamelobby.js` (the saved-fleet notice heading), docs (About Officers). Statics and
+bundles rebuilt; no new class, autoload unchanged.
+
+**As built:**
+- **No officers on a remote-controlled unit.** `mayCarryOfficers` returns false for `$remoteControl`, so no
+  offer (the three classes: `HkShiningLight`, `HkShiningStar`, `hkBlazingStarGC`) and, for a doctored or old
+  row, no officer at load. Statics −414 B: their Dogfighter, Evader and Motivator offers. Shuttles and breaching
+  pods are manned and keep theirs.
+- ⚠️ **The refund.** An HK could buy the Expert Motivator while it was an enhancement, and a saved fleet may
+  hold one (none locally). An unmatched saved row drops silently while `enhvalue` stays, so the fleet would
+  keep paying for him ([[arch_retiring_ship_enhancement]]). `Manager::loadSavedFleet` now refunds an officer
+  row the unit is no longer offered - `Officers::rowPrice`, the lobby's rule - and lists it in the reload notice
+  ("Enhancements changed since this fleet was saved:"). A **running** game with an HK Motivator loses his −2
+  dropout from its next load (he is no longer an officer it may carry); its points stay spent.
+- **He follows his fighter.** Every HangarOps path that moves craft from one flight row to a new one calls
+  `Officers::followFighter($source, $target, $crafts, $gamedata)` just before the craft state is copied, in the
+  order of `$crafts`: a partial launch (`launchWholeFlight`), a partial dock's fragment (`spawnFragmentFlight`),
+  a rail escape (`spawnRailEscapeFlight`), a carrier-death escape (`spawnEscapeForBucket`), and a catapult's
+  stash extraction (`consumeStashesForLaunch`). If his serving craft is among them it moves to the **front**, so
+  its state lands in the new row's first craft - his post there by the ordinary rule; the new row buys his row
+  (`insertSingleEnhancement`, mirrored in memory and re-posted); and the old row gets one **`OffMoved`** note on
+  his old post (`notekey_human` "Expert Dogfighter left with his fighter").
+- **`'moved'`.** Read back by interception in the bulk note loop, like `OffKilled`, into the ship's move list;
+  `apply` takes the earliest of killed / moved / disabled, so a move beats a disengage on the same turn (the
+  craft left serving). He serves the old row to the end of that turn (the next-turn rule), is listed in its
+  payload up to then without `out`/`how` (he did not fall), and not at all after. The client needs nothing new.
+- **His cost goes with him.** `Officers::shareWithCraft($flight, $total, $k, $n, $withOfficer)` is the one rule
+  for splitting a flight's `pointCostEnh`: his own `rowPrice` whole to the side that has him, the rest by craft
+  as before - exactly `round($total * $k / $n)` on a flight without one. Used by `spawnLaunchedKFlight`,
+  `performWholeFlightDock` (fragment and remnant) and `escapeShedCraft` (the remnant), with `officerAmong`
+  deciding the side.
+
+**Verified.**
+- `officersHarness.php` 292 / 0 (31 new): no offers on the three HKs and no officer from a doctored HK row;
+  `rowPrice` (Aurora Dogfighter 29, Evader 342, Motivator 36; Thunderbolt Missileer 58; Omega Helmsman 47);
+  `followFighter` on fake flights (transfer and new post, a staying craft, a lost officer, the moved state at T
+  and T+1, a move beating a same-turn disengage, the payload); `shareWithCraft` (33 / 53 / 24); the real hangar
+  paths with a DB recorder - `performWholeFlightDock` with and without his craft docking (fragment 53 / remnant
+  47 against 24 / 76), `launchWholeFlight` launching 1 of 2 from a fragment (41), and `spawnRailEscapeFlight` /
+  `spawnEscapeForBucket` by reflection (53 / 24); a saved fleet's HK Motivator refunded through the real
+  `loadSavedFleet`; an `OffMoved` note read back through the real load, rolled back. Mutation-tested: 19 new
+  breaks (the exclusion, each step of `followFighter`, `'moved'`, the payload, the cost split, each HangarOps
+  transfer and cost site, the refund, the interception), all caught. The first run found an in-memory move
+  record in `followFighter` that nothing depended on; removed.
+- `officersClientHarness.js` 85 / 0, `enhancementsHarness` 265 / 0 (fingerprint unchanged),
+  `enhancementsDifferential` 443 cases / 0 differing, `fvbuild -Check` all passed, replay corpus 140 / 0.
+- Real site (`officersE2E/`): `lobby4` 30 / 30 (a manned Templar keeps its Officers section; both Orieni HKs
+  have none), `docs` 15 / 15, `lobby` 25 / 25, `lobby3` 19 / 19, `game` 18 / 18 per player.
+
+**Observations, not changed:**
+1. `consumeStashesForLaunch` moves him only when his fragment heads the launched flight (the first fragment
+   consumed). That per-bay path serves catapults, one craft at a time, so a second fragment in one launch is not
+   met today. It also prices nothing: the catapult path never split `pointCostEnh`, so his cost stays where it was.
+2. A per-craft officer (Evader, Motivator) is re-priced by `rowPrice` from the row's own `flightSize` at each
+   later split, not from what was originally paid. Fleet-list valuation only.
+3. A flight row he has left still holds his `tac_enhancements` row: harmless, since the `OffMoved` note wins at
+   every load (HangarOps has no path that moves craft back into an existing row).
+
+**Follow-up (user, 2026-10-11): the flight tooltip's OFFICERS block in gold.** `ShipInfo` (hovering a craft, and
+game.php's Notes popup) now renders it with System Info's own styled parts, exported from `SystemInfo.js`:
+`OfficerHeading` (the "OFFICERS:" heading), `OfficerEntry` (gold text, dimmed once he is out) and `OfficerName`.
+Their colours are tripled-class (`&&&`), because the Notes popup's compact mode recolours every Entry and Header
+through a two-class descendant selector. Checked: client harness 88 / 0 (three new: the shared parts on both
+tooltips, and the dimmed line), and computed colours in headless Chrome, normal and compact (heading and name
+#e8cf93, line #d8be86, a lost officer's line #7f9bb8, other headings unchanged). Both places are game.php-only,
+and the lobby suppresses the fighter hover tooltip.

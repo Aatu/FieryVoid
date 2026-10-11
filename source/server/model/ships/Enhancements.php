@@ -1711,21 +1711,10 @@ class Enhancements{
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }  	  
 	  
-		//Expert Motivator: -2 dropout modifier, cost: 10% craft price (round up), limit: 1
-	  $enhID = 'EXP_MOTIV';	  
-	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option needs to be specifically enabled
-		  $enhName = 'Expert Motivator';
-		  $enhLimit = 1;	
-		  if($flight instanceof SuperHeavyFighter){//single-craft flight! 
-			$enhPrice = ceil($flight->pointCost/10);
-		  }else{
-		  	$enhPrice = ceil($flight->pointCost/60); //price per craft, while flight price is per 6-craft flight	  
-		  }
-		  $enhPriceStep = 0;
-		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
-	  }
-	  
-	  //Extra Ammo for Fighters with a limited supply, cost: 3 per extra shot, limit: 5	  	
+	  //Expert Motivator (EXP_MOTIV) is an officer since OFFICERS_PLAN.md Stage 4: offered, priced and
+	  //applied by Officers (Officers::addOffers below), under the same id, price and -2 dropout.
+
+	  //Extra Ammo for Fighters with a limited supply, cost: 3 per extra shot, limit: 5
 	  $enhID = 'EXT_AMMO';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 		  $enhName = 'Additional Ammo for Gun';
@@ -2007,10 +1996,11 @@ class Enhancements{
 			$enhPrice = $ammoClass->getPrice($flight); 
 			$enhPriceStep = 0; //flat rate
 			$flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
-		  }		  
+		  }
 	  } //end of magazine-requiring options
-	  
-	  
+
+	  //Fighter officers (OFFICERS_PLAN.md Stage 4): availability, posts and prices live in the Officers registry
+	  Officers::addOffers($flight);
   } //endof function setEnhancementOptionsFighter
 	    
     
@@ -2286,9 +2276,7 @@ class Enhancements{
 						$flight->forwardDefense -= $enhCount;
 						$flight->sideDefense -= $enhCount;
 						break;
-					case 'EXP_MOTIV': //Expert Motivator: -2 on dropout rolls
-						$flight->critRollMod -= $enhCount*2;
-						break;
+					//EXP_MOTIV (Expert Motivator): an officer now - Officers::applyMotivator, while his craft flies
 					case 'EXT_AMMO'://Extra ammo, for fighter with a limited supply.  Max 5 extra shots.
 						foreach($flight->systems as $ftr) foreach($ftr->systems as $sys)
 							//Find relevant weapons 
@@ -3235,15 +3223,7 @@ class Enhancements{
 							}
 							break;
 														
-						case 'EXP_MOTIV': //Expert Motivator: modify dropout modifier
-							/* actually irrelevant for front end
-							if($ship instanceof FighterFlight){
-								$strippedShip->critRollMod = $ship->critRollMod;
-							}
-							*/
-							break;
-							
-						case 'IMPR_OB': //Improved Targeting Computer: modify offensive bonus 
+						case 'IMPR_OB': //Improved Targeting Computer: modify offensive bonus
 							if($ship instanceof FighterFlight){
 								$strippedShip->offensivebonus = $ship->offensivebonus;
 							}

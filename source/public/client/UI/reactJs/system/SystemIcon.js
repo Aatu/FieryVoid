@@ -91,7 +91,8 @@ const Insignia = styled.svg`
    into the darkened art. Light grey still reads as "not gold". */
 const INSIGNIA_COLOUR = { serving: theme.colors.enhTitle, disabled: '#c4c4c4', killed: '#c4c4c4' };
 
-const OfficerInsignia = ({ state, title }) => (
+//exported for the fighter card (FighterIcon), a fighter officer's post being the craft itself (Stage 4)
+export const OfficerInsignia = ({ state, title }) => (
     <Insignia viewBox="0 0 12 12" role="img" aria-label={title}>
         <title>{title}</title>
         <path d="M1.5 5.5 L6 2 L10.5 5.5 M1.5 10 L6 6.5 L10.5 10" fill="none"

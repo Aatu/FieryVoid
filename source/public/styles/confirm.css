@@ -2126,6 +2126,25 @@
     color: var(--fv-text-dim);
 }
 
+/* "A flight may carry only one officer." (OFFICERS_PLAN.md D9). A second officer is refused with this
+   line flashing in the warning yellow and fading back - a passive notice, never a dialog
+   (confirm.officerBlocked restarts it on every refusal). */
+.confirm.buyDialog .buyOfficerNote.is-flash {
+    animation: buyOfficerNoteFlash 1.6s ease-out;
+}
+
+@keyframes buyOfficerNoteFlash {
+    0%, 30% { color: var(--fv-warning); }
+    100% { color: var(--fv-text-dim); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .confirm.buyDialog .buyOfficerNote.is-flash {
+        animation: none;
+        color: var(--fv-warning);
+    }
+}
+
 /* ── One row: name over its price note | cost | − value +  (the cost left of the spinner, so every
    spinner and dropdown shares one right edge) ── */
 

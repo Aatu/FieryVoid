@@ -768,7 +768,8 @@ window.gamedata = {
 	   then ONE line for the per-system refits.
 	   ⚠️ A ship-level line is priced from its option the way the buy dialog seeds data('enhCost')
 	   (confirm.js): level i costs price + i x step, a choice costs its listed price, and a flight
-	   pays per craft (doBuyShip). The refit line is the refit bucket itself. */
+	   pays per craft (doBuyShip) - except an officer charged per flight (officers.flightCost, the
+	   rule the dialog prices by). The refit line is the refit bucket itself. */
 	enhancementLines: function enhancementLines(ship) {
 		var lines = [];
 		var units = gamedata.bulkCount(ship);
@@ -779,7 +780,10 @@ window.gamedata = {
 			var name = lobbyEnhancements.describeTaken(entry); //null when not taken
 			if (name === null) continue;
 			name = name.replace(/^(\(AMMO\)|\(LIGHT AMMO\)|\(MEDIUM AMMO\)|\(HEAVY AMMO\)|\(Option\))\s*/, '');
-			lines.unshift({ text: name, cost: gamedata.enhancementOptionCost(entry) * crafts * units }); //reverse order
+			var cost = window.officers
+				? officers.flightCost(entry[0], entry[2], gamedata.enhancementOptionCost(entry), crafts, officers.perCraftExtra(ship, entry[0]))
+				: gamedata.enhancementOptionCost(entry) * crafts;
+			lines.unshift({ text: name, cost: cost * units }); //reverse order
 		}
 
 		if (window.systemEnhancements) {
@@ -4200,13 +4204,13 @@ window.gamedata = {
 				ship.enhancementOptions[enhNo][2] = noTaken;
 				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight) {
-						ship.pointCostEnh += target.data("enhCost") * flightSize;
+						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
 					} else {
 						ship.pointCostEnh += target.data("enhCost");
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
-						ship.pointCostEnh2 += target.data("enhCost") * flightSize;
+						ship.pointCostEnh2 += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
 					} else {
 						ship.pointCostEnh2 += target.data("enhCost");
 					}
@@ -4411,13 +4415,13 @@ window.gamedata = {
 				ship.enhancementOptions[enhNo][2] = noTaken;
 				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight) {
-						ship.pointCostEnh += target.data("enhCost") * flightSize;
+						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
 					} else {
 						ship.pointCostEnh += target.data("enhCost");
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
-						ship.pointCostEnh2 += target.data("enhCost") * flightSize;
+						ship.pointCostEnh2 += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
 					} else {
 						ship.pointCostEnh2 += target.data("enhCost");
 					}
@@ -4631,13 +4635,13 @@ window.gamedata = {
 				ship.enhancementOptions[enhNo][2] = nowTaken;
 				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight) {
-						ship.pointCostEnh += target.data("enhCost") * flightSize;
+						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
 					} else {
 						ship.pointCostEnh += target.data("enhCost");
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
-						ship.pointCostEnh2 += target.data("enhCost") * flightSize;
+						ship.pointCostEnh2 += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
 					} else {
 						ship.pointCostEnh2 += target.data("enhCost");
 					}
@@ -5284,8 +5288,9 @@ window.gamedata = {
 			confirm.fleetNotice("Fleet loaded. Saved " + skipped.join(" and ") + " were not applied.");
 		}
 
+		//per-system refits re-priced or dropped, and (OFFICERS_PLAN.md §4.9) officers no longer offered, refunded
 		if (Array.isArray(sysEnhNotice) && sysEnhNotice.length > 0) {
-			confirm.fleetNotice("System enhancements changed since this fleet was saved: "
+			confirm.fleetNotice("Enhancements changed since this fleet was saved: "
 				+ sysEnhNotice.join(" "));
 		}
 

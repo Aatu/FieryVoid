@@ -8,7 +8,7 @@
      - in GAME, and for anything the server built: ship.officers, sent by Officers::addForJson to the
        owner's team only (and to everybody once the game is over). An enemy's ship simply has none, so
        nothing on this side ever compares userids - the isRevealedToCurrentViewer pattern.
-     - in the LOBBY, before the server has seen the fleet: derived from the bought OFF_* rows, the way
+     - in the LOBBY, before the server has seen the fleet: derived from the bought officer rows, the way
        Officers::pickPosts derives it. Only the buyer's own browser holds those counts; server payloads
        never carry enhancementOptions, and a static blueprint's rows are all 0.
    Out of action is decided SERVER-SIDE from the full damage history and the kill notes (§4.4); the
@@ -18,26 +18,44 @@ window.officers = {
 
 	ID_PREFIX: 'OFF_',
 
-	/* ⚠️ MIRROR of Officers::$registry (PHP): ids, labels, posts and `needs`, in the SAME order - the
-	   order every list here is shown in. `summary` is the effect line the System Info tooltip prints
-	   (D12). `stats` is what the officer adds to ship fields while he serves (Officers::apply), which
-	   the lobby adds at READ time (displayStat); his other effects have their own previews below
-	   (reactorBonus, displayFireControl) or none the lobby can show (the Scanner's saved EW). */
+	/* ⚠️ MIRROR of Officers::$registry (PHP): ids, labels, posts, `needs`, `flight`, `per` and
+	   `perMissile`, in the SAME order - the order every list here is shown in. `summary` is the effect
+	   line the System Info tooltip prints (D12). `stats` is what the officer adds to ship fields while
+	   he serves (Officers::apply), which the lobby adds at READ time (displayStat); his other effects have
+	   their own previews below (reactorBonus, displayFireControl) or none the lobby can show (the
+	   Scanner's saved EW).
+	   Fighter officers (Stage 4) carry `flight: true` and a `per`: 'flight' = charged once whatever the
+	   flight's size, 'craft' = per craft like every other fighter enhancement (flightCost). */
 	REGISTRY: [
 		{ id: 'OFF_HELM', label: 'Expert Helmsman', post: 'cnc', stats: { iniativebonus: 5 },
 			summary: '+5 initiative, wins ties, -1 on meteor chart' },
 		{ id: 'OFF_SCAN', label: 'Expert Scanner', post: 'scanner',
-			summary: 'may save 1 more EW point to spend in Firing Phase' },
+			summary: 'May save 1 more EW point to spend in Firing Phase' },
 		{ id: 'OFF_TECH', label: 'Expert Technician', post: 'reactor',
-			summary: '+2 power, or a +33% power from largest destroyed system\'s power' },
+			summary: '+2 power, or +33% power from a destroyed system' },
 		{ id: 'OFF_GENE', label: 'Expert Geneticist', post: 'cnc', stats: { forwardDefense: 2, sideDefense: 2, toHitBonus: -1 },
 			summary: '-1 to hit with own weapons, +2 to be hit, enemies may ram this ship' },
 		{ id: 'OFF_MWE', label: 'Matter Weapons Expert', post: 'cnc', needs: 'matterWeapon',
-			summary: '+1 fire control and +1 damage for Matter weapons' }
+			summary: '+1 fire control and +1 damage for Matter weapons' },
+		{ id: 'OFF_DOG', label: 'Expert Dogfighter', post: 'craft', flight: true, per: 'flight', stats: { iniativebonus: 5 },
+			summary: '+5 initiative' },
+		{ id: 'OFF_MSL', label: 'Expert Missileer', post: 'craft', flight: true, per: 'flight', perMissile: 1, needs: 'missiles',
+			summary: '+5 offensive bonus for missiles' },
+		{ id: 'OFF_EVAD', label: 'Expert Evader', post: 'craft', flight: true, per: 'craft', stats: { offensivebonus: -1 },
+			summary: '-5 offensive bonus, -1 damage to hits on this flight' },
+		{ id: 'EXP_MOTIV', label: 'Expert Motivator', post: 'craft', flight: true, per: 'craft', stats: { critRollMod: -2 },
+			summary: '-2 on dropout rolls' }
 	],
 
+	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV, the Expert
+	   Motivator). ⚠️ MIRROR PAIR with Officers::isOfficerId (PHP). */
 	isOfficerId: function isOfficerId(enhID) {
-		return typeof enhID === 'string' && enhID.indexOf(this.ID_PREFIX) === 0;
+		return typeof enhID === 'string' && (enhID.indexOf(this.ID_PREFIX) === 0 || this.get(enhID) !== null);
+	},
+
+	isFighterOfficer: function isFighterOfficer(enhID) {
+		var officer = this.get(enhID);
+		return Boolean(officer && officer.flight);
 	},
 
 	get: function get(id) {
@@ -59,12 +77,16 @@ window.officers = {
 	     cnc      the first C&C that is not a Flag Bridge; failing that, the first one of any kind
 	     scanner  the strongest scanner by output - the list and the pick Elite Crew's lobby mirror uses
 	     reactor  the biggest reactor by maxhealth - likewise
+	     craft    a flight's first craft - the lobby's one fighter card, id 1
 	   ⚠️ D2: the server picks from BLUEPRINT values, before any enhancement moves an output, but a lobby
 	   fleet ship has already had lobbyEnhancements.apply - Poor Crew has taken a point off its strongest
 	   scanner. So outputs are read off the store's pristine copy of the hull when the page has one. */
 	findPost: function findPost(ship, post) {
 		if (!ship || !ship.systems) return null;
 		var systems = this.systemsOf(ship);
+		if (post === 'craft') {
+			return ship.flight ? this.firstCraft(ship) : null;
+		}
 		if (post === 'cnc') {
 			var any = null;
 			for (var i = 0; i < systems.length; i++) {
@@ -126,14 +148,42 @@ window.officers = {
 		return Array.isArray(ship.systems) ? ship.systems : Object.values(ship.systems);
 	},
 
+	//a flight's first craft: its systems are keyed by id (holes allowed - doLoadFleet leaves them), id 1 first
+	firstCraft: function firstCraft(ship) {
+		var systems = this.systemsOf(ship);
+		for (var i = 0; i < systems.length; i++) {
+			if (systems[i]) return systems[i];
+		}
+		return null;
+	},
+
+	/* Missiles one craft can carry: its magazine's capacity (rounds, not salvoes) plus each legacy
+	   launcher's own load - duck-typed as the FighterMissileRack family, the only systems with both a
+	   missileArray and a maxAmount. Read off the first craft's blueprint fields, which no enhancement
+	   moves. ⚠️ MIRROR PAIR with Officers::missilesPerCraft (PHP). */
+	missilesPerCraft: function missilesPerCraft(ship) {
+		if (!ship || !ship.flight) return 0;
+		var craft = this.firstCraft(ship);
+		if (!craft || !craft.systems) return 0;
+		var total = 0;
+		this.systemsOf(craft).forEach(function (s) {
+			if (!s) return;
+			if (s.name === 'ammoMagazine') total += parseInt(s.capacity, 10) || 0;
+			else if (s.missileArray && s.maxAmount !== undefined) total += parseInt(s.maxAmount, 10) || 0;
+		});
+		return total;
+	},
+
 	/* An officer's own test beyond having the post. ⚠️ MIRROR PAIR with Officers::isEligible's `needs`.
-	     matterWeapon  the hull carries a weapon with a Matter mode (the Matter Weapons Expert) */
+	     matterWeapon  the hull carries a weapon with a Matter mode (the Matter Weapons Expert)
+	     missiles      the flight carries missiles (the Expert Missileer) */
 	passesNeeds: function passesNeeds(ship, officer) {
 		if (!officer.needs) return true;
 		if (officer.needs === 'matterWeapon') {
 			var self = this;
 			return this.systemsOf(ship).some(function (s) { return self.isMatterWeapon(s); });
 		}
+		if (officer.needs === 'missiles') return this.missilesPerCraft(ship) > 0;
 		return false;
 	},
 
@@ -153,15 +203,17 @@ window.officers = {
 	},
 
 	/* Every officer aboard, as array({id, post, out?, how?}) in registry order. See the header for
-	   which of the two sources answers. Flights carry none before the fighter framework (Stage 4). */
+	   which of the two sources answers. A flight's derived list holds ONE officer at most (D9), the
+	   first bought in registry order, as Officers::pickPosts serves. */
 	listFor: function listFor(ship) {
-		if (!ship || ship.flight) return [];
+		if (!ship) return [];
 		if (Array.isArray(ship.officers)) return ship.officers;
 		if (!Array.isArray(ship.enhancementOptions)) return [];
 
 		var list = [];
 		for (var i = 0; i < this.REGISTRY.length; i++) {
 			var officer = this.REGISTRY[i];
+			if (Boolean(officer.flight) !== Boolean(ship.flight)) continue;
 			if (!this.isBought(ship, officer.id)) continue;
 			var post = this.findPost(ship, officer.post);
 			if (!post || !this.passesNeeds(ship, officer)) continue;
@@ -171,13 +223,14 @@ window.officers = {
 				entry.how = 'disabled';
 			}
 			list.push(entry);
+			if (ship.flight) break;
 		}
 		return list;
 	},
 
 	//true when the list is the lobby's own derivation rather than something the server sent
 	isDerived: function isDerived(ship) {
-		return Boolean(ship) && !ship.flight && !Array.isArray(ship.officers);
+		return Boolean(ship) && !Array.isArray(ship.officers);
 	},
 
 	isBought: function isBought(ship, id) {
@@ -258,6 +311,61 @@ window.officers = {
 		return this.isActive(ship, 'OFF_SCAN') ? 1 : 0;
 	},
 
+	/* Expert Missileer: the OB a fighter's ballistic launch gets, when it gets the flight's OB at all, is 1
+	   higher. Asked for the SHOOTER, so it is always an own-team flight with its list.
+	   ⚠️ MIRROR PAIR with Officers::missileObBonus (PHP), read in weapon.php's fighter-ballistic branch. */
+	missileObBonus: function missileObBonus(ship) {
+		return (ship && ship.flight && this.isActive(ship, 'OFF_MSL')) ? 1 : 0;
+	},
+
+	/* "Officers (2)" - the one line the ship window's gold Enhancements block shows for them (user request
+	   2026-10-11: a count, like "System Enhancements (n)", the detail living on each post's tooltip). Own
+	   team only, through listFor; null with none aboard. */
+	summaryLine: function summaryLine(ship) {
+		var n = this.listFor(ship).length;
+		return n > 0 ? 'Officers (' + n + ')' : null;
+	},
+
+	/* ------------------------------------------------------------------ what a flight's officer costs */
+
+	//an officer charged ONCE per flight (D8), not per craft like every other fighter enhancement
+	isPerFlight: function isPerFlight(enhID) {
+		var officer = this.get(enhID);
+		return Boolean(officer && officer.flight && officer.per === 'flight');
+	},
+
+	/* The per-craft points a per-flight officer adds on top of his once-per-flight price: the Missileer's
+	   1 per missile each craft can carry ("+1 per missile the flight can take", user ruling 2026-10-11).
+	   The offer tuple carries only the per-flight part, since this one grows with the flight. */
+	perCraftExtra: function perCraftExtra(ship, enhID) {
+		var officer = this.get(enhID);
+		if (!officer || !officer.perMissile || !this.isPerFlight(enhID)) return 0;
+		return officer.perMissile * this.missilesPerCraft(ship);
+	},
+
+	/* ⭐ What one bought enhancement row costs a FLIGHT of `size` craft - THE rule every lobby site that
+	   turns a fighter's rows into points goes through (confirm.getTotalCost and paintBuySummary, through
+	   confirm.enhRowCost; gamelobby doBuyShip, doCopyShip, doEditShip and enhancementLines). A fighter
+	   enhancement is priced per craft and multiplied by the flight size (D8); a per-flight officer is
+	   charged once, plus his perCraftExtra per craft. enhCost is the row's own sum (price x count);
+	   `extra` is perCraftExtra(ship, enhID), worked out once by the caller. */
+	flightCost: function flightCost(enhID, count, enhCost, size, extra) {
+		var cost = Number(enhCost) || 0;
+		size = Number(size) || 1;
+		if (!this.isPerFlight(enhID)) return cost * size;
+		return cost + (((parseInt(count, 10) || 0) > 0) ? (Number(extra) || 0) * size : 0);
+	},
+
+	/* The buy dialog's price note for a fighter officer's row: "29pts per flight", "40pts per flight + 6pts
+	   per craft" - a per-craft one keeps the plain note every fighter row has. null for anything else. */
+	priceNote: function priceNote(ship, enhancement) {
+		if (!this.isPerFlight(enhancement[0])) return null;
+		var note = enhancement[4] + 'pts per flight';
+		var extra = this.perCraftExtra(ship, enhancement[0]);
+		if (extra > 0) note += ' + ' + extra + 'pts per craft';
+		return note;
+	},
+
 	/* ------------------------------------------------------------------ what a window shows */
 
 	/* The officers whose stat changes a window has to add itself: the lobby's own derivation. In game the
@@ -272,9 +380,9 @@ window.officers = {
 		return this.listFor(ship).filter(function (entry) { return self.serves(entry, turn); });
 	},
 
-	/* A ship field as a window should show it: iniativebonus, forwardDefense, sideDefense, toHitBonus.
-	   ⚠️ MIRROR PAIR with Officers::apply's stat changes (PHP) - enhancementsDifferential.js compares the
-	   two through this function. */
+	/* A ship field as a window should show it: iniativebonus, forwardDefense, sideDefense, toHitBonus, and a
+	   flight's offensivebonus. ⚠️ MIRROR PAIR with Officers::apply's stat changes (PHP) -
+	   enhancementsDifferential.js compares the two through this function. */
 	displayStat: function displayStat(ship, field) {
 		var value = Number(ship && ship[field]) || 0;
 		var serving = this.servingDerived(ship);
