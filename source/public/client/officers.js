@@ -320,10 +320,14 @@ window.officers = {
 
 	/* "Officers (2)" - the one line the ship window's gold Enhancements block shows for them (user request
 	   2026-10-11: a count, like "System Enhancements (n)", the detail living on each post's tooltip). Own
-	   team only, through listFor; null with none aboard. */
+	   team only, through listFor; null with none aboard.
+	   A FLIGHT in the LOBBY names him instead ("Expert Dogfighter"; user request 2026-10-11): a flight
+	   carries one officer at most (D9), so a count says less than his name. In game it stays a count. */
 	summaryLine: function summaryLine(ship) {
-		var n = this.listFor(ship).length;
-		return n > 0 ? 'Officers (' + n + ')' : null;
+		var list = this.listFor(ship);
+		if (list.length === 0) return null;
+		if (ship.flight && window.gamedata && gamedata.gamephase === -2) return this.label(list[0].id);
+		return 'Officers (' + list.length + ')';
 	},
 
 	/* ------------------------------------------------------------------ what a flight's officer costs */

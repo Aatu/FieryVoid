@@ -1083,3 +1083,8 @@ through a two-class descendant selector. Checked: client harness 88 / 0 (three n
 tooltips, and the dimmed line), and computed colours in headless Chrome, normal and compact (heading and name
 #e8cf93, line #d8be86, a lost officer's line #7f9bb8, other headings unchanged). Both places are game.php-only,
 and the lobby suppresses the fighter hover tooltip.
+
+**Follow-ups (user, 2026-10-11):** a flight's gold Enhancements block (in the blue rail) read blue - `Block $gold` now
+sets the gold body text itself, so it matches the grid's `EnhancementsPanel` (lobby4 compares the computed colours).
+And since a flight carries one officer, **in the lobby** its gold line names him ("Expert Missileer") instead of
+"Officers (1)" (`officers.summaryLine`, lobby = `gamephase === -2`); ships, and flights in game, keep the count.
