@@ -1382,6 +1382,11 @@ public function getFullStartLoading()
 				}		
 			}
 		}	
+		//Matter Weapons Expert (OFFICERS_PLAN.md Stage 3): +1 on a shot in a Matter mode - weaponClass is
+		//the fired mode's by now. Behind the static, so an ordinary game pays one read per shot.
+		if (TacGamedata::$officersPresent && $this->weaponClass === 'Matter' && $ship instanceof BaseShip){
+			$bonusDamage += Officers::matterDamageBonus($ship);
+		}
 		return $bonusDamage;
     }   
 

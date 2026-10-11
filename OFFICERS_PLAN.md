@@ -1,11 +1,13 @@
 # Officers — Implementation Plan
 
-Status: **Stages 0, 1, 2 and 2a BUILT 2026-10-10, uncommitted** (§9). Written against `dab951bf5`. The user
+Status: **Stages 0, 1, 2 and 2a BUILT and committed (`7800ab827`); Stage 3 BUILT 2026-10-10, uncommitted**
+(§9). Written against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
 a third Helmsman effect (−1 on the meteor impact chart) and play-tested Stage 1 in game 4457 (confirmed
-correct). Each officer's own rules questions (§6) still only need ruling when that officer's stage
-starts. Next step: Stage 3 (the rest of the Easy ship officers).
+correct), then ruled the Scanner, Technician and Geneticist questions for Stage 3 (§6). Each officer's own
+rules questions still only need ruling when that officer's stage starts. Next step: Stage 4 (the fighter
+framework).
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -163,7 +165,7 @@ Medium-sized job (§3.4).
 | **Expert Scanner** | Sensor Array, 7 % | `EW::getDetectorAllowance` and its JS twin become max(detector ladder, 1 for a live officer). The "no detectors on the board → return" early exits (two server-side, one client-side) must not skip a ship that has one | FV already built this exact rule. The EW Detector's own text says it grants "the enhancement of Expert Scanner" ([baseSystems.php:20447](source/server/model/systems/baseSystems.php#L20447)). The late-EW window, budget and DB write all key off `getSavedEwAllowance`, so they need nothing. |
 | **Expert Technician** | Reactor, 9 % | The reactor's `output` at load: + max(2, ⅓ of the largest `powerReq` among systems destroyed before this turn) | Server-side `output` already reaches every client ([ShipSystem.php:319](source/server/model/systems/ShipSystem.php#L319)) and power.js reads `reactor.output`, so there is no client logic. Easy **only** on the best-of reading: under it the "+1 from a deactivated system" branch can never win. If the player chooses each turn, it becomes Medium (a live mirror in power.js). |
 | **Matter Weapons Expert, C&C** | C&C, 10 % | Every Matter-class weapon: fire control +1 (`fireControl` **and** `fireControlArray`, `isModified`), and +1 damage in `getBonusDamage` | A copy of `SYS_GSGT`, including its trap: a bump to `fireControl` alone evaporates on the first mode switch ([weapon.php:3349](source/server/model/weapons/weapon.php#L3349)). |
-| **Expert Geneticist** | C&C, 5 %, scenario only | `toHitBonus` −1 (exists). +2 to be hit: one public field, one term in `calculateHitBase` and one in weaponManager's mirror. Ramming: a tooltip line | Ramming is already allowed against anything by consent ([specialWeapons.php:2438](source/server/model/weapons/specialWeapons.php#L2438)), so that clause needs no code. "Scenario only" = never offered unless a hull opts in. |
+| **Expert Geneticist** | C&C, 5 %, scenario only | `toHitBonus` −1 (exists). +2 to be hit: one public field, one term in `calculateHitBase` and one in weaponManager's mirror. *As built: +2 on both profiles instead, the Poor Crew / ProfileIncreased convention, so no new field or term (§9.5).* Ramming: a tooltip line | Ramming is already allowed against anything by consent ([specialWeapons.php:2438](source/server/model/weapons/specialWeapons.php#L2438)), so that clause needs no code. "Scenario only" = never offered unless a hull opts in. |
 | **Expert Dogfighter** | flight, 50 % of one craft | The flight's `iniativebonus` +5 | The line `ELITE_SW` already uses ([Enhancements.php:2282](source/server/model/ships/Enhancements.php#L2282)). Easy once the fighter framework exists. |
 | **Expert Missileer** | flight, 50 % + 1 per missile carried | +N to the OB that the fighter-ballistic branch grants ([weapon.php:1927](source/server/model/weapons/weapon.php#L1927)), plus the weaponManager twin | One term on each side. The price needs the magazine capacity, which `setEnhancementOptionsFighter` already computes ([Enhancements.php:1930](source/server/model/ships/Enhancements.php#L1930)). "+5 OB" needs a ruling (§6, Fighter officers). |
 | **Expert Evader** | flight, 100 % × craft count | The flight's OB −1; +1 in `FighterFlight::getDamageMod` | That is the defensive choke-point for flights ([FighterFlight.php:374](source/server/model/ships/FighterFlight.php#L374)), and no client damage mirror exists. Easy if always on; Medium as a per-turn toggle like jinking. |
@@ -383,7 +385,8 @@ masking: individual notes never reach any client.
 | Navigator | turn, pivot, roll and accel costs | Own-team only (an enemy client never budgets your thrust) |
 | Technician | reactor `output` | **Yes.** `output` is sent unconditionally. Accept, as the ✦ does |
 | Matter Weapons Expert, Gunner | `fireControl` via `isModified` | **Yes**, exactly like Gunsights |
-| Geneticist | +2 to be hit | **Must**: the shooter's own hit-chance preview needs it (the Stealth Coating precedent) |
+| Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
+| Scanner | the late-EW allowance | Own-team only: the client asks `officers.listFor`, which an enemy payload never carries |
 | Every officer | `pointCostEnh` | **Yes**, as for every enhancement already |
 
 ### 4.7 UI
@@ -514,7 +517,7 @@ committed.
 | **1** | Server framework with **Expert Helmsman** (and its meteor clause). **BUILT 2026-10-10** (§9.2) | `officersHarness`: ids ≤ 10; offers (no C&C → no Helmsman; an Ancient hull, an OSAT, a mine, terrain → none); post picks (two equal Engines with Poor Crew bought → the same engine as the lobby picks); **disabled** (post destroyed on turn N → serves N, out N+1; block cascade → disabled, no roll; Self Repair revival changes nothing; destroyed pre-battle → never serves); **killed** (a damaged post rolling 20+ → killed, 19 → not, through a seeded `Dice`; a post destroyed this turn still rolls; the Hyach scanner halving reaches the roll; the note is written, read back on the next load, and never reaches the post's own `onIndividualNotesLoaded`, proven on a Jump Engine post); the Helmsman's +5 and tie-break on a forced tie; payload per viewer (owner, teammate, enemy, spectator, finished game). Replay `check` byte-identical, since no corpus game has an officer |
 | **2a** | Buy-dialog filter chips (D13), independent of everything else here, so it can go first. **BUILT 2026-10-10** (§9.4) | Every buy, edit and bulk dialog: chips only for sections with rows, none at all with a single section; a picked chip shows its section's colours; hiding a section changes no total and no saved row (buy with **Enhancements** picked, then reload the fleet); 360 px wrap. Headless |
 | **2** | Client framework. **BUILT 2026-10-10** (§9.3) | Lobby: buy a Helmsman, the Officers section shows, points move, the insignia lands on the C&C, the tooltip line appears. Destroy the C&C in the pre-battle editor → the warning shows. Game: own team sees the insignia in all three looks (serving, disabled, killed), an enemy browser sees nothing, a finished game shows all. Headless, driving the real site ([[howto_headless_chrome_phone_width]]) |
-| **3** | Easy ship officers: Scanner, Technician, Matter Weapons Expert (C&C), Geneticist | Scanner: the late-EW window opens on a ship with no EW Detector on the board. MWE: switch modes and back, the +1 stays. Technician: power balance after a system dies |
+| **3** | Easy ship officers: Scanner, Technician, Matter Weapons Expert (C&C), Geneticist. **BUILT 2026-10-10** (§9.5) | Scanner: the late-EW window opens on a ship with no EW Detector on the board. MWE: switch modes and back, the +1 stays. Technician: power balance after a system dies |
 | **4** | Fighter framework; Dogfighter, Missileer, Evader | A per-flight price is identical across buy, edit, copy and save/reload on 1-, 3- and 6-craft flights. A second officer on one flight is refused in the dialog, and a doctored payload with two serves only one. A lead-craft dropout loses him; a dock does not |
 | **5** | Repair pass: Engineer and Scavenger | Deterministic pick; the C&C d20; no repair of this turn's crits (if so ruled); no revival of a destroyed system; runs after Self Repair |
 | **6** | Navigator | Server and client thrust agree on every cost change; the ship window shows the new numbers own-team only |
@@ -544,12 +547,12 @@ committed.
 |---|---|
 | Helmsman | Does the tie-break also apply under the simultaneous-movement initiative categories? (Default: no; ties there are categories, not orderings.) **Built with the default, 2026-10-10** (not ruled by the user; nothing in a category is ordered, so there is no tie to break; his +5 still counts toward the category, through `getInitiativebonus`). Reverse it if ruled otherwise. |
 | Engineer | Reading: "once per turn, repair one critical anywhere; a C&C critical needs 16+ on a d20"? Which critical: the highest `repairPriority` system's oldest? Never a critical from this turn, as Self Repair? On a failed roll, try another or stop? |
-| Scanner | Cumulative with EW Detectors, or the same point? (Default: max(1, ladder), not cumulative.) |
+| Scanner | Cumulative with EW Detectors, or the same point? (Default: max(1, ladder), not cumulative.) **RULED 2026-10-10: cumulative** - the ladder + 1. |
 | Navigator | (a) The turn-cost ladder. The hulls use 0.25, 0.33, 0.5, 0.66, 0.75, 1, 1.25, 1.33, 1.5, 1.66, 1.75, 2 and 3. Which of those are "steps"? (b) Turn delay unchanged? (c) Accel/decel: × 0.75 per change, or on the turn's total? Which rounding? |
-| Technician | "Or" = the best of the three automatically, the player's choice each turn, or a fixed priority? How is 33 % rounded? |
+| Technician | "Or" = the best of the three automatically, the player's choice each turn, or a fixed priority? How is 33 % rounded? **RULED 2026-10-10: the best of the three, automatically; a third, rounded down.** |
 | Jump Officer | (a) +1 over the drive's own range (4 → 5, or 6 → 7 with the Jump Accelerator)? (b) −20 before or after the Accelerator's doubling? (c) On arrival: the officer of the ship that OPENED the doorway, or each arriving rider's own? (d) Does −20 also cover the hyperspace-jump failure roll? |
 | Quartermaster | "Free" = this ship's own other enhancements and ammo? What is "+10 turn delay"? How much on C&C crits? Post: random primary? Price: 5 % of the game's points limit? |
-| Geneticist | "Scenario only" = never offered unless a hull opts in, or a Create Game rule? "−1 to hit other ships" = this ship's own weapons? |
+| Geneticist | "Scenario only" = never offered unless a hull opts in, or a Create Game rule? "−1 to hit other ships" = this ship's own weapons? **RULED 2026-10-10: offered on every hull with a C&C** ("scenario only" is by agreement, as the doc card says). The −1 was built with its default: this ship's own weapons. |
 | Scavenger | A critical first, else 4 boxes? Which system first? May he repair Structure? |
 | Breaching Expert | "+1 thrust" for one pod of a flight that moves as one? "20 % of total pods": fleet-wide, rounded down? What are "3 attack rolls on the first boarding turn" in FV's capture-mission terms? |
 | Analyst | Does he need range, line of sight or an OEW lock? Every enemy ship, or only those in range? Weapon arming is already public in FV: leave it so? |
@@ -560,7 +563,7 @@ committed.
 | Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? |
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? |
-| Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? |
+| Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). |
 | Gunner | Size caps for LCVs and bases? Which weapons are eligible: any with fire control, ballistics too? Does he stack with Gunsights? |
 | Fighter officers | Post = the first craft? A craft has no d20 critical roll (its test is a d10 dropout), so: no kill roll at all, or a d20 + damage roll on any damage to his craft, 20+ kills? (Default: none; he is lost with his craft.) Does he go with that craft on a split-launch? Missileer's "+5 OB": is that +1 OB (5 %)? Evader: always on, or toggled like jinking? Coordinator's "180°+" = three combat pivots in one turn? |
 
@@ -659,9 +662,9 @@ intercept. A 12th, removing the FLIGHT tooltip skip, passes unnoticed: no flight
 before Stage 4, which must add that test.
 
 **Known gaps and deferrals:**
-1. The fresh roll for a post destroyed this turn omits the Hyach "damage halved for critical rolls"
+1. ~~The fresh roll for a post destroyed this turn omits the Hyach "damage halved for critical rolls"
    (it lives in `Scanner::testCritical`). A captured roll includes it (tested). No Stage 1 post is a
-   scanner; decide it in the Scanner officers' stage.
+   scanner; decide it in the Scanner officers' stage.~~ Resolved by Stage 3 (§9.5): `rollFor` mirrors it.
 2. The exit test "two equal Engines with Poor Crew → the same engine as the lobby picks" has no
    Stage 1 subject (the Helmsman's post is the C&C). It moves to Stage 2 (lobby mirror) and Stage 5
    (the first Engine post).
@@ -791,3 +794,95 @@ without being told who is behind it.
   `ShipTooltip` showing "base 10" and "base 5"; lobby 25 / 25, including the chips: which ones show,
   section isolation, colours, a purchase surviving a chip switch, all 83 Earth Alliance units (70 with a
   chip row, 13 single-section ones without), and the 360 px wrap; the Ship Options document 8 / 8.
+
+### 9.5 Stage 3: Expert Scanner, Expert Technician, Expert Geneticist, Matter Weapons Expert (C&C)
+
+**Rulings (user, 2026-10-10, §6).** Scanner: **cumulative** with EW Detectors (the ladder + 1). Technician:
+the **best of the three, automatically**, a third **rounded down**. Geneticist: **offered on every hull with
+a C&C** ("scenario only" is by agreement). Built with defaults, not ruled: the Geneticist's −1 is this ship's
+own weapons; the Matter Weapons Expert is offered to a hull carrying at least one weapon with a Matter mode.
+
+**Files.** Server: `Officers.php` (four registry entries; posts `scanner` and `reactor`; the `needs` test;
+the effects; the generic `publish` list; the Hyach halving in `rollFor`), `EW.php` (`getDetectorAllowance`
+adds the officer's point and no longer exits on an empty board when he is aboard; `submitLateEw`'s empty-board
+exit is behind `$officersPresent`), `weapon.php` (`getBonusDamage`: +1 on a Matter-mode shot). Client:
+`officers.js` (registry, posts, `passesNeeds`, `isActive`, `savedEwBonus`, `displayStat`, `reactorBonus`,
+`displayFireControl`, `adjustDataDisplay`), `ew.js` (the allowance twin), `power.js` (`getReactorPower` adds the
+lobby Technician), `SystemInfo.js` (its data hook passes through `officers.adjustDataDisplay`),
+`ShipNotesPanel.js` (the lobby Profile row through `officers.displayStat`). Docs: four cards in Ship Options
+→ Ship Officers, and the About Officers "what the opponent sees" line. Statics and bundles rebuilt
+(`fvbuild -Statics`, `-Client`); no new class, so autoload is unchanged.
+
+**As built:**
+- **Registry.** Two optional keys: `publish` (the ship fields his apply moves that every viewer is sent while
+  he serves, which replaced the Helmsman-only `initiativeShare`) and `needs` (a further offer test, checked
+  by `addOffers` and `pickPosts` through `isEligible`, so a doctored row buys nothing). Apply methods now take
+  `($ship, $entry, $turn)`. Order: Helmsman, Scanner, Technician, Geneticist, Matter Weapons Expert.
+- **Posts.** `scanner` = the strongest Scanner by output (ELINT included); `reactor` = the biggest Reactor by
+  maxhealth (Elite Crew's rule). ⭐ The lobby must pick from the **store's pristine hull**
+  (`gamedata.allShips`), because `lobbyEnhancements.apply` has moved the fleet ship's outputs by the time the
+  insignia draws: on pirocia's two equal scanners Poor Crew lowers the first, and a pick on live values chose
+  the second while the server (D2) chose the first. `officers.strongest` reads the store copy; the
+  differential now gives its sandbox one and compares every post.
+- **Scanner.** `EW::getDetectorAllowance` = ladder + `Officers::savedEwBonus` (1 while he serves). The pool
+  clamp, the window and the write are the detectors' own. The client twin asks `officers.savedEwBonus`, which
+  reads the own-team list, so an enemy hull answers 0.
+- **Technician.** At load the post's `output` += max(2, ⌊largest powerReq / 3⌋) over the systems destroyed
+  BEFORE this turn (`isDestroyed($turn - 1)`: Self Repair revivals excluded, pre-battle damage counts on turn 1,
+  the reactor itself never). `output` reaches every client already. The lobby adds the same at read time in
+  `getReactorPower` (`officers.reactorBonus`, only for his post and only for a derived list).
+- **Geneticist.** `forwardDefense` and `sideDefense` +2, `toHitBonus` −1, all three published to every viewer.
+  **+2 on the profiles, not a new to-hit field** (§3.1 had drafted one): the profiles are what Poor Crew and the
+  C&C's ProfileIncreased critical move for "easier to hit", so every to-hit path, server and client, already
+  has it, and the ship window's Profile row shows the true figure. The ramming clause is the doc card's note
+  only. The client's hit-chance breakdown labels `toHitBonus` "Crew Quality", so his −1 appears under that name.
+- **Matter Weapons Expert.** +1 on every non-null entry of every Matter **mode** of every weapon: in
+  `fireControlArray`, and in the live `fireControl` when the current mode is Matter; `isModified` sends both.
+  A mode missing from `weaponClassArray` keeps the weapon's own class, as `changeFiringMode` leaves it. The
+  client needs nothing in game: `shipManager.systems.initializeSystem` already rebuilds an `isModified`
+  weapon's fire-control tooltip line, and a mode switch rebuilds it from the bumped array. +1 damage rides
+  `getBonusDamage` (behind `$officersPresent`, read off the fired mode's `weaponClass`); every Matter weapon's
+  damage passes through it (the `getDamageMod` overrides that skip it are all Plasma). In the lobby,
+  SystemInfo's data hook rewrites the fire-control row at read time (`officers.displayFireControl`).
+- **The fresh kill roll** for a scanner post destroyed this turn now includes the Hyach halving (§9.2 gap 1):
+  `rollFor` mirrors `Scanner::testCritical` and `ElintScanner::testCritical`.
+
+**Measured.** Statics +277,813 B (+0.41 %), exactly the new offers: 1,820 Technician, 1,820 Geneticist, 1,819
+Scanner and 416 Matter Weapons Expert offers across 2,670 hulls.
+
+**Verified.**
+- `officersHarness.php` 189 / 0 (181 with `--no-db`): offers and prices, the four posts, D2 on pirocia, a
+  doctored Matter row, the Scanner's allowance (no detector; cumulative with a Waymarker's; the DEW clamp; the
+  gate; disabled) and a real `submitLateEw` write with no detector on the board, the Technician's bonus
+  (+2; powerReq 7/8/9/12; this turn not counted; revived not counted; pre-battle counted; killed), the
+  Geneticist's profiles, to-hit and per-viewer payload, the Matter Weapons Expert on the Altarian plus a
+  `GromeLgtRailgun` (Matter modes 1, 3, 4 and a Plasma mode 2: switch to Plasma and back, the +1 stays), null
+  fire control, the payload, the gate, and the Hyach fresh roll. Two Stage 1 checks were reworded ("no C&C →
+  no Helmsman" and the disabled-offer check now look for that one id). Mutation-tested: 15 breaks, all caught.
+- `officersClientHarness.js` 56 / 0: lobby profile row, the Technician preview (+2, a third rounded down, his
+  post only, not in game), the Matter fire-control row (Plasma mode, null, not in game), the `needs` gate, the
+  pristine scanner pick, and the real `ew.getDetectorAllowance` and `power.js` `getReactorPower`. Mutation-tested:
+  8 breaks, all caught.
+- `enhancementsHarness.php`: Altarian added to the hulls, eight officer cases added; re-recorded, **additions
+  only** (0 lines removed, 5,167 added; the old file is `baseline_enhancements/fingerprint.before-officers-stage3.txt`),
+  258 / 0. `enhancementsDifferential.js`: 408 cases, 0 differing; it now compares profiles and to-hit "as shown",
+  reactor output with the lobby preview, every weapon's fire control, and the posts. Four drift mutations caught.
+- `fvbuild -Check`: autoload up to date, ship-data validator clean, replay corpus 140 / 0. The neighbouring EW
+  harnesses: `walkersStage12Harness.php` 33 / 0, `kirishiacRefits` 168 / 0 and 88 / 0, `profileCoatingClientHarness`
+  2,901 / 0; `lateEwElintHarness.js` and `walkersStage12ClientHarness.js` fail exactly as on HEAD (stale stubs,
+  [[arch_stale_stage_harnesses]]).
+- Real site, headless (`tests/replay/officersE2E/`): game 4457 18 / 18 per player (adds the Scanner with no
+  detector on the board: allowance 0 → 1, the enemy 0, the Firing-phase window open with him and shut without,
+  and the ship window's "Saved EW 1"); lobby 25 / 25; the new `lobby3.mjs` 19 / 19 (offers and prices, three
+  gold insignia, Profile 90/100 on the Omega, the reactor icon +2, the pre-battle editor taking the Geneticist's
+  +2 away, the Altarian's Matter Cannon tooltip −5/20/20 over −10/15/15); docs 10 / 10.
+
+**Observations, not changed:**
+1. On a Mag-Grav (fixed-power) reactor a destroyed system draws nothing anyway, so the Technician's "third of
+   a destroyed system" there is pure gain rather than recovered power. Built as the brief reads; rule it if it
+   matters for the Ipsha.
+2. The buy dialog lists officer rows alphabetically (Geneticist first), not in registry order. The Stage 2
+   lobby driver had clicked the section's first **+**; it now picks the Helmsman's own row.
+3. On a base, `getReactorPower` reads only the first reactor's `output`; if the biggest reactor (the
+   Technician's post) is not first, his bonus is invisible client-side. Elite Crew and Improved Reactor have the
+   same exposure today.

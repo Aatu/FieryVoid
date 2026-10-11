@@ -365,7 +365,7 @@ export const ManoeuvreStats = ({ ship, live, bare }) => {
             {mobile && <StatRow><StatLabel>Accel/decel</StatLabel><StatValue>{ship.accelcost}</StatValue></StatRow>}
             {mobile && <StatRow><StatLabel>Pivot</StatLabel><StatValue>{ship.pivotcost}</StatValue></StatRow>}
             {mobile && <StatRow><StatLabel>Roll</StatLabel><StatValue>{ship.rollcost}</StatValue></StatRow>}
-            <StatRow><StatLabel>Profile - Front / Side</StatLabel><StatValue $changed={Boolean(now && now.profileChanged)}>{now ? now.profile : profileText(ship.forwardDefense, ship.sideDefense)}</StatValue></StatRow>
+            <StatRow><StatLabel>Profile - Front / Side</StatLabel><StatValue $changed={Boolean(now && now.profileChanged)}>{now ? now.profile : (window.officers ? profileText(officers.displayStat(ship, 'forwardDefense'), officers.displayStat(ship, 'sideDefense')) : profileText(ship.forwardDefense, ship.sideDefense))}</StatValue></StatRow>
             {mobile && <StatRow><StatLabel>Initiative</StatLabel><StatValue $changed={Boolean(now && now.initiativeChanged)}>{now ? now.initiative : (window.officers ? officers.displayIniativeBonus(ship) : ship.iniativebonus)}</StatValue></StatRow>}
 
         </StatsPanel>

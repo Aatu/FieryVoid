@@ -184,7 +184,7 @@ class SystemInfo extends React.Component {
 
                 {system.missileArray && Object.keys(system.missileArray).length > 0 && !isUnrevealedMine && getEntry('Ammo Amount', system.missileArray[system.firingMode].amount)}
 
-                {!isUnrevealedMine && Object.keys(system.data).map((key, i) => (key != specialName && !(key === 'Ammunition' && (system.name === 'GrapplingClaw' || system.name === 'Marines')) && getEntry(key, adjustDataDisplay(system, key), 'data' + i)))}
+                {!isUnrevealedMine && Object.keys(system.data).map((key, i) => (key != specialName && !(key === 'Ammunition' && (system.name === 'GrapplingClaw' || system.name === 'Marines')) && getEntry(key, adjustDataDisplay(ship, system, key), 'data' + i)))}
 
                 {shadowBombAvailable !== null && getEntry('Fighters available', shadowBombAvailable)}
 
@@ -369,10 +369,14 @@ const adjustObDisplay = (system, baseObPercent) =>
         ? system.adjustOffensiveBonusDisplay(baseObPercent)
         : baseObPercent;
 
-const adjustDataDisplay = (system, key) =>
-    (typeof system.adjustDataValueDisplay === 'function')
+//...and then let an officer the lobby has not applied yet do the same (the Matter Weapons Expert's
+//fire control - officers.adjustDataDisplay; a no-op in game, where the server already applied him).
+const adjustDataDisplay = (ship, system, key) => {
+    const value = (typeof system.adjustDataValueDisplay === 'function')
         ? system.adjustDataValueDisplay(key, system.data[key])
         : system.data[key];
+    return window.officers ? officers.adjustDataDisplay(ship, system, key, value) : value;
+};
 
 const getEntry = (header, value, key) => {
     if (typeof value === 'string' && value.indexOf('<br>') !== -1) {

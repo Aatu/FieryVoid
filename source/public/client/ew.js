@@ -1417,7 +1417,11 @@ window.ew = {
     getDetectorAllowance: function getDetectorAllowance(ship, detectors) {
         if (!ship) return 0;
         if (detectors === undefined || detectors === null) detectors = ew.collectEwDetectors();
-        if (detectors.length === 0) return 0;
+        /* OFFICERS_PLAN.md Stage 3 - an EXPERT SCANNER aboard adds one point ON TOP of the ladder (user
+           ruling 2026-10-10), wherever the ship is, so the empty-board exit must not skip his ship. Only
+           the owner's team is sent the officer list, so an enemy ship answers 0 here. */
+        var officer = window.officers ? officers.savedEwBonus(ship) : 0;
+        if (detectors.length === 0 && officer === 0) return 0;
 
         /* ⭐ FLIGHTS ARE IN (user ruling 2026-09-10: "the effect applies to all Walker units").
            No test for one is needed and none is wanted: the ladder is a question about POSITION,
@@ -1434,7 +1438,7 @@ window.ew = {
 
         var count = ew.countEwDetectorsCovering(detectors, ship.team, position);
 
-        return ew.savedEwAllowanceFromDetectors(count);
+        return ew.savedEwAllowanceFromDetectors(count) + officer;
     },
 
     /* ============================== STAGE 10B - THE POOL AND THE WINDOW =========================

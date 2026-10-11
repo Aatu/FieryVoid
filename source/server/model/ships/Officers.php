@@ -20,7 +20,8 @@
    ⚠️ POST-side ships (Manager::getShipsFromJSON) never run onConstructed, so their list is empty:
    nothing in a phase's process() may ask about officers ([[arch_post_side_ship_reconstruction]]).
 
-   Track 1 only so far (fixed-post ship officers, ship-level OFF_* rows). Placed officers (track 2,
+   Track 1 only so far (fixed-post ship officers, ship-level OFF_* rows): the Helmsman (Stage 1) and the
+   Scanner, Technician, Geneticist and C&C Matter Weapons Expert (Stage 3). Placed officers (track 2,
    Stage 8) and fighter officers (Stage 4) are not built yet. */
 class Officers{
 
@@ -29,16 +30,38 @@ class Officers{
 	const KILL_ROLL = 20;          //"a '20' or greater (including any modifications)"
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
-	     label  the name in the buy dialog, the stored enhname and the kill note's notekey_human
-	     post   a key into findPost()
-	     pct    price in percent of the hull's blueprint pointCost, rounded up (D8)
-	     apply  the static method that applies his stat changes while he serves, or null when every
-	            rule he carries is asked for elsewhere (isActive). */
+	     label    the name in the buy dialog, the stored enhname and the kill note's notekey_human
+	     post     a key into findPost()
+	     pct      price in percent of the hull's blueprint pointCost, rounded up (D8)
+	     apply    the static method that applies his stat changes while he serves, or null when every
+	              rule he carries is asked for elsewhere (isActive)
+	     publish  (optional) ship fields his apply moves that every viewer is sent while he serves: a
+	              displayed stat is public, only the officer is hidden (user ruling 2026-10-10)
+	     needs    (optional) a further test the hull must pass to be offered him, beyond having the post */
 	private static $registry = array(
 		/* Expert Helmsman: +5 initiative (FV units, QX1), wins initiative ties, and -1 on the die he
 		   rolls on a meteor swarm's impact chart (user, 2026-10-10). The tie-break is
 		   TacGamedata::sortShips; the chart is RammingAttack::resolveMeteors. */
-		'OFF_HELM' => array('label' => 'Expert Helmsman', 'post' => 'cnc', 'pct' => 5, 'apply' => 'applyHelmsman'),
+		'OFF_HELM' => array('label' => 'Expert Helmsman', 'post' => 'cnc', 'pct' => 5, 'apply' => 'applyHelmsman',
+			'publish' => array('iniativebonus')),
+		/* Expert Scanner: "can save an EW point for after Initial Orders, but before firing - the same
+		   mechanically as an EW Detector". One more point on top of the detector ladder (CUMULATIVE,
+		   user ruling 2026-10-10), anywhere on the map - EW::getDetectorAllowance and its JS twin. */
+		'OFF_SCAN' => array('label' => 'Expert Scanner', 'post' => 'scanner', 'pct' => 7, 'apply' => null),
+		/* Expert Technician: "33% power of destroyed system (choose highest), or +1 power from a
+		   deactivated system, or +2 power" - the BEST of the three, automatically, a third rounded down
+		   (user rulings 2026-10-10). The +1 branch can never beat +2, so it is not computed. */
+		'OFF_TECH' => array('label' => 'Expert Technician', 'post' => 'reactor', 'pct' => 9, 'apply' => 'applyTechnician'),
+		/* Expert Geneticist: -1 to hit with this ship's own weapons, +2 to be hit (both profiles, the
+		   Poor Crew and ProfileIncreased convention), and "enemies can ram this ship" - a tooltip line
+		   only, as FV leaves ramming to the players. Offered on every hull with a C&C (user ruling
+		   2026-10-10: "scenario only" is by agreement, not a gate). */
+		'OFF_GENE' => array('label' => 'Expert Geneticist', 'post' => 'cnc', 'pct' => 5, 'apply' => 'applyGeneticist',
+			'publish' => array('forwardDefense', 'sideDefense', 'toHitBonus')),
+		/* Matter Weapons Expert (the C&C variant; the weapon-mounted one is Stage 8): +1 fire control and
+		   +1 damage on every Matter-class weapon, per firing mode. Only for hulls carrying one. */
+		'OFF_MWE'  => array('label' => 'Matter Weapons Expert', 'post' => 'cnc', 'pct' => 10, 'apply' => 'applyMatterExpert',
+			'needs' => 'hasMatterWeapon'),
 	);
 
 	public static function isOfficerId($enhID){
@@ -73,7 +96,7 @@ class Officers{
 		if (!self::mayCarryOfficers($ship)) return;
 		foreach (self::$registry as $id => $officer){
 			if (in_array($id, $ship->enhancementOptionsDisabled)) continue;
-			if (self::findPost($ship, $officer['post']) === null) continue;
+			if (!self::isEligible($ship, $officer)) continue;
 			$price = self::price($ship->pointCost, $officer['pct']);
 			$ship->enhancementOptions[] = array($id, $officer['label'], 0, 1, $price, 0, false);
 		}
@@ -89,9 +112,15 @@ class Officers{
 	/* ------------------------------------------------------------------ posts */
 
 	/* The system an officer lives in, or null when the hull has none (so he is not offered).
-	   ⚠️ MIRROR PAIR with officers.js pickPosts (Stage 2).
-	     cnc  the first C&C that is not a Flag Bridge; failing that, the first C&C of any kind.
-	          SecondaryCnC is not a CnC subclass, so it is never picked. */
+	   ⚠️ MIRROR PAIR with officers.js findPost.
+	     cnc      the first C&C that is not a Flag Bridge; failing that, the first C&C of any kind.
+	              SecondaryCnC is not a CnC subclass, so it is never picked.
+	     scanner  the strongest Scanner by output (ELINT scanners included) - the one Elite Crew,
+	              Poor Crew and Improved Sensors move, so they agree on a hull with two.
+	     reactor  the biggest Reactor by maxhealth - Elite Crew's rule (a malus would sit on the main
+	              reactor too); Mag-Grav reactors included.
+	   ⚠️ Asked BEFORE any enhancement moves an output (D2): Poor Crew takes a point off the strongest
+	   scanner, so on a hull with two equal ones asking afterwards would pick the other. */
 	private static function findPost($ship, $post){
 		switch ($post){
 			case 'cnc':
@@ -102,21 +131,46 @@ class Officers{
 					if ($any === null) $any = $system;
 				}
 				return $any;
+			case 'scanner':
+				return self::strongest($ship, 'Scanner', 'output', -1);
+			case 'reactor':
+				return self::strongest($ship, 'Reactor', 'maxhealth', -1000);
 		}
 		return null;
 	}
 
+	//Enhancements::strongestSystem's semantics: the first in construction order wins a tie
+	private static function strongest($ship, $class, $field, $floor){
+		$best = null;
+		$bestValue = $floor;
+		foreach ($ship->systems as $system){
+			if ($system instanceof $class && $system->$field > $bestValue){
+				$bestValue = $system->$field;
+				$best = $system;
+			}
+		}
+		return $best;
+	}
+
+	//the hull has the post, and passes the officer's own test if he has one
+	private static function isEligible($ship, $officer){
+		if (self::findPost($ship, $officer['post']) === null) return false;
+		if (empty($officer['needs'])) return true;
+		$needs = $officer['needs'];
+		return (bool)self::$needs($ship);
+	}
+
 	/* D2: posts are picked at the top of BaseShip::onConstructed, BEFORE any enhancement moves an
-	   output, from the bought rows. A count above 1 still means one officer (D9), and a row whose
-	   post the hull lacks buys nothing - the server trusts the client's rows, so a doctored payload
-	   is answered here. */
+	   output, from the bought rows. A count above 1 still means one officer (D9), and a row the hull
+	   would not have been offered (no post, or the officer's own test fails) buys nothing - the
+	   server trusts the client's rows, so a doctored payload is answered here. */
 	public static function pickPosts($ship){
 		$list = array();
 		if (self::hasOfficerRow($ship) && self::mayCarryOfficers($ship)){
 			foreach (self::$registry as $id => $officer){
 				if (!self::isBought($ship, $id)) continue;
+				if (!self::isEligible($ship, $officer)) continue;
 				$post = self::findPost($ship, $officer['post']);
-				if ($post === null) continue;
 				$list[] = array('id' => $id, 'post' => (int)$post->id, 'out' => null, 'how' => null);
 			}
 		}
@@ -164,7 +218,7 @@ class Officers{
 		foreach ($list as $entry){
 			if (!self::serves($entry, $turn)) continue;
 			$method = self::$registry[$entry['id']]['apply'];
-			if ($method !== null) self::$method($ship);
+			if ($method !== null) self::$method($ship, $entry, $turn);
 		}
 	}
 
@@ -283,12 +337,19 @@ class Officers{
 	}
 
 	/* ShipSystem::testCritical's formula for a post that made no roll this turn: d20 + floor(total
-	   damage) + the system's and the ship's critRollMod.
-	   ⚠️ Known gap: a Hyach scanner's "damage halved for critical rolls" lives in Scanner::testCritical
-	   and is not repeated here, so it reaches a CAPTURED roll but not this one. No Stage 1 post is a
-	   scanner; the Scanner officers' stage decides it. */
+	   damage) + the system's and the ship's critRollMod - plus a Hyach scanner's "damage halved for
+	   critical rolls", which its own testCritical adds to critRollMod around the parent's roll. Since
+	   Stage 3 an Expert Scanner can be posted there, so a destroyed one must roll as a captured one
+	   does. ⚠️ MIRROR of Scanner::testCritical and ElintScanner::testCritical (the ELINT one wraps the
+	   Scanner one, so a hull with both abilities halves twice there, and here). */
 	private static function rollFor($ship, $post){
-		return Dice::d(20) + floor($post->getTotalDamage()) + $post->critRollMod + $ship->critRollMod;
+		$mod = $post->critRollMod;
+		if ($post instanceof Scanner){
+			$half = round($post->getTotalDamage() / 2);
+			if ($post instanceof ElintScanner && $ship->getSpecialAbilityValue("HyachELINTSensors")) $mod -= $half;
+			if ($ship->hasSpecialAbility("HyachSensors")) $mod -= $half;
+		}
+		return Dice::d(20) + floor($post->getTotalDamage()) + $mod + $ship->critRollMod;
 	}
 
 	//DBManager's bulk note loop hands every OffKilled note here instead of to its system (§4.4)
@@ -298,7 +359,11 @@ class Officers{
 
 	/* ------------------------------------------------------------------ effects */
 
-	private static function applyHelmsman($ship){
+	/* Every apply method takes ($ship, $entry, $turn): the officer's runtime entry (his post) and the
+	   turn the load is for. ⚠️ Each stat change is a MIRROR PAIR with the lobby's read-time preview in
+	   officers.js (`stats`, reactorBonus, displayFireControl) - enhancementsDifferential.js compares them. */
+
+	private static function applyHelmsman($ship, $entry, $turn){
 		$ship->iniativebonus += 5;
 	}
 
@@ -312,9 +377,95 @@ class Officers{
 		return self::isActive($ship, 'OFF_HELM') ? -1 : 0;
 	}
 
-	//the initiative serving officers add to iniativebonus
-	private static function initiativeShare($ship){
-		return self::isActive($ship, 'OFF_HELM') ? 5 : 0;
+	/* Expert Scanner: the EW points he lets the ship hold back for the late window, ON TOP of the EW
+	   Detector ladder (user ruling 2026-10-10) - EW::getDetectorAllowance. The pool clamp, the window
+	   and the write are the detectors' own and need nothing. ⚠️ MIRROR PAIR with officers.savedEwBonus. */
+	public static function savedEwBonus($ship, $turn = null){
+		return self::isActive($ship, 'OFF_SCAN', $turn) ? 1 : 0;
+	}
+
+	/* Expert Technician: the reactor's output, raised at load. `output` is sent to every client
+	   unconditionally and power.js reads it, so the client's power balance needs nothing (§4.6: it
+	   reaches the enemy too, as the refit star's numbers do). */
+	private static function applyTechnician($ship, $entry, $turn){
+		$reactor = $ship->getSystemById($entry['post']);
+		if ($reactor !== null) $reactor->output += self::technicianBonus($ship, $reactor, $turn);
+	}
+
+	/* The best of his three: +2, or a third (rounded down) of the largest powerReq among the systems
+	   destroyed BEFORE this turn - the power a normal reactor lost with them. isDestroyed($turn - 1)
+	   is the state at the end of the previous turn, Self Repair revivals included (a revived system
+	   draws power again), and pre-battle damage counts on turn 1. The reactor itself is never counted.
+	   ⚠️ MIRROR PAIR with officers.reactorBonus (the lobby, where only pre-battle damage exists). */
+	public static function technicianBonus($ship, $post, $turn){
+		$largest = 0;
+		foreach ($ship->systems as $system){
+			if ($system === $post || (int)$system->powerReq <= 0) continue;
+			if (!$system->isDestroyed((int)$turn - 1)) continue;
+			$largest = max($largest, (int)$system->powerReq);
+		}
+		return max(2, intdiv($largest, 3));
+	}
+
+	/* Expert Geneticist: +2 to be hit is +2 on both profiles, the way Poor Crew's +1 and the C&C's
+	   ProfileIncreased critical are written - so every to-hit path, server and client, already has it. */
+	private static function applyGeneticist($ship, $entry, $turn){
+		$ship->forwardDefense += 2;
+		$ship->sideDefense += 2;
+		$ship->toHitBonus -= 1;
+	}
+
+	/* Matter Weapons Expert: +1 to every non-null fire control of every Matter MODE, in fireControlArray
+	   AND in the live fireControl when the current mode is Matter - Weapon::changeFiringMode re-reads the
+	   array straight over fireControl, so a bump to the scalar alone is gone at the first mode switch
+	   (the Gunsights trap, §3.1). isModified makes weapon::stripForJson send both, and the client
+	   rebuilds the tooltip's fire control line from them (shipManager.systems.initializeSystem). */
+	private static function applyMatterExpert($ship, $entry, $turn){
+		foreach ($ship->systems as $system){
+			if (!($system instanceof Weapon) || !self::isMatterWeapon($system)) continue;
+			if (!empty($system->fireControlArray) && is_array($system->fireControlArray)){
+				foreach ($system->fireControlArray as $mode => $fc){
+					if (is_array($fc) && self::isMatterMode($system, $mode)) $system->fireControlArray[$mode] = self::bumpFireControl($fc);
+				}
+			}
+			if (self::isMatterMode($system, $system->firingMode)) $system->fireControl = self::bumpFireControl($system->fireControl);
+			$system->isModified = true;
+		}
+	}
+
+	//Matter Weapons Expert: +1 damage, read by Weapon::getBonusDamage for a shot in a Matter mode
+	public static function matterDamageBonus($ship){
+		return self::isActive($ship, 'OFF_MWE') ? 1 : 0;
+	}
+
+	/* "Only for factions with matter weapons" - asked of the hull, since a hull without one gains nothing
+	   from him. A weapon counts when any of its modes is Matter. */
+	private static function hasMatterWeapon($ship){
+		foreach ($ship->systems as $system){
+			if ($system instanceof Weapon && self::isMatterWeapon($system)) return true;
+		}
+		return false;
+	}
+
+	private static function isMatterWeapon($weapon){
+		if ($weapon->weaponClass === 'Matter') return true;
+		return is_array($weapon->weaponClassArray) && in_array('Matter', $weapon->weaponClassArray, true);
+	}
+
+	//a mode missing from weaponClassArray keeps the weapon's own class, as changeFiringMode leaves it
+	private static function isMatterMode($weapon, $mode){
+		$class = isset($weapon->weaponClassArray[$mode]) ? $weapon->weaponClassArray[$mode] : $weapon->weaponClass;
+		return $class === 'Matter';
+	}
+
+	/* +1 to every NON-NULL entry. null means "cannot target this size class" and must stay null:
+	   null + 1 is 1 in PHP (Enhancements::sysEnhBumpFireControl's warning). */
+	private static function bumpFireControl($fireControl){
+		if (!is_array($fireControl)) return $fireControl;
+		foreach ($fireControl as $i => $fc){
+			if ($fc !== null) $fireControl[$i] = (int)$fc + 1;
+		}
+		return $fireControl;
 	}
 
 	/* ------------------------------------------------------------------ payload */
@@ -322,14 +473,21 @@ class Officers{
 	/* BaseShip::stripForJson, after the enhancement fields.
 	   - The LIST goes to the owner's team, and to everybody once the game is over (D4), with out/how
 	     only once he has left action.
-	   - The INITIATIVE BONUS goes to EVERY viewer whenever a serving officer has moved it (user ruling
-	     2026-10-10): the ship tooltip's "base" figure has to be the ship's real one, because a hidden +5
-	     misleads more than it hides. So an enemy reads the number but not who is behind it.
+	   - The STATS a serving officer moved (his registry `publish` list) go to EVERY viewer (user ruling
+	     2026-10-10): the ship tooltip's "base" initiative, the profiles and the to-hit bonus have to be
+	     the ship's real ones - a hidden +5 misleads more than it hides, and the shooter's own hit-chance
+	     preview needs a Geneticist's profiles. So an enemy reads the numbers but not who is behind them.
+	     A Technician's reactor output and a Matter expert's fire control need no line here: output and
+	     an isModified weapon's fire control are sent by the systems themselves.
 	   ⚠️ Cosmetic secrecy, like the refit star - §4.6 lists the numbers that reach the enemy. */
 	public static function addForJson($ship, $strippedShip){
 		$list = $ship->getOfficers();
 		if (empty($list)) return;
-		if (self::initiativeShare($ship) !== 0) $strippedShip->iniativebonus = $ship->iniativebonus;
+		foreach ($list as $entry){
+			if (!self::serves($entry, TacGamedata::$currentTurn)) continue;
+			if (empty(self::$registry[$entry['id']]['publish'])) continue;
+			foreach (self::$registry[$entry['id']]['publish'] as $field) $strippedShip->$field = $ship->$field;
+		}
 		if (!TacGamedata::$currentGameFinished && !$ship->isRevealedToCurrentViewer()) return;
 		$out = array();
 		foreach ($list as $entry){
