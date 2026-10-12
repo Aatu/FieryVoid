@@ -15,6 +15,7 @@ class shadowRegenBase extends OSAT{
 		$this->variantOf = 'NONE';		
 
 	    $this->notes = 'Enormous Unit';
+		$this->base = true;		
 		$this->notes .= '<br>Ignores Manoeuvre Hit Modifiers';			
 
         $this->Enormous = true;
