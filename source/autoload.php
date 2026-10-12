@@ -1698,6 +1698,7 @@ spl_autoload_register(
                 'kestrel' => '/server/model/ships/drazi/kestrel.php',
                 'kestrelcommon' => '/server/model/ships/drazi/kestrelcommon.php',
                 'kirishiacadvgravshield' => '/server/model/systems/baseSystems.php',
+                'kirishiaccitadel' => '/server/model/ships/kirishiac/kirishiacCitadel.php',
                 'kirishiacconqueror' => '/server/model/ships/kirishiac/kirishiacConqueror.php',
                 'kirishiacelintmodule' => '/server/model/systems/baseSystems.php',
                 'kirishiacheavyorbital' => '/server/model/systems/baseSystems.php',

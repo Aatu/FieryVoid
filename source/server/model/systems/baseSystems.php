@@ -12083,9 +12083,18 @@ class KirishiacAdvGravShield extends GraviticShield{
 	public $repairPriority = 0; //deployed default; the orbital sets it again on every load
 	public $linkedOrbital = null; //set by KirishiacOrbital (D9)
 	public $stowed = false; //declared for D9; never set - a shield generator is never stowed
+	private $pairing = null; //Which orbital is it paired with? (null on refit-mounted generators - forOrbital names them)
 
 	const ARMOUR = 2;    //R2
 	const STRUCTURE = 3; //R2 - the same for every generator, however many an orbital carries (A9)
+
+	/*$pairing names a generator built into a hull blueprint (Citadel). Kept off GraviticShield: several
+	Abbai hulls pass a stray 7th argument there, which would rename their shields.*/
+	function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc, $pairing = null){
+		$this->pairing = $pairing;
+		if ($pairing !== null) $this->displayName = 'Adv. Gravitic Shield ' . $pairing;
+		parent::__construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc);
+	}
 
 	/*one generator for $orbital at shield rating $rating, covering $arcSource's arc - the mount it
 	replaces (R3), or the first generator for the appended second one. $ordinal 2 names the second
@@ -12154,6 +12163,7 @@ class KirishiacElintModule extends ShipSystem implements SpecialAbility{
 	public $repairPriority = 0; //deployed default; the orbital sets it again on every load
 	public $linkedOrbital = null; //set by KirishiacOrbital (D9)
 	public $stowed = false; //declared for D9; never set - the module works while docked (R11)
+	private $pairing = null; //Which orbital is it paired with? (null on refit-mounted modules - forOrbital names them)
 
 	const ARMOUR = 6;     //R12
 	const STRUCTURE = 12; //R12
@@ -12166,7 +12176,10 @@ class KirishiacElintModule extends ShipSystem implements SpecialAbility{
 		23=>"OutputReduced3",
 		27=>"OutputReduced4");
 
-	function __construct($armour, $maxhealth, $powerReq, $output, $startArc, $endArc){
+	function __construct($armour, $maxhealth, $powerReq, $output, $startArc, $endArc, $pairing = null){
+
+		$this->pairing = $pairing;
+		if ($pairing !== null) $this->displayName = 'ELINT Sensor Module ' . $pairing;    
 		parent::__construct($armour, $maxhealth, $powerReq, $output);
 		$this->startArc = (int)$startArc;
 		$this->endArc = (int)$endArc;
