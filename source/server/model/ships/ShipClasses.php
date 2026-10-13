@@ -177,6 +177,16 @@ class BaseShip {
 	   but NOT zeroes (its "D" rule was deliberately never built), so the key would survive. */
 	protected $crewQuality = 0;
 
+	/* OFFICERS_PLAN.md - the officers aboard, as Officers keeps them: array('id', 'post', 'out',
+	   'how') each. Rebuilt at every load by Officers::pickPosts / ::apply; only Officers writes it.
+	   $officerKills is officer id => turn, read off the OffKilled notes by DBManager's note loop, and
+	   $officerMoves likewise off the OffMoved notes (a fighter officer who left this row with his fighter).
+	   All PROTECTED for $crewQuality's reason: a public empty default would put a dead key on every
+	   static blueprint. */
+	protected $officers = array();
+	protected $officerKills = array();
+	protected $officerMoves = array();
+
 	
 	public $halfPhaseThrust = 0; //needed for half phasing; equal to thrust from two BioThrusters on a given ship; 0 for ships that cannot half phase, eg. vast majority
     
@@ -220,6 +230,29 @@ class BaseShip {
 	//once (advanceGameState, then the phase's own load), and a second pass would mount a second
 	//pair. Transient, per object, never persisted.
 	public $enhancementSystemsAdded = false;
+
+	/* KIRISHIAC_ORBITAL_REFITS_PLAN.md - the refit mount step's once-per-object guard and the ELINT
+	   modules it mounted. ⚠️ Non-public on purpose (D14): the static blueprint serialises every
+	   PUBLIC property, so a flag here would ride all ~2,500 blueprints and an array of system objects
+	   would ride every Kirishiac one. Reached through the three methods below. */
+	protected $systemEnhancementSystemsMounted = false;
+	protected $elintModules = array();
+
+	//true the FIRST time it is asked on this object, false after - Enhancements::mountSystemEnhancementSystems
+	public function claimSystemEnhancementMount(){
+		if ($this->systemEnhancementSystemsMounted) return false;
+		$this->systemEnhancementSystemsMounted = true;
+		return true;
+	}
+
+	public function registerElintModule($module){
+		$this->elintModules[] = $module;
+	}
+
+	//the ELINT Sensor Modules this ship carries, alive or not; empty on every other ship in the game
+	public function getElintModules(){
+		return $this->elintModules;
+	}
 
 	//Pre-battle damage & fleet damage persistence (PREBATTLE_DAMAGE_PLAN.md).
 	//Compact wire-format payload: {sys:{<systemid>:{d,k,c}}, ftr:{<ordinal>:{d,k,c}}}.
@@ -283,6 +316,15 @@ class BaseShip {
 		   uses a leaner 5-slot shape of its own (Enhancements::setSystemEnhancementOptions). */
 		public $systemEnhancements = array();       //PURCHASED per-system refits
 		public $systemEnhancementOffers = array();  //what MAY be bought - lobby only, never sent back (D3)
+		/* KIRISHIAC_ORBITAL_REFITS_PLAN.md §9.3 - for a refit that SWAPS a system's class:
+		   {mounts: {orbitalId: mountedSystemId}, templates: {jsClassName: compacted system}}. ONE
+		   template per class per hull, built at rating 1 on the hull's first eligible orbital; the
+		   lobby clones it per orbital and patches id, section, arcs, name and rating
+		   (systemEnhancements.buildSwapSystem), so the preview shows the system the game will really
+		   have. Lobby only, like the offers: written on the $offerSystemEnhancements path and dropped
+		   by ShipCompactor when empty. ~2KB on a Kirishiac hull; one entry PER ORBITAL measured
+		   ~35KB on a Mastership. */
+		public $systemEnhancementSwapPreviews = array();
 
     public $advancedArmor = false; //set to true if ship is equipped with advanced armor!
 	public $hardAdvancedArmor = false; // set to true if ship is equipped with hardented advanced armor - GTS
@@ -953,6 +995,11 @@ class BaseShip {
 		if(!empty($this->systemEnhancements) && $this->isRevealedToCurrentViewer()){
 			$strippedShip->systemEnhancements = $this->systemEnhancements;
 		}
+
+		/* OFFICERS_PLAN.md D4 - own team (and everybody once the game is over) gets the officer list;
+		   nobody else gets an officer's share of a published iniativebonus. AFTER the enhancement
+		   fields above, which is where that iniativebonus is published. */
+		Officers::addForJson($this, $strippedShip);
 
 		//Stage S (fleet-value attribution): for an integrated-fighter carrier, send the
 		//number of integrated fighters it BOUGHT and their per-craft CP cost. The carrier's
@@ -1735,6 +1782,8 @@ class BaseShip {
 
     public function onConstructed($turn, $phase, $gamedata)
     {	    
+		//OFFICERS_PLAN.md D2 - officers' posts are picked BEFORE any enhancement moves an output
+		Officers::pickPosts($this);
 		//enhancements (in game, NOT fleet selection!)
 		Enhancements::setEnhancements($this);
 		/* PER-SYSTEM enhancements, immediately after the ship-level ones and - critically - BEFORE
@@ -1751,6 +1800,9 @@ class BaseShip {
                 $this->enabledSpecialAbilities = array_merge($this->enabledSpecialAbilities, $abilities);
             }
         }
+        /* OFFICERS_PLAN.md D5 - who is still serving, and their stat changes, in ONE post-pass: after
+           the loop above (a post's structureSystem is filled there) and before iniativeadded. */
+        Officers::apply($this, $turn);
         //fill $this->iniativeadded
         $modifiedbonus = $this->getInitiativebonus( $gamedata ) + $this->getCommonIniModifiers( $gamedata );
         $modifiedbonus = $modifiedbonus - $this->iniativebonus;
@@ -1798,6 +1850,45 @@ class BaseShip {
 	   (AntimatterConverter's 4X+2, say) therefore gains nothing, which is correct. */
 	public function getCrewDieDamageBonus(){
 		return max(0, (int)$this->crewQuality);
+	}
+
+	/* ===================== OFFICERS - see $officers above and Officers.php ===================== */
+	public function getOfficers(){
+		return $this->officers;
+	}
+
+	public function setOfficers($list){
+		$this->officers = $list;
+	}
+
+	public function hasOfficers(){
+		return !empty($this->officers);
+	}
+
+	public function getOfficerKills(){
+		return $this->officerKills;
+	}
+
+	//one OffKilled note: the earliest turn wins if one were ever written twice
+	public function recordOfficerKill($officerId, $turn){
+		$officerId = (string)$officerId;
+		$turn = (int)$turn;
+		if (!isset($this->officerKills[$officerId]) || $turn < $this->officerKills[$officerId]){
+			$this->officerKills[$officerId] = $turn;
+		}
+	}
+
+	public function getOfficerMoves(){
+		return $this->officerMoves;
+	}
+
+	//one OffMoved note (Officers::followFighter): the earliest turn wins, as for a kill
+	public function recordOfficerMove($officerId, $turn){
+		$officerId = (string)$officerId;
+		$turn = (int)$turn;
+		if (!isset($this->officerMoves[$officerId]) || $turn < $this->officerMoves[$officerId]){
+			$this->officerMoves[$officerId] = $turn;
+		}
 	}
 
     public function getSpecialAbilitySystem($ability)
@@ -2442,6 +2533,25 @@ class BaseShip {
 			$this->addSystem($system, $loc);
 		}
 
+		/*The other post-constructor mutation, and the only one that does not APPEND: a Kirishiac
+		  orbital refit swaps the orbital's weapon for a system of another class UNDER THE SAME ID
+		  (KIRISHIAC_ORBITAL_REFITS_PLAN.md §6.1, D5), so every damage, critical and power row stored
+		  against that id belongs to the replacement. Called only by Enhancements'
+		  mountSystemEnhancementSystems, at game load, before any of those rows are read.
+		  ⚠️ Deliberately NOT addSystem(): that would append (a new id), stamp a section arc over a
+		  0/0 arc and run the LCV and Structure bookkeeping. The replacement carries its own arc
+		  (R3) and is never a Structure. */
+		public function replaceEnhancementSystem($id, $system){
+			if (!isset($this->systems[$id])) return false;
+			$old = $this->systems[$id];
+			$system->setId($id);
+			$system->location = $old->location;
+			$system->setUnit($this);
+			if ($this->systemsSurviveStructureLoss) $system->setSurvivesStructureDestruction(true);
+			$this->systems[$id] = $system;
+			return true;
+		}
+
 		/* fill notes with information contained in various attributes, not so readily accessible to player*/
 		public function notesFill($sampleFighter = null){
 			//if (TacGamedata::$currentTurn >= 1){ //in later turns notes will be displayed from pre-compiled cache! no point generating them every time
@@ -2589,10 +2699,16 @@ class BaseShip {
 							$this->notes .= '<br>Sensor Fluctuations';
 						}else if ($ability=='ConstrainedEW'){ 
 							$this->notes .= '<br>Constrained ELINT';
+						}else if ($ability=='JealousELINT'){
+							$this->notes .= '<br>Jealous ELINT';
 						}
 					}
 					break; //checking one Scanner is enough
 				}				
+				foreach($this->systems as $cnc) if ($cnc instanceof CnC){
+					if (in_array('CommandNode', $cnc->specialAbilities, true)) $this->notes .= '<br>Command Node';
+					break; //checking one C&C is enough
+				}
 				foreach($this->systems as $reactor) if ($reactor instanceof Reactor){
 					foreach($reactor->specialAbilities as $ability){
 						if ($ability=='ReactorFlux'){

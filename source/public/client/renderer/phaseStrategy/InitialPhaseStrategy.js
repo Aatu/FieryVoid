@@ -130,12 +130,16 @@ window.InitialPhaseStrategy = function () {
         var isElintOrAlliedEW = this.selectedShip && (shipManager.isElint(this.selectedShip) || shipManager.hasSpecialAbility(this.selectedShip, "alliedEW"));
         var friendlyFireActive = gamedata.rules && gamedata.rules.friendlyFire === 1;
         var clickedFriendly = gamedata.isMyorMyTeamShip(ship);
+        //Triad Command Node (TRIAD_ADVANCED_FEATURES_PLAN.md §4): the node keeps the selection when it clicks
+        //another Triad capital ship of its fleet, as an ELINT does, so that tooltip can offer Swap Initiative.
+        var isCommandNodeSwap = this.selectedShip && typeof CnC !== 'undefined' && CnC.canSwapWith(this.selectedShip, ship);
 
         // Add selectShip and don't instant target for:
         // - ELINT or alliedEW weapons
+        // - a Triad Command Node clicking a ship it may swap initiative with
         // - Friendly ships when you have a hex weapon selected, or Friendly Fire rules are in effect
         if (this.selectedShip && ship !== this.selectedShip &&
-            (isElintOrAlliedEW || (clickedFriendly && (hexWeaponSelected || friendlyFireActive)))) {
+            (isElintOrAlliedEW || isCommandNodeSwap || (clickedFriendly && (hexWeaponSelected || friendlyFireActive)))) {
 
             var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
             menu.addButton("selectShip",

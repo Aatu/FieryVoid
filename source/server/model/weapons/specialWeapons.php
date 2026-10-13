@@ -3268,6 +3268,7 @@ if($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass ==
 		$modifier = 0;
 		if ($targetSpeed <= 4) $modifier = -1;
 		if ($targetSpeed > 12) $modifier = 1;
+		if (TacGamedata::$officersPresent) $modifier += Officers::meteorChartModifier($target); //Expert Helmsman: -1 (OFFICERS_PLAN.md)
 		$hits = $swarm::rollMeteorChart($target->shipSizeClass, ($target instanceof FighterFlight), $modifier);
 		if ($hits <= 0) {
 			$fireOrder->pubnotes .= "<br>No meteors struck.";

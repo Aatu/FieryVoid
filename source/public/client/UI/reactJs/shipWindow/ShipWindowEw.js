@@ -32,6 +32,7 @@ const EW_LABEL_COLORS = {
     'SOEW': theme.colors.text,        //soft orange
     'OEW_HOSTILE': '#e49b9b',       //soft red - pseudo-label, see ewLabelColor
     'Saved EW': '#e0d39a',          //soft gold - the EW Detector allowance (WALKERS_OF_SIGMA_PLAN.md 3.8)
+    'ELINT': '#9ad4cf',             //soft teal - Kirishiac ELINT module pool (KIRISHIAC_ORBITAL_REFITS_PLAN.md §8.2)
 };
 
 /*OEW is the one CONTEXTUAL label (user request 2026-07-23): it keeps the green while the
@@ -409,6 +410,20 @@ const getShipRows = (ship, component) => {
         : {};
 
     list.push(<Row key={`dew-scs-${ship.id}`}><RowLabel $color={ewLabelColor('DEW')}>DEW</RowLabel><RowValue>{formatEW(ew.getDefensiveEW(ship))}</RowValue></Row>);
+
+    /*Kirishiac ELINT Sensor Modules (KIRISHIAC_ORBITAL_REFITS_PLAN.md §8.2) - the module pool, which
+      never becomes DEW. Initial Orders: unspent / pool. Afterwards: the pool, and whatever the
+      after-movement arc check took (the server's note, read off the modules). OWN SIDE ONLY - which
+      allocations fell out of arc is not the enemy's to see - and in game only (the lobby has no EW).*/
+    if (interactive && ew.hasElintModules(ship) && gamedata.isMyorMyTeamShip(ship)) {
+        const split = ew.getElintModuleSplit(ship);
+        let lost = 0;
+        ew.getElintModules(ship).forEach(module => { lost += module.elintLost || 0; });
+        const elintValue = (gamedata.gamephase == 1)
+            ? `${formatEW(split.freeM)} / ${formatEW(split.M)}`
+            : (lost > 0 ? `${formatEW(split.M)} (lost ${lost})` : formatEW(split.M));
+        list.push(<Row key={`elint-scs-${ship.id}`}><RowLabel $color={ewLabelColor('ELINT')}>ELINT Modules</RowLabel><RowValue>{elintValue}</RowValue></Row>);
+    }
     var CCEWamount = Math.max(0, ew.getCCEW(ship) - ew.getDistruptionEW(ship));
     if (CCEWamount > 0) {
         list.push(<Row key={`ccew-scs-${ship.id}`}><RowLabel $color={ewLabelColor('CCEW')}>CCEW</RowLabel><RowValue>{formatEW(CCEWamount)}</RowValue></Row>);

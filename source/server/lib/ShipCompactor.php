@@ -352,6 +352,12 @@ class ShipCompactor
             && empty($ship['systemEnhancementOffers'])) {
             unset($ship['systemEnhancementOffers']);
         }
+        //Same rule for the swap-refit templates (KIRISHIAC_ORBITAL_REFITS_PLAN.md §9.3): only a
+        //handful of Kirishiac hulls carry any, and an empty PHP array would encode as a bare [].
+        if (isset($ship['systemEnhancementSwapPreviews']) && is_array($ship['systemEnhancementSwapPreviews'])
+            && empty($ship['systemEnhancementSwapPreviews'])) {
+            unset($ship['systemEnhancementSwapPreviews']);
+        }
 
         if (!empty($ship['systems'])) {
             foreach ($ship['systems'] as $i => $system) {

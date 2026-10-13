@@ -112,6 +112,11 @@ class Criticals{
             }
         }
 
+        /* OFFICERS_PLAN.md §4.4 - an officer whose post was damaged dies on its critical roll of 20+.
+           After Pass 1, which made the posts' own rolls, and before Pass 2's Self Repair. One static
+           read for a game without officers. */
+        if (TacGamedata::$officersPresent) Officers::rollKills($activeShips, $gamedata);
+
         // ---- Pass 2: criticalPhaseEffects + EngineShorted post-check ---
         foreach ($activeShips as $ship){
             foreach ($ship->systems as $system){

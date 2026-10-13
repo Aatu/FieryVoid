@@ -1514,6 +1514,10 @@ Both halves have their own non-vacuity control in the test. ⚠️ Written again
 moves to a version that changes `round()`'s edge cases, re-run the differential test before
 assuming the port still matches. **Any future JS port of a PHP geometry routine needs this.**
 
+> **Update 2026-10-08:** PHP 8.4 (which live runs) removed the pre-rounding, so half (2) is gone from
+> `phpRound()`. With it, the mirror disagreed with the 8.4 server on 106 of 100,000 seeded lines;
+> without it, it agrees on all 100,000. Half (1) still applies. See `LIBRARY_UPGRADES_PLAN.md` §2.4.
+
 ⚠️ It deliberately does NOT reuse `mathlib.isLoSBlocked`'s geometry, which asks a different
 question (does the segment *clip* a hex, tested in pixels) and would count hexes the server's
 line never enters. Line of sight and field crossing are two different rules.

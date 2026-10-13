@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "imagemin-svgo": "^12.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "styled-components": "^6.1.8",
-    "three": "^0.160.1"
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",

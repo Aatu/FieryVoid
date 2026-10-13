@@ -2,6 +2,7 @@ import * as React from "react";
 import styled from "styled-components"
 import { Tooltip, TooltipHeader, TooltipEntry } from '../common'
 import ShipInfo from "./ShipInfo";
+import theme from "../styled/theme";
 
 const InfoHeader = styled(TooltipHeader)`
     /*font-size: 12px;*/
@@ -48,12 +49,33 @@ export const Entry = styled(TooltipEntry)`
 
 export const Header = styled.span`
     color: white;
-	font-style:italic;
 	font-size: 11px;
+    font-weight: bold;
 `;
 
 const ShipNameHeader = styled.span`
     color: #C6E2FF;
+`;
+
+/* The Officers block (OFFICERS_PLAN.md D12) wears the gold set, like every other enhancement surface.
+   Exported for ShipInfo's flight OFFICERS block, so a craft's officer reads like a system's. The
+   colours are tripled-class (&&&) to win over ShipInfo's compact mode, which recolours every Entry and
+   Header through a descendant selector (two classes). */
+const OfficerHeader = styled(InfoHeader)`
+    color: ${theme.colors.enhTitle};
+`;
+
+export const OfficerEntry = styled(Entry)`
+    &&& { color: ${props => props.$out ? theme.colors.textDim : theme.colors.enhText}; }
+`;
+
+export const OfficerName = styled.span`
+    &&& { color: ${theme.colors.enhTitle}; }
+`;
+
+//ShipInfo's "OFFICERS:" heading, in its own heading shape but gold
+export const OfficerHeading = styled(Header)`
+    &&& { color: ${theme.colors.enhTitle}; }
 `;
 
 class SystemInfo extends React.Component {
@@ -94,7 +116,8 @@ class SystemInfo extends React.Component {
         var specialName = 'Special';
         var reactKey = 0; //needed for react so each line has unique key!
 
-        let displayOffensiveBonus = ship.offensivebonus;
+        //an Expert Evader's -1 in the lobby, added as it is shown (officers.displayStat; in game the server applied it)
+        let displayOffensiveBonus = window.officers ? officers.displayStat(ship, 'offensivebonus') : ship.offensivebonus;
         if (ship.flight && gamedata.areMinesPresent) {
 			if(ship.minesweeper){
 				displayOffensiveBonus -= window.ew.getDetectMEW(ship);
@@ -170,7 +193,7 @@ class SystemInfo extends React.Component {
 
                 {system.missileArray && Object.keys(system.missileArray).length > 0 && !isUnrevealedMine && getEntry('Ammo Amount', system.missileArray[system.firingMode].amount)}
 
-                {!isUnrevealedMine && Object.keys(system.data).map((key, i) => (key != specialName && !(key === 'Ammunition' && (system.name === 'GrapplingClaw' || system.name === 'Marines')) && getEntry(key, adjustDataDisplay(system, key), 'data' + i)))}
+                {!isUnrevealedMine && Object.keys(system.data).map((key, i) => (key != specialName && !(key === 'Ammunition' && (system.name === 'GrapplingClaw' || system.name === 'Marines')) && getEntry(key, adjustDataDisplay(ship, system, key), 'data' + i)))}
 
                 {shadowBombAvailable !== null && getEntry('Fighters available', shadowBombAvailable)}
 
@@ -184,6 +207,8 @@ class SystemInfo extends React.Component {
                 {Object.keys(specialEntry).length > 0 &&
                     Object.keys(specialEntry).map(i => <Entry key={`special-${reactKey++}`}>{specialEntry[i]}</Entry>)
                 }
+
+                {!isUnrevealedMine && getOfficers(ship, system)}
 
                 {(Object.keys(system.critData).length > 0 || (system.criticals && system.criticals.length > 0)) && !isUnrevealedMine && getCriticals(system)}
 
@@ -250,6 +275,30 @@ const getCalledShotDisplay = (ship, system) => {
         </Entry>
     ];
 }
+
+/* OFFICERS_PLAN.md D12 - one line per officer posted on this system: his name, his one-line effect,
+   and how he left action once he has. Own team only, through officers.listFor (D4). Not system.data:
+   that is rebuilt per turn, replaced wholesale by a server `data`, and shared by reference across
+   same-class systems ([[arch_system_info_tooltip_data_flow]]). */
+const getOfficers = (ship, system) => {
+    if (!window.officers || !ship || !system) return null;
+    const posted = officers.onPost(ship, system.id);
+    if (posted.length === 0) return null;
+    const turn = officers.currentTurn();
+    return [
+        <Divider key="officerDivider" />,
+        <OfficerHeader key="officerHeader">Officers</OfficerHeader>
+    ].concat(posted.map(entry => {
+        const officer = officers.get(entry.id);
+        const state = officers.stateText(entry);
+        return (
+            <OfficerEntry key={`officer-${entry.id}`} $out={!officers.serves(entry, turn)}>
+                <OfficerName>{officers.label(entry.id)}: </OfficerName>
+                {officer ? officer.summary : ''}{state ? ' ' + state : ''}
+            </OfficerEntry>
+        );
+    }));
+};
 
 const getCriticals = (system) => {
     const critKeys = Object.keys(system.critData).length > 0
@@ -329,10 +378,14 @@ const adjustObDisplay = (system, baseObPercent) =>
         ? system.adjustOffensiveBonusDisplay(baseObPercent)
         : baseObPercent;
 
-const adjustDataDisplay = (system, key) =>
-    (typeof system.adjustDataValueDisplay === 'function')
+//...and then let an officer the lobby has not applied yet do the same (the Matter Weapons Expert's
+//fire control - officers.adjustDataDisplay; a no-op in game, where the server already applied him).
+const adjustDataDisplay = (ship, system, key) => {
+    const value = (typeof system.adjustDataValueDisplay === 'function')
         ? system.adjustDataValueDisplay(key, system.data[key])
         : system.data[key];
+    return window.officers ? officers.adjustDataDisplay(ship, system, key, value) : value;
+};
 
 const getEntry = (header, value, key) => {
     if (typeof value === 'string' && value.indexOf('<br>') !== -1) {

@@ -78,6 +78,18 @@ class ShipSystem {
        ShipCompactor::annotateSystems - never through live gamedata. */
     protected $survivesStructureDestruction = false;
 
+    /* OFFICERS_PLAN.md §4.4 - this system's last critical roll as array(turn, total), written by
+       testCritical and read by Officers::rollKills: an officer posted here is killed by the post's
+       own roll of 20 or more. PROTECTED for the reason above - no blueprint or payload may carry it.
+       No dice are involved in keeping it, so no replay line moves. */
+    protected $lastCritRoll = null;
+
+    //the total of this system's critical roll on $turn, or null when it made none
+    public function getCritRollOnTurn($turn){
+        if ($this->lastCritRoll === null || $this->lastCritRoll[0] !== (int)$turn) return null;
+        return $this->lastCritRoll[1];
+    }
+
     /* Does this system stay alive when its structure block is destroyed? Read by
        ShipCompactor so the lobby's pre-battle damage preview can mirror isDestroyed()'s
        structure cascade for it (the client's isDestroyed reads a server-computed boolean
@@ -1419,6 +1431,7 @@ public function setParentFighter($fighter) {
 	*/
 
         $roll = Dice::d(20) + floor(($this->getTotalDamage())*$damageMulti) + $add +$bonusCrit;
+        $this->lastCritRoll = array((int)$gamedata->turn, (int)$roll); //an officer posted here dies on 20+ (Officers::rollKills)
         $criticalTypes = -1;
 
         foreach ($this->possibleCriticals as $i=>$value){

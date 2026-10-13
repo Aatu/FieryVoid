@@ -10,6 +10,10 @@ export default defineConfig({
         exclude: [],
     },
     define: {
+        // Library mode leaves NODE_ENV for the consumer to set, and the 'process.env' polyfill
+        // below makes it undefined - so without this line React and styled-components pick
+        // their DEVELOPMENT builds at runtime and the bundle carries both builds.
+        'process.env.NODE_ENV': JSON.stringify('production'),
         'process.env': {} // Polyfill for some libs that might expect it
     },
     build: {

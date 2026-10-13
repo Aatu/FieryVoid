@@ -1,6 +1,6 @@
 import * as React from "react";
 import styled from "styled-components"
-import SystemIcon from "../system/SystemIcon"
+import SystemIcon, { OfficerInsignia } from "../system/SystemIcon"
 
 //gamelobby.php is the only page whose gamedata reports gamephase -2 (buy phase);
 //mirrors ShipWindow.js's local isLobby(). Used to suppress the fighter-image
@@ -67,6 +67,19 @@ const OverlayLabel = styled.div`
     z-index: 2;
     pointer-events: none;
     opacity: 0.7;
+`;
+
+/* A fighter officer's insignia (OFFICERS_PLAN.md D11, Stage 4): his post is the flight's first craft,
+   so it sits on that craft's card - on the card's own top-left CORNER, straddling its border (the card's
+   5px margin has room), because just inside it sat on the first weapon icon and read as that gun's. A
+   sibling of FadedContent, as the overlay label is, so a lost craft's fade does not swallow it - the
+   grey (and the red slash) say he is gone. */
+const CardBadge = styled.div`
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    z-index: 3;
+    pointer-events: none;
 `;
 
 const Container = styled.div`
@@ -316,6 +329,9 @@ class FighterIcon extends React.Component {
             ? `${battleDamage.fighterHealth(ship, 1)} / ${fighter.maxhealth}`
             : `${fighter.maxhealth - damageManager.getDamage(ship, fighter)} / ${fighter.maxhealth}`;
 
+        //own team only: officers.listFor is empty for anybody else's flight (D4)
+        const officerState = window.officers ? officers.postState(ship, fighter.id) : null;
+
         return (
             <FighterIconContainer $docked={docked} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut.bind(this)} onTouchStart={this.onFighterTouchStart.bind(this)} onTouchMove={this.onFighterTouchMove.bind(this)} onTouchEnd={this.onFighterTouchEnd.bind(this)} onTouchCancel={this.onFighterTouchCancel.bind(this)}>
                 <FadedContent $destroyed={destroyed} $img={window.AssetManager.getSmartImagePath(fighter.iconPath)}>
@@ -332,6 +348,7 @@ class FighterIcon extends React.Component {
                     ><HealthText>{barText}</HealthText></HealthBar>
                 </FadedContent>
                 {overlay}
+                {officerState && <CardBadge><OfficerInsignia state={officerState} title={officers.describePost(ship, fighter.id)} /></CardBadge>}
             </FighterIconContainer>
         );
     }

@@ -24,6 +24,18 @@ window.SystemFactory = (function () {
                     staticSystem = ship.flight ? getFirstSystem(ship) : ship.systems[jsonSystem.id];
                 }
 
+                /* ⚠️ NEVER MERGE A SYSTEM ONTO A BLUEPRINT ENTRY OF ANOTHER CLASS
+                   (KIRISHIAC_ORBITAL_REFITS_PLAN.md D6). A Kirishiac orbital refit swaps the
+                   orbital's weapon for a shield generator or an ELINT module UNDER THE SAME ID, and
+                   the merge below would hand the new system the old weapon's `weapon: true`, fire
+                   control, range and data. Such a system sends its blueprint fields itself
+                   (addedByEnhancement on the server), so its payload stands alone - exactly as an
+                   appended system with no blueprint entry already does. Only fighters ever change
+                   `name` at runtime, and flights never reach this branch. */
+                if (!ship.flight && staticSystem && staticSystem !== jsonSystem && staticSystem.name !== jsonSystem.name) {
+                    staticSystem = jsonSystem;
+                }
+
                 var system = SystemFactory.createSystemFromJson(jsonSystem, staticSystem, ship);
 
                 //if(system.initializeOnLoad) system.initializationUpdate(); //Not used by any systems yet, but available if you wanted to runs system.initialisationUpdate() immediately on page load.                 

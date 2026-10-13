@@ -1,4 +1,5 @@
-FROM php:8.2-fpm
+# Same minor version as live (LiteSpeed LSAPI, alt-php 8.4). Tracks the latest 8.4.x patch.
+FROM php:8.4-fpm
 
 # Set bash as the default shell for better interactive experience
 SHELL ["/bin/bash", "-c"]

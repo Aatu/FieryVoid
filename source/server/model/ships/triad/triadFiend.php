@@ -40,7 +40,8 @@ class triadFiend extends HeavyCombatVessel{
 //			$scanner->markAdvanced();
 //			$this->addPrimarySystem($scanner);			
         $scanner = new ElintScanner(8, 16, 0, 12);
-			$scanner->markMindrider();
+			$scanner->markAdvanced();
+			$scanner->markJealous(); //Jealous ELINT
 			$this->addPrimarySystem($scanner);	        
 		$this->addPrimarySystem(new Engine(8, 20, 0, 12, 3));
         $this->addPrimarySystem(new StructureSelfRepair(8, 18, 18)); //armor, structure, output

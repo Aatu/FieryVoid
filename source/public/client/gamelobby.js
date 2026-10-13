@@ -747,29 +747,67 @@ window.gamedata = {
 	   and the pre-battle-damage badge was written into only one of them and vanished on the
 	   next rebuild (PREBATTLE_DAMAGE_PLAN.md §6). Per-system refits are summarised as ONE
 	   line rather than a dozen - the detail is in each system's own tooltip
-	   (WEAPON_ENHANCEMENTS_PLAN.md §6.4). */
+	   (WEAPON_ENHANCEMENTS_PLAN.md §6.4).
+	   Each line carries its own cost and the row's cost is the unit WITHOUT them (user
+	   2026-10-08), so the row and its lines add up to what the row charges - see rowDisplay. */
 	enhancementListHtml: function enhancementListHtml(ship) {
-		var listHtml = "";
-		var hasEnhancements = false;
+		var lines = gamedata.enhancementLines(ship);
+		if (!lines.length) return '';
+
+		var listHtml = '';
+		lines.forEach(function (line) {
+			listHtml += '<div class="ship-enhancement-entry"><span class="ship-enhancement-name">- ' + line.text + '</span>'
+				+ (line.cost ? '<span class="ship-enhancement-cost">' + gamedata.formatEnhancementCost(line.cost) + '</span>' : '')
+				+ '</div>';
+		});
+		return '<div class="ship-enhancements">' + listHtml + '</div>';
+	},
+
+	/* The fleet-list row's enhancement lines, in display order, each with what it costs the ROW
+	   (a bulk row's lines are for all its units). Ship-level lines come in reverse purchase order,
+	   then ONE line for the per-system refits.
+	   ⚠️ A ship-level line is priced from its option the way the buy dialog seeds data('enhCost')
+	   (confirm.js): level i costs price + i x step, a choice costs its listed price, and a flight
+	   pays per craft (doBuyShip) - except an officer charged per flight (officers.flightCost, the
+	   rule the dialog prices by). The refit line is the refit bucket itself. */
+	enhancementLines: function enhancementLines(ship) {
+		var lines = [];
+		var units = gamedata.bulkCount(ship);
+		var crafts = ship.flight ? (parseInt(ship.flightSize, 10) || 1) : 1;
 
 		for (var enhId in (ship.enhancementOptions || {})) {
-			var name = lobbyEnhancements.describeTaken(ship.enhancementOptions[enhId]); //null when not taken
+			var entry = ship.enhancementOptions[enhId];
+			var name = lobbyEnhancements.describeTaken(entry); //null when not taken
 			if (name === null) continue;
 			name = name.replace(/^(\(AMMO\)|\(LIGHT AMMO\)|\(MEDIUM AMMO\)|\(HEAVY AMMO\)|\(Option\))\s*/, '');
-			hasEnhancements = true;
-			listHtml = '<div class="ship-enhancement-entry">- ' + name + '</div>' + listHtml; // Prepend to reverse order
+			var cost = window.officers
+				? officers.flightCost(entry[0], entry[2], gamedata.enhancementOptionCost(entry), crafts, officers.perCraftExtra(ship, entry[0]))
+				: gamedata.enhancementOptionCost(entry) * crafts;
+			lines.unshift({ text: name, cost: cost * units }); //reverse order
 		}
 
 		if (window.systemEnhancements) {
 			var sysEnhLine = systemEnhancements.summaryLine(ship);
-			if (sysEnhLine) {
-				hasEnhancements = true;
-				//Appended, so it reads LAST after the prepend-reversed ship-level lines above.
-				listHtml = listHtml + '<div class="ship-enhancement-entry">- ' + sysEnhLine + '</div>';
-			}
+			//LAST, after the reversed ship-level lines above
+			if (sysEnhLine) lines.push({ text: sysEnhLine, cost: (parseFloat(ship.pointCostSysEnh) || 0) * units });
 		}
+		return lines;
+	},
 
-		return hasEnhancements ? '<div class="ship-enhancements">' + listHtml + '</div>' : '';
+	//one unit's cost for one bought enhancement option - the sum the buy dialog's spinner builds
+	enhancementOptionCost: function enhancementOptionCost(entry) {
+		var count = parseInt(entry[2], 10) || 0;
+		if (count < 1) return 0;
+		if (Array.isArray(entry[7])) return Array.isArray(entry[8]) ? (Number(entry[8][count]) || 0) : 0;
+		var price = Number(entry[4]) || 0;
+		var step = Number(entry[5]) || 0;
+		return count * price + step * (count * (count - 1) / 2);
+	},
+
+	//"+1400p", "−20p" (Poor Crew refunds), "+3.5p" (the half-point mine enhancement)
+	formatEnhancementCost: function formatEnhancementCost(cost) {
+		var n = Math.round(cost * 100) / 100;
+		return (n < 0 ? '−' + Math.abs(n) : '+' + n) + 'p';
 	},
 
 	/* Re-derive ONE fleet-list row's mutable content from the ship. Called by the React
@@ -851,13 +889,17 @@ window.gamedata = {
 	},
 
 	/* The name and cost a fleet-list row displays. A bulk row shows the whole purchase:
-	   "Gravitic Mine (10)" at the cost of all ten. */
+	   "Gravitic Mine (10)" at the cost of all ten. The cost leaves out the enhancements, which
+	   enhancementListHtml prices line by line underneath (user 2026-10-08) - taken off the row's
+	   real charge, so the row and its lines always add up to it. */
 	rowDisplay: function rowDisplay(ship) {
 		var count = gamedata.bulkCount(ship);
+		var enhancements = 0;
+		gamedata.enhancementLines(ship).forEach(function (line) { enhancements += line.cost; });
 
 		return {
 			name: count > 1 ? ship.name + ' (' + count + ')' : ship.name,
-			cost: Math.ceil(gamedata.rowPointCost(ship))
+			cost: Math.ceil(Math.round((gamedata.rowPointCost(ship) - enhancements) * 100) / 100)
 		};
 	},
 
@@ -1042,6 +1084,9 @@ window.gamedata = {
 		var totalShips = 0;
 		var customShipPresent = false;
 		var enhancementPresent = false;
+		//KIRISHIAC_ORBITAL_REFITS_PLAN.md R6: Ancient ships carrying Advanced Gravitic Shields, out of every non-flight unit
+		var advGravShieldShips = 0;
+		var nonFlightUnits = 0;
 		var uniqueShipPresent = false;
 		var ancientUnitPresent = false;
 		var specialVariantPresent = false;
@@ -1574,6 +1619,12 @@ window.gamedata = {
 				warningFound = true;
 			}
 			if ((lship.base == true) || (lship.osat == true && !lship.mine)) staticPresent = true;
+			/* "Only 25% of the fleet's vessels may have shields at all" - an ANCIENT-hull rule (A8); a
+			   Primordial hull is limited by rating instead, so it does not count here. Ships, not flights. */
+			if (!lship.flight) {
+				nonFlightUnits++;
+				if (lship.factionAge == 3 && window.systemEnhancements && systemEnhancements.carriesAdvGravShields(lship)) advGravShieldShips++;
+			}
 			if (lship.isCombatUnit != true) nonCombatPresent = true;
 			//check for presence of enhancements
 			if (!enhancementPresent) { //if already found - no point in checking
@@ -1680,6 +1731,20 @@ window.gamedata = {
 				checkResult += potProblemEntry.text + " <span class='fc-bad'>NOT OK!</span>" + "<br>";
 				problemFound = true;
 			}
+		}
+
+		//Kirishiac Advanced Gravitic Shields (R6): shown only when the fleet carries any. Rounds DOWN.
+		if (advGravShieldShips > 0) {
+			var advGravShieldLimit = Math.floor(nonFlightUnits * 0.25);
+			checkResult += "Advanced Gravitic Shields: " + advGravShieldShips + " of " + nonFlightUnits
+				+ " ships (max " + advGravShieldLimit + ", 25%)";
+			if (advGravShieldShips <= advGravShieldLimit) {
+				checkResult += R_OK;
+			} else {
+				checkResult += R_TOOMANY;
+				problemFound = true;
+			}
+			checkResult += "<br>";
 		}
 
 
@@ -4139,13 +4204,13 @@ window.gamedata = {
 				ship.enhancementOptions[enhNo][2] = noTaken;
 				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight) {
-						ship.pointCostEnh += target.data("enhCost") * flightSize;
+						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
 					} else {
 						ship.pointCostEnh += target.data("enhCost");
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
-						ship.pointCostEnh2 += target.data("enhCost") * flightSize;
+						ship.pointCostEnh2 += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
 					} else {
 						ship.pointCostEnh2 += target.data("enhCost");
 					}
@@ -4350,13 +4415,13 @@ window.gamedata = {
 				ship.enhancementOptions[enhNo][2] = noTaken;
 				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight) {
-						ship.pointCostEnh += target.data("enhCost") * flightSize;
+						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
 					} else {
 						ship.pointCostEnh += target.data("enhCost");
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
-						ship.pointCostEnh2 += target.data("enhCost") * flightSize;
+						ship.pointCostEnh2 += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
 					} else {
 						ship.pointCostEnh2 += target.data("enhCost");
 					}
@@ -4570,13 +4635,13 @@ window.gamedata = {
 				ship.enhancementOptions[enhNo][2] = nowTaken;
 				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight) {
-						ship.pointCostEnh += target.data("enhCost") * flightSize;
+						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
 					} else {
 						ship.pointCostEnh += target.data("enhCost");
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
-						ship.pointCostEnh2 += target.data("enhCost") * flightSize;
+						ship.pointCostEnh2 += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
 					} else {
 						ship.pointCostEnh2 += target.data("enhCost");
 					}
@@ -5223,8 +5288,9 @@ window.gamedata = {
 			confirm.fleetNotice("Fleet loaded. Saved " + skipped.join(" and ") + " were not applied.");
 		}
 
+		//per-system refits re-priced or dropped, and (OFFICERS_PLAN.md §4.9) officers no longer offered, refunded
 		if (Array.isArray(sysEnhNotice) && sysEnhNotice.length > 0) {
-			confirm.fleetNotice("System enhancements changed since this fleet was saved: "
+			confirm.fleetNotice("Enhancements changed since this fleet was saved: "
 				+ sysEnhNotice.join(" "));
 		}
 

@@ -68,6 +68,15 @@ ShipSystem.prototype.canDeactivate = function () {
 ShipSystem.prototype.isScanner = function () {
 	return false;
 };
+
+/* Does this system's listed special ability actually work right now? Asked by
+   shipManager.getSpecialAbilitySystem for each ability a system lists, after its own destroyed /
+   offline tests. True everywhere except where a class says otherwise - a Jealous ELINT array
+   answers false for "ELINT" on a turn it is not designated (TRIAD_ADVANCED_FEATURES_PLAN.md §3),
+   the client twin of ElintScanner::getSpecialAbilityList on the server. */
+ShipSystem.prototype.isSpecialAbilityActive = function (ability) {
+	return true;
+};
 ShipSystem.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
 	this.individualNotesTransfer = "";
 	return false;

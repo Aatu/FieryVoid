@@ -1847,34 +1847,86 @@ class HyperplasmaCutter extends Weapon{
 	private $sustainedTarget = array();
 	private $sustainedSystemsHit = array();
 
-	// Each HPC-intercept selfIntercept order represents one intercept shot.
-	// shots = number of dice on that order; each die = 5% hit reduction.
-	// getInterceptionMod uses the count of already-created 'intercept' orders
-	// to determine which selfIntercept order is next in the queue — safe because
-	// getBestInterception calls this multiple times per shot without creating
-	// intercept orders, so the count stays stable during that evaluation loop.
-	// The engine optimises intercept allocation automatically.
+	/* DEFENSIVE DICE (TRIAD_ADVANCED_FEATURES_PLAN.md §2). Two kinds of defensive order, both worth
+	   dice x 5% against ONE incoming shot:
+	     - a BLOCK: 'selfIntercept' + 'HPC-intercept', shots = dice. Made by the self-interception
+	       dialog ("9 dice as one 45% intercept, or three 15% ones"); the automation gives each block
+	       one shot.
+	     - a MANUAL order: 'intercept' + 'HPC-intercept', shots = dice (one per click), naming the shot.
+	   Firing::automateIntercept credits the manual orders first (its totals loop) and only then lets
+	   the automation spend the blocks, so this answers in exactly that sequence. The position in it is
+	   $firedDefensivelyAlready, which addToInterceptionTotal -> fireDefensively bumps once per credited
+	   interception, manual or automated; getBestInterception asks repeatedly WITHOUT crediting, so the
+	   answer holds still while the automation weighs its options.
+	   ⚠️ NOT "how many intercept orders exist", which is what this used to key on: every manual order is
+	   already in the array when the first one is credited, so each was paired with the wrong block, or
+	   with none and worth 0. */
 	public function getInterceptionMod($gamedata, $intercepted){
 		if ($this->overloadshots > 0) return 0;
 		if (!empty($this->sustainedTarget)) return 0;
 
-		$assignedCount = 0;
-		foreach ($this->fireOrders as $order){
-			if ($order->type == "intercept" && $order->turn == $gamedata->turn) $assignedCount++;
-		}
+		$sequence = $this->getDefensiveDiceSequence($gamedata->turn);
+		$next = $this->firedDefensivelyAlready;
+		if (!isset($sequence[$next])) return 0;
+		return $sequence[$next] * $this->intercept * 5;
+	}
 
-		$interceptOrders = array();
-		foreach ($this->fireOrders as $order){
-			if ($order->type == "selfIntercept" &&
-				$order->turn == $gamedata->turn &&
-				strpos($order->notes ?? '', 'HPC-intercept') !== false &&
-				$order->shots > 0){
-				$interceptOrders[] = $order->shots;
+	/* This cutter's defensive dice in crediting order - manual orders, then blocks largest first - held to the SHIP's
+	   pool (ruling H3, 2026-10-09: the cutters share their dice, even for intercept). A block may hold more
+	   dice than its own cutter has; what bounds it is every intact cutter's dice, less what the offensive
+	   shots took ($damageDice, captured by beforeFiringOrderResolution, holds each primary shot's WHOLE
+	   dice - subordinates carry none), shared out across the cutters in id order. So a doctored order
+	   cannot buy more interception than the ship has dice.
+	   A manual order stays in the list even at 0, because the totals loop credits it (and so moves
+	   $firedDefensivelyAlready on) whatever it is worth. An empty block is left out, because the
+	   automation never credits a 0 and every block behind it would be stranded. */
+	private function getDefensiveDiceSequence($turn){
+		$ship = $this->getUnit();
+		$cutters = array();
+		if ($ship){
+			foreach ($ship->systems as $system){
+				if ($system instanceof HyperplasmaCutter && !$system->isDestroyed()) $cutters[] = $system;
 			}
 		}
+		if (!in_array($this, $cutters, true)) $cutters = array($this);
 
-		if ($assignedCount >= count($interceptOrders)) return 0;
-		return $interceptOrders[$assignedCount] * $this->intercept * 5;
+		$left = 0;
+		foreach ($cutters as $cutter){
+			$left += $cutter->maxDice;
+			foreach ($cutter->damageDice as $dice) $left -= (int)$dice;
+		}
+		$left = max(0, $left);
+
+		$mine = array();
+		foreach ($cutters as $cutter){
+			foreach ($cutter->getOwnDefensiveDice($turn) as $dice){
+				$dice = max(0, min($dice, $left));
+				$left -= $dice;
+				if ($cutter === $this) $mine[] = $dice;
+			}
+		}
+		return $mine;
+	}
+
+	/* This cutter's own defensive orders this turn: manual orders as declared (the totals loop credits them in
+	   array order), then blocks LARGEST FIRST (user, 2026-10-09). The automation hands each block in turn to the
+	   shot it stops the most expected damage on (Firing::getBestInterception), so leading with the biggest puts
+	   it on the most dangerous shot - whatever order the player entered the rows in, or in however many dialogs.
+	   Game 4455 turn 2 spent a 5 and a 3 while a 9 entered earlier sat unused. */
+	public function getOwnDefensiveDice($turn){
+		$manual = array();
+		$blocks = array();
+		foreach ($this->fireOrders as $order){
+			if ($order->turn != $turn) continue;
+			if (strpos($order->notes ?? '', 'HPC-intercept') === false) continue;
+			if ($order->type == "intercept"){
+				$manual[] = (int)$order->shots;
+			} else if ($order->type == "selfIntercept" && $order->shots > 0){
+				$blocks[] = (int)$order->shots;
+			}
+		}
+		rsort($blocks);
+		return array_merge($manual, $blocks);
 	}
 
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -1893,7 +1945,8 @@ class HyperplasmaCutter extends Weapon{
 		}
 		$ship = $this->getUnit();
 		$count = $ship ? $this->countShipHyperplasmaCutters($ship) : 1;
-		$this->data["Special"] .= "Base pool: " . $this->maxDice . "d10 per cutter, freely allocated across any number of targets with no accuracy penalty. Right-click to allocate dice to defensive intercept shots (each die = -5% hit chance on one incoming shot).";
+		$this->data["Special"] .= "Base pool: " . $this->maxDice . "d10 per cutter, freely allocated across any number of targets with no accuracy penalty.";
+		$this->data["Special"] .= "<br>Defensive fire: each die gives -5% to hit against one incoming shot, drawn from the same shared pool. Use the self-intercept (shield) button to commit defensive shots (e.g. 9 dice as one -45% intercept, or three -15% ones), or select a cutter in the Firing phase and click an incoming shot's hit chance to put one die on it per click.";
 		$this->data["Special"] .= "<br>This ship has {$count} cutter(s), giving a maximum pool of " . (10*$count) . "d10.";
 		$this->data["Special"] .= "<br>Sustained mode (Mode 2) requires ALL cutters to commit ALL dice to one target. Sustains for up to 3 turns (auto-hit turns 2-3). Cooldown of 1 turn applies after sustain. Blocks defensive intercept while active.";
 		if (!empty($this->sustainedTarget)){
@@ -2018,10 +2071,23 @@ class HyperplasmaCutter extends Weapon{
 			}
 		}
 
-		// Capture dice counts and nullify subordinate orders.
+		/* Capture dice counts, nullify subordinate orders - and size $guns for interception
+		   (TRIAD_ADVANCED_FEATURES_PLAN.md §2.3). Firing::automateIntercept gives a split-shot weapon a
+		   budget of `guns - count(orders) + selfIntercepts`, so counting every order that is NOT a
+		   selfIntercept once, plus one per defensive block, makes that budget come out at exactly the
+		   number of blocks: the automation spends each block once and nothing more. The same figure
+		   keeps validateManualIntercept's gun cap clear of the manual orders (they are counted here) and
+		   keeps isValidInterceptor true only while a block is left.
+		   The old sum counted every block twice and skipped subordinate orders, so a cutter that had lent
+		   dice to another cutter's shot could be left with no budget for its own blocks. */
 		$this->guns = 0;
 		foreach ($this->fireOrders as $order){
-			if ($order->type == 'selfIntercept' && $order->shots == 0) continue;
+			if ($order->type == 'selfIntercept'){
+				if (strpos($order->notes ?? '', 'HPC-intercept') !== false && $order->shots > 0) $this->guns++;
+				continue;
+			}
+
+			$this->guns++;
 
 			// HPC-subordinate: nullify — dice already on primary order.
 			if ($order->type == 'normal'
@@ -2035,20 +2101,9 @@ class HyperplasmaCutter extends Weapon{
 				continue;
 			}
 
-			$this->guns++;
 			if ($order->type == "normal"){
 				$this->damageDice[$order->id] = $order->shots;
 				$order->shots = 1;
-			}
-		}
-
-		// Add one gun per HPC-intercept selfIntercept order so the engine's
-		// intercept loop runs the correct number of times for this cutter.
-		foreach ($this->fireOrders as $order){
-			if ($order->type == 'selfIntercept' &&
-				strpos($order->notes ?? '', 'HPC-intercept') !== false &&
-				$order->shots > 0){
-				$this->guns++;
 			}
 		}
 	}

@@ -2336,8 +2336,8 @@ class CloakingDevice extends ShipSystem implements SpecialAbility{
 					// Apply detection multiplier based on ship type
 					if ($otherShip->base) {
 						$totalDetection = floor($totalDetection * 1.5);
-					} elseif ($otherShip->hasSpecialAbility("ELINT")) {
-						//$totalDetection *= 1;				
+					} elseif ($otherShip->hasSpecialAbility("ELINT") && ElintModules::elintReaches($otherShip, $ship)) { //Kirishiac ELINT modules: in arc only (refits plan R10)
+						//$totalDetection *= 1;
 						$totalDetection = floor($totalDetection * 1.5);
 //						$bonusDSEW = $otherShip->getEWByType("Detect Stealth", $gameData->turn);	
 //						$totalDetection += $bonusDSEW;
@@ -3800,7 +3800,7 @@ public $name = "TrekShieldProjection";
 
 //New version of Phaser so it can be adjusteted in KellyTrek without affecting existing Trek units
 class TrekPhaserKelly extends TrekPhaserBase{
-		public $name = "TrekPhaser";
+		public $name = "TrekPhaserKelly";
         public $displayName = "Type 6 Phaser";
         public $iconPath = "TrekPhaserM.png"; 
         //public $animationExplosionScale = 0.3;
@@ -3829,7 +3829,7 @@ class TrekPhaserKelly extends TrekPhaserBase{
 
         public $boostable = true;
         public $boostEfficiency = 0;
-        public $maxBoostLevel = 6;		
+        public $maxBoostLevel = 3;		
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $guns = 2){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
 			if ( $maxhealth == 0 ) $maxhealth = 7;
@@ -3994,12 +3994,12 @@ class TrekPhaserKellyType7 extends TrekPhaserBase{
 		public $shots = 0;	
         public $defaultShots = 0;		
         public $rangePenalty = 0.3; //1.5 per hex.
-        public $rangePenaltyArray = array(1=> 0.3, 2=> 1);		
+        public $rangePenaltyArray = array(1=> 0.3, 2=> 0.3);		
         public $fireControl = array(3, 3, 3);
-        public $fireControlArray = array(1=> array(3, 3, 3), 2=> array(6, 2, 0));		
+        public $fireControlArray = array(1=> array(3, 3, 3), 2=> array(3, 3, 3));		
 
         public $damageType = "Raking";
-		public $damageTypeArray = array( 1 => "Raking", 2=> "Standard");		
+		public $damageTypeArray = array( 1 => "Raking", 2=> "Raking");		
 		public $weaponClass = "Particle";
 		public $firingModes = array( 1 => "Sustained", 2=> "Normal");
 		public $uninterceptable = true;
@@ -4014,7 +4014,7 @@ class TrekPhaserKellyType7 extends TrekPhaserBase{
 
         public $boostable = true;
         public $boostEfficiency = 0;
-        public $maxBoostLevel = 7;			
+        public $maxBoostLevel = 3;			
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $shots = 2){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
 			if ( $maxhealth == 0 ) $maxhealth = 7;

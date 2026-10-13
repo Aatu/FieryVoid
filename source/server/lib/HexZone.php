@@ -22,6 +22,10 @@
  *
  * The originals both delegate here, so there is exactly one copy of each routine.
  *
+ * ONE DELIBERATE EXCEPTION (2026-10-08): cubeRound() no longer calls PHP's round(). It uses
+ * roundHalfAwayFromZero() below, so the line no longer changes with the PHP version and stays
+ * in step with the client mirror. See the comment on that helper.
+ *
  * Design record: WALKERS_OF_SIGMA_PLAN.md section 2.3 (Stage 0).
  */
 class HexZone
@@ -61,9 +65,9 @@ class HexZone
 	}
 
     private static function cubeRound($x, $y, $z) {
-        $rx = round($x);
-        $ry = round($y);
-        $rz = round($z);
+        $rx = self::roundHalfAwayFromZero($x);
+        $ry = self::roundHalfAwayFromZero($y);
+        $rz = self::roundHalfAwayFromZero($z);
         $dx = abs($rx - $x);
         $dy = abs($ry - $y);
         $dz = abs($rz - $z);
@@ -75,6 +79,21 @@ class HexZone
             $rz = -$rx - $ry;
         }
         return array($rx, $ry, $rz);
+    }
+
+    /* Round half away from zero on the exact double, deliberately NOT PHP's round().
+       round() changed under this code: PHP 8.4 dropped the "pre-rounding" 8.2 applied, which moved
+       106 of 100,000 seeded lines (every one through an exact hex corner). The client mirror
+       (mathlib.hexLine's phpRound) must agree with the server on every line, so the server no longer
+       depends on what any PHP version's round() does. Rounding |x| and restoring the sign keeps the
+       subtraction exact: for x >= 0, x - floor(x) is exact in IEEE doubles, whereas for x just above
+       -0.5 it is not (-0.49999999999999994 would come out at -1). This is the same form as the JS
+       mirror, v < 0 ? -Math.round(-v) : Math.round(v). Measured identical to native round() on 8.4
+       and 8.5 and to the client mirror (LIBRARY_UPGRADES_PLAN.md section 2.4). */
+    private static function roundHalfAwayFromZero($x) {
+        if ($x < 0) return -self::roundHalfAwayFromZero(-$x);
+        $f = floor($x);
+        return ($x - $f >= 0.5) ? $f + 1 : $f;
     }
 
 	private static function cubeToOffset($cube) {

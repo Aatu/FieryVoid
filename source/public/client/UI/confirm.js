@@ -202,23 +202,32 @@ window.confirm = {
 
         var totalCost = (flightSize * fighterCost) + totalMissileCost;
 
-        // Add enhancement cost	   
-        var enhCost = 0;
+        // Add enhancement cost - per craft for a flight, except an officer charged per flight (enhRowCost)
         var enhNo = 0;
         var target = $(".selectAmount.shpenh" + enhNo);
         while (typeof target.data("enhPrice") != 'undefined') { //as long as there are enhancements defined...
-            enhCost += target.data("enhCost");
+            totalCost += confirm.enhRowCost(target, flightSize);
             //go to next enhancement
             enhNo++;
             target = $(".selectAmount.shpenh" + enhNo);
         }
-        totalCost += flightSize * enhCost;
         totalCost = Math.ceil(totalCost);
 
         totalCostSpan.data("value", totalCost);
         totalCostSpan.html(totalCost);
 
         confirm.paintBuySummary(flightSize * fighterCost, flightSize);
+    },
+
+    /* What one enhancement row's spinner costs the unit: its enhCost, times the flight size for a flight
+       (1 for anything else) - unless it is a fighter officer priced per FLIGHT, whose price is charged
+       once plus his per-craft part (officers.flightCost, the one rule; perCraftExtra was worked out when
+       the row was built). gamelobby.js's doBuyShip / doCopyShip / doEditShip read rows back through this
+       too, so the dialog and the fleet can never charge differently. */
+    enhRowCost: function enhRowCost(target, flightSize) {
+        if (!window.officers) return (target.data("enhCost") || 0) * flightSize;
+        return officers.flightCost(target.data("enhID"), target.data("count"), target.data("enhCost"),
+            flightSize, target.data("perCraftExtra"));
     },
 
     getTotalCostBulk: function getTotalCostBulk() {
@@ -326,6 +335,7 @@ window.confirm = {
                 return;
             }
         }
+        if (noTaken < 1 && confirm.officerBlocked(target)) return; //D9: one officer per flight
 
         if (noTaken < enhLimit) { //increase possible
             var newCount = noTaken + 1;
@@ -542,6 +552,7 @@ window.confirm = {
             var maxFit = confirm.getMaxAmmoFit(ship, enhID);
             if (value > maxFit) value = Math.max(0, maxFit);
         }
+        if (value > 0 && confirm.officerBlocked($(this))) value = 0; //D9: one officer per flight
 
         // Update the displayed and stored value
         confirm.enhShowLevel($(this), value);
@@ -700,6 +711,7 @@ window.confirm = {
             var maxFit = confirm.getMaxAmmoFit(ship, enhID);
             if (value > maxFit) value = Math.max(0, maxFit);
         }
+        if (value > 0 && confirm.officerBlocked($(this))) value = 0; //D9: one officer per flight
 
         // Update displayed value
         confirm.enhShowLevel($(this), value);
@@ -822,19 +834,21 @@ window.confirm = {
          .confirmok                       data shipclass / ship / originalShipData; `this` in the callback
        getTotalCost / getTotalCostBulk work every figure out; paintBuySummary only shows them. */
 
-    //Top to bottom. A section no row is filed into is never shown - which is how Officers holds its
-    //place: plan §10.2 reserves the slot, the feature itself is not designed yet.
+    //Top to bottom. A section no row is filed into is never shown, so Officers appears only on a hull
+    //that is offered one (OFFICERS_PLAN.md D10 - buySectionOf files every OFF_ row there).
     //Every section starts OPEN, however long (user, 2026-09-26 - plan §10.4's fold-past-8-rows default
     //was dropped): the player folds one away by hand if they want it out of the road.
     //`word` is what the filter box's placeholder calls the section: "Filter ammo, enhancements, options…".
     //`icon`: the head shows an icon after its title. WHICH image is confirm.css's business - each
     //section's .buySectionIcon is masked with img/Ordnance.png, Enhancements.png or Options.png and
-    //tinted to the section's colour (SHIP_ENHANCEMENTS_PLAN.md §5). Officers has none yet.
+    //tinted to the section's colour (SHIP_ENHANCEMENTS_PLAN.md §5). Officers has none yet: it waits for
+    //the art (img/Officers.png, OFFICERS_PLAN.md §4.7) and keeps the default blue meanwhile.
+    //`chip` is the section's filter-chip label (OFFICERS_PLAN.md D13) - shorter than its title for Ammo.
     BUY_SECTIONS: [
-        { key: 'ammo', title: 'Ammo &amp; Ordnance', word: 'ammo', icon: true },
-        { key: 'enhancements', title: 'Enhancements', word: 'enhancements', icon: true },
-        { key: 'options', title: 'Options', word: 'options', icon: true },
-        { key: 'officers', title: 'Officers', word: 'officers', icon: false }
+        { key: 'ammo', title: 'Ammo &amp; Ordnance', word: 'ammo', chip: 'Ordnance', icon: true },
+        { key: 'enhancements', title: 'Enhancements', word: 'enhancements', chip: 'Enhancements', icon: true },
+        { key: 'options', title: 'Options', word: 'options', chip: 'Options', icon: true },
+        { key: 'officers', title: 'Officers', word: 'officers', chip: 'Officers', icon: false }
     ],
 
     //The filter box shows from this many rows (in all sections together). A mine's three to seven
@@ -850,6 +864,8 @@ window.confirm = {
     BUY_AMMO_IDS: ['EXT_AMMO', 'EXT_HAMMO'],
 
     buySectionOf: function buySectionOf(enhancement) {
+        //OFFICERS_PLAN.md D10 - the reserved section; an OFF_ id is an officer whatever else it says
+        if (window.officers && officers.isOfficerId(enhancement[0])) return 'officers';
         if (confirm.BUY_AMMO_TAG.test(enhancement[1]) || confirm.BUY_AMMO_IDS.indexOf(enhancement[0]) !== -1) {
             return 'ammo';
         }
@@ -936,6 +952,16 @@ window.confirm = {
                 + '</section>';
         }).join('');
 
+        //Filter chips (D13): All, then one per section in BUY_SECTIONS order. Each starts hidden;
+        //addBuyChips shows the ones whose section got rows. data-section is what colours a chip.
+        var chips = '<div class="buyChips" role="toolbar" aria-label="Show sections" hidden>'
+            + '<button type="button" class="buyChip" data-chip="all" aria-pressed="true">All</button>'
+            + confirm.BUY_SECTIONS.map(function (section) {
+                return '<button type="button" class="buyChip" data-section="' + section.key + '" aria-pressed="false" hidden>'
+                    + section.chip + '</button>';
+            }).join('')
+            + '</div>';
+
         var total = function (label, modifier, amountClass) {
             return '<span class="buyDialogTotal' + modifier + '">'
                 + '<span class="buyDialogTotalLabel">' + label + '</span>'
@@ -965,6 +991,7 @@ window.confirm = {
             //+ '<div class="buyDialogFilter" hidden>'
             //+ '<input type="search" class="buyFilterInput" aria-label="Filter the rows below" autocomplete="off" spellcheck="false" enterkeyhint="next">'
             //+ '</div>'
+            + chips
             + '<div class="buyDialogSections">' + sections + '</div>'
             + '<p class="buyFilterEmpty" hidden>Nothing here matches <q></q>.</p>'
             + '</div>'
@@ -1177,6 +1204,8 @@ window.confirm = {
             selectAmountItem.data('max', enhLimit);
             selectAmountItem.data('enhPrice', enhPrice);
             selectAmountItem.data('enhPriceStep', enhPriceStep);
+            //a per-flight officer's per-craft part (the Missileer's missiles), for enhRowCost - 0 otherwise
+            selectAmountItem.data('perCraftExtra', window.officers ? officers.perCraftExtra(ship, enhID) : 0);
             //Marked before the box is first written: a stepped enhancement shows the quantity its
             //level buys (and cannot be typed into); step 1 - every one but Extra Tendrils - leaves
             //the row as it was.
@@ -1189,7 +1218,9 @@ window.confirm = {
             selectAmountItem.on("keydown", confirm.preventNonNumericInput);
             selectAmountItem.on("wheel", confirm.handleMouseWheel);
 
-            $(".buyRowNote", item).html(confirm.enhancementPriceNote(enhLimit, enhPrice, enhPriceStep, enhStep, section === 'ammo'));
+            var officerNote = window.officers ? officers.priceNote(ship, enhancement) : null;
+            $(".buyRowNote", item).html(officerNote !== null ? officerNote
+                : confirm.enhancementPriceNote(enhLimit, enhPrice, enhPriceStep, enhStep, section === 'ammo'));
 
             $(".plusButton", item).data("enhNo", i).on("click", confirm.doOnPlusEnhancement);
             $(".minusButton", item).data("enhNo", i).on("click", confirm.doOnMinusEnhancement);
@@ -1199,6 +1230,38 @@ window.confirm = {
             //a choice-valued option (Chameleon disguise) swaps the spinner for a dropdown; no-op otherwise
             confirm.applyEnhancementChoiceWidget(item, enhancement);
         }
+        confirm.addOfficerLimitNote(e, ship);
+    },
+
+    /* D9: a flight carries ONE officer in total. Its Officers section says so up front, and a second one
+       is refused (officerBlocked) with that line flashing - a passive notice, never a dialog
+       (feedback_passive_notices). A ship may carry one of each, so it gets no line. The server does not
+       trust the dialog: Officers::pickPosts serves only the first officer row on a flight. */
+    OFFICER_LIMIT_NOTE: 'A flight may carry only one officer.',
+
+    addOfficerLimitNote: function addOfficerLimitNote(e, ship) {
+        if (!ship || !ship.flight) return;
+        var body = confirm.buySectionBody(e, 'officers');
+        if (!$(".buyRow", body).length) return;
+        $('<p class="buySectionNote buyOfficerNote"></p>').text(confirm.OFFICER_LIMIT_NOTE).prependTo(body);
+    },
+
+    /* Would raising this row's count put a SECOND officer on a flight? True for a fighter officer's row
+       while another officer row of the same dialog is already bought. */
+    officerBlocked: function officerBlocked(target) {
+        if (!window.officers || !officers.isFighterOfficer(target.data("enhID"))) return false;
+        var dialog = target.closest(".confirm");
+        var taken = $(".selectAmount", dialog).filter(function () {
+            var other = $(this);
+            return this !== target[0] && officers.isOfficerId(other.data("enhID")) && (other.data("count") || 0) > 0;
+        });
+        if (!taken.length) return false;
+        var note = $(".buyOfficerNote", dialog);
+        //restart the flash: drop the class, force a reflow, add it back
+        note.removeClass("is-flash");
+        if (note.length) void note[0].offsetWidth;
+        note.addClass("is-flash");
+        return true;
     },
 
     /* A fighter flight's missiles, into Ammo & Ordnance - bought PER LAUNCHER, and every craft in the
@@ -1256,6 +1319,43 @@ window.confirm = {
         $(".buyDialogSections", e).prop("hidden", used.length === 0);
 
         confirm.addBuyFilter(e, used);
+        confirm.addBuyChips(e, used);
+    },
+
+    /* The filter chips (OFFICERS_PLAN.md D13). One chip per section that got rows, plus All; no chip
+       row at all with fewer than two sections, since a chip that filters down to the only section
+       there is would do nothing.
+       ⭐ A chip HIDES sections, it never empties one - the promise the text filter makes too: every
+       row stays in the dialog, so the .shpenh<N> spinners, the totals and gamelobby.js's read-back
+       all still see it, and a purchase made under one chip survives picking another. The choice
+       lasts for this dialog only. If the text filter box ever returns, the two combine:
+       filterBuyRows only walks the sections that are shown. */
+    addBuyChips: function addBuyChips(e, used) {
+        var chips = $(".buyChips", e);
+        if (used.length < 2 || chips.data("ready")) return;
+        chips.data("ready", true);
+
+        used.each(function () {
+            $('.buyChip[data-section="' + this.getAttribute("data-section") + '"]', chips).prop("hidden", false);
+        });
+        chips.prop("hidden", false);
+
+        chips.on("click", ".buyChip", function () {
+            confirm.pickBuyChip(e, used, this.getAttribute("data-section")); //null for All
+        });
+    },
+
+    //Show only the section `key` (null = all of them); a picked section is shown open.
+    pickBuyChip: function pickBuyChip(e, used, key) {
+        $(".buyChip", e).each(function () {
+            var picked = key ? this.getAttribute("data-section") === key : this.getAttribute("data-chip") === "all";
+            this.setAttribute("aria-pressed", picked ? "true" : "false");
+        });
+        used.each(function () {
+            var show = !key || this.getAttribute("data-section") === key;
+            this.hidden = !show;
+            if (show && key) confirm.setBuySectionOpen($(this), true);
+        });
     },
 
     /* The filter box (plan §10.2, Stage 10), for "I know the name of the one I want" - which a B5W
@@ -1334,8 +1434,9 @@ window.confirm = {
             //:last-child cannot skip a hidden row, so the last one SHOWN drops its rule by class.
             rows.removeClass("is-lastShown");
             shown.last().addClass("is-lastShown");
-            //"Missiles are bought per missile launcher" goes with the missile rows.
-            $(".buySectionNote", this).prop("hidden", shown.filter(".buyMissileRow").length === 0);
+            //"Missiles are bought per missile launcher" goes with the missile rows (the officer limit
+            //line goes with its section, so it is left alone).
+            $(".buySectionNote", this).not(".buyOfficerNote").prop("hidden", shown.filter(".buyMissileRow").length === 0);
 
             if (filtering) {
                 if (!wasFiltering) section.data("openBeforeFilter", $(".buySectionHead", this).attr("aria-expanded") === "true");
@@ -1352,9 +1453,10 @@ window.confirm = {
 
     /* Paint what getTotalCost / getTotalCostBulk worked out: the Base Hull line, each row's cost and
        each section's count + subtotal. `base` is the hull figure they priced from, and `each` what an
-       enhancement's per-craft cost is multiplied by (the flight size; 1 otherwise), so Base Hull plus
-       every subtotal is the total. The bulk dialog works per unit: there that sum is the Per Unit
-       figure, and the total is it times the quantity. */
+       enhancement's per-craft cost is multiplied by (the flight size; 1 otherwise - enhRowCost, so a
+       per-flight officer is charged once), so Base Hull plus every subtotal is the total. The bulk
+       dialog works per unit: there that sum is the Per Unit figure, and the total is it times the
+       quantity. */
     paintBuySummary: function paintBuySummary(base, each) {
         var dialog = $(".confirm.buyDialog");
         if (!dialog.length) return;
@@ -1379,7 +1481,7 @@ window.confirm = {
 
                 if (typeof amount.data("enhPrice") !== 'undefined') {
                     isTaken = amount.data("count") > 0;
-                    cost = (amount.data("enhCost") || 0) * each;
+                    cost = confirm.enhRowCost(amount, each);
                 } else if (typeof amount.data("firingMode") !== 'undefined') {
                     var value = amount.data("value") || 0;
                     isTaken = value > 0;
@@ -1895,6 +1997,49 @@ window.confirm = {
 
 
 
+    /* Themed replacement for the browser's number-input spinner. The native arrows are
+       drawn by the UA in its own colours - white on the dark multi-value dialogs - and cannot
+       be recoloured: Firefox exposes no hook at all, and resetting the appearance of
+       Blink's ::-webkit-inner-spin-button also kills its click behaviour. So the native
+       pair is hidden (see .stepper-input in confirm.css) and replaced with these, which
+       are ordinary elements and therefore themeable.
+
+       They read min/max/step straight off the input - including a max the caller rewrites
+       as the rest of the dialog changes (askForMultipleValues' clampRow, the Hyperplasma
+       Cutter's shot rows) - and fire `change`, so a click runs exactly the same clamp/readout
+       path a native click would. Used by askForMultipleValues and hyperplasmaIntercept. */
+    attachStepper: function attachStepper(field) {
+        field.addClass('stepper-input');
+
+        var stepper = $('<span class="multi-value-stepper"></span>');
+        var up = $('<span class="multi-value-step up"></span>').appendTo(stepper);
+        var down = $('<span class="multi-value-step down"></span>').appendTo(stepper);
+
+        var nudge = function (direction) {
+            var step = parseInt(field.attr('step'));
+            var min = parseInt(field.attr('min'));
+            var max = parseInt(field.attr('max'));
+            if (isNaN(step) || step < 1) step = 1;
+
+            var current = parseInt(field.val());
+            if (isNaN(current)) current = isNaN(min) ? 0 : min;
+
+            var next = current + (direction * step);
+            if (!isNaN(min) && next < min) next = min;
+            if (!isNaN(max) && next > max) next = max;
+            if (next === current) return;
+
+            field.val(next).trigger('change');
+        };
+
+        // mousedown rather than click so holding the pointer down doesn't steal focus
+        // from the field mid-edit, and so the arrow responds on press like a real spinner.
+        up.on('mousedown', function (ev) { ev.preventDefault(); nudge(1); });
+        down.on('mousedown', function (ev) { ev.preventDefault(); nudge(-1); });
+
+        stepper.insertAfter(field);
+    },
+
     /* Numeric allocation dialog - one row per item, each row a main numeric input plus
        two OPTIONAL companions:
          item.multiplier   -> a "shots" count input; the main value is spent PER shot, so
@@ -1921,54 +2066,18 @@ window.confirm = {
        them - it just limits how much set damage each of those shots may carry.
 
        Rows with an extra pool also print a live "left:" readout that drains as the player
-       types, so both pools can be watched without doing the arithmetic. */
-    askForMultipleValues: function (msg, inputs, callback) {
+       types, so both pools can be watched without doing the arithmetic.
+
+       options.cssClass adds a class to the dialog - a weapon's own skin over the default purple
+       one (the Hyperplasma Cutter's green, .hpcConfirm in confirm.css). */
+    askForMultipleValues: function (msg, inputs, callback, options) {
         var e = $('<div class="confirm error multi-value-confirm"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        if (options && options.cssClass) e.addClass(options.cssClass);
         $('<div class="multi-value-header">' + msg + '</div>').prependTo(e);
 
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
-        /* Themed replacement for the browser's number-input spinner. The native arrows are
-           drawn by the UA in its own colours - white on this dark purple dialog - and cannot
-           be recoloured: Firefox exposes no hook at all, and resetting the appearance of
-           Blink's ::-webkit-inner-spin-button also kills its click behaviour. So the native
-           pair is hidden (see .stepper-input in confirm.css) and replaced with these, which
-           are ordinary elements and therefore themeable.
-
-           They read min/max/step straight off the input - including the max that clampRow
-           rewrites as the shot count changes - and fire `change`, so a click runs exactly the
-           same clamp/readout path a native click would. */
-        var attachStepper = function (field) {
-            field.addClass('stepper-input');
-
-            var stepper = $('<span class="multi-value-stepper"></span>');
-            var up = $('<span class="multi-value-step up"></span>').appendTo(stepper);
-            var down = $('<span class="multi-value-step down"></span>').appendTo(stepper);
-
-            var nudge = function (direction) {
-                var step = parseInt(field.attr('step'));
-                var min = parseInt(field.attr('min'));
-                var max = parseInt(field.attr('max'));
-                if (isNaN(step) || step < 1) step = 1;
-
-                var current = parseInt(field.val());
-                if (isNaN(current)) current = isNaN(min) ? 0 : min;
-
-                var next = current + (direction * step);
-                if (!isNaN(min) && next < min) next = min;
-                if (!isNaN(max) && next > max) next = max;
-                if (next === current) return;
-
-                field.val(next).trigger('change');
-            };
-
-            // mousedown rather than click so holding the pointer down doesn't steal focus
-            // from the field mid-edit, and so the arrow responds on press like a real spinner.
-            up.on('mousedown', function (ev) { ev.preventDefault(); nudge(1); });
-            down.on('mousedown', function (ev) { ev.preventDefault(); nudge(-1); });
-
-            stepper.insertAfter(field);
-        };
+        var attachStepper = confirm.attachStepper;
 
         inputs.forEach(function (item) {
             var row = $('<div class="multi-value-row"></div>');
@@ -2153,6 +2262,129 @@ window.confirm = {
         var a = e.appendTo("body");
         a.fadeIn(250);
         $(".multiConfirmInput", e).first().focus();
+    },
+
+    /* Hyperplasma Cutter - Commit to interception (TRIAD_ADVANCED_FEATURES_PLAN.md §2, §9). ONE ROW PER
+       INTERCEPT SHOT, each with dice of its own - "one 9-dice intercept shot, a 5-dice intercept shot and a
+       3-dice intercept shot (or any combination using available dice)" (user, 2026-10-09). It replaced a
+       "shots x dice" row, which could only make shots of one size. Each shot is -5% per die against ONE
+       incoming shot, which the automation picks at resolution.
+
+       The rows share the ship's pool: a row may take whatever the others leave (its max is rewritten as they
+       change, so its stepper stops there too), "+ Add another intercept shot" is live while a die is unspent,
+       and a new row starts on one die. Each row prices itself ("-45%"); the footer counts what is left.
+       callback receives the dice of each row with any, in order - [9, 5, 3]. Green, as .hpcConfirm. */
+    hyperplasmaIntercept: function hyperplasmaIntercept(shipName, pool, callback) {
+        pool = Math.max(0, parseInt(pool, 10) || 0);
+        if (pool <= 0) return;
+
+        var e = $('<div class="confirm error multi-value-confirm hpcConfirm hpcIntercept"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        $('<div class="multi-value-header">Commit to interception</div>').prependTo(e);
+        var sub = $('<div class="hpcSubheader"></div>')
+            .text((shipName ? shipName + ': ' : '') + pool + ' dice available. Each intercept shot is -5% per die against one incoming shot.')
+            .insertAfter(e.find('.multi-value-header'));
+        var container = $('<div class="multi-value-container"></div>').insertAfter(sub);
+        var rowsHolder = $('<div class="hpcShotRows"></div>').appendTo(container);
+        var footer = $('<div class="multi-value-row hpcFooterRow"></div>').appendTo(container);
+        var addLink = $('<span class="hpcAddShot">+ Add another intercept shot</span>').appendTo(footer);
+        var leftReadout = $('<span class="hpcLeft"></span>').appendTo(footer);
+
+        var rows = []; //{ row, input, label, pct, remove }
+
+        var readDice = function (input) {
+            var v = parseInt(input.val(), 10);
+            return (isNaN(v) || v < 0) ? 0 : v;
+        };
+        var total = function () {
+            return rows.reduce(function (sum, r) { return sum + readDice(r.input); }, 0);
+        };
+
+        /* Only the row being edited is ever clamped - against what the OTHERS hold - so typing into one row can
+           never pull another down under the player. A box just emptied is left alone until the player leaves it. */
+        var clampRow = function (r, commit) {
+            var room = Math.max(0, pool - (total() - readDice(r.input)));
+            var raw = r.input.val();
+            if (raw === '') {
+                if (commit) r.input.val(Math.min(1, room));
+                return;
+            }
+            var v = parseInt(raw, 10);
+            if (isNaN(v) || v < 1) v = Math.min(1, room);
+            if (v > room) v = room;
+            if (String(v) !== raw) r.input.val(v);
+        };
+
+        var refresh = function () {
+            var used = total();
+            rows.forEach(function (r, i) {
+                var dice = readDice(r.input);
+                r.input.attr('max', Math.max(0, pool - (used - dice)));
+                r.label.text('Intercept shot ' + (i + 1));
+                r.pct.text(dice > 0 ? '(-' + (dice * 5) + '%)' : '');
+                //always keep one row; hidden rather than removed, so the inputs keep their column
+                r.remove.css('visibility', rows.length > 1 ? 'visible' : 'hidden');
+            });
+            var left = Math.max(0, pool - used);
+            leftReadout.text('left: ' + left + ' / ' + pool + ' dice').toggleClass('depleted', left === 0);
+            addLink.toggleClass('disabled', left === 0);
+        };
+
+        var addRow = function (dice) {
+            var row = $('<div class="multi-value-row hpcShotRow"></div>').appendTo(rowsHolder);
+            var labelBox = $('<span class="multi-value-label"></span>').appendTo(row);
+            var label = $('<span class="multi-value-name"></span>').appendTo(labelBox);
+            labelBox.append(' ');
+            var pct = $('<span class="multi-value-max hpcShotPct"></span>').appendTo(labelBox);
+
+            var inputWrapper = $('<div class="hpcShotInputs"></div>').appendTo(row);
+            var input = $('<input type="number" class="multiConfirmInput multi-value-input hpcShotInput" min="1" value="' + dice + '">').appendTo(inputWrapper);
+            confirm.attachStepper(input);
+            $('<span class="multi-value-max hpcUnit">dice</span>').appendTo(inputWrapper);
+            var remove = $('<span class="hpcRemoveShot" title="Remove this intercept shot">&#10005;</span>').appendTo(inputWrapper);
+
+            var entry = { row: row, input: input, label: label, pct: pct, remove: remove };
+            rows.push(entry);
+
+            input.on("input keyup", function () { clampRow(entry, false); refresh(); })
+                .on("change blur", function () { clampRow(entry, true); refresh(); });
+            remove.on("click", function () {
+                if (rows.length <= 1) return;
+                rows.splice(rows.indexOf(entry), 1);
+                row.remove();
+                refresh();
+            });
+            return entry;
+        };
+
+        addLink.on("click", function () {
+            var left = pool - total();
+            if (left <= 0) return;
+            var entry = addRow(1);
+            refresh();
+            entry.input.trigger("focus").trigger("select");
+        });
+
+        addRow(1);
+        refresh();
+
+        $(".confirmok", e).on("click", function () {
+            //Re-held in order, so whatever state the boxes were left in, the shots never add up past the pool.
+            var dice = [];
+            var left = pool;
+            rows.forEach(function (r) {
+                var d = Math.min(readDice(r.input), left);
+                if (d > 0) {
+                    dice.push(d);
+                    left -= d;
+                }
+            });
+            $(".confirm").remove();
+            if (dice.length > 0) callback(dice);
+        });
+        $(".confirmcancel", e).on("click", function () { $(".confirm").remove(); });
+
+        e.appendTo("body").fadeIn(250);
+        rows[0].input.trigger("focus").trigger("select");
     },
 
     // === LCV Rails (DockingCollar) — whole-ship dock/launch dialogs ===

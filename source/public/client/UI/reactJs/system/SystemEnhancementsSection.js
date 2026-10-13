@@ -94,11 +94,13 @@ class EnhancementRow extends Component {
         //stop, but keeping ONE control shape means the rows do not reflow as the player
         //clicks between systems - the same reasoning that keeps Destroy greyed rather than
         //removed in the damage half.
-        const title = row.max > 1
+        //row.note: a refit that excludes others on this system says so here (systemEnhancements.GROUP_NOTES)
+        const title = (row.max > 1
             ? `${row.label} - ${row.count}/${row.max} levels`
                 + (row.count > 0 ? `, ${row.price} pts spent` : '')
                 + (spent ? '' : `; next level ${row.nextPrice} pts`)
-            : `${row.label} - ${row.price || row.nextPrice} pts`;
+            : `${row.label} - ${row.price || row.nextPrice} pts`)
+            + (row.note ? `\n${row.note}` : '');
 
         return (
             <MenuRow $gold title={title}>

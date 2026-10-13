@@ -646,7 +646,7 @@ class LightScattergun extends ScatterGun{
 	public $animation = "bolt";
 	public $animationColor = array(190, 75, 20);
 	
-	public $intercept = 2;	
+	public $intercept = 1;	
 	public $rangePenalty = 2; //-2/hex	
 	public $priority = 4;
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals

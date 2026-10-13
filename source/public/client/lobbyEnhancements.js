@@ -26,6 +26,10 @@ window.lobbyEnhancements = {
 		var tooltipParts = [];
 		for (let entry of ship.enhancementOptions) {
 			// ID, readableName, numberTaken, limit, price, priceStep
+			//officers never enter this tooltip (OFFICERS_PLAN.md D4) - the gold box counts them from
+			//officers.listFor instead ("Officers (n)"). ⚠️ MIRROR PAIR with the officer skip in
+			//Enhancements::setEnhancementsShip / setEnhancementsFighter (EXP_MOTIV included).
+			if (window.officers && officers.isOfficerId(entry[0])) continue;
 			var line = this.describeTaken(entry);
 			if (line !== null) tooltipParts.push(line);
 		}
@@ -1336,12 +1340,8 @@ window.lobbyEnhancements = {
 						flight.swEnh = true;
 						break;
 
-					case 'EXP_MOTIV': // Expert Motivator
-						if (!flight.motivEnh) {
-							flight.notes += "<br>Expert Motivator";
-						}
-						flight.motivEnh = true;
-						break;
+					//EXP_MOTIV (Expert Motivator) is an officer since OFFICERS_PLAN.md Stage 4: listed by
+					//officers.listFor (the Officers line, the insignia on the first craft), not here
 
 					case 'EXT_AMMO': // Extra ammo
 						if (!flight.exAmmoEnh) {
@@ -1933,10 +1933,6 @@ window.lobbyEnhancements = {
 
 				case 'ELITE_SW': // Elite Pilot (SW)
 					flight.swEnh = false;
-					break;
-
-				case 'EXP_MOTIV': // Expert Motivator
-					flight.motivEnh = false;
 					break;
 
 				case 'EXT_AMMO': // Extra ammo

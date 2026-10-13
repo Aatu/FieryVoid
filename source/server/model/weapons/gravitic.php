@@ -1291,12 +1291,16 @@ class HypergravitonBlaster extends Weapon {
 		public $damageType = 'Raking'; 
     	public $weaponClass = "Gravitic";
 		public $firingModes = array(1=>"Raking");
-    	
+		private $pairing = null;	//Which Heavy Orbital is it paired with? (null on standalone mounts - Conqueror)
+		public $linkedOrbital = null; //set by KirishiacOrbital::addOrbitalWeapon - null on standalone mounts
+
 		protected $thrustBoosted = true;//Variable Front End looks for to use thrust as boost. 
 	    protected $thrustPerBoost = 6; //Variable showing how much thrust is used per boost.
 
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $pairing = null)
         {
+			$this->pairing = $pairing;
+			if ($pairing !== null) $this->displayName = 'Hypergraviton Blaster ' . $pairing;            
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
                 $maxhealth = 30;
@@ -1308,8 +1312,18 @@ class HypergravitonBlaster extends Weapon {
         }
 
         public function setThrustPerBoost($setting){
-            $this->thrustPerBoost = $setting;       
-        }        
+            $this->thrustPerBoost = $setting;
+        }
+
+		/*paired-weapon overkill (Kirishiac Citadel Heavy Orbitals) - as HypergravitonBeam: while the
+		orbital is deployed, excess damage passes into it; if the orbital is already gone the excess is
+		lost. Docked, overkill follows the normal ship flow. Standalone mounts behave normally.*/
+		public function getOverkillDestination($target){
+			if ($this->linkedOrbital === null) return null; //standalone mount - normal flow
+			if ($this->linkedOrbital->activeEffective) return null; //docked - overkill returns to the ship (combined Structure)
+			if ($this->linkedOrbital->isDestroyed() || ($this->linkedOrbital->getRemainingHealth() == 0)) return false; //orbital gone - overkill lost
+			return $this->linkedOrbital;
+		}
 
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
@@ -1318,8 +1332,14 @@ class HypergravitonBlaster extends Weapon {
 			$this->data["Special"] .= "<br>Can fire accelerated for less damage.";
 			$this->data["Special"] .= "<br> - 1 turn: 5d10 + 40";
 			$this->data["Special"] .= "<br> - 2 turns: 10d10 + 80";
-			$this->data["Special"] .= "<br>Can target multiple enemy units on a single turn, use Target Transfer List menu to build a chain of potential targets.";            
+			$this->data["Special"] .= "<br>Can target multiple enemy units on a single turn, use Target Transfer List menu to build a chain of potential targets.";
 			$this->data["Special"] .= "<br>On a miss or transfer, weapon subtracts 20 damage and re-rolls to hit until it hits or runs out of damage.";
+			if ($this->linkedOrbital !== null){
+				$this->data["Special"] .= "<br>Mounted on " . $this->linkedOrbital->displayName . ": cannot be targeted by called shots; overkill passes to the Orbital.";
+				if ($this->stowedArcStart !== null){
+					$this->data["Special"] .= "<br>Remains operational while the Orbital is docked, with a reduced arc (" . $this->stowedArcStart . ".." . $this->stowedArcEnd . " - the Arc line above always shows the arc currently in effect). May be powered down only while docked.";
+				}
+			}
 
             parent::setSystemDataWindow($turn);
         }
@@ -1886,7 +1906,19 @@ class HypergravitonBlaster extends Weapon {
 			$strippedSystem = parent::stripForJson();
 			$strippedSystem->thrustBoosted = $this->thrustBoosted;
 			$strippedSystem->thrustPerBoost = $this->thrustPerBoost;
-            if($this->thrustPerBoost == 4) $strippedSystem->data = $this->data;												
+            if($this->thrustPerBoost == 4) $strippedSystem->data = $this->data;
+			if ($this->linkedOrbital !== null){ //paired with a Heavy Orbital - dynamic state the client needs on every load (as HypergravitonBeam)
+				$strippedSystem->stowed = (bool)$this->stowed;
+				$strippedSystem->powerLocked = !$this->stowed; //deployed weapon cannot be powered down (client Off-button gate)
+				$strippedSystem->isTargetable = $this->isTargetable;
+				$strippedSystem->repairPriority = $this->repairPriority;
+				$strippedSystem->privateRepairOnly = $this->privateRepairOnly; //deployed Heavy Orbital weapon: excluded from the ship-wide SelfRepair list (only the orbital's on-board SR)
+				$strippedSystem->startArc = $this->startArc; //live arcs - reduced set while docked (applyStowedArcs)
+				$strippedSystem->endArc = $this->endArc;
+				$strippedSystem->stowedArcStart = $this->stowedArcStart; //non-null = operational while stowed (client fire/arc gates)
+				$strippedSystem->stowedArcEnd = $this->stowedArcEnd;
+				if ($this->structureHomeLocation !== null) $strippedSystem->structureHomeLocation = $this->structureHomeLocation;
+			}
 			return $strippedSystem;
 		}
 

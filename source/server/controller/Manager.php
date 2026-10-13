@@ -1240,6 +1240,22 @@ class Manager{
                 foreach ($shipEnh as $enhEntry) {
                     $enhID       = $enhEntry[0];
                     $numberTaken = $enhEntry[1];
+                    /* OFFICERS_PLAN.md §4.9 - an officer this unit is no longer offered drops out like any
+                       unmatched row, but is REFUNDED: enhvalue is one lump the lobby trusts, so dropping the
+                       row alone would leave the fleet paying for him (arch_retiring_ship_enhancement). The
+                       case met: a Hunter-Killer's Expert Motivator, bought while it was an enhancement -
+                       remote-controlled flights carry no officers (user ruling 2026-10-11). */
+                    if ((int)$numberTaken > 0 && Officers::isOfficerId($enhID)) {
+                        $offered = false;
+                        foreach ($ship->enhancementOptions as $option) if ($option[0] === $enhID) $offered = true;
+                        if (!$offered) {
+                            $refund = Officers::rowPrice($ship, $enhID);
+                            $ship->pointCostEnh = max(0, (float)$ship->pointCostEnh - $refund);
+                            $sysEnhNotices[] = $ship->name . ': ' . Officers::getLabel($enhID) . ' is no longer offered on this unit'
+                                . ' - removed, and its ' . $refund . ' points refunded.';
+                            continue;
+                        }
+                    }
                     foreach ($ship->enhancementOptions as &$option) {
                         if ($option[0] === $enhID) {
                             $option[2] = $numberTaken;

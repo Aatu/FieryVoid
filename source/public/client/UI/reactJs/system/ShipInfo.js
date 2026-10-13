@@ -1,6 +1,6 @@
 import * as React from "react";
 import styled from "styled-components"
-import { Header, Entry } from './SystemInfo';
+import { Header, Entry, OfficerHeading, OfficerEntry, OfficerName } from './SystemInfo';
 import theme from "../styled/theme";
 import buildHitChart from "../helpers/buildHitChart";
 
@@ -91,7 +91,8 @@ class ShipInfo extends React.Component {
 			}
 		}
 
-		let displayOffensiveBonus = ship.offensivebonus;
+		//an officer's stat in the lobby is added as it is shown (officers.displayStat); in game the server applied it
+		let displayOffensiveBonus = window.officers ? officers.displayStat(ship, 'offensivebonus') : ship.offensivebonus;
 		if (ship.flight && gamedata.areMinesPresent) {
 			if(ship.minesweeper){
 				displayOffensiveBonus -= window.ew.getDetectMEW(ship);
@@ -99,6 +100,23 @@ class ShipInfo extends React.Component {
 				displayOffensiveBonus -= window.ew.getDetectMEW(ship) * 2;
 			}	
 		}
+
+		/* A FLIGHT's officer (OFFICERS_PLAN.md D12, Stage 4): his post is the first craft, and hovering a
+		   craft's card shows this block rather than a system tooltip - so his line lives here: name, effect
+		   and how he left action once he has. Own team only, through officers.listFor (D4). Gold, and dimmed
+		   once he is out, exactly as SystemInfo's Officers block (its styled parts are shared). */
+		const officerTurn = window.officers ? officers.currentTurn() : 0;
+		const officerLines = (ship.flight && window.officers)
+			? officers.listFor(ship).map(entry => {
+				const officer = officers.get(entry.id);
+				const state = officers.stateText(entry);
+				return {
+					name: officers.label(entry.id),
+					text: (officer ? officer.summary : '') + (state ? ' ' + state : ''),
+					out: !officers.serves(entry, officerTurn)
+				};
+			})
+			: [];
 
 		var reactKey = 0; //needed for react so each line has unique key!
 
@@ -121,7 +139,7 @@ class ShipInfo extends React.Component {
 				   2026-07-23); the map tooltip's "Defence (F/S)" line adds the range/EW
 				   modified chance on top of these*/}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Profile - Front/Side: </Header>{ship.forwardDefense * 5}/{ship.sideDefense * 5}</Entry>}
-				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Initiative: </Header>{ship.iniativebonus}</Entry>}
+				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Initiative: </Header>{window.officers ? officers.displayIniativeBonus(ship) : ship.iniativebonus}</Entry>}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Thrust: </Header>{ship.freethrust}</Entry>}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Turn Cost: </Header>{ship.turncost}</Entry>}										
 				{ship.flight && isRevealed && ship.turndelay && <Entry key={reactKey++}><Header>Turn Delay: </Header>{ship.turndelaycost}</Entry>}											
@@ -150,6 +168,10 @@ class ShipInfo extends React.Component {
 					Object.keys(enhArray).map(i => <Entry key={reactKey++}>{enhArray[i]}</Entry>)
 				}
 				{showEnhancements && ship.enhancementTooltip != '' && isRevealed && <Entry key={reactKey++}>&nbsp;</Entry>}
+
+				{ship.flight && officerLines.length > 0 && <Entry key={reactKey++}><OfficerHeading>OFFICERS:</OfficerHeading>&nbsp;</Entry>}
+				{ship.flight && officerLines.map(line => <OfficerEntry key={reactKey++} $out={line.out}><OfficerName>{line.name}: </OfficerName>{line.text}</OfficerEntry>)}
+				{ship.flight && officerLines.length > 0 && <Entry key={reactKey++}>&nbsp;</Entry>}
 
 			</InfoContainer>
 		);

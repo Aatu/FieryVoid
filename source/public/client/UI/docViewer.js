@@ -1,6 +1,6 @@
 /*
  * docViewer.js - the Fiery Void DATA ARCHIVE: the Starter Guide, FAQ, Factions & Tiers,
- * Ammo & Options and Fleet Checker documents shown as one window over the current screen,
+ * Ship Options and Fleet Checker documents shown as one window over the current screen,
  * instead of each opening as a new web page. DOCUMENT_VIEWER_PLAN.md is the record.
  *
  * HOW A PAGE GETS IT
@@ -50,7 +50,7 @@
         { key: "starter",  page: "starterGuide.php",              src: "docs/starter-guide.html",  title: "Starter Guide",    heading: "How to Play Fiery Void" },
         { key: "faq",      page: "faq.php",                       src: "docs/faq.html",            title: "FAQ",              heading: "Fiery Void FAQ" },
         { key: "factions", page: "factions-tiers.php",            src: "docs/factions-tiers.html", title: "Factions & Tiers", heading: "Factions & Tiers" },
-        { key: "ammo",     page: "ammo-options-enhancements.php", src: "docs/ammo-options.html",   title: "Ammo & Options",   heading: "Ammo, Options & Enhancements" },
+        { key: "ammo",     page: "ammo-options-enhancements.php", src: "docs/ammo-options.html",   title: "Ship Options",     heading: "Ship Options" },
         { key: "fleet",    page: "fleetchecker.php",              src: "docs/fleet-checker.html",  title: "Fleet Checker",    heading: "Fleet Checker Rules" }
     ];
     var DOC = {};
