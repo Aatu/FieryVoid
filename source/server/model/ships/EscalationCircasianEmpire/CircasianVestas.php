@@ -93,7 +93,7 @@ class CircasianVestas extends BaseShip{
 			),
 			3=> array(
 					5 => "Thruster",
-					7 => "Light Particle Cannon",
+					7 => "Particle Cannon",
 					8 => "Light Particle Beam",
 					11 => "Rocket Launcher",
 					18 => "Structure",
@@ -101,7 +101,7 @@ class CircasianVestas extends BaseShip{
 			),
 			4=> array(
 					5 => "Thruster",
-					7 => "Light Particle Cannon",
+					7 => "Particle Cannon",
 					8 => "Light Particle Beam",
 					11 => "Rocket Launcher",
 					18 => "Structure",

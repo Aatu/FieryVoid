@@ -36,11 +36,13 @@ class VelraxReshithAuxCarrier extends MediumShipLeftRight{
 		
 		$this->addLeftSystem(new NexusIonGun(1, 2, 2, 180, 60));
         $this->addLeftSystem(new Thruster(2, 12, 0, 4, 3));
-		$this->addLeftSystem(new FighterRail(3, 6, 6, 0, 'normal'));
+		$this->addLeftSystem(new FighterRail(3, 3, 3, 0, 'light'));
+		$this->addLeftSystem(new FighterRail(3, 3, 3, 0, 'light'));
 	    
 		$this->addRightSystem(new NexusIonGun(1, 2, 2, 300, 180));
         $this->addRightSystem(new Thruster(2, 12, 0, 4, 4));    
-		$this->addRightSystem(new FighterRail(3, 6, 6, 0, 'normal'));
+		$this->addRightSystem(new FighterRail(3, 3, 3, 0, 'light'));
+		$this->addRightSystem(new FighterRail(3, 3, 3, 0, 'light'));
        
         $this->addPrimarySystem(new Structure(3, 40));
 

@@ -57,29 +57,7 @@ class VelraxKarsissFlightBase extends OSAT{
 				17 => "0:Quarters",
 				19 => "0:Scanner",
 				20 => "0:Reactor",
-			),
-			1=> array(
-				6 => "Structure",
-				8 => "2:Thruster",
-				10 => "1:Laser Spear",
-				12 => "1:Twin Ion Gun",
-				14 => "2:Catapult",
-				16 => "0:Cargo Bay",
-				17 => "0:Quarters",
-				19 => "0:Scanner",
-				20 => "0:Reactor",
-			),
-			2=> array(
-				6 => "Structure",
-				8 => "2:Thruster",
-				10 => "1:Laser Spear",
-				12 => "1:Twin Ion Gun",
-				14 => "2:Catapult",
-				16 => "0:Cargo Bay",
-				17 => "0:Quarters",
-				19 => "0:Scanner",
-				20 => "0:Reactor",
-			),
+			)
         );
     }
 }
