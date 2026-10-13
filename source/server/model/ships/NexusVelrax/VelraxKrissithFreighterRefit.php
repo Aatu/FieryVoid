@@ -43,8 +43,8 @@ class VelraxKrissithFreighterRefit extends MediumShipLeftRight{
         $this->addPrimarySystem(new CnC(2, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(2, 4, 2, 2));
         $this->addPrimarySystem(new Engine(2, 6, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(2, 12, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(2, 12, 0, 4, 2));        
+        $this->addAftSystem(new Thruster(2, 12, 0, 4, 1));
+        $this->addAftSystem(new Thruster(2, 12, 0, 4, 2));        
 		$this->addPrimarySystem(new Hangar(0, 4, 2));
 		
 		$this->addLeftSystem(new NexusIonBolter(1, 2, 2, 180, 60));
@@ -65,12 +65,12 @@ class VelraxKrissithFreighterRefit extends MediumShipLeftRight{
 	$this->hitChart = array(
 		
 		0=> array(
-			9 => "Thruster",
-			12 => "Scanner",
-			15 => "Engine",
-			17 => "Hangar",
-			19 => "Reactor",
-			20 => "C&C",
+			9 => "2:Thruster",
+			12 => "0:Scanner",
+			15 => "0:Engine",
+			17 => "0:Hangar",
+			19 => "0:Reactor",
+			20 => "0:C&C",
 		),
 
 			3=> array(

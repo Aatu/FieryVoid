@@ -118,8 +118,7 @@ class ColonialJupiterClassAM extends BaseShip{
 		
 		$this->hitChart = array(
 			0=> array(
-					9 => "Structure",
-					10 => "Thruster",
+					10 => "Structure",
 					12 => "Hyperdrive",
 					14 => "Scanner",
 					15 => "Engine",

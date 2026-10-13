@@ -9,7 +9,7 @@ class MakarSkiff extends LCV{
         $this->phpclass = "MakarSkiff";
         $this->imagePath = "img/ships/Nexus/makar_skiff2.png";
 		$this->canvasSize = 70; //img has 200px per side
-        $this->shipClass = "Makar Civilian Skiff";
+        $this->shipClass = "Makar Felk Civilian Skiff";
 		$this->unofficial = true;
 		$this->isd = 1852;
 

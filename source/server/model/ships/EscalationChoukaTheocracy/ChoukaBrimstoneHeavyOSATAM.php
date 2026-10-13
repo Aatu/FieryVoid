@@ -65,13 +65,7 @@ class ChoukaBrimstoneHeavyOSATAM extends OSAT
 					16 => "2:Heavy Point Plasma Gun",
 					18 => "Scanner",
 					20 => "Reactor",
-                ),
-				1=> array(
-                        20 => "Primary",
-                ),
-                2=> array(
-                        20 => "Primary",
-                ),
+                )
         );
 
 	}

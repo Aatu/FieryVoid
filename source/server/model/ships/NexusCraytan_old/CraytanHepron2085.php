@@ -72,7 +72,7 @@ class CraytanHepron2085 extends HeavyCombatVessel{
                     4 => "Thruster",
                     6 => "Heavy Plasma Cannon",
                     8 => "Medium Plasma Cannon",
-					10 => "Advanced Close-In Defense System",
+					10 => "Close-In Defense System",
 					18 => "Structure",
                     20 => "Primary",
             ),

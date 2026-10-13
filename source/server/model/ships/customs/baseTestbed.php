@@ -10,7 +10,8 @@ class baseTestbed extends SmallStarBaseFourSections{
 		$this->faction = "Custom Ships";
 		$this->phpclass = "baseTestbed";
 		$this->shipClass = "Base Testbed";
-		$this->imagePath = "img/ships/Babylon5.png";
+//		$this->imagePath = "img/ships/Babylon5.png";
+		$this->imagePath = "img/ships/kirishiacCitadel2.png";
 		$this->fighters = array("heavy"=>6); 
 		$this->isd = 0;
 
