@@ -36,10 +36,10 @@ class VelraxVasrevEscort extends MediumShip{
         $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 4));        
         
-		$this->addFrontSystem(new EWPlasmaArc(3, 5, 4, 240, 60));
-		$this->addFrontSystem(new EWPlasmaArc(3, 5, 4, 300, 120));
-		$this->addFrontSystem(new NexusDartInterceptor(2, 4, 1, 270, 90));
+		$this->addFrontSystem(new NexusDartInterceptor(2, 4, 1, 240, 60));
+		$this->addFrontSystem(new EWPlasmaArc(3, 5, 4, 270, 90));
 		$this->addFrontSystem(new NexusTwinIonGun(3, 4, 4, 270, 90));
+		$this->addFrontSystem(new NexusDartInterceptor(2, 4, 1, 300, 120));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
 	    
         $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    

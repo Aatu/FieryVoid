@@ -9,7 +9,7 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 		$this->smallBase = true;
 		$this->faction = "Nexus Velrax Republic";
 		$this->phpclass = "VelraxWarbase";
-		$this->shipClass = "Warbase";
+		$this->shipClass = "Kashrath Warbase";
 		$this->imagePath = "img/ships/Nexus/velraxBase.png";
 		$this->canvasSize = 140; 
 		$this->unofficial = true;
@@ -21,7 +21,7 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
 
-		$this->fighters = array("normal"=>24);
+		$this->fighters = array("normal"=>24, "superheavy"=>4);
 
 		$this->forwardDefense = 18;
 		$this->sideDefense = 18;
@@ -50,6 +50,10 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 			$hangar->startArc = 270;
 			$hangar->endArc = 90;
 			$this->addFrontSystem($hangar);
+			$catapult = new Catapult(4, 6);
+			$catapult->startArc = 270;
+			$catapult->endArc = 90;
+			$this->addFrontSystem($catapult);
 					
 		$this->addAftSystem(new LaserLance(4, 6, 4, 90, 270));
 		$this->addAftSystem(new NexusRangedPlasmaWave(4, 7, 4, 90, 270));
@@ -66,6 +70,10 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 			$hangar->startArc = 90;
 			$hangar->endArc = 270;
 			$this->addAftSystem($hangar);
+			$catapult = new Catapult(4, 6);
+			$catapult->startArc = 90;
+			$catapult->endArc = 270;
+			$this->addAftSystem($catapult);
 								
 		$this->addLeftSystem(new LaserLance(4, 6, 4, 180, 360));
 		$this->addLeftSystem(new NexusRangedPlasmaWave(4, 7, 4, 180, 360));
@@ -82,6 +90,10 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 			$hangar->startArc = 180;
 			$hangar->endArc = 360;
 			$this->addLeftSystem($hangar);
+			$catapult = new Catapult(4, 6);
+			$catapult->startArc = 180;
+			$catapult->endArc = 360;
+			$this->addLeftSystem($catapult);
 		
 		$this->addRightSystem(new LaserLance(4, 6, 4, 0, 180));
 		$this->addRightSystem(new NexusRangedPlasmaWave(4, 7, 4, 0, 180));
@@ -98,6 +110,10 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 			$hangar->startArc = 0;
 			$hangar->endArc = 180;
 			$this->addRightSystem($hangar);
+			$catapult = new Catapult(4, 6);
+			$catapult->startArc = 0;
+			$catapult->endArc = 180;
+			$this->addRightSystem($catapult);
 				
 		/*replaced by TAGed versions!
 		$this->addFrontSystem(new Structure( 4, 70));
@@ -127,7 +143,8 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 				4 => "TAG:Dual Ion Bolter",
 				5 => "TAG:Hangar",
 				9 => "TAG:Cargo Bay",
-				11 => "TAG:Ranged Plasma Wave",
+				10 => "TAG:Catapult",
+				12 => "TAG:Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -136,7 +153,8 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 				4 => "TAG:Dual Ion Bolter",
 				5 => "TAG:Hangar",
 				9 => "TAG:Cargo Bay",
-				11 => "TAG:Ranged Plasma Wave",
+				10 => "TAG:Catapult",
+				12 => "TAG:Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),	
@@ -145,7 +163,8 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 				4 => "TAG:Dual Ion Bolter",
 				5 => "TAG:Hangar",
 				9 => "TAG:Cargo Bay",
-				11 => "TAG:Ranged Plasma Wave",
+				10 => "TAG:Catapult",
+				12 => "TAG:Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -154,7 +173,8 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 				4 => "TAG:Dual Ion Bolter",
 				5 => "TAG:Hangar",
 				9 => "TAG:Cargo Bay",
-				11 => "TAG:Ranged Plasma Wave",
+				10 => "TAG:Catapult",
+				12 => "TAG:Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),

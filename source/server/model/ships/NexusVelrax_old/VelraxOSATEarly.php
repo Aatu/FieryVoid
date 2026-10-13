@@ -9,8 +9,8 @@ class VelraxOSATEarly extends OSAT{
         $this->phpclass = "VelraxOSATEarly";
         $this->imagePath = "img/ships/Nexus/velraxOSAT.png";
 			$this->canvasSize = 90; //img has 100px per side
-        $this->shipClass = "Early OSAT";
-			$this->variantOf = "Standard OSAT";
+        $this->shipClass = "Early Tesskith OSAT";
+			$this->variantOf = "Tesskith OSAT";
 			$this->occurence = "common";
 		$this->unofficial = true;
 		$this->isd = 2019;

@@ -9,7 +9,7 @@ class VelraxOSATRefit extends OSAT{
         $this->phpclass = "VelraxOSATRefit";
         $this->imagePath = "img/ships/Nexus/velraxOSAT.png";
 			$this->canvasSize = 90; //img has 100px per side
-        $this->shipClass = "Standard OSAT (2112)";
+        $this->shipClass = "Tesskith OSAT (2112)";
 		$this->unofficial = true;
 		$this->isd = 2112;
         

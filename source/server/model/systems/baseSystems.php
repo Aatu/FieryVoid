@@ -5758,6 +5758,7 @@ class DockingBay extends Hangar{
 }
 
 
+
 /* JUMP_POINTS_PLAN.md STAGES 1-2 - the Jump Engine is a Weapon that never fires.
    It is not a gun: the conversion exists because opening a hyperspace vortex is a HEX-TARGETED
    DECLARATION (plan section 3.1), and the ballistic/hextarget fire-order pipeline - client

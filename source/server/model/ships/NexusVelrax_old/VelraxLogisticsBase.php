@@ -9,11 +9,13 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 		$this->smallBase = true;
 		$this->faction = "Nexus Velrax Republic (early)";
 		$this->phpclass = "VelraxLogisticsBase";
-		$this->shipClass = "Logistics Base";
+		$this->shipClass = "Ushrist Logistics Base";
 		$this->imagePath = "img/ships/Nexus/velraxBase.png";
 		$this->canvasSize = 140; 
 		$this->unofficial = true;
 		$this->isd = 2033;
+
+        $this->notes = 'Fielded Hisskar Intra-System Transports prior to Ivren War';
 
 		$this->shipSizeClass = 3; 
 		$this->Enormous = false;
@@ -21,7 +23,7 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
 
-		$this->fighters = array("normal"=>12);
+		$this->fighters = array("normal"=>12, "superheavy"=>4);
 
 		$this->forwardDefense = 18;
 		$this->sideDefense = 18;
@@ -50,6 +52,10 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 			$hangar->startArc = 270;
 			$hangar->endArc = 90;
 			$this->addFrontSystem($hangar);
+			$catapult = new Catapult(3, 6);
+			$catapult->startArc = 270;
+			$catapult->endArc = 90;
+			$this->addFrontSystem($catapult);
 
 		$this->addAftSystem(new NexusLaserSpear(3, 5, 3, 90, 270));
 		$this->addAftSystem(new NexusRangedPlasmaWave(3, 7, 4, 90, 270));
@@ -66,6 +72,10 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 			$hangar->startArc = 90;
 			$hangar->endArc = 270;
 			$this->addAftSystem($hangar);
+			$catapult = new Catapult(3, 6);
+			$catapult->startArc = 90;
+			$catapult->endArc = 270;
+			$this->addAftSystem($catapult);
 			
 		$this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 180, 360));
 		$this->addLeftSystem(new NexusRangedPlasmaWave(3, 7, 4, 180, 360));
@@ -82,6 +92,10 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 			$hangar->startArc = 180;
 			$hangar->endArc = 360;
 			$this->addLeftSystem($hangar);
+			$catapult = new Catapult(3, 6);
+			$catapult->startArc = 180;
+			$catapult->endArc = 360;
+			$this->addLeftSystem($catapult);
 					
 		$this->addRightSystem(new NexusLaserSpear(3, 5, 3, 0, 180));
 		$this->addRightSystem(new NexusRangedPlasmaWave(3, 7, 4, 0, 180));
@@ -98,6 +112,10 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 			$hangar->startArc = 0;
 			$hangar->endArc = 180;
 			$this->addRightSystem($hangar);
+			$catapult = new Catapult(3, 6);
+			$catapult->startArc = 0;
+			$catapult->endArc = 180;
+			$this->addRightSystem($catapult);
 				
 		/*replaced by TAGed versions!		
 		$this->addFrontSystem(new Structure( 3, 70));
@@ -127,7 +145,8 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 				4 => "TAG:Twin Ion Gun",
 				5 => "TAG:Hangar",
 				9 => "TAG:Cargo Bay",
-				11 => "TAG:Ranged Plasma Wave",
+				10 => "TAG:Catapult",
+				12 => "TAG:Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -136,7 +155,8 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 				4 => "TAG:Twin Ion Gun",
 				5 => "TAG:Hangar",
 				9 => "TAG:Cargo Bay",
-				11 => "TAG:Ranged Plasma Wave",
+				10 => "TAG:Catapult",
+				12 => "TAG:Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),	
@@ -145,7 +165,8 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 				4 => "TAG:Twin Ion Gun",
 				5 => "TAG:Hangar",
 				9 => "TAG:Cargo Bay",
-				11 => "TAG:Ranged Plasma Wave",
+				10 => "TAG:Catapult",
+				12 => "TAG:Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -154,7 +175,8 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 				4 => "TAG:Twin Ion Gun",
 				5 => "TAG:Hangar",
 				9 => "TAG:Cargo Bay",
-				11 => "TAG:Ranged Plasma Wave",
+				10 => "TAG:Catapult",
+				12 => "TAG:Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),
