@@ -8,7 +8,7 @@ class ChoukaTribunalMissileCruiserRefitAM extends BaseShip{
 	$this->faction = "Escalation Wars Chouka Theocracy";
         $this->phpclass = "ChoukaTribunalMissileCruiserRefitAM";
         $this->imagePath = "img/ships/EscalationWars/ChoukaInquisitor.png";
-        $this->shipClass = "Tribunal Missile Cruiser (1948 Refit)";
+        $this->shipClass = "Tribunal Missile Cruiser (1948)";
 			$this->variantOf = "Inquisitor Light Cruiser";
 			$this->occurence = "uncommon";			
         $this->shipSizeClass = 3;

@@ -75,7 +75,7 @@ class BrixadiiLightEscortFrigate2057 extends MediumShip{
             ),
             2=> array(
 				7 => "Thruster",
-				9 => "Chaff Launcer",
+				9 => "Chaff Launcher",
 				11 => "Light Particle Beam",
 				17 => "Structure",
 				20 => "Primary",

@@ -32,7 +32,7 @@ class Acclamator extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 14, 5, 6));
         $this->addPrimarySystem(new Engine(5, 18, 0, 8, 4));
-		$this->addPrimarySystem(new Hangar(4, 4));
+		$this->addPrimarySystem(new Hangar(4, 12));
 		$this->addPrimarySystem(new JumpEngine(4, 16, 3, 24));
 
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));

@@ -52,27 +52,7 @@ class DalithornOSATEarly extends OSAT{
 				16 => "1:Light Gas Gun",
 				18 => "0:Scanner",
 				20 => "0:Reactor",
-			),
-			1=> array(
-				7 => "Structure",
-				8 => "0:Magazine",
-				10 => "2:Thruster",
-				12 => "1:Coilgun",
-				14 => "1:Shatter Gun",
-				16 => "1:Light Gas Gun",
-				18 => "0:Scanner",
-				20 => "0:Reactor",
-			),
-			2=> array(
-				7 => "Structure",
-				8 => "0:Magazine",
-				10 => "2:Thruster",
-				12 => "1:Coilgun",
-				14 => "1:Shatter Gun",
-				16 => "1:Light Gas Gun",
-				18 => "0:Scanner",
-				20 => "0:Reactor",
-			),
+			)
         );
     }
 }

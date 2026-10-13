@@ -61,9 +61,8 @@ class ChoukaRaiderGambler extends MediumShip{
 		),
 
 		1=> array(
-			4 => "Thruster",
-			7 => "Heavy Plasma Gun",
-			9 => "Point Plasma Gun",
+			5 => "Thruster",
+			8 => "Point Plasma Gun",
 			16 => "Structure",
 			20 => "Primary",
 		),

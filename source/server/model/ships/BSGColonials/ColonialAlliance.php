@@ -78,7 +78,7 @@ class ColonialAlliance extends HeavyCombatVessel{
 			),
 			2=> array(
 					6 => "Thruster",
-                    10 => "RapidGatling",
+                    10 => "Rapid Gatling Railgun",
 					18 => "Structure",
 					20 => "Primary",
 			),

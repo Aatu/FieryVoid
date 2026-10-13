@@ -39,6 +39,7 @@ class CraytanDela extends HeavyCombatVesselLeftRight{
 		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 240, 60));
 		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 120, 300));
 		$this->addLeftSystem(new CargoBay(2, 40));
+        $this->addLeftSystem(new ConnectionStrut(2));
                 
         $this->addRightSystem(new Thruster(2, 10, 0, 2, 2));
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 4));
@@ -46,6 +47,7 @@ class CraytanDela extends HeavyCombatVesselLeftRight{
 		$this->addRightSystem(new NexusCIDS(2, 4, 2, 300, 120));
 		$this->addRightSystem(new NexusCIDS(2, 4, 2, 60, 240));
 		$this->addRightSystem(new CargoBay(2, 40));
+        $this->addRightSystem(new ConnectionStrut(2));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(3, 40));
@@ -57,7 +59,7 @@ class CraytanDela extends HeavyCombatVesselLeftRight{
                     8 => "Structure",
 					10 => "1:Thruster",
 					11 => "Magazine",
-					13 => "Cargo",
+					13 => "Cargo Bay",
                     15 => "Scanner",
                     17 => "Engine",
                     19 => "Reactor",
@@ -68,7 +70,7 @@ class CraytanDela extends HeavyCombatVesselLeftRight{
                     5 => "Thruster",
 					7 => "Close-In Defense System",
 					8 => "Hangar",
-					12 => "Cargo",
+					12 => "Cargo Bay",
 					18 => "Structure",
                     20 => "Primary",
             ),
@@ -77,7 +79,7 @@ class CraytanDela extends HeavyCombatVesselLeftRight{
                     5 => "Thruster",
 					7 => "Close-In Defense System",
 					8 => "Hangar",
-					12 => "Cargo",
+					12 => "Cargo Bay",
 					18 => "Structure",
                     20 => "Primary",
             ),
