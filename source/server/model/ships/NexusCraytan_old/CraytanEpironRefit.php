@@ -91,7 +91,6 @@ class CraytanEpironRefit extends BaseShip{
 					6 => "Thruster",
 					8 => "Light Assault Cannon",
 					10 => "Light Plasma Cannon",
-					12 => "Close-In Defense System",
 					18 => "Structure",
 					20 => "Primary",
 			),

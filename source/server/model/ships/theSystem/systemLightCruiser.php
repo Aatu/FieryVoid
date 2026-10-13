@@ -45,7 +45,7 @@ class systemLightCruiser extends BaseShipNoAft{
 			$scanner->markAdvanced();
 			$this->addPrimarySystem($scanner);			
 		$this->addPrimarySystem(new Engine(5, 12, 0, 14, 4));
-		$this->addPrimarySystem(new Hangar(5, 4, 2));
+		$this->addPrimarySystem(new Hangar(5, 8, 6));
 		$this->addPrimarySystem(new ThirdspaceShieldGenerator(6, 15, 0, 30, 3, 8)); //$armor, $maxhealth, $power used, output, maxBoost, boostEfficiency
         $this->addPrimarySystem(new SelfRepair(6, 8, 6)); //armor, structure, output
 		$this->addAftSystem(new GraviticThruster(5, 15, 0, 7, 2));

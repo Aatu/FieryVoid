@@ -48,13 +48,7 @@ class BrixadiiWeaponsPlatform2107 extends OSAT{
 				16 => "1:Scatter Pulsar",
 				18 => "Scanner",
 				20 => "Reactor",
-			),
-			1=> array(
-				20 => "Primary",
-			),
-			2=> array(
-				20 => "Primary",
-			),
+			)
         );
     }
 }

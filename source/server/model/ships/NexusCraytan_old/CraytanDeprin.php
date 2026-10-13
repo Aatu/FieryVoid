@@ -53,27 +53,7 @@ class CraytanDeprin extends OSAT{
 				17 => "0:Scanner",
 				19 => "0:Reactor",
 				20 => "0:Magazine",
-			),
-			1=> array(
-				6 => "Structure",
-				8 => "2:Thruster",
-				10 => "1:Heavy Sentry Gun",
-				13 => "1:Assault Cannon Battery",
-				15 => "2:Close-In Defense System",
-				17 => "0:Scanner",
-				19 => "0:Reactor",
-				20 => "0:Magazine",
-			),
-			2=> array(
-				6 => "Structure",
-				8 => "2:Thruster",
-				10 => "1:Heavy Sentry Gun",
-				13 => "1:Assault Cannon Battery",
-				15 => "2:Close-In Defense System",
-				17 => "0:Scanner",
-				19 => "0:Reactor",
-				20 => "0:Magazine",
-			),
+			)
         );
     }
 }

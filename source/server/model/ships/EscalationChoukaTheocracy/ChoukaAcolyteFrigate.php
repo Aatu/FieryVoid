@@ -58,7 +58,7 @@ class ChoukaAcolyteFrigate extends HeavyCombatVessel{
             0=> array(
                     8 => "Structure",
                     11 => "Thruster",
-					13 => "Cargo",
+					13 => "Cargo Bay",
 					15 => "Scanner",
                     17 => "Engine",
                     19 => "Reactor",

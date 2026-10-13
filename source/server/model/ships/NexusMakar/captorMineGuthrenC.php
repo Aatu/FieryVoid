@@ -27,9 +27,16 @@ class captorMineGuthrenC extends Mine{
         $this->pivotcost = 0;	
         $this->iniativebonus = -200; 
         $this->mineType = 'Captor';         
+        $this->IFFSystem = true;         
        		    	    	    	    
         //Block all enhancements for Mine units when bought
 		Enhancements::nonstandardEnhancementSet($this, 'Mines');	 
+
+		// Remove IFF_SYS from enabled array because it's added by the 'Mines' set, but this unit already has one.
+		$iffIndex = array_search('IFF_SYS', $this->enhancementOptionsEnabled);
+		if ($iffIndex !== false) {
+			unset($this->enhancementOptionsEnabled[$iffIndex]);
+		}
 
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new MagGravReactorTechnical(0, 1, 0, 2));

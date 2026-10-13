@@ -45,7 +45,7 @@ class systemLiberatorAlt extends BaseShip{
 			$scanner->markAdvanced();
 			$this->addPrimarySystem($scanner);			
 		$this->addPrimarySystem(new Engine(5, 12, 0, 14, 4));
-		$this->addPrimarySystem(new Hangar(5, 4, 2));
+		$this->addPrimarySystem(new Hangar(5, 16, 6));
 		$this->addPrimarySystem(new ThirdspaceShieldGenerator(6, 20, 0, 40, 3, 8)); //$armor, $maxhealth, $power used, output, maxBoost, boostEfficiency
         $this->addPrimarySystem(new FusionBomb(5, 9, 5, 0, 360));
         $this->addPrimarySystem(new SelfRepair(6, 8, 4)); //armor, structure, output
