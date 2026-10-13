@@ -7,7 +7,7 @@ class kirishiacCitadel extends StarBaseSixSections{
 		$this->pointCost = 30000;
 		$this->faction = "Kirishiac Lords";     
         $this->phpclass = "kirishiacCitadel";
-        $this->imagePath = "img/ships/KirishiacCitadel.png";
+        $this->imagePath = "img/ships/kirishiacCitadel2.png";
         $this->canvasSize = 280;
         $this->shipClass = "Citadel Starbase";
         $this->isd = 'Ancient';
