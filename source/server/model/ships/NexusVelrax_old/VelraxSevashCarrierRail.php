@@ -38,10 +38,9 @@ class VelraxSevashCarrierRail extends MediumShip{
         $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 4));        
 		$this->addPrimarySystem(new FighterRail(4, 6, 6, 0, 'normal'));
         
-		$this->addFrontSystem(new NexusLaserSpear(3, 5, 3, 240, 60));
-		$this->addFrontSystem(new NexusLaserSpear(3, 5, 3, 300, 120));
-		$this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 270, 90));
+		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 7, 4, 300, 60));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
+		$this->addFrontSystem(new NexusDartInterceptor(2, 4, 1, 270, 90));
 	    
         $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
         $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
@@ -64,8 +63,8 @@ class VelraxSevashCarrierRail extends MediumShip{
 
 		1=> array(
 			6 => "Thruster",
-			8 => "Laser Spear",
-			10 => "Twin Ion Gun",
+			8 => "Plasma Wave",
+			10 => "Dart Interceptor",
 			17 => "Structure",
 			20 => "Primary",
 		),
