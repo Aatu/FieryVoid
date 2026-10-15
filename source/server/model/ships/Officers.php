@@ -100,7 +100,7 @@ class Officers{
 		   fleets carry rows under it, and a withdrawn id drops a saved row silently while its cost stays
 		   in pointCostEnh ([[arch_retiring_ship_enhancement]]) - and its old price, 10% of a craft per
 		   craft. Withheld, as before, by the nonstandard fighter sets (blockStandardEnhancements). */
-		'EXP_MOTIV' => array('label' => 'Expert Motivator', 'post' => 'craft', 'flight' => true, 'pct' => 10, 'per' => 'craft',
+		'EXP_MOTIV' => array('label' => 'Expert Motivator', 'post' => 'craft', 'flight' => true, 'pct' => 50, 'per' => 'craft',
 			'apply' => 'applyMotivator'),
 	);
 
