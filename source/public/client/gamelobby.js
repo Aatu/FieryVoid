@@ -2753,18 +2753,18 @@ window.gamedata = {
 		holder.empty().append(made).css("--picker-cols", String(best.length));
 	},
 
-	/* The picker's filters: a row shows when its tier is ticked, it passes Show Custom (and its
-	   Show Only Customs mode), and its name contains the search text. A group shows while any row in
-	   it does, and its count is how many. While a search is typed every group is shown open
-	   (.is-searching), so a match is never hidden inside a closed one. */
+	/* The picker's filters: a row shows when its tier is the chosen tier chip's (any chip's, under
+	   All), it passes Show Custom (and its Show Only Customs mode), and its name contains the search
+	   text. A group shows while any row in it does, and its count is how many. While a search is typed
+	   every group is shown open (.is-searching), so a match is never hidden inside a closed one. */
 	filterFactionList: function filterFactionList() {
 		var list = $("#factionList");
 		if (!list.length) return;
 
-		var tiers = $(".tier-filter:checked").map(function () { return $(this).attr("data-tier"); }).get();
-		//All / None read pressed while every tier chip - or none - is on.
-		$("#lbTierAll").attr("aria-pressed", tiers.length === $(".tier-filter").length ? "true" : "false");
-		$("#lbTierNone").attr("aria-pressed", tiers.length === 0 ? "true" : "false");
+		//All is every tier a chip names - as every tier chip ticked was, so a faction with no power
+		//rating yet still shows under none.
+		var tier = $(".tier-filter:checked").attr("data-tier") || "";
+		var tiers = tier !== "" ? [tier] : $(".tier-filter").map(function () { return this.getAttribute("data-tier"); }).get().filter(Boolean);
 		var showCustom = $("#toggleCustom").is(":checked");
 		var onlyCustom = showCustom && $("#customSelect").val() === "showOnlyCustom";
 		var search = String($("#factionSearch").val() || "").trim().toLowerCase();
@@ -2792,13 +2792,6 @@ window.gamedata = {
 		$("#lbRollFaction").prop("disabled", !anyShown);
 		var rolled = gamedata.rolledFactionRow();
 		if (gamedata.rolledFaction !== null && (!rolled || rolled.hidden)) gamedata.showRolledFaction(null);
-	},
-
-	//The picker's All / None chips: every tier chip on, or every one off. Custom is left as it is - it
-	//is a different question (which customs may be picked, with its own mode and warning).
-	setAllTierFilters: function setAllTierFilters(on) {
-		$(".tier-filter").prop("checked", !!on);
-		gamedata.filterFactionList();
 	},
 
 	/* The randomiser (plan §4.5, Stage 7), in place of the three off-site Wheel of Names links. It
@@ -3098,10 +3091,6 @@ window.gamedata = {
 				else if (mq.addListener) mq.addListener(relayout);
 			});
 		}
-
-		//The tier chips' All / None.
-		$("#lbTierAll").on("click", gamedata.setAllTierFilters.bind(gamedata, true));
-		$("#lbTierNone").on("click", gamedata.setAllTierFilters.bind(gamedata, false));
 
 		//The randomiser, and its Choose - the rolled row's own click.
 		$("#lbRollFaction").on("click", gamedata.rollFaction);
