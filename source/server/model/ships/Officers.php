@@ -25,9 +25,9 @@
    Track 1 only so far (fixed-post officers, ship-level rows): the Helmsman (Stage 1); the Scanner,
    Technician, Geneticist and C&C Matter Weapons Expert (Stage 3); the fighter officers (Stage 4):
    Dogfighter, Missileer, Evader and the Expert Motivator, which was a fighter enhancement until then
-   and keeps its old id; and the Engineer and Scavenger (Stage 5: an end-of-turn repair pass, and the
-   Scavenger's once-per-game save, stored as one OffSaved note). Placed officers (track 2, Stage 8)
-   are not built yet. */
+   and keeps its old id; the Engineer and Scavenger (Stage 5: an end-of-turn repair pass, and the
+   Scavenger's once-per-game save, stored as one OffSaved note); and the Navigator (Stage 6: the
+   ship's movement costs). Placed officers (track 2, Stage 8) are not built yet. */
 class Officers{
 
 	const ID_PREFIX = 'OFF_';
@@ -38,12 +38,16 @@ class Officers{
 	const CNC_REPAIR_ROLL = 16;    //Engineer and Scavenger: "C&C criticals ... repaired only on a roll of 16 or greater on a single d20"
 	const SCAVENGER_BOXES = 4;     //"Each turn, he can repair four destroyed boxes anywhere on the ship"
 	const SAVE_POINTS = 6;         //"up to six points of damage can be ignored in any single volley"
+	const TECH_POWER = 2;          //Technician: "provides an extra 2 points of power"
+	const TECH_CRIT_MOD = -2;      //Technician: "a -2 bonus on any critical hit die roll involving the reactor"
+	const NAV_CANNOT = 99;         //Navigator: a cost of 99 or more is a hull's "cannot" (a base's turn, a 999 pivot) - left alone
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
 	     label    the name in the buy dialog, the stored enhname and the kill note's notekey_human
 	     post     a key into findPost()
 	     pct      price in percent of the hull's blueprint pointCost, rounded up (D8) - of ONE CRAFT for
 	              a fighter officer
+	     roundDown  (optional) true: pct is rounded DOWN instead, where the officer's own text says so
 	     apply    the static method that applies his stat changes while he serves, or null when every
 	              rule he carries is asked for elsewhere (isActive)
 	     publish  (optional) ship fields his apply moves that every viewer is sent while he serves: a
@@ -65,9 +69,14 @@ class Officers{
 		   mechanically as an EW Detector". One more point on top of the detector ladder (CUMULATIVE,
 		   user ruling 2026-10-10), anywhere on the map - EW::getDetectorAllowance and its JS twin. */
 		'OFF_SCAN' => array('label' => 'Expert Scanner', 'post' => 'scanner', 'pct' => 7, 'apply' => null),
-		/* Expert Technician: "33% power of destroyed system (choose highest), or +1 power from a
-		   deactivated system, or +2 power" - the BEST of the three, automatically, a third rounded down
-		   (user rulings 2026-10-10). The +1 branch can never beat +2, so it is not computed. */
+		/* Expert Technician - ALL THREE of his skills, cumulative (the full rules text, user 2026-10-15;
+		   Stage 3 had built the best of three from a summary):
+		     Improved Power      +2 reactor power, and -2 on every critical roll the reactor makes;
+		     Efficient Transfers +1 power while the player has switched off at least one system with a
+		                         power requirement, once a turn however many - CLIENT ONLY, power.js
+		                         (officers.efficientTransferBonus): the power balance has no server twin;
+		     Circuit Breakers    a third, rounded down, of the powerReq of EVERY system destroyed (user
+		                         ruling 2026-10-15: added together, not only the largest). */
 		'OFF_TECH' => array('label' => 'Expert Technician', 'post' => 'reactor', 'pct' => 9, 'apply' => 'applyTechnician'),
 		/* Expert Geneticist: -1 to hit with this ship's own weapons, +2 to be hit (both profiles, the
 		   Poor Crew and ProfileIncreased convention), and "enemies can ram this ship" - a tooltip line
@@ -85,9 +94,17 @@ class Officers{
 		'OFF_ENG'  => array('label' => 'Expert Engineer', 'post' => 'engine', 'pct' => 5, 'apply' => null),
 		/* Expert Scavenger (Stage 5): at the end of each turn erases one critical as the Engineer does, or,
 		   with none left to erase, repairs 4 boxes (runRepairs); and ONCE per game ignores up to 6 points
-		   of a hit that would destroy the C&C, a reactor or a Structure block (scavengerSave). User
-		   rulings 2026-10-15. */
+		   of a hit that would destroy the C&C, a reactor, a scanner, an engine or a Structure block
+		   (scavengerSave). User rulings 2026-10-15; scanners and engines added the same day. */
 		'OFF_SCAV' => array('label' => 'Expert Scavenger', 'post' => 'engine', 'pct' => 25, 'apply' => null),
+		/* Expert Navigator (Stage 6; rules text and rulings, user 2026-10-15): turn cost one level down
+		   the rulebook's ladder; pivot and roll costs -1 (never below 1, and a cost of 0 stays 0); accel/
+		   decel cost x0.75, its fractions kept until a turn's speed changes are added up and then rounded
+		   up - the client's shipManager.movement.getSpeedChangeCost (Movement::doStuckEngine's
+		   floor(thrust / cost) is already exact for it). Turn DELAY is unchanged (ruled). Priced at 7%
+		   "dropping fractions", the one officer whose text rounds down. */
+		'OFF_NAV'  => array('label' => 'Expert Navigator', 'post' => 'cnc', 'pct' => 7, 'roundDown' => true,
+			'apply' => 'applyNavigator', 'publish' => array('turncost', 'pivotcost', 'rollcost', 'accelcost')),
 
 		/* FIGHTER OFFICERS (Stage 4). A flight carries ONE officer in total (D9), posted on its first
 		   craft. He is lost with that craft - destroyed, or dropped out - and never by a dock, a partial
@@ -177,15 +194,21 @@ class Officers{
 	   mirror of flightPrice). The Missileer's per-missile part is not in it: it grows with the flight,
 	   so the lobby adds it at buy time (perCraftExtra). */
 	private static function offerPrice($ship, $officer){
-		if (empty($officer['flight'])) return self::price($ship->pointCost, $officer['pct']);
+		if (empty($officer['flight'])) return self::shipPrice($ship, $officer);
 		return self::craftPrice($ship, $officer['pct']);
 	}
 
+	//a ship officer's price: pct% of the hull, rounded up - or down for an officer marked roundDown
+	private static function shipPrice($ship, $officer){
+		return self::price($ship->pointCost, $officer['pct'], !empty($officer['roundDown']));
+	}
+
 	/* ceil(pct% of the blueprint cost), in whole numbers: 0.07 x 100 is 7.000000000000001 in floats,
-	   and ceil() would charge 8 for it (SHIP_ENHANCEMENTS_PLAN.md Stage 5 hit the same trap). */
-	public static function price($pointCost, $pct){
+	   and ceil() would charge 8 for it (SHIP_ENHANCEMENTS_PLAN.md Stage 5 hit the same trap). $down:
+	   floor instead ("dropping fractions" - the Navigator), in the same whole numbers. */
+	public static function price($pointCost, $pct, $down = false){
 		$hundredths = max(0, (int)round($pointCost * 100));
-		return intdiv($hundredths * (int)$pct + 9999, 10000);
+		return intdiv($hundredths * (int)$pct + ($down ? 0 : 9999), 10000);
 	}
 
 	/* ceil(pct% of ONE craft), in whole numbers: pointCost is for a standard flight (standardFlight). */
@@ -555,27 +578,33 @@ class Officers{
 		return self::isActive($ship, 'OFF_SCAN', $turn) ? 1 : 0;
 	}
 
-	/* Expert Technician: the reactor's output, raised at load. `output` is sent to every client
-	   unconditionally and power.js reads it, so the client's power balance needs nothing (§4.6: it
-	   reaches the enemy too, as the refit star's numbers do). */
+	/* Expert Technician: the reactor's output, raised at load, and its critical rolls eased. `output` is
+	   sent to every client unconditionally and power.js reads it, so the client's power balance needs
+	   nothing for these two skills (§4.6: it reaches the enemy too, as the refit star's numbers do).
+	   The -2 is the reactor's own critRollMod, which ShipSystem::testCritical reads - so it also eases
+	   his kill roll, which is that same roll "including any modifications" (D3). Efficient Transfers
+	   is the client's (officers.efficientTransferBonus). */
 	private static function applyTechnician($ship, $entry, $turn){
 		$reactor = $ship->getSystemById($entry['post']);
-		if ($reactor !== null) $reactor->output += self::technicianBonus($ship, $reactor, $turn);
+		if ($reactor === null) return;
+		$reactor->output += self::technicianBonus($ship, $reactor, $turn);
+		$reactor->critRollMod += self::TECH_CRIT_MOD;
 	}
 
-	/* The best of his three: +2, or a third (rounded down) of the largest powerReq among the systems
-	   destroyed BEFORE this turn - the power a normal reactor lost with them. isDestroyed($turn - 1)
-	   is the state at the end of the previous turn, Self Repair revivals included (a revived system
-	   draws power again), and pre-battle damage counts on turn 1. The reactor itself is never counted.
+	/* Improved Power's +2, plus Improved Circuit Breakers: a third (rounded down, per system) of the
+	   powerReq of EVERY system destroyed BEFORE this turn. isDestroyed($turn - 1) is the state at the
+	   end of the previous turn, Self Repair revivals included (a revived system draws power again),
+	   and pre-battle damage counts on turn 1. The reactor itself is never counted, and a system with no
+	   power requirement gives nothing. A destroyed Battle Laser (6) gives 2.
 	   ⚠️ MIRROR PAIR with officers.reactorBonus (the lobby, where only pre-battle damage exists). */
 	public static function technicianBonus($ship, $post, $turn){
-		$largest = 0;
+		$bonus = self::TECH_POWER;
 		foreach ($ship->systems as $system){
 			if ($system === $post || (int)$system->powerReq <= 0) continue;
 			if (!$system->isDestroyed((int)$turn - 1)) continue;
-			$largest = max($largest, (int)$system->powerReq);
+			$bonus += intdiv((int)$system->powerReq, 3);
 		}
-		return max(2, intdiv($largest, 3));
+		return $bonus;
 	}
 
 	/* Expert Geneticist: +2 to be hit is +2 on both profiles, the way Poor Crew's +1 and the C&C's
@@ -637,6 +666,53 @@ class Officers{
 			if ($fc !== null) $fireControl[$i] = (int)$fc + 1;
 		}
 		return $fireControl;
+	}
+
+	/* ------------------------------------------------------------------ Expert Navigator (Stage 6) */
+
+	/* The rulebook's turn cost levels, in descending order: 0.83 is five sixths and 0.16 one sixth, written
+	   to two places as the hulls write 0.33 and 0.66. Shared with the Hyach Maneuvering Specialist
+	   (turnCostLevelDown). ⚠️ MIRROR PAIR with officers.TURN_COST_LADDER. */
+	private static $turnCostLadder = array(2, 1.75, 1.66, 1.5, 1.33, 1.25, 1, 0.83, 0.75, 0.66, 0.5, 0.33, 0.25, 0.16, 0.1);
+
+	/* Every number is a ship field movement.js reads as it is - published to every viewer (`publish`: a
+	   displayed stat is public, user ruling 2026-10-10). ⚠️ MIRROR PAIR with officers.navigatorStat. */
+	private static function applyNavigator($ship, $entry, $turn){
+		$ship->turncost = self::turnCostLevelDown($ship->turncost);
+		$ship->pivotcost = self::navigatorThrustCost($ship->pivotcost);
+		$ship->rollcost = self::navigatorThrustCost($ship->rollcost);
+		$ship->accelcost = self::navigatorAccelCost($ship->accelcost);
+	}
+
+	/* One level down the ladder: the highest level below the hull's cost, compared in hundredths (so 1.0
+	   and 1 are one level, and 0.8 - Gemini AM - goes to 0.75). 0.1 has no level below it and stays; so
+	   does 0 (cannot be lower) and a "cannot" sentinel.
+	   ⭐ THE turn cost step: the Expert Navigator's, and the Hyach Maneuvering Specialist's (user ruling
+	   2026-10-15: "mirror the Expert Navigator steps"). With both, the Navigator's passive step comes first
+	   (Officers::apply, in onConstructed) and the Specialist's active one after it (onIndividualNotesLoaded),
+	   so the ship drops two levels. ⚠️ MIRROR PAIR with officers.turnCostLevelDown. */
+	public static function turnCostLevelDown($cost){
+		if ($cost <= 0 || $cost >= self::NAV_CANNOT) return $cost;
+		$hundredths = (int)round($cost * 100);
+		foreach (self::$turnCostLadder as $level){
+			if ((int)round($level * 100) < $hundredths) return $level;
+		}
+		return $cost;
+	}
+
+	//pivot and roll: "reduced by 1 point (minimum 1)"; "ships that already have a cost of 0 gain no advantage"
+	public static function navigatorThrustCost($cost){
+		if ($cost <= 0 || $cost >= self::NAV_CANNOT) return $cost;
+		return max(1, $cost - 1);
+	}
+
+	/* "Reduced by 25%. Retain all fractions until the full acceleration/deceleration cost has been determined,
+	   then round any remainder up": so the FIELD keeps the fraction (a whole cost x0.75 is always a quarter,
+	   exact in floats) and the client rounds a turn's total (getSpeedChangeCost). The hulls write whole
+	   numbers, and PHP's / gives a whole number back when it divides exactly, so a 4 reads 3, not 3.0. */
+	public static function navigatorAccelCost($cost){
+		if ($cost <= 0 || $cost >= self::NAV_CANNOT) return $cost;
+		return $cost * 3 / 4;
 	}
 
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */
@@ -771,16 +847,17 @@ class Officers{
 
 	/* ⭐ THE SCAVENGER'S SAVE: "once per scenario ... up to six points of damage can be ignored in any single
 	   volley, anywhere on the ship". Automatic (user ruling 2026-10-15): spent on the first hit that would
-	   DESTROY the C&C, a reactor or a Structure block when ignoring SAVE_POINTS of it keeps that system
-	   standing - and then it ignores all of them, or the whole hit if that is less. A hit 6 points cannot
-	   stop does not spend it. A volley's other rakes and pulses are hits of their own and land in full.
+	   DESTROY the C&C, a reactor, a scanner (ELINT included), an engine or a Structure block when ignoring
+	   SAVE_POINTS of it keeps that system standing - and then it ignores all of them, or the whole hit if
+	   that is less. A hit 6 points cannot stop does not spend it. A volley's other rakes and pulses are hits
+	   of their own and land in full.
 	   Called from ShipSystem::assignDamageReturnOverkill, behind $officersPresent, AFTER any protecting system
 	   (a Gaim Bulkhead, a shield pool) has taken its share: the once-per-game save is the last resort, judged
 	   on the damage still coming, so it never spends itself on a hit a Bulkhead has already stopped.
 	   Spent at once in memory, so a second hit this request sees it gone, and stored as one OffSaved note
 	   (written straight through: firing runs inside advance()). Returns the hit's damage to deal. */
 	public static function scavengerSave($ship, $system, $gamedata, $damage, $armour){
-		if (!($system instanceof CnC) && !($system instanceof Reactor) && !($system instanceof Structure)) return $damage;
+		if (!self::isSavedSystem($system)) return $damage;
 		$dealt = $damage - $armour;
 		$health = $system->getRemainingHealth();
 		if ($dealt < $health || $dealt - self::SAVE_POINTS >= $health) return $damage;
@@ -793,6 +870,12 @@ class Officers{
 		Manager::insertIndividualNote(new IndividualNote(-1, $gamedata->id, $turn, $gamedata->phase,
 			$ship->id, $post, self::SAVE_NOTE, substr(self::getLabel('OFF_SCAV') . ' save used', 0, 40), 'OFF_SCAV'));
 		return $damage - min(self::SAVE_POINTS, $dealt);
+	}
+
+	//the systems his save protects (user rulings 2026-10-15)
+	private static function isSavedSystem($system){
+		return ($system instanceof CnC) || ($system instanceof Reactor) || ($system instanceof Scanner)
+			|| ($system instanceof Engine) || ($system instanceof Structure);
 	}
 
 	private static function saveSpent($ship){
@@ -814,7 +897,7 @@ class Officers{
 	public static function rowPrice($ship, $id){
 		if (!isset(self::$registry[$id])) return 0;
 		$officer = self::$registry[$id];
-		if (empty($officer['flight'])) return self::price($ship->pointCost, $officer['pct']);
+		if (empty($officer['flight'])) return self::shipPrice($ship, $officer);
 		return self::flightPrice($ship, $id, $ship->flightSize);
 	}
 

@@ -13244,7 +13244,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 						}
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
-				}else if ($explodedKey[1] == 'Maneuvering'){ //Reduce Turn Cost and Turn Delay by one step.
+				}else if ($explodedKey[1] == 'Maneuvering'){ //Turn Cost one level lower, Turn Delay halved.
 				 	$strongestSystem = null;
 					$strongestValue = -1;
 						foreach ($ship->systems as $system) {
@@ -13261,11 +13261,12 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 								} 
 							}
 						}			
-			            if ($ship->turncost == 0) $ship->turncost = 0;
-			            if ($ship->turncost == 0.5) $ship->turncost = 0.25;
-			            if ($ship->turncost == 0.66) $ship->turncost = 0.33;
-			            if ($ship->turncost == 1) $ship->turncost = 0.5;
-			            if ($ship->turncost == 1.5) $ship->turncost = 0.75;
+			            /* Turn Cost one level down the rulebook ladder - the SAME step as an Expert Navigator's
+			               (OFFICERS_PLAN.md §9.11, user ruling 2026-10-15). It used to halve 0.5 / 0.66 / 1 / 1.5 by a
+			               table, which missed every value a Navigator had already lowered. This runs after his
+			               passive step (Officers::apply, in onConstructed), so with both the ship drops two levels.
+			               ⚠️ The client's preview and undo: HyachSpecialists doUse / doDecrease (baseSystems.js). */
+			            $ship->turncost = Officers::turnCostLevelDown($ship->turncost);
 
 			            if ($ship->turndelaycost == 0) $ship->turndelaycost = 0;        
 			            if ($ship->turndelaycost == 0.5) $ship->turndelaycost = 0.25;
@@ -13484,7 +13485,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 			$this->data["Special"] .= "<br>  - Computer: +2 BFCP, +1 BFCP per type."; 
 			$this->data["Special"] .= "<br>  - Defence: Profiles lowered by 10%, all intercept ratings +10%."; 
 			$this->data["Special"] .= "<br>  - Engine: +25% Thrust."; 
-			$this->data["Special"] .= "<br>  - Maneuvering: +10% thrust, Halves Turn Cost / Delay.";
+			$this->data["Special"] .= "<br>  - Maneuvering: +10% thrust, Turn Cost one level lower, halves Turn Delay.";
 			$this->data["Special"] .= "<br>  - Sensor: +1 EW, remove a Scanner critical.";
 			$this->data["Special"] .= "<br>  - Power: +8 to 12 power, remove a Reactor critical.";
 			$this->data["Special"] .= "<br>  - Repair: Remove two critical effects.";						 			
@@ -13499,7 +13500,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +2 BFCP, +1 BFCP per type.';
 					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  -  '.$specialistType . ': Profiles lowered by 10%, intercept ratings +10%.';
 					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +25% Thrust.';
-					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +10% thrust, Halves Turn Cost / Delay.';
+					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +10% thrust, Turn Cost one level lower, halves Turn Delay.';
 					if ($specialistType == 'Repair') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :Remove two critical effects.';
 					if ($specialistType == 'Sensor') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :+1 EW, removes Scanner critical.';
 					if ($specialistType == 'Power') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :+8 to 12 power, removes Reactor critical.';

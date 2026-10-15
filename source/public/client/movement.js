@@ -28,6 +28,24 @@ shipManager.movement = {
         return Math.round(baseTurnDelayCost * 100) / 100;
     },
 
+    // What the NEXT speed change this turn costs. An accel/decel cost may carry a fraction (an Expert
+    // Navigator's x0.75, OFFICERS_PLAN.md §9.11): "retain all fractions until the full acceleration/
+    // deceleration cost has been determined, then round any remainder up" - so a turn's n changes cost
+    // ceil(n x cost) together, and the k-th costs ceil(k x cost) - ceil((k-1) x cost): 2, 1, 2, 1... for
+    // 1.5. A whole cost comes out as itself. Speed changes are always undone from the LAST row
+    // (deleteSpeedChange), so the rows already plotted keep what they cost. Deployment speed is not a row.
+    getSpeedChangeCost: function getSpeedChangeCost(ship) {
+        var cost = Number(ship.accelcost) || 0;
+        if (cost === Math.floor(cost)) return cost;
+        var done = 0;
+        for (var i in ship.movement) {
+            var movement = ship.movement[i];
+            if (movement.turn == gamedata.turn && movement.type == "speedchange") done++;
+        }
+        //a whole cost x0.75 is always a quarter, exact in floats; the epsilon only guards other fractions
+        return Math.ceil((done + 1) * cost - 1e-9) - Math.ceil(done * cost - 1e-9);
+    },
+
     // LCV Rails (B5W §10.1): each LCV docked on a rail makes a turn/turn-delay cost
     // +1 THRUST this turn (a FLAT surcharge on the final turn-cost/turn-delay value,
     // NOT a change to the ship's turncost/turndelaycost rate). E.g. a turn-cost-1
@@ -2031,7 +2049,7 @@ shipManager.movement = {
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.movement.checkHasUncommitted(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
-        if (ship.accelcost > shipManager.movement.getRemainingEngineThrust(ship)) {
+        if (shipManager.movement.getSpeedChangeCost(ship) > shipManager.movement.getRemainingEngineThrust(ship)) {
             return false;
         }
 
@@ -2133,17 +2151,18 @@ shipManager.movement = {
 
         var commit = false;
         var assignedThrust = Array();
+        var speedChangeCost = shipManager.movement.getSpeedChangeCost(ship); //counted BEFORE this row is added
         if (ship.flight) {
             commit = true;
-            requiredThrust[0] = ship.accelcost;
-            assignedThrust[0] = ship.accelcost;
+            requiredThrust[0] = speedChangeCost;
+            assignedThrust[0] = speedChangeCost;
         } else {
             var reqThrusterName = "main";
             if (!accel) { //!accel means it's deceleration instead
                 reqThrusterName = "retro";
             }
             var requiredThruster = shipManager.movement.thrusterDirectionRequired(ship, reqThrusterName, true);
-            requiredThrust[requiredThruster] = ship.accelcost;
+            requiredThrust[requiredThruster] = speedChangeCost;
         }
 
         var lm = shipManager.movement.getLastCommitedMove(ship);

@@ -21,8 +21,10 @@ window.officers = {
 	/* ⚠️ MIRROR of Officers::$registry (PHP): ids, labels, posts, `needs`, `flight` and `perMissile`, in
 	   the SAME order - the order every list here is shown in. `summary` is the effect line the System
 	   Info tooltip prints (D12). `stats` is what the officer adds to ship fields while he serves
-	   (Officers::apply), which the lobby adds at READ time (displayStat); his other effects have their own
-	   previews below (reactorBonus, displayFireControl) or none the lobby can show (the Scanner's saved EW).
+	   (Officers::apply), which the lobby adds at READ time (displayStat); `adjust` names a method that
+	   rewrites a field the same way when the change is not an addition (the Navigator's costs); his other
+	   effects have their own previews below (reactorBonus, displayFireControl) or none the lobby can show
+	   (the Scanner's saved EW).
 	   Fighter officers (Stage 4) carry `flight: true`: priced for a standard flight and scaled by the
 	   size bought (flightCost; user ruling 2026-10-15). */
 	REGISTRY: [
@@ -31,7 +33,7 @@ window.officers = {
 		{ id: 'OFF_SCAN', label: 'Expert Scanner', post: 'scanner',
 			summary: 'May save 1 more EW point to spend in Firing Phase' },
 		{ id: 'OFF_TECH', label: 'Expert Technician', post: 'reactor',
-			summary: '+2 power, or +33% power from a destroyed system' },
+			summary: '+2 power, +1 when a system is switched off, +1/3 of each destroyed system\'s power; -2 on reactor criticals' },
 		{ id: 'OFF_GENE', label: 'Expert Geneticist', post: 'cnc', stats: { forwardDefense: 2, sideDefense: 2, toHitBonus: -1 },
 			summary: '-1 to hit with own weapons, +2 to be hit, enemies may ram this ship' },
 		{ id: 'OFF_MWE', label: 'Matter Weapons Expert', post: 'cnc', needs: 'matterWeapon',
@@ -39,7 +41,9 @@ window.officers = {
 		{ id: 'OFF_ENG', label: 'Expert Engineer', post: 'engine',
 			summary: 'Repairs 1 critical per turn (a C&C critical on a d20 of 16+)' },
 		{ id: 'OFF_SCAV', label: 'Expert Scavenger', post: 'engine',
-			summary: 'Repairs 1 critical or 4 boxes per turn; once per game blocks up to 6 damage that would destroy the C&C, a reactor or a structure block' },
+			summary: 'Repairs 1 critical or 4 boxes per turn; once per game blocks up to 6 damage that would destroy the C&C, a reactor, a scanner, an engine or a structure block' },
+		{ id: 'OFF_NAV', label: 'Expert Navigator', post: 'cnc', adjust: 'navigatorStat',
+			summary: 'Turn cost one level lower, pivot and roll cost -1, accel/decel cost -25%' },
 		{ id: 'OFF_DOG', label: 'Expert Dogfighter', post: 'craft', flight: true, stats: { iniativebonus: 5 },
 			summary: '+5 initiative' },
 		{ id: 'OFF_MSL', label: 'Expert Missileer', post: 'craft', flight: true, perMissile: 1, needs: 'missiles',
@@ -398,15 +402,61 @@ window.officers = {
 		return this.listFor(ship).filter(function (entry) { return self.serves(entry, turn); });
 	},
 
-	/* A ship field as a window should show it: iniativebonus, forwardDefense, sideDefense, toHitBonus, and a
-	   flight's offensivebonus. ⚠️ MIRROR PAIR with Officers::apply's stat changes (PHP) -
-	   enhancementsDifferential.js compares the two through this function. */
+	/* A ship field as a window should show it: iniativebonus, forwardDefense, sideDefense, toHitBonus, a
+	   flight's offensivebonus, and the Navigator's turncost, pivotcost, rollcost and accelcost. ⚠️ MIRROR
+	   PAIR with Officers::apply's stat changes (PHP) - enhancementsDifferential.js compares the two through
+	   this function. */
 	displayStat: function displayStat(ship, field) {
 		var value = Number(ship && ship[field]) || 0;
 		var serving = this.servingDerived(ship);
 		for (var i = 0; i < serving.length; i++) {
 			var officer = this.get(serving[i].id);
-			if (officer && officer.stats && officer.stats[field]) value += officer.stats[field];
+			if (!officer) continue;
+			if (officer.stats && officer.stats[field]) value += officer.stats[field];
+			if (officer.adjust) value = this[officer.adjust](field, value);
+		}
+		return value;
+	},
+
+	/* ------------------------------------------------------------------ Expert Navigator (Stage 6) */
+
+	//The rulebook's turn cost levels, descending. ⚠️ MIRROR PAIR with Officers::$turnCostLadder (PHP).
+	TURN_COST_LADDER: [2, 1.75, 1.66, 1.5, 1.33, 1.25, 1, 0.83, 0.75, 0.66, 0.5, 0.33, 0.25, 0.16, 0.1],
+	NAV_CANNOT: 99, //a cost of 99 or more is a hull's "cannot" - left alone
+
+	/* One movement cost with the Navigator's change - turn cost one level down the ladder (compared in
+	   hundredths; 0.1 and 0 stay), pivot and roll -1 (minimum 1, a 0 stays 0), accel/decel x0.75 with its
+	   fraction kept (movement.js getSpeedChangeCost rounds a turn's total up). Any other field unchanged.
+	   ⚠️ MIRROR PAIR with Officers::turnCostLevelDown / navigatorThrustCost / navigatorAccelCost (PHP). */
+	navigatorStat: function navigatorStat(field, value) {
+		if (!(value > 0) || value >= this.NAV_CANNOT) return value;
+		if (field === 'turncost') return this.turnCostLevelDown(value);
+		if (field === 'pivotcost' || field === 'rollcost') return Math.max(1, value - 1);
+		if (field === 'accelcost') return value * 3 / 4;
+		return value;
+	},
+
+	/* ⭐ THE turn cost step, one level down the ladder (compared in hundredths; 0.1, 0 and a "cannot" stay):
+	   the Expert Navigator's, and the Hyach Maneuvering Specialist's too (user ruling 2026-10-15) - its
+	   preview in HyachSpecialists.doUse (model/system/baseSystems.js), applied after the Navigator's, which
+	   the server has already put into ship.turncost. ⚠️ MIRROR PAIR with Officers::turnCostLevelDown (PHP). */
+	turnCostLevelDown: function turnCostLevelDown(value) {
+		if (!(value > 0) || value >= this.NAV_CANNOT) return value;
+		var hundredths = Math.round(value * 100);
+		for (var i = 0; i < this.TURN_COST_LADDER.length; i++) {
+			if (Math.round(this.TURN_COST_LADDER[i] * 100) < hundredths) return this.TURN_COST_LADDER[i];
+		}
+		return value;
+	},
+
+	/* The other way: the lowest level above value - the Hyach Specialist's undo (doDecrease), as its old
+	   table undid its halving. Exact for everything the Specialist meets: every Specialist hull's turn cost
+	   (0.5, 0.66, 1, 1.5) and the level a Navigator puts each at are on the ladder above 0.1. */
+	turnCostLevelUp: function turnCostLevelUp(value) {
+		if (!(value > 0) || value >= this.NAV_CANNOT) return value;
+		var hundredths = Math.round(value * 100);
+		for (var i = this.TURN_COST_LADDER.length - 1; i >= 0; i--) {
+			if (Math.round(this.TURN_COST_LADDER[i] * 100) > hundredths) return this.TURN_COST_LADDER[i];
 		}
 		return value;
 	},
@@ -416,22 +466,42 @@ window.officers = {
 	},
 
 	/* Expert Technician, in the lobby: what he adds to THIS reactor's output - 0 unless it is his post.
-	   The best of +2 and a third (rounded down) of the largest powerReq among the destroyed systems, which
-	   in the lobby can only be pre-battle damage. power.js getReactorPower adds it to the balance.
+	   +2, plus a third (rounded down, per system) of the powerReq of every destroyed system, which in the
+	   lobby can only be pre-battle damage. power.js getReactorPower adds it to the balance.
 	   ⚠️ MIRROR PAIR with Officers::technicianBonus (PHP). */
 	reactorBonus: function reactorBonus(ship, system) {
 		if (!system) return 0;
 		var serving = this.servingDerived(ship);
 		for (var i = 0; i < serving.length; i++) {
 			if (serving[i].id !== 'OFF_TECH' || String(serving[i].post) !== String(system.id)) continue;
-			var largest = 0;
+			var bonus = 2;
 			var self = this;
 			this.systemsOf(ship).forEach(function (s) {
 				if (!s || s === system || String(s.id) === String(system.id)) return;
 				var req = parseInt(s.powerReq, 10) || 0;
-				if (req > largest && self.isPostDestroyed(ship, s)) largest = req;
+				if (req > 0 && self.isPostDestroyed(ship, s)) bonus += Math.floor(req / 3);
 			});
-			return Math.max(2, Math.floor(largest / 3));
+			return bonus;
+		}
+		return 0;
+	},
+
+	/* Expert Technician, Efficient Transfers: +1 power while the player has switched off at least one
+	   undestroyed system with a power requirement this turn - "only one system in any turn", so never
+	   more than 1. A system forced offline by a critical (a cooldown, Forced Offline) returns its usual
+	   power but not this point (user ruling 2026-10-15). In GAME only, from the server's list - so own
+	   team only, as an enemy's list is empty; the lobby switches nothing off. No PHP pair: the power
+	   balance lives only in power.js (getReactorPower adds this), the server has no twin of it. */
+	efficientTransferBonus: function efficientTransferBonus(ship) {
+		if (!ship || ship.flight || this.isDerived(ship) || !this.isActive(ship, 'OFF_TECH')) return 0;
+		if (!window.shipManager || !shipManager.power) return 0;
+		var systems = this.systemsOf(ship);
+		for (var i = 0; i < systems.length; i++) {
+			var s = systems[i];
+			if (!s || s.destroyed || !(Number(s.powerReq) > 0)) continue;
+			if (!shipManager.power.isOfflineOnTurn(ship, s, this.currentTurn())) continue;
+			if (shipManager.power.isForcedOffline(ship, s)) continue;
+			return 1;
 		}
 		return 0;
 	},

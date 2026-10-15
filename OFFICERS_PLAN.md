@@ -2,8 +2,9 @@
 
 Status: **Stages 0–2a committed (`7800ab827`), Stage 3 committed (`1714c3651`), Stage 4 committed
 (`ab0025aba`, `4738173cc`; the Motivator re-priced to 50 % in `32c9f2a11`); Stage 5 committed (`85c30272c`,
-§9.8); fighter officer prices scaled by flight size + saved fleets re-priced BUILT 2026-10-15, uncommitted
-(§9.9 - ⚠️ db/savedOfficerPrice.sql before deploying).** Written against `dab951bf5`. The user
+§9.8); fighter officer prices scaled by flight size + saved fleets re-priced committed (`75dc7d68d`, §9.9 - ⚠️
+db/savedOfficerPrice.sql before deploying); the Technician rebuilt from his full rules and the Scavenger's save
+widened (§9.10), and Stage 6, the Expert Navigator (§9.11), BUILT 2026-10-15, uncommitted.** Written against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
 a third Helmsman effect (−1 on the meteor impact chart) and play-tested Stage 1 in game 4457 (confirmed
@@ -13,8 +14,11 @@ and asked for the ship window's officers as one **"Officers (n)"** row in the go
 (§9.6). The same day they ruled out officers on remotely controlled craft (the Hunter-Killers) and had a
 fighter officer **follow his fighter** onto a split-off flight row, cost included (§9.7). On 2026-10-15 they
 supplied the Engineer's and Scavenger's rules text and ruled their questions (§6), including an **automatic**
-once-per-game save for the Scavenger (§9.8). Each officer's own rules questions still only need ruling when
-that officer's stage starts. Next step: Stage 6 (Navigator).
+once-per-game save for the Scavenger (§9.8). Later that day they widened the save to Scanners and Engines,
+supplied the Technician's full rules (all three skills at once, §9.10) and the Navigator's (Stage 6, §9.11), and
+ruled the three questions those raised - then put the Hyach Maneuvering Specialist's turn cost on the Navigator's
+ladder, applied after him (§9.11 follow-up). Each officer's own rules questions still only need ruling when that
+officer's stage starts. Next step: Stage 7 (Jump Officer).
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -73,7 +77,8 @@ until the game is over (or, in a later stage, an Expert Analyst looks).
 | | | Expert Gunner, once-per-battle abilities |
 | | | Expert Electrician ² |
 
-¹ On the "best of the three, automatically" reading (§6, Technician). ² After the fighter-officer framework
+¹ On the "best of the three, automatically" reading (§6, Technician), as Stage 3 built him. His full rules
+(§9.10) make all three cumulative, which adds a client-only term in power.js: Easy-Medium. ² After the fighter-officer framework
 (Stage 4). ³ After the placed-officer framework (Stage 8). ⁴ If always on; Medium as a per-turn
 toggle. ⁵ Medium-Hard; one build serves both Gunner and the weapon-mounted Matter Weapons Expert.
 
@@ -170,7 +175,7 @@ Medium-sized job (§3.4).
 |---|---|---|---|
 | **Expert Helmsman** | C&C, 5 % | +5 `iniativebonus`; one clause in `TacGamedata::sortShips` so a live Helmsman sorts ahead on equal initiative; **−1 on the d20 his ship rolls on a meteor swarm's impact chart** (user, 2026-10-10: one term in `RammingAttack::resolveMeteors`, which serves the Meteor Swarm and the Triad's spawned meteoroids alike) | Initiative is rolled server-side ([Manager.php:2605](source/server/controller/Manager.php#L2605)), and `generateIniative` already turns sort order into distinct values ([:2611-2624](source/server/controller/Manager.php#L2611)). So the tie-break needs no client change. The meteor chart is rolled server-side in Pre-Firing, on a full load. |
 | **Expert Scanner** | Sensor Array, 7 % | `EW::getDetectorAllowance` and its JS twin become max(detector ladder, 1 for a live officer). The "no detectors on the board → return" early exits (two server-side, one client-side) must not skip a ship that has one | FV already built this exact rule. The EW Detector's own text says it grants "the enhancement of Expert Scanner" ([baseSystems.php:20447](source/server/model/systems/baseSystems.php#L20447)). The late-EW window, budget and DB write all key off `getSavedEwAllowance`, so they need nothing. |
-| **Expert Technician** | Reactor, 9 % | The reactor's `output` at load: + max(2, ⅓ of the largest `powerReq` among systems destroyed before this turn) | Server-side `output` already reaches every client ([ShipSystem.php:319](source/server/model/systems/ShipSystem.php#L319)) and power.js reads `reactor.output`, so there is no client logic. Easy **only** on the best-of reading: under it the "+1 from a deactivated system" branch can never win. If the player chooses each turn, it becomes Medium (a live mirror in power.js). |
+| **Expert Technician** | Reactor, 9 % | The reactor's `output` at load: + max(2, ⅓ of the largest `powerReq` among systems destroyed before this turn) | Server-side `output` already reaches every client ([ShipSystem.php:319](source/server/model/systems/ShipSystem.php#L319)) and power.js reads `reactor.output`, so there is no client logic. Easy **only** on the best-of reading: under it the "+1 from a deactivated system" branch can never win. If the player chooses each turn, it becomes Medium (a live mirror in power.js). *Rebuilt 2026-10-15 from the full rules (§9.10): +2, plus ⅓ of EVERY destroyed system, plus +1 while a system is switched off (power.js), and −2 on the reactor's criticals.* |
 | **Matter Weapons Expert, C&C** | C&C, 10 % | Every Matter-class weapon: fire control +1 (`fireControl` **and** `fireControlArray`, `isModified`), and +1 damage in `getBonusDamage` | A copy of `SYS_GSGT`, including its trap: a bump to `fireControl` alone evaporates on the first mode switch ([weapon.php:3349](source/server/model/weapons/weapon.php#L3349)). |
 | **Expert Geneticist** | C&C, 5 %, scenario only | `toHitBonus` −1 (exists). +2 to be hit: one public field, one term in `calculateHitBase` and one in weaponManager's mirror. *As built: +2 on both profiles instead, the Poor Crew / ProfileIncreased convention, so no new field or term (§9.5).* Ramming: a tooltip line | Ramming is already allowed against anything by consent ([specialWeapons.php:2438](source/server/model/weapons/specialWeapons.php#L2438)), so that clause needs no code. "Scenario only" = never offered unless a hull opts in. |
 | **Expert Dogfighter** | flight, 50 % of one craft | The flight's `iniativebonus` +5 | The line `ELITE_SW` already uses ([Enhancements.php:2282](source/server/model/ships/Enhancements.php#L2282)). Easy once the fighter framework exists. |
@@ -183,7 +188,7 @@ Medium-sized job (§3.4).
 |---|---|---|---|
 | **Expert Engineer** | Engine, 5 % | A new automated end-of-turn repair pass after setCriticals Pass 2: one critical per turn, a d20 of 16+ for a C&C critical | `repairCritical` exists. What is new is the pass itself and choosing deterministically. The replay harness does not cover `criticalPhaseEffects` (it stops at Pass 1), so this needs its own tests. Build together with the Scavenger. |
 | **Expert Scavenger** | Engine, 25 % | The same pass: one critical, else 4 boxes, never on a destroyed system | As above. |
-| **Expert Navigator** | C&C, 7 % | Turn cost one step lower; pivot and roll −1 (min 1); accel/decel −25 % | Every one of these costs is used twice, in movement.js and movement.php, plus the ship window and tooltip readouts and the lobby. Turn cost has no defined "step" ladder in the code (§6, Navigator). |
+| **Expert Navigator** | C&C, 7 % | Turn cost one step lower; pivot and roll −1 (min 1); accel/decel −25 % | Every one of these costs is used twice, in movement.js and movement.php, plus the ship window and tooltip readouts and the lobby. Turn cost has no defined "step" ladder in the code (§6, Navigator). *Built in Stage 6 (§9.11): the rules text gives the ladder; movement.php recomputes none of these costs, so the only movement change is one client helper for the accel rounding.* |
 | **Expert Jump Officer** | Jump Drive, 5 % | Opening range +1; failure chance −20 points; arrival scatter −1 hex and −1 facing step, initiative penalty −20 | Three separate, well-localised hooks. The failure % is computed at three sites ([:9648](source/server/model/systems/baseSystems.php#L9648), [:10419](source/server/model/systems/baseSystems.php#L10419), [:10856](source/server/model/systems/baseSystems.php#L10856)) that should become one helper first. `JUMP_ACC` already shows how to publish a changed range ([Enhancements.php:3497](source/server/model/ships/Enhancements.php#L3497)). |
 | **Expert Analyst** | Sensors, 10 %, capitals and ELINT | A per-load "the viewer's team has a live Analyst" static that widens `isDisclosedToCurrentViewer()` (ammo types, hangar contents) and the officer payload | The masks exist. Per-viewer state has to be computed per load and tested per viewer. Two of his clauses are moot in FV: weapon arming is already sent to everyone ([weapon.php:453](source/server/model/weapons/weapon.php#L453)), and cargo contents are not modelled (`CargoBay` is a plain box). |
 | **Expert Coordinator** | flight, 50 % | A combat pivot costs 1; the −1 to-hit only from 180° | The cost lives in movement.js `doPivot` ([:1436](source/public/client/movement.js#L1436)) and the penalty in [weapon.php:1872](source/server/model/weapons/weapon.php#L1872) plus its client twin. "180°" needs net rotation counted, not pivot rows. |
@@ -391,8 +396,8 @@ masking: individual notes never reach any client.
 | Officer | Changed number | Reaches the enemy? |
 |---|---|---|
 | Helmsman | `iniativebonus` | **Yes, to every viewer** (user ruling 2026-10-10, overruling the drafted own-team-only). The ship tooltip's "base" initiative must be the ship's real figure: a hidden +5 misleads more than it hides. The officer list itself stays own-team |
-| Navigator | turn, pivot, roll and accel costs | Own-team only (an enemy client never budgets your thrust) |
-| Technician | reactor `output` | **Yes.** `output` is sent unconditionally. Accept, as the ✦ does |
+| Navigator | turn, pivot, roll and accel costs | **Yes, to every viewer** (Stage 6, §9.11): the 2026-10-10 default for a displayed stat, through his `publish` list. The draft said own-team only |
+| Technician | reactor `output` | **Yes.** `output` is sent unconditionally. Accept, as the ✦ does. *§9.10: the reactor's −2 critical modifier is not sent (nothing displays it), and Efficient Transfers' +1 is worked out by the owner's client alone* |
 | Matter Weapons Expert, Gunner | `fireControl` via `isModified` | **Yes**, exactly like Gunsights |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
 | Scanner | the late-EW allowance | Own-team only: the client asks `officers.listFor`, which an enemy payload never carries |
@@ -531,7 +536,7 @@ committed.
 | **3** | Easy ship officers: Scanner, Technician, Matter Weapons Expert (C&C), Geneticist. **BUILT 2026-10-10** (§9.5) | Scanner: the late-EW window opens on a ship with no EW Detector on the board. MWE: switch modes and back, the +1 stays. Technician: power balance after a system dies |
 | **4** | Fighter framework; Dogfighter, Missileer, Evader; the Expert Motivator made an officer. **BUILT 2026-10-11** (§9.6) | A per-flight price is identical across buy, edit, copy and save/reload on 1-, 3- and 6-craft flights. A second officer on one flight is refused in the dialog, and a doctored payload with two serves only one. A lead-craft dropout loses him; a dock does not |
 | **5** | Repair pass: Engineer and Scavenger; the Scavenger's once-per-game save. **BUILT 2026-10-15** (§9.8) | Deterministic pick; the C&C d20; no repair of this turn's crits (if so ruled); no revival of a destroyed system; runs after Self Repair |
-| **6** | Navigator | Server and client thrust agree on every cost change; the ship window shows the new numbers own-team only |
+| **6** | Navigator. **BUILT 2026-10-15** (§9.11) | Server and client thrust agree on every cost change; the ship window shows the new numbers ~~own-team only~~ (published to every viewer, §4.6) |
 | **7** | Jump Officer | Range +1 (with and without the Jump Accelerator); failure −20 at all three sites through one helper; arrival scatter and initiative |
 | **8** | Placed-officer framework; Gunner core; weapon-mounted Matter Weapons Expert (without loading) | The cap per size; a Gunner and Gunsights on one gun show ✦ and insignia side by side; "any damage" kills; the destroyed-host refund |
 | **9** | Coordinator; Analyst | The Analyst's disclosure per viewer, and its harness `masking` check |
@@ -559,12 +564,12 @@ committed.
 | Helmsman | Does the tie-break also apply under the simultaneous-movement initiative categories? (Default: no; ties there are categories, not orderings.) **Built with the default, 2026-10-10** (not ruled by the user; nothing in a category is ordered, so there is no tie to break; his +5 still counts toward the category, through `getInitiativebonus`). Reverse it if ruled otherwise. |
 | Engineer | Reading: "once per turn, repair one critical anywhere; a C&C critical needs 16+ on a d20"? Which critical: the highest `repairPriority` system's oldest? Never a critical from this turn, as Self Repair? On a failed roll, try another or stop? **RULED 2026-10-15** (the user supplied the rules text, §9.8): one critical a turn, automatic, except a C&C critical, repaired only on a d20 of 16+; a failed attempt ends his repairs that turn. Not until the ship has suffered it a full turn (a critical from turn 3 acts on 4 and may be repaired at the end of 4) - Self Repair's own filter. The pick: **Self Repair's default order** (the critical's priority plus its system's; no player overrides). |
 | Scanner | Cumulative with EW Detectors, or the same point? (Default: max(1, ladder), not cumulative.) **RULED 2026-10-10: cumulative** - the ladder + 1. |
-| Navigator | (a) The turn-cost ladder. The hulls use 0.25, 0.33, 0.5, 0.66, 0.75, 1, 1.25, 1.33, 1.5, 1.66, 1.75, 2 and 3. Which of those are "steps"? (b) Turn delay unchanged? (c) Accel/decel: × 0.75 per change, or on the turn's total? Which rounding? |
-| Technician | "Or" = the best of the three automatically, the player's choice each turn, or a fixed priority? How is 33 % rounded? **RULED 2026-10-10: the best of the three, automatically; a third, rounded down.** |
+| Navigator | (a) The turn-cost ladder. The hulls use 0.25, 0.33, 0.5, 0.66, 0.75, 1, 1.25, 1.33, 1.5, 1.66, 1.75, 2 and 3. Which of those are "steps"? (b) Turn delay unchanged? (c) Accel/decel: × 0.75 per change, or on the turn's total? Which rounding? **RULED 2026-10-15** (the user supplied the rules text, §9.11): (a) the rulebook's ladder 2, 1.75, 1.66, 1.5, 1.33, 1.25, 1.0, 0.83, 0.75, 0.66, 0.5, 0.33, 0.25, 0.16, 0.1; (b) **turn delay unchanged** (asked: the text names turn cost only); (c) −25 % with the fractions kept until the turn's full cost is known, then rounded up. Pivot and roll −1, minimum 1; 7 % "dropping fractions". |
+| Technician | "Or" = the best of the three automatically, the player's choice each turn, or a fixed priority? How is 33 % rounded? **RULED 2026-10-10: the best of the three, automatically; a third, rounded down.** **RE-RULED 2026-10-15** (the full rules text, §9.10): all three at once - +2 power and −2 on reactor criticals; +1 from one system shut down for power, once a turn (a system forced offline by a critical does not count - asked); a third, rounded down, of EVERY destroyed system's power requirement, added together (asked). |
 | Jump Officer | (a) +1 over the drive's own range (4 → 5, or 6 → 7 with the Jump Accelerator)? (b) −20 before or after the Accelerator's doubling? (c) On arrival: the officer of the ship that OPENED the doorway, or each arriving rider's own? (d) Does −20 also cover the hyperspace-jump failure roll? |
 | Quartermaster | "Free" = this ship's own other enhancements and ammo? What is "+10 turn delay"? How much on C&C crits? Post: random primary? Price: 5 % of the game's points limit? |
 | Geneticist | "Scenario only" = never offered unless a hull opts in, or a Create Game rule? "−1 to hit other ships" = this ship's own weapons? **RULED 2026-10-10: offered on every hull with a C&C** ("scenario only" is by agreement, as the doc card says). The −1 was built with its default: this ship's own weapons. |
-| Scavenger | A critical first, else 4 boxes? Which system first? May he repair Structure? **RULED 2026-10-15** (§9.8): **a critical first** (as the Engineer, same order and C&C roll), else 4 boxes, by Self Repair's default system order; **Structure yes**, never a destroyed system or anything on a destroyed section, never this turn's damage. His rules text adds a **once-per-scenario save** - "up to six points of damage can be ignored in any single volley" - ruled **automatic**: spent on the first hit that would destroy the C&C, a reactor or a Structure block when ignoring up to 6 points saves it ("note the Gaim Bulkhead already has a similar function"). The campaign clauses (permanent repairs after the battle) are not built. |
+| Scavenger | A critical first, else 4 boxes? Which system first? May he repair Structure? **RULED 2026-10-15** (§9.8): **a critical first** (as the Engineer, same order and C&C roll), else 4 boxes, by Self Repair's default system order; **Structure yes**, never a destroyed system or anything on a destroyed section, never this turn's damage. His rules text adds a **once-per-scenario save** - "up to six points of damage can be ignored in any single volley" - ruled **automatic**: spent on the first hit that would destroy the C&C, a reactor or a Structure block when ignoring up to 6 points saves it ("note the Gaim Bulkhead already has a similar function"). The campaign clauses (permanent repairs after the battle) are not built. **Widened 2026-10-15 (§9.10): Scanners and Engines too.** |
 | Breaching Expert | "+1 thrust" for one pod of a flight that moves as one? "20 % of total pods": fleet-wide, rounded down? What are "3 attack rolls on the first boarding turn" in FV's capture-mission terms? |
 | Analyst | Does he need range, line of sight or an OEW lock? Every enemy ship, or only those in range? Weapon arming is already public in FV: leave it so? |
 | Evangelist | The fleet = this player's ships, or the whole team? His penalty is worded "if killed": does a merely **disabled** Evangelist (post destroyed, kill roll survived) cost the fleet its +1 without the −10 initiative / −1 to hit? (Default: yes, the penalty needs a kill.) Is the penalty permanent? Do reinforcements that arrive later get the bonus? |
@@ -1243,3 +1248,155 @@ the old code runs: it never names the column, so its rows stay NULL and read as 
 3. `tac_saved_list.points` is stored, so the saved-fleet dropdown shows a re-priced fleet's OLD total until it is
    saved again (as with §4.7.1's per-system re-pricing).
 4. No local saved fleet holds an officer, so the live data path is proved only by the harness's rolled-back fixtures.
+
+### 9.10 Refinements round 3 (user, 2026-10-15): the Scavenger's save widened; the Technician rebuilt from his full rules
+
+**Rulings.** The Scavenger's once-per-game save also covers **Scanners and Engines**. The Technician: the user
+supplied his full rules text - the Stage 3 build (best of three, from a summary) was "simplified and ultimately
+wrong". All three skills apply together:
+- **Improved Power:** +2 power, and −2 on any critical roll involving the reactor;
+- **Efficient Transfers:** a system shut down for extra power gives 1 more point than usual - one system a turn, and
+  never one with no power requirement;
+- **Improved Circuit Breakers:** a destroyed system gives back 33 % of its power requirement (fractions dropped, the
+  transfer point not included) - "a destroyed battle laser would provide 2 points".
+
+Asked and ruled: **every** destroyed system counts, added together (not only the largest); a system **forced
+offline by a critical** (a cooldown, Forced Offline) returns its usual power but does not earn the transfer point -
+only a player's switch-off does.
+
+**Files.** `Officers.php` (`isSavedSystem`; `TECH_POWER`, `TECH_CRIT_MOD`; `applyTechnician` also moves the
+reactor's `critRollMod`; `technicianBonus` sums), `officers.js` (`reactorBonus` sums; new `efficientTransferBonus`;
+the two summaries), `power.js` (`getReactorPower` adds `officers.efficientTransferBonus`), docs (the Technician and
+Scavenger cards). No offer changed and no new class.
+
+**As built:**
+- **The save.** `Officers::isSavedSystem` = C&C, Reactor, Scanner (ELINT and the other subclasses), Engine,
+  Structure. Nothing overrides `ShipSystem::assignDamageReturnOverkill`, so every scanner and engine passes the hook.
+- **Output.** `technicianBonus` = 2 + Σ ⌊powerReq / 3⌋ over the systems destroyed before this turn
+  (`isDestroyed($turn - 1)`: a Self Repair revival stops counting, pre-battle damage counts on turn 1, a system lost
+  with its Structure block counts, the reactor itself never). "33 %" is read as a third: the rules' Battle Laser
+  (powerReq 6, the value on 74 of 77 hulls) gives 2, where 33 % would drop to 1.
+- **−2.** `$reactor->critRollMod += TECH_CRIT_MOD`. `testCritical` reads it, so it also eases his own kill roll, which
+  is that same roll "including any modifications" (D3). Not published: no client display reads a system's
+  `critRollMod`.
+- **Efficient Transfers is client-only**, like the whole power balance (no server twin, §2).
+  `officers.efficientTransferBonus(ship)` = 1 while he serves and at least one undestroyed system with powerReq > 0
+  is offline this turn and not `shipManager.power.isForcedOffline`. In game only (the server's list, so own team;
+  the lobby switches nothing off). Added at the end of `getReactorPower`, before the docking-bay share, so the commit
+  gate, the reactor icon and the surplus notice all see it. No switch-on gate reads the balance, so switching the
+  only system back on just drops the point, and the commit gate sees the true deficit.
+
+**Verified.**
+- `officersHarness.php`: the Technician section rewritten - 2 + a third for powerReq 9 / 8 / 7 / 6 / 12 / 2; three
+  systems (9, 6, 5) = +8; this turn not counted; revived not counted; pre-battle +6; killed: no power, no modifier;
+  the −2 through a real `testCritical` + `rollKills` (a roll of 20 without him reads 18 and he lives; 22 reads 20 and
+  he dies). The save: scanner and engine (his own post) added to the key-systems loop, and an ELINT scanner (Balosian
+  Athasa) through the real `assignDamageReturnOverkill`.
+- `officersClientHarness.js`: the lobby `reactorBonus` tables and three destroyed systems; Efficient Transfers through
+  the real `power.js` (+1; none off 0; three off still 1; powerReq 0, destroyed, forced, switched off last turn only,
+  killed, no Technician, enemy, lobby all 0; a forced one beside a player's switch-off 1; `getReactorPower` +1).
+- `enhancementsHarness`: the Technician cases' reactor lines now read `crit=-2` (39 lines: 13 hulls × `tech`,
+  `tech+rea+poor1`, `all5`), checked line for line before re-recording (§9.11).
+- Replay corpus: **game 4461** (the user's Stage 3 test game) moved, as it should: Hyperion reactor 2 → 7 (+2, two
+  Heavy Lasers 2 + 2 - one lost with its block - and a Medium Pulse 1), G'Quan 2 → 8 (+2, two Heavy Lasers, two Energy
+  Mines 1 + 1). Checked by hand against a real load, then accepted with `record --games=4461` merged back into the
+  manifest (the narrowing trap): 146 / 0.
+- `lobby3.mjs`: the pre-battle check now expects 2 + a third (+4 for a Heavy Laser).
+
+**Observations, not changed:**
+1. The breakers are uncapped, as the text reads: a ship that loses many powered systems gains a third of each.
+2. Efficient Transfers is advisory like the rest of the balance: the server trusts the power rows it is handed.
+
+### 9.11 Stage 6: Expert Navigator (2026-10-15)
+
+**Rulings (user, 2026-10-15, §6).** The rules text: turn cost one level lower on the ladder 2, 1.75, 1.66, 1.5, 1.33,
+1.25, 1.0, 0.83, 0.75, 0.66, 0.5, 0.33, 0.25, 0.16, 0.1 ("the existing Hyach Maneuvering Specialist already has a
+similar function"); pivot and roll costs −1 (minimum 1; a cost of 0 gains nothing); accel/decel −25 %, fractions kept
+until the full cost is determined and then rounded up (a cost of 2 becomes 1.5: one change still costs 2, two cost
+3); 7 % of the base cost, dropping fractions; post C&C. Asked and ruled: **turn delay unchanged**.
+
+Built with defaults, stated here: a cost of 99 or more is a hull's "cannot" (a base's turn 99, a 999 pivot) and is
+left alone; a turn cost off the ladder drops to the next level below it (Gemini AM's 0.8 → 0.75; the two hulls at 3
+are Ancient); 0.1 stays 0.1. The lowered costs are **published to every viewer**, the 2026-10-10 default for a
+displayed stat (§4.6 had drafted own-team only).
+
+**Files.** `Officers.php` (`OFF_NAV`; `roundDown`, `price(..., $down)`, `shipPrice`; `$turnCostLadder`, `NAV_CANNOT`;
+`applyNavigator`, `navigatorTurnCost` - since renamed `turnCostLevelDown`, see the follow-up - `navigatorThrustCost`,
+`navigatorAccelCost`), `officers.js` (the registry row
+with `adjust`; `TURN_COST_LADDER`, `navigatorStat`; `displayStat` runs an officer's `adjust`), `movement.js`
+(`getSpeedChangeCost`, read by `canChangeSpeed` and `changeSpeed`), `ShipNotesPanel.js` (Ship Stats' turn, accel,
+pivot and roll rows through `statOf`), docs (the Navigator card; About Officers' list of public numbers). Statics and
+bundles rebuilt; no new class, so autoload is unchanged.
+
+**As built:**
+- **Price.** 7 % rounded **down**, the only officer whose text says so: Omega 925 → 64 (65 rounded up). `rowPrice`
+  (saved fleets, refunds) goes through the same `shipPrice`; the lobby reads the offer tuple's price, so there is no
+  client mirror.
+- **Effects**, in `apply` (registry order: after the Scavenger): turncost one level down (compared in hundredths, so 1
+  and 1.0 are one level); pivotcost and rollcost max(1, x − 1) (the five 1.5-roll hulls → 1); accelcost × 0.75 kept
+  fractional (a whole cost × 0.75 is always a quarter, exact in floats; PHP gives 4 → int 3). `publish` sends the four
+  fields while he serves, as Hyach's Maneuvering Specialist publishes turncost.
+- ⭐ **The accel rounding lives in ONE client helper**, `shipManager.movement.getSpeedChangeCost(ship)`: the k-th speed
+  change of a turn costs ⌈k·c⌉ − ⌈(k − 1)·c⌉, so a turn's n changes cost ⌈n·c⌉ together (2, 1, 2, 1… at 1.5; 3, 2, 2, 2
+  at 2.25). A whole cost returns itself, so no hull without him changes. It holds because speed changes are always
+  undone from the LAST row (`deleteSpeedChange`) and deployment speed is not a row. `canChangeSpeed`'s thrust gate asks
+  it too (a second change at 1.5 needs 1 thrust, not 1.5).
+- **Server.** Nothing recomputes a speed change's cost (the thrust validator checks the submitted `requiredThrust`),
+  and `Movement::doStuckEngine`'s ⌊thrust / accelcost⌋ is already exact for a fractional cost (⌈n·c⌉ ≤ T ⟺ n·c ≤ T
+  for a whole T).
+- **Lobby.** Ship Stats shows the costs at read time through `officers.displayStat` → `navigatorStat` (MIRROR PAIR with
+  the three PHP functions); a C&C destroyed in the pre-battle editor brings the hull's own costs back. In game the
+  published fields are read as they are.
+
+**Verified.**
+- `officersHarness.php` **417 / 0** (374 with `--no-db`; 35 new across §9.10 and §9.11): the offer at 64 and
+  `rowPrice`, no C&C / Ancient / terrain / flight → no offer, the three functions' tables, the Omega's costs (turn 0.83,
+  pivot 2, roll 1, accel 2.25, turn delay 1) against its twin, disabled last turn vs this turn, the payload per viewer
+  (an enemy reads the four costs and survives `json_encode`; a disabled Navigator publishes nothing), and the stuck
+  engine's arithmetic.
+- `officersClientHarness.js` **133 / 0** (33 new): the registry row and order, the `navigatorStat` tables, the lobby
+  `displayStat` and `ManoeuvreStats` rows, the pre-battle editor, no double lowering in game, and the real
+  `movement.js` `getSpeedChangeCost` (1.5, 2.25, 0.75, whole costs, last turn's rows, other row types).
+- **Mutation-tested**: 32 breaks across §9.10 and §9.11 (15 server, 14 client, 3 against the differential), 31 caught.
+  The miss was an int-normalising line in `navigatorAccelCost` that PHP's own `/` made dead: removed.
+- `enhancementsHarness` **268 / 0** after re-recording; the diff, read as a unified diff (the check compares by
+  position, so one inserted line cascades), is exactly two new cases (`nav`, `nav+elite1`) on the 13 hulls, 13
+  `OFF_NAV` offer lines, and §9.10's 39 reactor lines. Old copy: `fingerprint.before-officers-stage6.txt`.
+  `enhancementsDifferential` **469 / 0 differing** (26 new cases, none skipped); it now compares every ship's turn,
+  turn delay, pivot, roll and accel cost as shown.
+- `fvbuild -Check`: all three pass (replay corpus 146 / 0, after §9.10's game 4461).
+- Real site (`officersE2E/`): `lobby3` **24 / 24** (adds the Navigator: **+** adds 64; Ship Stats 0.83 / 2.25 / 2 / 1
+  with turn delay 1.00; his line on the C&C; the pre-battle editor bringing back 1.00 / 3 / 3 / 2), `docs` **18 / 18**
+  (eight Ship Officers cards; the Technician's three skills; the save's scanners and engines; the Navigator card),
+  `lobby` 25 / 25, `lobby4` 35 / 35. Not run: `game.mjs` (game 4457 is surrendered, §9.8); the in-game movement path is
+  the client harness's, on the real `movement.js`.
+
+**Observations:**
+1. ~~Hyach Maneuvering Specialist + Navigator: the specialist's halving table missed every value a Navigator had
+   lowered.~~ **Ruled and built the same day** (follow-up below).
+2. Ship Stats and the ship tooltip show a fractional accel cost as it is (2.25); each speed change in the movement
+   window asks for its rounded share.
+
+**Follow-up (user, 2026-10-15): the Hyach Maneuvering Specialist on the Navigator's ladder.** "The Specialist's Turn
+Cost steps should be changed to mirror the Expert Navigator steps so they become compliant with one another. Applying
+Navigator first as a passive buff, then Specialist later as an active buff is correct." The ruling covers turn cost
+only, so the Specialist still **halves turn delay** with its own table.
+- **One step, two users.** `Officers::navigatorTurnCost` is renamed **`Officers::turnCostLevelDown`** (MIRROR PAIR
+  `officers.turnCostLevelDown`, which `navigatorStat` now calls). `HyachSpecialists::onIndividualNotesLoaded`
+  (baseSystems.php) replaces its 0.5 / 0.66 / 1 / 1.5 halving table with it. The order is already the ruled one: the
+  Navigator in `onConstructed` (`Officers::apply`), the Specialist at `onIndividualNotesLoaded`, which runs after it.
+- **Client.** `HyachSpecialists.doUse` (model/system/baseSystems.js) previews with `officers.turnCostLevelDown` on the
+  `ship.turncost` the server published (the Navigator's step already in it); `doDecrease` undoes it with
+  `officers.turnCostLevelUp` (new: the lowest level above). That inverse is exact for everything the Specialist meets:
+  the Specialist hulls' turn costs are 0, 0.5, 0.66, 1 and 1.5, and the level a Navigator puts each at is on the
+  ladder above 0.1.
+- **Effect on every Specialist hull**, Navigator or not: 1 → 0.83 (was 0.5), 0.5 → 0.33 (was 0.25), 0.66 → 0.5 (was
+  0.33), 1.5 → 1.33 (was 0.75); with a Navigator, two levels (1 → 0.83 → 0.75). Tooltip text (both lists in
+  `setSystemDataWindow`) and the Hyach entry in Factions & Tiers say "Turn Cost one level lower, halves Turn Delay".
+- The old client undo table also cascaded (0.25 → 0.5 → 1, so undoing a 0.5 hull's Specialist left it at 1); the
+  replacement removes that.
+- **Verified:** `officersHarness` 426 / 0 (383 with `--no-db`; nine new: four Specialist hulls alone and with a
+  Navigator, their turn delay still halved, and the payload); `officersClientHarness` 138 / 0 (five new, including the
+  REAL `doUse` / `doDecrease` loaded from baseSystems.js: 1 → 0.83 and back, a Navigator's 0.83 → 0.75 and back, 0.5 →
+  0.33 and back); 6 mutations, all caught; enhancementsHarness 268 / 0, differential 469 / 0, `fvbuild -Check` all pass
+  (replay 146 / 0 - no local game has an `allocated;Maneuvering` note at all), `docs` 18 / 18.

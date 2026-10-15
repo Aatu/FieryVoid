@@ -685,6 +685,11 @@ shipManager.power = {
 			}
 		}
 
+		/* Expert Technician's Efficient Transfers (OFFICERS_PLAN.md §9.10): +1 while the player has switched
+		   off at least one system with a power requirement this turn. Only here: the server has no twin of
+		   this balance. 0 on every hull without a serving Technician, and for every enemy hull. */
+		if (window.officers) output += officers.efficientTransferBonus(ship);
+
 		/* WALKERS_OF_SIGMA_PLAN.md 3.16 (Stage 18, D20) - THE SHIPS IN THIS HULL'S DOCKING BAY FEED IT.
 		   LAST, after this hull's own balance is fully known, and additive: a grant from elsewhere is
 		   not a system's draw and must not be folded into the loop above, which is indexed by this

@@ -3703,10 +3703,9 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 			ship.turncost = Math.round(ship.turncost * 100) / 100;
 			ship.turndelaycost = Math.round(ship.turndelaycost * 100) / 100;
 
-			if (ship.turncost == 0.5) ship.turncost = 0.25;
-			if (ship.turncost == 0.66) ship.turncost = 0.33;
-			if (ship.turncost == 1) ship.turncost = 0.5;
-			if (ship.turncost == 1.5) ship.turncost = 0.75;
+			//Turn Cost one level down the rulebook ladder - an Expert Navigator's step, applied after his (the
+			//server has already put it into ship.turncost). OFFICERS_PLAN.md §9.11; MIRROR of the server's case.
+			if (window.officers) ship.turncost = officers.turnCostLevelDown(ship.turncost);
 
 			if (ship.turndelaycost == 0.5) ship.turndelaycost = 0.25;
 			if (ship.turndelaycost == 0.66) ship.turndelaycost = 0.33;
@@ -3858,10 +3857,7 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 			ship.turncost = Math.round(ship.turncost * 100) / 100;
 			ship.turndelaycost = Math.round(ship.turndelaycost * 100) / 100;
 
-			if (ship.turncost == 0.25) ship.turncost = 0.5;
-			if (ship.turncost == 0.33) ship.turncost = 0.66;
-			if (ship.turncost == 0.5) ship.turncost = 1;
-			if (ship.turncost == 0.75) ship.turncost = 1.5;
+			if (window.officers) ship.turncost = officers.turnCostLevelUp(ship.turncost); //undo the one-level step
 
 			if (ship.turndelaycost == 0.25) ship.turndelaycost = 0.5;
 			if (ship.turndelaycost == 0.33) ship.turndelaycost = 0.66;

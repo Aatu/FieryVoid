@@ -892,8 +892,9 @@
       fighter flight's box names its one officer instead.</li>
     <li>Your opponent sees none of these until the game is over. Some effects do show, though, because they change numbers
       everyone can read: a Helmsman's or a Dogfighter's initiative, a Geneticist's profiles, a Technician's reactor power,
-      a Matter Weapons Expert's fire control, an Evader's offensive bonus, and the criticals and damage an Engineer or
-      Scavenger repairs. The opponent sees the number, not who is behind it.</li>
+      a Matter Weapons Expert's fire control, a Navigator's turn, pivot, roll and accel/decel costs, an Evader's offensive
+      bonus, and the criticals and damage an Engineer or Scavenger repairs. The opponent sees the number, not who is behind
+      it.</li>
   </ul>
 </section>
 
@@ -949,15 +950,22 @@
         <dd>The ship's Reactor (the largest, if it has more than one).</dd>
         <dt>Effect</dt>
         <dd><ul>
-          <li>+2 Reactor power.</li>
-          <li>Or, if it is more, a third (rounded down) of the power used by the largest system the ship has lost - for
-            example +3 once a system using 9 power has been destroyed.</li>
-          <li>Worked out again every turn, so the bonus grows as the ship loses bigger systems.</li>
+          <li><b>Improved Power:</b> +2 Reactor power, and -2 on every critical roll the Reactor makes.</li>
+          <li><b>Efficient Transfers:</b> +1 power on any turn you switch off at least one system that needs power. Only one
+            system counts, however many you switch off.</li>
+          <li><b>Improved Circuit Breakers:</b> every destroyed system gives back a third (rounded down) of the power it
+            used - for example +2 for a destroyed Battle Laser, or +5 once a 9-power and a 6-power system are both lost.</li>
+          <li>All three add together.</li>
         </ul></dd>
         <dt>Cost</dt>
         <dd>9% of the ship's base cost.</dd>
         <dt>Limit</dt>
         <dd>1 per ship.</dd>
+        <dt>Notes</dt>
+        <dd>A system forced offline by a critical hit, such as a weapon cooling down, still returns its usual power, but
+          does not earn the Efficient Transfers point. A destroyed system counts from the turn after it is lost, and stops
+          counting if it is repaired. The -2 also makes the Technician harder to kill, since his fate is decided by the
+          Reactor's critical roll.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
@@ -1031,8 +1039,9 @@
             C&amp;C roll). If there is no critical left to repair, he repairs 4 boxes of damage instead.</li>
           <li>Boxes go to the most important damaged systems first, Structure blocks included, but never to a destroyed
             system, anything on a destroyed section, or damage taken that same turn.</li>
-          <li><b>Once per battle</b>, ignores up to 6 points of a hit that would destroy the C&amp;C, a Reactor or a
-            Structure block, if that is enough to keep it standing. This happens automatically, the first time it can.</li>
+          <li><b>Once per battle</b>, ignores up to 6 points of a hit that would destroy the C&amp;C, a Reactor, a
+            Scanner, an Engine or a Structure block, if that is enough to keep it standing. This happens automatically, the
+            first time it can.</li>
         </ul></dd>
         <dt>Cost</dt>
         <dd>25% of the ship's base cost.</dd>
@@ -1042,6 +1051,30 @@
         <dd>The once-per-battle save covers one hit: the other rakes or pulses of the same attack land in full. A system
           that absorbs damage, such as a Gaim Bulkhead, takes its share first; the save is only spent if what is left would
           still destroy the system. An Expert Engineer aboard makes his repair first; the Scavenger then picks his own.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Navigator</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>C&amp;C</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li><b>Turn cost</b> one level lower. The levels, from highest to lowest: 2, 1.75, 1.66, 1.5, 1.33, 1.25, 1, 0.83,
+            0.75, 0.66, 0.5, 0.33, 0.25, 0.16 and 0.1 - so a turn cost of 1 becomes 0.83.</li>
+          <li><b>Pivot and roll costs</b> 1 lower each, but never below 1: 3 becomes 2, and 1 stays 1.</li>
+          <li><b>Accel/decel cost</b> 25% lower, with fractions kept until the turn's speed changes are added up, then
+            rounded up. With a cost of 2 (now 1.5), one speed change still costs 2 thrust, but two cost only 3.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>7% of the ship's base cost, rounded down.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship.</dd>
+        <dt>Notes</dt>
+        <dd>Turn delay is not changed. A ship whose pivot or roll cost is already 0 gains nothing there, and one already at
+          the lowest turn cost (0.1) keeps it. The ship window shows the lowered costs; with a fractional accel/decel cost,
+          each speed change asks for its share in turn (2, 1, 2, 1... for 1.5). A Hyach Manoeuvring Specialist uses the same
+          levels, so on the turn one is used the ship drops a second level: 1 becomes 0.83, then 0.75.</dd>
       </dl>
     </article>
   </div>
