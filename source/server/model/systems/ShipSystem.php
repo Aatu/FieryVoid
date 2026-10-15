@@ -1809,6 +1809,8 @@ public function setParentFighter($fighter) {
 			$effectiveDamage = $effectOfProtection['dmg'];
 			$effectiveArmor = $effectOfProtection['armor'];
 		}
+		//OFFICERS_PLAN.md Stage 5: the Expert Scavenger's once-per-game save - the last resort, on what any protector left
+		if(TacGamedata::$officersPresent) $effectiveDamage = Officers::scavengerSave($target, $this, $gamedata, $effectiveDamage, $effectiveArmor);
 		
 		
 		//if damage is more than system has structure left - mark rest as overkilling

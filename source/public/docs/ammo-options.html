@@ -885,14 +885,15 @@
   <ul>
     <li>A gold double-chevron insignia marks the post's icon in the ship window - for a fighter officer, the flight's first
       fighter. It turns grey once the officer is out of action, with a red slash through it if they were killed.</li>
-    <li>The post's information tooltip names the officer and what they do, and says how and when they were lost. A fighter
-      officer is named in the flight's own tooltip, shown when you hover over a fighter.</li>
+    <li>The post's information tooltip names the officer and what they do, and says how and when they were lost - or, for
+      an Expert Scavenger, when he spent his once-per-battle save. A fighter officer is named in the flight's own tooltip,
+      shown when you hover over a fighter.</li>
     <li>The ship window's gold Enhancements box counts the officers aboard, as <b>Officers (2)</b>. In the lobby, a
       fighter flight's box names its one officer instead.</li>
     <li>Your opponent sees none of these until the game is over. Some effects do show, though, because they change numbers
       everyone can read: a Helmsman's or a Dogfighter's initiative, a Geneticist's profiles, a Technician's reactor power,
-      a Matter Weapons Expert's fire control and an Evader's offensive bonus. The opponent sees the number, not who is
-      behind it.</li>
+      a Matter Weapons Expert's fire control, an Evader's offensive bonus, and the criticals and damage an Engineer or
+      Scavenger repairs. The opponent sees the number, not who is behind it.</li>
   </ul>
 </section>
 
@@ -996,6 +997,53 @@
         <dd>1 per ship. Only offered to ships carrying at least one Matter weapon.</dd>
       </dl>
     </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Engineer</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The ship's strongest Engine.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>At the end of each turn, repairs one critical hit, automatically.</li>
+          <li>A critical can only be repaired once the ship has suffered it for a full turn: one taken on turn 3 acts on
+            turn 4 and can be repaired at the end of turn 4.</li>
+          <li>A C&amp;C critical is repaired only on a roll of 16 or more on a d20. If that roll fails, he repairs nothing
+            else that turn.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>5% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship.</dd>
+        <dt>Notes</dt>
+        <dd>He picks the most important critical first, in the same order a Self Repair system uses by default. He works
+          after any Self Repair system the ship has, never on a destroyed system, and still makes his repair at the end of
+          the turn he is lost.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Scavenger</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The ship's strongest Engine.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>At the end of each turn, repairs one critical hit, as an Expert Engineer does (the same full-turn wait and
+            C&amp;C roll). If there is no critical left to repair, he repairs 4 boxes of damage instead.</li>
+          <li>Boxes go to the most important damaged systems first, Structure blocks included, but never to a destroyed
+            system, anything on a destroyed section, or damage taken that same turn.</li>
+          <li><b>Once per battle</b>, ignores up to 6 points of a hit that would destroy the C&amp;C, a Reactor or a
+            Structure block, if that is enough to keep it standing. This happens automatically, the first time it can.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>25% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship.</dd>
+        <dt>Notes</dt>
+        <dd>The once-per-battle save covers one hit: the other rakes or pulses of the same attack land in full. A system
+          that absorbs damage, such as a Gaim Bulkhead, takes its share first; the save is only spent if what is left would
+          still destroy the system. An Expert Engineer aboard makes his repair first; the Scavenger then picks his own.</dd>
+      </dl>
+    </article>
   </div>
 </section>
 
@@ -1056,12 +1104,12 @@
         <dt>Effect</dt>
         <dd>-2 to the flight's dropout rolls.</dd>
         <dt>Cost</dt>
-        <dd>10% of one fighter's cost (rounded up), for every fighter in the flight.</dd>
+        <dd>50% of one fighter's cost (rounded up), for every fighter in the flight.</dd>
         <dt>Limit</dt>
         <dd>1 officer per flight.</dd>
         <dt>Notes</dt>
-        <dd>Formerly a fighter enhancement, with the same effect and price. As an officer he now counts as the flight's one
-          officer, is lost with the flight's first fighter, and is hidden from your opponent.</dd>
+        <dd>Formerly a fighter enhancement, with the same effect but a lower price (10% of a fighter). As an officer he now
+          counts as the flight's one officer, is lost with the flight's first fighter, and is hidden from your opponent.</dd>
       </dl>
     </article>
   </div>

@@ -23,15 +23,21 @@
    nothing in a phase's process() may ask about officers ([[arch_post_side_ship_reconstruction]]).
 
    Track 1 only so far (fixed-post officers, ship-level rows): the Helmsman (Stage 1); the Scanner,
-   Technician, Geneticist and C&C Matter Weapons Expert (Stage 3); and the fighter officers (Stage 4):
+   Technician, Geneticist and C&C Matter Weapons Expert (Stage 3); the fighter officers (Stage 4):
    Dogfighter, Missileer, Evader and the Expert Motivator, which was a fighter enhancement until then
-   and keeps its old id. Placed officers (track 2, Stage 8) are not built yet. */
+   and keeps its old id; and the Engineer and Scavenger (Stage 5: an end-of-turn repair pass, and the
+   Scavenger's once-per-game save, stored as one OffSaved note). Placed officers (track 2, Stage 8)
+   are not built yet. */
 class Officers{
 
 	const ID_PREFIX = 'OFF_';
 	const KILL_NOTE = 'OffKilled'; //tac_individual_notes.notekey, varchar(40)
 	const MOVE_NOTE = 'OffMoved';  //a fighter officer left this row with his fighter (followFighter)
+	const SAVE_NOTE = 'OffSaved';  //the Expert Scavenger has spent his once-per-game save (scavengerSave)
 	const KILL_ROLL = 20;          //"a '20' or greater (including any modifications)"
+	const CNC_REPAIR_ROLL = 16;    //Engineer and Scavenger: "C&C criticals ... repaired only on a roll of 16 or greater on a single d20"
+	const SCAVENGER_BOXES = 4;     //"Each turn, he can repair four destroyed boxes anywhere on the ship"
+	const SAVE_POINTS = 6;         //"up to six points of damage can be ignored in any single volley"
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
 	     label    the name in the buy dialog, the stored enhname and the kill note's notekey_human
@@ -73,6 +79,15 @@ class Officers{
 		   +1 damage on every Matter-class weapon, per firing mode. Only for hulls carrying one. */
 		'OFF_MWE'  => array('label' => 'Matter Weapons Expert', 'post' => 'cnc', 'pct' => 10, 'apply' => 'applyMatterExpert',
 			'needs' => 'hasMatterWeapon'),
+		/* Expert Engineer (Stage 5): repairs one critical at the end of each turn - runRepairs, after Self
+		   Repair. Never one the ship has not yet suffered for a full turn; a C&C critical only on a d20 of
+		   16+, and a failed roll ends his repairs for the turn. */
+		'OFF_ENG'  => array('label' => 'Expert Engineer', 'post' => 'engine', 'pct' => 5, 'apply' => null),
+		/* Expert Scavenger (Stage 5): at the end of each turn erases one critical as the Engineer does, or,
+		   with none left to erase, repairs 4 boxes (runRepairs); and ONCE per game ignores up to 6 points
+		   of a hit that would destroy the C&C, a reactor or a Structure block (scavengerSave). User
+		   rulings 2026-10-15. */
+		'OFF_SCAV' => array('label' => 'Expert Scavenger', 'post' => 'engine', 'pct' => 25, 'apply' => null),
 
 		/* FIGHTER OFFICERS (Stage 4). A flight carries ONE officer in total (D9), posted on its first
 		   craft. He is lost with that craft - destroyed, or dropped out - and never by a dock, a partial
@@ -98,8 +113,9 @@ class Officers{
 		/* Expert Motivator: -2 on the flight's dropout rolls. A fighter ENHANCEMENT until Stage 4, when the
 		   user ruled it an officer (2026-10-11). ⚠️ It keeps its OLD id, EXP_MOTIV - live games and saved
 		   fleets carry rows under it, and a withdrawn id drops a saved row silently while its cost stays
-		   in pointCostEnh ([[arch_retiring_ship_enhancement]]) - and its old price, 10% of a craft per
-		   craft. Withheld, as before, by the nonstandard fighter sets (blockStandardEnhancements). */
+		   in pointCostEnh ([[arch_retiring_ship_enhancement]]). Priced per craft like before, but at 50% of
+		   a craft since 2026-10-15 (user; it was 10% as an enhancement). Withheld, as before, by the
+		   nonstandard fighter sets (blockStandardEnhancements). */
 		'EXP_MOTIV' => array('label' => 'Expert Motivator', 'post' => 'craft', 'flight' => true, 'pct' => 50, 'per' => 'craft',
 			'apply' => 'applyMotivator'),
 	);
@@ -173,8 +189,8 @@ class Officers{
 
 	/* ceil(pct% of ONE craft), in whole numbers. A flight's pointCost is for six craft whatever size it
 	   is bought at (the lobby prices a craft as pointCost / 6); a superheavy's is its own - the
-	   convention every fighter enhancement prices by. For EXP_MOTIV this is exactly the old
-	   ceil(pointCost / 60) and ceil(pointCost / 10). */
+	   convention every fighter enhancement prices by (at 10% it was exactly EXP_MOTIV's old
+	   ceil(pointCost / 60) and ceil(pointCost / 10)). */
 	public static function craftPrice($flight, $pct){
 		$crafts = ($flight instanceof SuperHeavyFighter) ? 1 : 6;
 		$hundredths = max(0, (int)round($flight->pointCost * 100));
@@ -207,6 +223,7 @@ class Officers{
 	              Poor Crew and Improved Sensors move, so they agree on a hull with two.
 	     reactor  the biggest Reactor by maxhealth - Elite Crew's rule (a malus would sit on the main
 	              reactor too); Mag-Grav reactors included.
+	     engine   the strongest Engine by output - the one Poor Crew and ADV_ENG move (Stage 5)
 	     craft    a flight's first craft (Stage 4): the lobby's one fighter card, and the sample fighter
 	              getSampleFighter() answers - id 1, whether or not it is still flying.
 	   ⚠️ Asked BEFORE any enhancement moves an output (D2): Poor Crew takes a point off the strongest
@@ -227,6 +244,8 @@ class Officers{
 				return self::strongest($ship, 'Scanner', 'output', -1);
 			case 'reactor':
 				return self::strongest($ship, 'Reactor', 'maxhealth', -1000);
+			case 'engine':
+				return self::strongest($ship, 'Engine', 'output', -1);
 		}
 		return null;
 	}
@@ -636,6 +655,136 @@ class Officers{
 		$ship->critRollMod -= 2;
 	}
 
+	/* ------------------------------------------------------------------ repairs (Stage 5) */
+
+	/* Criticals::setCriticals, after Pass 2 - so after every Self Repair has spent its points - behind
+	   TacGamedata::$officersPresent. Per ship, its serving Expert Engineer and then its Expert Scavenger
+	   (user rulings 2026-10-15):
+	     Engineer   one critical, the first in Self Repair's default order (criticalQueue).
+	     Scavenger  one critical the same way while one is left to erase; with none, SCAVENGER_BOXES boxes.
+	   A C&C critical is repaired only on a d20 of CNC_REPAIR_ROLL or more, and a failed roll ends THAT
+	   officer's repairs for the turn - so a Scavenger who fails one repairs no boxes either; and he picks
+	   for himself, so he may try the C&C critical the Engineer has just failed on.
+	   He still repairs at the end of the turn he falls (out = this turn: the next-turn rule of D3).
+	   Saved like Self Repair's own work: a critical's turnend (repairCritical) and a negative DamageEntry
+	   go out with the ordinary end-of-firing save, so nothing is written from here. */
+	public static function runRepairs($ships, $gamedata){
+		$turn = (int)$gamedata->turn;
+		foreach ($ships as $ship){
+			if (!$ship->hasOfficers()) continue;
+			if (self::isActive($ship, 'OFF_ENG', $turn)) self::repairOneCritical($ship, $turn);
+			if (self::isActive($ship, 'OFF_SCAV', $turn) && self::repairOneCritical($ship, $turn) === null){
+				self::repairBoxes($ship, $turn, self::SCAVENGER_BOXES);
+			}
+		}
+	}
+
+	//The first critical of criticalQueue: null when there was none, true once repaired, false on a failed C&C roll
+	private static function repairOneCritical($ship, $turn){
+		$queue = self::criticalQueue($ship, $turn);
+		if (empty($queue)) return null;
+		$job = $queue[0];
+		if ($job['system'] instanceof CnC && Dice::d(20) < self::CNC_REPAIR_ROLL) return false;
+		$job['system']->repairCritical($job['critical'], $turn);
+		return true;
+	}
+
+	/* Every critical an officer may erase, in Self Repair's DEFAULT order (user ruling 2026-10-15 - the
+	   player's Repair Queue overrides belong to a Self Repair system and are not read): the critical's
+	   repairPriority, plus its system's while the critical's own is under 10; then the lowest system id,
+	   then the lowest critical id. The filters are Self Repair's: a repairable critical on a repairable,
+	   undestroyed system (C&C criticals are Self Repair's "cost 4" ones - SecondaryCnC is not a CnC), not
+	   a temporary one or one already ended, and not one rolled this turn. That last is the Engineer's "has
+	   suffered its effect for at least one full turn": rolled at the end of turn N, a critical acts on
+	   N + 1 and may be repaired at the end of N + 1. ⚠️ MIRROR of SelfRepair::criticalPhaseEffects' step 2. */
+	private static function criticalQueue($ship, $turn){
+		$queue = array();
+		foreach ($ship->systems as $system){
+			if ($system->repairPriority < 1 || $system->isDestroyed($turn)) continue;
+			foreach ($system->criticals as $critical){
+				if ($critical->repairPriority < 1) continue;
+				if ($critical->turn >= $turn) continue;
+				if ($critical->oneturn || $critical->turnend > 0) continue;
+				$priority = $critical->repairPriority;
+				if ($priority < 10) $priority += $system->repairPriority;
+				$queue[] = array('system' => $system, 'critical' => $critical, 'priority' => $priority);
+			}
+		}
+		usort($queue, function ($a, $b){
+			if ($a['priority'] !== $b['priority']) return $b['priority'] - $a['priority'];
+			if ((int)$a['system']->id !== (int)$b['system']->id) return (int)$a['system']->id - (int)$b['system']->id;
+			return (int)$a['critical']->id - (int)$b['critical']->id;
+		});
+		return $queue;
+	}
+
+	/* The Scavenger's boxes, spilling from system to system: the damaged systems in Self Repair's default
+	   order (repairPriority, then the lowest id), Structure blocks included (user ruling 2026-10-15).
+	   "Only un-destroyed systems ... other than on a destroyed section", and never damage taken this turn
+	   (damageReceivedOnTurn - which also counts pre-battle damage, as it does for Self Repair). A negative
+	   DamageEntry, as Self Repair writes, that never "undestroys". ⚠️ MIRROR of SelfRepair::
+	   criticalPhaseEffects' step 1, without its +10 for a destroyed system, which he may not touch. */
+	private static function repairBoxes($ship, $turn, $boxes){
+		$queue = array();
+		foreach ($ship->systems as $system){
+			if ($system->repairPriority < 1 || $system->isDestroyed($turn)) continue;
+			if (!($system instanceof Structure)){
+				$block = $ship->getStructureSystem($system->getStructureLocation());
+				if ($block && $block->isDestroyed($turn)) continue;
+			}
+			$repairable = ($system->maxhealth - $system->getRemainingHealth()) - $system->damageReceivedOnTurn($turn);
+			if ($repairable > 0) $queue[] = array('system' => $system, 'boxes' => $repairable);
+		}
+		usort($queue, function ($a, $b){
+			if ($a['system']->repairPriority !== $b['system']->repairPriority) return $b['system']->repairPriority - $a['system']->repairPriority;
+			return (int)$a['system']->id - (int)$b['system']->id;
+		});
+		foreach ($queue as $job){
+			if ($boxes < 1) break;
+			$fixed = min($boxes, $job['boxes']);
+			$entry = new DamageEntry(-1, $ship->id, -1, $turn, $job['system']->id, -$fixed, 0, 0, -1, false, false, '', 'Repair');
+			$entry->updated = true;
+			$job['system']->damage[] = $entry;
+			$boxes -= $fixed;
+		}
+	}
+
+	/* ⭐ THE SCAVENGER'S SAVE: "once per scenario ... up to six points of damage can be ignored in any single
+	   volley, anywhere on the ship". Automatic (user ruling 2026-10-15): spent on the first hit that would
+	   DESTROY the C&C, a reactor or a Structure block when ignoring SAVE_POINTS of it keeps that system
+	   standing - and then it ignores all of them, or the whole hit if that is less. A hit 6 points cannot
+	   stop does not spend it. A volley's other rakes and pulses are hits of their own and land in full.
+	   Called from ShipSystem::assignDamageReturnOverkill, behind $officersPresent, AFTER any protecting system
+	   (a Gaim Bulkhead, a shield pool) has taken its share: the once-per-game save is the last resort, judged
+	   on the damage still coming, so it never spends itself on a hit a Bulkhead has already stopped.
+	   Spent at once in memory, so a second hit this request sees it gone, and stored as one OffSaved note
+	   (written straight through: firing runs inside advance()). Returns the hit's damage to deal. */
+	public static function scavengerSave($ship, $system, $gamedata, $damage, $armour){
+		if (!($system instanceof CnC) && !($system instanceof Reactor) && !($system instanceof Structure)) return $damage;
+		$dealt = $damage - $armour;
+		$health = $system->getRemainingHealth();
+		if ($dealt < $health || $dealt - self::SAVE_POINTS >= $health) return $damage;
+		$turn = (int)$gamedata->turn;
+		if (!self::isActive($ship, 'OFF_SCAV', $turn) || self::saveSpent($ship)) return $damage;
+
+		$ship->recordOfficerSave('OFF_SCAV', $turn);
+		$post = null;
+		foreach ($ship->getOfficers() as $entry) if ($entry['id'] === 'OFF_SCAV') $post = (int)$entry['post'];
+		Manager::insertIndividualNote(new IndividualNote(-1, $gamedata->id, $turn, $gamedata->phase,
+			$ship->id, $post, self::SAVE_NOTE, substr(self::getLabel('OFF_SCAV') . ' save used', 0, 40), 'OFF_SCAV'));
+		return $damage - min(self::SAVE_POINTS, $dealt);
+	}
+
+	private static function saveSpent($ship){
+		$saves = $ship->getOfficerSaves();
+		return isset($saves['OFF_SCAV']);
+	}
+
+	//DBManager's bulk note loop hands every OffSaved note here, as it does OffKilled and OffMoved
+	public static function isSaveNote($note){
+		return $note->notekey === self::SAVE_NOTE;
+	}
+
 	/* ------------------------------------------------------------------ a fighter officer follows his fighter */
 
 	/* What one bought officer row cost the unit, by the lobby's rule (officers.flightCost): a ship
@@ -746,8 +895,11 @@ class Officers{
 		}
 		if (!TacGamedata::$currentGameFinished && !$ship->isRevealedToCurrentViewer()) return;
 		$out = array();
+		$saves = $ship->getOfficerSaves();
 		foreach ($list as $entry){
 			$row = array('id' => $entry['id'], 'post' => $entry['post']);
+			//the Scavenger's once-per-game save: the turn it was spent (officers.stateText words it)
+			if (isset($saves[$entry['id']])) $row['used'] = $saves[$entry['id']];
 			/* An officer who moved with his fighter is not out of action - he is on another row now:
 			   listed here as serving up to the turn he left, and not at all afterwards. */
 			if ($entry['how'] === 'moved'){

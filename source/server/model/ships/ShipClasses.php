@@ -180,12 +180,14 @@ class BaseShip {
 	/* OFFICERS_PLAN.md - the officers aboard, as Officers keeps them: array('id', 'post', 'out',
 	   'how') each. Rebuilt at every load by Officers::pickPosts / ::apply; only Officers writes it.
 	   $officerKills is officer id => turn, read off the OffKilled notes by DBManager's note loop, and
-	   $officerMoves likewise off the OffMoved notes (a fighter officer who left this row with his fighter).
+	   $officerMoves likewise off the OffMoved notes (a fighter officer who left this row with his fighter),
+	   and $officerSaves off the OffSaved notes (the Expert Scavenger's once-per-game save, spent).
 	   All PROTECTED for $crewQuality's reason: a public empty default would put a dead key on every
 	   static blueprint. */
 	protected $officers = array();
 	protected $officerKills = array();
 	protected $officerMoves = array();
+	protected $officerSaves = array();
 
 	
 	public $halfPhaseThrust = 0; //needed for half phasing; equal to thrust from two BioThrusters on a given ship; 0 for ships that cannot half phase, eg. vast majority
@@ -1888,6 +1890,19 @@ class BaseShip {
 		$turn = (int)$turn;
 		if (!isset($this->officerMoves[$officerId]) || $turn < $this->officerMoves[$officerId]){
 			$this->officerMoves[$officerId] = $turn;
+		}
+	}
+
+	public function getOfficerSaves(){
+		return $this->officerSaves;
+	}
+
+	//one OffSaved note (Officers::scavengerSave), or the save just spent in this request: the earliest turn wins
+	public function recordOfficerSave($officerId, $turn){
+		$officerId = (string)$officerId;
+		$turn = (int)$turn;
+		if (!isset($this->officerSaves[$officerId]) || $turn < $this->officerSaves[$officerId]){
+			$this->officerSaves[$officerId] = $turn;
 		}
 	}
 

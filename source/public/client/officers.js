@@ -37,6 +37,10 @@ window.officers = {
 			summary: '-1 to hit with own weapons, +2 to be hit, enemies may ram this ship' },
 		{ id: 'OFF_MWE', label: 'Matter Weapons Expert', post: 'cnc', needs: 'matterWeapon',
 			summary: '+1 fire control and +1 damage for Matter weapons' },
+		{ id: 'OFF_ENG', label: 'Expert Engineer', post: 'engine',
+			summary: 'Repairs 1 critical per turn (a C&C critical on a d20 of 16+)' },
+		{ id: 'OFF_SCAV', label: 'Expert Scavenger', post: 'engine',
+			summary: 'Repairs 1 critical or 4 boxes per turn; once per game blocks up to 6 damage that would destroy the C&C, a reactor or a structure block' },
 		{ id: 'OFF_DOG', label: 'Expert Dogfighter', post: 'craft', flight: true, per: 'flight', stats: { iniativebonus: 5 },
 			summary: '+5 initiative' },
 		{ id: 'OFF_MSL', label: 'Expert Missileer', post: 'craft', flight: true, per: 'flight', perMissile: 1, needs: 'missiles',
@@ -77,6 +81,7 @@ window.officers = {
 	     cnc      the first C&C that is not a Flag Bridge; failing that, the first one of any kind
 	     scanner  the strongest scanner by output - the list and the pick Elite Crew's lobby mirror uses
 	     reactor  the biggest reactor by maxhealth - likewise
+	     engine   the strongest engine by output - the pick Poor Crew's and ADV_ENG's lobby mirrors use
 	     craft    a flight's first craft - the lobby's one fighter card, id 1
 	   ⚠️ D2: the server picks from BLUEPRINT values, before any enhancement moves an output, but a lobby
 	   fleet ship has already had lobbyEnhancements.apply - Poor Crew has taken a point off its strongest
@@ -105,6 +110,9 @@ window.officers = {
 		}
 		if (post === 'reactor') {
 			return this.strongest(ship, systems.filter(function (s) { return s && s.name === 'reactor'; }), 'maxhealth', -1000);
+		}
+		if (post === 'engine') {
+			return this.strongest(ship, systems.filter(function (s) { return s && s.name === 'engine'; }), 'output', -1);
 		}
 		return null;
 	},
@@ -279,9 +287,10 @@ window.officers = {
 		return state;
 	},
 
-	//"(disabled, turn 3)", "(killed, turn 3)", the pre-battle wording, or '' while he serves
+	/* "(disabled, turn 3)", "(killed, turn 3)", the pre-battle wording, or '' while he serves - unless a
+	   serving Expert Scavenger has spent his once-per-game save: "(save used, turn 3)" (`used`, own team only). */
 	stateText: function stateText(entry) {
-		if (entry.out === undefined || entry.out === null) return '';
+		if (entry.out === undefined || entry.out === null) return entry.used ? '(save used, turn ' + entry.used + ')' : '';
 		if (parseInt(entry.out, 10) < 1) return '(post destroyed before battle - he will not serve)';
 		return '(' + (entry.how === 'killed' ? 'killed' : 'disabled') + ', turn ' + entry.out + ')';
 	},

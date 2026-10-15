@@ -1,7 +1,8 @@
 # Officers — Implementation Plan
 
-Status: **Stages 0–2a committed (`7800ab827`), Stage 3 committed (`1714c3651`); Stage 4 BUILT 2026-10-11,
-uncommitted** (§9.6). Written against `dab951bf5`. The user
+Status: **Stages 0–2a committed (`7800ab827`), Stage 3 committed (`1714c3651`), Stage 4 committed
+(`ab0025aba`, `4738173cc`; the Motivator re-priced to 50 % in `32c9f2a11`); Stage 5 BUILT 2026-10-15,
+uncommitted** (§9.8). Written against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
 a third Helmsman effect (−1 on the meteor impact chart) and play-tested Stage 1 in game 4457 (confirmed
@@ -9,9 +10,10 @@ correct), then ruled the Scanner, Technician and Geneticist questions for Stage 
 ruled the fighter-officer questions (§6), made the old fighter enhancement **Expert Motivator** an officer,
 and asked for the ship window's officers as one **"Officers (n)"** row in the gold Enhancements block
 (§9.6). The same day they ruled out officers on remotely controlled craft (the Hunter-Killers) and had a
-fighter officer **follow his fighter** onto a split-off flight row, cost included (§9.7). Each officer's own
-rules questions still only need ruling when that officer's stage starts. Next
-step: Stage 5 (Engineer and Scavenger).
+fighter officer **follow his fighter** onto a split-off flight row, cost included (§9.7). On 2026-10-15 they
+supplied the Engineer's and Scavenger's rules text and ruled their questions (§6), including an **automatic**
+once-per-game save for the Scavenger (§9.8). Each officer's own rules questions still only need ruling when
+that officer's stage starts. Next step: Stage 6 (Navigator).
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -527,7 +529,7 @@ committed.
 | **2** | Client framework. **BUILT 2026-10-10** (§9.3) | Lobby: buy a Helmsman, the Officers section shows, points move, the insignia lands on the C&C, the tooltip line appears. Destroy the C&C in the pre-battle editor → the warning shows. Game: own team sees the insignia in all three looks (serving, disabled, killed), an enemy browser sees nothing, a finished game shows all. Headless, driving the real site ([[howto_headless_chrome_phone_width]]) |
 | **3** | Easy ship officers: Scanner, Technician, Matter Weapons Expert (C&C), Geneticist. **BUILT 2026-10-10** (§9.5) | Scanner: the late-EW window opens on a ship with no EW Detector on the board. MWE: switch modes and back, the +1 stays. Technician: power balance after a system dies |
 | **4** | Fighter framework; Dogfighter, Missileer, Evader; the Expert Motivator made an officer. **BUILT 2026-10-11** (§9.6) | A per-flight price is identical across buy, edit, copy and save/reload on 1-, 3- and 6-craft flights. A second officer on one flight is refused in the dialog, and a doctored payload with two serves only one. A lead-craft dropout loses him; a dock does not |
-| **5** | Repair pass: Engineer and Scavenger | Deterministic pick; the C&C d20; no repair of this turn's crits (if so ruled); no revival of a destroyed system; runs after Self Repair |
+| **5** | Repair pass: Engineer and Scavenger; the Scavenger's once-per-game save. **BUILT 2026-10-15** (§9.8) | Deterministic pick; the C&C d20; no repair of this turn's crits (if so ruled); no revival of a destroyed system; runs after Self Repair |
 | **6** | Navigator | Server and client thrust agree on every cost change; the ship window shows the new numbers own-team only |
 | **7** | Jump Officer | Range +1 (with and without the Jump Accelerator); failure −20 at all three sites through one helper; arrival scatter and initiative |
 | **8** | Placed-officer framework; Gunner core; weapon-mounted Matter Weapons Expert (without loading) | The cap per size; a Gunner and Gunsights on one gun show ✦ and insignia side by side; "any damage" kills; the destroyed-host refund |
@@ -554,14 +556,14 @@ committed.
 | Officer | Questions |
 |---|---|
 | Helmsman | Does the tie-break also apply under the simultaneous-movement initiative categories? (Default: no; ties there are categories, not orderings.) **Built with the default, 2026-10-10** (not ruled by the user; nothing in a category is ordered, so there is no tie to break; his +5 still counts toward the category, through `getInitiativebonus`). Reverse it if ruled otherwise. |
-| Engineer | Reading: "once per turn, repair one critical anywhere; a C&C critical needs 16+ on a d20"? Which critical: the highest `repairPriority` system's oldest? Never a critical from this turn, as Self Repair? On a failed roll, try another or stop? |
+| Engineer | Reading: "once per turn, repair one critical anywhere; a C&C critical needs 16+ on a d20"? Which critical: the highest `repairPriority` system's oldest? Never a critical from this turn, as Self Repair? On a failed roll, try another or stop? **RULED 2026-10-15** (the user supplied the rules text, §9.8): one critical a turn, automatic, except a C&C critical, repaired only on a d20 of 16+; a failed attempt ends his repairs that turn. Not until the ship has suffered it a full turn (a critical from turn 3 acts on 4 and may be repaired at the end of 4) - Self Repair's own filter. The pick: **Self Repair's default order** (the critical's priority plus its system's; no player overrides). |
 | Scanner | Cumulative with EW Detectors, or the same point? (Default: max(1, ladder), not cumulative.) **RULED 2026-10-10: cumulative** - the ladder + 1. |
 | Navigator | (a) The turn-cost ladder. The hulls use 0.25, 0.33, 0.5, 0.66, 0.75, 1, 1.25, 1.33, 1.5, 1.66, 1.75, 2 and 3. Which of those are "steps"? (b) Turn delay unchanged? (c) Accel/decel: × 0.75 per change, or on the turn's total? Which rounding? |
 | Technician | "Or" = the best of the three automatically, the player's choice each turn, or a fixed priority? How is 33 % rounded? **RULED 2026-10-10: the best of the three, automatically; a third, rounded down.** |
 | Jump Officer | (a) +1 over the drive's own range (4 → 5, or 6 → 7 with the Jump Accelerator)? (b) −20 before or after the Accelerator's doubling? (c) On arrival: the officer of the ship that OPENED the doorway, or each arriving rider's own? (d) Does −20 also cover the hyperspace-jump failure roll? |
 | Quartermaster | "Free" = this ship's own other enhancements and ammo? What is "+10 turn delay"? How much on C&C crits? Post: random primary? Price: 5 % of the game's points limit? |
 | Geneticist | "Scenario only" = never offered unless a hull opts in, or a Create Game rule? "−1 to hit other ships" = this ship's own weapons? **RULED 2026-10-10: offered on every hull with a C&C** ("scenario only" is by agreement, as the doc card says). The −1 was built with its default: this ship's own weapons. |
-| Scavenger | A critical first, else 4 boxes? Which system first? May he repair Structure? |
+| Scavenger | A critical first, else 4 boxes? Which system first? May he repair Structure? **RULED 2026-10-15** (§9.8): **a critical first** (as the Engineer, same order and C&C roll), else 4 boxes, by Self Repair's default system order; **Structure yes**, never a destroyed system or anything on a destroyed section, never this turn's damage. His rules text adds a **once-per-scenario save** - "up to six points of damage can be ignored in any single volley" - ruled **automatic**: spent on the first hit that would destroy the C&C, a reactor or a Structure block when ignoring up to 6 points saves it ("note the Gaim Bulkhead already has a similar function"). The campaign clauses (permanent repairs after the battle) are not built. |
 | Breaching Expert | "+1 thrust" for one pod of a flight that moves as one? "20 % of total pods": fleet-wide, rounded down? What are "3 attack rolls on the first boarding turn" in FV's capture-mission terms? |
 | Analyst | Does he need range, line of sight or an OEW lock? Every enemy ship, or only those in range? Weapon arming is already public in FV: leave it so? |
 | Evangelist | The fleet = this player's ships, or the whole team? His penalty is worded "if killed": does a merely **disabled** Evangelist (post destroyed, kill roll survived) cost the fleet its +1 without the −10 initiative / −1 to hit? (Default: yes, the penalty needs a kill.) Is the penalty permanent? Do reinforcements that arrive later get the bonus? |
@@ -1088,3 +1090,82 @@ and the lobby suppresses the fighter hover tooltip.
 sets the gold body text itself, so it matches the grid's `EnhancementsPanel` (lobby4 compares the computed colours).
 And since a flight carries one officer, **in the lobby** its gold line names him ("Expert Missileer") instead of
 "Officers (1)" (`officers.summaryLine`, lobby = `gamephase === -2`); ships, and flights in game, keep the count.
+
+### 9.8 Stage 5: Expert Engineer and Expert Scavenger (2026-10-15)
+
+**Rulings (user, 2026-10-15, §6).** The user supplied both officers' rules text. Engineer (Engine, 5 %): one
+critical a turn, automatic except a C&C critical (d20 of 16+; a failed attempt ends his repairs that turn),
+never one the ship has not yet suffered for a full turn. Scavenger (Engine, 25 %): each turn one critical as
+the Engineer does, **else** 4 boxes, Structure included; and **once per scenario** "up to six points of damage
+can be ignored in any single volley" - ruled **automatic**. The pick: **Self Repair's default order**.
+
+Built with defaults, stated before building and not contested: the pass runs after every Self Repair; never a
+destroyed system or anything on a destroyed section; an officer still repairs at the end of the turn he falls
+(D3's next-turn rule); no log line (D4); the campaign clauses (permanent repairs, rebuilding a system after the
+battle) are not built.
+
+**Files.** `Officers.php` (registry `OFF_ENG`, `OFF_SCAV`; post `engine` = the strongest Engine by output;
+`runRepairs` / `repairOneCritical` / `criticalQueue` / `repairBoxes`; `scavengerSave`, `SAVE_NOTE` 'OffSaved',
+`isSaveNote`; the payload's `used`), `ShipClasses.php` (`$officerSaves`, `getOfficerSaves`, `recordOfficerSave` -
+the twin of kills and moves), `DBManager.php` (the `OffSaved` interception beside `OffKilled`/`OffMoved`),
+`criticals.php` (`Officers::runRepairs` after Pass 2, behind `$officersPresent`), `ShipSystem.php` (one line in
+`assignDamageReturnOverkill`, behind `$officersPresent`). Client: `officers.js` (registry rows, the `engine` post
+on the store's pristine outputs, `stateText`'s "(save used, turn N)"). Docs: two Ship Officers cards and two
+About Officers lines. Statics and legacy bundles rebuilt; no React change, no new class, autoload unchanged.
+
+**As built:**
+- **The repair pass** (`Officers::runRepairs`, Criticals::setCriticals after Pass 2). Per ship: a serving Engineer
+  repairs the first critical of `criticalQueue`; then a serving Scavenger does the same, and only if there was
+  NO critical to try does he repair 4 boxes. `criticalQueue` is a MIRROR of Self Repair's step 2 - repairable
+  critical on a repairable undestroyed system, `turn < now`, not `oneturn`, `turnend == 0`; priority = the
+  critical's own plus its system's below 10; then system id, then critical id. A C&C critical (`instanceof CnC`,
+  so never SecondaryCnC) needs `Dice::d(20) >= 16`; a failure ends that officer's turn, so a Scavenger who fails
+  repairs no boxes, and a Scavenger after a failed Engineer tries the same critical again. `repairBoxes` mirrors
+  Self Repair's step 1 without its destroyed-system bump: undestroyed, not on a section whose block is destroyed
+  at this turn (`isDestroyed` alone would let its systems through until next turn), damage minus
+  `damageReceivedOnTurn`; spilled by repairPriority, then id. Saved as Self Repair's work is: `repairCritical`
+  (turnend + forceModify) and a negative `DamageEntry` (damageclass `'Repair'`, never `undestroyed`).
+- **The save** (`Officers::scavengerSave`, from `assignDamageReturnOverkill` AFTER the protector step). On a C&C,
+  Reactor or Structure: if the hit's damage through armour would destroy it (`dealt >= health`) and 6 points
+  would stop that (`dealt - 6 < health`), it ignores `min(6, dealt)`, marks the save spent in memory
+  (`recordOfficerSave`) and writes one `OffSaved` note on his Engine straight through
+  `Manager::insertIndividualNote`. ⭐ It runs on what any protector left (user: "the Gaim Bulkhead already has a
+  similar function"), so a Bulkhead or a shield pool spends itself first and the save is the last resort; it
+  never spends itself on a hit the Bulkhead already stopped. One hit only: a volley's other rakes and pulses land.
+- **Disclosure.** The owner's payload row carries `used` (the turn); `officers.stateText` words it, so SystemInfo,
+  ShipInfo and the insignia title need nothing new. Repairs themselves are public (criticals and damage rows),
+  which the About Officers list of "numbers everyone can read" now says.
+
+**Measured.** Statics: 3,440 new offer tuples (1,720 hulls x 2), about 163 KB.
+
+**Verified.**
+- `officersHarness.php` 353 / 0 (332 with `--no-db`): offers and posts; the Engineer (priority order, one a turn,
+  no die, this turn's critical waits, the C&C 16 / 15 with nothing after a failure, a destroyed system skipped,
+  his Engine destroyed last turn vs this turn, a Helmsman repairs nothing, and the REAL `Criticals::setCriticals`
+  with the gate on and off); the Scavenger (critical first, 4 boxes spilling reactor 2 + Structure 2, this turn's
+  damage left, a destroyed weapon and a weapon on a block destroyed this turn skipped, a failed C&C roll leaves no
+  boxes, with an Engineer two criticals, the Engineer's failed C&C retried); the save (the note and memory, once
+  only, survives-anyway / 6-cannot-stop / not-key / the edge, a hit under 6 ignored whole, reactor and Structure,
+  disabled, spent earlier, an Engineer has none, the real `assignDamageReturnOverkill` with the gate on and off,
+  a Gaim Rafa whose Bulkhead absorbs first and whose save stops the rest, the payload per viewer); and a DB
+  round trip (an `OffSaved` note hosted on a Jump Engine reads back as spent and never reaches the engine).
+  Mutation-tested: 28 breaks, all caught (the first run found a gap - "ignore 6 even of a smaller hit" - closed
+  with the under-6 check).
+- `officersClientHarness.js` 97 / 0 (the registry rows, the derived list on the strongest engine, D2 on the
+  store's pristine outputs, pre-battle disabled, `stateText` and the System Info line). 4 client mutations caught.
+- `enhancementsHarness` 267 / 0 after re-recording the fingerprint; with the two offers withheld it matched the old
+  one exactly, and the re-recorded diff is 24 added offer lines plus payload hashes (old copy kept as
+  `fingerprint.before-officers-stage5.txt`). `enhancementsDifferential` 443 / 0. Replay corpus 146 / 0.
+- `fvbuild -Check`: all three checks pass (the validator after the user re-recorded its baseline for another
+  developer's hit-chart fixes, `8454aec91`).
+- Real site, headless (`officersE2E/`): `lobby4` 35 / 35 (new: the Omega's Engineer 47 / Scavenger 232 rows, the
+  279 total, both posted on the strongest engine, one insignia naming both; the Motivator at 50 %), `lobby` 25 / 25,
+  `lobby3` 19 / 19, `docs` 16 / 16. `game.mjs` 13 / 18 per player: game 4457 has since been SURRENDERED (turn 1,
+  phase 1), so D4 now reveals its Helmsman to the enemy and the Firing-phase Scanner checks cannot run - the game's
+  state, not a regression; that driver needs a fresh ACTIVE officer game.
+
+**Follow-up (user, 2026-10-15): the Expert Motivator at 50 %.** Confirmed (`32c9f2a11`); the harness, the lobby4
+driver, the registry comment and the Fighter Officers card now say 50 % ("same effect but a lower price" before).
+Observation, not changed: `Manager::loadSavedFleet` refunds an unoffered officer row at today's `rowPrice`, so a saved
+Hunter-Killer fleet whose Motivator was bought at 10 % would be refunded at 50 % - the refund clamps the fleet's
+enhancement value at 0, eating into its other enhancements. None exists locally.

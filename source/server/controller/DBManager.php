@@ -3810,6 +3810,11 @@ class DBManager
 					$ship->recordOfficerMove($currNote->notevalue, $currNote->turn);
 					continue;
 				}
+				//...and the Expert Scavenger's spent save (Stage 5), which sits on his post, an Engine
+				if (Officers::isSaveNote($currNote)){
+					$ship->recordOfficerSave($currNote->notevalue, $currNote->turn);
+					continue;
+				}
 				$system = $ship->getSystemById($currNote->systemid);
                 if ($system) // Robustness check
 				    $system->addIndividualNote($currNote);
