@@ -6467,6 +6467,15 @@ class JumpEngine extends Weapon{
      * payload carries `jumpAccelerated` only when true (Enhancements::addSystemEnhancementsForJSON). */
     protected $jumpAccelerated = false;
 
+    /* ⭐ AN EXPERT JUMP OFFICER SERVES IN THIS DRIVE (OFFICERS_PLAN.md Stage 7). Set by applyJumpOfficer()
+     * from Officers::apply, so it is true only on a real load, on his post, while he serves on the turn
+     * loaded - never on a POST-side ship or a static blueprint. What it changes: range +1 (applyJumpOfficer),
+     * the hold cap +1 turn (getMaxVortexTurns) and the failure chance -20 (getJumpFailureChance). His other
+     * three rules belong to the UNIT, not the drive, and ask Officers directly (getExitDeviationModifier,
+     * openExitVortex, BaseShip::getReinforcementArrivalIniModifier).
+     * Protected like $jumpAccelerated: no blueprint key. stripForJson sends the range and tooltip it moves. */
+    protected $jumpOfficer = false;
+
     //§5 R3 - "boost N => N+1 turns of charging, capped at 4 turns in any one turn".
     const CHARGE_BOOST_MAX = 3;
     //The note key, both columns - well inside notekey_human's varchar(40).
@@ -7485,7 +7494,7 @@ class JumpEngine extends Weapon{
         $age = $turn - (int)$this->vortexOpenTurn;
         if ($this->chargesVortexUpkeep()) return $age;
 
-        return min($age, self::MAX_VORTEX_TURNS);
+        return min($age, $this->getMaxVortexTurns());
     }
 
     /* Has $ship declared a vortex on $turn? Public static because the CONCEALMENT systems need to
@@ -7735,6 +7744,58 @@ class JumpEngine extends Weapon{
     protected function getOpeningFailureMultiplier()
     {
         return $this->jumpAccelerated ? 2 : 1;
+    }
+
+    /* ⭐ AN EXPERT JUMP OFFICER IS POSTED HERE, AND SERVES (Officers::applyJumpOfficer): "open a jump gate up to
+     * 5 hexes away (not 4 hexes)" - $range + $range, after the Jump Accelerator's +2 if there is one (4 -> 5,
+     * 6 -> 7). Like the Accelerator's, the extra hex also lengthens the hold distance getVortexClosureReason
+     * measures. Once per load: a second call changes nothing. */
+    public function applyJumpOfficer($range)
+    {
+        if ($this->jumpOfficer) return;
+        $this->jumpOfficer = true;
+        $this->range += (int)$range;
+    }
+
+    public function hasJumpOfficer()
+    {
+        return $this->jumpOfficer;
+    }
+
+    /* HOW MANY TURNS A JUMP POINT THIS DRIVE OPENS MAY STAND - MAX_VORTEX_TURNS, and one more while an Expert
+     * Jump Officer serves in it ("can hold it open for one turn longer than normal"). Asked at the END of each
+     * turn (getVortexClosureReason), so it is his state on that turn: killed on turn 5 of a 5-turn hold, he
+     * still serves turn 5, and the point closes at the end of turn 6 as it would have anyway.
+     * The counter the icon draws (getVortexAge, stripForJson's vortexMaxTurns) and the client's Maintain
+     * toggle (JumpEngine.canMaintainVortex, off vortexMaxTurns) follow it. A gate's programmed hold and a
+     * capacitor-fed drive's open-ended hold are their own rules and never ask this. */
+    public function getMaxVortexTurns()
+    {
+        return self::MAX_VORTEX_TURNS + ($this->jumpOfficer ? Officers::JUMP_EXTRA_TURNS : 0);
+    }
+
+    /* ⭐ THE CHANCE A DAMAGED DRIVE DESTROYS ITS SHIP, in percent - ONE helper for the three rolls that ask it
+     * (openVortex's quoted chance, rollVortexJumpFailure and doHyperspaceJump), so a rule that moves it
+     * cannot reach one and miss another (OFFICERS_PLAN.md Stage 7). In this order, which is the order the
+     * three sites always used:
+     *   the % of boxes lost, rounded;
+     *   halved for an Ancient hull, rounded;
+     *   on the turn the drive OPENS a jump point ($opening), x the Jump Accelerator's multiplier, max 100;
+     *   less an Expert Jump Officer's 20, never below 0 - on the chance the roll is actually made against, so
+     *     after the doubling ("exactly half the boxes destroyed ... 30%, not 50%") - and not on a drive with no
+     *     box left ("the jumpdrive still cannot be used if all boxes are lost, however");
+     *   0 on a drive that cannot fail (isJumpFailureImmune - a Walker's).
+     * doHyperspaceJump passes $opening false: a legacy drive can take no Accelerator and no officer, so both
+     * terms are 0 there and its chance is what it always was. */
+    protected function getJumpFailureChance($ship, $gamedata, $opening)
+    {
+        $healthDiff = $this->maxhealth - $this->getRemainingHealth();
+        $chance = round(($healthDiff / $this->maxhealth) * 100);
+        if ($ship->factionAge >= 3) $chance = round($chance / 2);
+        if ($opening) $chance = min(100, $chance * $this->getOpeningFailureMultiplier());
+        if ($this->jumpOfficer && $this->getRemainingHealth() > 0) $chance = max(0, $chance - Officers::JUMP_FAILURE_CUT);
+        if ($this->isJumpFailureImmune($ship, $gamedata)) $chance = 0;
+        return $chance;
     }
 
     /* ================= STAGE 3 - THE VORTEX UNIT ==================================
@@ -8913,6 +8974,16 @@ class JumpEngine extends Weapon{
         $facingSteps = ((($facing - $declaredFacing) % 6) + 6) % 6;
         if ($facingSteps > 3) $facingSteps -= 6;
 
+        /* OFFICERS_PLAN.md Stage 7 - an Expert Jump Officer aboard the opener "can cancel 60 degrees of
+           unintended facing change caused by a vortex shift", never past the declared facing: one step back
+           towards it (a 180-degree turn becomes 120). After the dice, so the d6 a random facing takes is still
+           drawn. Before the note and the log, which record the facing the doorway really has - and so the
+           arrival initiative penalty, which reads the note, is charged on it. */
+        if ($facingSteps !== 0 && TacGamedata::$officersPresent && Officers::cancelsFacingShift($opener, $gamedata->turn)){
+            $facingSteps -= ($facingSteps > 0) ? 1 : -1;
+            $facing = ((($declaredFacing + $facingSteps) % 6) + 6) % 6;
+        }
+
         /* ⭐⭐ STAGE 9 - A PHASING HULL GETS A DOORWAY WITH NO PICTURE (user ruling 2026-08-29).
            A Shadow ship fades out rather than tearing a vortex open (PhasingDrive, markLegacy), and
            it now fades IN the same way. SpawnJumpPointPhaseIn is a SpawnJumpPointExit in every
@@ -9084,8 +9155,9 @@ class JumpEngine extends Weapon{
         return $result;
     }
 
-    /* THE MODIFIERS, all four of them negative - a jump point exit is aimed by the fleet that is
-     * already here as much as by the drive that opens it (section 2.5).
+    /* THE MODIFIERS, all of them negative - a jump point exit is aimed by the fleet that is
+     * already here as much as by the drive that opens it (section 2.5). The fifth, an Expert Jump
+     * Officer aboard the opener (-1), is OFFICERS_PLAN.md Stage 7's.
      *
      * ⭐ -5 MAKES ANCIENTS PRECISE MOST OF THE TIME AND THAT IS THE INTENT - do not "fix" it. A bare
      * Ancient is precise on 1-5 of a d20 and never worse than 1d3 until an 8; with a friendly base on
@@ -9123,6 +9195,9 @@ class JumpEngine extends Weapon{
 
         if ($base)  $mod -= 3;
         if ($elint) $mod -= 1;
+
+        //OFFICERS_PLAN.md Stage 7 - an Expert Jump Officer aboard the opener: "a -1 shift to the vortex scatter chart"
+        if (TacGamedata::$officersPresent) $mod += Officers::exitScatterShift($opener, $turn);
 
         return $mod;
     }
@@ -9643,18 +9718,10 @@ class JumpEngine extends Weapon{
         $vortex = $this->spawnVortexUnit($ship, $hex, $facing, $gamedata);
         if (!$vortex) return;
 
-		//An undamaged drive never fails. Same measure doHyperspaceJump uses for the boost path.
-		$healthDiff = $this->maxhealth - $this->getRemainingHealth();
-
-		$missingHealthPercentage = round(($healthDiff / $this->maxhealth) * 100);
-		//Ancients have half the normal chance of Jump Engine failure. 
-		if($ship->factionAge >= 3) $missingHealthPercentage = round($missingHealthPercentage / 2);		
-		//Jump Accelerator: doubled on the opening turn, which this always is (SHIP_ENHANCEMENTS_PLAN.md §2.3.4)
-		$missingHealthPercentage = min(100, $missingHealthPercentage * $this->getOpeningFailureMultiplier());
-
-        //WALKERS §3.17 rule 3 (plan trap 33) - the log line must quote the 0% a Walker drive
-        //actually carries, or it contradicts rollVortexJumpFailure's outcome.
-        if ($this->isJumpFailureImmune($ship, $gamedata)) $missingHealthPercentage = 0;
+		/* The chance rollVortexJumpFailure will roll against at the end of this turn - the opening turn, so the
+		   Jump Accelerator's doubling applies (SHIP_ENHANCEMENTS_PLAN.md §2.3.4). WALKERS §3.17 rule 3 (plan
+		   trap 33): the log line must quote the 0% a Walker drive actually carries, or it contradicts the roll. */
+		$missingHealthPercentage = $this->getJumpFailureChance($ship, $gamedata, true);
 
         $distance = $ship->getHexPos()->distanceTo($vortex->getHexPos());
         self::writeVortexLogOrder($ship, $gamedata,
@@ -10114,8 +10181,10 @@ class JumpEngine extends Weapon{
            for one - it is the rule the upkeep REPLACES, along with the all-systems-dark rule below.
            Asked through chargesVortexUpkeep(), so a marked drive with no Power Capacitor to pay from
            keeps the cap it has today rather than getting an indefinite jump point for nothing. */
-        if (!$this->chargesVortexUpkeep()
-            && $turn >= $this->vortexOpenTurn + self::MAX_VORTEX_TURNS) return 'four-turn limit reached';
+        //getMaxVortexTurns: one turn more while an Expert Jump Officer serves in this drive (OFFICERS_PLAN.md Stage 7)
+        if (!$this->chargesVortexUpkeep() && $turn >= $this->vortexOpenTurn + $this->getMaxVortexTurns()){
+            return ($this->jumpOfficer ? 'five' : 'four') . '-turn limit reached';
+        }
 
         $distance = $ship->getHexPos()->distanceTo($vortex->getHexPos());
         if ($distance > $this->range) return 'holder is ' . $distance . ' hexes away';
@@ -10412,23 +10481,13 @@ class JumpEngine extends Weapon{
 		$hostStruct = $ship->getStructureSystem($this->location);
 		if($hostStruct && $hostStruct->isDestroyed($gamedata->turn)) return;
 
-		$currHealth = $this->getRemainingHealth();
-		$maxhealth = $this->maxhealth;
-		$healthDiff = $maxhealth - $currHealth;
-	
-		// Calculate the percentage of health missing
-		$missingHealthPercentage = round(($healthDiff / $maxhealth) * 100);
-
-		/* Ancients have half the normal chance of Jump Engine failure - "if the jump drive itself is
-		   damaged while the ship is departing/arriving, it has only half the usual chance of
-		   detonating" (user ruling 2026-09-11). openVortex and rollVortexJumpFailure have always
-		   carried this line; this site - the one an Ancient special jump drive actually jumps
-		   through - never did. */
-		if($ship->factionAge >= 3) $missingHealthPercentage = round($missingHealthPercentage / 2);
-
-		//WALKERS §3.17 - a Walker drive carries no chance of failure. ZEROED, not an early return,
-		//so the d100 below is still drawn (plan trap 34) and the log reports 0%.
-		if ($this->isJumpFailureImmune($ship, $gamedata)) $missingHealthPercentage = 0;
+		/* The percentage of the drive's boxes lost, through getJumpFailureChance. Ancients have half the
+		   normal chance - "if the jump drive itself is damaged while the ship is departing/arriving, it has
+		   only half the usual chance of detonating" (user ruling 2026-09-11) - which this site, the one an
+		   Ancient special jump drive actually jumps through, once lacked. WALKERS §3.17 - a Walker drive
+		   carries no chance of failure: ZEROED, not an early return, so the d100 below is still drawn (plan
+		   trap 34) and the log reports 0%. Not an opening turn: no Jump Accelerator doubling. */
+		$missingHealthPercentage = $this->getJumpFailureChance($ship, $gamedata, false);
 
 		// Roll a D100
 		$d100Roll = Dice::d(100);
@@ -10854,18 +10913,11 @@ class JumpEngine extends Weapon{
 		$primaryStruct = $ship->getStructureSystem(0);
 		if (!$primaryStruct || $primaryStruct->isDestroyed($turn)) return;
 
-		$missingHealthPercentage = round(($healthDiff / $this->maxhealth) * 100);
-		//Ancieents have half the normal chance of Jump Engine failure. 
-		if($ship->factionAge >= 3) $missingHealthPercentage = round($missingHealthPercentage / 2);
-		//Jump Accelerator: doubled on the turn the jump point is OPENED, never on a Maintain turn (D17)
-		if ((int)$this->vortexOpenTurn === $turn){
-			$missingHealthPercentage = min(100, $missingHealthPercentage * $this->getOpeningFailureMultiplier());
-		}
-
-		/* WALKERS §3.17 rule 3 - no chance of destruction while a Walker drive is in use. ZEROED
-		   rather than returned early: the d100 below is then still drawn exactly when it always was
-		   (plan trap 34), and a roll of 1-100 against 0 always holds. */
-		if ($this->isJumpFailureImmune($ship, $gamedata)) $missingHealthPercentage = 0;
+		/* The Jump Accelerator doubles it on the turn the jump point is OPENED, never on a Maintain turn (D17).
+		   WALKERS §3.17 rule 3 - no chance of destruction while a Walker drive is in use: ZEROED rather than
+		   returned early, so the d100 below is still drawn exactly when it always was (plan trap 34), and a
+		   roll of 1-100 against 0 always holds. Both inside getJumpFailureChance. */
+		$missingHealthPercentage = $this->getJumpFailureChance($ship, $gamedata, (int)$this->vortexOpenTurn === $turn);
 
 		if (Dice::d(100) > $missingHealthPercentage) return; //held
 
@@ -11268,8 +11320,21 @@ class JumpEngine extends Weapon{
             if ($source->vortexHoldTurns !== null){
                 $strippedSystem->vortexMaxTurns = (int)$source->vortexHoldTurns;
             } elseif (!$source->chargesVortexUpkeep()){
-                $strippedSystem->vortexMaxTurns = $source->isFlightMounted() ? 1 : self::MAX_VORTEX_TURNS;
+                $strippedSystem->vortexMaxTurns = $source->isFlightMounted() ? 1 : $source->getMaxVortexTurns();
             }
+        }
+
+        /* ⭐ OFFICERS_PLAN.md Stage 7 - AN EXPERT JUMP OFFICER'S RANGE, published to EVERY viewer (a displayed stat
+           is public; only the officer is hidden - user ruling 2026-10-10). The client reads weapon.range for
+           the declaration, the reach overlay and the Maintain distance, and the tooltip's "within N hexes" and
+           Range row come from data - both off the static blueprint unless sent, and data is rebuilt per load
+           from the raised range (beforeTurn). The Jump Accelerator's case in
+           Enhancements::addSystemEnhancementsForJSON sends the same two for the same reason. The +1 hold turn
+           needs nothing here: vortexMaxTurns above already carries it while a jump point stands. Only while he
+           serves (the flag exists only then), so every other engine's payload is byte-identical. */
+        if ($this->jumpOfficer){
+            $strippedSystem->range = $this->range;
+            $strippedSystem->data = $this->data;
         }
 
         return $strippedSystem;

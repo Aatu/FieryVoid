@@ -26,7 +26,10 @@ window.officers = {
 	   effects have their own previews below (reactorBonus, displayFireControl) or none the lobby can show
 	   (the Scanner's saved EW).
 	   Fighter officers (Stage 4) carry `flight: true`: priced for a standard flight and scaled by the
-	   size bought (flightCost; user ruling 2026-10-15). */
+	   size bought (flightCost; user ruling 2026-10-15).
+	   ⭐ FACTION RULES have no mirror here, on purpose: Officers::$factionRules (PHP) decides which offers
+	   a hull's static blueprint carries and at what price, and a lobby row exists only for an offer - so
+	   a faction's availability and prices are edited in that one table (README.md has the how-to). */
 	REGISTRY: [
 		{ id: 'OFF_HELM', label: 'Expert Helmsman', post: 'cnc', stats: { iniativebonus: 5 },
 			summary: '+5 initiative, wins ties, -1 on meteor chart' },
@@ -44,6 +47,8 @@ window.officers = {
 			summary: 'Repairs 1 critical or 4 boxes per turn; once per game blocks up to 6 damage that would destroy the C&C, a reactor, a scanner, an engine or a structure block' },
 		{ id: 'OFF_NAV', label: 'Expert Navigator', post: 'cnc', adjust: 'navigatorStat',
 			summary: 'Turn cost one level lower, pivot and roll cost -1, accel/decel cost -25%' },
+		{ id: 'OFF_JUMP', label: 'Expert Jump Officer', post: 'jump',
+			summary: 'Jump points opened 1 hex further and held 1 turn longer; jump failure chance -20%; exits scatter less (-1 on the chart, 60 degrees of facing shift cancelled); arrival initiative penalty -20' },
 		{ id: 'OFF_DOG', label: 'Expert Dogfighter', post: 'craft', flight: true, stats: { iniativebonus: 5 },
 			summary: '+5 initiative' },
 		{ id: 'OFF_MSL', label: 'Expert Missileer', post: 'craft', flight: true, perMissile: 1, needs: 'missiles',
@@ -85,6 +90,9 @@ window.officers = {
 	     scanner  the strongest scanner by output - the list and the pick Elite Crew's lobby mirror uses
 	     reactor  the biggest reactor by maxhealth - likewise
 	     engine   the strongest engine by output - the pick Poor Crew's and ADV_ENG's lobby mirrors use
+	     jump     the first jump drive that opens jump points: a legacy drive's range is 0 (markLegacy), the
+	              lobby JUMP_ACC case's own test. The one gate drive (JumpgateCapital) is on terrain, which
+	              carries no officers.
 	     craft    a flight's first craft - the lobby's one fighter card, id 1
 	   ⚠️ D2: the server picks from BLUEPRINT values, before any enhancement moves an output, but a lobby
 	   fleet ship has already had lobbyEnhancements.apply - Poor Crew has taken a point off its strongest
@@ -116,6 +124,12 @@ window.officers = {
 		}
 		if (post === 'engine') {
 			return this.strongest(ship, systems.filter(function (s) { return s && s.name === 'engine'; }), 'output', -1);
+		}
+		if (post === 'jump') {
+			for (var j = 0; j < systems.length; j++) {
+				if (systems[j] && systems[j].name === 'jumpEngine' && Number(systems[j].range) > 0) return systems[j];
+			}
+			return null;
 		}
 		return null;
 	},
@@ -520,12 +534,37 @@ window.officers = {
 		return fc;
 	},
 
-	/* SystemInfo's one hook into a system's data rows. The weapon tooltip quotes fire control only through
-	   data["Fire control (fighter/med/cap)"], baked into the static blueprint, so the lobby rewrites that
-	   row as it is shown. In game the server's isModified fire control already rebuilt it. */
+	/* Expert Jump Officer, in the lobby: the hexes he adds to THIS drive's range - 0 unless it is his post.
+	   In game the server raised the range and sent it with the rebuilt tooltip (JumpEngine::stripForJson),
+	   and the derived list is empty there. ⚠️ MIRROR PAIR with Officers::JUMP_RANGE /
+	   JumpEngine::applyJumpOfficer (PHP). */
+	JUMP_RANGE: 1,
+	jumpRangeBonus: function jumpRangeBonus(ship, system) {
+		if (!system) return 0;
+		var serving = this.servingDerived(ship);
+		for (var i = 0; i < serving.length; i++) {
+			if (serving[i].id === 'OFF_JUMP' && String(serving[i].post) === String(system.id)) return this.JUMP_RANGE;
+		}
+		return 0;
+	},
+
+	/* SystemInfo's one hook into a system's data rows (and its Special text). The weapon tooltip quotes fire
+	   control only through data["Fire control (fighter/med/cap)"], and a jump drive its range through
+	   data["Range"] and the Special sentence "target a hex within N hexes" - all baked into the static
+	   blueprint, so the lobby rewrites them as they are shown. N is the drive's range as the lobby has it
+	   (after a Jump Accelerator's +2, which lobbyEnhancements writes into both). In game the server's
+	   isModified fire control already rebuilt the one, and its payload the other. */
 	DATA_KEY_FIRECONTROL: 'Fire control (fighter/med/cap)',
 	adjustDataDisplay: function adjustDataDisplay(ship, system, key, value) {
-		if (key !== this.DATA_KEY_FIRECONTROL || !system) return value;
+		if (!system) return value;
+		if (system.name === 'jumpEngine' && (key === 'Range' || key === 'Special')) {
+			var bonus = this.jumpRangeBonus(ship, system);
+			if (!bonus) return value;
+			if (key === 'Range') return (parseInt(value, 10) || 0) + bonus;
+			var range = parseInt(system.range, 10) || 0;
+			return String(value).replace('within ' + range + ' hexes', 'within ' + (range + bonus) + ' hexes');
+		}
+		if (key !== this.DATA_KEY_FIRECONTROL) return value;
 		var fc = this.displayFireControl(ship, system);
 		if (fc === system.fireControl) return value;
 		if (typeof system.translateFCtoD100txt === 'function') return system.translateFCtoD100txt(fc);

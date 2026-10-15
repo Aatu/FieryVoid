@@ -514,7 +514,13 @@ class BaseShip {
         $scatter = JumpEngine::getArrivalScatter($this, $gamedata);
         if ($scatter === null) return 0;
 
-        return -5 * (int)$scatter['hexes'] - 10 * abs((int)$scatter['facingSteps']);
+        $penalty = -5 * (int)$scatter['hexes'] - 10 * abs((int)$scatter['facingSteps']);
+        /* OFFICERS_PLAN.md Stage 7 - "any initiative penalty produced by scatter is reduced by 20 for his unit
+           only. Note that this is not an initiative bonus": this unit's OWN Expert Jump Officer, capped at 0. */
+        if ($penalty < 0 && TacGamedata::$officersPresent){
+            $penalty = min(0, $penalty + Officers::arrivalPenaltyRelief($this, $gamedata->turn));
+        }
+        return $penalty;
     }
     
 

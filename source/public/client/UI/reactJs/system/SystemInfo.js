@@ -108,12 +108,13 @@ class SystemInfo extends React.Component {
                 </SystemInfoTooltip>
             );
         }
-        //special treatment for 'Special' entry (due to probable multiline)    
+        //special treatment for 'Special' entry (due to probable multiline)
+        var specialName = 'Special';
         var specialEntry = new Array;
         if (system.data.Special && system.data.Special != "") {
-            specialEntry = system.data.Special.split('<br>');
+            //through the same hook as the other rows: an Expert Jump Officer's "within N hexes" in the lobby
+            specialEntry = String(adjustDataDisplay(ship, system, specialName)).split('<br>');
         }
-        var specialName = 'Special';
         var reactKey = 0; //needed for react so each line has unique key!
 
         //an Expert Evader's -1 in the lobby, added as it is shown (officers.displayStat; in game the server applied it)

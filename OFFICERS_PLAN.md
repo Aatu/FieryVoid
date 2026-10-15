@@ -4,7 +4,8 @@ Status: **Stages 0–2a committed (`7800ab827`), Stage 3 committed (`1714c3651`)
 (`ab0025aba`, `4738173cc`; the Motivator re-priced to 50 % in `32c9f2a11`); Stage 5 committed (`85c30272c`,
 §9.8); fighter officer prices scaled by flight size + saved fleets re-priced committed (`75dc7d68d`, §9.9 - ⚠️
 db/savedOfficerPrice.sql before deploying); the Technician rebuilt from his full rules and the Scavenger's save
-widened (§9.10), and Stage 6, the Expert Navigator (§9.11), BUILT 2026-10-15, uncommitted.** Written against `dab951bf5`. The user
+widened (§9.10), and Stage 6, the Expert Navigator (§9.11), committed (`6dd2f740e`). Faction rules for officers (§9.12)
+and Stage 7, the Expert Jump Officer (§9.13), BUILT 2026-10-15, uncommitted.** Written against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
 a third Helmsman effect (−1 on the meteor impact chart) and play-tested Stage 1 in game 4457 (confirmed
@@ -17,8 +18,12 @@ supplied the Engineer's and Scavenger's rules text and ruled their questions (§
 once-per-game save for the Scavenger (§9.8). Later that day they widened the save to Scanners and Engines,
 supplied the Technician's full rules (all three skills at once, §9.10) and the Navigator's (Stage 6, §9.11), and
 ruled the three questions those raised - then put the Hyach Maneuvering Specialist's turn cost on the Navigator's
-ladder, applied after him (§9.11 follow-up). Each officer's own rules questions still only need ruling when that
-officer's stage starts. Next step: Stage 7 (Jump Officer).
+ladder, applied after him (§9.11 follow-up). Later the same day they asked for faction availability and faction
+prices as one easily edited table, with a README how-to for custom factions - Geneticist Dilgar only, Matter Weapons
+Expert Grome only, the Scavenger at 15% for the Descari and 20% for Balosians, Raiders and Llort (§9.12) - and
+supplied the Jump Officer's rules text (Stage 7, §9.13). Each officer's own rules questions still only need ruling
+when that officer's stage starts. Next step: Stage 8 (placed officers: Gunner core, weapon-mounted Matter Weapons
+Expert).
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -397,6 +402,7 @@ masking: individual notes never reach any client.
 |---|---|---|
 | Helmsman | `iniativebonus` | **Yes, to every viewer** (user ruling 2026-10-10, overruling the drafted own-team-only). The ship tooltip's "base" initiative must be the ship's real figure: a hidden +5 misleads more than it hides. The officer list itself stays own-team |
 | Navigator | turn, pivot, roll and accel costs | **Yes, to every viewer** (Stage 6, §9.11): the 2026-10-10 default for a displayed stat, through his `publish` list. The draft said own-team only |
+| Jump Officer | the drive's `range` and tooltip; the jump point counter's `vortexMaxTurns`; `arrivalIniPenalty` | **Yes, to every viewer** (Stage 7, §9.13): `JumpEngine::stripForJson` sends range and data while he serves; the counter and the arrival penalty were public already. The −1 scatter shift and the facing cancel show only as where and how the doorway formed |
 | Technician | reactor `output` | **Yes.** `output` is sent unconditionally. Accept, as the ✦ does. *§9.10: the reactor's −2 critical modifier is not sent (nothing displays it), and Efficient Transfers' +1 is worked out by the owner's client alone* |
 | Matter Weapons Expert, Gunner | `fireControl` via `isModified` | **Yes**, exactly like Gunsights |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
@@ -537,7 +543,7 @@ committed.
 | **4** | Fighter framework; Dogfighter, Missileer, Evader; the Expert Motivator made an officer. **BUILT 2026-10-11** (§9.6) | A per-flight price is identical across buy, edit, copy and save/reload on 1-, 3- and 6-craft flights. A second officer on one flight is refused in the dialog, and a doctored payload with two serves only one. A lead-craft dropout loses him; a dock does not |
 | **5** | Repair pass: Engineer and Scavenger; the Scavenger's once-per-game save. **BUILT 2026-10-15** (§9.8) | Deterministic pick; the C&C d20; no repair of this turn's crits (if so ruled); no revival of a destroyed system; runs after Self Repair |
 | **6** | Navigator. **BUILT 2026-10-15** (§9.11) | Server and client thrust agree on every cost change; the ship window shows the new numbers ~~own-team only~~ (published to every viewer, §4.6) |
-| **7** | Jump Officer | Range +1 (with and without the Jump Accelerator); failure −20 at all three sites through one helper; arrival scatter and initiative |
+| **7** | Jump Officer. **BUILT 2026-10-15** (§9.13), with the faction rules (§9.12) | Range +1 (with and without the Jump Accelerator); failure −20 at all three sites through one helper; arrival scatter and initiative |
 | **8** | Placed-officer framework; Gunner core; weapon-mounted Matter Weapons Expert (without loading) | The cap per size; a Gunner and Gunsights on one gun show ✦ and insignia side by side; "any damage" kills; the destroyed-host refund |
 | **9** | Coordinator; Analyst | The Analyst's disclosure per viewer, and its harness `masking` check |
 | **10** | Loading time −1 | A mode switch keeps it; the officer lost mid-charge; the client's `isLoaded` agrees with the server |
@@ -566,10 +572,10 @@ committed.
 | Scanner | Cumulative with EW Detectors, or the same point? (Default: max(1, ladder), not cumulative.) **RULED 2026-10-10: cumulative** - the ladder + 1. |
 | Navigator | (a) The turn-cost ladder. The hulls use 0.25, 0.33, 0.5, 0.66, 0.75, 1, 1.25, 1.33, 1.5, 1.66, 1.75, 2 and 3. Which of those are "steps"? (b) Turn delay unchanged? (c) Accel/decel: × 0.75 per change, or on the turn's total? Which rounding? **RULED 2026-10-15** (the user supplied the rules text, §9.11): (a) the rulebook's ladder 2, 1.75, 1.66, 1.5, 1.33, 1.25, 1.0, 0.83, 0.75, 0.66, 0.5, 0.33, 0.25, 0.16, 0.1; (b) **turn delay unchanged** (asked: the text names turn cost only); (c) −25 % with the fractions kept until the turn's full cost is known, then rounded up. Pivot and roll −1, minimum 1; 7 % "dropping fractions". |
 | Technician | "Or" = the best of the three automatically, the player's choice each turn, or a fixed priority? How is 33 % rounded? **RULED 2026-10-10: the best of the three, automatically; a third, rounded down.** **RE-RULED 2026-10-15** (the full rules text, §9.10): all three at once - +2 power and −2 on reactor criticals; +1 from one system shut down for power, once a turn (a system forced offline by a critical does not count - asked); a third, rounded down, of EVERY destroyed system's power requirement, added together (asked). |
-| Jump Officer | (a) +1 over the drive's own range (4 → 5, or 6 → 7 with the Jump Accelerator)? (b) −20 before or after the Accelerator's doubling? (c) On arrival: the officer of the ship that OPENED the doorway, or each arriving rider's own? (d) Does −20 also cover the hyperspace-jump failure roll? |
+| Jump Officer | (a) +1 over the drive's own range (4 → 5, or 6 → 7 with the Jump Accelerator)? (b) −20 before or after the Accelerator's doubling? (c) On arrival: the officer of the ship that OPENED the doorway, or each arriving rider's own? (d) Does −20 also cover the hyperspace-jump failure roll? **Rules text supplied 2026-10-15** (§9.13), which settles most of it: 5 hexes not 4; held one turn longer; −20 on the chance of the drive destroying the ship ("half the boxes ... 30%, not 50%"), never usable with every box lost; −1 on the scatter chart when HIS ship opens the vortex; 60° of unintended facing change cancelled, never past the original facing; the scatter initiative penalty −20 for HIS unit only, never a bonus; 5%; not Raiders or Belt Alliance, not without a jump drive. Built with defaults, stated in §9.13 and not yet ruled: (a) +1 on whatever the drive has (6 → 7 with an Accelerator); (b) after the doubling; (c) the facing cancel turns the DOORWAY (so every rider), the initiative relief is each unit's own officer; (d) one helper serves all three rolls, but a legacy drive is never his post, so in practice he never meets the boost-path roll. |
 | Quartermaster | "Free" = this ship's own other enhancements and ammo? What is "+10 turn delay"? How much on C&C crits? Post: random primary? Price: 5 % of the game's points limit? |
-| Geneticist | "Scenario only" = never offered unless a hull opts in, or a Create Game rule? "−1 to hit other ships" = this ship's own weapons? **RULED 2026-10-10: offered on every hull with a C&C** ("scenario only" is by agreement, as the doc card says). The −1 was built with its default: this ship's own weapons. |
-| Scavenger | A critical first, else 4 boxes? Which system first? May he repair Structure? **RULED 2026-10-15** (§9.8): **a critical first** (as the Engineer, same order and C&C roll), else 4 boxes, by Self Repair's default system order; **Structure yes**, never a destroyed system or anything on a destroyed section, never this turn's damage. His rules text adds a **once-per-scenario save** - "up to six points of damage can be ignored in any single volley" - ruled **automatic**: spent on the first hit that would destroy the C&C, a reactor or a Structure block when ignoring up to 6 points saves it ("note the Gaim Bulkhead already has a similar function"). The campaign clauses (permanent repairs after the battle) are not built. **Widened 2026-10-15 (§9.10): Scanners and Engines too.** |
+| Geneticist | "Scenario only" = never offered unless a hull opts in, or a Create Game rule? "−1 to hit other ships" = this ship's own weapons? **RULED 2026-10-10: offered on every hull with a C&C** ("scenario only" is by agreement, as the doc card says). The −1 was built with its default: this ship's own weapons. **RE-RULED 2026-10-15: Dilgar Imperium only** (§9.12). |
+| Scavenger | A critical first, else 4 boxes? Which system first? May he repair Structure? **RULED 2026-10-15** (§9.8): **a critical first** (as the Engineer, same order and C&C roll), else 4 boxes, by Self Repair's default system order; **Structure yes**, never a destroyed system or anything on a destroyed section, never this turn's damage. His rules text adds a **once-per-scenario save** - "up to six points of damage can be ignored in any single volley" - ruled **automatic**: spent on the first hit that would destroy the C&C, a reactor or a Structure block when ignoring up to 6 points saves it ("note the Gaim Bulkhead already has a similar function"). The campaign clauses (permanent repairs after the battle) are not built. **Widened 2026-10-15 (§9.10): Scanners and Engines too.** **Faction prices 2026-10-15 (§9.12): 15% for the Descari, 20% for Balosians, Raiders and Llort.** |
 | Breaching Expert | "+1 thrust" for one pod of a flight that moves as one? "20 % of total pods": fleet-wide, rounded down? What are "3 attack rolls on the first boarding turn" in FV's capture-mission terms? |
 | Analyst | Does he need range, line of sight or an OEW lock? Every enemy ship, or only those in range? Weapon arming is already public in FV: leave it so? |
 | Evangelist | The fleet = this player's ships, or the whole team? His penalty is worded "if killed": does a merely **disabled** Evangelist (post destroyed, kill roll survived) cost the fleet its +1 without the −10 initiative / −1 to hit? (Default: yes, the penalty needs a kill.) Is the penalty permanent? Do reinforcements that arrive later get the bonus? |
@@ -579,7 +585,7 @@ committed.
 | Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? |
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? |
-| Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). |
+| Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). **RULED 2026-10-15: Grome Autocracy only** (§9.12); the Matter-weapon hull test is kept beside it. |
 | Gunner | Size caps for LCVs and bases? Which weapons are eligible: any with fire control, ballistics too? Does he stack with Gunsights? |
 | Fighter officers | Post = the first craft? A craft has no d20 critical roll (its test is a d10 dropout), so: no kill roll at all, or a d20 + damage roll on any damage to his craft, 20+ kills? (Default: none; he is lost with his craft.) Does he go with that craft on a split-launch? Missileer's "+5 OB": is that +1 OB (5 %)? Evader: always on, or toggled like jinking? Coordinator's "180°+" = three combat pivots in one turn? **RULED 2026-10-11:** the post is the first craft; he is lost **with his craft** (destroyed or dropped out), with **no kill roll**; a dock, a partial dock or a split launch never loses him, and he **stays on the flight row he was bought on** (a "- Split" row never carries him). Missileer: **+1 OB** on a launch that gets the flight's OB, priced **half a craft once, plus 1 per missile the whole flight can carry**. Evader: **always on**. Expert Motivator: **a full officer** (one per flight, lost with his craft, hidden), under his old id, effect and price. Coordinator: Stage 9. **RE-RULED 2026-10-11 (round 2, §9.7):** a **remotely controlled** unit (`$remoteControl`, the Orieni Hunter-Killers) carries no officer of any kind - "they have no pilots". An officer's abilities apply only to the part of the flight that holds his fighter, so when the flight splits **he follows his fighter**: the new row gets him, posted in its first craft, and his cost; the old row loses him from the next turn. The Evader's −1 OB also lowering mine detection is accepted. |
 
@@ -1400,3 +1406,138 @@ only, so the Specialist still **halves turn delay** with its own table.
   REAL `doUse` / `doDecrease` loaded from baseSystems.js: 1 → 0.83 and back, a Navigator's 0.83 → 0.75 and back, 0.5 →
   0.33 and back); 6 mutations, all caught; enhancementsHarness 268 / 0, differential 469 / 0, `fvbuild -Check` all pass
   (replay 146 / 0 - no local game has an `allocated;Maneuvering` note at all), `docs` 18 / 18.
+
+### 9.12 Faction rules: which factions may buy an officer, and at what price (user, 2026-10-15)
+
+**Request.** "The Scavenger should be discounted for certain Factions. 15% for Descari, 20% for Balosians, Raiders and
+Llort of the ship's base value, everyone else pays the normal 25% cost. Other future officers will also have
+faction-specific price changes so good to have a robust system ... easy for other devs to add their own Custom Factions
+to an Officer's availability (adding a quick 'how to' in ReadMe file). Expert Geneticist should be restricted to Dilgar
+Imperium only. The Matter Weapon Expert should be Grome Autocracy only." Then the Jump Officer (§9.13) added the third
+shape: "any race except Raiders, Belt Alliance".
+
+**Built.** One table, `Officers::$factionRules`, keyed by officer id, three keys: `only` (offered to these factions
+only), `never` (never to these), `pct` (this faction's price in place of the registry's). Faction = the hull's
+`$faction` string, exact. Entries: `OFF_GENE` only Dilgar Imperium; `OFF_MWE` only Grome Autocracy; `OFF_SCAV` pct
+Descari Committees 15, Balosian Underdwellers 20, Raiders 20, Llort 20; `OFF_JUMP` never Raiders, Belt Alliance.
+- **Availability** is one test in `isEligible` (`factionAllows`), so it answers both the offers (`addOffers`, hence the
+  static blueprints) and a doctored row at load (`pickPosts`), exactly as `needs` does. The Matter expert keeps his
+  `needs` (a Matter weapon aboard) beside the faction rule: a Grome hull without one gains nothing from him.
+- **Price**: `pctFor($ship, $id)` feeds `shipPrice` (offers, `rowPrice`), and `craftPrice` / `flightPrice` for a
+  fighter officer, so a future fighter-officer discount needs nothing more. The registry's rounding still applies
+  (the Navigator's round-down).
+- **No client mirror, on purpose.** The offer list and its prices reach the lobby in the static blueprint, and a lobby
+  row exists only for an offer, so the table is the one place a developer edits. `officers.js` says so.
+- **Saved fleets** need nothing new: `loadSavedFleet` already refunds an officer the unit is no longer offered and
+  re-prices one whose price moved (§9.9). One change: `legacyPrice` (a NULL `enhvalue` row, saved before rows kept
+  their price) now prices a ship officer at the REGISTRY pct - every such row predates faction prices, so a Descari
+  Scavenger saved then was paid 25%.
+- **README.md** gained "Officers: faction availability and prices (10.2026)": the three keys, adding a custom faction to
+  a list, the exact-name rule, `enhancementOptionsDisabled` for one hull, `fvbuild -Statics`, and what happens to saved
+  fleets and running games.
+
+**Effect, measured.** Statics: Geneticist offers 1,820 → 39 (the Dilgar file), Matter Weapons Expert 416 → 11 (the Grome
+file); the Rulnar's Scavenger 157 → 94, Areko's (Raiders) 119 → 95. ⚠️ **A running game loses a refused officer at its
+next load, points spent**: locally games 4461 (an EA Hyperion's Geneticist, an EA Artemis's Matter expert) and 4467 (a
+Commune's Matter expert) moved in the replay corpus - checked by shape (only those officers' published profiles, to-hit,
+fire control and list entries; the Hyperion's shots +5, shots at it -10) and re-recorded with `record --games=4461,4467`
+merged back into the manifest (146 games).
+
+**Observations, not changed:**
+1. "Raiders" is the faction string of the 105 Raiders hulls only. The custom "Escalation Wars Blood Sword Raiders" and
+   "Escalation Wars Chouka Raider" factions are not included in the Raiders entries; add them to the table if they
+   should be.
+2. There is no per-HULL opt-in (a single non-Dilgar ship allowed a Geneticist): only faction lists, plus the existing
+   per-hull opt-out. The Evangelist (§3.3, Corillani CPN/OSF hulls only) will need a hull-level opt-in when he is built.
+
+### 9.13 Stage 7: Expert Jump Officer (2026-10-15)
+
+**Rules text (user, 2026-10-15).** "He permits his ship to open a jump gate up to 5 hexes away (not 4 hexes) from his
+ship, and can hold it open for one turn longer than normal. If the jump engine takes damage, he reduces the chance of a
+catastrophic explosion by 20%. For example, if exactly half the boxes of the jump drive are destroyed, the chance of
+detonation would be 30%, not 50%. The jumpdrive still cannot be used if all boxes are lost, however. The jump officer
+provides a -1 shift to the vortex scatter chart (as listed in the modifiers) if his ship is the one opening the vortex.
+He can cancel 60 degrees of unintended facing change caused by a vortex shift (this does not allow him to alter the
+facing from its original position, however). Any initiative penalty produced by scatter is reduced by 20 for his unit
+only. Note that this is not an initiative bonus, only a reduction of an initiative penalty! Location: Jump drive. Cost:
+5% of the ship's base value. Availability: Any race except Raiders, Belt Alliance, and any ship that does not possess a
+jump drive."
+
+**Built with defaults, stated here and not yet ruled** (§6 has them as the open questions):
+- Range +1 on whatever the drive has: 4 → 5, and 6 → 7 with a Jump Accelerator. Like the Accelerator's +2, it also
+  lengthens the distance the holder may stray before the jump point closes (`getVortexClosureReason` reads `$range`).
+- The −20 comes off the chance the roll is made against, so AFTER the Accelerator's opening-turn doubling (half the
+  boxes lost, opening with an Accelerator: 100% → 80%), and never below 0. "Cannot be used if all boxes are lost":
+  a drive with no box left gets no reduction (he is disabled from the next turn anyway, but serves the turn it falls).
+- The facing cancel turns the DOORWAY one step back towards the declared facing, so every unit riding it comes out
+  facing that way; a random facing 180° off comes back 60° (to 120°). The initiative relief is each arriving unit's OWN
+  officer ("his unit only"): a rider through his doorway keeps its full penalty, a rider with an officer of its own has
+  it reduced through anyone's doorway.
+- His post is the first drive that opens jump points: never a legacy drive (Trek nacelle, BSG FTL, Star Wars
+  hyperdrive, The System's, every Ancient's) nor a gate's - plan §4.3. So a custom faction whose only drive is a legacy
+  one is not offered him. No officer-eligible hull carries two vortex drives (measured over every hull), so "his ship's
+  drive" and "the drive he sits in" never disagree.
+
+**Files.** Server: `Officers.php` (`OFF_JUMP`, post `jump`, `applyJumpOfficer`, `exitScatterShift`, `cancelsFacingShift`,
+`arrivalPenaltyRelief`, the `JUMP_*` constants), `baseSystems.php` (JumpEngine: `$jumpOfficer`, `applyJumpOfficer`,
+`hasJumpOfficer`, `getMaxVortexTurns`, `getJumpFailureChance`; the three failure rolls, `getVortexAge`,
+`getVortexClosureReason`, `stripForJson`, `getExitDeviationModifier`, `openExitVortex`), `ShipClasses.php`
+(`getReinforcementArrivalIniModifier`). Client: `officers.js` (registry row, post `jump`, `jumpRangeBonus`,
+`adjustDataDisplay` for the drive's Range row and "within N hexes"), `model/system/baseSystems.js`
+(`JumpEngine.canMaintainVortex` reads the payload's cap), `SystemInfo.js` (the Special text goes through the same
+data hook). Docs: the Jump Officer card, three cards' faction lines, two About Officers lines. Statics and bundles
+rebuilt; no new class, autoload unchanged.
+
+**As built:**
+- **The drive's rules live on the drive.** `Officers::apply` calls `JumpEngine::applyJumpOfficer` on his post while he
+  serves (the Jump Accelerator's shape): `$range` +1 and a protected flag. `getMaxVortexTurns()` = 4, 5 with the flag,
+  read by the closure ("five-turn limit reached"), `getVortexAge` and the payload's `vortexMaxTurns`; a gate's
+  programmed hold and a Vorlon's open-ended hold never ask it.
+- ⭐ **ONE failure helper**, `getJumpFailureChance($ship, $gamedata, $opening)` - boxes lost %, Ancient halving, the
+  Accelerator's doubling on an opening turn, the officer's −20, the Walker zeroing, in the order the three sites always
+  used - now serves `openVortex` (the quoted chance), `rollVortexJumpFailure` and `doHyperspaceJump`. Byte-identical
+  without him: the jump harnesses' outcomes are unchanged (`walkersStage15Harness`'s two source-text checks, which
+  looked for the halving inside each roll, now follow it into the helper).
+- **The unit's rules ask Officers.** `getExitDeviationModifier` adds −1 when the opener's officer serves (behind
+  `$officersPresent`); `openExitVortex` steps the facing back after every die is drawn and before the scatter note and
+  the log, so the note - and the arrival penalty read from it - records the doorway's real facing;
+  `getReinforcementArrivalIniModifier` adds +20 to a penalty and caps it at 0.
+- **Payload.** `JumpEngine::stripForJson` sends `range` and the rebuilt `data` (Range row, "within 5 hexes") to every
+  viewer while he serves - a displayed stat is public (the Accelerator's case sends the same two). In the lobby both are
+  read-time previews (`officers.jumpRangeBonus`, `adjustDataDisplay`); the client's Maintain toggle cuts off at
+  `spawned + vortexMaxTurns - 1` (4 when absent: unchanged for everyone else).
+
+**Verified.**
+- `officersHarness.php` **502 / 0** (446 with `--no-db`; 76 new across §9.12 and §9.13): the faction table's names
+  against the factions that exist; `only` / `never` / `pct` on real hulls (AthraskalaAM, GromeTrokanAM, Altarian, Dux,
+  BALCVCarrier, Rulnar, athasa, erlorra, Omega); `legacyPrice`; doctored rows; the Jump Officer's offers (a hull
+  without a drive, Ancients, OSATs, terrain, a drive marked legacy or gate), post and order; range 4/5/7, disabled,
+  killed; the real `getVortexClosureReason` (cap and distance); the payload per viewer; the failure table through the
+  helper and a real `rollVortexJumpFailure` with a d100 between the two chances; the scatter modifier; the real
+  `openExitVortex` (a 1d10-band shift cancelled, a 2d10+2 random facing 180° → 120°); the arrival penalty (−40 → −20,
+  −10 → 0, rider vs opener both ways); and a real saved-fleet reload (Descari / Llort Scavengers re-priced with notices,
+  a Dilgar Geneticist untouched, an EA Geneticist refunded 47). The Geneticist and Matter sections moved onto a Dilgar
+  hull and a Grome-flagged Altarian, plus a real GromeTrokanAM.
+- `officersClientHarness.js` **152 / 0** (14 new): the registry row, the `jump` post past a legacy drive, the Range /
+  Special preview (with an Accelerator, destroyed pre-battle, in game), the REAL SystemInfo render, the REAL
+  `JumpEngine.canMaintainVortex` at caps 4, 5 and absent.
+- **Mutation-tested**: 38 server/client breaks, all caught (three first crashed the harness - the error handler makes a
+  null access fatal - so those checks were made null-safe and re-run: caught by assertion); 4 differential breaks
+  caught.
+- `enhancementsHarness` **269 / 0** after re-recording: the unified diff was exactly 12 Geneticist and 2 Matter offers
+  gone (Tratharti, a Dilgar hull, keeps its Geneticist), Areko's Scavenger 119 → 95, 9 Jump Officer offers, the Geneticist
+  cases' unmoved stats, 13 hulls × 2 new cases (`jump`, `jump+jacc`), and two new hulls (AthraskalaAM, GromeTrokanAM).
+  Old copy `fingerprint.before-officers-stage7.txt`. `enhancementsDifferential` **526 / 0 differing** (the drive's range
+  and tooltip now compared as shown, through the lobby's hook; `jump` cases compared on 10 hulls).
+- `fvbuild -Check`: all three pass (replay 146 / 0 after 4461 and 4467, §9.12). Jump-point harness sweep (23 PHP, 14 Node)
+  identical to before but for the officers' and enhancements' own counts.
+- Real site (`officersE2E/`): `lobby3` **34 / 34** (the Omega's Jump Officer at 5%, insignia on the drive, Range 5 and
+  "within 5 hexes", back to 4 with the drive destroyed pre-battle; the Geneticist on a Dilgar hull, the Matter expert
+  on a Grome hull's railgun; none for the Altarian or the Raiders Dux; the Descari Scavenger at 15%), `docs` **21 / 21**,
+  `lobby` 25 / 25, `lobby4` 35 / 35. `game.mjs` not run (4457 surrendered, §9.8).
+
+**Observations, not changed:**
+1. Not tested in a real game: opening a jump point 5 hexes out, holding it a fifth turn, and a reinforcement exit with
+   him aboard. Worth a play test (Initial Orders declaration at 5 hexes; Maintain still offered on the fifth turn).
+2. The −1 scatter shift and the facing cancel are visible to the opponent only as where and how the doorway formed - the
+   log quotes the modified roll, as it does for every other modifier.

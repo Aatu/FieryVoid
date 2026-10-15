@@ -26,8 +26,11 @@
    Technician, Geneticist and C&C Matter Weapons Expert (Stage 3); the fighter officers (Stage 4):
    Dogfighter, Missileer, Evader and the Expert Motivator, which was a fighter enhancement until then
    and keeps its old id; the Engineer and Scavenger (Stage 5: an end-of-turn repair pass, and the
-   Scavenger's once-per-game save, stored as one OffSaved note); and the Navigator (Stage 6: the
-   ship's movement costs). Placed officers (track 2, Stage 8) are not built yet. */
+   Scavenger's once-per-game save, stored as one OffSaved note); the Navigator (Stage 6: the ship's
+   movement costs); and the Jump Officer (Stage 7: the jump drive's range, hold, failure chance, exit
+   scatter and arrival initiative). Placed officers (track 2, Stage 8) are not built yet.
+
+   Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
 
 	const ID_PREFIX = 'OFF_';
@@ -41,6 +44,33 @@ class Officers{
 	const TECH_POWER = 2;          //Technician: "provides an extra 2 points of power"
 	const TECH_CRIT_MOD = -2;      //Technician: "a -2 bonus on any critical hit die roll involving the reactor"
 	const NAV_CANNOT = 99;         //Navigator: a cost of 99 or more is a hull's "cannot" (a base's turn, a 999 pivot) - left alone
+	const JUMP_RANGE = 1;          //Jump Officer: "open a jump gate up to 5 hexes away (not 4 hexes)"
+	const JUMP_EXTRA_TURNS = 1;    //Jump Officer: "can hold it open for one turn longer than normal"
+	const JUMP_FAILURE_CUT = 20;   //Jump Officer: "reduces the chance of a catastrophic explosion by 20%" (50% -> 30%)
+	const JUMP_SCATTER_SHIFT = -1; //Jump Officer: "a -1 shift to the vortex scatter chart"
+	const JUMP_INI_RELIEF = 20;    //Jump Officer: "any initiative penalty produced by scatter is reduced by 20"
+
+	/* ⭐ FACTION RULES (user request 2026-10-15) - which factions an officer is offered to, and what some
+	   of them pay. ONE table, so a faction's officers change here and nowhere else: README.md, "Officers:
+	   faction availability and prices", is the how-to for a custom faction. An officer with no entry is
+	   offered to every faction at his registry price. D9's exclusions (Ancients, OSATs, mines, terrain,
+	   remotely controlled craft) and the hull's own tests (the post, `needs`) apply whatever this says.
+	     only   offered ONLY to these factions
+	     never  never offered to these factions
+	     pct    his price in percent for these factions, in place of the registry's pct (of the hull, or
+	            of one craft for a fighter officer); the registry's rounding still applies
+	   A faction is named by its hulls' $faction string, exactly as the ship files write it - the name the
+	   faction has in Fleet Selection. A name that matches no faction simply never applies, so
+	   officersHarness checks every name here against the factions that exist.
+	   ⚠️ Changing a rule changes the static blueprints' offers: run fvbuild.ps1 -Statics. A saved fleet
+	   holding an officer its faction may no longer buy is refunded on reload, and one whose price moved is
+	   re-priced (Manager::loadSavedFleet); a running game simply loses the officer at its next load. */
+	private static $factionRules = array(
+		'OFF_GENE' => array('only' => array('Dilgar Imperium')),
+		'OFF_MWE'  => array('only' => array('Grome Autocracy')),
+		'OFF_SCAV' => array('pct' => array('Descari Committees' => 15, 'Balosian Underdwellers' => 20, 'Raiders' => 20, 'Llort' => 20)),
+		'OFF_JUMP' => array('never' => array('Raiders', 'Belt Alliance')),
+	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
 	     label    the name in the buy dialog, the stored enhname and the kill note's notekey_human
@@ -105,6 +135,13 @@ class Officers{
 		   "dropping fractions", the one officer whose text rounds down. */
 		'OFF_NAV'  => array('label' => 'Expert Navigator', 'post' => 'cnc', 'pct' => 7, 'roundDown' => true,
 			'apply' => 'applyNavigator', 'publish' => array('turncost', 'pivotcost', 'rollcost', 'accelcost')),
+		/* Expert Jump Officer (Stage 7; rules text, user 2026-10-15), in the jump drive, 5%. His drive opens a
+		   jump point 1 hex further and holds it 1 turn longer (JumpEngine::applyJumpOfficer, which publishes
+		   the drive's range itself); a damaged drive's failure chance is 20 lower (getJumpFailureChance). An
+		   exit his ship opens rolls 1 lower on the scatter chart and loses 60 degrees of any facing shift, and
+		   his own unit's arrival initiative penalty is 20 smaller, never a bonus (exitScatterShift,
+		   cancelsFacingShift, arrivalPenaltyRelief). Not for Raiders or the Belt Alliance ($factionRules). */
+		'OFF_JUMP' => array('label' => 'Expert Jump Officer', 'post' => 'jump', 'pct' => 5, 'apply' => 'applyJumpOfficer'),
 
 		/* FIGHTER OFFICERS (Stage 4). A flight carries ONE officer in total (D9), posted on its first
 		   craft. He is lost with that craft - destroyed, or dropped out - and never by a dock, a partial
@@ -158,6 +195,27 @@ class Officers{
 		return isset(self::$registry[$id]) ? self::$registry[$id]['label'] : (string)$id;
 	}
 
+	public static function getFactionRules(){
+		return self::$factionRules;
+	}
+
+	//Does $factionRules let this unit's faction be offered him?
+	private static function factionAllows($ship, $id){
+		if (!isset(self::$factionRules[$id])) return true;
+		$rule = self::$factionRules[$id];
+		$faction = (string)$ship->faction;
+		if (isset($rule['only']) && !in_array($faction, $rule['only'], true)) return false;
+		if (isset($rule['never']) && in_array($faction, $rule['never'], true)) return false;
+		return true;
+	}
+
+	//His price in percent for this unit's faction: $factionRules' when it names one, else the registry's
+	public static function pctFor($ship, $id){
+		$faction = (string)$ship->faction;
+		if (isset(self::$factionRules[$id]['pct'][$faction])) return (int)self::$factionRules[$id]['pct'][$faction];
+		return (int)self::$registry[$id]['pct'];
+	}
+
 	/* D9: never on Ancient hulls, OSATs (mines extend OSAT) or terrain - one shared test in front of
 	   every officer, not something each entry repeats. Bases, LCVs and the rest only where the post
 	   exists, which findPost() decides. Flights too (Stage 4), except the flight-shaped mines
@@ -184,23 +242,26 @@ class Officers{
 		if (!self::mayCarryOfficers($ship)) return;
 		foreach (self::$registry as $id => $officer){
 			if (in_array($id, $ship->enhancementOptionsDisabled)) continue;
-			if (!self::isEligible($ship, $officer)) continue;
-			$ship->enhancementOptions[] = array($id, $officer['label'], 0, 1, self::offerPrice($ship, $officer), 0, false);
+			if (!self::isEligible($ship, $id)) continue;
+			$ship->enhancementOptions[] = array($id, $officer['label'], 0, 1, self::offerPrice($ship, $id), 0, false);
 		}
 	}
 
 	/* The offer's price. A ship officer: pct% of the hull. A fighter officer: pct% of ONE craft - his
 	   price for a standard flight, which the lobby scales by the size bought (officers.flightCost, the
 	   mirror of flightPrice). The Missileer's per-missile part is not in it: it grows with the flight,
-	   so the lobby adds it at buy time (perCraftExtra). */
-	private static function offerPrice($ship, $officer){
-		if (empty($officer['flight'])) return self::shipPrice($ship, $officer);
-		return self::craftPrice($ship, $officer['pct']);
+	   so the lobby adds it at buy time (perCraftExtra). pct is the faction's (pctFor). */
+	private static function offerPrice($ship, $id){
+		if (empty(self::$registry[$id]['flight'])) return self::shipPrice($ship, $id);
+		return self::craftPrice($ship, self::pctFor($ship, $id));
 	}
 
-	//a ship officer's price: pct% of the hull, rounded up - or down for an officer marked roundDown
-	private static function shipPrice($ship, $officer){
-		return self::price($ship->pointCost, $officer['pct'], !empty($officer['roundDown']));
+	/* A ship officer's price: pct% of the hull, rounded up - or down for an officer marked roundDown. The
+	   faction's pct (pctFor), unless $byFaction is false: legacyPrice, for rows saved before there were
+	   faction prices. */
+	private static function shipPrice($ship, $id, $byFaction = true){
+		$pct = $byFaction ? self::pctFor($ship, $id) : (int)self::$registry[$id]['pct'];
+		return self::price($ship->pointCost, $pct, !empty(self::$registry[$id]['roundDown']));
 	}
 
 	/* ceil(pct% of the blueprint cost), in whole numbers: 0.07 x 100 is 7.000000000000001 in floats,
@@ -236,7 +297,7 @@ class Officers{
 		$officer = self::$registry[$id];
 		$crafts = max(1, (int)$crafts);
 		$standard = self::standardFlight($flight);
-		$price = intdiv(self::craftPrice($flight, $officer['pct']) * $crafts + $standard - 1, $standard);
+		$price = intdiv(self::craftPrice($flight, self::pctFor($flight, $id)) * $crafts + $standard - 1, $standard);
 		if (!empty($officer['perMissile'])) $price += (int)$officer['perMissile'] * self::missilesPerCraft($flight) * $crafts;
 		return $price;
 	}
@@ -267,6 +328,11 @@ class Officers{
 	     reactor  the biggest Reactor by maxhealth - Elite Crew's rule (a malus would sit on the main
 	              reactor too); Mag-Grav reactors included.
 	     engine   the strongest Engine by output - the one Poor Crew and ADV_ENG move (Stage 5)
+	     jump     the first jump drive that opens jump points (Stage 7): not a legacy drive (the one-click
+	              Hyperdrive / FTL Drive / Phasing Drive / Trek Nacelle, and every Ancient's), not a fixed
+	              gate's. Through getUnitJumpEngines, never a sweep of $ship->systems ([[project_jump_points]]).
+	              No officer-eligible hull carries two (measured 2026-10-15), so "his ship's drive" and "the
+	              drive he sits in" cannot disagree.
 	     craft    a flight's first craft (Stage 4): the lobby's one fighter card, and the sample fighter
 	              getSampleFighter() answers - id 1, whether or not it is still flying.
 	   ⚠️ Asked BEFORE any enhancement moves an output (D2): Poor Crew takes a point off the strongest
@@ -289,6 +355,11 @@ class Officers{
 				return self::strongest($ship, 'Reactor', 'maxhealth', -1000);
 			case 'engine':
 				return self::strongest($ship, 'Engine', 'output', -1);
+			case 'jump':
+				foreach (JumpEngine::getUnitJumpEngines($ship) as $engine){
+					if (!$engine->isLegacyJump() && !$engine->isGateJump()) return $engine;
+				}
+				return null;
 		}
 		return null;
 	}
@@ -314,10 +385,12 @@ class Officers{
 		return null;
 	}
 
-	//a fighter officer for a flight and every other officer for a ship; the hull has the post, and
-	//passes the officer's own test if he has one
-	private static function isEligible($ship, $officer){
+	//a fighter officer for a flight and every other officer for a ship; the faction may have him
+	//($factionRules), the hull has the post, and passes the officer's own test if he has one
+	private static function isEligible($ship, $id){
+		$officer = self::$registry[$id];
 		if (!empty($officer['flight']) !== ($ship instanceof FighterFlight)) return false;
+		if (!self::factionAllows($ship, $id)) return false;
 		if (self::findPost($ship, $officer['post']) === null) return false;
 		if (empty($officer['needs'])) return true;
 		$needs = $officer['needs'];
@@ -326,15 +399,15 @@ class Officers{
 
 	/* D2: posts are picked at the top of BaseShip::onConstructed, BEFORE any enhancement moves an
 	   output, from the bought rows. A count above 1 still means one officer (D9), and a row the hull
-	   would not have been offered (no post, or the officer's own test fails) buys nothing - the
-	   server trusts the client's rows, so a doctored payload is answered here. So is a flight's second
-	   officer row (D9: one officer in total): only the first in registry order serves. */
+	   would not have been offered (no post, the officer's own test fails, or his faction rules refuse
+	   it) buys nothing - the server trusts the client's rows, so a doctored payload is answered here. So
+	   is a flight's second officer row (D9: one officer in total): only the first in registry order serves. */
 	public static function pickPosts($ship){
 		$list = array();
 		if (self::hasOfficerRow($ship) && self::mayCarryOfficers($ship)){
 			foreach (self::$registry as $id => $officer){
 				if (!self::isBought($ship, $id)) continue;
-				if (!self::isEligible($ship, $officer)) continue;
+				if (!self::isEligible($ship, $id)) continue;
 				$post = self::findPost($ship, $officer['post']);
 				$list[] = array('id' => $id, 'post' => (int)$post->id, 'out' => null, 'how' => null);
 				if ($ship instanceof FighterFlight) break;
@@ -715,6 +788,39 @@ class Officers{
 		return $cost * 3 / 4;
 	}
 
+	/* ------------------------------------------------------------------ Expert Jump Officer (Stage 7) */
+
+	/* The drive's own rules, on the drive: range +1 (and with it the "holder drifted too far" distance, as
+	   the Jump Accelerator's +2 does), one turn more before the hold cap, and the failure cut - all read off
+	   the flag this sets, which exists only while he serves on this load's turn. JumpEngine::stripForJson
+	   publishes the range and the tooltip to every viewer (a displayed stat is public, user ruling
+	   2026-10-10), and the cap goes out as vortexMaxTurns while a jump point stands. */
+	private static function applyJumpOfficer($ship, $entry, $turn){
+		$engine = $ship->getSystemById($entry['post']);
+		if ($engine instanceof JumpEngine) $engine->applyJumpOfficer(self::JUMP_RANGE);
+	}
+
+	/* "A -1 shift to the vortex scatter chart (as listed in the modifiers) if his ship is the one opening the
+	   vortex" - JumpEngine::getExitDeviationModifier, behind $officersPresent. */
+	public static function exitScatterShift($opener, $turn){
+		return self::isActive($opener, 'OFF_JUMP', $turn) ? self::JUMP_SCATTER_SHIFT : 0;
+	}
+
+	/* "He can cancel 60 degrees of unintended facing change caused by a vortex shift (this does not allow him
+	   to alter the facing from its original position)" - JumpEngine::openExitVortex turns the doorway one
+	   step back towards the declared facing, never past it. The doorway, so every unit riding it comes out
+	   facing the way it does. */
+	public static function cancelsFacingShift($opener, $turn){
+		return self::isActive($opener, 'OFF_JUMP', $turn);
+	}
+
+	/* "Any initiative penalty produced by scatter is reduced by 20 for his unit only ... not an initiative
+	   bonus" - BaseShip::getReinforcementArrivalIniModifier caps the sum at 0. His own unit: a rider through
+	   his doorway keeps its full penalty, and a rider with an officer of its own has it reduced. */
+	public static function arrivalPenaltyRelief($unit, $turn){
+		return self::isActive($unit, 'OFF_JUMP', $turn) ? self::JUMP_INI_RELIEF : 0;
+	}
+
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */
 
 	//Expert Dogfighter: +5 initiative, ELITE_SW's line
@@ -896,8 +1002,7 @@ class Officers{
 	   with him when HangarOps splits a flight. */
 	public static function rowPrice($ship, $id){
 		if (!isset(self::$registry[$id])) return 0;
-		$officer = self::$registry[$id];
-		if (empty($officer['flight'])) return self::shipPrice($ship, $officer);
+		if (empty(self::$registry[$id]['flight'])) return self::shipPrice($ship, $id);
 		return self::flightPrice($ship, $id, $ship->flightSize);
 	}
 
@@ -911,10 +1016,13 @@ class Officers{
 
 	/* What a saved officer row cost when it was saved with no price of its own (tac_saved_enh.enhvalue
 	   NULL, every row saved before 2026-10-15): the Stage 4 prices for a fighter officer, plus the
-	   Missileer's missiles per craft (unchanged); today's rowPrice for a ship officer, whose prices have
-	   not changed. */
+	   Missileer's missiles per craft (unchanged); for a ship officer, his registry pct - every such row
+	   predates the faction prices ($factionRules, 2026-10-15), so a Descari fleet's Scavenger was paid at 25%. */
 	public static function legacyPrice($ship, $id){
-		if (!isset(self::$legacyFighterPrices[$id])) return self::rowPrice($ship, $id);
+		if (!isset(self::$registry[$id])) return 0;
+		if (!isset(self::$legacyFighterPrices[$id])){
+			return empty(self::$registry[$id]['flight']) ? self::shipPrice($ship, $id, false) : self::rowPrice($ship, $id);
+		}
 		list($pct, $per) = self::$legacyFighterPrices[$id];
 		$crafts = max(1, (int)$ship->flightSize);
 		$den = 10000 * (($ship instanceof SuperHeavyFighter) ? 1 : 6);

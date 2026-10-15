@@ -2398,7 +2398,10 @@ JumpEngine.prototype.canMaintainVortex = function () {
 	   would vanish on spawned+3 and the player would silently lose the control that keeps a jump
 	   point they are paying for open. This is the single highest-consequence line of H3's client
 	   half: everything else here would merely look wrong. */
-	if (!this.chargesVortexUpkeep() && gamedata.turn >= vortex.spawned + 3) return false;   //its last turn - see above
+	/* The cap is the payload's vortexMaxTurns (4, or 5 while an Expert Jump Officer serves in this drive -
+	   OFFICERS_PLAN.md Stage 7; JumpEngine::getMaxVortexTurns), sent while the jump point stands; 4 without it. */
+	var cap = parseInt(this.vortexMaxTurns, 10) > 0 ? parseInt(this.vortexMaxTurns, 10) : 4;
+	if (!this.chargesVortexUpkeep() && gamedata.turn >= vortex.spawned + cap - 1) return false;   //its last turn - see above
 
 	//Out of range NOW is refused by the server's declaration test too. (Straying out of range
 	//LATER, during Movement, closes the vortex at end of turn - that one is not preventable here.)

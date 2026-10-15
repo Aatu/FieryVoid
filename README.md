@@ -399,6 +399,30 @@ Unlike the replay harness's baseline, this one is derived purely from the reposi
 
 It runs as check 2 of 3 in `scripts\fvbuild.ps1 -Check`, before the replay harness — a broken hit-chart entry would otherwise surface there as a puzzling damage diff instead of as itself.
 
+# Officers: faction availability and prices (10.2026)
+
+Some Expert Officers belong to particular factions (the Expert Geneticist is Dilgar only), are not available to some (no Expert Jump Officer for Raiders), or cost a faction less (the Expert Scavenger is 15% for the Descari instead of 25%). All of that lives in **one table**, `$factionRules`, near the top of `source/server/model/ships/Officers.php`. Nothing else needs touching — not the client, not the ship files.
+
+Each entry is keyed by the officer's id (the ids are listed in `Officers::$registry` just below the table, e.g. `OFF_GENE` for the Expert Geneticist) and can use any of three keys:
+
+    'OFF_GENE' => array('only'  => array('Dilgar Imperium')),            // offered ONLY to these factions
+    'OFF_JUMP' => array('never' => array('Raiders', 'Belt Alliance')),   // never offered to these factions
+    'OFF_SCAV' => array('pct'   => array('Descari Committees' => 15)),   // this faction's price, in % of the ship
+
+**To add your custom faction**, add its name to the right list. For example, to let a custom faction buy the Expert Geneticist:
+
+    'OFF_GENE' => array('only' => array('Dilgar Imperium', 'My Custom Faction')),
+
+and to give it a cheaper Expert Scavenger, add `'My Custom Faction' => 20` to the Scavenger's `pct` list. An officer with no entry at all is offered to every faction at his normal price.
+
+Things to know:
+
+- **The name must be the faction string exactly as your ship files set it** (`$this->faction = "My Custom Faction";`) — the same name the faction has in Fleet Selection. It is case-sensitive, and a name that matches no faction silently does nothing; `tests/replay/officersHarness.php` (if you run it) checks every name in the table against the factions that exist.
+- The table only narrows what the officer's own rules allow. A ship still needs his post (no Jump Engine, no Jump Officer), and Ancients, OSATs, mines, terrain and remotely controlled craft never get officers at all.
+- To take an officer away from **one hull** rather than a whole faction, use the usual `$this->enhancementOptionsDisabled[] = 'OFF_GENE';` in that ship's file.
+- Offers are baked into the static ship files, so **regenerate them after any change**: `scripts\fvbuild.ps1 -Statics` (or plain `fvbuild.ps1`).
+- A saved fleet that holds an officer its faction can no longer buy gets him removed and his points refunded when it is loaded; one whose price changed is re-priced, with a notice either way. A game already in progress simply loses the officer at its next load (the points stay spent), so avoid changing a rule mid-campaign.
+
 # Maintenance tools need a key (08.2026)
 
 The three web-runnable maintenance tools -- `generateStaticShipFileWeb.php`, `generateStaticShipFile.php`
