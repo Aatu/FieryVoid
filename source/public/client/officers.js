@@ -18,14 +18,13 @@ window.officers = {
 
 	ID_PREFIX: 'OFF_',
 
-	/* ⚠️ MIRROR of Officers::$registry (PHP): ids, labels, posts, `needs`, `flight`, `per` and
-	   `perMissile`, in the SAME order - the order every list here is shown in. `summary` is the effect
-	   line the System Info tooltip prints (D12). `stats` is what the officer adds to ship fields while
-	   he serves (Officers::apply), which the lobby adds at READ time (displayStat); his other effects have
-	   their own previews below (reactorBonus, displayFireControl) or none the lobby can show (the
-	   Scanner's saved EW).
-	   Fighter officers (Stage 4) carry `flight: true` and a `per`: 'flight' = charged once whatever the
-	   flight's size, 'craft' = per craft like every other fighter enhancement (flightCost). */
+	/* ⚠️ MIRROR of Officers::$registry (PHP): ids, labels, posts, `needs`, `flight` and `perMissile`, in
+	   the SAME order - the order every list here is shown in. `summary` is the effect line the System
+	   Info tooltip prints (D12). `stats` is what the officer adds to ship fields while he serves
+	   (Officers::apply), which the lobby adds at READ time (displayStat); his other effects have their own
+	   previews below (reactorBonus, displayFireControl) or none the lobby can show (the Scanner's saved EW).
+	   Fighter officers (Stage 4) carry `flight: true`: priced for a standard flight and scaled by the
+	   size bought (flightCost; user ruling 2026-10-15). */
 	REGISTRY: [
 		{ id: 'OFF_HELM', label: 'Expert Helmsman', post: 'cnc', stats: { iniativebonus: 5 },
 			summary: '+5 initiative, wins ties, -1 on meteor chart' },
@@ -41,13 +40,13 @@ window.officers = {
 			summary: 'Repairs 1 critical per turn (a C&C critical on a d20 of 16+)' },
 		{ id: 'OFF_SCAV', label: 'Expert Scavenger', post: 'engine',
 			summary: 'Repairs 1 critical or 4 boxes per turn; once per game blocks up to 6 damage that would destroy the C&C, a reactor or a structure block' },
-		{ id: 'OFF_DOG', label: 'Expert Dogfighter', post: 'craft', flight: true, per: 'flight', stats: { iniativebonus: 5 },
+		{ id: 'OFF_DOG', label: 'Expert Dogfighter', post: 'craft', flight: true, stats: { iniativebonus: 5 },
 			summary: '+5 initiative' },
-		{ id: 'OFF_MSL', label: 'Expert Missileer', post: 'craft', flight: true, per: 'flight', perMissile: 1, needs: 'missiles',
+		{ id: 'OFF_MSL', label: 'Expert Missileer', post: 'craft', flight: true, perMissile: 1, needs: 'missiles',
 			summary: '+5 offensive bonus for missiles' },
-		{ id: 'OFF_EVAD', label: 'Expert Evader', post: 'craft', flight: true, per: 'craft', stats: { offensivebonus: -1 },
+		{ id: 'OFF_EVAD', label: 'Expert Evader', post: 'craft', flight: true, stats: { offensivebonus: -1 },
 			summary: '-5 offensive bonus, -1 damage to hits on this flight' },
-		{ id: 'EXP_MOTIV', label: 'Expert Motivator', post: 'craft', flight: true, per: 'craft', stats: { critRollMod: -2 },
+		{ id: 'EXP_MOTIV', label: 'Expert Motivator', post: 'craft', flight: true, stats: { critRollMod: -2 },
 			summary: '-2 on dropout rolls' }
 	],
 
@@ -341,39 +340,45 @@ window.officers = {
 
 	/* ------------------------------------------------------------------ what a flight's officer costs */
 
-	//an officer charged ONCE per flight (D8), not per craft like every other fighter enhancement
-	isPerFlight: function isPerFlight(enhID) {
-		var officer = this.get(enhID);
-		return Boolean(officer && officer.flight && officer.per === 'flight');
+	/* How many craft a flight's pointCost is for, so the flight a fighter officer's listed price is for:
+	   1 on a single superheavy (maxFlightSize 1), otherwise 6 - the lobby's own convention
+	   (confirm.getVariableSize). ⚠️ MIRROR PAIR with Officers::standardFlight (PHP). */
+	standardFlight: function standardFlight(ship) {
+		return (ship && Number(ship.maxFlightSize) === 1) ? 1 : 6;
 	},
 
-	/* The per-craft points a per-flight officer adds on top of his once-per-flight price: the Missileer's
-	   1 per missile each craft can carry ("+1 per missile the flight can take", user ruling 2026-10-11).
-	   The offer tuple carries only the per-flight part, since this one grows with the flight. */
+	/* The per-craft points a fighter officer adds on top of his scaled price: the Missileer's 1 per
+	   missile each craft can carry ("+1 per missile the flight can take", user ruling 2026-10-11). The
+	   offer tuple carries only the scaled part, since this one grows with the flight. */
 	perCraftExtra: function perCraftExtra(ship, enhID) {
 		var officer = this.get(enhID);
-		if (!officer || !officer.perMissile || !this.isPerFlight(enhID)) return 0;
+		if (!officer || !officer.perMissile || !officer.flight) return 0;
 		return officer.perMissile * this.missilesPerCraft(ship);
 	},
 
 	/* ⭐ What one bought enhancement row costs a FLIGHT of `size` craft - THE rule every lobby site that
 	   turns a fighter's rows into points goes through (confirm.getTotalCost and paintBuySummary, through
 	   confirm.enhRowCost; gamelobby doBuyShip, doCopyShip, doEditShip and enhancementLines). A fighter
-	   enhancement is priced per craft and multiplied by the flight size (D8); a per-flight officer is
-	   charged once, plus his perCraftExtra per craft. enhCost is the row's own sum (price x count);
-	   `extra` is perCraftExtra(ship, enhID), worked out once by the caller. */
-	flightCost: function flightCost(enhID, count, enhCost, size, extra) {
+	   enhancement is priced per craft and multiplied by the flight size (D8). A fighter officer's listed
+	   price is for a `standard` flight (standardFlight), so it is scaled by size / standard and rounded
+	   up, plus his perCraftExtra per craft (user ruling 2026-10-15). enhCost is the row's own sum (price x
+	   count); `extra` is perCraftExtra(ship, enhID), worked out once by the caller.
+	   ⚠️ MIRROR PAIR with Officers::flightPrice (PHP). */
+	flightCost: function flightCost(enhID, count, enhCost, size, extra, standard) {
 		var cost = Number(enhCost) || 0;
 		size = Number(size) || 1;
-		if (!this.isPerFlight(enhID)) return cost * size;
-		return cost + (((parseInt(count, 10) || 0) > 0) ? (Number(extra) || 0) * size : 0);
+		if (!this.isFighterOfficer(enhID)) return cost * size;
+		if ((parseInt(count, 10) || 0) < 1) return 0;
+		standard = Number(standard) || 6;
+		return Math.ceil(cost * size / standard) + (Number(extra) || 0) * size;
 	},
 
-	/* The buy dialog's price note for a fighter officer's row: "29pts per flight", "40pts per flight + 6pts
-	   per craft" - a per-craft one keeps the plain note every fighter row has. null for anything else. */
+	/* The buy dialog's price note for a fighter officer's row: "29pts per 6 craft", "40pts per 6 craft + 6pts
+	   per craft"; a single superheavy's is just its price. null for anything else. */
 	priceNote: function priceNote(ship, enhancement) {
-		if (!this.isPerFlight(enhancement[0])) return null;
-		var note = enhancement[4] + 'pts per flight';
+		if (!this.isFighterOfficer(enhancement[0])) return null;
+		var standard = this.standardFlight(ship);
+		var note = enhancement[4] + 'pts' + (standard > 1 ? ' per ' + standard + ' craft' : '');
 		var extra = this.perCraftExtra(ship, enhancement[0]);
 		if (extra > 0) note += ' + ' + extra + 'pts per craft';
 		return note;

@@ -202,7 +202,7 @@ window.confirm = {
 
         var totalCost = (flightSize * fighterCost) + totalMissileCost;
 
-        // Add enhancement cost - per craft for a flight, except an officer charged per flight (enhRowCost)
+        // Add enhancement cost - per craft for a flight, except a fighter officer scaled by its size (enhRowCost)
         var enhNo = 0;
         var target = $(".selectAmount.shpenh" + enhNo);
         while (typeof target.data("enhPrice") != 'undefined') { //as long as there are enhancements defined...
@@ -220,14 +220,14 @@ window.confirm = {
     },
 
     /* What one enhancement row's spinner costs the unit: its enhCost, times the flight size for a flight
-       (1 for anything else) - unless it is a fighter officer priced per FLIGHT, whose price is charged
-       once plus his per-craft part (officers.flightCost, the one rule; perCraftExtra was worked out when
-       the row was built). gamelobby.js's doBuyShip / doCopyShip / doEditShip read rows back through this
-       too, so the dialog and the fleet can never charge differently. */
+       (1 for anything else) - unless it is a fighter officer, whose price is scaled by the flight's size
+       plus his per-craft part (officers.flightCost, the one rule; perCraftExtra and standardFlight were
+       worked out when the row was built). gamelobby.js's doBuyShip / doCopyShip / doEditShip read rows
+       back through this too, so the dialog and the fleet can never charge differently. */
     enhRowCost: function enhRowCost(target, flightSize) {
         if (!window.officers) return (target.data("enhCost") || 0) * flightSize;
         return officers.flightCost(target.data("enhID"), target.data("count"), target.data("enhCost"),
-            flightSize, target.data("perCraftExtra"));
+            flightSize, target.data("perCraftExtra"), target.data("standardFlight"));
     },
 
     getTotalCostBulk: function getTotalCostBulk() {
@@ -1204,8 +1204,10 @@ window.confirm = {
             selectAmountItem.data('max', enhLimit);
             selectAmountItem.data('enhPrice', enhPrice);
             selectAmountItem.data('enhPriceStep', enhPriceStep);
-            //a per-flight officer's per-craft part (the Missileer's missiles), for enhRowCost - 0 otherwise
+            //a fighter officer's per-craft part (the Missileer's missiles) and the flight size his price is
+            //for, for enhRowCost - 0 and 6 otherwise
             selectAmountItem.data('perCraftExtra', window.officers ? officers.perCraftExtra(ship, enhID) : 0);
+            selectAmountItem.data('standardFlight', window.officers ? officers.standardFlight(ship) : 6);
             //Marked before the box is first written: a stepped enhancement shows the quantity its
             //level buys (and cannot be typed into); step 1 - every one but Extra Tendrils - leaves
             //the row as it was.
@@ -1454,7 +1456,7 @@ window.confirm = {
     /* Paint what getTotalCost / getTotalCostBulk worked out: the Base Hull line, each row's cost and
        each section's count + subtotal. `base` is the hull figure they priced from, and `each` what an
        enhancement's per-craft cost is multiplied by (the flight size; 1 otherwise - enhRowCost, so a
-       per-flight officer is charged once), so Base Hull plus every subtotal is the total. The bulk
+       fighter officer is scaled by it instead), so Base Hull plus every subtotal is the total. The bulk
        dialog works per unit: there that sum is the Per Unit figure, and the total is it times the
        quantity. */
     paintBuySummary: function paintBuySummary(base, each) {

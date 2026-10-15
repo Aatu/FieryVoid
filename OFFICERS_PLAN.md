@@ -1,8 +1,9 @@
 # Officers — Implementation Plan
 
 Status: **Stages 0–2a committed (`7800ab827`), Stage 3 committed (`1714c3651`), Stage 4 committed
-(`ab0025aba`, `4738173cc`; the Motivator re-priced to 50 % in `32c9f2a11`); Stage 5 BUILT 2026-10-15,
-uncommitted** (§9.8). Written against `dab951bf5`. The user
+(`ab0025aba`, `4738173cc`; the Motivator re-priced to 50 % in `32c9f2a11`); Stage 5 committed (`85c30272c`,
+§9.8); fighter officer prices scaled by flight size + saved fleets re-priced BUILT 2026-10-15, uncommitted
+(§9.9 - ⚠️ db/savedOfficerPrice.sql before deploying).** Written against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
 a third Helmsman effect (−1 on the meteor impact chart) and play-tested Stage 1 in game 4457 (confirmed
@@ -108,7 +109,7 @@ here and can be built first, on their own (Stage 2a).
 | **D5** | **Effects run in ONE post-pass**, `Officers::apply()`, after enhancements and after the per-system `onConstructed` loop, and before `iniativeadded` is filled ([ShipClasses.php:1779-1789](source/server/model/ships/ShipClasses.php#L1779)). Never as a `case` in `setEnhancementsShip`. | (a) That switch runs rows in `enhid` order, and an order-sensitive effect belongs in a fixed post-pass on both ends ([[arch_enhancement_storage_and_order]]). (b) `isDestroyed()` needs `structureSystem`, which `ShipSystem::onConstructed` fills ([ShipSystem.php:473](source/server/model/systems/ShipSystem.php#L473)). (c) None of the 25 has to precede `Shield::onConstructed`, which is the reason system refits run earlier. |
 | **D6** | **A new class, `Officers`** (`source/server/model/ships/Officers.php`), holds the registry and the resolver. `Enhancements.php` gains hook calls only. | `Enhancements.php` is 4,789 lines. WEAPON plan D12's argument applies: one literal per officer, so nothing gets added in three places out of four. |
 | **D7** | **ids are `OFF_*`, at most 10 characters** (table in §4.2). | `enhid` is `varchar(10)` in both tables. The prefix routes a row to the Officers section, and keeps it out of the public tooltip, with one test each. It also avoids the existing fighter `NAVIGATOR`. |
-| **D8** | **Price = ceil(pct × blueprint `pointCost`)**, the base `ELITE_CREW` uses ([Enhancements.php:244](source/server/model/ships/Enhancements.php#L244)). **Fighter officers are priced per FLIGHT**, not per craft. **Fleet-% officers** (Quartermaster, Evangelist) are priced off the **game's points limit**, not the live fleet total. | The lobby multiplies every fighter enhancement by flight size ([confirm.js:215](source/public/client/UI/confirm.js#L215), [gamelobby.js:4203](source/public/client/gamelobby.js#L4203) and five more sites). "1 per flight, 50 % of one fighter" is not that shape, so it needs a per-row exception (§4.10). Evader's "× number of fighters" is the one fighter officer that already fits. A price on the live fleet total is circular (the officer is part of the fleet) and changes with every purchase. The game's limit is fixed and known in the lobby. |
+| **D8** | **Price = ceil(pct × blueprint `pointCost`)**, the base `ELITE_CREW` uses ([Enhancements.php:244](source/server/model/ships/Enhancements.php#L244)). **Fighter officers are priced per FLIGHT**, not per craft (*re-ruled 2026-10-15, §9.9: every fighter officer is pct of one craft for a flight of six, scaled by the flight's size*). **Fleet-% officers** (Quartermaster, Evangelist) are priced off the **game's points limit**, not the live fleet total. | The lobby multiplies every fighter enhancement by flight size ([confirm.js:215](source/public/client/UI/confirm.js#L215), [gamelobby.js:4203](source/public/client/gamelobby.js#L4203) and five more sites). "1 per flight, 50 % of one fighter" is not that shape, so it needs a per-row exception (§4.10). Evader's "× number of fighters" is the one fighter officer that already fits. A price on the live fleet total is circular (the officer is part of the fleet) and changes with every purchase. The game's limit is fixed and known in the lobby. |
 | **D9** | **RULED.** **Ships: one officer of each type**, several different types per ship, "except as noted" (Gunner up to 3 / 2 / 1 by size; Breaching Expert up to 20 % of pods). **Flights: one officer in total.** **Never on Ancient hulls (factionAge ≥ 3), OSATs (mines extend OSAT) or terrain.** Bases, LCVs and everything else only where the post exists, so a base without a jump drive is never offered a Jump Officer. Faction gates use the faction string. | User ruling (QX3, QX4) and the rulebook: a unit "may not benefit from more than one expert officer of the same type (except as noted)". The flight cap makes a flight's officer rows mutually exclusive in the buy dialog (§4.10). ⚠️ FV_factions.txt:438 still promises Shadow ships "enhancements relating to special officers"; that line now contradicts the ruling. Corillani CPN and OSF exist only in `$notes` prose ([VostovaAMCPN.php:15](source/server/model/ships/corillani/VostovaAMCPN.php#L15)), so the Evangelist needs a per-hull opt-in (`enhancementOptionsEnabled[] = 'OFF_EVAN'`), which is a contributor-area edit. |
 | **D10** | **Where they are bought:** track-1 officers in the buy dialog's Officers section; placed officers in the system's own *Add Enhancements & Damage* menu, under an **Officers** sub-heading of the gold section. **Plus filter chips in the buy dialogs (D13).** | One `buySectionOf` change lights the reserved section ([confirm.js:852](source/public/client/UI/confirm.js#L852)). A placed officer is bought where his post is. |
 | **D11** | **The insignia** is a small gold double chevron (inline SVG, `theme.colors.enhTitle`) in a top-left **badge row** shared with the ✦. One insignia per post, however many officers are posted there. **Disabled** = grey; **killed** = grey with a red slash. Both stay shown. | Top-right belongs to the meteor badge ([SystemIcon.js:69](source/public/client/UI/reactJs/system/SystemIcon.js#L69)). A shared row keeps ✦ and insignia from overlapping on a gun with both Gunsights and a Gunner. Showing a fallen officer is what tells the player why a bonus stopped. |
@@ -1169,3 +1170,76 @@ driver, the registry comment and the Fighter Officers card now say 50 % ("same e
 Observation, not changed: `Manager::loadSavedFleet` refunds an unoffered officer row at today's `rowPrice`, so a saved
 Hunter-Killer fleet whose Motivator was bought at 10 % would be refunded at 50 % - the refund clamps the fleet's
 enhancement value at 0, eating into its other enhancements. None exists locally.
+
+### 9.9 Fighter officer prices scaled by flight size; saved fleets re-priced (2026-10-15)
+
+**Rulings (user, 2026-10-15).** "The current prices for Fighter Officers are based on a standard flight of 6
+fighters": each one is pct % of ONE craft for a flight of six, and a flight of another size pays it **scaled by
+crafts / 6**. The Evader (100 %) and the Expert Motivator (50 %) are no longer per craft - "neither should be
+costed on a flight basis". The Missileer's +1 per missile per craft is unchanged. Saved fleets bought under the
+old prices are corrected on reload, by **storing each officer row's price**. ("HKs are a bad example": they carry
+no officers - the §9.8 follow-up's refund case is now simply "refund what was paid".)
+
+Built with defaults, stated here: the scaling is of the **listed** six-craft price, `ceil(listed x crafts / 6)`, so
+the dialog's "29pts per 6 craft" can be checked by hand (an Aurora Dogfighter is 15 / 29 / 44 / 58 at 3 / 6 / 9 /
+12 craft); a single superheavy (maxFlightSize 1) is its own standard flight, unscaled (none is officer-eligible
+today: a harness probe covers it).
+
+**Files.** `Officers.php` (`per` gone from the registry; `standardFlight`; `craftPrice` on it; `flightPrice`, THE
+rule; `rowPrice` through it; `legacyPrice` + `$legacyFighterPrices`), `Manager.php` (`submitSavedFleet` stores an
+officer row's `rowPrice`; `loadSavedFleet` re-prices every officer row), `DBManager.php` (`submitSavedEnhancement`
+/ `getSavedEnhancementsForShip` carry `enhvalue`), **`db/savedOfficerPrice.sql`** (new; `emptyDatabase.sql` too).
+Client: `officers.js` (`per` gone, `isPerFlight` gone, `standardFlight`, `flightCost` scaled, `priceNote` "per 6
+craft"), `confirm.js` (the row's `standardFlight`, read by `enhRowCost`), `gamelobby.js` (`enhancementLines`).
+Docs: the Fighter Officers lede and four cards. Statics and bundles rebuilt; no new class.
+
+**As built:**
+- **The rule.** `Officers::flightPrice($flight, $id, $crafts)` = `ceil(craftPrice x crafts / standard)` + the
+  Missileer's `perMissile x missilesPerCraft x crafts`; ⚠️ MIRROR PAIR `officers.flightCost(enhID, count, enhCost,
+  size, extra, standard)`. Every lobby site already went through `flightCost` (nine, §9.6), so only its two direct
+  callers needed `standard`: `confirm.enhRowCost` (from the row's `data('standardFlight')`, set where the row's
+  `perCraftExtra` is) and `enhancementLines`.
+- ⚠️ **`standardFlight` is `maxFlightSize === 1`, NOT `instanceof SuperHeavyFighter`.** The lobby prices a craft as
+  pointCost / 6 unless maxFlightSize is 1. Five SuperHeavyFighters (FangedSerpentAM, SkySerpentAM, the three Rogolon
+  SHFs) fly up to 3 with a pointCost for six, so the old test priced their officers off all six craft: a
+  FangedSerpentAM's Dogfighter offer was 435, now 73. Every fighter ENHANCEMENT in Enhancements.php still asks
+  `instanceof SuperHeavyFighter` (observation 1).
+- **Saved fleets.** `tac_saved_enh.enhvalue` (DECIMAL, NULL): `submitSavedFleet` writes `rowPrice` for every officer
+  row (ship officers too) and NULL for every other row. `loadSavedFleet`, for each officer row: paid = the stored
+  value, or for NULL the price the row was charged - `legacyPrice`, the Stage 4 rules live ran until now (Dogfighter
+  / Missileer 50 % once per flight, Evader 100 % per craft, Motivator 10 % per craft - also his price as an
+  enhancement - with live's `instanceof SuperHeavyFighter` craft, quirk included); today's `rowPrice` for a ship
+  officer. Offered: `pointCostEnh - paid + now`, and a notice line "<name>: Expert Evader now costs 57 points (was
+  342)." under the existing "Enhancements changed since this fleet was saved:" heading. Not offered: refunded `paid`.
+  A fleet saved after this change reloads untouched (stored = today's).
+
+**Verified.**
+- `officersHarness.php` 382 / 0 (339 with `--no-db`): `flightPrice` tables (Aurora Dogfighter 5 / 10 / 15 / 29 / 44 /
+  58 at 1 / 2 / 3 / 6 / 9 / 12, Evader 10 / 29 / 57 / 86 / 114, Motivator 15 / 29 / 58; Thunderbolt Missileer 38 / 76 /
+  152), the FangedSerpentAM offers (73) and a single-superheavy probe (435 unscaled), `rowPrice`, `legacyPrice`
+  (incl. a FangedSerpentAM trio's Motivator 261, the old quirk); a REAL save / reload: eight saved units (five NULL
+  rows re-priced 58→38, 36→29, 342→57, 29→15, 174→25; a stored 57 untouched; a stored 25 re-priced to 29; a
+  Helmsman untouched), each lump's other 5 points kept, each notice line exact, the HK Motivator refunded its
+  enhancement-era 36; and the real `submitSavedFleet` storing 44 for a 9-craft Dogfighter, 47 for a Helmsman and
+  NULL for an ordinary row, reloading with no notice. Mutation-tested: 15 server breaks, all caught.
+- `officersClientHarness.js` 100 / 0: the same tables through `officers.flightCost`, `standardFlight`, `priceNote`,
+  `confirm.enhRowCost`. 6 client breaks, all caught.
+- `enhancementsHarness` 267 / 0 (fingerprint unchanged: ships only); `enhancementsDifferential` 443 / 0;
+  `fvbuild -Check` all passed (replay corpus 146 / 0).
+- Real site (`officersE2E/`): `lobby4` 35 / 35 (notes "per 6 craft"; Thunderbolt Dogfighter 520 / 260 / 87 at 6 / 3 /
+  1, Missileer 556 / 278 / 93, bought / copied at 3 = 38, edited to 6 = 76; Aurora Evader 57 / 29; Motivator 29),
+  `docs` 16 / 16, `lobby` 25 / 25, `lobby3` 19 / 19.
+
+**Deploy:** ⚠️ apply `db/savedOfficerPrice.sql` on live BEFORE deploying - the new save names the column (a save
+fails without it) and the new load selects it (a load would come back with no enhancements). Safe to apply while
+the old code runs: it never names the column, so its rows stay NULL and read as Stage 4 prices.
+
+**Observations, not changed:**
+1. The same SuperHeavyFighter craft bug prices EVERY fighter enhancement on those five hulls off six craft
+   (Enhancements.php's `instanceof SuperHeavyFighter` branches), e.g. a FangedSerpentAM's enhancements cost 6x.
+2. §9.7 observation 2 now covers every fighter officer: HangarOps' `shareWithCraft` re-derives his price at the
+   row's CURRENT size, so a 2-craft fragment's Dogfighter counts 10 (not the 29 paid at six) when it splits again
+   (the harness's launched / fragment split is 32 / 21). Fleet-list value only; the total is unchanged.
+3. `tac_saved_list.points` is stored, so the saved-fleet dropdown shows a re-priced fleet's OLD total until it is
+   saved again (as with §4.7.1's per-system re-pricing).
+4. No local saved fleet holds an officer, so the live data path is proved only by the harness's rolled-back fixtures.

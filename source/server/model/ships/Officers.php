@@ -50,11 +50,11 @@ class Officers{
 	              displayed stat is public, only the officer is hidden (user ruling 2026-10-10)
 	     needs    (optional) a further test the hull must pass to be offered him, beyond having the post
 	   Fighter officers (Stage 4) also carry:
-	     flight      true: offered to flights only (and every other officer to ships only)
-	     per         'flight' = charged ONCE whatever the flight's size; 'craft' = per craft, which the
-	                 lobby multiplies by the flight size like every other fighter enhancement (D8)
-	     perMissile  (optional) points added PER CRAFT for every missile one craft can carry, on top of a
-	                 per-flight price (the Missileer) */
+	     flight      true: offered to flights only (and every other officer to ships only). His pct is
+	                 of ONE craft, for a standard flight; a flight of another size pays it scaled by its
+	                 craft count (flightPrice - user ruling 2026-10-15)
+	     perMissile  (optional) points added PER CRAFT for every missile one craft can carry, on top of
+	                 that (the Missileer) */
 	private static $registry = array(
 		/* Expert Helmsman: +5 initiative (FV units, QX1), wins initiative ties, and -1 on the die he
 		   rolls on a meteor swarm's impact chart (user, 2026-10-10). The tie-break is
@@ -93,30 +93,31 @@ class Officers{
 		   craft. He is lost with that craft - destroyed, or dropped out - and never by a dock, a partial
 		   dock or a split launch: he stays on the flight row he was bought on, and a "- Split" row never
 		   carries him. No kill roll: a craft has no d20 critical roll, only the d10 dropout test (user
-		   rulings 2026-10-11). Priced off one craft (D8). */
-		/* Expert Dogfighter: +5 initiative (FV units, QX1). 50% of a craft, once per flight. */
-		'OFF_DOG'  => array('label' => 'Expert Dogfighter', 'post' => 'craft', 'flight' => true, 'pct' => 50, 'per' => 'flight',
+		   rulings 2026-10-11). Priced off one craft, scaled by the flight's size (flightPrice). ⚠️ Saved
+		   fleets bought under the Stage 4 prices are re-priced on reload (legacyPrice). */
+		/* Expert Dogfighter: +5 initiative (FV units, QX1). 50% of a craft. */
+		'OFF_DOG'  => array('label' => 'Expert Dogfighter', 'post' => 'craft', 'flight' => true, 'pct' => 50,
 			'apply' => 'applyDogfighter', 'publish' => array('iniativebonus')),
 		/* Expert Missileer: "+5 OB for missiles" = +1 OB (the +5 is FV's displayed %) on every ballistic
 		   launch that gets the flight's OB - Weapon::calculateHitBase's fighter-ballistic branch and its
-		   weaponManager twins. "50% of a fighter + 1 per missile the flight CAN take": half a craft once,
-		   plus 1 point per craft for each missile one craft carries, so the price grows with the flight
-		   (user ruling 2026-10-11). Only for flights that carry missiles. */
-		'OFF_MSL'  => array('label' => 'Expert Missileer', 'post' => 'craft', 'flight' => true, 'pct' => 50, 'per' => 'flight',
+		   weaponManager twins. "50% of a fighter + 1 per missile the flight CAN take": half a craft, plus
+		   1 point per craft for each missile one craft carries (user ruling 2026-10-11). Only for flights
+		   that carry missiles. */
+		'OFF_MSL'  => array('label' => 'Expert Missileer', 'post' => 'craft', 'flight' => true, 'pct' => 50,
 			'perMissile' => 1, 'apply' => null, 'needs' => 'hasMissiles'),
 		/* Expert Evader: "-1 to hit with the flight's own weapons, -1 damage on all incoming fire",
 		   always on (user ruling 2026-10-11). -1 OB, which is what every fighter to-hit path reads on
 		   both ends (the client never reads a flight's toHitBonus), and +1 in FighterFlight::getDamageMod.
-		   "100% of a fighter x number of fighters" is the per-craft shape every fighter enhancement has. */
-		'OFF_EVAD' => array('label' => 'Expert Evader', 'post' => 'craft', 'flight' => true, 'pct' => 100, 'per' => 'craft',
+		   100% of a craft - NOT per craft (user ruling 2026-10-15). */
+		'OFF_EVAD' => array('label' => 'Expert Evader', 'post' => 'craft', 'flight' => true, 'pct' => 100,
 			'apply' => 'applyEvader', 'publish' => array('offensivebonus')),
 		/* Expert Motivator: -2 on the flight's dropout rolls. A fighter ENHANCEMENT until Stage 4, when the
 		   user ruled it an officer (2026-10-11). ⚠️ It keeps its OLD id, EXP_MOTIV - live games and saved
 		   fleets carry rows under it, and a withdrawn id drops a saved row silently while its cost stays
-		   in pointCostEnh ([[arch_retiring_ship_enhancement]]). Priced per craft like before, but at 50% of
-		   a craft since 2026-10-15 (user; it was 10% as an enhancement). Withheld, as before, by the
-		   nonstandard fighter sets (blockStandardEnhancements). */
-		'EXP_MOTIV' => array('label' => 'Expert Motivator', 'post' => 'craft', 'flight' => true, 'pct' => 50, 'per' => 'craft',
+		   in pointCostEnh ([[arch_retiring_ship_enhancement]]). 50% of a craft (user, 2026-10-15) - no longer
+		   per craft, as it was at 10% when it was an enhancement. Withheld, as before, by the nonstandard
+		   fighter sets (blockStandardEnhancements). */
+		'EXP_MOTIV' => array('label' => 'Expert Motivator', 'post' => 'craft', 'flight' => true, 'pct' => 50,
 			'apply' => 'applyMotivator'),
 	);
 
@@ -146,7 +147,7 @@ class Officers{
 	   (MineClass, $mine), MicroSATs ($osat), the OSATs of the fighter world, and anything remotely
 	   controlled ($remoteControl - the Orieni Hunter-Killers): "they have no pilots" (user ruling
 	   2026-10-11). The Hunter-Killers were offered the Expert Motivator while it was an enhancement,
-	   so a saved fleet can still hold one - Manager::loadSavedFleet refunds it (rowPrice). */
+	   so a saved fleet can still hold one - Manager::loadSavedFleet refunds what it cost (legacyPrice). */
 	public static function mayCarryOfficers($ship){
 		if ((int)$ship->factionAge >= 3) return false;
 		if ($ship instanceof OSAT || !empty($ship->osat)) return false;
@@ -171,10 +172,10 @@ class Officers{
 		}
 	}
 
-	/* The offer's price. A ship officer: pct% of the hull. A fighter officer: pct% of ONE craft - per
-	   flight or per craft by his `per` (the buy dialog multiplies a 'craft' price by the flight size,
-	   as it does every fighter enhancement's). The Missileer's per-missile part is not in it: it grows
-	   with the flight, so the lobby adds it at buy time (officers.flightCost, perCraftExtra). */
+	/* The offer's price. A ship officer: pct% of the hull. A fighter officer: pct% of ONE craft - his
+	   price for a standard flight, which the lobby scales by the size bought (officers.flightCost, the
+	   mirror of flightPrice). The Missileer's per-missile part is not in it: it grows with the flight,
+	   so the lobby adds it at buy time (perCraftExtra). */
 	private static function offerPrice($ship, $officer){
 		if (empty($officer['flight'])) return self::price($ship->pointCost, $officer['pct']);
 		return self::craftPrice($ship, $officer['pct']);
@@ -187,15 +188,34 @@ class Officers{
 		return intdiv($hundredths * (int)$pct + 9999, 10000);
 	}
 
-	/* ceil(pct% of ONE craft), in whole numbers. A flight's pointCost is for six craft whatever size it
-	   is bought at (the lobby prices a craft as pointCost / 6); a superheavy's is its own - the
-	   convention every fighter enhancement prices by (at 10% it was exactly EXP_MOTIV's old
-	   ceil(pointCost / 60) and ceil(pointCost / 10)). */
+	/* ceil(pct% of ONE craft), in whole numbers: pointCost is for a standard flight (standardFlight). */
 	public static function craftPrice($flight, $pct){
-		$crafts = ($flight instanceof SuperHeavyFighter) ? 1 : 6;
 		$hundredths = max(0, (int)round($flight->pointCost * 100));
-		$den = 10000 * $crafts;
+		$den = 10000 * self::standardFlight($flight);
 		return intdiv($hundredths * (int)$pct + $den - 1, $den);
+	}
+
+	/* How many craft a flight's pointCost is for, so the flight its officer's listed price is for: ONE
+	   on a single superheavy (maxFlightSize 1, its own pointCost), otherwise six whatever size it is
+	   bought at - the lobby's own convention (confirm.getVariableSize, showShipBuy). NOT `instanceof
+	   SuperHeavyFighter`, which every fighter ENHANCEMENT still asks: five superheavies (Sky / Fanged
+	   Serpent AM, the Rogolon SHFs) fly up to 3 with a pointCost for six, and that test priced their
+	   officers off all six craft. ⚠️ MIRROR PAIR with officers.standardFlight. */
+	public static function standardFlight($flight){
+		return ((int)$flight->maxFlightSize === 1) ? 1 : 6;
+	}
+
+	/* ⭐ What a fighter officer costs a flight of $crafts craft - THE rule (user ruling 2026-10-15): his
+	   listed price (craftPrice, for a standard flight) scaled by $crafts / standardFlight and rounded up,
+	   plus the Missileer's 1 point per missile per craft. So a 3-craft flight pays half the six-craft
+	   price and a 12-craft flight twice it. ⚠️ MIRROR PAIR with officers.flightCost. */
+	public static function flightPrice($flight, $id, $crafts){
+		$officer = self::$registry[$id];
+		$crafts = max(1, (int)$crafts);
+		$standard = self::standardFlight($flight);
+		$price = intdiv(self::craftPrice($flight, $officer['pct']) * $crafts + $standard - 1, $standard);
+		if (!empty($officer['perMissile'])) $price += (int)$officer['perMissile'] * self::missilesPerCraft($flight) * $crafts;
+		return $price;
 	}
 
 	/* Missiles one craft can carry: its magazine's capacity (rounds, not salvoes) plus every legacy
@@ -787,19 +807,37 @@ class Officers{
 
 	/* ------------------------------------------------------------------ a fighter officer follows his fighter */
 
-	/* What one bought officer row cost the unit, by the lobby's rule (officers.flightCost): a ship
-	   officer pct% of the hull; a fighter officer pct% of one craft, once per flight or per craft by his
-	   `per`, plus the Missileer's 1 per missile a craft carries, per craft. $flight->flightSize is the
-	   size the row was bought or spawned at. Used to refund a saved row the hull is no longer offered
-	   (Manager::loadSavedFleet) and to keep an officer's cost with him when HangarOps splits a flight. */
+	/* What one bought officer row costs the unit, by the lobby's rule: a ship officer pct% of the hull, a
+	   fighter officer flightPrice at the row's own flightSize (the size it was bought or spawned at).
+	   Stored with a saved fleet's row (Manager::submitSavedFleet), and used to keep an officer's cost
+	   with him when HangarOps splits a flight. */
 	public static function rowPrice($ship, $id){
 		if (!isset(self::$registry[$id])) return 0;
 		$officer = self::$registry[$id];
 		if (empty($officer['flight'])) return self::price($ship->pointCost, $officer['pct']);
+		return self::flightPrice($ship, $id, $ship->flightSize);
+	}
+
+	/* The fighter officers' Stage 4 prices, as live ran them until 2026-10-15 (ab0025aba): pct of one
+	   craft - a craft being pointCost / 6 unless the hull is a SuperHeavyFighter - and charged once per
+	   flight or per craft. EXP_MOTIV's 10% per craft was also his price as an enhancement before that. */
+	private static $legacyFighterPrices = array(
+		'OFF_DOG' => array(50, 'flight'), 'OFF_MSL' => array(50, 'flight'),
+		'OFF_EVAD' => array(100, 'craft'), 'EXP_MOTIV' => array(10, 'craft'),
+	);
+
+	/* What a saved officer row cost when it was saved with no price of its own (tac_saved_enh.enhvalue
+	   NULL, every row saved before 2026-10-15): the Stage 4 prices for a fighter officer, plus the
+	   Missileer's missiles per craft (unchanged); today's rowPrice for a ship officer, whose prices have
+	   not changed. */
+	public static function legacyPrice($ship, $id){
+		if (!isset(self::$legacyFighterPrices[$id])) return self::rowPrice($ship, $id);
+		list($pct, $per) = self::$legacyFighterPrices[$id];
 		$crafts = max(1, (int)$ship->flightSize);
-		$price = self::craftPrice($ship, $officer['pct']);
-		if (($officer['per'] ?? 'craft') !== 'flight') return $price * $crafts;
-		if (!empty($officer['perMissile'])) $price += (int)$officer['perMissile'] * self::missilesPerCraft($ship) * $crafts;
+		$den = 10000 * (($ship instanceof SuperHeavyFighter) ? 1 : 6);
+		$price = intdiv(max(0, (int)round($ship->pointCost * 100)) * $pct + $den - 1, $den);
+		if ($per === 'craft') return $price * $crafts;
+		if (!empty(self::$registry[$id]['perMissile'])) $price += (int)self::$registry[$id]['perMissile'] * self::missilesPerCraft($ship) * $crafts;
 		return $price;
 	}
 

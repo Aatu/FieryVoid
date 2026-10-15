@@ -596,6 +596,7 @@ CREATE TABLE `tac_saved_enh` (
   `enhid` VARCHAR(10) NOT NULL,
   `numbertaken` INT(11) NOT NULL,
   `enhname` VARCHAR(255) NOT NULL,
+  `enhvalue` DECIMAL(10,2) NULL DEFAULT NULL, -- an officer row's price; NULL otherwise (db/savedOfficerPrice.sql)
   PRIMARY KEY (`listid`,`shipid`,`enhid`),
   KEY `idx_shipid` (`shipid`),
   KEY `idx_listid` (`listid`),
