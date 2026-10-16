@@ -54,7 +54,17 @@ window.systemEnhancements = {
 		SYS_WBMLA: 'Wide-Beam Medium Lightning Array',
 		SYS_AGS: 'Adv. Gravitic Shield',
 		SYS_AGS2: '2nd Adv. Gravitic Shield',
-		SYS_ELINT: 'ELINT Sensor Module'
+		SYS_ELINT: 'ELINT Sensor Module',
+		//placed officers (OFFICERS_PLAN.md Stage 8) - officers.js holds the rest of what they are
+		OFF_GUN: 'Expert Gunner',
+		OFF_MWEW: 'Matter Weapons Expert'
+	},
+
+	/* A placed officer's row (OFFICERS_PLAN.md Stage 8), not a refit: the OFF_ prefix every officer id carries
+	   (D7) - the registry's `officer` slot (PHP). No ✦, not in "System Enhancements (n)" (the gold box's
+	   "Officers (n)" counts him through officers.listFor), its own sub-heading in the menu, its own fleet-list line. */
+	isOfficer: function isOfficer(enhID) {
+		return String(enhID).indexOf('OFF_') === 0;
 	},
 
 	/* MUTUAL EXCLUSION (KIRISHIAC_ORBITAL_REFITS_PLAN.md §9.2): enhID -> [group, rank]. On one system,
@@ -135,6 +145,7 @@ window.systemEnhancements = {
 		var offers = this.offersFor(ship, system);
 		return offers.map(function (offer) {
 			var count = self.taken(ship, offer[4], offer[0]);
+			var officer = self.isOfficer(offer[0]);
 			return {
 				enhID: offer[0],
 				label: self.label(offer[0]),
@@ -144,7 +155,10 @@ window.systemEnhancements = {
 				//points this row costs RIGHT NOW, and what one more level would add
 				price: self.priceFor(offer, count),
 				nextPrice: self.priceForLevel(offer, count),
-				note: self.groupNote(offers, offer[0])
+				note: self.groupNote(offers, offer[0]),
+				officer: officer,
+				//why a placed officer may not be bought here now (his ship cap, another officer on this weapon...)
+				blocked: (officer && count < 1 && window.officers) ? officers.placedBlock(ship, offer[4], offer[0]) : null
 			};
 		});
 	},
@@ -217,6 +231,24 @@ window.systemEnhancements = {
 		return total;
 	},
 
+	/* The bucket split for the fleet list: what the REFITS cost (the "System Enhancements (n)" line), and the
+	   placed officers' rows, each with a line of its own. pointCostSysEnh holds both. */
+	refitCost: function refitCost(ship) {
+		var self = this;
+		var total = 0;
+		this.rows(ship).forEach(function (row) {
+			if ((parseInt(row[2], 10) || 0) > 0 && !self.isOfficer(row[0])) total += parseFloat(row[4]) || 0;
+		});
+		return total;
+	},
+
+	officerRows: function officerRows(ship) {
+		var self = this;
+		return this.rows(ship).filter(function (row) {
+			return (parseInt(row[2], 10) || 0) > 0 && self.isOfficer(row[0]);
+		});
+	},
+
 	/* How many purchased ROWS this ship carries. Used only as a "has it got any?" test - the
 	   summary line counts SYSTEMS, see systemsEnhanced(). */
 	count: function count(ship) {
@@ -234,10 +266,12 @@ window.systemEnhancements = {
 	   summary drift away from the badges for exactly the ships that had the most going on.
 	   ⚠️ MIRROR PAIR with the same count in Enhancements::setSystemEnhancements (PHP). */
 	systemsEnhanced: function systemsEnhanced(ship) {
+		var self = this;
 		var seen = {};
 		var n = 0;
 		this.rows(ship).forEach(function (row) {
 			if ((parseInt(row[2], 10) || 0) < 1) return;
+			if (self.isOfficer(row[0])) return; //a placed officer is no refit (Stage 8)
 			var id = parseInt(row[6], 10);
 			if (seen[id]) return;
 			seen[id] = true;
@@ -266,6 +300,7 @@ window.systemEnhancements = {
 		return rows.some(function (row) {
 			if (parseInt(row[6], 10) !== id) return false;
 			if ((parseInt(row[2], 10) || 0) < 1) return false;
+			if (self.isOfficer(row[0])) return false; //a placed officer wears the insignia, not the star (D11)
 			if (!row[7]) return true;   //older rows carry no name - fall through on the id alone
 			if (system === undefined) system = self.systemById(ship, id) || false;
 			return system && String(system.name) === String(row[7]);
@@ -288,6 +323,11 @@ window.systemEnhancements = {
 
 		var rows = this.rows(ship);
 		var id = parseInt(systemid, 10);
+
+		//a placed officer past his ship cap, onto a weapon that already hosts one, or already posted at the C&C:
+		//refused, the count left as it was (the menu row says why - officers.placedBlock)
+		var had = this.taken(ship, id, enhID);
+		if (n > had && this.isOfficer(enhID) && window.officers && officers.placedBlock(ship, id, enhID)) return had;
 
 		/* One RANK per (system, group) - §9.2. Buying a row removes the same group's rows of another
 		   rank on the same system (an ELINT module removes both generators, and the other way round),
@@ -799,9 +839,10 @@ window.systemEnhancements = {
 	/* One sentence naming what went, for confirm.warning. */
 	describeRemoved: function describeRemoved(removed) {
 		if (!removed || !removed.length) return '';
+		var self = this;
 		return removed.map(function (r) {
 			return r.systemName + ' #' + r.systemid + ' was destroyed; its ' + r.label
-				+ ' refit (' + r.points + ' pts) has been removed.';
+				+ (self.isOfficer(r.enhID) ? '' : ' refit') + ' (' + r.points + ' pts) has been removed.';
 		}).join(' ');
 	},
 

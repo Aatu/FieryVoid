@@ -14,6 +14,9 @@ import {
  *   │ Gunsights            [-] [ 1 ] [+]   12p │
  *   │ Hardened Armour      [-] [ 0 ] [+]   18p │
  *   │                          Refits: 30 pts  │
+ *   │ OFFICERS ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄ │   placed officers (OFFICERS_PLAN.md Stage 8)
+ *   │ Expert Gunner        [-] [ 1 ] [+]   93p │
+ *   │                        Officers: 93 pts  │
  *
  * ⭐ This is a RENDERER, not a decision-maker. It takes `rows` already built by
  * systemEnhancements.menuRowsFor, so "what may this system have" stays in exactly one
@@ -34,6 +37,24 @@ const Total = styled.div`
     color: ${theme.colors.enhText};
     opacity: 0.85;
     user-select: none;
+`;
+
+/* OFFICERS_PLAN.md D10 / Stage 8: placed officers sit under their own sub-heading inside the gold section -
+   bought here, on the weapon they will serve in, but not refits (no ✦, their own fleet-list line). A quiet
+   divider rather than a second section bar: the points are the same bucket and the same gold. */
+const SubHeading = styled.div`
+    padding: 5px 8px 2px 10px;
+    font-family: ${theme.fonts.display};
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    color: ${theme.colors.enhTitle};
+    border-top: 1px solid rgba(195, 154, 82, 0.35);
+    user-select: none;
+    &:first-child {
+        border-top: none;
+    }
 `;
 
 const Price = styled.span`
@@ -100,10 +121,13 @@ class EnhancementRow extends Component {
                 + (row.count > 0 ? `, ${row.price} pts spent` : '')
                 + (spent ? '' : `; next level ${row.nextPrice} pts`)
             : `${row.label} - ${row.price || row.nextPrice} pts`)
-            + (row.note ? `\n${row.note}` : '');
+            + (row.note ? `\n${row.note}` : '')
+            //a placed officer who may not be bought here now says why (officers.placedBlock); set() refuses it too
+            + (row.blocked ? `\n${row.blocked}` : '');
+        const blocked = Boolean(row.blocked) && row.count < 1;
 
         return (
-            <MenuRow $gold title={title}>
+            <MenuRow $gold title={title} style={blocked ? { opacity: 0.55 } : undefined}>
                 {/* ⚠️ The container's max-width is load-bearing (see ApplyDamageMenu), and
                     "Advanced Defensive Targeting" is the longest label in the game. It
                     ellipsises with the full text on hover rather than widening the menu. */}
@@ -128,8 +152,9 @@ class EnhancementRow extends Component {
                 />
                 <ActionButton
                     $ink={SECTION_INK.enh}
-                    title={row.count >= row.max ? "Already at the maximum" : `Add a level (${row.nextPrice} pts)`}
-                    disabled={row.count >= row.max}
+                    title={blocked ? row.blocked
+                        : (row.count >= row.max ? "Already at the maximum" : `Add a level (${row.nextPrice} pts)`)}
+                    disabled={blocked || row.count >= row.max}
                     onClick={() => this.step(1)}
                 >+</ActionButton>
                 <Price
@@ -149,16 +174,26 @@ class SystemEnhancementsSection extends Component {
         const { rows, onChange } = this.props;
         if (!rows || rows.length === 0) return null;
 
-        const total = rows.reduce((sum, row) => sum + (row.count > 0 ? row.price : 0), 0);
+        //refits first, then the placed officers under their own sub-heading (OFFICERS_PLAN.md D10, Stage 8)
+        const refits = rows.filter(row => !row.officer);
+        const officers = rows.filter(row => row.officer);
+        const spent = list => list.reduce((sum, row) => sum + (row.count > 0 ? row.price : 0), 0);
+        const refitTotal = spent(refits);
+        const officerTotal = spent(officers);
 
         return (
             <React.Fragment>
                 <EnhSectionHeader>✦ ENHANCEMENTS</EnhSectionHeader>
                 <SectionBody $ink={SECTION_INK.enh}>
-                    {rows.map(row => (
+                    {refits.map(row => (
                         <EnhancementRow key={row.enhID} row={row} onChange={onChange} />
                     ))}
-                    {total > 0 && <Total>Refits: {total} pts</Total>}
+                    {refitTotal > 0 && <Total>Refits: {refitTotal} pts</Total>}
+                    {officers.length > 0 && <SubHeading>Officers</SubHeading>}
+                    {officers.map(row => (
+                        <EnhancementRow key={row.enhID} row={row} onChange={onChange} />
+                    ))}
+                    {officerTotal > 0 && <Total>Officers: {officerTotal} pts</Total>}
                 </SectionBody>
             </React.Fragment>
         );

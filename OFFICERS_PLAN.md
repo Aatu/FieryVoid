@@ -5,7 +5,9 @@ Status: **Stages 0–2a committed (`7800ab827`), Stage 3 committed (`1714c3651`)
 §9.8); fighter officer prices scaled by flight size + saved fleets re-priced committed (`75dc7d68d`, §9.9 - ⚠️
 db/savedOfficerPrice.sql before deploying); the Technician rebuilt from his full rules and the Scavenger's save
 widened (§9.10), and Stage 6, the Expert Navigator (§9.11), committed (`6dd2f740e`). Faction rules for officers (§9.12)
-and Stage 7, the Expert Jump Officer (§9.13), BUILT 2026-10-15, uncommitted.** Written against `dab951bf5`. The user
+and Stage 7, the Expert Jump Officer (§9.13), committed (`6996071b9`). Stage 8, the placed officers - Expert Gunner (core)
+and the weapon-mounted Matter Weapons Expert - and the lobby system menu opening beside the ship window (§9.14), BUILT
+2026-10-16, uncommitted.** Written against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
 a third Helmsman effect (−1 on the meteor impact chart) and play-tested Stage 1 in game 4457 (confirmed
@@ -21,9 +23,10 @@ ruled the three questions those raised - then put the Hyach Maneuvering Speciali
 ladder, applied after him (§9.11 follow-up). Later the same day they asked for faction availability and faction
 prices as one easily edited table, with a README how-to for custom factions - Geneticist Dilgar only, Matter Weapons
 Expert Grome only, the Scavenger at 15% for the Descari and 20% for Balosians, Raiders and Llort (§9.12) - and
-supplied the Jump Officer's rules text (Stage 7, §9.13). Each officer's own rules questions still only need ruling
-when that officer's stage starts. Next step: Stage 8 (placed officers: Gunner core, weapon-mounted Matter Weapons
-Expert).
+supplied the Jump Officer's rules text (Stage 7, §9.13). On 2026-10-16 they supplied the Expert Gunner's and the
+Matter Weapons Expert's full rules and ruled Stage 8's four questions (§6, §9.14), and asked for the lobby's system
+menu to stop covering the ship window. Each officer's own rules questions still only need ruling when that officer's
+stage starts. Next step: Stage 9 (Coordinator; Analyst).
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -197,8 +200,8 @@ Medium-sized job (§3.4).
 | **Expert Jump Officer** | Jump Drive, 5 % | Opening range +1; failure chance −20 points; arrival scatter −1 hex and −1 facing step, initiative penalty −20 | Three separate, well-localised hooks. The failure % is computed at three sites ([:9648](source/server/model/systems/baseSystems.php#L9648), [:10419](source/server/model/systems/baseSystems.php#L10419), [:10856](source/server/model/systems/baseSystems.php#L10856)) that should become one helper first. `JUMP_ACC` already shows how to publish a changed range ([Enhancements.php:3497](source/server/model/ships/Enhancements.php#L3497)). |
 | **Expert Analyst** | Sensors, 10 %, capitals and ELINT | A per-load "the viewer's team has a live Analyst" static that widens `isDisclosedToCurrentViewer()` (ammo types, hangar contents) and the officer payload | The masks exist. Per-viewer state has to be computed per load and tested per viewer. Two of his clauses are moot in FV: weapon arming is already sent to everyone ([weapon.php:453](source/server/model/weapons/weapon.php#L453)), and cargo contents are not modelled (`CargoBay` is a plain box). |
 | **Expert Coordinator** | flight, 50 % | A combat pivot costs 1; the −1 to-hit only from 180° | The cost lives in movement.js `doPivot` ([:1436](source/public/client/movement.js#L1436)) and the penalty in [weapon.php:1872](source/server/model/weapons/weapon.php#L1872) plus its client twin. "180°" needs net rotation counted, not pivot rows. |
-| **Expert Gunner, core** | a chosen weapon, 10 %, max 3 / 2 / 1 by size | +1 fire control; +1 per die through `Dice::$perDieBonus` | The effects are Easy. The cost is that he is the first **placed** officer: a registry entry, a ship-wide cap in sanitise and on the client, the menu sub-heading, and the insignia instead of the ✦. |
-| **Matter Weapons Expert, weapon** | a chosen weapon | Dies on any penetrating damage; loading −1 (next row) | A placed officer plus the "any damage" kill rule. |
+| **Expert Gunner, core** | a chosen weapon, 10 %, max 3 / 2 / 1 by size *(rules text 2026-10-16: 5% doubled off the Yolu, max 1 / 2 / 3 / 4 for medium / heavy / capital / enormous - §9.14)* | +1 fire control; +1 per die through `Dice::$perDieBonus` | The effects are Easy. The cost is that he is the first **placed** officer: a registry entry, a ship-wide cap in sanitise and on the client, the menu sub-heading, and the insignia instead of the ✦. *Built in Stage 8 (§9.14).* |
+| **Matter Weapons Expert, weapon** | a chosen weapon | Dies on any penetrating damage; loading −1 (next row) *(rules text: disabled by any damage, killed when destroyed - §9.14)* | A placed officer plus the "any damage" kill rule. *Built in Stage 8 (§9.14), loading still Stage 10.* |
 | **Loading time −1** (Gunner and the weapon-mounted MWE) | — | — | Medium-Hard. `loadingtime` is overwritten from the stored loading row on every load ([weapon.php:1189](source/server/model/weapons/weapon.php#L1189)) and from `loadingtimeArray` on every mode switch ([:3350](source/server/model/weapons/weapon.php#L3350)). The client reads it from the blueprint, because `stripForJson` does not send it. Losing the officer mid-charge changes whether the weapon is loaded. One build serves both officers. |
 
 ### 3.3 Hard
@@ -544,7 +547,7 @@ committed.
 | **5** | Repair pass: Engineer and Scavenger; the Scavenger's once-per-game save. **BUILT 2026-10-15** (§9.8) | Deterministic pick; the C&C d20; no repair of this turn's crits (if so ruled); no revival of a destroyed system; runs after Self Repair |
 | **6** | Navigator. **BUILT 2026-10-15** (§9.11) | Server and client thrust agree on every cost change; the ship window shows the new numbers ~~own-team only~~ (published to every viewer, §4.6) |
 | **7** | Jump Officer. **BUILT 2026-10-15** (§9.13), with the faction rules (§9.12) | Range +1 (with and without the Jump Accelerator); failure −20 at all three sites through one helper; arrival scatter and initiative |
-| **8** | Placed-officer framework; Gunner core; weapon-mounted Matter Weapons Expert (without loading) | The cap per size; a Gunner and Gunsights on one gun show ✦ and insignia side by side; "any damage" kills; the destroyed-host refund |
+| **8** | Placed-officer framework; Gunner core; weapon-mounted Matter Weapons Expert (without loading). **BUILT 2026-10-16** (§9.14) | The cap per size; a Gunner and Gunsights on one gun show ✦ and insignia side by side; "any damage" ~~kills~~ disables (his full rules text; destroyed kills); the destroyed-host refund |
 | **9** | Coordinator; Analyst | The Analyst's disclosure per viewer, and its harness `masking` check |
 | **10** | Loading time −1 | A mode switch keeps it; the officer lost mid-charge; the client's `isLoaded` agrees with the server |
 | **11+** | Hard officers, one at a time, each starting with its own short plan and ruling round | — |
@@ -585,8 +588,8 @@ committed.
 | Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? |
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? |
-| Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). **RULED 2026-10-15: Grome Autocracy only** (§9.12); the Matter-weapon hull test is kept beside it. |
-| Gunner | Size caps for LCVs and bases? Which weapons are eligible: any with fire control, ballistics too? Does he stack with Gunsights? |
+| Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). **RULED 2026-10-15: Grome Autocracy only** (§9.12); the Matter-weapon hull test is kept beside it. **Rules text and rulings 2026-10-16 (§9.14):** "moved into one specific weapon instead of his normal station" - **one or the other, never both**; that weapon gets the +1 / +1 "but no others do", and its rate of fire +1 (Stage 10); "disabled if the weapon takes any damage at all (after armor), and automatically killed if the weapon is destroyed" - **and the ordinary kill roll too**. |
+| Gunner | Size caps for LCVs and bases? Which weapons are eligible: any with fire control, ballistics too? Does he stack with Gunsights? **Rules text and rulings 2026-10-16 (§9.14):** +1 to hit (not EW) and +1 per die capped at the face, always; 5% of the base cost, doubled on non-Yolu ships; at most 1 on a medium ship or smaller, 2 heavy, 3 capital, 4 enormous; **any weapon Gunsights may be bought for** (ballistics included), stacking with Gunsights and with Elite Crew; "does not combine any to-hit or damage bonuses with those of other elite officers" - **on his weapon his own replace the Matter Weapons Expert's**. Once-per-scenario rate of fire, piercing mode and +3 called shot: not combinable, Hard (§3.3), not built; moving between weapons: §8. |
 | Fighter officers | Post = the first craft? A craft has no d20 critical roll (its test is a d10 dropout), so: no kill roll at all, or a d20 + damage roll on any damage to his craft, 20+ kills? (Default: none; he is lost with his craft.) Does he go with that craft on a split-launch? Missileer's "+5 OB": is that +1 OB (5 %)? Evader: always on, or toggled like jinking? Coordinator's "180°+" = three combat pivots in one turn? **RULED 2026-10-11:** the post is the first craft; he is lost **with his craft** (destroyed or dropped out), with **no kill roll**; a dock, a partial dock or a split launch never loses him, and he **stays on the flight row he was bought on** (a "- Split" row never carries him). Missileer: **+1 OB** on a launch that gets the flight's OB, priced **half a craft once, plus 1 per missile the whole flight can carry**. Evader: **always on**. Expert Motivator: **a full officer** (one per flight, lost with his craft, hidden), under his old id, effect and price. Coordinator: Stage 9. **RE-RULED 2026-10-11 (round 2, §9.7):** a **remotely controlled** unit (`$remoteControl`, the Orieni Hunter-Killers) carries no officer of any kind - "they have no pilots". An officer's abilities apply only to the part of the flight that holds his fighter, so when the flight splits **he follows his fighter**: the new row gets him, posted in its first craft, and his cost; the old row loses him from the next turn. The Evader's −1 OB also lowering mine detection is accepted. |
 
 ---
@@ -1541,3 +1544,115 @@ rebuilt; no new class, autoload unchanged.
    him aboard. Worth a play test (Initial Orders declaration at 5 hexes; Maintain still offered on the fifth turn).
 2. The −1 scatter shift and the facing cancel are visible to the opponent only as where and how the doorway formed - the
    log quotes the modified roll, as it does for every other modifier.
+
+### 9.14 Stage 8: placed officers - Expert Gunner (core) and the weapon-mounted Matter Weapons Expert (2026-10-16)
+
+**Rules text (user, 2026-10-16).** Expert Gunner (League-2, Yolu): assigned to a specific weapon; +1 to hit, "not EW",
+always; +1 damage per die, never above the die's highest roll, always; the weapon's rate of fire +1 turn (never better
+than once a turn), piercing mode even where not normally allowed (no penalty where it is), and a called shot at +3 -
+each **once per scenario**, none combinable with another; "does not combine any to-hit or damage bonuses with those of
+other elite officers"; 5% of the base cost, doubled on non-Yolu ships; at most 1 on a medium ship or smaller, 2 on a
+heavy, 3 on a capital, 4 on an enormous unit; may move between weapons by the officer movement rules. Matter Weapons
+Expert: +1 to hit and damage with all Matter weapons (part of the fire control, cumulative with an improved gunsight);
+may instead be moved into one specific weapon, which alone gets the bonus, plus its rate of fire +1 (never better than
+once a turn); there he is "disabled if the weapon takes any damage at all (after armor), and automatically killed if
+the weapon is destroyed"; 10%, C&C or a Matter weapon, Grome only.
+
+**Rulings (user, 2026-10-16, asked before building):** (1) a Gunner on a Matter weapon the C&C expert also covers: **the
+Gunner's bonuses replace the expert's on that weapon** (to-hit +1 either way; +1 per die instead of +1 flat); (2) the
+Matter Weapons Expert is **one officer with two posts - C&C or a weapon, never both**; (3) the Gunner may take **any
+weapon Gunsights may be bought for**, ballistics included, stacking with Gunsights and with Elite Crew's own +1 per die;
+(4) the weapon-mounted expert **also makes the ordinary kill roll** (20+ killed) on top of his own text.
+
+Built with defaults, stated here: **Stage 8 scope as the plan set it** - the Gunner's once-per-scenario abilities (Hard,
+§3.3) and both officers' rate of fire (Stage 10, loading time) are not built, and an officer cannot change weapons in
+game (§8: lobby only). **A weapon hosts one placed officer** (a Gunner and the weapon-mounted expert on one gun would
+waste one of them under ruling 1). Size caps: shipSizeClass 0 (LCV) and 1 give 1, 2 gives 2, 3 gives 3, `$Enormous`
+gives 4 (FV's size class 4 is not implemented) - so an enormous starbase gets 4. A weapon whose damage is not rolled on
+dice gains no Gunner damage (the rule is per die). The weapon-mounted expert's pre-battle damage that does not destroy
+his gun disables him from the start (any damage); one that destroys it removes and refunds him (D11, as any per-system row).
+
+**Files.** Server: `Officers.php` (registry `OFF_GUN` / `OFF_MWEW` with the new keys `placed`, `hosts`, `shipLimit`,
+`sameAs`, `anyDamage`; `$factionRules` OFF_GUN Yolu 5; `rulesId` - a sameAs officer reads his self's faction line;
+`pickPlacedPosts`, `placedRows`, `keepPlacedRows` (THE rule), `placedLimit`, `gunnerLimit`, `mayHost`; `firstDamagedTurn`
+and the anyDamage branch in `apply`; `applyGunner`, `gunnerDieBonus`, `applyWeaponMatterExpert`, `raiseMatterModes`,
+`servesOn`; `matterDamageBonus($ship, $weapon)` and `applyMatterExpert` skip a Gunner's gun), `Enhancements.php`
+(per-system registry entries with `officer`; `isSystemEnhancementOfficer`, `systemEnhancementOffered`; the offer's 6th
+slot; `sysEnhEligibleOfficer*` / `sysEnhPriceOfficer*`; the summary count skips officers; `sanitisePlacedOfficers`),
+`weapon.php` (`getFinalDamage` adds `gunnerDieBonus`; `getBonusDamage` passes the weapon). Client: `officers.js` (the
+two registry rows; `placedRows`, `placedLimit`, `placedEntries` - the derived track 2 - `isPostDamaged`, `placedBlock`,
+`shipLevelBlock`, `systemById`; `displayFireControl` for both; `stateText`'s pre-battle wording for anyDamage),
+`systemEnhancements.js` (labels, `isOfficer`, the star / count skip officers, `refitCost`, `officerRows`, menu rows carry
+`officer` and `blocked`, `set()` refuses a blocked buy, `describeRemoved` wording), `confirm.js` (`officerBlock` on a
+ship officer row placed in a weapon, its note, `officerBlocked`), `gamelobby.js` (fleet-list lines; the menu's
+`avoidBox`), React `SystemEnhancementsSection.js` (Officers sub-heading, their total, a refused row's disabled + and
+reason), `SystemInfoMenu.js` + new `helpers/besideWindow.js`, `ShipWindow.js` (`data-ship-window`). Docs: About Officers
+(placing an officer, the refund), the Matter Weapons Expert card (the weapon post), a new Expert Gunner card. Statics and
+bundles rebuilt; no new PHP class, autoload unchanged.
+
+**As built:**
+- **Two tracks, one list (D1).** A placed officer is a per-system row (`tac_sys_enhancements`, `tac_saved_sysenh`), so
+  D13's name check, saved-fleet re-validation and re-pricing, and the D11 destroyed-host refund came free. Everything that
+  makes him an officer lives in `Officers.php`: `pickPosts` resolves the rows into `$ship->officers` (after the ship-level
+  officers) and every effect, the insignia, the tooltip and the payload read that list, as before. The per-system
+  registry's `officer` slot only keeps him off the ✦ and the "System Enhancements (n)" count, and has no `apply` (his
+  effects need to know whether he serves, which only `Officers::apply` knows).
+- ⭐ **`Officers::keepPlacedRows` is THE placement rule** - registry order, then system id: a system hosts one, no officer
+  past his ship cap. The sanitiser (buy, save, reload - with a notice per dropped row) and the load both call it; the
+  lobby's `officers.placedEntries` mirrors it. The **sameAs** rule (the C&C expert wins over a weapon row) is checked at
+  load and in the lobby, not in the sanitiser (which sees only per-system rows).
+- **The cap reaches the lobby as data**: the officer offer tuple carries a 6th slot, `Officers::placedLimit`, so
+  `systemEnhancements.set()` refuses past it with no client copy of the size rule. Price = `Officers::rowPrice` (pct of
+  the hull, whichever weapon): Omega 93, Yolu Aluin 55 (5%), Grome Trokan 90.
+- **Effects.** Gunner: +1 on every non-null fire control of every mode (`fireControlArray` and the live one, `isModified`
+  sends both to everyone, as Gunsights); +1 per die beside Elite Crew's in `Dice::$perDieBonus` (a heavy laser's 10/9/3/1
+  reads 26 against 23). Weapon expert: the C&C rule on his gun's Matter modes. The C&C expert skips a gun a serving
+  Gunner holds (fire control and damage), so it comes back when the Gunner falls.
+- **Out of action.** Gunner: the ordinary disabled / killed. Weapon expert (`anyDamage`): disabled from the first damage
+  through armour, killed when the gun falls (its boxes or its block; a hit that does both is a kill), and the kill roll.
+- **UI.** The menu's gold section lists refits, then an OFFICERS sub-heading with the officer rows and their own total; a
+  refused row is dimmed, its + disabled, the reason on hover ("This ship may carry 2 Expert Gunners (already on ...)",
+  "This weapon already hosts the Expert Gunner", "The Matter Weapons Expert is posted at the C&C ..."). The buy and edit
+  dialogs refuse the C&C expert while he is placed in a weapon, with that line in the Officers section. The fleet list
+  shows "System Enhancements (n)" for refits only and a line per placed officer.
+- **The menu beside the window (user request 2026-10-16).** `helpers/besideWindow`: the lobby passes the ship window's
+  rectangle (`closest('[data-ship-window]')`), and the menu opens 8px off the window on its roomier side, level with the
+  clicked icon (top on its top in the upper half, bottom on its bottom in the lower), never nearer than 8px to the screen
+  edge; with no side 300px wide (a phone, a full-screen window) it falls back to the old at-icon placement. game.php
+  passes no rectangle and is unchanged; the lobby's fighter / mine damage menus and the hover tooltip are unchanged.
+
+**Measured.** Statics +414,859 B (+0.65%; Earth Alliance +0.61%): 17,107 Gunner offers on 1,802 hulls and 165
+weapon-expert offers on 11 Grome hulls, each 6 slots.
+
+**Verified.**
+- `officersHarness.php` **583 / 0** (518 with `--no-db`; 81 new): the two registries agree; offers (exactly the Gunsights
+  weapons; prices and caps on Omega, Aluin, Hastan, Falaren, GromeMorgatAM, Altarian, lupaEscort; the expert on the Grome
+  Matter guns only, and on a mixed Altarian flown Grome its Matter Cannons only; none for OSATs, a flight, a hull opting
+  out); posts (D13, not offered, count 0, a missing id; the cap's lowest ids; one per gun; C&C wins; Centauri refused);
+  the sanitiser (three of four kept at 93, the fourth named; one per gun; the D11 removal); the summary line; the
+  Gunner's fire control (every mode, +2 with Gunsights, a mode switch), the die bonus through the real `getFinalDamage`
+  (+3, +2 per die with Elite Crew, the gate, the static restored), disabled, the kill roll's note on the gun, the payload
+  per viewer; the weapon expert (Matter modes, damage, "no others do", the Gunner replacing the C&C expert and the
+  expert's return when the Gunner is killed, every anyDamage state incl. pre-battle); a REAL load of a stored Gunner row
+  (G'Quan, game 4472) and a REAL save / reload, both rolled back. Mutation-tested: **29 breaks, all caught** (the first
+  run missed two: a dead skip in `addOffers`, removed - `isEligible` refuses placed officers for both callers - and a Grome
+  hull whose guns were all Matter, so the mixed Altarian case was added).
+- `officersClientHarness.js` **192 / 0** (40 new): the derived list, insignia without a star (and with one beside
+  Gunsights), counts and costs, the caps and reasons, `set()` refusals, both officers' fire control, pre-battle, the
+  real `SystemEnhancementsSection`, `confirm.officerBlocked`, `besideWindow`. **27 breaks, all caught.**
+- `enhancementsDifferential.js` **575 cases / 0 differing** (49 new placed cases built off each hull's own offers: a
+  Gunner, with Gunsights, on every gun, the weapon expert, with the C&C one, both on one gun); posts are now compared as
+  a list per officer. **4 drift breaks, all caught.** `enhancementsHarness` 271 / 0 (the fingerprint covers ship-level
+  offers only, so per-system ones are the differential's and officersHarness's).
+- `fvbuild -Check`: autoload current, validator clean, replay **146 / 0**. Kirishiac refit harnesses 168 / 0 and 88 / 0.
+- **Standalone lobby driver** (`officersE2E/lobby8.mjs`, real bundles, no PHP / DB / session - planting sessions is
+  refused since 2026-10-15): 17 / 17 at 1600 and 1920 wide, 16 / 16 at 700 (the fallback). The real-site drivers
+  (`lobby*.mjs`, `docs.mjs`, `game.mjs`) were not run this stage.
+
+**Observations, not changed:**
+1. The officer rows ride `pointCostSysEnh`, the refit bucket, so a saved fleet's refit total and the "refits re-priced"
+   notices include them - correct points, a refit word.
+2. The Gunner is offered on every Gunsights weapon, so an offer per gun on 1,802 hulls is the static growth above; if it
+   matters, the cap slot could move to one ship-level field.
+3. Not tested in a real game: a Gunner's die bonus and fire control on a live shot, and the weapon expert disabled by a
+   live hit. Worth a play test (any Grome ship for the expert; any hull for the Gunner).

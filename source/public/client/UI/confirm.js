@@ -1208,6 +1208,9 @@ window.confirm = {
             //for, for enhRowCost - 0 and 6 otherwise
             selectAmountItem.data('perCraftExtra', window.officers ? officers.perCraftExtra(ship, enhID) : 0);
             selectAmountItem.data('standardFlight', window.officers ? officers.standardFlight(ship) : 6);
+            //a ship officer already placed in a weapon (the Matter Weapons Expert, OFFICERS_PLAN.md Stage 8): why he
+            //may not be bought here too, or null - read by officerBlocked, shown by addOfficerLimitNote
+            selectAmountItem.data('officerBlock', (window.officers && !enhCount) ? officers.shipLevelBlock(ship, enhID) : null);
             //Marked before the box is first written: a stepped enhancement shows the quantity its
             //level buys (and cannot be typed into); step 1 - every one but Extra Tendrils - leaves
             //the row as it was.
@@ -1242,22 +1245,34 @@ window.confirm = {
     OFFICER_LIMIT_NOTE: 'A flight may carry only one officer.',
 
     addOfficerLimitNote: function addOfficerLimitNote(e, ship) {
-        if (!ship || !ship.flight) return;
+        if (!ship) return;
         var body = confirm.buySectionBody(e, 'officers');
         if (!$(".buyRow", body).length) return;
-        $('<p class="buySectionNote buyOfficerNote"></p>').text(confirm.OFFICER_LIMIT_NOTE).prependTo(body);
+        if (ship.flight) {
+            $('<p class="buySectionNote buyOfficerNote"></p>').text(confirm.OFFICER_LIMIT_NOTE).prependTo(body);
+            return;
+        }
+        //a ship: one line per officer row refused because he is placed in a weapon already (officerBlock)
+        $(".selectAmount", body).each(function () {
+            var reason = $(this).data("officerBlock");
+            if (reason) $('<p class="buySectionNote buyOfficerNote"></p>').text(reason).prependTo(body);
+        });
     },
 
     /* Would raising this row's count put a SECOND officer on a flight? True for a fighter officer's row
-       while another officer row of the same dialog is already bought. */
+       while another officer row of the same dialog is already bought. And on a ship, for an officer row
+       carrying an officerBlock: he is placed in a weapon already (Stage 8, the Matter Weapons Expert). */
     officerBlocked: function officerBlocked(target) {
-        if (!window.officers || !officers.isFighterOfficer(target.data("enhID"))) return false;
+        if (!window.officers) return false;
         var dialog = target.closest(".confirm");
-        var taken = $(".selectAmount", dialog).filter(function () {
-            var other = $(this);
-            return this !== target[0] && officers.isOfficerId(other.data("enhID")) && (other.data("count") || 0) > 0;
-        });
-        if (!taken.length) return false;
+        if (!target.data("officerBlock")) {
+            if (!officers.isFighterOfficer(target.data("enhID"))) return false;
+            var taken = $(".selectAmount", dialog).filter(function () {
+                var other = $(this);
+                return this !== target[0] && officers.isOfficerId(other.data("enhID")) && (other.data("count") || 0) > 0;
+            });
+            if (!taken.length) return false;
+        }
         var note = $(".buyOfficerNote", dialog);
         //restart the flash: drop the class, force a reflow, add it back
         note.removeClass("is-flash");

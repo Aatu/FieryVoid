@@ -2,6 +2,7 @@ import * as React from "react";
 import styled from "styled-components"
 import SystemInfoButtons, { canDoAnything, hasStyledMenu } from "./SystemInfoButtons";
 import { Tooltip, TooltipHeader, TooltipEntry } from '../common'
+import besideWindow from '../helpers/besideWindow'
 
 const InfoHeader = styled(TooltipHeader)`
     font-size: 12px;
@@ -48,14 +49,15 @@ class SystemInfoMenu extends React.Component {
 
     render() {
 
-        const { ship, system, boundingBox } = this.props;
+        const { ship, system, boundingBox, avoidBox } = this.props;
 
         if (!canDoAnything(ship, system)) {
             return null;
         }
 
         return (
-            <SystemInfoTooltip position={getPosition(boundingBox)} opacity={hasStyledMenu(ship, system) ? 0.95 : 0.8}
+            <SystemInfoTooltip position={besideWindow(boundingBox, avoidBox, window.innerWidth, window.innerHeight) || getPosition(boundingBox)}
+                opacity={hasStyledMenu(ship, system) ? 0.95 : 0.8}
                 $bare={gamedata.gamephase === -2}>
                 <SystemInfoButtons {...this.props} />
             </SystemInfoTooltip>
@@ -63,6 +65,8 @@ class SystemInfoMenu extends React.Component {
     }
 }
 
+/* avoidBox: the ship window's rectangle, which the lobby passes so its menu opens beside the window rather
+   than over it (helpers/besideWindow); game.php passes none, and getPosition places it at the icon as before. */
 const getPosition = boundingBox => {
     const position = {};
 

@@ -1382,10 +1382,10 @@ public function getFullStartLoading()
 				}		
 			}
 		}	
-		//Matter Weapons Expert (OFFICERS_PLAN.md Stage 3): +1 on a shot in a Matter mode - weaponClass is
-		//the fired mode's by now. Behind the static, so an ordinary game pays one read per shot.
+		//Matter Weapons Expert (OFFICERS_PLAN.md Stage 3; in this weapon, Stage 8): +1 on a shot in a Matter
+		//mode - weaponClass is the fired mode's by now. Behind the static, so an ordinary game pays one read per shot.
 		if (TacGamedata::$officersPresent && $this->weaponClass === 'Matter' && $ship instanceof BaseShip){
-			$bonusDamage += Officers::matterDamageBonus($ship);
+			$bonusDamage += Officers::matterDamageBonus($ship, $this);
 		}
 		return $bonusDamage;
     }   
@@ -3132,6 +3132,9 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
            that fired, so the two must agree. Flights and mines answer 0 - ELITE_CREW is only ever
            offered to ships (Enhancements::setEnhancementOptionsShip). */
         $dieBonus = ($shooter instanceof BaseShip) ? $shooter->getCrewDieDamageBonus() : 0;
+        /* An Expert Gunner in THIS weapon (OFFICERS_PLAN.md Stage 8): +1 per die more, on top of Elite Crew's
+           (not an officer, so they stack) - each die still capped at its face. Behind the static. */
+        if (TacGamedata::$officersPresent && $shooter instanceof BaseShip) $dieBonus += Officers::gunnerDieBonus($shooter, $this);
         $previousDieBonus = Dice::$perDieBonus;
         Dice::$perDieBonus = $dieBonus;
         try {

@@ -855,8 +855,11 @@
   <ul>
     <li>Officers are bought with the unit in Fleet Selection, in the <b>Officers</b> section at the bottom of its buy
       window.</li>
-    <li>A ship may carry several officers, but only one of each type. A fighter flight may carry only <b>one officer in
-      total</b>: once one is bought, the buy window refuses a second.</li>
+    <li>A few officers serve in a <b>weapon you choose</b> - the Expert Gunner, and the Matter Weapons Expert if you move him
+      out of the C&amp;C. Buy one of these once the ship is in your fleet: click the weapon in the ship window and add him
+      under <b>Officers</b> in its Enhancements menu. A weapon holds one such officer.</li>
+    <li>A ship may carry several officers, but only one of each type - except where a card gives a higher limit. A fighter
+      flight may carry only <b>one officer in total</b>: once one is bought, the buy window refuses a second.</li>
     <li>A ship officer's price is a percentage of the ship's base cost, rounded up. A fighter officer's is a percentage of
       one fighter's cost - paid once for the whole flight, or for every fighter in it, as each card says.</li>
     <li>A unit is only offered an officer whose post it has - no C&amp;C, no Helmsman. Ancient units, OSATs, MicroSATs,
@@ -875,7 +878,8 @@
       20 or more, modifiers included, kills them. The roll is made even when the damage destroys the system.</li>
     <li>Either way, the officer still serves for the rest of the turn it happens, and is gone from the next turn.</li>
     <li>An officer whose post is destroyed by pre-battle damage never serves at all. Fleet Selection warns you, and you can
-      remove the officer by editing the ship.</li>
+      remove the officer by editing the ship. An officer you placed in a weapon is removed and refunded if pre-battle
+      damage destroys that weapon.</li>
     <li><b>Fighter officers</b> fly in the flight's first fighter and are lost only with it: when it is destroyed or drops
       out. There is no kill roll, and docking never loses them.</li>
     <li>If the flight splits in two - part of it launched or docked on its own, or escaping a lost hangar as a separate
@@ -894,7 +898,7 @@
       fighter flight's box names its one officer instead.</li>
     <li>Your opponent sees none of these until the game is over. Some effects do show, though, because they change numbers
       everyone can read: a Helmsman's or a Dogfighter's initiative, a Geneticist's profiles, a Technician's reactor power,
-      a Matter Weapons Expert's fire control, a Navigator's turn, pivot, roll and accel/decel costs, a Jump Officer's jump
+      a Matter Weapons Expert's or an Expert Gunner's fire control, a Navigator's turn, pivot, roll and accel/decel costs, a Jump Officer's jump
       range, how long his jump point stays open and his arrival initiative penalty, an Evader's offensive bonus, and the
       criticals and damage an Engineer or Scavenger repairs. The opponent sees the number, not who is behind it.</li>
   </ul>
@@ -994,17 +998,49 @@
       <h4>Matter Weapons Expert</h4>
       <dl class="fvd-spec">
         <dt>Post</dt>
-        <dd>C&amp;C</dd>
+        <dd>C&amp;C - or one Matter weapon of your choice, instead.</dd>
         <dt>Effect</dt>
         <dd><ul>
           <li>+1 fire control (+5%) for every Matter weapon on the ship, against every target size it can engage.</li>
           <li>+1 damage on every Matter weapon shot.</li>
           <li>On a weapon with several firing modes, only its Matter modes benefit.</li>
+          <li><b>In a weapon:</b> the same bonuses, but for that weapon only. Bought from the weapon's own Enhancements menu,
+            under Officers.</li>
         </ul></dd>
         <dt>Cost</dt>
-        <dd>10% of the ship's base cost.</dd>
+        <dd>10% of the ship's base cost, wherever he serves.</dd>
         <dt>Limit</dt>
-        <dd>1 per ship. Grome Autocracy only, and only on ships carrying at least one Matter weapon.</dd>
+        <dd>1 per ship - at the C&amp;C or in a weapon, never both. Grome Autocracy only, and only on ships carrying at least
+          one Matter weapon.</dd>
+        <dt>Notes</dt>
+        <dd>In a weapon he works from deep inside its machinery: he is <b>disabled</b> as soon as the weapon takes any
+          damage through its armour, and <b>killed</b> if it is destroyed (or by the usual kill roll). Best used early in a
+          battle, or on a well-protected weapon. On a weapon an Expert Gunner serves in, the Gunner's bonuses apply instead
+          of his. The rules' improved rate of fire for the weapon he sits in is not in the game yet.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Gunner</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>One weapon of your choice - any weapon Gunsights can be bought for. Bought from the weapon's own Enhancements menu,
+          under Officers.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>+1 fire control (+5%) for that weapon, in every firing mode. This is not EW, so nothing that reduces EW
+            reduces it.</li>
+          <li>+1 damage on every damage die the weapon rolls, but no die above its maximum (a 10 on a d10 stays 10).</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>10% of the ship's base cost (5% for the Yolu Confederation).</dd>
+        <dt>Limit</dt>
+        <dd>1 on a medium ship or smaller, 2 on a heavy combat vessel, 3 on a capital ship, 4 on an enormous unit. One
+          per weapon.</dd>
+        <dt>Notes</dt>
+        <dd>Stacks with Gunsights (+2 fire control with both) and with Elite Crew's own +1 per die. It does not combine with
+          a Matter Weapons Expert: on the Gunner's weapon only the Gunner's bonuses count. A weapon whose damage is not
+          rolled on dice gains no extra damage. The rules' once-per-battle abilities (faster reload, piercing mode, a +3
+          called shot) are not in the game yet, and a Gunner cannot change weapons during a battle.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">

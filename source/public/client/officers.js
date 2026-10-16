@@ -18,8 +18,8 @@ window.officers = {
 
 	ID_PREFIX: 'OFF_',
 
-	/* ⚠️ MIRROR of Officers::$registry (PHP): ids, labels, posts, `needs`, `flight` and `perMissile`, in
-	   the SAME order - the order every list here is shown in. `summary` is the effect line the System
+	/* ⚠️ MIRROR of Officers::$registry (PHP): ids, labels, posts, `needs`, `flight`, `perMissile` and the placed
+	   officers' `placed`, `sameAs` and `anyDamage`, in the SAME order - the order every list here is shown in. `summary` is the effect line the System
 	   Info tooltip prints (D12). `stats` is what the officer adds to ship fields while he serves
 	   (Officers::apply), which the lobby adds at READ time (displayStat); `adjust` names a method that
 	   rewrites a field the same way when the change is not an addition (the Navigator's costs); his other
@@ -49,6 +49,13 @@ window.officers = {
 			summary: 'Turn cost one level lower, pivot and roll cost -1, accel/decel cost -25%' },
 		{ id: 'OFF_JUMP', label: 'Expert Jump Officer', post: 'jump',
 			summary: 'Jump points opened 1 hex further and held 1 turn longer; jump failure chance -20%; exits scatter less (-1 on the chart, 60 degrees of facing shift cancelled); arrival initiative penalty -20' },
+		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
+		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
+		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon. */
+		{ id: 'OFF_GUN', label: 'Expert Gunner', placed: true,
+			summary: '+1 fire control and +1 damage per die (no die above its maximum) for this weapon' },
+		{ id: 'OFF_MWEW', label: 'Matter Weapons Expert', placed: true, sameAs: 'OFF_MWE', anyDamage: true,
+			summary: '+1 fire control and +1 damage for this Matter weapon; disabled by any damage to it, killed if it is destroyed' },
 		{ id: 'OFF_DOG', label: 'Expert Dogfighter', post: 'craft', flight: true, stats: { iniativebonus: 5 },
 			summary: '+5 initiative' },
 		{ id: 'OFF_MSL', label: 'Expert Missileer', post: 'craft', flight: true, perMissile: 1, needs: 'missiles',
@@ -238,6 +245,7 @@ window.officers = {
 		var list = [];
 		for (var i = 0; i < this.REGISTRY.length; i++) {
 			var officer = this.REGISTRY[i];
+			if (officer.placed) continue; //track 2: placedEntries below
 			if (Boolean(officer.flight) !== Boolean(ship.flight)) continue;
 			if (!this.isBought(ship, officer.id)) continue;
 			var post = this.findPost(ship, officer.post);
@@ -250,7 +258,136 @@ window.officers = {
 			list.push(entry);
 			if (ship.flight) break;
 		}
+		if (!ship.flight) list = list.concat(this.placedEntries(ship, list));
 		return list;
+	},
+
+	/* ------------------------------------------------------------------ placed officers (Stage 8) */
+
+	isPlacedOfficer: function isPlacedOfficer(enhID) {
+		var officer = this.get(enhID);
+		return Boolean(officer && officer.placed);
+	},
+
+	//the bought per-system rows holding a placed officer: [enhID, label, count, limit, total, step, systemid, sysname]
+	placedRows: function placedRows(ship) {
+		var self = this;
+		var rows = (ship && Array.isArray(ship.systemEnhancements)) ? ship.systemEnhancements : [];
+		return rows.filter(function (row) {
+			return Array.isArray(row) && (parseInt(row[2], 10) || 0) > 0 && self.isPlacedOfficer(row[0]);
+		});
+	},
+
+	//⚠️ own lookup, not shipManager.systems.getSystem: a lobby flight's systems have holes (systemEnhancements.systemById)
+	systemById: function systemById(ship, systemid) {
+		var systems = this.systemsOf(ship);
+		var id = parseInt(systemid, 10);
+		for (var i = 0; i < systems.length; i++) {
+			if (systems[i] && parseInt(systems[i].id, 10) === id) return systems[i];
+		}
+		return null;
+	},
+
+	/* How many of this placed officer one ship may carry: the 6th slot of his per-system offer, which the
+	   server fills from Officers::placedLimit - so the size caps have no client copy. 1 without an offer. */
+	placedLimit: function placedLimit(ship, enhID) {
+		var offers = (ship && Array.isArray(ship.systemEnhancementOffers)) ? ship.systemEnhancementOffers : [];
+		for (var i = 0; i < offers.length; i++) {
+			if (offers[i][0] === enhID && offers[i][5] !== undefined) return parseInt(offers[i][5], 10) || 1;
+		}
+		return 1;
+	},
+
+	/* The lobby's derived track 2: one officer per bought row, posted in its system - after D13's name check,
+	   with his ship-level self winning (sameAs), a system hosting ONE, and no officer past his ship cap
+	   (registry order, then system id). Pre-battle damage that destroys his weapon refunds him (D11, the row
+	   is gone); damage that does not still disables the Matter expert from the start (anyDamage).
+	   ⚠️ MIRROR PAIR with Officers::pickPlacedPosts / ::keepPlacedRows (PHP). */
+	placedEntries: function placedEntries(ship, shipLevel) {
+		var rows = this.placedRows(ship);
+		if (!rows.length) return [];
+		var self = this;
+		var aboard = {};
+		(shipLevel || []).forEach(function (entry) { aboard[entry.id] = true; });
+		var hosted = {}, count = {}, out = [];
+		this.REGISTRY.forEach(function (officer) {
+			if (!officer.placed || (officer.sameAs && aboard[officer.sameAs])) return;
+			rows.filter(function (row) { return row[0] === officer.id; })
+				.map(function (row) { return { row: row, system: self.systemById(ship, row[6]) }; })
+				.filter(function (c) { return c.system && (!c.row[7] || String(c.system.name) === String(c.row[7])); })
+				.sort(function (a, b) { return parseInt(a.system.id, 10) - parseInt(b.system.id, 10); })
+				.forEach(function (c) {
+					var id = parseInt(c.system.id, 10);
+					if (hosted[id] || (count[officer.id] || 0) >= self.placedLimit(ship, officer.id)) return;
+					hosted[id] = true;
+					count[officer.id] = (count[officer.id] || 0) + 1;
+					var entry = { id: officer.id, post: c.system.id };
+					if (officer.anyDamage ? self.isPostDamaged(ship, c.system) : self.isPostDestroyed(ship, c.system)) {
+						entry.out = 0;
+						entry.how = 'disabled';
+					}
+					out.push(entry);
+				});
+		});
+		return out;
+	},
+
+	//any pre-battle damage on this system - the lobby's only damage (battleDamage's payload, else the system's rows)
+	isPostDamaged: function isPostDamaged(ship, system) {
+		if (this.isPostDestroyed(ship, system)) return true;
+		if (window.battleDamage && typeof battleDamage.getEntry === 'function') {
+			var entry = battleDamage.getEntry(ship, battleDamage.KIND_SYSTEM, system.id);
+			if (entry && ((parseInt(entry.d, 10) || 0) > 0 || entry.k)) return true;
+		}
+		return Array.isArray(system.damage) && system.damage.some(function (d) {
+			return d && (Number(d.damage) || 0) > (Number(d.armour) || 0);
+		});
+	},
+
+	/* Why this placed officer may not be bought on this system right now - a sentence for the menu row's
+	   hover - or null. systemEnhancements.set() refuses while there is one; the server does not trust that
+	   (Officers::pickPlacedPosts, Enhancements::sanitisePlacedOfficers). */
+	placedBlock: function placedBlock(ship, systemid, enhID) {
+		var officer = this.get(enhID);
+		if (!ship || !officer || !officer.placed) return null;
+		if (officer.sameAs && Array.isArray(ship.enhancementOptions) && this.isBought(ship, officer.sameAs)) {
+			return 'The ' + this.label(officer.sameAs) + ' is posted at the C&C (bought in the Officers section). A ship carries him in one place: remove him there first.';
+		}
+		var self = this;
+		var id = parseInt(systemid, 10);
+		var elsewhere = [];
+		var reason = null;
+		this.placedRows(ship).forEach(function (row) {
+			var rowSystem = parseInt(row[6], 10);
+			if (rowSystem === id && row[0] !== enhID) reason = 'This weapon already hosts the ' + self.label(row[0]) + ': a weapon hosts one officer.';
+			if (rowSystem !== id && row[0] === enhID) elsewhere.push(row);
+		});
+		if (reason) return reason;
+		var cap = this.placedLimit(ship, enhID);
+		if (elsewhere.length >= cap) {
+			var where = elsewhere.map(function (row) {
+				var s = self.systemById(ship, row[6]);
+				return (s ? (s.displayName || s.name) : row[7]) + ' #' + row[6];
+			}).join(', ');
+			return 'This ship may carry ' + cap + ' ' + this.label(enhID) + (cap === 1 ? '' : 's') + ' (already on ' + where + ')'
+				+ (enhID === 'OFF_GUN' ? ' - 1 on a medium ship or smaller, 2 on a heavy, 3 on a capital, 4 on an enormous unit.' : '.');
+		}
+		return null;
+	},
+
+	/* The buy dialog's half: why a ship-level officer may not be bought because he is already placed in a
+	   weapon (sameAs) - or null. confirm.js refuses the row and shows this in the Officers section. */
+	shipLevelBlock: function shipLevelBlock(ship, enhID) {
+		var self = this;
+		var placed = this.REGISTRY.filter(function (o) { return o.placed && o.sameAs === enhID; });
+		for (var i = 0; i < placed.length; i++) {
+			var rows = this.placedRows(ship).filter(function (row) { return row[0] === placed[i].id; });
+			if (!rows.length) continue;
+			var s = this.systemById(ship, rows[0][6]);
+			return 'The ' + self.label(enhID) + ' is placed in ' + (s ? (s.displayName || s.name) : rows[0][7]) + ' #' + rows[0][6]
+				+ '. A ship carries him in one place: remove him there (that system\'s menu in the ship window) to post him at the C&C.';
+		}
+		return null;
 	},
 
 	//true when the list is the lobby's own derivation rather than something the server sent
@@ -308,7 +445,12 @@ window.officers = {
 	   serving Expert Scavenger has spent his once-per-game save: "(save used, turn 3)" (`used`, own team only). */
 	stateText: function stateText(entry) {
 		if (entry.out === undefined || entry.out === null) return entry.used ? '(save used, turn ' + entry.used + ')' : '';
-		if (parseInt(entry.out, 10) < 1) return '(post destroyed before battle - he will not serve)';
+		if (parseInt(entry.out, 10) < 1) {
+			var officer = this.get(entry.id);
+			//the weapon-mounted Matter Weapons Expert is out on ANY damage (anyDamage), not only a destroyed post
+			return officer && officer.anyDamage ? '(his weapon is damaged before battle - he will not serve)'
+				: '(post destroyed before battle - he will not serve)';
+		}
 		return '(' + (entry.how === 'killed' ? 'killed' : 'disabled') + ', turn ' + entry.out + ')';
 	},
 
@@ -520,18 +662,24 @@ window.officers = {
 		return 0;
 	},
 
-	/* Matter Weapons Expert, in the lobby: this weapon's fire control in its current mode, +1 on every
-	   non-null entry when it is a Matter mode and he serves (null = cannot target that size, and stays so).
-	   ⚠️ MIRROR PAIR with Officers::applyMatterExpert (PHP). */
+	/* This weapon's fire control in its current mode as the lobby shows it, +1 on every non-null entry (null =
+	   cannot target that size, and stays so) when:
+	     - an Expert Gunner serves IN it - every mode;
+	     - otherwise, in a Matter mode, the C&C Matter Weapons Expert serves, or the weapon-mounted one serves in
+	       it. A Gunner's +1 replaces the Matter expert's on his own weapon (user ruling 2026-10-16), never adds.
+	   Gunsights is already in system.fireControl (systemEnhancements.apply), so the two show stacked.
+	   ⚠️ MIRROR PAIR with Officers::applyGunner / applyMatterExpert / applyWeaponMatterExpert (PHP). */
 	displayFireControl: function displayFireControl(ship, system) {
 		var fc = system ? system.fireControl : null;
-		if (!Array.isArray(fc) || !this.isMatterWeapon(system) || !this.isMatterMode(system, system.firingMode)) return fc;
+		if (!Array.isArray(fc)) return fc;
 		var serving = this.servingDerived(ship);
-		for (var i = 0; i < serving.length; i++) {
-			if (serving[i].id !== 'OFF_MWE') continue;
-			return fc.map(function (v) { return (v === null || v === undefined) ? v : (parseInt(v, 10) || 0) + 1; });
-		}
-		return fc;
+		var on = function (id) {
+			return serving.some(function (entry) { return entry.id === id && String(entry.post) === String(system.id); });
+		};
+		var raised = on('OFF_GUN') || (this.isMatterWeapon(system) && this.isMatterMode(system, system.firingMode)
+			&& (on('OFF_MWEW') || serving.some(function (entry) { return entry.id === 'OFF_MWE'; })));
+		if (!raised) return fc;
+		return fc.map(function (v) { return (v === null || v === undefined) ? v : (parseInt(v, 10) || 0) + 1; });
 	},
 
 	/* Expert Jump Officer, in the lobby: the hexes he adds to THIS drive's range - 0 unless it is his post.

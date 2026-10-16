@@ -74,7 +74,9 @@ const FlightFighterArea = styled.div`
     max-width: ${FLIGHT_MAX_WIDTH}px;
 `;
 
-const ShipWindowContainer = styled.div`
+/* data-ship-window: the lobby finds the window an icon sits in with closest() to open its system menu beside
+   it, not over it (gamelobby.js shipWindowBox). */
+const ShipWindowContainer = styled.div.attrs({ 'data-ship-window': '' })`
     display: flex;
     flex-direction: column;
     position: absolute;

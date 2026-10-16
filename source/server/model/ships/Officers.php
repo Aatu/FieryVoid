@@ -22,13 +22,16 @@
    ⚠️ POST-side ships (Manager::getShipsFromJSON) never run onConstructed, so their list is empty:
    nothing in a phase's process() may ask about officers ([[arch_post_side_ship_reconstruction]]).
 
-   Track 1 only so far (fixed-post officers, ship-level rows): the Helmsman (Stage 1); the Scanner,
-   Technician, Geneticist and C&C Matter Weapons Expert (Stage 3); the fighter officers (Stage 4):
-   Dogfighter, Missileer, Evader and the Expert Motivator, which was a fighter enhancement until then
-   and keeps its old id; the Engineer and Scavenger (Stage 5: an end-of-turn repair pass, and the
-   Scavenger's once-per-game save, stored as one OffSaved note); the Navigator (Stage 6: the ship's
-   movement costs); and the Jump Officer (Stage 7: the jump drive's range, hold, failure chance, exit
-   scatter and arrival initiative). Placed officers (track 2, Stage 8) are not built yet.
+   Track 1 (fixed-post officers, ship-level rows): the Helmsman (Stage 1); the Scanner, Technician,
+   Geneticist and C&C Matter Weapons Expert (Stage 3); the fighter officers (Stage 4): Dogfighter,
+   Missileer, Evader and the Expert Motivator, which was a fighter enhancement until then and keeps its
+   old id; the Engineer and Scavenger (Stage 5: an end-of-turn repair pass, and the Scavenger's
+   once-per-game save, stored as one OffSaved note); the Navigator (Stage 6: the ship's movement costs);
+   and the Jump Officer (Stage 7: the jump drive's range, hold, failure chance, exit scatter and arrival
+   initiative).
+   Track 2 (Stage 8, PLACED officers): the Expert Gunner and the weapon-mounted Matter Weapons Expert,
+   whose post is the weapon the player picks - bought as per-system rows (tac_sys_enhancements) through
+   Enhancements::$systemEnhancementRegistry, and resolved into the same runtime list (pickPlacedPosts).
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -70,6 +73,9 @@ class Officers{
 		'OFF_MWE'  => array('only' => array('Grome Autocracy')),
 		'OFF_SCAV' => array('pct' => array('Descari Committees' => 15, 'Balosian Underdwellers' => 20, 'Raiders' => 20, 'Llort' => 20)),
 		'OFF_JUMP' => array('never' => array('Raiders', 'Belt Alliance')),
+		//"5% of the ship's base cost. On non-Yolu ships, the cost is doubled" - the registry's 10, and 5 here
+		'OFF_GUN'  => array('pct' => array('Yolu Confederation' => 5)),
+		//(the weapon-mounted Matter Weapons Expert is OFF_MWE at another post - `sameAs` - and reads OFF_MWE's line)
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -88,7 +94,16 @@ class Officers{
 	                 of ONE craft, for a standard flight; a flight of another size pays it scaled by its
 	                 craft count (flightPrice - user ruling 2026-10-15)
 	     perMissile  (optional) points added PER CRAFT for every missile one craft can carry, on top of
-	                 that (the Missileer) */
+	                 that (the Missileer)
+	   Placed officers (Stage 8) carry, instead of a post key:
+	     placed      true: the player picks his post, a weapon, in that system's own menu - a per-system row
+	                 (Enhancements::$systemEnhancementRegistry), never an enhancementOptions offer
+	     hosts       (optional) a further test the weapon must pass to host him (a method taking the system)
+	     shipLimit   (optional) the method answering how many one ship may carry (default 1, "one of each")
+	     sameAs      (optional) the ship-level officer he IS, at another post: his faction rules are that
+	                 officer's, and a ship carries one or the other, never both (user ruling 2026-10-16)
+	     anyDamage   (optional) true: DISABLED by any damage through armour to his post, KILLED when it is
+	                 destroyed - on top of the ordinary kill roll (user ruling 2026-10-16) */
 	private static $registry = array(
 		/* Expert Helmsman: +5 initiative (FV units, QX1), wins initiative ties, and -1 on the die he
 		   rolls on a meteor swarm's impact chart (user, 2026-10-10). The tie-break is
@@ -143,6 +158,29 @@ class Officers{
 		   cancelsFacingShift, arrivalPenaltyRelief). Not for Raiders or the Belt Alliance ($factionRules). */
 		'OFF_JUMP' => array('label' => 'Expert Jump Officer', 'post' => 'jump', 'pct' => 5, 'apply' => 'applyJumpOfficer'),
 
+		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
+		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
+		   the fighter officers (a flight is never offered one: per-system rows are ships only).
+		   One system hosts ONE placed officer (keepPlacedRows). */
+		/* Expert Gunner (rules text, user 2026-10-16), on any weapon Gunsights may be bought for (user
+		   ruling): +1 to hit - fire control, so not EW - and +1 damage per die, each die capped at its face
+		   (Weapon::getFinalDamage, beside Elite Crew's, with which it stacks). "Does not combine any to-hit or
+		   damage bonuses with those of other elite officers": on his weapon his own replace the Matter
+		   Weapons Expert's (user ruling 2026-10-16). 10%, 5% for the Yolu ($factionRules); at most 1 on a
+		   medium ship or smaller, 2 on a heavy, 3 on a capital, 4 on an enormous unit (gunnerLimit).
+		   NOT BUILT: his once-per-scenario rate of fire, piercing mode and +3 called shot (plan §3.3), and
+		   moving between weapons in game (§8 - officers are placed in the lobby only). */
+		'OFF_GUN'  => array('label' => 'Expert Gunner', 'placed' => true, 'pct' => 10, 'apply' => 'applyGunner',
+			'shipLimit' => 'gunnerLimit'),
+		/* Matter Weapons Expert, moved "into one specific weapon instead of his normal station": +1 fire
+		   control and +1 damage on THAT weapon's Matter modes only, the C&C variant's rule on one gun. The
+		   same officer as OFF_MWE (sameAs): Grome only, 10%, and never both (user ruling 2026-10-16). "Disabled
+		   if the weapon takes any damage at all (after armor), and automatically killed if the weapon is
+		   destroyed" (anyDamage), and the ordinary kill roll besides (user ruling). NOT BUILT: his rate of
+		   fire +1 (Stage 10, loading time). */
+		'OFF_MWEW' => array('label' => 'Matter Weapons Expert', 'placed' => true, 'pct' => 10, 'sameAs' => 'OFF_MWE',
+			'hosts' => 'isMatterWeapon', 'apply' => 'applyWeaponMatterExpert', 'anyDamage' => true),
+
 		/* FIGHTER OFFICERS (Stage 4). A flight carries ONE officer in total (D9), posted on its first
 		   craft. He is lost with that craft - destroyed, or dropped out - and never by a dock, a partial
 		   dock or a split launch: he stays on the flight row he was bought on, and a "- Split" row never
@@ -187,6 +225,16 @@ class Officers{
 		return !empty(self::$registry[$id]['flight']);
 	}
 
+	//a PLACED officer (Stage 8): bought as a per-system row, posted in that row's system
+	public static function isPlacedOfficer($id){
+		return !empty(self::$registry[$id]['placed']);
+	}
+
+	//the officer whose $factionRules line applies: his own, or the one he IS at another post (sameAs)
+	private static function rulesId($id){
+		return isset(self::$registry[$id]['sameAs']) ? self::$registry[$id]['sameAs'] : $id;
+	}
+
 	public static function getRegistry(){
 		return self::$registry;
 	}
@@ -201,6 +249,7 @@ class Officers{
 
 	//Does $factionRules let this unit's faction be offered him?
 	private static function factionAllows($ship, $id){
+		$id = self::rulesId($id);
 		if (!isset(self::$factionRules[$id])) return true;
 		$rule = self::$factionRules[$id];
 		$faction = (string)$ship->faction;
@@ -212,7 +261,8 @@ class Officers{
 	//His price in percent for this unit's faction: $factionRules' when it names one, else the registry's
 	public static function pctFor($ship, $id){
 		$faction = (string)$ship->faction;
-		if (isset(self::$factionRules[$id]['pct'][$faction])) return (int)self::$factionRules[$id]['pct'][$faction];
+		$rules = self::rulesId($id);
+		if (isset(self::$factionRules[$rules]['pct'][$faction])) return (int)self::$factionRules[$rules]['pct'][$faction];
 		return (int)self::$registry[$id]['pct'];
 	}
 
@@ -389,6 +439,9 @@ class Officers{
 	//($factionRules), the hull has the post, and passes the officer's own test if he has one
 	private static function isEligible($ship, $id){
 		$officer = self::$registry[$id];
+		/* Track 2 has no ship-level row - offered per weapon by setSystemEnhancementOptions, posted by
+		   pickPlacedPosts, asked per system by mayHost - so neither addOffers nor a doctored row reaches it. */
+		if (!empty($officer['placed'])) return false;
 		if (!empty($officer['flight']) !== ($ship instanceof FighterFlight)) return false;
 		if (!self::factionAllows($ship, $id)) return false;
 		if (self::findPost($ship, $officer['post']) === null) return false;
@@ -412,8 +465,108 @@ class Officers{
 				$list[] = array('id' => $id, 'post' => (int)$post->id, 'out' => null, 'how' => null);
 				if ($ship instanceof FighterFlight) break;
 			}
+			if (!($ship instanceof FighterFlight)) self::pickPlacedPosts($ship, $list);
 		}
 		$ship->setOfficers($list);
+	}
+
+	/* Track 2 (Stage 8): one officer per bought per-system row, posted in that row's system. A row buys
+	   nothing unless its system resolves under the name it was bought on (D13), it is still offered that
+	   officer (Enhancements::systemEnhancementOffered - the per-system registry's own test), keepPlacedRows
+	   lets it stand, and - for a sameAs officer - his ship-level self is not already aboard (the C&C
+	   Matter Weapons Expert wins: the server trusts the client's rows, so a doctored list is answered
+	   here). Posts are system ids, which pre-battle damage and the D11 refund already reckon with. */
+	private static function pickPlacedPosts($ship, array &$list){
+		$aboard = array();
+		foreach ($list as $entry) $aboard[$entry['id']] = true;
+		$pairs = array();
+		foreach (self::placedRows($ship) as $row){
+			$officer = self::$registry[$row[0]];
+			if (!empty($officer['sameAs']) && isset($aboard[$officer['sameAs']])) continue;
+			$system = $ship->getSystemById((int)$row[6]);
+			if (!$system) continue;
+			if (isset($row[7]) && $row[7] !== '' && (string)$system->name !== (string)$row[7]) continue;
+			if (!Enhancements::systemEnhancementOffered($ship, $system, $row[0])) continue;
+			$pairs[] = array($row[0], (int)$system->id);
+		}
+		foreach (self::keepPlacedRows($ship, $pairs) as $i) {
+			$list[] = array('id' => $pairs[$i][0], 'post' => $pairs[$i][1], 'out' => null, 'how' => null);
+		}
+	}
+
+	//the bought per-system rows that hold a placed officer (purchase tuples, systemid at [6], sysname at [7])
+	private static function placedRows($ship){
+		$rows = array();
+		if (empty($ship->systemEnhancements) || !is_array($ship->systemEnhancements)) return $rows;
+		foreach ($ship->systemEnhancements as $row){
+			if (!is_array($row) || !isset($row[0], $row[2], $row[6])) continue;
+			if ((int)$row[2] < 1 || !self::isPlacedOfficer((string)$row[0])) continue;
+			$rows[] = $row;
+		}
+		return $rows;
+	}
+
+	/* ⭐ WHICH PLACED OFFICERS A SHIP MAY KEEP - THE rule, for the sanitiser (Enhancements::
+	   sanitiseSystemEnhancements, at buy, save and reload, which names what it drops) and for the load
+	   (pickPlacedPosts). $pairs: array(array(id, systemid), ...). Walked in registry order, then system id:
+	     - a system hosts ONE placed officer (so a doctored Gunner + Matter expert on one gun keeps the Gunner);
+	     - no officer passes his ship cap (placedLimit).
+	   Returns the keys of $pairs that stand, in that order. ⚠️ MIRROR PAIR with officers.placedEntries (JS). */
+	public static function keepPlacedRows($ship, array $pairs){
+		$order = array_flip(array_keys(self::$registry));
+		$keys = array_keys($pairs);
+		usort($keys, function ($a, $b) use ($pairs, $order){
+			$ra = isset($order[$pairs[$a][0]]) ? $order[$pairs[$a][0]] : PHP_INT_MAX;
+			$rb = isset($order[$pairs[$b][0]]) ? $order[$pairs[$b][0]] : PHP_INT_MAX;
+			if ($ra !== $rb) return $ra - $rb;
+			if ((int)$pairs[$a][1] !== (int)$pairs[$b][1]) return (int)$pairs[$a][1] - (int)$pairs[$b][1];
+			return $a - $b;
+		});
+		$hosted = array(); $count = array(); $kept = array();
+		foreach ($keys as $key){
+			list($id, $systemid) = $pairs[$key];
+			if (!self::isPlacedOfficer($id) || isset($hosted[(int)$systemid])) continue;
+			$n = isset($count[$id]) ? $count[$id] : 0;
+			if ($n >= self::placedLimit($ship, $id)) continue;
+			$hosted[(int)$systemid] = true;
+			$count[$id] = $n + 1;
+			$kept[] = $key;
+		}
+		return $kept;
+	}
+
+	/* How many of this placed officer one ship may carry: his `shipLimit` method, or 1 ("one of each type").
+	   Sent to the lobby as the 6th slot of his per-system offer (Enhancements::setSystemEnhancementOptions),
+	   so systemEnhancements.set() refuses past it without a client copy of the rule. */
+	public static function placedLimit($ship, $id){
+		if (empty(self::$registry[$id]['shipLimit'])) return 1;
+		$method = self::$registry[$id]['shipLimit'];
+		return (int)self::$method($ship);
+	}
+
+	/* The Expert Gunner: "at most one such officer on a medium ship or smaller, two on a heavy combat vessel,
+	   three on a capital ship and four on an enormous unit" - shipSizeClass 0 (LCV) and 1 give 1, 2 gives 2,
+	   3 gives 3, and $Enormous (FV's enormous units; size class 4 is not implemented) gives 4. */
+	private static function gunnerLimit($ship){
+		if (!empty($ship->Enormous)) return 4;
+		return max(1, min(3, (int)$ship->shipSizeClass));
+	}
+
+	/* May this system host this placed officer? D9's unit test (no Ancients, OSATs - which
+	   Enhancements::systemMayBeEnhanced lets through - terrain, flights or remotely controlled craft), the
+	   hull's enhancementOptionsDisabled, his faction rules, and his own weapon test (`hosts`: the Matter
+	   expert needs a weapon with a Matter mode). Asked by the per-system registry's `eligible` wrappers,
+	   AFTER Gunsights' own weapon test ("any weapon Gunsights may be bought for", user ruling 2026-10-16) -
+	   so every host is a gun that rolls to hit. */
+	public static function mayHost($ship, $system, $id){
+		if (!self::isPlacedOfficer($id)) return false;
+		if ($ship instanceof FighterFlight || !self::mayCarryOfficers($ship)) return false;
+		if (in_array($id, $ship->enhancementOptionsDisabled)) return false; //the per-hull opt-out, as addOffers honours it
+		if (!self::factionAllows($ship, $id)) return false;
+		if (!($system instanceof Weapon)) return false;
+		if (empty(self::$registry[$id]['hosts'])) return true;
+		$hosts = self::$registry[$id]['hosts'];
+		return (bool)self::$hosts($system);
 	}
 
 	//the cheap test that keeps every ordinary ship (a single 'NONE' row) out of the resolver
@@ -421,7 +574,7 @@ class Officers{
 		foreach ($ship->enhancementOptions as $entry){
 			if ((int)$entry[2] > 0 && self::isOfficerId($entry[0])) return true;
 		}
-		return false;
+		return !empty(self::placedRows($ship));
 	}
 
 	private static function isBought($ship, $id){
@@ -451,6 +604,14 @@ class Officers{
 				'moved'    => isset($moves[$entry['id']]) ? (int)$moves[$entry['id']] : null,
 				'disabled' => ($post !== null) ? self::disabledTurn($ship, $post) : 0, //a vanished post never served
 			);
+			/* The weapon-mounted Matter Weapons Expert (anyDamage): "disabled if the weapon takes any damage at
+			   all (after armor), and automatically killed if the weapon is destroyed" - so the post's fall
+			   (its own boxes or its Structure block) KILLS him, and any damage through armour before that
+			   disables him. One hit that both damages and destroys it is a kill (the tie rule above). */
+			if ($post !== null && !empty(self::$registry[$entry['id']]['anyDamage'])){
+				$candidates['killed'] = self::earlier($candidates['killed'], $candidates['disabled']);
+				$candidates['disabled'] = self::firstDamagedTurn($post);
+			}
 			foreach ($candidates as $how => $out){
 				if ($out === null) continue;
 				if ($list[$i]['out'] === null || $out < $list[$i]['out']){
@@ -539,6 +700,16 @@ class Officers{
 		$first = null;
 		foreach ($system->damage as $damage){
 			if ($damage->destroyed) $first = self::earlier($first, (int)$damage->turn);
+		}
+		return $first;
+	}
+
+	/* The earliest turn the system took damage through its armour (isDamagedOnTurn's test) - pre-battle
+	   damage included (turn 0, armour 0: he never serves). A repair row is negative and never counts. */
+	private static function firstDamagedTurn($system){
+		$first = null;
+		foreach ($system->damage as $damage){
+			if ($damage->damage > $damage->armour) $first = self::earlier($first, (int)$damage->turn);
 		}
 		return $first;
 	}
@@ -696,19 +867,69 @@ class Officers{
 	private static function applyMatterExpert($ship, $entry, $turn){
 		foreach ($ship->systems as $system){
 			if (!($system instanceof Weapon) || !self::isMatterWeapon($system)) continue;
-			if (!empty($system->fireControlArray) && is_array($system->fireControlArray)){
-				foreach ($system->fireControlArray as $mode => $fc){
-					if (is_array($fc) && self::isMatterMode($system, $mode)) $system->fireControlArray[$mode] = self::bumpFireControl($fc);
-				}
-			}
-			if (self::isMatterMode($system, $system->firingMode)) $system->fireControl = self::bumpFireControl($system->fireControl);
-			$system->isModified = true;
+			if (self::servesOn($ship, 'OFF_GUN', $system, $turn)) continue; //the Gunner's replace his (user ruling 2026-10-16)
+			self::raiseMatterModes($system);
 		}
 	}
 
-	//Matter Weapons Expert: +1 damage, read by Weapon::getBonusDamage for a shot in a Matter mode
-	public static function matterDamageBonus($ship){
-		return self::isActive($ship, 'OFF_MWE') ? 1 : 0;
+	//+1 on every non-null fire control of a weapon's Matter modes, live and per mode (applyMatterExpert's rule)
+	private static function raiseMatterModes($system){
+		if (!empty($system->fireControlArray) && is_array($system->fireControlArray)){
+			foreach ($system->fireControlArray as $mode => $fc){
+				if (is_array($fc) && self::isMatterMode($system, $mode)) $system->fireControlArray[$mode] = self::bumpFireControl($fc);
+			}
+		}
+		if (self::isMatterMode($system, $system->firingMode)) $system->fireControl = self::bumpFireControl($system->fireControl);
+		$system->isModified = true;
+	}
+
+	/* Matter Weapons Expert: +1 damage, read by Weapon::getBonusDamage for a shot in a Matter mode - from
+	   the C&C on every Matter weapon but one a Gunner serves on (his own damage bonus replaces it, user
+	   ruling 2026-10-16), or from inside THIS weapon (OFF_MWEW). */
+	public static function matterDamageBonus($ship, $weapon){
+		$turn = TacGamedata::$currentTurn;
+		if (self::servesOn($ship, 'OFF_MWEW', $weapon, $turn)) return 1;
+		if (!self::isActive($ship, 'OFF_MWE', $turn)) return 0;
+		return self::servesOn($ship, 'OFF_GUN', $weapon, $turn) ? 0 : 1;
+	}
+
+	//Is this officer posted on THIS system, and serving on $turn?
+	private static function servesOn($ship, $id, $system, $turn){
+		foreach ($ship->getOfficers() as $entry){
+			if ($entry['id'] === $id && (int)$entry['post'] === (int)$system->id) return self::serves($entry, $turn);
+		}
+		return false;
+	}
+
+	/* ------------------------------------------------------------------ placed officers (Stage 8) */
+
+	/* Expert Gunner, to hit: +1 on every non-null fire control of his weapon, every mode - in fireControlArray
+	   AND the live fireControl, for the same mode-switch reason as the Matter expert's. Gunsights does the same
+	   earlier in the load, so the two stack (+2). isModified sends both to every viewer, exactly as for
+	   Gunsights (§4.6): the shooter's own hit chance needs them. */
+	private static function applyGunner($ship, $entry, $turn){
+		$weapon = $ship->getSystemById($entry['post']);
+		if (!($weapon instanceof Weapon)) return;
+		if (!empty($weapon->fireControlArray) && is_array($weapon->fireControlArray)){
+			foreach ($weapon->fireControlArray as $mode => $fc){
+				if (is_array($fc)) $weapon->fireControlArray[$mode] = self::bumpFireControl($fc);
+			}
+		}
+		$weapon->fireControl = self::bumpFireControl($weapon->fireControl);
+		$weapon->isModified = true;
+	}
+
+	/* Expert Gunner, damage: +1 per die his weapon rolls, each die capped at its face ("a roll of 10 on 1d10
+	   would not be increased") - Weapon::getFinalDamage adds it to Elite Crew's Dice::$perDieBonus, behind
+	   $officersPresent. A weapon whose damage is not rolled gains nothing, which is the rule. */
+	public static function gunnerDieBonus($ship, $weapon){
+		return self::servesOn($ship, 'OFF_GUN', $weapon, TacGamedata::$currentTurn) ? 1 : 0;
+	}
+
+	//Matter Weapons Expert in a weapon: the C&C variant's +1 fire control, on his own weapon's Matter modes only
+	private static function applyWeaponMatterExpert($ship, $entry, $turn){
+		$weapon = $ship->getSystemById($entry['post']);
+		if ($weapon instanceof Weapon && self::isMatterWeapon($weapon)) self::raiseMatterModes($weapon);
 	}
 
 	/* "Only for factions with matter weapons" - asked of the hull, since a hull without one gains nothing

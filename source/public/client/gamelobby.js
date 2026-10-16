@@ -788,8 +788,19 @@ window.gamedata = {
 
 		if (window.systemEnhancements) {
 			var sysEnhLine = systemEnhancements.summaryLine(ship);
-			//LAST, after the reversed ship-level lines above
-			if (sysEnhLine) lines.push({ text: sysEnhLine, cost: (parseFloat(ship.pointCostSysEnh) || 0) * units });
+			//LAST, after the reversed ship-level lines above. The bucket also holds the placed officers'
+			//rows (OFFICERS_PLAN.md Stage 8), which get a line each below, so the refit line is the refits alone.
+			if (sysEnhLine) lines.push({ text: sysEnhLine, cost: systemEnhancements.refitCost(ship) * units });
+			var placed = {};
+			systemEnhancements.officerRows(ship).forEach(function (row) {
+				if (!placed[row[0]]) placed[row[0]] = { count: 0, cost: 0 };
+				placed[row[0]].count++;
+				placed[row[0]].cost += parseFloat(row[4]) || 0;
+			});
+			Object.keys(placed).forEach(function (enhID) {
+				var name = systemEnhancements.label(enhID) + (placed[enhID].count > 1 ? ' (' + placed[enhID].count + ')' : '');
+				lines.push({ text: name, cost: placed[enhID].cost * units });
+			});
 		}
 		return lines;
 	},
@@ -6691,12 +6702,22 @@ jQuery(function () {
 	  ACTIONABLE system menu, so a click now opens SystemInfoMenu when the system has
 	  something to offer (canDoAnything, via canShowSystemInfoMenu) and falls back to the
 	  read-only popup otherwise. Mirrors PhaseStrategy.showSystemInfo's menu branch.*/
+	/*The ship window holding the clicked icon (ShipWindow tags its container data-ship-window), so the
+	  menu can be set BESIDE it rather than over the systems and stats around the icon (user request
+	  2026-10-16). Its on-screen rectangle, scaled windows included; null if it cannot be found.*/
+	var shipWindowBox = function (element) {
+		var el = element && (element.getBoundingClientRect ? element : $(element)[0]);
+		var win = el && el.closest ? el.closest('[data-ship-window]') : null;
+		return win ? win.getBoundingClientRect() : null;
+	};
+
 	var showMenu = function (payload) {
 		uiManager.showSystemInfoMenu({
 			ship: payload.ship,
 			selectedShip: null,
 			system: payload.system,
-			boundingBox: getBoundingBox(payload.element)
+			boundingBox: getBoundingBox(payload.element),
+			avoidBox: shipWindowBox(payload.element)
 		});
 		systemInfoState = { menu: true };
 	};
