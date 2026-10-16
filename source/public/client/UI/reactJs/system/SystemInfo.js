@@ -284,21 +284,28 @@ const getCalledShotDisplay = (ship, system) => {
 const getOfficers = (ship, system) => {
     if (!window.officers || !ship || !system) return null;
     const posted = officers.onPost(ship, system.id);
-    if (posted.length === 0) return null;
+    //Stage 10: an officer moving onto this post this turn (ordered now or committed) has a line here too
+    const arriving = officers.arrivingAt(ship, system.id);
+    if (posted.length === 0 && arriving.length === 0) return null;
     const turn = officers.currentTurn();
     return [
         <Divider key="officerDivider" />,
         <OfficerHeader key="officerHeader">Officers</OfficerHeader>
-    ].concat(posted.map(entry => {
+    ].concat(posted.map((entry, i) => {
         const officer = officers.get(entry.id);
-        const state = officers.stateText(entry);
+        const state = officers.moveText(ship, entry) || officers.stateText(entry);
         return (
-            <OfficerEntry key={`officer-${entry.id}`} $out={!officers.serves(entry, turn)}>
+            <OfficerEntry key={`officer-${entry.id}-${i}`} $out={!officers.serves(entry, turn) || officers.movingTo(ship, entry) !== null}>
                 <OfficerName>{officers.label(entry.id)}: </OfficerName>
                 {officer ? officer.summary : ''}{state ? ' ' + state : ''}
             </OfficerEntry>
         );
-    }));
+    }), arriving.map((arrival, i) => (
+        <OfficerEntry key={`arriving-${arrival.entry.id}-${i}`} $out>
+            <OfficerName>{officers.label(arrival.entry.id)} </OfficerName>
+            {officers.arrivalText(ship, arrival.entry)}
+        </OfficerEntry>
+    )));
 };
 
 const getCriticals = (system) => {

@@ -39,7 +39,7 @@ window.officers = {
 			summary: '+2 power, +1 when a system is switched off, +1/3 of each destroyed system\'s power; -2 on reactor criticals' },
 		{ id: 'OFF_GENE', label: 'Expert Geneticist', post: 'cnc', stats: { forwardDefense: 2, sideDefense: 2, toHitBonus: -1 },
 			summary: '-1 to hit with own weapons, +2 to be hit, enemies may ram this ship' },
-		{ id: 'OFF_MWE', label: 'Matter Weapons Expert', post: 'cnc', needs: 'matterWeapon',
+		{ id: 'OFF_MWE', label: 'Matter Weapons Expert', post: 'cnc', needs: 'matterWeapon', movable: true,
 			summary: '+1 fire control and +1 damage for Matter weapons' },
 		{ id: 'OFF_ENG', label: 'Expert Engineer', post: 'engine',
 			summary: 'Repairs 1 critical per turn (a C&C critical on a d20 of 16+)' },
@@ -51,11 +51,14 @@ window.officers = {
 			summary: 'Jump points opened 1 hex further and held 1 turn longer; jump failure chance -20%; exits scatter less (-1 on the chart, 60 degrees of facing shift cancelled); arrival initiative penalty -20' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
-		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon. */
-		{ id: 'OFF_GUN', label: 'Expert Gunner', placed: true,
-			summary: '+1 fire control and +1 damage per die (no die above its maximum) for this weapon' },
-		{ id: 'OFF_MWEW', label: 'Matter Weapons Expert', placed: true, sameAs: 'OFF_MWE', anyDamage: true,
-			summary: '+1 fire control and +1 damage for this Matter weapon; disabled by any damage to it, killed if it is destroyed' },
+		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
+		   Stage 10: `movable` - may be moved to another post in Initial Orders (the Matter Weapons Expert between
+		   the C&C and his Matter weapons, as one man); `abilities` - the Gunner's once-per-battle three;
+		   `reload` - his weapon reloads a turn faster. */
+		{ id: 'OFF_GUN', label: 'Expert Gunner', placed: true, movable: true, abilities: true,
+			summary: '+1 fire control and +1 damage per die (no die above its maximum) for this weapon. Once per battle each: a turn off the reload after a shot, a Piercing shot (no penalty if the weapon may already pierce), and +15% on a called shot' },
+		{ id: 'OFF_MWEW', label: 'Matter Weapons Expert', placed: true, sameAs: 'OFF_MWE', anyDamage: true, movable: true, reload: true,
+			summary: '+1 fire control and +1 damage for this Matter weapon, which reloads a turn faster; disabled by any damage to it, killed if it is destroyed' },
 		{ id: 'OFF_DOG', label: 'Expert Dogfighter', post: 'craft', flight: true, stats: { iniativebonus: 5 },
 			summary: '+5 initiative' },
 		{ id: 'OFF_MSL', label: 'Expert Missileer', post: 'craft', flight: true, perMissile: 1, needs: 'missiles',
@@ -417,9 +420,11 @@ window.officers = {
 		return this.listFor(ship).filter(function (entry) { return String(entry.post) === String(systemId); });
 	},
 
-	/* Out on turn N = serves N, gone from N + 1; out at turn 0 (pre-battle damage) never serves.
+	/* Out on turn N = serves N, gone from N + 1; out at turn 0 (pre-battle damage) never serves. Nor on the turn
+	   he moves to another post (`moving`, sent for the current turn only - Stage 10).
 	   ⚠️ MIRROR PAIR with Officers::serves (PHP). */
 	serves: function serves(entry, turn) {
+		if (entry.moving !== undefined && entry.moving !== null) return false;
 		if (entry.out === undefined || entry.out === null) return true;
 		var out = parseInt(entry.out, 10);
 		return out >= 1 && out >= (parseInt(turn, 10) || 0);
@@ -429,24 +434,31 @@ window.officers = {
 		return (window.gamedata && gamedata.turn !== undefined) ? gamedata.turn : 0;
 	},
 
-	/* 'serving' | 'disabled' | 'killed' - what the insignia shows for one post: the BEST state of the
-	   officers posted there, so any serving officer keeps it gold (D11). null with nobody posted. */
+	/* 'serving' | 'moving' | 'disabled' | 'killed' - what the insignia shows for one post: the BEST state of
+	   the officers posted there, so any serving officer keeps it gold (D11). 'moving' (Stage 10): an officer
+	   leaving this post this turn - ordered now, or committed - and the post one is moving TO. null with
+	   nobody posted or arriving. */
 	postState: function postState(ship, systemId) {
 		var entries = this.onPost(ship, systemId);
-		if (entries.length === 0) return null;
 		var turn = this.currentTurn();
-		var state = 'killed';
+		var state = null;
 		for (var i = 0; i < entries.length; i++) {
+			if (this.movingTo(ship, entries[i]) !== null) { state = 'moving'; continue; }
 			if (this.serves(entries[i], turn)) return 'serving';
-			if (entries[i].how !== 'killed') state = 'disabled';
+			if (state === null || state === 'killed') state = (entries[i].how === 'killed') ? 'killed' : 'disabled';
 		}
+		if (state !== 'moving' && this.arrivingAt(ship, systemId).length > 0) return 'moving';
 		return state;
 	},
 
 	/* "(disabled, turn 3)", "(killed, turn 3)", the pre-battle wording, or '' while he serves - unless a
-	   serving Expert Scavenger has spent his once-per-game save: "(save used, turn 3)" (`used`, own team only). */
+	   serving Expert Scavenger has spent his once-per-game save: "(save used, turn 3)" (`used`, own team only),
+	   or an Expert Gunner has spent any of his three (`abilities`, Stage 10). */
 	stateText: function stateText(entry) {
-		if (entry.out === undefined || entry.out === null) return entry.used ? '(save used, turn ' + entry.used + ')' : '';
+		if (entry.out === undefined || entry.out === null) {
+			if (entry.used) return '(save used, turn ' + entry.used + ')';
+			return this.abilitiesText(entry);
+		}
 		if (parseInt(entry.out, 10) < 1) {
 			var officer = this.get(entry.id);
 			//the weapon-mounted Matter Weapons Expert is out on ANY damage (anyDamage), not only a destroyed post
@@ -456,13 +468,219 @@ window.officers = {
 		return '(' + (entry.how === 'killed' ? 'killed' : 'disabled') + ', turn ' + entry.out + ')';
 	},
 
-	//"Expert Helmsman (disabled, turn 3)" - the insignia's title, one officer per line
+	//"(used: called shot, turn 3; Piercing shot, turn 4)" - the Gunner's spent once-per-battle abilities, or ''
+	ABILITY_NAMES: { reload: 'faster reload', pierce: 'Piercing shot', called: 'called shot' },
+	abilitiesText: function abilitiesText(entry) {
+		var spent = entry && entry.abilities ? entry.abilities : null;
+		if (!spent) return '';
+		var self = this;
+		var parts = Object.keys(this.ABILITY_NAMES).filter(function (key) { return spent[key] !== undefined && spent[key] !== null; })
+			.map(function (key) { return self.ABILITY_NAMES[key] + ', turn ' + spent[key]; });
+		return parts.length ? '(used: ' + parts.join('; ') + ')' : '';
+	},
+
+	/* "Expert Helmsman (disabled, turn 3)" - the insignia's title, one officer per line; Stage 10 adds an
+	   officer moving off this post and one moving onto it */
 	describePost: function describePost(ship, systemId) {
 		var self = this;
-		return this.onPost(ship, systemId).map(function (entry) {
-			var state = self.stateText(entry);
+		var lines = this.onPost(ship, systemId).map(function (entry) {
+			var move = self.moveText(ship, entry);
+			var state = move || self.stateText(entry);
 			return self.label(entry.id) + (state ? ' ' + state : '');
-		}).join('\n');
+		});
+		this.arrivingAt(ship, systemId).forEach(function (arrival) {
+			lines.push(self.label(arrival.entry.id) + ' ' + self.arrivalText(ship, arrival.entry));
+		});
+		return lines.join('\n');
+	},
+
+	/* ------------------------------------------------------------------ the Expert Gunner's shot (Stage 10) */
+
+	/* What his once-per-battle shot adds to THIS shot's hit chance, in d20 units: a Piercing shot while he still
+	   has his Piercing - +4 on a weapon that may already pierce ("no penalty where it is"), nothing in the mode
+	   added for him (`mode`, which carries the penalty); otherwise +3 on a called shot that is not Piercing, while
+	   he still has it. Spent ON this turn still counts (the turn's own shot spent it). Never while he has been ordered
+	   to move this turn (pendingMoveFireControl's reason). Asked for the SHOOTER, so always an own-team ship with its
+	   list. ⚠️ MIRROR PAIR with Officers::gunnerShotBonus (PHP). */
+	GUNNER_CALLED_BONUS: 3,
+	PIERCE_PENALTY: 4,
+	gunnerShotBonus: function gunnerShotBonus(ship, weapon, called) {
+		if (!ship || !weapon || ship.flight) return 0;
+		var turn = this.currentTurn();
+		var self = this;
+		var entry = this.listFor(ship).filter(function (e) {
+			return e.id === 'OFF_GUN' && String(e.post) === String(weapon.id) && self.serves(e, turn) && self.transferOf(ship, e) === null;
+		})[0];
+		if (!entry) return 0;
+		var open = function (ability) {
+			var spent = entry.abilities ? entry.abilities[ability] : undefined;
+			return spent === undefined || spent === null || (parseInt(spent, 10) || 0) >= turn;
+		};
+		if (weapon.damageType === 'Piercing') {
+			if (!open('pierce')) return 0;
+			return (entry.mode !== undefined && parseInt(weapon.firingMode, 10) === parseInt(entry.mode, 10)) ? 0 : this.PIERCE_PENALTY;
+		}
+		return (called && open('called')) ? this.GUNNER_CALLED_BONUS : 0;
+	},
+
+	/* ------------------------------------------------------------------ moving officers (Stage 10) */
+
+	/* In Initial Orders the player may move an officer marked `movable` to another post. The server sends, with each
+	   such officer of the owner's, `targets` - every post he may move to this turn (Officers::mayMoveTo; occupied
+	   posts, wrecks and posts he could not be bought for are already out) - and `moving` once a move is committed.
+	   An order made here is kept on the ship (ship.officerTransfers, {id, from, to}) until the commit carries it
+	   (ajaxInterface.construcGamedata -> transferClaims); the server checks it again before writing it. */
+
+	//the movable officers posted here who may be ordered to move now (serving, not already moving, somewhere to go)
+	movableOn: function movableOn(ship, systemId) {
+		if (!ship || this.isDerived(ship)) return [];
+		var self = this;
+		var turn = this.currentTurn();
+		return this.onPost(ship, systemId).filter(function (entry) {
+			var officer = self.get(entry.id);
+			return officer && officer.movable && self.serves(entry, turn) && Array.isArray(entry.targets) && entry.targets.length > 0;
+		});
+	},
+
+	/* The Officers menu (SystemInfoButtons): Initial Orders, the player's own ship, and an officer here who may move
+	   - or one already ordered to (so the order can be cancelled). */
+	canManage: function canManage(ship, system) {
+		if (!ship || !system || !window.gamedata || gamedata.gamephase !== 1 || gamedata.waiting || gamedata.replay) return false;
+		if (typeof gamedata.isMyShip === 'function' && !gamedata.isMyShip(ship)) return false;
+		return this.movableOn(ship, system.id).length > 0;
+	},
+
+	//his pending (uncommitted) order, or null
+	transferOf: function transferOf(ship, entry) {
+		var orders = (ship && Array.isArray(ship.officerTransfers)) ? ship.officerTransfers : [];
+		for (var i = 0; i < orders.length; i++) {
+			if (orders[i].id === entry.id && String(orders[i].from) === String(entry.post)) return orders[i];
+		}
+		return null;
+	},
+
+	//the post he is moving to this turn - committed (the server's `moving`) or ordered now - or null
+	movingTo: function movingTo(ship, entry) {
+		if (entry.moving !== undefined && entry.moving !== null) return parseInt(entry.moving, 10);
+		var order = this.transferOf(ship, entry);
+		return order ? parseInt(order.to, 10) : null;
+	},
+
+	//the officers moving onto this post this turn, as [{entry}]
+	arrivingAt: function arrivingAt(ship, systemId) {
+		var self = this;
+		return this.listFor(ship).filter(function (entry) {
+			return String(self.movingTo(ship, entry)) === String(systemId) && String(entry.post) !== String(systemId);
+		}).map(function (entry) { return { entry: entry }; });
+	},
+
+	//where he may be moved: the server's `targets`, less posts another officer has been ordered to this turn
+	destinations: function destinations(ship, entry) {
+		if (!Array.isArray(entry.targets)) return [];
+		var self = this;
+		var taken = this.listFor(ship).filter(function (other) { return other !== entry; })
+			.map(function (other) { return self.movingTo(ship, other); })
+			.filter(function (to) { return to !== null; }).map(String);
+		return entry.targets.filter(function (id) { return taken.indexOf(String(id)) === -1; });
+	},
+
+	systemName: function systemName(ship, systemId) {
+		var s = this.systemById(ship, systemId);
+		return (s ? (s.displayName || s.name) : 'system') + ' #' + systemId;
+	},
+
+	//"(moving to Heavy Laser #12 - serves there from turn 5)", or '' while he is not moving
+	moveText: function moveText(ship, entry) {
+		var to = this.movingTo(ship, entry);
+		if (to === null) return '';
+		var pending = (entry.moving === undefined || entry.moving === null);
+		return '(' + (pending ? 'ordered to ' : 'moving to ') + this.systemName(ship, to) + ' - serves there from turn ' + (this.currentTurn() + 1) + ')';
+	},
+
+	//"(arriving from Medium Laser #8 - serves here from turn 5)"
+	arrivalText: function arrivalText(ship, entry) {
+		return '(arriving from ' + this.systemName(ship, entry.post) + ' - serves here from turn ' + (this.currentTurn() + 1) + ')';
+	},
+
+	/* The pick: "Move Officer" arms it, and the next click on one of that ship's systems ends it - on one of his
+	   destinations it orders the move, anywhere else it cancels (SystemIcon.clickSystem asks pickTarget first).
+	   While armed, his destinations are outlined (isPickTarget). */
+	picking: null,
+
+	startPick: function startPick(ship, entry) {
+		this.picking = { ship: ship, id: entry.id, from: entry.post };
+		this.notice('Click a highlighted system to move the ' + this.label(entry.id) + ' there - anything else cancels.');
+		this.repaint(ship);
+	},
+
+	pickingEntry: function pickingEntry(ship) {
+		var pick = this.picking;
+		if (!pick || pick.ship !== ship) return null;
+		return this.onPost(ship, pick.from).filter(function (entry) { return entry.id === pick.id; })[0] || null;
+	},
+
+	isPickTarget: function isPickTarget(ship, system) {
+		var entry = system ? this.pickingEntry(ship) : null;
+		return Boolean(entry) && this.destinations(ship, entry).map(String).indexOf(String(system.id)) !== -1;
+	},
+
+	//true when the click was the pick's (and so nothing else should happen)
+	pickTarget: function pickTarget(ship, system) {
+		if (!this.picking) return false;
+		var entry = this.pickingEntry(ship);
+		if (!entry) { this.cancelPick(); return false; } //another ship's system: the pick ends, the click goes on
+		if (this.isPickTarget(ship, system)) {
+			this.setTransfer(ship, entry, system.id);
+			this.notice(this.label(entry.id) + ' ordered to ' + this.systemName(ship, system.id) + ': he serves nowhere for the rest of this turn.');
+		} else {
+			this.notice('Move cancelled - ' + this.systemName(ship, system.id) + ' is not a post the ' + this.label(entry.id) + ' can move to.');
+		}
+		this.picking = null;
+		this.repaint(ship, system);
+		return true;
+	},
+
+	cancelPick: function cancelPick() {
+		var ship = this.picking ? this.picking.ship : null;
+		this.picking = null;
+		if (ship) this.repaint(ship);
+	},
+
+	setTransfer: function setTransfer(ship, entry, to) {
+		var others = (Array.isArray(ship.officerTransfers) ? ship.officerTransfers : []).filter(function (order) {
+			return !(order.id === entry.id && String(order.from) === String(entry.post));
+		});
+		others.push({ id: entry.id, from: parseInt(entry.post, 10), to: parseInt(to, 10) });
+		ship.officerTransfers = others;
+		this.repaint(ship);
+	},
+
+	cancelTransfer: function cancelTransfer(ship, entry) {
+		if (!Array.isArray(ship.officerTransfers)) return;
+		ship.officerTransfers = ship.officerTransfers.filter(function (order) {
+			return !(order.id === entry.id && String(order.from) === String(entry.post));
+		});
+		this.repaint(ship);
+	},
+
+	//what the Initial Orders commit sends (construcGamedata): the orders still standing - each to one of his destinations
+	transferClaims: function transferClaims(ship) {
+		if (!ship || !Array.isArray(ship.officerTransfers) || !window.gamedata || gamedata.gamephase !== 1) return [];
+		var self = this;
+		return ship.officerTransfers.filter(function (order) {
+			var entry = self.onPost(ship, order.from).filter(function (e) { return e.id === order.id; })[0];
+			return entry && Array.isArray(entry.targets) && entry.targets.map(String).indexOf(String(order.to)) !== -1;
+		}).map(function (order) { return { id: order.id, from: order.from, to: order.to }; });
+	},
+
+	repaint: function repaint(ship, system) {
+		if (window.webglScene && typeof webglScene.customEvent === 'function') webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		if (window.shipWindowManagerReact && typeof shipWindowManagerReact.update === 'function') shipWindowManagerReact.update();
+	},
+
+	//a passive notice (feedback_passive_notices): game.php's own, when it is there
+	notice: function notice(text) {
+		if (window.savedOrders && typeof savedOrders.showNotice === 'function') savedOrders.showNotice(text);
 	},
 
 	//Is this officer aboard and serving now? ⚠️ MIRROR PAIR with Officers::isActive (PHP).
@@ -691,14 +909,33 @@ window.officers = {
 	displayFireControl: function displayFireControl(ship, system) {
 		var fc = system ? system.fireControl : null;
 		if (!Array.isArray(fc)) return fc;
-		var serving = this.servingDerived(ship);
+		if (!this.fireControlRaise(this.servingDerived(ship), system)) return fc;
+		return fc.map(function (v) { return (v === null || v === undefined) ? v : (parseInt(v, 10) || 0) + 1; });
+	},
+
+	//1 when the officers in `serving` raise this weapon's fire control in its current mode (displayFireControl's rule), else 0
+	fireControlRaise: function fireControlRaise(serving, system) {
 		var on = function (id) {
 			return serving.some(function (entry) { return entry.id === id && String(entry.post) === String(system.id); });
 		};
-		var raised = on('OFF_GUN') || (this.isMatterWeapon(system) && this.isMatterMode(system, system.firingMode)
-			&& (on('OFF_MWEW') || serving.some(function (entry) { return entry.id === 'OFF_MWE'; })));
-		if (!raised) return fc;
-		return fc.map(function (v) { return (v === null || v === undefined) ? v : (parseInt(v, 10) || 0) + 1; });
+		if (on('OFF_GUN')) return 1;
+		return (this.isMatterWeapon(system) && this.isMatterMode(system, system.firingMode)
+			&& (on('OFF_MWEW') || serving.some(function (entry) { return entry.id === 'OFF_MWE'; }))) ? 1 : 0;
+	},
+
+	/* Stage 10 (user request 2026-10-16): the fire control an officer ordered to move THIS turn - not yet committed - still
+	   gives this weapon in the numbers the server sent. The server raised them at load and drops them once the move is
+	   committed (he serves nowhere that turn), so the owner's hit-chance preview drops them at once
+	   (weaponManager.computeFireControl) - a ballistic launched in the same Initial Orders would otherwise show his +5%.
+	   displayFireControl's rule asked twice: with every serving officer, and without those with an order pending - so a
+	   Gunner leaving a Matter gun the C&C expert also covers costs it nothing, as on the server (the expert's +1 takes over). */
+	pendingMoveFireControl: function pendingMoveFireControl(ship, weapon) {
+		if (!ship || !weapon || ship.flight || this.isDerived(ship) || !Array.isArray(ship.officerTransfers) || !ship.officerTransfers.length) return 0;
+		var self = this;
+		var turn = this.currentTurn();
+		var serving = this.listFor(ship).filter(function (entry) { return self.serves(entry, turn); });
+		var staying = serving.filter(function (entry) { return self.transferOf(ship, entry) === null; });
+		return this.fireControlRaise(serving, weapon) - this.fireControlRaise(staying, weapon);
 	},
 
 	/* Expert Jump Officer, in the lobby: the hexes he adds to THIS drive's range - 0 unless it is his post.
@@ -716,7 +953,8 @@ window.officers = {
 	},
 
 	/* SystemInfo's one hook into a system's data rows (and its Special text). The weapon tooltip quotes fire
-	   control only through data["Fire control (fighter/med/cap)"], and a jump drive its range through
+	   control only through data["Fire control (fighter/med/cap)"] - in game too, less an officer just ordered to
+	   move (pendingMoveFireControl, user request 2026-10-16) - and a jump drive its range through
 	   data["Range"] and the Special sentence "target a hex within N hexes" - all baked into the static
 	   blueprint, so the lobby rewrites them as they are shown. N is the drive's range as the lobby has it
 	   (after a Jump Accelerator's +2, which lobbyEnhancements writes into both). In game the server's
@@ -733,6 +971,9 @@ window.officers = {
 		}
 		if (key !== this.DATA_KEY_FIRECONTROL) return value;
 		var fc = this.displayFireControl(ship, system);
+		//Stage 10: an officer ordered off this turn gives the weapon nothing this turn - the hit-chance preview's rule
+		var loss = this.pendingMoveFireControl(ship, system);
+		if (loss && Array.isArray(fc)) fc = fc.map(function (v) { return (v === null || v === undefined) ? v : (parseInt(v, 10) || 0) - loss; });
 		if (fc === system.fireControl) return value;
 		if (typeof system.translateFCtoD100txt === 'function') return system.translateFCtoD100txt(fc);
 		return fc.map(function (v) { return (v === null || v === undefined) ? '-' : String(v * 5); }).join('/');

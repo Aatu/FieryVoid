@@ -2197,6 +2197,9 @@ window.weaponManager = {
 
         var firecontrol = (fcIndexOverride != null) ? weapon.fireControl[fcIndexOverride] : weaponManager.getFireControl(target, weapon);
         if (target.mine && weapon.canShootMines) weapon.fireControl[1] = -4; //preserved as-is from old code; mutates next-call FC
+        /* An officer the player has just ordered to move (OFFICERS_PLAN.md Stage 10) serves nowhere this turn: the server
+           drops his +1 once the move is committed, so the preview drops it now. 0 for every ordinary weapon. */
+        if (firecontrol !== null && firecontrol !== undefined && window.officers) firecontrol -= officers.pendingMoveFireControl(shooter, weapon);
 
         if (shipManager.hasSpecialAbility(shooter, "HyachComputer")) {
             var computer = shipManager.systems.getSystemByName(shooter, "hyachComputer");
@@ -2356,16 +2359,23 @@ window.weaponManager = {
             }
         }
 
+        var standardCalledShot = false;
         if (calledid > 0) {
             var calledSystem = shipManager.systems.getSystem(target, calledid);
             if (calledSystem && calledSystem.targetProfile != null) {
                 calledShot = 0; //flat fighter-style profile (Kirishiac Orbital) - no called-shot penalty or bonus; the profile replaces base defence in calculateHitChange
             } else {
+                standardCalledShot = true;
                 calledShot = weapon.calledShotMod;
                 if (target.base) calledShot += weapon.calledShotMod; //double penalty vs bases
                 if (calledSystem && calledSystem.calledShotBonus != null) calledShot += calledSystem.calledShotBonus;
             }
         }
+
+        /* An Expert Gunner's once-per-battle shot (OFFICERS_PLAN.md Stage 10): +4 on his gun's first native Piercing
+           shot, +3 on its first called shot. ⚠️ MIRROR PAIR with the gunnerShotBonus line in Weapon::calculateHitBase. */
+        var gunnerShot = window.officers ? officers.gunnerShotBonus(shooter, weapon, standardCalledShot) : 0;
+        if (gunnerShot !== 0) otherDetail.push({ label: 'Expert Gunner', value: gunnerShot });
 
         var ammo = weapon.getAmmo(null);
         if (ammo && ammo.hitChanceMod !== 0) {

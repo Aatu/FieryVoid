@@ -995,6 +995,8 @@ class Manager{
 
             $gamedata->prepareForPlayer($actualTurn > $turn);
             $gamedata->setTurn($turn);
+            //OFFICERS_PLAN.md Stage 10: the load above judged officers by the CURRENT turn - put back the Piercing mode a Gunner fired on $turn
+            Officers::restoreFiredModes($gamedata, $turn);
 
             $json = json_encode($gamedata->stripForJson(), JSON_NUMERIC_CHECK);
             return $json;
@@ -2798,6 +2800,11 @@ class Manager{
                eligibility and REPLACES the client's prices with the server's own (D4). Every
                other phase ignores the field, so a client cannot inject a refit mid-game. */
             $ship->systemEnhancements = $value["systemEnhancements"] ?? array();
+
+            /* OFFICERS_PLAN.md Stage 10 - officers the player ordered to another post this turn. A CLAIM,
+               carried raw: InitialOrdersGamePhase::process checks each against the loaded ship
+               (Officers::saveTransfers) before writing it, and every other phase ignores the field. */
+            $ship->setOfficerTransferClaims($value["officerTransfers"] ?? array());
 
             $systems = $value["systems"] ?? [];
             foreach ($systems as $i => $system) {

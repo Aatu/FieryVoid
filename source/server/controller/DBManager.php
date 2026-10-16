@@ -3806,9 +3806,11 @@ class DBManager
 				   to its post: a Jump Engine takes any note it does not recognise for its pre-jump
 				   combat value, and HyachComputer never calls its parent. */
 				if (Officers::isKillNote($currNote)){
-					$ship->recordOfficerKill($currNote->notevalue, $currNote->turn);
+					$ship->recordOfficerKill($currNote->notevalue, $currNote->turn, $currNote->systemid);
 					continue;
 				}
+				//...and so are an officer's move to another post and a Gunner's spent ability (Stage 10)
+				if (Officers::takeNote($ship, $currNote)) continue;
 				//...and so is a fighter officer's move with his fighter to another flight row (Stage 4)
 				if (Officers::isMoveNote($currNote)){
 					$ship->recordOfficerMove($currNote->notevalue, $currNote->turn);

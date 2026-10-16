@@ -33,6 +33,13 @@
    whose post is the weapon the player picks - bought as per-system rows (tac_sys_enhancements) through
    Enhancements::$systemEnhancementRegistry, and resolved into the same runtime list (pickPlacedPosts).
 
+   Stage 10: a weapon's faster reload (the weapon-mounted Matter Weapons Expert always, the Gunner once),
+   the Gunner's once-per-battle Piercing mode and called shot (abilities - tied to HIM, not to a weapon,
+   and stored as OffUsed notes), and MOVING officers between posts in Initial Orders (resolveTransfers:
+   OffTransfer notes, replayed at every load; he serves nowhere on the turn he moves). A moved officer's
+   entry carries his `stays` (each post and the turns he held it) - so a kill note, a destroyed post or a
+   spent ability is matched to the officer who was THERE at that turn.
+
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
 
@@ -53,6 +60,12 @@ class Officers{
 	const JUMP_SCATTER_SHIFT = -1; //Jump Officer: "a -1 shift to the vortex scatter chart"
 	const JUMP_INI_RELIEF = 20;    //Jump Officer: "any initiative penalty produced by scatter is reduced by 20"
 	const COMBAT_PIVOT_FULL = 3;   //Coordinator: "a full 180" - in hex sides, 3 x 60 degrees
+	const TRANSFER_NOTE = 'OffTransfer'; //an officer the player moved to another post (Stage 10): value "id:to", on his old post
+	const USE_NOTE = 'OffUsed';          //an Expert Gunner spent a once-per-battle ability (Stage 10): value "id:ability", on his post
+	const GUNNER_CALLED_BONUS = 3;       //Gunner: "a called shot at +3" (+15%)
+	const PIERCE_PENALTY = 4;            //Piercing's usual -4 fire control: an added mode carries it, a native one is spared it once
+	const PIERCE_PRIORITY = 2;           //an added Piercing mode resolves early, as the Battle Laser's own does
+	const MAX_TRANSFER_CLAIMS = 8;       //a POST asking for more moves than any ship has movable officers is not read past this
 
 	/* ⭐ FACTION RULES (user request 2026-10-15) - which factions an officer is offered to, and what some
 	   of them pay. ONE table, so a faction's officers change here and nowhere else: README.md, "Officers:
@@ -104,7 +117,13 @@ class Officers{
 	     sameAs      (optional) the ship-level officer he IS, at another post: his faction rules are that
 	                 officer's, and a ship carries one or the other, never both (user ruling 2026-10-16)
 	     anyDamage   (optional) true: DISABLED by any damage through armour to his post, KILLED when it is
-	                 destroyed - on top of the ordinary kill roll (user ruling 2026-10-16) */
+	                 destroyed - on top of the ordinary kill roll (user ruling 2026-10-16)
+	   Stage 10:
+	     movable     true: the player may move him to another post in Initial Orders (resolveTransfers). Every
+	                 officer sharing his rulesId moves as ONE man: the Matter Weapons Expert at the C&C is OFF_MWE
+	                 and in a weapon OFF_MWEW (user ruling 2026-10-16), whichever his new post makes him.
+	     reload      true: the weapon he serves in reloads a turn faster after every shot (fasterReload)
+	     abilities   true: the Expert Gunner's once-per-battle faster reload, Piercing and called shot */
 	private static $registry = array(
 		/* Expert Helmsman: +5 initiative (FV units, QX1), wins initiative ties, and -1 on the die he
 		   rolls on a meteor swarm's impact chart (user, 2026-10-10). The tie-break is
@@ -131,9 +150,10 @@ class Officers{
 		'OFF_GENE' => array('label' => 'Expert Geneticist', 'post' => 'cnc', 'pct' => 5, 'apply' => 'applyGeneticist',
 			'publish' => array('forwardDefense', 'sideDefense', 'toHitBonus')),
 		/* Matter Weapons Expert (the C&C variant; the weapon-mounted one is Stage 8): +1 fire control and
-		   +1 damage on every Matter-class weapon, per firing mode. Only for hulls carrying one. */
+		   +1 damage on every Matter-class weapon, per firing mode. Only for hulls carrying one. He may move
+		   into a Matter weapon - becoming OFF_MWEW there - and back (Stage 10, `movable`). */
 		'OFF_MWE'  => array('label' => 'Matter Weapons Expert', 'post' => 'cnc', 'pct' => 10, 'apply' => 'applyMatterExpert',
-			'needs' => 'hasMatterWeapon'),
+			'needs' => 'hasMatterWeapon', 'movable' => true),
 		/* Expert Engineer (Stage 5): repairs one critical at the end of each turn - runRepairs, after Self
 		   Repair. Never one the ship has not yet suffered for a full turn; a C&C critical only on a d20 of
 		   16+, and a failed roll ends his repairs for the turn. */
@@ -169,18 +189,24 @@ class Officers{
 		   damage bonuses with those of other elite officers": on his weapon his own replace the Matter
 		   Weapons Expert's (user ruling 2026-10-16). 10%, 5% for the Yolu ($factionRules); at most 1 on a
 		   medium ship or smaller, 2 on a heavy, 3 on a capital, 4 on an enormous unit (gunnerLimit).
-		   NOT BUILT: his once-per-scenario rate of fire, piercing mode and +3 called shot (plan §3.3), and
-		   moving between weapons in game (§8 - officers are placed in the lobby only). */
+		   Stage 10 (user rulings 2026-10-16) - ONCE PER BATTLE each, automatic, never two on one shot, and HIS
+		   (they go with him to another weapon): a Piercing shot (an added Piercing mode on a single-mode
+		   Standard/Raking direct-fire gun, at Piercing's usual -4; on a gun that may already pierce, +4 on its
+		   first Piercing shot - addPiercingMode / gunnerShotBonus); +3 on his weapon's first called shot that is
+		   not Piercing; and a turn off the reload after the first firing that used neither (fasterReload). He
+		   may move to another weapon he could be bought for (movable). */
 		'OFF_GUN'  => array('label' => 'Expert Gunner', 'placed' => true, 'pct' => 10, 'apply' => 'applyGunner',
-			'shipLimit' => 'gunnerLimit'),
+			'shipLimit' => 'gunnerLimit', 'movable' => true, 'abilities' => true),
 		/* Matter Weapons Expert, moved "into one specific weapon instead of his normal station": +1 fire
 		   control and +1 damage on THAT weapon's Matter modes only, the C&C variant's rule on one gun. The
 		   same officer as OFF_MWE (sameAs): Grome only, 10%, and never both (user ruling 2026-10-16). "Disabled
 		   if the weapon takes any damage at all (after armor), and automatically killed if the weapon is
-		   destroyed" (anyDamage), and the ordinary kill roll besides (user ruling). NOT BUILT: his rate of
-		   fire +1 (Stage 10, loading time). */
+		   destroyed" (anyDamage), and the ordinary kill roll besides (user ruling). "Plus its rate of fire +1
+		   (never better than once a turn)": a turn off every reload (Stage 10, `reload`). He may move to another
+		   Matter weapon or back to the C&C (movable). */
 		'OFF_MWEW' => array('label' => 'Matter Weapons Expert', 'placed' => true, 'pct' => 10, 'sameAs' => 'OFF_MWE',
-			'hosts' => 'isMatterWeapon', 'apply' => 'applyWeaponMatterExpert', 'anyDamage' => true),
+			'hosts' => 'isMatterWeapon', 'apply' => 'applyWeaponMatterExpert', 'anyDamage' => true,
+			'movable' => true, 'reload' => true),
 
 		/* FIGHTER OFFICERS (Stage 4). A flight carries ONE officer in total (D9), posted on its first
 		   craft. He is lost with that craft - destroyed, or dropped out - and never by a dock, a partial
@@ -597,53 +623,263 @@ class Officers{
 	/* ------------------------------------------------------------------ out of action */
 
 	/* After the per-system onConstructed loop (structureSystem is filled there) and before
-	   iniativeadded is computed (D5). Derives each officer's state, then applies the stat changes of
-	   every officer serving on $turn, in registry order. */
+	   iniativeadded is computed (D5). Replays the officers' moves (Stage 10), derives each officer's
+	   state, then applies the stat changes of every officer serving on $turn, in registry order. */
 	public static function apply($ship, $turn){
 		$list = $ship->getOfficers();
 		if (empty($list)) return;
-		$kills = $ship->getOfficerKills();
-		$moves = $ship->getOfficerMoves();
+		$turn = (int)$turn;
+		self::resolveTransfers($ship, $list, $turn);
 		foreach ($list as $i => $entry){
-			$post = $ship->getSystemById($entry['post']);
-			/* The earliest wins; on a tie the first of these (both in one turn reads as killed, §4.4). A
-			   fighter officer who MOVED with his fighter (followFighter) left this row: a move beats the
-			   DisengagedFighter bookkeeping that retires the row he left on the same turn. */
-			$candidates = array(
-				'killed'   => isset($kills[$entry['id']]) ? (int)$kills[$entry['id']] : null,
-				'moved'    => isset($moves[$entry['id']]) ? (int)$moves[$entry['id']] : null,
-				'disabled' => ($post !== null) ? self::disabledTurn($ship, $post) : 0, //a vanished post never served
-			);
-			/* The weapon-mounted Matter Weapons Expert (anyDamage): "disabled if the weapon takes any damage at
-			   all (after armor), and automatically killed if the weapon is destroyed" - so the post's fall
-			   (its own boxes or its Structure block) KILLS him, and any damage through armour before that
-			   disables him. One hit that both damages and destroys it is a kill (the tie rule above). */
-			if ($post !== null && !empty(self::$registry[$entry['id']]['anyDamage'])){
-				$candidates['killed'] = self::earlier($candidates['killed'], $candidates['disabled']);
-				$candidates['disabled'] = self::firstDamagedTurn($post);
-			}
-			foreach ($candidates as $how => $out){
-				if ($out === null) continue;
-				if ($list[$i]['out'] === null || $out < $list[$i]['out']){
-					$list[$i]['out'] = $out;
-					$list[$i]['how'] = $how;
-				}
-			}
+			list($list[$i]['out'], $list[$i]['how']) = self::outState($ship, $entry);
 		}
+		self::resolveUses($ship, $list);
 		$ship->setOfficers($list);
 
-		foreach ($list as $entry){
+		foreach ($list as $i => $entry){
 			if (!self::serves($entry, $turn)) continue;
 			$method = self::$registry[$entry['id']]['apply'];
-			if ($method !== null) self::$method($ship, $entry, $turn);
+			if ($method !== null) self::$method($ship, $list[$i], $turn); //by reference for applyGunner, which notes his added mode
 		}
+		self::settleFiringModes($ship, $list);
+		$ship->setOfficers($list);
+	}
+
+	/* WHEN AND HOW HE LEFT ACTION: array(out, how), or array(null, null) while he serves. The earliest
+	   wins; on a tie the first offered (a kill before a move before a disabling: both in one turn reads
+	   as killed, §4.4). Each is matched to the post he held at that turn ($entry['stays'], Stage 10), so
+	   a Gunner who moved off a gun is not disabled when it falls later, and a kill note on one Gunner's
+	   gun kills him and not his ship's other Gunners. */
+	private static function outState($ship, array $entry){
+		$best = null; $how = null;
+		$take = function ($turn, $state) use (&$best, &$how){
+			if ($turn === null) return;
+			if ($best === null || (int)$turn < $best){ $best = (int)$turn; $how = $state; }
+		};
+		$stays = self::staysOf($entry);
+		//KILLED: his kill notes, each on the post he held that turn (a note naming no post: wherever he was)
+		foreach ($ship->getOfficerKills() as $kill){
+			foreach ($stays as $stay){
+				if ($kill['id'] !== $stay['id']) continue;
+				if ($kill['post'] === null || ((int)$kill['post'] === (int)$stay['post'] && self::within($kill['turn'], $stay))) $take($kill['turn'], 'killed');
+			}
+		}
+		/* ...and the weapon-mounted Matter Weapons Expert (anyDamage): "disabled if the weapon takes any damage
+		   at all (after armor), and automatically killed if the weapon is destroyed" - so his post's fall while
+		   he holds it (its own boxes or its Structure block) KILLS him. One hit that damages and destroys it is
+		   a kill (the tie rule above). */
+		foreach ($stays as $stay){
+			if (empty(self::$registry[$stay['id']]['anyDamage'])) continue;
+			$post = $ship->getSystemById($stay['post']);
+			$fell = ($post !== null) ? self::disabledTurn($ship, $post) : null;
+			if ($fell !== null && self::within($fell, $stay)) $take($fell, 'killed');
+		}
+		/* MOVED: a fighter officer who left this row with his fighter (followFighter) - a move beats the
+		   DisengagedFighter bookkeeping that retires the row he left on the same turn. */
+		$moves = $ship->getOfficerMoves();
+		if (isset($moves[$entry['id']])) $take((int)$moves[$entry['id']], 'moved');
+		//DISABLED: a post destroyed while he held it, or by the end of the turn he was moving to it (he arrives to a wreck)
+		foreach ($stays as $stay){
+			$post = $ship->getSystemById($stay['post']);
+			if ($post === null){ $take(0, 'disabled'); continue; } //a vanished post never served
+			$anyDamage = !empty(self::$registry[$stay['id']]['anyDamage']);
+			$fell = self::disabledTurn($ship, $post);
+			if ($fell !== null && ($stay['to'] === null || $fell <= $stay['to'])){
+				if ($stay['from'] === null || $fell >= $stay['from']){
+					if (!$anyDamage) $take($fell, 'disabled');
+				} else if ($fell === $stay['from'] - 1){
+					$take($fell, 'disabled');
+				}
+			}
+			if ($anyDamage) $take(self::firstDamagedTurn($post, $stay), 'disabled');
+		}
+		return array($best, $how);
 	}
 
 	/* Out on turn N = serves N, gone from N + 1 (D3: the support-system convention, and it keeps
-	   simultaneous fire simultaneous). Out at turn 0 is pre-battle damage: he never serves (§4.9). */
+	   simultaneous fire simultaneous). Out at turn 0 is pre-battle damage: he never serves (§4.9).
+	   Stage 10: and not on a turn he spent moving to another post ("lose their abilities for the rest of
+	   that turn"). ⚠️ MIRROR PAIR with officers.serves (JS). */
 	private static function serves($entry, $turn){
+		if (!empty($entry['transit']) && in_array((int)$turn, $entry['transit'], true)) return false;
 		if ($entry['out'] === null) return true;
 		return ($entry['out'] >= 1) && ($entry['out'] >= (int)$turn);
+	}
+
+	/* ------------------------------------------------------------------ moving officers (Stage 10) */
+
+	/* ⭐ MOVING OFFICERS (user request 2026-10-16). In Initial Orders the player may order a movable officer
+	   (`movable` - the Expert Gunner, and the Matter Weapons Expert, at the C&C or in a weapon) to another post
+	   he could hold; the order is one OffTransfer note on his old post (saveTransfers), and every load replays
+	   them here in turn order. He serves nowhere on the turn he moves (serves), still counts at his OLD post
+	   for damage and his kill roll that turn, and holds the new one from the next turn.
+	   Each entry gets its `stays` - array('id', 'post', 'from', 'to') per post he has held, from/to the turns
+	   (null: open), `transit` (the turns he moved) when he has moved, and `moving` (the post he is moving to)
+	   on the turn of a move. Its id and post become those of the stay holding $turn - which is how the Matter
+	   Weapons Expert is OFF_MWE at the C&C and OFF_MWEW in a weapon. An order the rules refuse (mayMoveTo)
+	   moves nobody: the client offers only what they allow, and the server checks again before writing. */
+	private static function resolveTransfers($ship, array &$list, $turn){
+		foreach ($list as $i => $entry){
+			$list[$i]['stays'] = array(array('id' => $entry['id'], 'post' => (int)$entry['post'], 'from' => null, 'to' => null));
+		}
+		$orders = $ship->getOfficerTransfers();
+		if (empty($orders)) return;
+		usort($orders, function ($a, $b){
+			if ($a['turn'] !== $b['turn']) return $a['turn'] - $b['turn'];
+			return $a['seq'] - $b['seq'];
+		});
+		foreach ($orders as $order){
+			$m = (int)$order['turn'];
+			if ($m > $turn) continue;
+			$i = self::officerAt($list, $order['id'], $order['from'], $m);
+			if ($i === null) continue;
+			$target = $ship->getSystemById($order['to']);
+			$as = ($target === null) ? null : self::mayMoveTo($ship, $list, $i, $target, $m);
+			if ($as === null) continue;
+			$last = count($list[$i]['stays']) - 1;
+			$list[$i]['stays'][$last]['to'] = $m;
+			$list[$i]['stays'][] = array('id' => $as, 'post' => (int)$target->id, 'from' => $m + 1, 'to' => null);
+			$list[$i]['transit'][] = $m;
+		}
+		foreach ($list as $i => $entry){
+			$stay = self::stayOn($entry, $turn);
+			$list[$i]['id'] = $stay['id'];
+			$list[$i]['post'] = (int)$stay['post'];
+			if (!empty($entry['transit']) && in_array($turn, $entry['transit'], true)){
+				$next = self::stayOn($entry, $turn + 1);
+				$list[$i]['moving'] = (int)$next['post'];
+			}
+		}
+	}
+
+	/* May the officer at $list[$i] be moved to $target on turn $m? The id he would serve as there, or null.
+	   ⭐ THE move rule - the load (resolveTransfers), the write (saveTransfers) and the payload's `targets`
+	   (the client offers only those) all ask it:
+	     - a movable officer, serving (not disabled or killed before $m), moving at most once a turn;
+	     - a post he could hold (postAs: a weapon he could be bought for; the Matter Weapons Expert's C&C), not
+	       his own, and not destroyed;
+	     - not the post of another placed officer still in action that turn or the next - one officer to a
+	       weapon (Stage 8), and no swaps: the post must be free when he sets out. A disabled or killed
+	       officer holds nobody's post. */
+	private static function mayMoveTo($ship, array $list, $i, $target, $m){
+		$entry = $list[$i];
+		$stay = self::stayOn($entry, $m);
+		if ($stay === null || empty(self::$registry[$stay['id']]['movable'])) return null;
+		if (!empty($entry['transit']) && in_array((int)$m, $entry['transit'], true)) return null;
+		if ((int)$target->id === (int)$stay['post']) return null;
+		list($out) = self::outState($ship, $entry);
+		if ($out !== null && $out < $m) return null; //"Disabled or Killed Officers cannot be moved"
+		$as = self::postAs($ship, $stay['id'], $target);
+		if ($as === null) return null;
+		$fell = self::disabledTurn($ship, $target);
+		if ($fell !== null && $fell < $m) return null;
+		foreach ($list as $j => $other){
+			if ($j === $i) continue;
+			foreach (array($m, $m + 1) as $t){
+				$held = self::stayOn($other, $t);
+				if ($held === null || (int)$held['post'] !== (int)$target->id || !self::holdsAPost($held['id'])) continue;
+				list($otherOut) = self::outState($ship, $other);
+				if ($otherOut === null || $otherOut >= $m) return null;
+			}
+		}
+		return $as;
+	}
+
+	/* The officer he would be at $system - his own id, or another sharing his rulesId (the Matter Weapons Expert:
+	   OFF_MWE at the C&C, OFF_MWEW in a weapon) - or null when $system cannot host him. A placed officer needs
+	   the per-system offer he could be BOUGHT on (the lobby's own test, so a move goes where a purchase could);
+	   a ship-level one his own post. */
+	private static function postAs($ship, $id, $system){
+		$kind = self::rulesId($id);
+		foreach (self::$registry as $candidate => $officer){
+			if (empty($officer['movable']) || self::rulesId($candidate) !== $kind) continue;
+			if (!empty($officer['placed'])){
+				if (Enhancements::systemEnhancementOffered($ship, $system, $candidate)) return $candidate;
+			} else if (self::isEligible($ship, $candidate) && self::findPost($ship, $officer['post']) === $system){
+				return $candidate;
+			}
+		}
+		return null;
+	}
+
+	//an officer who occupies his post as far as another's move is concerned: a placed or movable one
+	private static function holdsAPost($id){
+		return !empty(self::$registry[$id]['placed']) || !empty(self::$registry[$id]['movable']);
+	}
+
+	//the officer serving as $id at post $from on turn $m, or null
+	private static function officerAt(array $list, $id, $from, $m){
+		foreach ($list as $i => $entry){
+			$stay = self::stayOn($entry, $m);
+			if ($stay !== null && $stay['id'] === (string)$id && (int)$stay['post'] === (int)$from) return $i;
+		}
+		return null;
+	}
+
+	//his posts so far: the stays resolveTransfers built, or the one post an entry built elsewhere names
+	private static function staysOf(array $entry){
+		if (!empty($entry['stays'])) return $entry['stays'];
+		return array(array('id' => $entry['id'], 'post' => (int)$entry['post'], 'from' => null, 'to' => null));
+	}
+
+	private static function stayOn(array $entry, $turn){
+		foreach (self::staysOf($entry) as $stay){
+			if (self::within($turn, $stay)) return $stay;
+		}
+		return null;
+	}
+
+	private static function within($turn, array $stay){
+		return ($stay['from'] === null || (int)$turn >= $stay['from']) && ($stay['to'] === null || (int)$turn <= $stay['to']);
+	}
+
+	/* InitialOrdersGamePhase::process: the moves a POST asked for ($claims - array(id, from, to) each, raw), checked
+	   against the LOADED ship (the POST-side copy has no officers) with the load's own rule, and each one that
+	   passes written as an OffTransfer note on his old post - read back at every later load (takeNote). */
+	public static function saveTransfers($ship, $claims, $gamedata){
+		if (!($ship instanceof BaseShip) || !is_array($claims)) return;
+		$list = $ship->getOfficers();
+		if (empty($list)) return;
+		$turn = (int)$gamedata->turn;
+		foreach (array_slice(array_values($claims), 0, self::MAX_TRANSFER_CLAIMS) as $claim){
+			if (!is_array($claim) || !isset($claim['id'], $claim['from'], $claim['to'])) continue;
+			$i = self::officerAt($list, (string)$claim['id'], (int)$claim['from'], $turn);
+			$target = ($i === null) ? null : $ship->getSystemById((int)$claim['to']);
+			$as = ($target === null) ? null : self::mayMoveTo($ship, $list, $i, $target, $turn);
+			if ($as === null) continue;
+			//this POST's later claims see him gone, as the load will
+			$list[$i]['stays'] = self::staysOf($list[$i]);
+			$list[$i]['stays'][count($list[$i]['stays']) - 1]['to'] = $turn;
+			$list[$i]['stays'][] = array('id' => $as, 'post' => (int)$target->id, 'from' => $turn + 1, 'to' => null);
+			$list[$i]['transit'][] = $turn;
+			Manager::insertIndividualNote(new IndividualNote(-1, $gamedata->id, $turn, $gamedata->phase, $ship->id, (int)$claim['from'],
+				self::TRANSFER_NOTE, substr(self::getLabel($list[$i]['id']) . ' moves to #' . (int)$target->id, 0, 40),
+				$list[$i]['id'] . ':' . (int)$target->id));
+		}
+	}
+
+	/* Every post he could be moved to this turn (the payload's `targets`, own team only): mayMoveTo over the
+	   ship's systems. Empty while he cannot move at all. */
+	private static function moveTargets($ship, array $list, $i, $turn){
+		$out = array();
+		if (empty(self::$registry[$list[$i]['id']]['movable']) || !self::serves($list[$i], $turn)) return $out;
+		foreach ($ship->systems as $system){
+			if (self::mayMoveTo($ship, $list, $i, $system, $turn) !== null) $out[] = (int)$system->id;
+		}
+		return $out;
+	}
+
+	/* DBManager's bulk note loop hands every note here first: an OffTransfer or OffUsed note is recorded on the
+	   ship and never handed to its system (§4.4's reason - a Jump Engine misreads a note it does not know).
+	   true = taken. Their values are "id:to" and "id:ability". */
+	public static function takeNote($ship, $note){
+		if ($note->notekey !== self::TRANSFER_NOTE && $note->notekey !== self::USE_NOTE) return false;
+		$parts = explode(':', (string)$note->notevalue, 2);
+		if (count($parts) === 2){
+			if ($note->notekey === self::TRANSFER_NOTE) $ship->recordOfficerTransfer($parts[0], $note->systemid, (int)$parts[1], $note->turn, (int)$note->id);
+			else $ship->recordOfficerUse($parts[0], $note->systemid, $parts[1], $note->turn);
+		}
+		return true;
 	}
 
 	/* Is this officer aboard and serving on $turn (default: the turn this gamedata was loaded at)?
@@ -715,11 +951,14 @@ class Officers{
 	}
 
 	/* The earliest turn the system took damage through its armour (isDamagedOnTurn's test) - pre-battle
-	   damage included (turn 0, armour 0: he never serves). A repair row is negative and never counts. */
-	private static function firstDamagedTurn($system){
+	   damage included (turn 0, armour 0: he never serves). A repair row is negative and never counts.
+	   $stay (Stage 10): only while he held it - a gun damaged before he moved into it does not disable him. */
+	private static function firstDamagedTurn($system, $stay = null){
 		$first = null;
 		foreach ($system->damage as $damage){
-			if ($damage->damage > $damage->armour) $first = self::earlier($first, (int)$damage->turn);
+			if ($damage->damage <= $damage->armour) continue;
+			if ($stay !== null && !self::within($damage->turn, $stay)) continue;
+			$first = self::earlier($first, (int)$damage->turn);
 		}
 		return $first;
 	}
@@ -917,9 +1156,12 @@ class Officers{
 	   AND the live fireControl, for the same mode-switch reason as the Matter expert's. Gunsights does the same
 	   earlier in the load, so the two stack (+2). isModified sends both to every viewer, exactly as for
 	   Gunsights (§4.6): the shooter's own hit chance needs them. */
-	private static function applyGunner($ship, $entry, $turn){
+	private static function applyGunner($ship, &$entry, $turn){
 		$weapon = $ship->getSystemById($entry['post']);
 		if (!($weapon instanceof Weapon)) return;
+		//his Piercing shot, while he still has it, on a gun with no Piercing mode of its own: a mode to fire it in
+		//(BEFORE the +1 below, so the added mode carries it too)
+		if (self::abilityOpen($entry, 'pierce', $turn) && self::mayAddPiercing($weapon)) $entry['mode'] = self::addPiercingMode($weapon, self::spentOn($entry, 'pierce', $turn));
 		if (!empty($weapon->fireControlArray) && is_array($weapon->fireControlArray)){
 			foreach ($weapon->fireControlArray as $mode => $fc){
 				if (is_array($fc)) $weapon->fireControlArray[$mode] = self::bumpFireControl($fc);
@@ -934,6 +1176,213 @@ class Officers{
 	   $officersPresent. A weapon whose damage is not rolled gains nothing, which is the rule. */
 	public static function gunnerDieBonus($ship, $weapon){
 		return self::servesOn($ship, 'OFF_GUN', $weapon, TacGamedata::$currentTurn) ? 1 : 0;
+	}
+
+	/* ------------------------------------------------------------------ once per battle, and faster reloads (Stage 10) */
+
+	//what a spent ability is called in its note and the tooltip
+	private static $abilityNames = array('reload' => 'faster reload', 'pierce' => 'Piercing shot', 'called' => 'called shot');
+
+	/* Is this ability still his on $turn? Spent ON $turn still counts: that turn's shot is the one that spent it
+	   (so every order his gun fires that turn, and a replay of it, reads the same). */
+	private static function abilityOpen(array $entry, $ability, $turn){
+		return !isset($entry['abilities'][$ability]) || (int)$entry['abilities'][$ability] >= (int)$turn;
+	}
+
+	/* The OffUsed notes (takeNote), each matched to the officer who held that post that turn - so a spent ability
+	   goes with him to another weapon ("tied to the Officer, not the weapon", user 2026-10-16). */
+	private static function resolveUses($ship, array &$list){
+		$uses = $ship->getOfficerUses();
+		if (empty($uses)) return;
+		foreach ($list as $i => $entry){
+			foreach ($uses as $use){
+				if ($entry['out'] !== null && $entry['out'] < $use['turn']) continue; //a fallen officer left on that gun spent nothing
+				foreach (self::staysOf($entry) as $stay){
+					if ($stay['id'] !== $use['id'] || (int)$stay['post'] !== (int)$use['post'] || !self::within($use['turn'], $stay)) continue;
+					$had = isset($list[$i]['abilities'][$use['ability']]) ? $list[$i]['abilities'][$use['ability']] : null;
+					$list[$i]['abilities'][$use['ability']] = ($had === null) ? (int)$use['turn'] : min($had, (int)$use['turn']);
+				}
+			}
+		}
+	}
+
+	/* Spend officer $i's $ability on $turn: in memory at once (a second order this request sees it) and as one OffUsed
+	   note on his post, written straight through - firing and the turn change run inside advance(). Once only. */
+	private static function spend($ship, $i, $ability, $turn, $gamedata){
+		$list = $ship->getOfficers();
+		if (isset($list[$i]['abilities'][$ability]) && (int)$list[$i]['abilities'][$ability] <= (int)$turn) return;
+		$list[$i]['abilities'][$ability] = (int)$turn;
+		$ship->setOfficers($list);
+		$ship->recordOfficerUse($list[$i]['id'], $list[$i]['post'], $ability, $turn);
+		Manager::insertIndividualNote(new IndividualNote(-1, $gamedata->id, (int)$turn, $gamedata->phase, $ship->id, (int)$list[$i]['post'],
+			self::USE_NOTE, substr(self::getLabel($list[$i]['id']) . ': ' . self::$abilityNames[$ability] . ' used', 0, 40),
+			$list[$i]['id'] . ':' . $ability));
+	}
+
+	//the index of the officer serving as $id IN this system on $turn, or null
+	private static function servingIndex($ship, $id, $system, $turn){
+		foreach ($ship->getOfficers() as $i => $entry){
+			if ($entry['id'] === $id && (int)$entry['post'] === (int)$system->id && self::serves($entry, $turn)) return $i;
+		}
+		return null;
+	}
+
+	/* ⭐ THE GUNNER'S SHOT BONUS - Weapon::calculateHitBase, in d20 units, behind $officersPresent, once the order's
+	   mode is set. One ability per shot (user rulings 2026-10-16):
+	     a Piercing shot      his Piercing ability, if he still has it: on a gun that may already pierce, +4 - the
+	                          usual -4 waived ("no penalty where it is"); in the mode added for him, nothing more
+	                          (that mode carries the penalty) - either way it is spent;
+	     a called shot        otherwise, +3 ("a called shot at +3"), spent - never on a Piercing shot;
+	   The faster reload is the turn change's (fasterReload). ⚠️ MIRROR PAIR with officers.gunnerShotBonus (JS). */
+	public static function gunnerShotBonus($ship, $weapon, $called, $gamedata){
+		$turn = (int)$gamedata->turn;
+		$i = self::servingIndex($ship, 'OFF_GUN', $weapon, $turn);
+		if ($i === null) return 0;
+		$entry = $ship->getOfficers()[$i];
+		if ($weapon->damageType === 'Piercing'){
+			if (!self::abilityOpen($entry, 'pierce', $turn)) return 0;
+			self::spend($ship, $i, 'pierce', $turn, $gamedata);
+			return (isset($entry['mode']) && (int)$weapon->firingMode === (int)$entry['mode']) ? 0 : self::PIERCE_PENALTY;
+		}
+		if (!$called || !self::abilityOpen($entry, 'called', $turn)) return 0;
+		self::spend($ship, $i, 'called', $turn, $gamedata);
+		return self::GUNNER_CALLED_BONUS;
+	}
+
+	/* ⭐ A TURN OFF THE RELOAD - Weapon::onAdvancingGamedata, behind $officersPresent, on the loading the new turn
+	   starts with (phase -1; the gamedata is the one the last turn was fought on, so the officers are that
+	   turn's). A weapon that fired last turn and is reloading starts one turn further on, never past a full
+	   load ("never better than once a turn" - a one-turn gun gains nothing, and spends nothing):
+	     the weapon-mounted Matter Weapons Expert (`reload`)  after every firing while he served in it;
+	     the Expert Gunner (`abilities`)                      ONCE: after the first firing that spent neither his
+	                                                          Piercing nor his called shot (a firing that did
+	                                                          reloads normally, and it waits for the next one).
+	   Granted at the start of the reload: losing him half way through does not take it back. Any firing
+	   counts - an interception starts a reload too. The client reads the loading the server writes, so
+	   isLoaded agrees with no mirror. */
+	public static function fasterReload($ship, $weapon, $data, $gamedata){
+		if ((int)$gamedata->phase !== -1) return;
+		$fired = (int)$gamedata->turn - 1;
+		if ($fired < 1 || !$weapon->firedOnTurn($fired)) return;
+		if ((int)$data->loading >= (int)$weapon->getNormalLoad()) return;
+		foreach ($ship->getOfficers() as $i => $entry){
+			if ((int)$entry['post'] !== (int)$weapon->id || !self::serves($entry, $fired)) continue;
+			$officer = self::$registry[$entry['id']];
+			if (!empty($officer['reload'])){
+				$data->loading += 1;
+			} else if (!empty($officer['abilities']) && self::abilityOpen($entry, 'reload', $fired)
+				&& !self::spentOn($entry, 'pierce', $fired) && !self::spentOn($entry, 'called', $fired)
+				&& !self::firingSpentAbility($weapon, $entry, $fired, $gamedata)){
+				self::spend($ship, $i, 'reload', $fired, $gamedata);
+				$data->loading += 1;
+			}
+			return;
+		}
+	}
+
+	private static function spentOn(array $entry, $ability, $turn){
+		return isset($entry['abilities'][$ability]) && (int)$entry['abilities'][$ability] === (int)$turn;
+	}
+
+	/* Did this weapon's firing on $fired spend his Piercing or his called shot? Read off its own fire orders, by
+	   gunnerShotBonus's rule (a Piercing mode while his Piercing was his; else a standard called shot while his
+	   called shot was), because the spend itself is not in this gamedata: Manager::advanceGameState runs the turn
+	   change on the gamedata it loaded BEFORE the firing, and FireGamePhase::advance resolved the shots on a
+	   gamedata of its own - so its OffUsed note and its in-memory spend are both invisible here (game 4484: the
+	   faster reload went with a Piercing shot on turns 1 and 6). Interceptions spend neither. */
+	private static function firingSpentAbility($weapon, array $entry, $fired, $gamedata){
+		foreach ($weapon->fireOrders as $order){
+			if ((int)$order->turn !== (int)$fired || (int)$order->weaponid !== (int)$weapon->id) continue;
+			if (strpos((string)$order->type, 'ntercept') !== false) continue;
+			$mode = (int)$order->firingMode;
+			$type = isset($weapon->damageTypeArray[$mode]) ? $weapon->damageTypeArray[$mode] : $weapon->damageType;
+			if ($type === 'Piercing'){
+				if (self::abilityOpen($entry, 'pierce', $fired)) return true;
+				continue;
+			}
+			if ((int)$order->calledid < 1 || !self::abilityOpen($entry, 'called', $fired)) continue;
+			$target = $gamedata->getShipById($order->targetid);
+			$called = $target ? $target->getCalledSystemAsAimed($order) : null;
+			if ($called !== null && $called->getTargetProfileOverride() === null) return true;
+		}
+		return false;
+	}
+
+	/* ⭐ A REPLAY'S FIRED PIERCING MODE. Manager::getReplayGameData (the replay, and the printed combat log) builds the
+	   past turn's data on a gamedata constructed at the game's CURRENT turn and only then sets it back to $turn - so
+	   apply() judged every Gunner's Piercing by the current turn, and one spent ON $turn already read as gone: the
+	   mode it was fired in was never added, and the log and replay named the shot by the weapon's own mode (game
+	   4484, turn 6: "Raking"). This adds that mode back to the weapon he held on $turn, for every viewer - it was
+	   fired. Nothing else about the officers is re-judged. */
+	public static function restoreFiredModes($gamedata, $turn){
+		if (!TacGamedata::$officersPresent) return;
+		foreach ($gamedata->ships as $ship){
+			if (!($ship instanceof BaseShip) || !$ship->hasOfficers()) continue;
+			foreach ($ship->getOfficers() as $entry){
+				if (!self::spentOn($entry, 'pierce', $turn)) continue;
+				$stay = self::stayOn($entry, $turn);
+				$weapon = ($stay !== null && $stay['id'] === 'OFF_GUN') ? $ship->getSystemById($stay['post']) : null;
+				if ($weapon instanceof Weapon && self::mayAddPiercing($weapon)) self::addPiercingMode($weapon, true);
+			}
+		}
+	}
+
+	/* A gun his Piercing ability adds a mode to (user ruling 2026-10-16): direct fire, ONE firing mode, Standard or
+	   Raking damage - 65% of the guns he can be bought for. Nothing in such a weapon's damage code branches on a
+	   mode number. A gun with Piercing already uses its own mode (gunnerShotBonus); Pulse, Flash, ballistic,
+	   hex-targeted and other multi-mode weapons offer no Piercing shot - he can still use it from another gun.
+	   ⚠️ Nor a magazine-fed gun (checkAmmoMagazine - the Grome railguns): its modes ARE its shells, built from the
+	   magazine, so one shell type reads as one mode; nor a dual / duo mount, whose modes pick a sub-weapon. */
+	private static function mayAddPiercing($weapon){
+		if ($weapon->ballistic || $weapon->hextarget || count($weapon->firingModes) !== 1) return false;
+		if ($weapon->checkAmmoMagazine || $weapon instanceof DualWeapon || $weapon instanceof DuoWeapon) return false;
+		if (!empty($weapon->damageTypeArray) && in_array('Piercing', $weapon->damageTypeArray, true)) return false;
+		return in_array($weapon->damageType, array('Standard', 'Raking'), true);
+	}
+
+	/* ONE MORE FIRING MODE: a copy of the weapon's only mode, as Piercing, at the usual Piercing fire control (-4,
+	   no shots at fighters - the Battle Laser's own Piercing mode) and an early resolution priority. Every per-mode
+	   array the weapon fills gets the new key, since changeFiringMode reads them by mode on both ends; the weapon
+	   sends them (Weapon::markAddedMode) because the static blueprint has never heard of the mode - to his own team,
+	   and to anyone else only when $fired (spent on the turn this load is for: a replay of the shot, the printed log;
+	   user request 2026-10-16 - it would point at him). Rebuilt at every load while the ability is his; gone the turn
+	   after he spends it (settleFiringModes). Returns its number. */
+	private static function addPiercingMode($weapon, $fired){
+		$source = (int)array_key_first($weapon->firingModes);
+		$mode = max(array_keys($weapon->firingModes)) + 1;
+		if (empty($weapon->damageTypeArray)) $weapon->damageTypeArray = array($source => $weapon->damageType);
+		if (empty($weapon->fireControlArray)) $weapon->fireControlArray = array($source => $weapon->fireControl);
+		if (empty($weapon->priorityArray)) $weapon->priorityArray = array($source => $weapon->priority);
+		$fields = array();
+		foreach (get_object_vars($weapon) as $name => $value){ //public fields only, from here: what the client merges
+			if (substr($name, -5) !== 'Array' || !is_array($value) || !array_key_exists($source, $value)) continue;
+			if ($weapon->splitArcs && ($name === 'startArcArray' || $name === 'endArcArray')) continue; //a list of arcs, not modes
+			$weapon->{$name}[$mode] = $value[$source];
+			$fields[] = $name;
+		}
+		$weapon->firingModes[$mode] = 'Piercing';
+		$weapon->damageTypeArray[$mode] = 'Piercing';
+		$fc = $weapon->fireControlArray[$source];
+		$pierced = array();
+		foreach ($fc as $k => $value) $pierced[$k] = ((int)$k === 0 || $value === null) ? null : (int)$value - self::PIERCE_PENALTY;
+		$weapon->fireControlArray[$mode] = $pierced;
+		$weapon->priorityArray[$mode] = self::PIERCE_PRIORITY;
+		$fields[] = 'firingModes';
+		$weapon->markAddedMode($mode, array_unique($fields), $fired);
+		if ((int)$weapon->firingMode === $mode) $weapon->changeFiringMode($mode); //a loading row may already name it
+		return $mode;
+	}
+
+	/* A gun left in a mode it no longer has - the added Piercing mode, gone the turn after it was spent, still named
+	   by the gun's loading row - goes back to its first mode. Every gun a Gunner has held. */
+	private static function settleFiringModes($ship, array $list){
+		foreach ($list as $entry){
+			foreach (self::staysOf($entry) as $stay){
+				if ($stay['id'] !== 'OFF_GUN') continue;
+				$weapon = $ship->getSystemById($stay['post']);
+				if ($weapon instanceof Weapon && !isset($weapon->firingModes[$weapon->firingMode])) $weapon->changeFiringMode((int)array_key_first($weapon->firingModes));
+			}
+		}
 	}
 
 	//Matter Weapons Expert in a weapon: the C&C variant's +1 fire control, on his own weapon's Matter modes only
@@ -1366,10 +1815,22 @@ class Officers{
 		if (!TacGamedata::$currentGameFinished && !$ship->isRevealedToCurrentViewer()) return;
 		$out = array();
 		$saves = $ship->getOfficerSaves();
-		foreach ($list as $entry){
+		$turn = (int)TacGamedata::$currentTurn;
+		foreach ($list as $i => $entry){
 			$row = array('id' => $entry['id'], 'post' => $entry['post']);
 			//the Scavenger's once-per-game save: the turn it was spent (officers.stateText words it)
 			if (isset($saves[$entry['id']])) $row['used'] = $saves[$entry['id']];
+			/* Stage 10: the post he is moving to this turn; the Gunner's spent abilities (ability => turn) and the
+			   number of the Piercing mode added for him; and, in Initial Orders (the only phase a move is ordered
+			   in), every post he may move to - the client offers those and no others (the server checks again:
+			   saveTransfers). */
+			if (isset($entry['moving'])) $row['moving'] = $entry['moving'];
+			if (!empty($entry['abilities'])) $row['abilities'] = $entry['abilities'];
+			if (isset($entry['mode'])) $row['mode'] = $entry['mode'];
+			if (!empty(self::$registry[$entry['id']]['movable']) && (int)TacGamedata::$currentPhase === 1 && !TacGamedata::$currentGameFinished){
+				$targets = self::moveTargets($ship, $list, $i, $turn);
+				if (!empty($targets)) $row['targets'] = $targets;
+			}
 			/* An officer who moved with his fighter is not out of action - he is on another row now:
 			   listed here as serving up to the turn he left, and not at all afterwards. */
 			if ($entry['how'] === 'moved'){

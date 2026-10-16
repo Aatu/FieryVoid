@@ -7,8 +7,10 @@ db/savedOfficerPrice.sql before deploying); the Technician rebuilt from his full
 widened (§9.10), and Stage 6, the Expert Navigator (§9.11), committed (`6dd2f740e`). Faction rules for officers (§9.12)
 and Stage 7, the Expert Jump Officer (§9.13), committed (`6996071b9`). Stage 8, the placed officers - Expert Gunner (core)
 and the weapon-mounted Matter Weapons Expert - and the lobby system menu opening beside the ship window (§9.14),
-committed (`9ecfd16d4`). Stage 9, the Expert Coordinator, with three system-menu refinements (§9.15), BUILT 2026-10-16,
-uncommitted; the Expert Analyst moved to the Hard tier the same day.** Written against `dab951bf5`. The user
+committed (`9ecfd16d4`). Stage 9, the Expert Coordinator, with three system-menu refinements (§9.15), committed
+(`0436100e3`); the Expert Analyst moved to the Hard tier the same day. Stage 10 - faster reloads, the Expert Gunner's
+once-per-battle abilities and MOVING officers between posts in game (§9.16) - BUILT 2026-10-16, uncommitted.** Written
+against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
 a third Helmsman effect (−1 on the meteor impact chart) and play-tested Stage 1 in game 4457 (confirmed
@@ -28,9 +30,11 @@ supplied the Jump Officer's rules text (Stage 7, §9.13). On 2026-10-16 they sup
 Matter Weapons Expert's full rules and ruled Stage 8's four questions (§6, §9.14), and asked for the lobby's system
 menu to stop covering the ship window. Later that day they supplied the Expert Coordinator's rules text (Stage 9,
 §9.15), moved the Expert Analyst into the Hard tier ("more complex than I first described"), and asked for three system
-menu refinements: no gap beside the ship window, the edited system outlined, and an Officers section bar. Each
-officer's own rules questions still only need ruling when that officer's stage starts. Next step: Stage 10 (loading
-time −1).
+menu refinements: no gap beside the ship window, the edited system outlined, and an Officers section bar. Later that
+day they began Stage 10 with three simplifications of the Gunner's once-per-battle abilities (all automatic) and a new
+feature, moving officers between posts in Initial Orders, and ruled the four questions it raised (§9.16). Each
+officer's own rules questions still only need ruling when that officer's stage starts. Next step: the Hard tier
+(Stage 11+), one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -207,8 +211,8 @@ Medium-sized job (§3.4).
 | ~~**Expert Analyst**~~ | *moved to Hard, 2026-10-16 (§3.3)* | | |
 | **Expert Coordinator** | flight, 50 % | A combat pivot costs 1; the −1 to-hit only from 180° | The cost lives in movement.js `doPivot` ([:1436](source/public/client/movement.js#L1436)) and the penalty in [weapon.php:1872](source/server/model/weapons/weapon.php#L1872) plus its client twin. "180°" needs net rotation counted, not pivot rows. *Built in Stage 9 (§9.15).* |
 | **Expert Gunner, core** | a chosen weapon, 10 %, max 3 / 2 / 1 by size *(rules text 2026-10-16: 5% doubled off the Yolu, max 1 / 2 / 3 / 4 for medium / heavy / capital / enormous - §9.14)* | +1 fire control; +1 per die through `Dice::$perDieBonus` | The effects are Easy. The cost is that he is the first **placed** officer: a registry entry, a ship-wide cap in sanitise and on the client, the menu sub-heading, and the insignia instead of the ✦. *Built in Stage 8 (§9.14).* |
-| **Matter Weapons Expert, weapon** | a chosen weapon | Dies on any penetrating damage; loading −1 (next row) *(rules text: disabled by any damage, killed when destroyed - §9.14)* | A placed officer plus the "any damage" kill rule. *Built in Stage 8 (§9.14), loading still Stage 10.* |
-| **Loading time −1** (Gunner and the weapon-mounted MWE) | — | — | Medium-Hard. `loadingtime` is overwritten from the stored loading row on every load ([weapon.php:1189](source/server/model/weapons/weapon.php#L1189)) and from `loadingtimeArray` on every mode switch ([:3350](source/server/model/weapons/weapon.php#L3350)). The client reads it from the blueprint, because `stripForJson` does not send it. Losing the officer mid-charge changes whether the weapon is loaded. One build serves both officers. |
+| **Matter Weapons Expert, weapon** | a chosen weapon | Dies on any penetrating damage; loading −1 (next row) *(rules text: disabled by any damage, killed when destroyed - §9.14)* | A placed officer plus the "any damage" kill rule. *Built in Stage 8 (§9.14), loading in Stage 10 (§9.16).* |
+| **Loading time −1** (Gunner and the weapon-mounted MWE) | — | — | Medium-Hard. `loadingtime` is overwritten from the stored loading row on every load ([weapon.php:1189](source/server/model/weapons/weapon.php#L1189)) and from `loadingtimeArray` on every mode switch ([:3350](source/server/model/weapons/weapon.php#L3350)). The client reads it from the blueprint, because `stripForJson` does not send it. Losing the officer mid-charge changes whether the weapon is loaded. One build serves both officers. *Built in Stage 10 (§9.16) without touching `loadingtime`: one more turn of loading at the start of each reload, in the loading row the turn change writes - which the client reads.* |
 
 ### 3.3 Hard
 
@@ -223,7 +227,7 @@ Medium-sized job (§3.4).
 | **Expert Surge Officer** | Six unrelated hooks: EM damage, combined Surge Cannon shots, capacitor power by ship size, EM-hardening −3, a d6 to resist deactivation, Spark Field −1 | +1 damage on Electromagnetic-class weapons |
 | **Expert Ballistic Officer** | "+1 magazine round per launcher" moves the lobby's ammo limits, which are derived from magazine capacity at offer time. Free missile swaps are lobby ammo pricing | +5 launch range (`range` **and** `rangeArray` — the same mode-switch trap — and sent to the client) |
 | **Expert Anticipator** | A free **turn** for a ship in the Firing phase is a new phase-3 movement for ships (today only flights move there, as combat pivots), with masking, validation and animation | Rolling initiative twice is Easy. Re-rolling the lowest die is Medium: a `Dice`-level flag, which the replay harness's own `Dice` stub must mirror ([[project_replay_harness]]) |
-| **Expert Gunner, once-per-battle abilities** | A Piercing mode injected into a weapon that lacks one, and +15 % on one called shot, each once per battle and not combinable: firing-mode injection, a persisted "used", and UI | — |
+| **Expert Gunner, once-per-battle abilities** | A Piercing mode injected into a weapon that lacks one, and +15 % on one called shot, each once per battle and not combinable: firing-mode injection, a persisted "used", and UI. *Built in Stage 10 (§9.16), all three automatic (user simplifications), with moving officers.* | — |
 | **Expert Electrician** | Per turn: deactivate the flight's weapons, convert their max damage ÷ flight size into thrust or OB, then a d6 to see whether they stay offline | — |
 | **Expert Analyst** | *Moved from Medium, 2026-10-16:* the user found his full rules "more complex than I first described". The Medium reading was a per-load "the viewer's team has a live Analyst" static widening `isDisclosedToCurrentViewer()` (ammo types, hangar contents) and the officer payload, per viewer; two clauses moot in FV (weapon arming already public, [weapon.php:453](source/server/model/weapons/weapon.php#L453); cargo not modelled). Needs his full rules text and its own ruling round | — |
 
@@ -415,6 +419,8 @@ masking: individual notes never reach any client.
 | Jump Officer | the drive's `range` and tooltip; the jump point counter's `vortexMaxTurns`; `arrivalIniPenalty` | **Yes, to every viewer** (Stage 7, §9.13): `JumpEngine::stripForJson` sends range and data while he serves; the counter and the arrival penalty were public already. The −1 scatter shift and the facing cancel show only as where and how the doorway formed |
 | Technician | reactor `output` | **Yes.** `output` is sent unconditionally. Accept, as the ✦ does. *§9.10: the reactor's −2 critical modifier is not sent (nothing displays it), and Efficient Transfers' +1 is worked out by the owner's client alone* |
 | Matter Weapons Expert, Gunner | `fireControl` via `isModified` | **Yes**, exactly like Gunsights |
+| Gunner, weapon-mounted MWE (Stage 10) | an added Piercing mode (the weapon's mode list and its per-mode fields); a weapon's `turnsloaded` one higher after a faster reload | The added mode: **own team only** (user request 2026-10-16 - it would point at the Gunner), and to anyone else only in the data of the turn it was FIRED (a replay, the printed log, which label the shot by it) or once the game is over; the opponent's fire control list is sent without its entry. Loading: **yes**, public anyway |
+| Moving officers (Stage 10) | where an officer is moving (`moving`), the posts he may move to (`targets`), a Gunner's spent abilities and added mode number | Own team only, in the officer payload |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
 | Scanner | the late-EW allowance | Own-team only: the client asks `officers.listFor`, which an enemy payload never carries |
 | Every officer | `pointCostEnh` | **Yes**, as for every enhancement already |
@@ -556,7 +562,7 @@ committed.
 | **7** | Jump Officer. **BUILT 2026-10-15** (§9.13), with the faction rules (§9.12) | Range +1 (with and without the Jump Accelerator); failure −20 at all three sites through one helper; arrival scatter and initiative |
 | **8** | Placed-officer framework; Gunner core; weapon-mounted Matter Weapons Expert (without loading). **BUILT 2026-10-16** (§9.14) | The cap per size; a Gunner and Gunsights on one gun show ✦ and insignia side by side; "any damage" ~~kills~~ disables (his full rules text; destroyed kills); the destroyed-host refund |
 | **9** | Coordinator. **BUILT 2026-10-16** (§9.15), with three system-menu refinements. ~~Analyst~~ moved to the Hard tier (11+) | The halved cost on the row `doPivot` writes and in `canPivot`; the −1 waived short of a full 180, on both ends |
-| **10** | Loading time −1 | A mode switch keeps it; the officer lost mid-charge; the client's `isLoaded` agrees with the server |
+| **10** | Loading time −1. *Plus (user, 2026-10-16) the Gunner's once-per-battle abilities and moving officers.* **BUILT 2026-10-16** (§9.16) | A mode switch keeps it; the officer lost mid-charge; the client's `isLoaded` agrees with the server |
 | **11+** | Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
@@ -597,7 +603,7 @@ committed.
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? |
 | Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). **RULED 2026-10-15: Grome Autocracy only** (§9.12); the Matter-weapon hull test is kept beside it. **Rules text and rulings 2026-10-16 (§9.14):** "moved into one specific weapon instead of his normal station" - **one or the other, never both**; that weapon gets the +1 / +1 "but no others do", and its rate of fire +1 (Stage 10); "disabled if the weapon takes any damage at all (after armor), and automatically killed if the weapon is destroyed" - **and the ordinary kill roll too**. |
-| Gunner | Size caps for LCVs and bases? Which weapons are eligible: any with fire control, ballistics too? Does he stack with Gunsights? **Rules text and rulings 2026-10-16 (§9.14):** +1 to hit (not EW) and +1 per die capped at the face, always; 5% of the base cost, doubled on non-Yolu ships; at most 1 on a medium ship or smaller, 2 heavy, 3 capital, 4 enormous; **any weapon Gunsights may be bought for** (ballistics included), stacking with Gunsights and with Elite Crew; "does not combine any to-hit or damage bonuses with those of other elite officers" - **on his weapon his own replace the Matter Weapons Expert's**. Once-per-scenario rate of fire, piercing mode and +3 called shot: not combinable, Hard (§3.3), not built; moving between weapons: §8. |
+| Gunner | Size caps for LCVs and bases? Which weapons are eligible: any with fire control, ballistics too? Does he stack with Gunsights? **Rules text and rulings 2026-10-16 (§9.14):** +1 to hit (not EW) and +1 per die capped at the face, always; 5% of the base cost, doubled on non-Yolu ships; at most 1 on a medium ship or smaller, 2 heavy, 3 capital, 4 enormous; **any weapon Gunsights may be bought for** (ballistics included), stacking with Gunsights and with Elite Crew; "does not combine any to-hit or damage bonuses with those of other elite officers" - **on his weapon his own replace the Matter Weapons Expert's**. Once-per-scenario rate of fire, piercing mode and +3 called shot: not combinable, Hard (§3.3), not built; moving between weapons: §8. **Stage 10 (user, 2026-10-16, §9.16) - all three automatic:** the faster reload after the first firing that used neither other ability (**RULED: saved for a later firing** when the first used one); +15% on his weapon's first called shot that is not Piercing; Piercing as an ADDED firing mode on a gun without one, removed once fired - **RULED: single-mode Standard/Raking direct-fire guns only, at the usual -4 with no fighters** - and +4 on a native Piercing gun's first Piercing shot. All three tied to HIM, not the weapon. Moving officers between posts in Initial Orders (blue `#90b1ee` Officers menu); **RULED: the Matter Weapons Expert moves between the C&C and his Matter weapons too**. |
 | Fighter officers | Post = the first craft? A craft has no d20 critical roll (its test is a d10 dropout), so: no kill roll at all, or a d20 + damage roll on any damage to his craft, 20+ kills? (Default: none; he is lost with his craft.) Does he go with that craft on a split-launch? Missileer's "+5 OB": is that +1 OB (5 %)? Evader: always on, or toggled like jinking? Coordinator's "180°+" = three combat pivots in one turn? **RULED 2026-10-11:** the post is the first craft; he is lost **with his craft** (destroyed or dropped out), with **no kill roll**; a dock, a partial dock or a split launch never loses him, and he **stays on the flight row he was bought on** (a "- Split" row never carries him). Missileer: **+1 OB** on a launch that gets the flight's OB, priced **half a craft once, plus 1 per missile the whole flight can carry**. Evader: **always on**. Expert Motivator: **a full officer** (one per flight, lost with his craft, hidden), under his old id, effect and price. Coordinator: Stage 9. **RE-RULED 2026-10-11 (round 2, §9.7):** a **remotely controlled** unit (`$remoteControl`, the Orieni Hunter-Killers) carries no officer of any kind - "they have no pilots". An officer's abilities apply only to the part of the flight that holds his fighter, so when the flight splits **he follows his fighter**: the new row gets him, posted in its first craft, and his cost; the old row loses him from the next turn. The Evader's −1 OB also lowering mine detection is accepted. |
 
 ---
@@ -626,8 +632,9 @@ committed.
 
 ## 8. Out of scope
 
-- Officers gaining experience, being promoted, or being swapped between posts mid-battle.
-- Buying or moving officers in game. Lobby only, like every other enhancement.
+- Officers gaining experience or being promoted. *(Moving an officer between posts mid-battle was added by the user on
+  2026-10-16 and built in Stage 10, §9.16.)*
+- Buying officers in game. Lobby only, like every other enhancement.
 - A distinct insignia per officer type (one insignia in v1; the tooltip names them).
 - A combat-log line announcing an officer's death (D4).
 - Updating FV_factions.txt:438, which still offers Shadow ships officer enhancements that D9 now
@@ -1746,3 +1753,159 @@ and "Combat pivot cost"). Docs: a fifth Fighter Officers card. Statics and bundl
    default) - not added without asking.
 2. Not tested in a real game: no local game holds a Coordinator flight. Worth a play test - buy one on any fighter, then
    in the Firing phase pivot once (1 thrust, no −5 in the hit chance) and three times one way (−5 back).
+
+### 9.16 Stage 10: faster reloads, the Expert Gunner's once-per-battle abilities, and moving officers (2026-10-16)
+
+**Request (user, 2026-10-16).** Stage 10 (loading time −1), plus the Gunner's three once-per-battle abilities, simplified
+so that none needs a player choice: (1) the faster reload applies just after the first time his weapon fires and begins
+reloading, unless that shot used the Piercing or called-shot bonus, "in which case normal recharge applies"; (2) +15%
+("+3") on the first called shot his weapon makes, not if Piercing; (3) Piercing added as a temporary firing mode where
+the weapon has none (read off `$damageTypeArray`), removed once fired in it - and on a weapon with its own Piercing mode,
++4 fire control on its first Piercing shot, cancelling the usual −4. "Once-per-battle abilities ... should be tied to the
+Officer, not the weapon." And a new feature: **moving officers** between posts - announced in Initial Orders through a new
+`#90b1ee` React **Officers** menu (**Move Officer**, then a click on the system; the button becomes **Cancel Move**), shown
+only on a system with a movable officer; disabled or killed officers cannot move; a moving officer loses his abilities for
+the rest of that turn and serves at the new post from the next; the insignia changes colour on the transfer turn and the
+tooltip says so.
+
+**Rulings (user, 2026-10-16, asked before building - all four as recommended):**
+1. The added Piercing mode goes only on **single-mode Standard/Raking direct-fire weapons** (65% of the 17,107 Gunner
+   offers; nothing in their damage code branches on a mode number). Pulse, Flash, ballistic, hex-targeted, magazine-fed and
+   multi-mode weapons offer no Piercing - he can use it after moving.
+2. The added mode carries the **usual Piercing penalty**: fire control −4 and no shots at fighters (the Battle Laser's own
+   Piercing mode). "No penalty where it is" is the +4 on a native Piercing gun.
+3. The **Matter Weapons Expert moves between the C&C and his Matter weapons** (and weapon to weapon) - one man, OFF_MWE at
+   the C&C and OFF_MWEW in a weapon.
+4. A first firing that spent another ability **keeps the faster reload for a later firing** (not lost).
+
+**Built with defaults, not ruled** (ask before changing):
+- The faster reload is **one more turn of loading at the start of the reload** (granted if he served on the gun the turn
+  it fired), capped at a full load - "never better than once a turn": a one-turn gun gains nothing and the Gunner's ability
+  is not spent on it. Losing him mid-reload does not take it back. **Any firing counts, an interception included.**
+- A called shot's +15% covers every called order his gun fires that turn (practically one); "spent on turn T" stays usable
+  through turn T, which is also what makes a replay of that turn read the same.
+- A moving officer **counts at his old post for the whole transfer turn** (its damage can disable him, its crit roll kill
+  him); a new post destroyed that same turn leaves him **disabled on arrival**. Damage his new weapon took before he
+  arrived does not touch the weapon-mounted Matter expert's "any damage" rule.
+- A target must be a post he could be **bought** for (a placed officer's per-system offer; the MWE's C&C), undestroyed, and
+  **not held** by another placed officer still in action, nor another's destination that turn - so **no swaps** in one turn.
+  A killed or disabled officer holds nobody's post. One move per officer per turn.
+- Insignia: **both** the old and the new post blue (`#90b1ee`) on the transfer turn - and already while the order is only
+  pending in Initial Orders.
+
+**Files.** Server: `Officers.php` (registry keys `movable`, `reload`, `abilities`; `TRANSFER_NOTE` OffTransfer and
+`USE_NOTE` OffUsed; `apply` rebuilt around `resolveTransfers` (each entry's `stays`, `transit`, `moving`), `outState` (out
+of action matched to the post he held at that turn), `resolveUses`, `settleFiringModes`; `mayMoveTo` - THE move rule -
+`postAs`, `officerAt`, `saveTransfers`, `moveTargets`, `takeNote`; `serves` skips a transit turn; `gunnerShotBonus`,
+`fasterReload`, `mayAddPiercing`, `addPiercingMode`, `spend`, `abilityOpen`; `addForJson` sends `moving`, `abilities`,
+`mode`, `targets`), `ShipClasses.php` (kills as a list WITH their post; `$officerTransfers`, `$officerUses`,
+`$officerTransferClaims`), `DBManager.php` (the kill note's post; `takeNote`), `Manager.php` (`officerTransfers` claim),
+`InitialOrdersGamePhase.php` (`saveTransfers` on the reloaded ship), `weapon.php` (`gunnerShotBonus` in `calculateHitBase`,
+`fasterReload` in `onAdvancingGamedata`, `$addedModeFields` / `markAddedMode` sent by `stripForJson`). Client: `officers.js`
+(registry flags and the Gunner/MWEW summaries; `serves`, `postState` 'moving', `stateText`/`abilitiesText`,
+`describePost`, `gunnerShotBonus`; the move store `ship.officerTransfers`, `movableOn`, `canManage`, `movingTo`,
+`arrivingAt`, `destinations`, the pick (`startPick`, `isPickTarget`, `pickTarget`, `cancelPick`), `setTransfer`,
+`cancelTransfer`, `transferClaims`), new React `OfficersMenu.js`, `SystemInfoButtons.js` (`canOfficersMenu`), `SystemIcon.js`
+(blue insignia, the pick click, destinations outlined), `SystemInfo.js` (moving / arriving lines), `weaponManager.js`
+(`computeShotModifiers`' "Expert Gunner" line), `ajaxInterface.js` (`officerTransfers` in the commit). Docs: About Officers
+gains **Moving an officer** (and the blue insignia, the used abilities in the tooltip, what the opponent sees); the Matter
+Weapons Expert and Expert Gunner cards. Bundles rebuilt and the served copy synced; statics unchanged (no offer moved); no
+new PHP class, autoload unchanged.
+
+**As built:**
+- ⭐ **Out of action is matched to the post he held at the time** (`outState` over `stays`). This also FIXES a Stage 8 bug:
+  kills were keyed by officer id only, so one Gunner's kill note killed every Gunner aboard. A kill note now names the
+  officer of its id at its post on its turn - which is where `rollKills` always wrote it. (The harness's synthetic kill
+  note on a Jump Engine was moved to the C&C; its non-delivery proof now uses notes on the Jump Engine that match nobody.)
+- **Moves are notes, replayed at every load** (`resolveTransfers`): the client keeps the order on the ship until the commit
+  carries it as a claim; `InitialOrdersGamePhase::process` checks each claim with `mayMoveTo` on the reloaded ship and
+  writes one OffTransfer note on his old post ("id:to"); every later load replays them in turn order through the same
+  rule. Notes are intercepted in DBManager's loop (`takeNote`), never delivered.
+- **Abilities are notes too** (OffUsed, "id:ability", on his post): `gunnerShotBonus` spends Piercing / called at hit-chance
+  time inside `advance()`, `fasterReload` spends the reload at the turn change - both write straight through, as the
+  Scavenger's save does. `resolveUses` gives each to the officer who held that post on that turn (never a fallen one).
+- **The added Piercing mode** is built at every load while his Piercing is unspent (or spent this turn): every public
+  per-mode `*Array` field holding mode 1 gets the new key (not a split mount's arc list), FC −4 with fighters null, priority
+  2; the Gunner's own +1 then raises it like every mode. The weapon sends `firingModes` and every filled field (the client
+  merges a system's payload key by key over its blueprint) - to his own team, and to an opponent only in the replay of the
+  turn it was fired (follow-up 1 below). A gun its loading row left in the vanished mode goes back to mode 1
+  (`settleFiringModes`).
+- **The faster reload** adds 1 to the loading the turn change writes (`Weapon::onAdvancingGamedata` → `fasterReload`), so the
+  client's `isLoaded` and loading readout follow with no mirror, and no `loadingtime` is touched (the plan's §3.2 trap).
+- The **Officers menu** (`OfficersMenu.js`, Officers blue) appears in Initial Orders on the player's own system holding a
+  serving movable officer with somewhere to go (`targets`, which the server computes in phase 1 only). Move Officer closes
+  the menu, a passive notice says what to do, and every destination is outlined in `#90b1ee`; the next click on that ship
+  orders the move (a non-destination cancels it, another ship's click ends the pick and goes on).
+
+**Measured.** Statics unchanged. Payload: `targets` only in Initial Orders and only for the owner's movable officers.
+
+**Verified.**
+- `officersHarness.php` **718 / 0** (650 `--no-db`; 117 new): moves (moved / transit turn / payload `moving`), every
+  refusal (the C&C, his own gun, a missing system, a wreck, an occupied gun, a post he does not hold, after his death), a
+  killed Gunner's gun taken over, one move a turn, no swaps, two moves in a row; out of action per stay (old post after he
+  left, during transit, a wreck on arrival, new post later, kill notes per post, the transit kill roll at the old post, the
+  two-Gunner kill fix); the Matter expert C&C → railgun → C&C and railgun → railgun, "any damage" only while he is there;
+  `targets` (phase 1, owner, occupied, transit); `saveTransfers` (valid, refused, duplicates, flood); the added mode (fields,
+  FC, damage, switch and back, payload, none on a multi-mode / magazine / native gun, spent, killed, the stale mode
+  settled); the REAL `calculateHitBase` (+15% called once and through its turn, gone later, gate; −20% added Piercing,
+  called Piercing is Piercing; native +25% and spent; a called Raking shot from a Battle Laser); abilities follow him; the
+  fallen Gunner's gun; `fasterReload` (every case) and the REAL `Weapon::onAdvancingGamedata` writing loading 2; and a
+  REAL database round trip of a move (claim → note → reload: moving, not serving), rolled back.
+- `officersClientHarness.js` **247 / 0** (33 new): the registry mirror, `serves`, `gunnerShotBonus` and the real
+  `computeShotModifiers` "Expert Gunner" line, the blue insignia and titles on both posts, the tooltip's moving / arriving /
+  used lines, `canManage` per phase and state, the menu (render and colours), the pick (outline, order, cancel, another
+  ship), `destinations`, `transferClaims`, Cancel Move.
+- **Mutation-tested: 36 breaks (23 server, 13 client), all caught** - the first run missed one (a fallen officer collecting
+  a newcomer's spent ability: test added) and skipped one on a line-ending pattern (rerun, caught).
+- `enhancementsDifferential.js` 583 / 0, `enhancementsHarness` 272 / 0, Kirishiac refits 168 / 0 and 88 / 0,
+  `fvbuild -Check` all passed (replay **146 / 0**).
+- Not run: the real-site headless drivers (session planting refused since 2026-10-15) and a real game.
+
+**Follow-ups (user, 2026-10-16, same day):**
+1. **The added Piercing mode is hidden from the opponent** ("we really should hide it ... so that it does appear
+   correctly in replay"). Done server-side rather than by a client `gamedata.replay` toggle, so the data never reaches
+   an opponent in live play: `Weapon::stripForJson` sends the mode's fields (`markAddedMode($mode, $fields, $public)`) to
+   the owner's team, and to anyone else only when `$public` - his Piercing spent ON the load turn - or the game is over;
+   otherwise it sends the fire control list without the mode's key. His Piercing is only ever spent while that turn's
+   shots resolve (inside `advance()`, which then moves the game on), so "spent on the load turn" holds only for a load OF
+   that past turn: `replay.php` (`Manager::getReplayGameData`, the replay and the printed combat log) - where
+   `combatLog.logFireOrders` switches the weapon to the order's mode and names the shot "Piercing". Opponents' replays
+   of other turns, and live play, never carry it.
+2. **A pending move drops the officer from the owner's hit-chance preview** ("misleading"): `weaponManager.
+   computeFireControl` subtracts `officers.pendingMoveFireControl` - `displayFireControl`'s rule (now `fireControlRaise`)
+   asked with every serving officer and without those with an uncommitted order, so a Gunner leaving a Matter gun the C&C
+   expert covers costs it nothing, as on the server. `officers.gunnerShotBonus` skips him too. The opponent's view needed
+   nothing: the move is committed before any of his ballistics resolve or show, and the server has dropped the +1 by then.
+3. Save Orders not saving a pending move: accepted as standard for Save Orders.
+Verified: officersHarness **721 / 0** (the payload per viewer, game over, the firing turn's replay), client **255 / 0**
+(`pendingMoveFireControl` cases, the real `computeFireControl`, the shot bonus); 9 more mutations, all caught; differential
+583 / 0; `fvbuild -Check` passed. Bundles rebuilt, served copy synced.
+
+4. **The weapon tooltip's "Fire control" line drops it too** (user, same day: "if the weapon doesn't actually gain the FC
+   bonus on that turn, the tooltip should not show it"): `officers.adjustDataDisplay` subtracts the same
+   `pendingMoveFireControl`. Client 256 / 0, the mutation caught.
+
+5. **Play test, game 4484 (user, 2026-10-16) - two bugs fixed:**
+   - *A replayed / logged Piercing shot read "Raking".* `Manager::getReplayGameData` builds a past turn on a gamedata
+     constructed at the game's CURRENT turn and only then `setTurn($turn)`s it, so `Officers::apply` judged the Gunner's
+     Piercing by the current turn - spent on the replayed turn, it read as gone and the mode was never added (and with it
+     "spent on the load turn", follow-up 1's public test, never held in a replay either). `Officers::restoreFiredModes(
+     $gamedata, $turn)`, called right after `setTurn`, adds the mode back - public - to the weapon each Gunner held on the
+     replayed turn when he spent his Piercing on it. Nothing else about officers is re-judged for a replay. ⚠️ Every other
+     officer state in a replay is still the current turn's (pre-existing since Stage 1; display only).
+   - *The faster reload was spent on the same firing as the Piercing shot* (notes on turns 1 and 6). The turn change runs
+     on the gamedata `Manager::advanceGameState` loaded BEFORE the firing; `FireGamePhase::advance` resolves the shots on a
+     gamedata of its own, so the Piercing / called-shot spend (in memory and as a note) is invisible to `fasterReload`.
+     It now also reads the firing's own fire orders (`firingSpentAbility`: a Piercing mode while his Piercing was his, a
+     standard called shot while his called shot was; interceptions spend neither). Game 4484's two wrongly spent reloads
+     are left as they are (the user's test data).
+   - *The +15% called-shot preview on turn 3* was not reproduced: the payload of a live turn-3 load carries "called shot
+     used, turn 1" for the Gunner on #23 and the client answers 0 for him (+15% only for the Gunners on #9 and #10, who had
+     not used theirs). Asked the user which weapon showed it.
+   Verified: officersHarness **731 / 0** (restoreFiredModes, the firing's own orders, a REAL `getReplayGameData` of a turn
+   with a spent Piercing for an opponent viewer, rolled back); 4 mutations, all caught; `fvbuild -Check` passed; synced.
+
+**Observations, not changed:**
+1. Not tested in a real game. Worth a play test: a Gunner on a laser (fire once - the next reload starts a turn on; a
+   called shot shows "Expert Gunner +15%" once; the added Piercing mode in the mode selector until fired), then Move
+   Officer in Initial Orders (both insignia blue, no bonuses that turn, the new gun's from the next).

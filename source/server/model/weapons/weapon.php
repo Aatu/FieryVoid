@@ -529,6 +529,22 @@ class Weapon extends ShipSystem
             $strippedSystem->isModified = $this->isModified;
         }
 
+        /* An officer's added firing mode (OFFICERS_PLAN.md Stage 10): every per-mode field it filled, and the mode list -
+           to his own team, and to anyone else only in the data of the turn it was FIRED (a replay, the printed combat
+           log, which label the shot by it) or once the game is over. Until then a Piercing mode on a gun that has none
+           would point at the Gunner, so anyone else gets the fire control list without it, too. */
+        if ($this->addedMode !== null) {
+            if ($this->addedModePublic || TacGamedata::$currentGameFinished || $ship->isRevealedToCurrentViewer()) {
+                foreach ($this->addedModeFields as $field) {
+                    $strippedSystem->$field = $this->$field;
+                }
+            } else if (isset($strippedSystem->fireControlArray) && is_array($strippedSystem->fireControlArray)) {
+                $withoutIt = $strippedSystem->fireControlArray;
+                unset($withoutIt[$this->addedMode]);
+                $strippedSystem->fireControlArray = $withoutIt;
+            }
+        }
+
         //Turret jam (ReducedArcs crit): the static blueprint still carries the mount's FULL arc, so
         //the live reduced arc has to travel with the payload - the client merges JSON over the
         //blueprint, and every arc consumer (targeting, "Not In Arc", the hover arc) reads these.
@@ -1028,8 +1044,27 @@ class Weapon extends ShipSystem
     public function onAdvancingGamedata($ship, $gamedata)
     {
         $data = $this->calculateLoading($gamedata);
+        //OFFICERS_PLAN.md Stage 10 - a weapon an officer reloads faster starts the new turn one turn further on
+        if ($data && TacGamedata::$officersPresent && $ship instanceof BaseShip)
+            Officers::fasterReload($ship, $this, $data, $gamedata);
         if ($data)
             SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
+    }
+
+    /* OFFICERS_PLAN.md Stage 10 - an officer's ADDED firing mode (the Expert Gunner's Piercing mode,
+       Officers::addPiercingMode): its number, the per-mode fields it filled - the static blueprint has never heard of
+       the mode, so stripForJson sends each field whole (the client merges a system's payload over its blueprint key by
+       key) - and whether anyone may see it ($addedModePublic: it was fired on the turn this data is for). PROTECTED, so
+       no blueprint carries any of it. */
+    protected $addedMode = null;
+    protected $addedModeFields = array();
+    protected $addedModePublic = false;
+
+    public function markAddedMode($mode, array $fields, $public)
+    {
+        $this->addedMode = $mode;
+        $this->addedModeFields = $fields;
+        $this->addedModePublic = (bool)$public;
     }
 
 
@@ -1851,6 +1886,13 @@ public function getFullStartLoading()
                 $mod += $calledSystem->checkforCalledShotBonus();
             }
             //else: the system's own flat profile replaces the ship's bearing profile below - no called-shot penalty, no bonus
+        }
+
+        /* OFFICERS_PLAN.md Stage 10 - an Expert Gunner's once-per-battle shot: +4 on his gun's first native Piercing
+           shot, +3 on its first called shot (Officers::gunnerShotBonus spends it). One static read for every other
+           shot in the game. ⚠️ MIRROR PAIR with officers.gunnerShotBonus, in weaponManager.computeShotModifiers. */
+        if (TacGamedata::$officersPresent) {
+            $mod += Officers::gunnerShotBonus($shooter, $this, $calledSystem !== null && $calledProfileOverride === null, $gamedata);
         }
 
         if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)) { //leaving instanceof OSAT here - assuming MicroSATs will not suffer this penalty (Dovarum seems to be able to turn/pivot like a superheavy fighter it's based on)

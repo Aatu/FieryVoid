@@ -2,7 +2,7 @@ import * as React from "react";
 import styled from "styled-components"
 import theme from "../styled/theme";
 import { canApplyPreBattleDamage } from "./SystemInfoButtons";
-import { MENU_CHROME } from "./menuControls";
+import { MENU_CHROME, SECTION_INK } from "./menuControls";
 import { isMenuTarget } from "../helpers/menuTarget";
 
 const HealthBar = styled.div`
@@ -90,8 +90,11 @@ const Insignia = styled.svg`
 
 /* The out-of-action grey is LIGHT on purpose: a disabled officer's post is usually a DESTROYED system,
    whose whole icon is blurred (System's filter) - a filter no child can escape - so a mid grey vanished
-   into the darkened art. Light grey still reads as "not gold". */
-const INSIGNIA_COLOUR = { serving: theme.colors.enhTitle, disabled: '#c4c4c4', killed: '#c4c4c4' };
+   into the darkened art. Light grey still reads as "not gold".
+   MOVING (OFFICERS_PLAN.md Stage 10): the post an officer is leaving this turn and the one he is moving to,
+   in the Officers blue (#90b1ee - the Officers menu's and the Buy dialog's Officers section's). */
+const OFFICER_BLUE = SECTION_INK.officer.bar;
+const INSIGNIA_COLOUR = { serving: theme.colors.enhTitle, disabled: '#c4c4c4', killed: '#c4c4c4', moving: OFFICER_BLUE };
 
 //exported for the fighter card (FighterIcon), a fighter officer's post being the craft itself (Stage 4)
 export const OfficerInsignia = ({ state, title }) => (
@@ -188,6 +191,13 @@ const System = styled.div`
         outline: 2px solid ${MENU_CHROME.focus};
         outline-offset: -2px;
         box-shadow: 0 0 8px ${MENU_CHROME.focus};
+    ` : ''}
+    /*A post the officer being moved may go to (OFFICERS_PLAN.md Stage 10, officers.isPickTarget): the same inset
+      outline, in the Officers blue, while "Move Officer" waits for the player's click.*/
+    ${props => props.$officerPick ? `
+        outline: 2px solid ${OFFICER_BLUE};
+        outline-offset: -2px;
+        box-shadow: 0 0 8px ${OFFICER_BLUE};
     ` : ''}
     /*$mirror (rolled ship, port/starboard drawn swapped): the icon ART is flipped
       horizontally on an ::after layer so its facing matches the drawn side, while
@@ -287,6 +297,9 @@ class SystemIcon extends React.Component {
         const preBattleDamage = canApplyPreBattleDamage(ship, system);
 
         if ((gamedata.waiting || gamedata.replay) && !preBattleDamage) return;
+
+        //OFFICERS_PLAN.md Stage 10 - "Move Officer" is waiting for the post to move him to: this click is its answer
+        if (window.officers && officers.picking && officers.pickTarget(ship, system)) return;
 
         /* WALKERS_OF_SIGMA_PLAN.md 3.15 (Stage 17) - STOWED IS NOT DEAD, AND THIS ONE LINE IS WHY
            A DOCKED SHIP'S WHOLE WINDOW WAS INERT (user report 2026-09-12).
@@ -634,6 +647,7 @@ class SystemIcon extends React.Component {
                 $docked={isDockedOrbital(system)}
                 $orderPending={hasPendingDockOrder(system)}
                 $menuTarget={isMenuTarget(ship, system)}
+                $officerPick={Boolean(window.officers) && officers.isPickTarget(ship, system)}
             >
                 {renderBadges(ship, system)}
                 {isMeteorDefence(ship, system) && <MeteorBadge title="Committed to meteor defence this turn">☄</MeteorBadge>}

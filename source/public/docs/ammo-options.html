@@ -887,20 +887,41 @@
       the fleet list, from the next turn; the rest of the flight does not.</li>
   </ul>
 
+  <h3 data-anchor="movingofficers">Moving an officer</h3>
+  <ul>
+    <li>Some officers can change posts during a battle: the Expert Gunner, between weapons, and the Matter Weapons Expert,
+      between the C&amp;C and the ship's Matter weapons.</li>
+    <li>In <b>Initial Orders</b>, click the system the officer serves in. Its menu shows an <b>Officers</b> panel: press
+      <b>Move Officer</b>, then click one of the highlighted systems in the ship window. <b>Cancel Move</b> keeps him where he
+      is, up until you commit your orders.</li>
+    <li>He serves nowhere for the rest of that turn - none of his bonuses apply - and takes up his new post at the start of
+      the next turn.</li>
+    <li>He can move to any system he could have been bought for (the Matter Weapons Expert also to the C&amp;C), but never
+      to a destroyed system, or to one another officer holds or is moving to that turn. Officers cannot swap posts in a
+      single turn. A disabled or killed officer cannot move, and an officer can move once a turn.</li>
+    <li>On the turn he moves he still counts as being at his old post: damage there can disable or kill him. If his new post
+      is destroyed that turn, he arrives to a wreck and is disabled.</li>
+    <li>Once-per-battle abilities belong to the officer, not the system: one he has used stays used after he moves.</li>
+  </ul>
+
   <h3 data-anchor="seeingofficers">Seeing your officers</h3>
   <ul>
     <li>A gold double-chevron insignia marks the post's icon in the ship window - for a fighter officer, the flight's first
-      fighter. It turns grey once the officer is out of action, with a red slash through it if they were killed.</li>
+      fighter. It turns grey once the officer is out of action, with a red slash through it if they were killed. On the turn
+      an officer moves, the insignia on both his old and his new post turns <b>blue</b>.</li>
     <li>The post's information tooltip names the officer and what they do, and says how and when they were lost - or, for
-      an Expert Scavenger, when he spent his once-per-battle save. A fighter officer is named in the flight's own tooltip,
-      shown when you hover over a fighter.</li>
+      an Expert Scavenger, when he spent his once-per-battle save, and for an Expert Gunner, which of his once-per-battle
+      abilities he has used. While an officer is moving, both posts' tooltips say where he is going or coming from. A
+      fighter officer is named in the flight's own tooltip, shown when you hover over a fighter.</li>
     <li>The ship window's gold Enhancements box counts the officers aboard, as <b>Officers (2)</b>. In the lobby, a
       fighter flight's box names its one officer instead.</li>
     <li>Your opponent sees none of these until the game is over. Some effects do show, though, because they change numbers
       everyone can read: a Helmsman's or a Dogfighter's initiative, a Geneticist's profiles, a Technician's reactor power,
       a Matter Weapons Expert's or an Expert Gunner's fire control, a Navigator's turn, pivot, roll and accel/decel costs, a Jump Officer's jump
-      range, how long his jump point stays open and his arrival initiative penalty, an Evader's offensive bonus, and the
-      criticals and damage an Engineer or Scavenger repairs. The opponent sees the number, not who is behind it.</li>
+      range, how long his jump point stays open and his arrival initiative penalty, an Evader's offensive bonus, the
+      criticals and damage an Engineer or Scavenger repairs, and a weapon's loading when an officer speeds up its reload.
+      The opponent sees the number, not who is behind it. An Expert Gunner's added Piercing mode stays hidden from your
+      opponent until he fires it: they see it only in the replay of that turn.</li>
   </ul>
 </section>
 
@@ -998,14 +1019,16 @@
       <h4>Matter Weapons Expert</h4>
       <dl class="fvd-spec">
         <dt>Post</dt>
-        <dd>C&amp;C - or one Matter weapon of your choice, instead.</dd>
+        <dd>C&amp;C - or one Matter weapon of your choice, instead. He can move between them during a battle (see
+          Moving an officer).</dd>
         <dt>Effect</dt>
         <dd><ul>
           <li>+1 fire control (+5%) for every Matter weapon on the ship, against every target size it can engage.</li>
           <li>+1 damage on every Matter weapon shot.</li>
           <li>On a weapon with several firing modes, only its Matter modes benefit.</li>
-          <li><b>In a weapon:</b> the same bonuses, but for that weapon only. Bought from the weapon's own Enhancements menu,
-            under Officers.</li>
+          <li><b>In a weapon:</b> the same bonuses, but for that weapon only - and it reloads a turn faster after every shot,
+            but never faster than once a turn (a weapon that already fires every turn gains nothing). Bought from the
+            weapon's own Enhancements menu, under Officers.</li>
         </ul></dd>
         <dt>Cost</dt>
         <dd>10% of the ship's base cost, wherever he serves.</dd>
@@ -1015,8 +1038,9 @@
         <dt>Notes</dt>
         <dd>In a weapon he works from deep inside its machinery: he is <b>disabled</b> as soon as the weapon takes any
           damage through its armour, and <b>killed</b> if it is destroyed (or by the usual kill roll). Best used early in a
-          battle, or on a well-protected weapon. On a weapon an Expert Gunner serves in, the Gunner's bonuses apply instead
-          of his. The rules' improved rate of fire for the weapon he sits in is not in the game yet.</dd>
+          battle, or on a well-protected weapon. Damage the weapon took before he moved into it does not count. On a weapon
+          an Expert Gunner serves in, the Gunner's bonuses apply instead of his. The faster reload is earned at the start
+          of each reload: losing him part way through does not take it back.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
@@ -1030,6 +1054,17 @@
           <li>+1 fire control (+5%) for that weapon, in every firing mode. This is not EW, so nothing that reduces EW
             reduces it.</li>
           <li>+1 damage on every damage die the weapon rolls, but no die above its maximum (a 10 on a d10 stays 10).</li>
+          <li><b>Once per battle each</b>, automatically - never two on the same shot:
+            <ul>
+              <li><b>Faster reload:</b> after the first firing that used neither ability below, the weapon starts its reload
+                a turn further on - never faster than once a turn. A weapon that already fires every turn gains nothing and
+                keeps the ability for later.</li>
+              <li><b>Piercing shot:</b> a weapon with a single Standard or Raking firing mode gains a <b>Piercing</b> firing
+                mode, at the usual Piercing penalty (-20%, and it cannot target fighters), until he has fired it once. A
+                weapon that can already fire in Piercing mode instead gets +20% on its first Piercing shot, which cancels the
+                penalty.</li>
+              <li><b>Called shot:</b> +15% on his weapon's first called shot that is not a Piercing shot.</li>
+            </ul></li>
         </ul></dd>
         <dt>Cost</dt>
         <dd>10% of the ship's base cost (5% for the Yolu Confederation).</dd>
@@ -1039,8 +1074,10 @@
         <dt>Notes</dt>
         <dd>Stacks with Gunsights (+2 fire control with both) and with Elite Crew's own +1 per die. It does not combine with
           a Matter Weapons Expert: on the Gunner's weapon only the Gunner's bonuses count. A weapon whose damage is not
-          rolled on dice gains no extra damage. The rules' once-per-battle abilities (faster reload, piercing mode, a +3
-          called shot) are not in the game yet, and a Gunner cannot change weapons during a battle.</dd>
+          rolled on dice gains no extra damage. Pulse, Flash, ballistic, magazine-fed and other multi-mode weapons get no
+          added Piercing mode - he can still use it from another weapon. His once-per-battle abilities are his own: they go
+          with him when he moves to another weapon (see Moving an officer). An interception counts as a firing for the
+          faster reload.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
