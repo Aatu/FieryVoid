@@ -49,6 +49,10 @@ window.officers = {
 			summary: 'Turn cost one level lower, pivot and roll cost -1, accel/decel cost -25%' },
 		{ id: 'OFF_JUMP', label: 'Expert Jump Officer', post: 'jump',
 			summary: 'Jump points opened 1 hex further and held 1 turn longer; jump failure chance -20%; exits scatter less (-1 on the chart, 60 degrees of facing shift cancelled); arrival initiative penalty -20' },
+		/* Stage 11: no stat moves - his flat bonus and the boost are the server's at damage time; the owner's tooltip
+		   shows both (adjustDataDisplay, laserBoostText), and the boost buttons come with the payload (boostable). */
+		{ id: 'OFF_LASR', label: 'Expert Laser Technician', post: 'reactor', needs: 'laserWeapon',
+			summary: 'Lasers +1 damage (Blast Lasers +2, Spinal Lasers +3). Power may be put into any laser in Initial Orders: +1 damage per point, never more than half the roll' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -213,15 +217,35 @@ window.officers = {
 
 	/* An officer's own test beyond having the post. ⚠️ MIRROR PAIR with Officers::isEligible's `needs`.
 	     matterWeapon  the hull carries a weapon with a Matter mode (the Matter Weapons Expert)
+	     laserWeapon   the hull carries a weapon with a Laser mode (the Expert Laser Technician)
 	     missiles      the flight carries missiles (the Expert Missileer) */
 	passesNeeds: function passesNeeds(ship, officer) {
 		if (!officer.needs) return true;
+		var self = this;
 		if (officer.needs === 'matterWeapon') {
-			var self = this;
 			return this.systemsOf(ship).some(function (s) { return self.isMatterWeapon(s); });
+		}
+		if (officer.needs === 'laserWeapon') {
+			return this.systemsOf(ship).some(function (s) { return self.isLaserWeapon(s); });
 		}
 		if (officer.needs === 'missiles') return this.missilesPerCraft(ship) > 0;
 		return false;
+	},
+
+	//⚠️ MIRROR PAIR with Officers::isLaserWeapon (PHP)
+	isLaserWeapon: function isLaserWeapon(system) {
+		if (!system || !system.weapon) return false;
+		if (system.weaponClass === 'Laser') return true;
+		var classes = system.weaponClassArray;
+		if (!classes || typeof classes !== 'object') return false;
+		return Object.keys(classes).some(function (mode) { return classes[mode] === 'Laser'; });
+	},
+
+	//a mode missing from weaponClassArray keeps the weapon's own class (as the server's changeFiringMode leaves it)
+	isLaserMode: function isLaserMode(system, mode) {
+		var classes = system.weaponClassArray;
+		var cls = (classes && typeof classes === 'object' && classes[mode] !== undefined) ? classes[mode] : system.weaponClass;
+		return cls === 'Laser';
 	},
 
 	//⚠️ MIRROR PAIR with Officers::isMatterWeapon / ::isMatterMode
@@ -952,16 +976,79 @@ window.officers = {
 		return 0;
 	},
 
+	/* ------------------------------------------------------------------ Expert Laser Technician (Stage 11) */
+
+	/* His flat bonus on each laser, by the class's `name`. ⚠️ MIRROR PAIR with Officers::$laserClassBonus (PHP), which
+	   is keyed by class - officersHarness compares the two over every laser in the statics. Any other laser: +1. */
+	LASER_BONUS: { SpinalLaser: 3, BlastLaser: 2, improvedBlastLaser: 2, LtBlastLaser: 2 },
+
+	/* What he adds to a hit from this laser: 0 unless he serves, and 0 on a laser a serving Expert Gunner holds - the
+	   Gunner's +1 per die replaces it (user ruling 2026-10-17). A Gunner ordered off it this turn serves nowhere once
+	   the order is committed, so the laser has it back at once, as on the server (pendingMoveFireControl's reading).
+	   The lobby's derived list and the owner's server list both answer; an enemy's list is empty.
+	   ⚠️ MIRROR PAIR with Officers::laserDamageBonus (PHP). */
+	laserDamageBonus: function laserDamageBonus(ship, system) {
+		if (!ship || ship.flight || !this.isLaserWeapon(system) || !this.isActive(ship, 'OFF_LASR')) return 0;
+		var self = this;
+		var turn = this.currentTurn();
+		var gunner = this.listFor(ship).some(function (entry) {
+			return entry.id === 'OFF_GUN' && String(entry.post) === String(system.id) && self.serves(entry, turn) && self.transferOf(ship, entry) === null;
+		});
+		if (gunner) return 0;
+		return this.LASER_BONUS[system.name] || 1;
+	},
+
+	/* The points of power the player has put into this laser this turn while he serves - in game only (the lobby boosts
+	   nothing), and only on the owner's side, the one the server tells the laser is boostable. 1 point = +1 damage,
+	   never more than half a hit's roll, from one pool for the turn (Officers::laserBoostDamage). */
+	laserBoost: function laserBoost(ship, system) {
+		if (!ship || ship.flight || this.isDerived(ship) || !this.isLaserWeapon(system) || !this.isActive(ship, 'OFF_LASR')) return 0;
+		if (!window.shipManager || !shipManager.power || typeof shipManager.power.getBoost !== 'function') return 0;
+		return parseInt(shipManager.power.getBoost(system), 10) || 0;
+	},
+
+	//SystemInfo's "Laser boost" line, or null with no boost
+	laserBoostText: function laserBoostText(ship, system) {
+		var boost = this.laserBoost(ship, system);
+		if (!boost) return null;
+		return '+' + boost + ' damage this turn, never more than half a hit\'s roll';
+	},
+
+	/* The weapon's Damage line ("min-max", or one number - Weapon::setSystemDataWindow's, which describes mode 1) with his
+	   flat bonus and this turn's boost on each end: a roll gains min(boost, half of it). The roll is read off the weapon's
+	   own min/max, so a number already raised by the line (a Hyach Weapon Specialist's +3) is carried, not halved. A line
+	   in any other shape, or one describing a non-laser mode 1, is left alone. */
+	laserDamageLine: function laserDamageLine(ship, system, value) {
+		if (!this.isLaserMode(system, 1)) return value;
+		var flat = this.laserDamageBonus(ship, system);
+		var boost = this.laserBoost(ship, system);
+		if (!flat && !boost) return value;
+		var m = /^\s*(\d+)\s*(?:-\s*(\d+))?\s*$/.exec(String(value));
+		if (!m) return value;
+		var lo = parseInt(m[1], 10), hi = (m[2] !== undefined) ? parseInt(m[2], 10) : lo;
+		var first = function (arr, fallback) { return (arr && typeof arr === 'object' && arr[1] !== undefined) ? arr[1] : fallback; };
+		var rollLo = parseInt(first(system.minDamageArray, system.minDamage), 10);
+		var rollHi = parseInt(first(system.maxDamageArray, system.maxDamage), 10);
+		if (!(rollLo >= 0)) rollLo = lo;
+		if (!(rollHi >= 0)) rollHi = hi;
+		lo += flat + Math.min(boost, Math.floor(rollLo / 2));
+		hi += flat + Math.min(boost, Math.floor(rollHi / 2));
+		return (lo === hi) ? String(hi) : lo + '-' + hi;
+	},
+
 	/* SystemInfo's one hook into a system's data rows (and its Special text). The weapon tooltip quotes fire
 	   control only through data["Fire control (fighter/med/cap)"] - in game too, less an officer just ordered to
 	   move (pendingMoveFireControl, user request 2026-10-16) - and a jump drive its range through
 	   data["Range"] and the Special sentence "target a hex within N hexes" - all baked into the static
 	   blueprint, so the lobby rewrites them as they are shown. N is the drive's range as the lobby has it
 	   (after a Jump Accelerator's +2, which lobbyEnhancements writes into both). In game the server's
-	   isModified fire control already rebuilt the one, and its payload the other. */
+	   isModified fire control already rebuilt the one, and its payload the other.
+	   Stage 11: a laser's Damage, with an Expert Laser Technician's bonus and boost (laserDamageLine) - in game too,
+	   where the server applies both only at damage time. */
 	DATA_KEY_FIRECONTROL: 'Fire control (fighter/med/cap)',
 	adjustDataDisplay: function adjustDataDisplay(ship, system, key, value) {
 		if (!system) return value;
+		if (key === 'Damage' && this.isLaserWeapon(system)) return this.laserDamageLine(ship, system, value);
 		if (system.name === 'jumpEngine' && (key === 'Range' || key === 'Special')) {
 			var bonus = this.jumpRangeBonus(ship, system);
 			if (!bonus) return value;

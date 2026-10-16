@@ -545,6 +545,10 @@ class Weapon extends ShipSystem
             }
         }
 
+        /* An Expert Laser Technician aboard (OFFICERS_PLAN.md Stage 11): his team is told this laser may be boosted, and
+           everyone else gets its power entries without the boosts, which would name him. Behind the static. */
+        if (TacGamedata::$officersPresent && $ship instanceof BaseShip) Officers::laserForJson($ship, $this, $strippedSystem);
+
         //Turret jam (ReducedArcs crit): the static blueprint still carries the mount's FULL arc, so
         //the live reduced arc has to travel with the payload - the client merges JSON over the
         //blueprint, and every arc consumer (targeting, "Not In Arc", the hover arc) reads these.
@@ -1421,6 +1425,10 @@ public function getFullStartLoading()
 		//mode - weaponClass is the fired mode's by now. Behind the static, so an ordinary game pays one read per shot.
 		if (TacGamedata::$officersPresent && $this->weaponClass === 'Matter' && $ship instanceof BaseShip){
 			$bonusDamage += Officers::matterDamageBonus($ship, $this);
+		}
+		//Expert Laser Technician (Stage 11): +3 Spinal, +2 Blast, +1 any other laser - on a shot in a Laser mode. Behind the static.
+		if (TacGamedata::$officersPresent && $this->weaponClass === 'Laser' && $ship instanceof BaseShip){
+			$bonusDamage += Officers::laserDamageBonus($ship, $this);
 		}
 		return $bonusDamage;
     }   
@@ -3186,7 +3194,12 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         } finally {
             Dice::$perDieBonus = $previousDieBonus;
         }
+        $rolled = $damage;
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);                
+        /* An Expert Laser Technician's power boost (OFFICERS_PLAN.md Stage 11): +1 per point the player put into this
+           laser, at most half of $rolled, from one pool for the turn - added after the weapon's own reductions, as
+           getDamageMod adds the flat bonuses. Behind the static. */
+        if (TacGamedata::$officersPresent && $shooter instanceof BaseShip) $damage += Officers::laserBoostDamage($shooter, $this, $rolled, $target, $fireOrder);
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		
 		/* first attempt of StarTrek shield

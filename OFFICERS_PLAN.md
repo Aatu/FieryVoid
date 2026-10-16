@@ -9,7 +9,8 @@ and Stage 7, the Expert Jump Officer (§9.13), committed (`6996071b9`). Stage 8,
 and the weapon-mounted Matter Weapons Expert - and the lobby system menu opening beside the ship window (§9.14),
 committed (`9ecfd16d4`). Stage 9, the Expert Coordinator, with three system-menu refinements (§9.15), committed
 (`0436100e3`); the Expert Analyst moved to the Hard tier the same day. Stage 10 - faster reloads, the Expert Gunner's
-once-per-battle abilities and MOVING officers between posts in game (§9.16) - BUILT 2026-10-16, uncommitted.** Written
+once-per-battle abilities and MOVING officers between posts in game (§9.16) - committed (`eae0de604`). Stage 11, the first
+Hard officer, the Expert Laser Technician (§9.17) - BUILT 2026-10-17, uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -32,9 +33,11 @@ menu to stop covering the ship window. Later that day they supplied the Expert C
 §9.15), moved the Expert Analyst into the Hard tier ("more complex than I first described"), and asked for three system
 menu refinements: no gap beside the ship window, the edited system outlined, and an Officers section bar. Later that
 day they began Stage 10 with three simplifications of the Gunner's once-per-battle abilities (all automatic) and a new
-feature, moving officers between posts in Initial Orders, and ruled the four questions it raised (§9.16). Each
-officer's own rules questions still only need ruling when that officer's stage starts. Next step: the Hard tier
-(Stage 11+), one officer at a time.
+feature, moving officers between posts in Initial Orders, and ruled the four questions it raised (§9.16). On 2026-10-17
+they supplied the Expert Laser Technician's rules text with a design note ("laser weapons essentially become boostable
+with this Officer at 1 power = 1 damage, with no maxBoostLevel but a cap at the point of damage") and ruled the four
+questions it raised (Stage 11, §9.17). Each officer's own rules questions still only need ruling when that officer's
+stage starts. Next step: the rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -221,7 +224,7 @@ Medium-sized job (§3.4).
 | **Expert Quartermaster** | Makes this ship's other enhancements and ammo free, which touches every price display, total and the saved-fleet bucket split; a fleet-% price; a random post; "+10 turn delay" is unclear | −30 initiative; the C&C critical modifier |
 | **Breaching Expert** | His post is **one pod inside a flight**, and per-craft ids do not exist in the lobby (WEAPON plan D7). Adds a fleet-wide "20 % of all pods" cap, a change to the capture roll ([ShipSystem.php:951](source/server/model/systems/ShipSystem.php#L951)), and "+1 thrust" for one craft of a flight that moves as one | — |
 | **Expert Evangelist** | Fleet-wide state: +1 to hit while he serves, then −10 initiative (QX1) and −1 to hit if he is **killed**, for every ship, with a client to-hit mirror. Also a fleet-% price, a random post, and the CPN/OSF gate exists only in notes prose | — |
-| **Expert Laser Technician** | "+1 damage per power point sent, up to +50 %" needs a new per-turn allocation UI, persistence and a cap | +3 Spinal / +2 Blast / +1 other lasers, through `getBonusDamage` (`SpinalLaser`, `BlastLaser`, `ImprovedBlastLaser`, `LtBlastLaser` exist) |
+| **Expert Laser Technician** | "+1 damage per power point sent, up to +50 %" needs a new per-turn allocation UI, persistence and a cap. *Built in Stage 11 (§9.17) with no new UI or persistence: the user's design note made every laser use the existing BOOST (power entries type 2, the generic boost buttons), so the allocation, its storage and the power balance all came free; what was new is the cap, a per-turn pool, and hiding the boosts from opponents.* | +3 Spinal / +2 Blast / +1 other lasers, through `getBonusDamage` (`SpinalLaser`, `BlastLaser`, `ImprovedBlastLaser`, `LtBlastLaser` exist) |
 | **Expert Software Engineer** | Bonus fire-control points spendable in the Firing phase need a new allocation window (`HyachComputer` only allocates in Initial Orders, [baseSystems.php:12862](source/server/model/systems/baseSystems.php#L12862)). Also a "first point of damage ignored" rule in the damage path, a submarine detection range, and a self-contradictory specialist clause (§6, Software Engineer) | — |
 | **Expert Ion Technician** | "3 thrust → 1d10+1 on one ion weapon" is a per-turn spend with UI | +1 per die and +1 flat on Ion-class weapons; +4 on C&C crits; the Rad Cannon's flat 12 and forced crits are Medium |
 | **Expert Surge Officer** | Six unrelated hooks: EM damage, combined Surge Cannon shots, capacitor power by ship size, EM-hardening −3, a d6 to resist deactivation, Spark Field −1 | +1 damage on Electromagnetic-class weapons |
@@ -421,6 +424,7 @@ masking: individual notes never reach any client.
 | Matter Weapons Expert, Gunner | `fireControl` via `isModified` | **Yes**, exactly like Gunsights |
 | Gunner, weapon-mounted MWE (Stage 10) | an added Piercing mode (the weapon's mode list and its per-mode fields); a weapon's `turnsloaded` one higher after a faster reload | The added mode: **own team only** (user request 2026-10-16 - it would point at the Gunner), and to anyone else only in the data of the turn it was FIRED (a replay, the printed log, which label the shot by it) or once the game is over; the opponent's fire control list is sent without its entry. Loading: **yes**, public anyway |
 | Moving officers (Stage 10) | where an officer is moving (`moving`), the posts he may move to (`targets`), a Gunner's spent abilities and added mode number | Own team only, in the officer payload |
+| Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
 | Scanner | the late-EW allowance | Own-team only: the client asks `officers.listFor`, which an enemy payload never carries |
 | Every officer | `pointCostEnh` | **Yes**, as for every enhancement already |
@@ -563,7 +567,8 @@ committed.
 | **8** | Placed-officer framework; Gunner core; weapon-mounted Matter Weapons Expert (without loading). **BUILT 2026-10-16** (§9.14) | The cap per size; a Gunner and Gunsights on one gun show ✦ and insignia side by side; "any damage" ~~kills~~ disables (his full rules text; destroyed kills); the destroyed-host refund |
 | **9** | Coordinator. **BUILT 2026-10-16** (§9.15), with three system-menu refinements. ~~Analyst~~ moved to the Hard tier (11+) | The halved cost on the row `doPivot` writes and in `canPivot`; the −1 waived short of a full 180, on both ends |
 | **10** | Loading time −1. *Plus (user, 2026-10-16) the Gunner's once-per-battle abilities and moving officers.* **BUILT 2026-10-16** (§9.16) | A mode switch keeps it; the officer lost mid-charge; the client's `isLoaded` agrees with the server |
-| **11+** | Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **11** | Expert Laser Technician, the first Hard officer. **BUILT 2026-10-17** (§9.17) | The flat bonus per laser class and laser mode only; the boost capped at half the roll, one pool a turn over a laser's hits; the Gunner's laser; hidden from opponents; the client's Damage line and power balance |
+| **12+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -596,7 +601,7 @@ committed.
 | Analyst | Does he need range, line of sight or an OEW lock? Every enemy ship, or only those in range? Weapon arming is already public in FV: leave it so? **Moved to the Hard tier 2026-10-16** (the full rules are more complex than the brief): his own plan and ruling round when he is reached. |
 | Coordinator | **Rules text 2026-10-16** (§9.15): "may make a combat pivot for half the normal thrust cost (i.e., 1 point instead of 2) and with no weapons fire penalties as a result, unless the combat pivot was a full 180°, in which case a penalty of −1 is applied"; one-half the base cost of the fighter; one coordinator per flight. Built with defaults, not ruled: (a) "a full 180°" = this turn's combat pivots, rights against lefts, have turned the flight 3 hex sides or more (R-L-R is 60°, no penalty; four one way passed through 180°, penalty); (b) half rounded **up** (a shuttle's 3 → 2, a pivot-cost-3 flight's 5 → 3); (c) the −1 is waived on every shot of the flight that turn, ballistic launches included (the penalty's own scope). |
 | Evangelist | The fleet = this player's ships, or the whole team? His penalty is worded "if killed": does a merely **disabled** Evangelist (post destroyed, kill roll survived) cost the fleet its +1 without the −10 initiative / −1 to hit? (Default: yes, the penalty needs a kill.) Is the penalty permanent? Do reinforcements that arrive later get the bonus? |
-| Laser Technician | Lasers = `weaponClass` Laser (49 classes)? Is the power boost declared in Initial Orders? Is the +50 % cap on base damage? |
+| Laser Technician | Lasers = `weaponClass` Laser (49 classes)? Is the power boost declared in Initial Orders? Is the +50 % cap on base damage? **Rules text and rulings 2026-10-17 (§9.17):** the text settles the first three - laser-category weapons (any weapon with a Laser mode; only a shot in that mode gains), the boost through the ordinary boost in Initial Orders (the user's design note: "boostable ... 1 power = 1 damage, with no maxBoostLevel but a cap"), the cap on the roll ("if the base roll was 12 damage, it could be raised to 18"). **RULED:** (1) a laser that hits more than once a turn shares its boost as **one pool** for the turn; (2) on a serving Expert Gunner's laser the Gunner's +1 per die **replaces the flat bonus only** - the boost still works there; (3) boosts **hidden from opponents**; (4) the owner's tooltip **Damage line shows** the flat bonus and the boost, with a **Laser boost** line. |
 | Software Engineer | "Lets the computer specialist use their ability twice" and "Incompatible with Computer Specialist" contradict each other. Which one stands? "Submarine" = the Hyach stealth hulls (Alichi Kav and Tal)? Whose detection range gets +5? |
 | Ion Technician | Rad Cannons always score 12, with no roll? Forced crits on Sensors, Engine and Reactor on every hit? When is the thrust boost declared? Is "+4 on C&C crits" a penalty? |
 | Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? |
@@ -1909,3 +1914,90 @@ Verified: officersHarness **721 / 0** (the payload per viewer, game over, the fi
 1. Not tested in a real game. Worth a play test: a Gunner on a laser (fire once - the next reload starts a turn on; a
    called shot shows "Expert Gunner +15%" once; the added Piercing mode in the mode selector until fired), then Move
    Officer in Initial Orders (both insignia blue, no bonuses that turn, the new gun's from the next).
+
+### 9.17 Stage 11: Expert Laser Technician (2026-10-17)
+
+**Rules text (user, 2026-10-17).** "With their natural affinity towards laser weapons, the Hyach have produced a few truly
+extraordinary laser technicians ... all of which operate throughout the scenario. Spinal lasers score +3 damage, blast
+lasers score +2 damage, and all other laser-category weapons score +1 damage. The player can shunt extra power into any
+laser weapon for added effect. Each point of power provides +1 extra damage, in addition to the above benefit ... A weapon's
+total damage cannot be increased by more than 50% through the use of this ability (e.g., if the base roll was 12 damage, it
+could be raised to 18 with 6 points of power, but any additional energy is lost. Note that if used with a weapon with
+multiple modes (such as the laser/pulse array), the above benefits affect only the laser portion of any shot. Location:
+Reactor. Cost: 10% of the ship's base cost. Availability: Races other than the Hyach pay 50% more for this officer. Not
+available on ships without laser weapon(s)." The user's design note: "Laser weapons essentially become boostable with this
+Officer at 1 power = 1 damage, with no maxBoostLevel but a cap at the point of damage."
+
+**Rulings (user, 2026-10-17, asked before building - all as recommended but the second):**
+1. A laser that hits more than once a turn (pulse lasers, multi-gun lasers) shares its boost as **one pool for the turn**,
+   handed to its hits in order, each taking at most half its own roll - 1 power = 1 damage, as the note puts it.
+2. On a laser a serving **Expert Gunner** holds, his +1 per die **replaces the flat bonus only**; the boost still works
+   there. (Recommended was "replaces both", the Matter Weapons Expert precedent of §9.14.)
+3. Boosts are **hidden from opponents**: no laser is boostable without him, so a boosted one would name him.
+4. The owner's tooltip **Damage line shows** his flat bonus and the boost, with a **Laser boost** line.
+
+**Built with defaults, stated here (ask before changing):**
+- Lasers = any weapon with a Laser mode (`weaponClass`, or a `weaponClassArray` entry); a shot gains only in a Laser mode -
+  the fired mode's `weaponClass`, so a Laser/Pulse Array's pulse mode gains nothing and its boost that turn is wasted.
+  Ballistic lasers (the Hyach Proximity Laser, the Nexus laser missiles) count. "Spinal" = `SpinalLaser` (+3); "blast" =
+  `BlastLaser`, `ImprovedBlastLaser`, `LtBlastLaser` (+2; the last is fighter-only, so never meets a ship officer).
+- The cap is half the roll **as the weapon made it** (`getDamage`, so Elite Crew's and a Gunner's per-die bonuses are part
+  of it), rounded **down** ("dropping fractions"); the flat bonus is outside it. Both are added **after** the weapon's own
+  reductions (range damage penalty, Piercing's cut against MCVs), as the Hyach Weapon Specialist's +3 is.
+- A hit on a Chameleon simulacrum alone is shown what a real hit would get but spends nothing from the pool.
+- Price: registry 15%, `$factionRules` Hyach Gerontocracy 10% ("Races other than the Hyach pay 50% more"); the Hyach
+  `HyachEcamronTek` is a Civilians hull, so it pays 15%. Post: the reactor (the Technician's pick; both may share it).
+- Not movable. The boost costs `LASER_BOOST_COST` (1) power a level; no ceiling (no laser class defines `hasMaxBoost`).
+
+**Files.** Server: `Officers.php` (registry `OFF_LASR` after OFF_JUMP - the last fixed-post ship officer - with `needs`
+`hasLaserWeapon` and no `apply`; `$factionRules` Hyach 10; `LASER_BOOST_COST`, `LASER_BOOST_CAP`, `$laserClassBonus`,
+`laserFlatBonus`, `laserDamageBonus`, `$laserBoostSpent` (a WeakMap), `laserBoostDamage`, `boostOn`, `laserForJson`,
+`isAboard`, `hasLaserWeapon`, `isLaserWeapon`), `weapon.php` (`getBonusDamage` asks `laserDamageBonus` for a Laser-mode
+shot; `getFinalDamage` keeps `$rolled` and adds `laserBoostDamage` after `getDamageMod`; `stripForJson` calls
+`laserForJson`). Client: `officers.js` (the registry row; `needs` `laserWeapon`; `isLaserWeapon`, `isLaserMode`,
+`LASER_BONUS` by name, `laserDamageBonus`, `laserBoost`, `laserBoostText`, `laserDamageLine`; `adjustDataDisplay` rewrites a
+laser's Damage line), React `SystemInfo.js` (the Laser boost line). Docs: an Expert Laser Technician card in Ship Officers,
+and a sentence in Seeing your officers. Bundles rebuilt; statics PENDING (Docker stack down); no new PHP class.
+
+**As built:**
+- ⭐ **The boost IS the generic boost.** The server tells the owner's team the laser is `boostable` (with `boostEfficiency`
+  1) while he serves - `Officers::laserForJson`, from `Weapon::stripForJson`, behind `$officersPresent` - and the existing
+  boost buttons, the type-2 power entries, the client's power balance (`countBoostPowerUsed`) and the commit all follow
+  with no new code. The server object's own `boostable` is never set: nothing server-side reads it for a weapon, and a
+  payload decides who sees it. The server trusts boost entries (the power balance is client-only), so a doctored boost
+  is answered at damage time: `laserBoostDamage` asks whether he serves on the order's turn.
+- **The flat bonus** is `Weapon::getBonusDamage` (beside the Matter Weapons Expert's), for a shot whose fired mode is
+  Laser. None of the 65 laser classes overrides `getFinalDamage`, `getDamageMod`, `getBonusDamage`, `beforeDamage` or
+  `damage` (measured), and each pulse and each gun's shot runs `getFinalDamage` once, so both bonuses land per hit.
+- **The pool** is in memory only (a WeakMap: weapon => turn => points spent): every hit a weapon makes in a turn is resolved
+  in one request on one weapon object. Replays never re-resolve damage.
+- **Hidden boosts:** an opponent's payload carries the laser's power entries WITHOUT the type-2 ones while he is aboard
+  (serving or not - an old boost would name him too), and no `boostable` / `boostEfficiency`. Game over discloses all.
+  The owner is always sent `boostEfficiency` with the entries (power.js prices any boost it finds by it, and a null one
+  would throw), `boostable` only while he serves.
+- **The tooltip** (client only - the server applies both at damage time, so in game too): `officers.adjustDataDisplay`
+  rewrites a laser's Damage line, which `setSystemDataWindow` builds from mode 1, as `roll + bonus + min(boost, half the
+  roll)` on each end, reading the roll off the weapon's own min/max so a line a Hyach Weapon Specialist already raised
+  keeps its +3 without it being halved; a line in any other shape is left alone. SystemInfo adds "Laser boost: +N damage this
+  turn, never more than half a hit's roll" while boosted. Read at render time, never written into `system.data` (the
+  shared-reference trap, [[arch_client_system_shared_reference]]).
+
+**Measured.** 654 hulls carry a laser, 575 of them may carry officers; no laser is boostable today. Static growth: PENDING.
+
+**Verified.**
+- `officersHarness.php` **718 / 0 with `--no-db`** (53 new: offers and prices on five hulls incl. a Civilians Hyach hull at 15%,
+  none without a laser or opted out, a doctored row; the post; the flat bonus through the REAL `getFinalDamage` on a Spinal,
+  Blast, Improved Blast, Heavy, Maser, pulse (Gatling) and multi-gun (CW Quad) laser; the Laser/Pulse Array per mode; killed,
+  gate off, a ship without him; the Gunner's laser; the client's `LASER_BONUS` against the server's table over all 65 laser
+  names in the statics; the boost - 4, the cap, an odd roll, the pool over three hits and a fresh turn, a Gatling's pulses,
+  the phantom hit, a doctored entry, killed, the pulse mode wasted, the gate, the Gunner's laser; the payload per viewer -
+  owner, enemy, another system's boost, a ship without him, a laser whose only entry is a boost, game over, killed).
+  The full DB run is PENDING (Docker stack down).
+- `officersClientHarness.js` **290 / 0** (34 new: the registry, `needs`, the flat bonus incl. the Gunner and his pending or
+  committed move, the boost read, the Damage line in every case incl. odd rolls and a raised line, `laserBoostText`, the
+  REAL SystemInfo, the REAL power.js charging 3 power for a boost of 3). Stage 8's registry-order check now states its
+  intent (after every fixed-post ship officer) instead of "right after the Jump Officer".
+- **Mutation-tested: 39 breaks (26 server, 13 client), all caught.** Run in a throwaway `fv-phpcheck:8.4` container against a
+  Stage-11-only copy of the harness (deleted afterwards); files byte-identical after the run.
+- `enhancementsHarness` / `enhancementsDifferential.js` (new cases `lasr`, `lasr+tech+rea`), `fvbuild -Statics`, `fvbuild
+  -Check`: PENDING (Docker stack down).

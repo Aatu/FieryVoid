@@ -40,6 +40,9 @@
    entry carries his `stays` (each post and the turns he held it) - so a kill note, a destroyed post or a
    spent ability is matched to the officer who was THERE at that turn.
 
+   Stage 11: the Expert Laser Technician - a flat damage bonus on every laser, and lasers the player may
+   BOOST with power for more (the generic boost buttons; capped at half the roll, one pool a turn).
+
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
 
@@ -66,6 +69,8 @@ class Officers{
 	const PIERCE_PENALTY = 4;            //Piercing's usual -4 fire control: an added mode carries it, a native one is spared it once
 	const PIERCE_PRIORITY = 2;           //an added Piercing mode resolves early, as the Battle Laser's own does
 	const MAX_TRANSFER_CLAIMS = 8;       //a POST asking for more moves than any ship has movable officers is not read past this
+	const LASER_BOOST_COST = 1;          //Laser Technician: "each point of power provides +1 extra damage"
+	const LASER_BOOST_CAP = 2;           //...and "cannot be increased by more than 50%": at most the roll / 2, rounded down
 
 	/* ⭐ FACTION RULES (user request 2026-10-15) - which factions an officer is offered to, and what some
 	   of them pay. ONE table, so a faction's officers change here and nowhere else: README.md, "Officers:
@@ -90,6 +95,8 @@ class Officers{
 		//"5% of the ship's base cost. On non-Yolu ships, the cost is doubled" - the registry's 10, and 5 here
 		'OFF_GUN'  => array('pct' => array('Yolu Confederation' => 5)),
 		//(the weapon-mounted Matter Weapons Expert is OFF_MWE at another post - `sameAs` - and reads OFF_MWE's line)
+		//"10% of the ship's base cost ... Races other than the Hyach pay 50% more" - the registry's 15, and 10 here
+		'OFF_LASR' => array('pct' => array('Hyach Gerontocracy' => 10)),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -178,6 +185,17 @@ class Officers{
 		   his own unit's arrival initiative penalty is 20 smaller, never a bonus (exitScatterShift,
 		   cancelsFacingShift, arrivalPenaltyRelief). Not for Raiders or the Belt Alliance ($factionRules). */
 		'OFF_JUMP' => array('label' => 'Expert Jump Officer', 'post' => 'jump', 'pct' => 5, 'apply' => 'applyJumpOfficer'),
+		/* Expert Laser Technician (Stage 11; rules text, user 2026-10-17), in the reactor. Every shot in a Laser mode
+		   scores +3 from a Spinal Laser, +2 from a Blast Laser, +1 from any other laser (laserDamageBonus); and the
+		   player may put power into any laser in Initial Orders, 1 point = +1 damage with no maximum, but never more
+		   than half the roll (laserBoostDamage). Only the laser part of a multi-mode weapon gains. Rulings (user
+		   2026-10-17): a laser's boost is ONE pool for its turn, shared by all its hits; a serving Expert Gunner's
+		   +1 per die replaces the flat bonus on his laser, while the boost still works there; an opponent sees no
+		   boost on these lasers until the game is over (laserForJson); the owner's tooltip shows both. 10% for the
+		   Hyach, 15% for everyone else ($factionRules); only for a hull carrying a laser. No stat moves at load:
+		   every rule is asked at damage time, and the boost buttons come from the payload. */
+		'OFF_LASR' => array('label' => 'Expert Laser Technician', 'post' => 'reactor', 'pct' => 15, 'apply' => null,
+			'needs' => 'hasLaserWeapon'),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -1499,6 +1517,118 @@ class Officers{
 	   his doorway keeps its full penalty, and a rider with an officer of its own has it reduced. */
 	public static function arrivalPenaltyRelief($unit, $turn){
 		return self::isActive($unit, 'OFF_JUMP', $turn) ? self::JUMP_INI_RELIEF : 0;
+	}
+
+	/* ------------------------------------------------------------------ Expert Laser Technician (Stage 11) */
+
+	/* "Spinal lasers score +3 damage, blast lasers score +2 damage, and all other laser-category weapons score +1".
+	   By class, so a subclass inherits its parent's (none exists today). ⚠️ MIRROR PAIR with officers.LASER_BONUS
+	   (JS), which is keyed by each class's $name - officersHarness compares the two over every laser in the statics. */
+	private static $laserClassBonus = array('SpinalLaser' => 3, 'BlastLaser' => 2, 'ImprovedBlastLaser' => 2, 'LtBlastLaser' => 2);
+
+	public static function laserFlatBonus($weapon){
+		foreach (self::$laserClassBonus as $class => $bonus){
+			if ($weapon instanceof $class) return $bonus;
+		}
+		return 1;
+	}
+
+	/* His flat bonus on a shot - Weapon::getBonusDamage, for a shot in a Laser mode (weaponClass is the fired mode's
+	   by then, so the pulse half of a Laser/Pulse Array gains nothing), behind $officersPresent. Added with the
+	   weapon's other bonus damage, after its own reductions. A serving Expert Gunner's +1 per die REPLACES it on his
+	   laser (user ruling 2026-10-17, the Gunner's "does not combine ... with other elite officers"). */
+	public static function laserDamageBonus($ship, $weapon){
+		$turn = TacGamedata::$currentTurn;
+		if (!self::isActive($ship, 'OFF_LASR', $turn)) return 0;
+		if (self::servesOn($ship, 'OFF_GUN', $weapon, $turn)) return 0;
+		return self::laserFlatBonus($weapon);
+	}
+
+	/* What each laser has used of its boost this turn: weapon => array(turn => points). In memory only - every hit a
+	   weapon makes in a turn is resolved in one request (FireGamePhase::advance) on one weapon object, and the entry
+	   goes with the object. */
+	private static $laserBoostSpent = null;
+
+	/* ⭐ THE POWER BOOST - Weapon::getFinalDamage, behind $officersPresent, after the weapon's own reductions (as his
+	   flat bonus): "each point of power provides +1 extra damage ... A weapon's total damage cannot be increased by
+	   more than 50% through the use of this ability (e.g., if the base roll was 12 damage, it could be raised to 18
+	   with 6 points of power, but any additional energy is lost)". $rolled is the roll as the weapon made it
+	   (getDamage, so Elite Crew's and a Gunner's per-die bonuses are part of it); half of it, rounded down, is the
+	   most one hit can gain. The points bought are the laser's boost levels on the order's turn - the generic type-2
+	   power entries (no maximum: a laser is never boostable without him, and the client's boost has no ceiling),
+	   each costing LASER_BOOST_COST power in the client's balance.
+	   ONE POOL A TURN (user ruling 2026-10-17): the points are the laser's extra damage for the turn, handed to its
+	   hits in the order they resolve - each pulse of a pulse laser, each gun's shot - until spent; what no hit can
+	   take is lost. A hit on a Chameleon simulacrum alone (Weapon::fireChameleonPhantomOnly) is shown what a real
+	   hit would get but spends nothing: the real hull was not hit, and a phantom sheet must read like a real one. */
+	public static function laserBoostDamage($ship, $weapon, $rolled, $target, $fireOrder){
+		if ($weapon->weaponClass !== 'Laser') return 0;
+		$turn = (int)$fireOrder->turn;
+		if (!self::isActive($ship, 'OFF_LASR', $turn)) return 0;
+		$bought = self::boostOn($weapon, $turn); //boost LEVELS - a level is +1 damage, and costs LASER_BOOST_COST power
+		if ($bought < 1) return 0;
+		if (self::$laserBoostSpent === null) self::$laserBoostSpent = new WeakMap();
+		$pool = isset(self::$laserBoostSpent[$weapon]) ? self::$laserBoostSpent[$weapon] : array();
+		$spent = isset($pool[$turn]) ? $pool[$turn] : 0;
+		$add = max(0, min($bought - $spent, (int)floor(max(0, $rolled) / self::LASER_BOOST_CAP)));
+		if ($add > 0 && empty($target->chameleonIsPhantom)){
+			$pool[$turn] = $spent + $add;
+			self::$laserBoostSpent[$weapon] = $pool;
+		}
+		return $add;
+	}
+
+	//the power a system was boosted by on $turn: its type-2 power entries, as every boostable system counts them
+	private static function boostOn($system, $turn){
+		$boost = 0;
+		foreach ($system->power as $power){
+			if ((int)$power->turn === (int)$turn && (int)$power->type === 2) $boost += (int)$power->amount;
+		}
+		return $boost;
+	}
+
+	/* Weapon::stripForJson, for each laser of a ship he is aboard (serving or not), behind $officersPresent:
+	   - his own team (and everybody once the game is over) is told the laser is BOOSTABLE while he serves - the
+	     client then offers the generic boost buttons, with no maximum (no laser class sets one) - and what a point
+	     costs, whenever its power entries are sent (power.js prices any boost it finds by boostEfficiency);
+	   - anyone else gets the laser's power entries WITHOUT its boosts (user ruling 2026-10-17): no laser is boostable
+	     without him, so a boosted one would name him. The extra damage still shows once the shots land. */
+	public static function laserForJson($ship, $weapon, $strippedSystem){
+		if (!self::isLaserWeapon($weapon) || !self::isAboard($ship, 'OFF_LASR')) return;
+		if (TacGamedata::$currentGameFinished || $ship->isRevealedToCurrentViewer()){
+			$strippedSystem->boostEfficiency = self::LASER_BOOST_COST;
+			if (self::isActive($ship, 'OFF_LASR')) $strippedSystem->boostable = true;
+			return;
+		}
+		if (empty($strippedSystem->power)) return;
+		$kept = array();
+		foreach ($strippedSystem->power as $power){
+			if ((int)$power->type !== 2) $kept[] = $power;
+		}
+		if (empty($kept)) unset($strippedSystem->power);
+		else $strippedSystem->power = $kept;
+	}
+
+	//Is this officer on the unit's list at all - serving, or out of action?
+	private static function isAboard($ship, $id){
+		foreach ($ship->getOfficers() as $entry){
+			if ($entry['id'] === $id) return true;
+		}
+		return false;
+	}
+
+	//"Not available on ships without laser weapon(s)": a weapon with any Laser mode
+	private static function hasLaserWeapon($ship){
+		foreach ($ship->systems as $system){
+			if ($system instanceof Weapon && self::isLaserWeapon($system)) return true;
+		}
+		return false;
+	}
+
+	//⚠️ MIRROR PAIR with officers.isLaserWeapon (JS)
+	private static function isLaserWeapon($weapon){
+		if ($weapon->weaponClass === 'Laser') return true;
+		return is_array($weapon->weaponClassArray) && in_array('Laser', $weapon->weaponClassArray, true);
 	}
 
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */

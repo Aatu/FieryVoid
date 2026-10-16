@@ -172,6 +172,11 @@ class SystemInfo extends React.Component {
             }
         }
 
+        /* OFFICERS_PLAN.md Stage 11: the power put into a laser this turn under an Expert Laser Technician. Read off the
+           power entries like the boost highlight, so it moves the instant the player clicks; only the owner's team has
+           an officer list, so it is null for anyone else (and in the lobby, where nothing is boosted). */
+        var laserBoost = window.officers ? officers.laserBoostText(ship, system) : null;
+
         let isUnrevealedMine = false;
         if (ship.mine) {
             var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
@@ -203,6 +208,8 @@ class SystemInfo extends React.Component {
                     + dockedPower.donors + (dockedPower.donors === 1 ? ' ship' : ' ships'))}
 
                 {abductionTarget !== null && getEntry('Abduction target', abductionTarget)}
+
+                {laserBoost !== null && !isUnrevealedMine && getEntry('Laser boost', laserBoost)}
 
                 {Object.keys(specialEntry).length > 0 && <Entry key={`special-${reactKey++}`}><Header>Special: </Header>&nbsp;</Entry>}
                 {Object.keys(specialEntry).length > 0 &&
