@@ -6,8 +6,9 @@ Status: **Stages 0–2a committed (`7800ab827`), Stage 3 committed (`1714c3651`)
 db/savedOfficerPrice.sql before deploying); the Technician rebuilt from his full rules and the Scavenger's save
 widened (§9.10), and Stage 6, the Expert Navigator (§9.11), committed (`6dd2f740e`). Faction rules for officers (§9.12)
 and Stage 7, the Expert Jump Officer (§9.13), committed (`6996071b9`). Stage 8, the placed officers - Expert Gunner (core)
-and the weapon-mounted Matter Weapons Expert - and the lobby system menu opening beside the ship window (§9.14), BUILT
-2026-10-16, uncommitted.** Written against `dab951bf5`. The user
+and the weapon-mounted Matter Weapons Expert - and the lobby system menu opening beside the ship window (§9.14),
+committed (`9ecfd16d4`). Stage 9, the Expert Coordinator, with three system-menu refinements (§9.15), BUILT 2026-10-16,
+uncommitted; the Expert Analyst moved to the Hard tier the same day.** Written against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
 a third Helmsman effect (−1 on the meteor impact chart) and play-tested Stage 1 in game 4457 (confirmed
@@ -25,8 +26,11 @@ prices as one easily edited table, with a README how-to for custom factions - Ge
 Expert Grome only, the Scavenger at 15% for the Descari and 20% for Balosians, Raiders and Llort (§9.12) - and
 supplied the Jump Officer's rules text (Stage 7, §9.13). On 2026-10-16 they supplied the Expert Gunner's and the
 Matter Weapons Expert's full rules and ruled Stage 8's four questions (§6, §9.14), and asked for the lobby's system
-menu to stop covering the ship window. Each officer's own rules questions still only need ruling when that officer's
-stage starts. Next step: Stage 9 (Coordinator; Analyst).
+menu to stop covering the ship window. Later that day they supplied the Expert Coordinator's rules text (Stage 9,
+§9.15), moved the Expert Analyst into the Hard tier ("more complex than I first described"), and asked for three system
+menu refinements: no gap beside the ship window, the edited system outlined, and an Officers section bar. Each
+officer's own rules questions still only need ruling when that officer's stage starts. Next step: Stage 10 (loading
+time −1).
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -77,18 +81,20 @@ until the game is over (or, in a later stage, an Expert Analyst looks).
 | Expert Scanner | Expert Scavenger | Breaching Expert |
 | Expert Technician ¹ | Expert Navigator | Expert Evangelist |
 | Matter Weapons Expert (C&C) | Expert Jump Officer | Expert Laser Technician |
-| Expert Geneticist | Expert Analyst | Expert Software Engineer |
-| Expert Dogfighter ² | Expert Coordinator ² | Expert Ion Technician |
-| Expert Missileer ² | Expert Gunner, core ³ | Expert Surge Officer |
-| Expert Evader ² ⁴ | Matter Weapons Expert (weapon) ³ | Expert Ballistic Officer |
-| | Loading time −1, shared ⁵ | Expert Anticipator |
+| Expert Geneticist | Expert Coordinator ² | Expert Software Engineer |
+| Expert Dogfighter ² | Expert Gunner, core ³ | Expert Ion Technician |
+| Expert Missileer ² | Matter Weapons Expert (weapon) ³ | Expert Surge Officer |
+| Expert Evader ² ⁴ | Loading time −1, shared ⁵ | Expert Ballistic Officer |
+| | | Expert Anticipator |
 | | | Expert Gunner, once-per-battle abilities |
 | | | Expert Electrician ² |
+| | | Expert Analyst ⁶ |
 
 ¹ On the "best of the three, automatically" reading (§6, Technician), as Stage 3 built him. His full rules
 (§9.10) make all three cumulative, which adds a client-only term in power.js: Easy-Medium. ² After the fighter-officer framework
 (Stage 4). ³ After the placed-officer framework (Stage 8). ⁴ If always on; Medium as a per-turn
-toggle. ⁵ Medium-Hard; one build serves both Gunner and the weapon-mounted Matter Weapons Expert.
+toggle. ⁵ Medium-Hard; one build serves both Gunner and the weapon-mounted Matter Weapons Expert. ⁶ Moved from
+Medium on 2026-10-16: the user found his full rules "more complex than I first described" (§3.3).
 
 **Recommended order:** the framework, with Expert Helmsman as its test vehicle (Stages 1–2); the rest
 of the Easy tier (3); fighters (4); then the Medium tier one officer per stage. Each Hard officer gets
@@ -198,8 +204,8 @@ Medium-sized job (§3.4).
 | **Expert Scavenger** | Engine, 25 % | The same pass: one critical, else 4 boxes, never on a destroyed system | As above. |
 | **Expert Navigator** | C&C, 7 % | Turn cost one step lower; pivot and roll −1 (min 1); accel/decel −25 % | Every one of these costs is used twice, in movement.js and movement.php, plus the ship window and tooltip readouts and the lobby. Turn cost has no defined "step" ladder in the code (§6, Navigator). *Built in Stage 6 (§9.11): the rules text gives the ladder; movement.php recomputes none of these costs, so the only movement change is one client helper for the accel rounding.* |
 | **Expert Jump Officer** | Jump Drive, 5 % | Opening range +1; failure chance −20 points; arrival scatter −1 hex and −1 facing step, initiative penalty −20 | Three separate, well-localised hooks. The failure % is computed at three sites ([:9648](source/server/model/systems/baseSystems.php#L9648), [:10419](source/server/model/systems/baseSystems.php#L10419), [:10856](source/server/model/systems/baseSystems.php#L10856)) that should become one helper first. `JUMP_ACC` already shows how to publish a changed range ([Enhancements.php:3497](source/server/model/ships/Enhancements.php#L3497)). |
-| **Expert Analyst** | Sensors, 10 %, capitals and ELINT | A per-load "the viewer's team has a live Analyst" static that widens `isDisclosedToCurrentViewer()` (ammo types, hangar contents) and the officer payload | The masks exist. Per-viewer state has to be computed per load and tested per viewer. Two of his clauses are moot in FV: weapon arming is already sent to everyone ([weapon.php:453](source/server/model/weapons/weapon.php#L453)), and cargo contents are not modelled (`CargoBay` is a plain box). |
-| **Expert Coordinator** | flight, 50 % | A combat pivot costs 1; the −1 to-hit only from 180° | The cost lives in movement.js `doPivot` ([:1436](source/public/client/movement.js#L1436)) and the penalty in [weapon.php:1872](source/server/model/weapons/weapon.php#L1872) plus its client twin. "180°" needs net rotation counted, not pivot rows. |
+| ~~**Expert Analyst**~~ | *moved to Hard, 2026-10-16 (§3.3)* | | |
+| **Expert Coordinator** | flight, 50 % | A combat pivot costs 1; the −1 to-hit only from 180° | The cost lives in movement.js `doPivot` ([:1436](source/public/client/movement.js#L1436)) and the penalty in [weapon.php:1872](source/server/model/weapons/weapon.php#L1872) plus its client twin. "180°" needs net rotation counted, not pivot rows. *Built in Stage 9 (§9.15).* |
 | **Expert Gunner, core** | a chosen weapon, 10 %, max 3 / 2 / 1 by size *(rules text 2026-10-16: 5% doubled off the Yolu, max 1 / 2 / 3 / 4 for medium / heavy / capital / enormous - §9.14)* | +1 fire control; +1 per die through `Dice::$perDieBonus` | The effects are Easy. The cost is that he is the first **placed** officer: a registry entry, a ship-wide cap in sanitise and on the client, the menu sub-heading, and the insignia instead of the ✦. *Built in Stage 8 (§9.14).* |
 | **Matter Weapons Expert, weapon** | a chosen weapon | Dies on any penetrating damage; loading −1 (next row) *(rules text: disabled by any damage, killed when destroyed - §9.14)* | A placed officer plus the "any damage" kill rule. *Built in Stage 8 (§9.14), loading still Stage 10.* |
 | **Loading time −1** (Gunner and the weapon-mounted MWE) | — | — | Medium-Hard. `loadingtime` is overwritten from the stored loading row on every load ([weapon.php:1189](source/server/model/weapons/weapon.php#L1189)) and from `loadingtimeArray` on every mode switch ([:3350](source/server/model/weapons/weapon.php#L3350)). The client reads it from the blueprint, because `stripForJson` does not send it. Losing the officer mid-charge changes whether the weapon is loaded. One build serves both officers. |
@@ -219,6 +225,7 @@ Medium-sized job (§3.4).
 | **Expert Anticipator** | A free **turn** for a ship in the Firing phase is a new phase-3 movement for ships (today only flights move there, as combat pivots), with masking, validation and animation | Rolling initiative twice is Easy. Re-rolling the lowest die is Medium: a `Dice`-level flag, which the replay harness's own `Dice` stub must mirror ([[project_replay_harness]]) |
 | **Expert Gunner, once-per-battle abilities** | A Piercing mode injected into a weapon that lacks one, and +15 % on one called shot, each once per battle and not combinable: firing-mode injection, a persisted "used", and UI | — |
 | **Expert Electrician** | Per turn: deactivate the flight's weapons, convert their max damage ÷ flight size into thrust or OB, then a d6 to see whether they stay offline | — |
+| **Expert Analyst** | *Moved from Medium, 2026-10-16:* the user found his full rules "more complex than I first described". The Medium reading was a per-load "the viewer's team has a live Analyst" static widening `isDisclosedToCurrentViewer()` (ammo types, hangar contents) and the officer payload, per viewer; two clauses moot in FV (weapon arming already public, [weapon.php:453](source/server/model/weapons/weapon.php#L453); cargo not modelled). Needs his full rules text and its own ruling round | — |
 
 ### 3.4 Framework costs (the part that is not any one officer)
 
@@ -548,9 +555,9 @@ committed.
 | **6** | Navigator. **BUILT 2026-10-15** (§9.11) | Server and client thrust agree on every cost change; the ship window shows the new numbers ~~own-team only~~ (published to every viewer, §4.6) |
 | **7** | Jump Officer. **BUILT 2026-10-15** (§9.13), with the faction rules (§9.12) | Range +1 (with and without the Jump Accelerator); failure −20 at all three sites through one helper; arrival scatter and initiative |
 | **8** | Placed-officer framework; Gunner core; weapon-mounted Matter Weapons Expert (without loading). **BUILT 2026-10-16** (§9.14) | The cap per size; a Gunner and Gunsights on one gun show ✦ and insignia side by side; "any damage" ~~kills~~ disables (his full rules text; destroyed kills); the destroyed-host refund |
-| **9** | Coordinator; Analyst | The Analyst's disclosure per viewer, and its harness `masking` check |
+| **9** | Coordinator. **BUILT 2026-10-16** (§9.15), with three system-menu refinements. ~~Analyst~~ moved to the Hard tier (11+) | The halved cost on the row `doPivot` writes and in `canPivot`; the −1 waived short of a full 180, on both ends |
 | **10** | Loading time −1 | A mode switch keeps it; the officer lost mid-charge; the client's `isLoaded` agrees with the server |
-| **11+** | Hard officers, one at a time, each starting with its own short plan and ruling round | — |
+| **11+** | Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -580,7 +587,8 @@ committed.
 | Geneticist | "Scenario only" = never offered unless a hull opts in, or a Create Game rule? "−1 to hit other ships" = this ship's own weapons? **RULED 2026-10-10: offered on every hull with a C&C** ("scenario only" is by agreement, as the doc card says). The −1 was built with its default: this ship's own weapons. **RE-RULED 2026-10-15: Dilgar Imperium only** (§9.12). |
 | Scavenger | A critical first, else 4 boxes? Which system first? May he repair Structure? **RULED 2026-10-15** (§9.8): **a critical first** (as the Engineer, same order and C&C roll), else 4 boxes, by Self Repair's default system order; **Structure yes**, never a destroyed system or anything on a destroyed section, never this turn's damage. His rules text adds a **once-per-scenario save** - "up to six points of damage can be ignored in any single volley" - ruled **automatic**: spent on the first hit that would destroy the C&C, a reactor or a Structure block when ignoring up to 6 points saves it ("note the Gaim Bulkhead already has a similar function"). The campaign clauses (permanent repairs after the battle) are not built. **Widened 2026-10-15 (§9.10): Scanners and Engines too.** **Faction prices 2026-10-15 (§9.12): 15% for the Descari, 20% for Balosians, Raiders and Llort.** |
 | Breaching Expert | "+1 thrust" for one pod of a flight that moves as one? "20 % of total pods": fleet-wide, rounded down? What are "3 attack rolls on the first boarding turn" in FV's capture-mission terms? |
-| Analyst | Does he need range, line of sight or an OEW lock? Every enemy ship, or only those in range? Weapon arming is already public in FV: leave it so? |
+| Analyst | Does he need range, line of sight or an OEW lock? Every enemy ship, or only those in range? Weapon arming is already public in FV: leave it so? **Moved to the Hard tier 2026-10-16** (the full rules are more complex than the brief): his own plan and ruling round when he is reached. |
+| Coordinator | **Rules text 2026-10-16** (§9.15): "may make a combat pivot for half the normal thrust cost (i.e., 1 point instead of 2) and with no weapons fire penalties as a result, unless the combat pivot was a full 180°, in which case a penalty of −1 is applied"; one-half the base cost of the fighter; one coordinator per flight. Built with defaults, not ruled: (a) "a full 180°" = this turn's combat pivots, rights against lefts, have turned the flight 3 hex sides or more (R-L-R is 60°, no penalty; four one way passed through 180°, penalty); (b) half rounded **up** (a shuttle's 3 → 2, a pivot-cost-3 flight's 5 → 3); (c) the −1 is waived on every shot of the flight that turn, ballistic launches included (the penalty's own scope). |
 | Evangelist | The fleet = this player's ships, or the whole team? His penalty is worded "if killed": does a merely **disabled** Evangelist (post destroyed, kill roll survived) cost the fleet its +1 without the −10 initiative / −1 to hit? (Default: yes, the penalty needs a kill.) Is the penalty permanent? Do reinforcements that arrive later get the bonus? |
 | Laser Technician | Lasers = `weaponClass` Laser (49 classes)? Is the power boost declared in Initial Orders? Is the +50 % cap on base damage? |
 | Software Engineer | "Lets the computer specialist use their ability twice" and "Incompatible with Computer Specialist" contradict each other. Which one stands? "Submarine" = the Hyach stealth hulls (Alichi Kav and Tal)? Whose detection range gets +5? |
@@ -1656,3 +1664,85 @@ weapon-expert offers on 11 Grome hulls, each 6 slots.
    matters, the cap slot could move to one ship-level field.
 3. Not tested in a real game: a Gunner's die bonus and fire control on a live shot, and the weapon expert disabled by a
    live hit. Worth a play test (any Grome ship for the expert; any hull for the Gunner).
+
+### 9.15 Stage 9: Expert Coordinator, and three system-menu refinements (2026-10-16)
+
+**Rules text (user, 2026-10-16).** "This expert allows a flight to react quickly to nearby threats, often with
+near-incredible feats of anticipation. The flight may make a combat pivot for half the normal thrust cost (i.e., 1 point
+instead of 2) and with no weapons fire penalties as a result, unless the combat pivot was a full 180°, in which case a
+penalty of −1 is applied. Point Cost: One-half the base cost of the fighter. Limitations: A flight may benefit from only
+one coordinator at a time." The same day the user moved the **Expert Analyst** to the Hard tier (§3.3) and asked for
+three refinements to the lobby's system menu (below).
+
+**Built with defaults, not ruled** (§6, Coordinator): "a full 180°" is this turn's combat pivots counted **rights against
+lefts** - 3 hex sides or more is the penalty (R-L-R is 60°; four one way passed through 180°); half the cost is rounded
+**up** (fighter 2 → 1, shuttle / breaching pod 3 → 2); the waiver covers every shot of the flight that turn, as the
+penalty itself does. "One coordinator per flight" is D9's one officer per flight. Price: 50% of a craft for a flight of
+six, scaled by size (the §9.9 rule) - Aurora 15 / 29 / 58 at 3 / 6 / 12 craft.
+
+**Files.** Server: `Officers.php` (`OFF_COOR`, last in the registry so a doctored second row never displaces an officer
+bought before him; `COMBAT_PIVOT_FULL`; `waivesCombatPivotPenalty`), `movement.php` (`Movement::getCombatPivotRotation`),
+`weapon.php` (the fighter branch's −1, behind `$officersPresent`). Client: `officers.js` (the registry row;
+`combatPivotCost`, `waivesCombatPivotPenalty`), `movement.js` (`getCombatPivotCost` - now the one cost `canPivot`
+checks, `doPivot` writes and the map tooltip quotes; `getCombatPivotRotation`; `hasCombatPivotPenalty`, the one penalty
+test), `weaponManager.js` (`computeShotModifiers` asks `hasCombatPivotPenalty`), `ShipTooltip.js` (the firing modifier
+and "Combat pivot cost"). Docs: a fifth Fighter Officers card. Statics and bundles rebuilt; no new PHP class.
+
+**As built:**
+- ⭐ **The thrust half is client-only.** movement.php recomputes no thrust cost (the validator trusts the row's
+  `requiredThrust`), so the row `doPivot` writes IS the cost. Every reader of the combat-pivot cost goes through
+  `shipManager.movement.getCombatPivotCost`; savedOrders restores rows whole, so it needs nothing.
+- **Every flight is agile** (measured over the statics: 434 flights, pivot costs 0 / 1 / 2 / 3, all agile), so
+  `isPivoting` is always "no" for a flight and each combat-pivot row is one 60° step the way it names - the rotation
+  count needs no facing arithmetic.
+- ⚠️ **weaponManager.js's second `calculateHitChange` (~line 2575) is the OLD one, inside a comment.** The live client
+  twin of weapon.php's fighter branch is `computeShotModifiers`, which the current `calculateHitChange` calls. An edit
+  first landed in the commented copy and was reverted.
+
+**The system menu (user requests 2026-10-16).**
+1. **No gap beside the ship window**: `besideWindow` places the menu flush on the window's frame; the 8px stays only as
+   the screen-edge margin (`EDGE_MARGIN`), so the room test is unchanged. *Follow-up (user report, same day): a menu on
+   the window's LEFT still fell ~17px short in the real lobby - the page's vertical scrollbar. The mount is a fixed
+   `inset: 0` overlay, so `right:` is measured from the viewport WITHOUT scrollbars, while `window.innerWidth` includes
+   them. `SystemInfoMenu` now passes `document.documentElement.clientWidth / clientHeight`. The headless driver had
+   `--hide-scrollbars`, so it could not see this; `lobby8.mjs <out> <w> <h> scroll` now runs with real scrollbars and a
+   scrolling page (25 / 25 at 1600 and 1920; it failed on the old bundle, 751 against 766).*
+2. **The edited system is outlined** while the menu is open: `helpers/menuTarget` holds (ship object, system id);
+   `SystemInfoMenu` sets it on mount / update and clears it on unmount - only for the lobby's menu (an `avoidBox` is
+   passed), so game.php is untouched - and each change repaints the ship windows once. `SystemIcon` draws a 2px outline
+   just inside the icon (`outline-offset: -2px`, no reflow, no border state displaced) with a glow, in the menu's focus
+   blue (`MENU_CHROME.focus`, #8bcaf2). The ship is matched by object, so a store blueprint sharing an id never lights.
+3. **An Officers section bar**: the Enhancements band (`SectionBar` + `band()`) in a new `SECTION_INK.officer` - the Buy
+   dialog's Officers colours (confirm.css's default `--buy-sec-*`: bar #90b1ee, title white). The officer rows became a
+   section of their own (its rail, and its ink on the tickers, price and total, as every section's rows wear their own);
+   refits keep the bronze. With only officer rows there is no empty Enhancements bar. ⚠️ The user called the colour
+   "gunmetal"; in confirm.css **gunmetal is Ammo & Ordnance** and Officers is this blue-grey. Built to match the Buy
+   dialog's Officers section, as asked; a one-line swap if literal gunmetal (#8e9aa6) was meant.
+
+**Measured.** Statics +17,617 B: 360 Coordinator offers (the same flights the Dogfighter and Evader are offered to).
+
+**Verified.**
+- `officersHarness.php` **601 / 0** (536 `--no-db`; 18 new): offer and price (Aurora 29; 15 / 29 / 58; a shuttle yes, a
+  ship and a Hunter-Killer no); a doctored second row; `getCombatPivotRotation` (none 0, R 1, LL 2, RRR 3, LLLL 4, RLR 1,
+  RLRL 0, last turn's and Movement-phase pivots ignored); the waiver (R / LL / RLR yes, RRR / LLLL / RRLRR no, none
+  without him or once his craft is lost); the real `Weapon::calculateHitBase` (−5% pivoted without him, none with him
+  short of 180, −5% at RRR, −5% with the gate off). **9 mutations, all caught.**
+- `officersClientHarness.js` **214 / 0** (22 new): `combatPivotCost`, `getCombatPivotCost` (fighter 1 / 2, shuttle 2 / 3),
+  the rotation and the waiver (the server's cases), `hasCombatPivotPenalty`, the real `computeShotModifiers`, the real
+  `doPivot` (a row costing 1 / 2; with 1 thrust left only his flight pivots); `besideWindow` flush; the outline on the
+  target icon only, its repaints, the Officers bar's CSS (via `ServerStyleSheet`). **23 mutations, all caught.**
+- `enhancementsDifferential.js` **583 cases / 0 differing** (8 new: `coor`, `coor+dog` on the four flight hulls);
+  `enhancementsHarness` 272 / 0; `fvbuild -Check` all passed, replay **146 / 0**.
+- Standalone lobby driver `officersE2E/lobby8.mjs` (real bundles; its harness page now loads confirm.css, as
+  gamelobby.php does): **24 / 24** at 1600 and 1920 wide, 23 / 23 at 700 - the menu flush on the window, the outline on
+  the clicked gun only (kept through a purchase, moved to the next gun, gone on close), and the Officers bar's computed
+  style equal to the Enhancements bar's but for its colours, which equal the Buy dialog's `--buy-sec-bar`.
+- `docs.mjs` and `lobby4.mjs` expectations updated (five Fighter Officers cards; the Thunderbolt's fifth officer row at
+  40 per 6 craft) but **not run**: both need a planted session, refused since 2026-10-15.
+
+**Observations, not changed:**
+1. An enemy flight's map tooltip still quotes the normal combat pivot cost (2): the halving is read off the officer list,
+   which an enemy never receives. Publishing it would need a new field (the 2026-10-10 "a displayed stat is public"
+   default) - not added without asking.
+2. Not tested in a real game: no local game holds a Coordinator flight. Worth a play test - buy one on any fighter, then
+   in the Firing phase pivot once (1 thrust, no −5 in the hit chance) and three times one way (−5 back).

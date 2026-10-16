@@ -63,7 +63,9 @@ window.officers = {
 		{ id: 'OFF_EVAD', label: 'Expert Evader', post: 'craft', flight: true, stats: { offensivebonus: -1 },
 			summary: '-5 offensive bonus, -1 damage to hits on this flight' },
 		{ id: 'EXP_MOTIV', label: 'Expert Motivator', post: 'craft', flight: true, stats: { critRollMod: -2 },
-			summary: '-2 on dropout rolls' }
+			summary: '-2 on dropout rolls' },
+		{ id: 'OFF_COOR', label: 'Expert Coordinator', post: 'craft', flight: true,
+			summary: 'Combat pivots cost half the thrust and give no to-hit penalty, unless they turn the flight a full 180 degrees (-5)' }
 	],
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV, the Expert
@@ -484,6 +486,23 @@ window.officers = {
 	   ⚠️ MIRROR PAIR with Officers::missileObBonus (PHP), read in weapon.php's fighter-ballistic branch. */
 	missileObBonus: function missileObBonus(ship) {
 		return (ship && ship.flight && this.isActive(ship, 'OFF_MSL')) ? 1 : 0;
+	},
+
+	/* Expert Coordinator, thrust: a combat pivot costs half its normal thrust, rounded up - 1 instead of 2 for a
+	   fighter, 2 instead of 3 for a shuttle. CLIENT ONLY: movement.php recomputes no thrust cost, so the cost the
+	   row carries (shipManager.movement.getCombatPivotCost) is the cost. Asked for the moving flight, always an
+	   own-team one with its list. */
+	combatPivotCost: function combatPivotCost(ship, cost) {
+		return (ship && ship.flight && this.isActive(ship, 'OFF_COOR')) ? Math.ceil(cost / 2) : cost;
+	},
+
+	/* Expert Coordinator, to hit: no combat pivot penalty unless this turn's pivots turned the flight a full 180
+	   degrees (shipManager.movement.getCombatPivotRotation, in hex sides). Asked for the SHOOTER.
+	   ⚠️ MIRROR PAIR with Officers::waivesCombatPivotPenalty (PHP), read in weapon.php's fighter branch. */
+	COMBAT_PIVOT_FULL: 3,
+	waivesCombatPivotPenalty: function waivesCombatPivotPenalty(ship) {
+		if (!(ship && ship.flight && this.isActive(ship, 'OFF_COOR'))) return false;
+		return shipManager.movement.getCombatPivotRotation(ship) < this.COMBAT_PIVOT_FULL;
 	},
 
 	/* "Officers (2)" - the one line the ship window's gold Enhancements block shows for them (user request

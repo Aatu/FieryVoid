@@ -1391,7 +1391,7 @@ shipManager.movement = {
         //		}
         if (ship.flight && gamedata.gamephase == 3) {
             if (!weaponManager.canCombatTurn(ship)) return false;
-            if (Math.ceil(ship.pivotcost * 1.5) > shipManager.movement.getRemainingEngineThrust(ship)) return false;
+            if (shipManager.movement.getCombatPivotCost(ship) > shipManager.movement.getRemainingEngineThrust(ship)) return false;
         } else if (gamedata.gamephase != 2) return false;
 
         return true;
@@ -1434,6 +1434,28 @@ shipManager.movement = {
         return c;
     },
 
+    /* What a flight's combat pivot (Firing phase) costs: 1.5 x its pivot cost, rounded up - halved, rounded up, by
+       an Expert Coordinator (officers.combatPivotCost). The cost canPivot checks, doPivot puts on the row and the
+       map tooltip quotes. */
+    getCombatPivotCost: function getCombatPivotCost(ship) {
+        var cost = Math.ceil(ship.pivotcost * 1.5);
+        return window.officers ? officers.combatPivotCost(ship, cost) : cost;
+    },
+
+    /* How far this turn's combat pivots have turned the flight, in hex sides, rights against lefts (every flight
+       is agile, so each row is one 60-degree step the way it names). ⚠️ MIRROR PAIR with
+       Movement::getCombatPivotRotation (PHP). */
+    getCombatPivotRotation: function getCombatPivotRotation(ship) {
+        var net = 0;
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move.turn != gamedata.turn || move.value != "combatpivot") continue;
+            if (move.type == "pivotright") net++;
+            else if (move.type == "pivotleft") net--;
+        }
+        return Math.abs(net);
+    },
+
 
     doPivot: function doPivot(ship, right) {
         if (!shipManager.movement.canPivot(ship, right)) return false;
@@ -1451,7 +1473,7 @@ shipManager.movement = {
 
         var value = 0;
         if (gamedata.gamephase == 3) {
-            pivotcost = Math.ceil(pivotcost * 1.5); //2 for fighters, 3 for shuttles
+            pivotcost = shipManager.movement.getCombatPivotCost(ship); //2 for fighters, 3 for shuttles
             value = "combatpivot";
         }
         if (pivoting != "no") {
@@ -1995,6 +2017,14 @@ shipManager.movement = {
             }
         }
         return false;
+    },
+
+    /* Does this flight's fire take the combat pivot's -1 this turn? Not when it ignores manoeuvre modifiers, nor
+       under an Expert Coordinator short of a full 180 (officers.waivesCombatPivotPenalty). The test the hit chance
+       (weaponManager.computeShotModifiers) and the map tooltip share - weapon.php's fighter branch is its server twin. */
+    hasCombatPivotPenalty: function hasCombatPivotPenalty(ship) {
+        if (!shipManager.movement.hasCombatPivoted(ship) || ship.ignoreManoeuvreMods) return false;
+        return !(window.officers && officers.waivesCombatPivotPenalty(ship));
     },
 
     hasPivotedForShooting: function hasPivotedForShooting(ship) {

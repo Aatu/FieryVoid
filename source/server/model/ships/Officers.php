@@ -28,7 +28,7 @@
    old id; the Engineer and Scavenger (Stage 5: an end-of-turn repair pass, and the Scavenger's
    once-per-game save, stored as one OffSaved note); the Navigator (Stage 6: the ship's movement costs);
    and the Jump Officer (Stage 7: the jump drive's range, hold, failure chance, exit scatter and arrival
-   initiative).
+   initiative); and the fighter officer Expert Coordinator (Stage 9: cheaper combat pivots, no pivot penalty).
    Track 2 (Stage 8, PLACED officers): the Expert Gunner and the weapon-mounted Matter Weapons Expert,
    whose post is the weapon the player picks - bought as per-system rows (tac_sys_enhancements) through
    Enhancements::$systemEnhancementRegistry, and resolved into the same runtime list (pickPlacedPosts).
@@ -52,6 +52,7 @@ class Officers{
 	const JUMP_FAILURE_CUT = 20;   //Jump Officer: "reduces the chance of a catastrophic explosion by 20%" (50% -> 30%)
 	const JUMP_SCATTER_SHIFT = -1; //Jump Officer: "a -1 shift to the vortex scatter chart"
 	const JUMP_INI_RELIEF = 20;    //Jump Officer: "any initiative penalty produced by scatter is reduced by 20"
+	const COMBAT_PIVOT_FULL = 3;   //Coordinator: "a full 180" - in hex sides, 3 x 60 degrees
 
 	/* ⭐ FACTION RULES (user request 2026-10-15) - which factions an officer is offered to, and what some
 	   of them pay. ONE table, so a faction's officers change here and nowhere else: README.md, "Officers:
@@ -211,6 +212,15 @@ class Officers{
 		   fighter sets (blockStandardEnhancements). */
 		'EXP_MOTIV' => array('label' => 'Expert Motivator', 'post' => 'craft', 'flight' => true, 'pct' => 50,
 			'apply' => 'applyMotivator'),
+		/* Expert Coordinator (Stage 9; rules text, user 2026-10-16): "may make a combat pivot for half the normal
+		   thrust cost (i.e., 1 point instead of 2) and with no weapons fire penalties as a result, unless the combat
+		   pivot was a full 180 degrees, in which case a penalty of -1 is applied". The thrust half is CLIENT ONLY
+		   (shipManager.movement.getCombatPivotCost - movement.php recomputes no thrust cost); the to-hit half is
+		   waivesCombatPivotPenalty, in Weapon::calculateHitBase and its client twin (hasCombatPivotPenalty). "One-half the base cost
+		   of the fighter": 50% of a craft. Last in the list, so a doctored second officer row never displaces one
+		   bought before he existed. */
+		'OFF_COOR' => array('label' => 'Expert Coordinator', 'post' => 'craft', 'flight' => true, 'pct' => 50,
+			'apply' => null),
 	);
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV) - so the
@@ -1076,6 +1086,16 @@ class Officers{
 	//Expert Motivator: -2 on dropout rolls, Fighter::testCritical's flight critRollMod (as EXP_MOTIV always was)
 	private static function applyMotivator($ship, $entry, $turn){
 		$ship->critRollMod -= 2;
+	}
+
+	/* Expert Coordinator, to hit: the flight's combat pivots cost it no -1 "unless the combat pivot was a full 180
+	   degrees" - its pivots this turn, rights against lefts, turned it COMBAT_PIVOT_FULL hex sides or more from where
+	   the Firing phase found it (Movement::getCombatPivotRotation). Right-left-right is 60 degrees, no penalty; four
+	   to one side passed through 180, penalty. Weapon::calculateHitBase, behind $officersPresent.
+	   ⚠️ MIRROR PAIR with officers.waivesCombatPivotPenalty (JS). */
+	public static function waivesCombatPivotPenalty($flight, $turn){
+		if (!self::isActive($flight, 'OFF_COOR', $turn)) return false;
+		return Movement::getCombatPivotRotation($flight, $turn) < self::COMBAT_PIVOT_FULL;
 	}
 
 	/* ------------------------------------------------------------------ repairs (Stage 5) */

@@ -2,6 +2,8 @@ import * as React from "react";
 import styled from "styled-components"
 import theme from "../styled/theme";
 import { canApplyPreBattleDamage } from "./SystemInfoButtons";
+import { MENU_CHROME } from "./menuControls";
+import { isMenuTarget } from "../helpers/menuTarget";
 
 const HealthBar = styled.div`
     position: absolute;
@@ -180,6 +182,13 @@ const System = styled.div`
             return 'none';
         }
     }};
+    /*The lobby's system menu is open on this system (helpers/menuTarget, user request 2026-10-16): an outline
+      drawn just inside the edge, so no border state moves and nothing reflows, in the menu's own focus blue.*/
+    ${props => props.$menuTarget ? `
+        outline: 2px solid ${MENU_CHROME.focus};
+        outline-offset: -2px;
+        box-shadow: 0 0 8px ${MENU_CHROME.focus};
+    ` : ''}
     /*$mirror (rolled ship, port/starboard drawn swapped): the icon ART is flipped
       horizontally on an ::after layer so its facing matches the drawn side, while
       text, health bar and state overlays stay unflipped and readable*/
@@ -624,6 +633,7 @@ class SystemIcon extends React.Component {
                 $off={isOff(system)}
                 $docked={isDockedOrbital(system)}
                 $orderPending={hasPendingDockOrder(system)}
+                $menuTarget={isMenuTarget(ship, system)}
             >
                 {renderBadges(ship, system)}
                 {isMeteorDefence(ship, system) && <MeteorBadge title="Committed to meteor defence this turn">☄</MeteorBadge>}

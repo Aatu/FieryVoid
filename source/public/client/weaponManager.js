@@ -2326,7 +2326,7 @@ window.weaponManager = {
                 var shooterJink = shipManager.movement.getJinking(shooter);
                 if (shooterJink !== 0) otherDetail.push({ label: 'Shooter Jinking', value: -shooterJink });
             }
-            if (shipManager.movement.hasCombatPivoted(shooter) && (!shooter.ignoreManoeuvreMods)) {
+            if (shipManager.movement.hasCombatPivotPenalty(shooter)) {
                 otherDetail.push({ label: 'Combat Pivot', value: -1 });
             }
         } else {

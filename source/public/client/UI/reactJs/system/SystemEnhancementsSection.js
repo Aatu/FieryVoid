@@ -4,18 +4,18 @@ import theme from '../styled/theme';
 import nonPassiveWheel from '../helpers/nonPassiveWheel';
 import {
     MenuRow, MenuRowLabel, MenuLabelText,
-    ActionButton, ValueInput, EnhSectionHeader, SectionBody, SECTION_INK
+    ActionButton, ValueInput, EnhSectionHeader, OfficerSectionHeader, SectionBody, SECTION_INK
 } from './menuControls';
 
 /* The gold half of "Add Enhancements & Damage" (WEAPON_ENHANCEMENTS_PLAN.md §6.1):
  * per-system refits for ONE system of a bought lobby ship.
  *
- *   ├ ✦ ENHANCEMENTS ──────────────────────────┤
+ *   ├ ✦ ENHANCEMENTS ──────────────────────────┤  bronze
  *   │ Gunsights            [-] [ 1 ] [+]   12p │
  *   │ Hardened Armour      [-] [ 0 ] [+]   18p │
  *   │                          Refits: 30 pts  │
- *   │ OFFICERS ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄ │   placed officers (OFFICERS_PLAN.md Stage 8)
- *   │ Expert Gunner        [-] [ 1 ] [+]   93p │
+ *   ├ OFFICERS ────────────────────────────────┤  the Buy dialog's Officers blue - placed officers
+ *   │ Expert Gunner        [-] [ 1 ] [+]   93p │  (OFFICERS_PLAN.md Stage 8)
  *   │                        Officers: 93 pts  │
  *
  * ⭐ This is a RENDERER, not a decision-maker. It takes `rows` already built by
@@ -34,28 +34,16 @@ const Total = styled.div`
     padding: 1px 8px 5px 10px;
     font-family: ${theme.fonts.mono};
     font-size: 10px;
-    color: ${theme.colors.enhText};
+    color: ${props => props.$color || theme.colors.enhText};
     opacity: 0.85;
     user-select: none;
 `;
 
-/* OFFICERS_PLAN.md D10 / Stage 8: placed officers sit under their own sub-heading inside the gold section -
-   bought here, on the weapon they will serve in, but not refits (no ✦, their own fleet-list line). A quiet
-   divider rather than a second section bar: the points are the same bucket and the same gold. */
-const SubHeading = styled.div`
-    padding: 5px 8px 2px 10px;
-    font-family: ${theme.fonts.display};
-    font-size: 8.5px;
-    font-weight: 700;
-    letter-spacing: 1.1px;
-    text-transform: uppercase;
-    color: ${theme.colors.enhTitle};
-    border-top: 1px solid rgba(195, 154, 82, 0.35);
-    user-select: none;
-    &:first-child {
-        border-top: none;
-    }
-`;
+/* OFFICERS_PLAN.md D10 / Stage 8: placed officers have a section of their own under the refits - bought
+   here, on the weapon they will serve in, but not refits (no ✦, their own fleet-list line). Its bar is the
+   Enhancements bar in the Buy dialog's Officers colours (SECTION_INK.officer, user request 2026-10-16), and
+   its rows wear that ink, as every section's do. */
+const OFFICER_TEXT = SECTION_INK.officer.btnText;
 
 const Price = styled.span`
     flex: 0 0 auto;
@@ -63,7 +51,7 @@ const Price = styled.span`
     text-align: right;
     font-family: ${theme.fonts.mono};
     font-size: 10px;
-    color: ${theme.colors.enhTitle};
+    color: ${props => props.$color || theme.colors.enhTitle};
     /*Nothing left to buy: the column has stopped quoting a price and is reporting a spend,
       so it stops looking like a price.*/
     opacity: ${props => props.$spent ? 0.6 : 1};
@@ -125,9 +113,11 @@ class EnhancementRow extends Component {
             //a placed officer who may not be bought here now says why (officers.placedBlock); set() refuses it too
             + (row.blocked ? `\n${row.blocked}` : '');
         const blocked = Boolean(row.blocked) && row.count < 1;
+        //a placed officer's row wears the Officers section's ink (blue), a refit's the gold
+        const ink = row.officer ? SECTION_INK.officer : SECTION_INK.enh;
 
         return (
-            <MenuRow $gold title={title} style={blocked ? { opacity: 0.55 } : undefined}>
+            <MenuRow $gold={!row.officer} title={title} style={blocked ? { opacity: 0.55 } : undefined}>
                 {/* ⚠️ The container's max-width is load-bearing (see ApplyDamageMenu), and
                     "Advanced Defensive Targeting" is the longest label in the game. It
                     ellipsises with the full text on hover rather than widening the menu. */}
@@ -138,20 +128,20 @@ class EnhancementRow extends Component {
                     SECTION_INK. This is the old $gold variant restored as one case of a
                     general rule rather than as a one-off. */}
                 <ActionButton
-                    $ink={SECTION_INK.enh}
+                    $ink={ink}
                     title="Remove a level"
                     disabled={row.count <= 0}
                     onClick={() => this.step(-1)}
                 >&minus;</ActionButton>
                 <ValueInput
                     ref={this.wheelRef}
-                    $ink={SECTION_INK.enh}
+                    $ink={ink}
                     type="text"
                     value={row.count}
                     onChange={e => this.onInput(e)}
                 />
                 <ActionButton
-                    $ink={SECTION_INK.enh}
+                    $ink={ink}
                     title={blocked ? row.blocked
                         : (row.count >= row.max ? "Already at the maximum" : `Add a level (${row.nextPrice} pts)`)}
                     disabled={blocked || row.count >= row.max}
@@ -159,6 +149,7 @@ class EnhancementRow extends Component {
                 >+</ActionButton>
                 <Price
                     $spent={spent}
+                    $color={row.officer ? ink.title : undefined}
                     title={spent
                         ? `Fully bought - ${row.price} pts`
                         : `Cost of the next level`}
@@ -174,7 +165,7 @@ class SystemEnhancementsSection extends Component {
         const { rows, onChange } = this.props;
         if (!rows || rows.length === 0) return null;
 
-        //refits first, then the placed officers under their own sub-heading (OFFICERS_PLAN.md D10, Stage 8)
+        //refits first, then the placed officers in a section of their own (OFFICERS_PLAN.md D10, Stage 8)
         const refits = rows.filter(row => !row.officer);
         const officers = rows.filter(row => row.officer);
         const spent = list => list.reduce((sum, row) => sum + (row.count > 0 ? row.price : 0), 0);
@@ -183,18 +174,24 @@ class SystemEnhancementsSection extends Component {
 
         return (
             <React.Fragment>
-                <EnhSectionHeader>✦ ENHANCEMENTS</EnhSectionHeader>
-                <SectionBody $ink={SECTION_INK.enh}>
-                    {refits.map(row => (
-                        <EnhancementRow key={row.enhID} row={row} onChange={onChange} />
-                    ))}
-                    {refitTotal > 0 && <Total>Refits: {refitTotal} pts</Total>}
-                    {officers.length > 0 && <SubHeading>Officers</SubHeading>}
-                    {officers.map(row => (
-                        <EnhancementRow key={row.enhID} row={row} onChange={onChange} />
-                    ))}
-                    {officerTotal > 0 && <Total>Officers: {officerTotal} pts</Total>}
-                </SectionBody>
+                {refits.length > 0 && <EnhSectionHeader>✦ ENHANCEMENTS</EnhSectionHeader>}
+                {refits.length > 0 && (
+                    <SectionBody $ink={SECTION_INK.enh}>
+                        {refits.map(row => (
+                            <EnhancementRow key={row.enhID} row={row} onChange={onChange} />
+                        ))}
+                        {refitTotal > 0 && <Total>Refits: {refitTotal} pts</Total>}
+                    </SectionBody>
+                )}
+                {officers.length > 0 && <OfficerSectionHeader>Officers</OfficerSectionHeader>}
+                {officers.length > 0 && (
+                    <SectionBody $ink={SECTION_INK.officer}>
+                        {officers.map(row => (
+                            <EnhancementRow key={row.enhID} row={row} onChange={onChange} />
+                        ))}
+                        {officerTotal > 0 && <Total $color={OFFICER_TEXT}>Officers: {officerTotal} pts</Total>}
+                    </SectionBody>
+                )}
             </React.Fragment>
         );
     }

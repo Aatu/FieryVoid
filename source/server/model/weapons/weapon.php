@@ -1875,7 +1875,9 @@ public function getFullStartLoading()
         //and use OB instead of OEW
         if ($shooter instanceof FighterFlight) {
             if (Movement::getCombatPivots($shooter, $gamedata->turn) > 0) {
-            	 if(!$shooter->ignoreManoeuvreMods) $mod -= 1;
+                //an Expert Coordinator waives it short of a full 180 (OFFICERS_PLAN.md Stage 9)
+                $coordinated = TacGamedata::$officersPresent && Officers::waivesCombatPivotPenalty($shooter, $gamedata->turn);
+            	 if(!$shooter->ignoreManoeuvreMods && !$coordinated) $mod -= 1;
             }
 
             $effectiveOB = $shooter->offensivebonus;
