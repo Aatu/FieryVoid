@@ -520,6 +520,7 @@
 			//target must be within 5 hexes
 			$distance = mathlib::getDistanceHex($interceptingShip, $target);
 			if ($distance > 5) return false;
+            if ($target instanceof Terrain) return false;			
 			
 			//both source and target of fire must be in arc
 			//first check target
@@ -609,6 +610,7 @@
 			//target must be within 3 hexes
 			$distance = mathlib::getDistanceHex($interceptingShip, $target);
 			if ($distance > 3) return false;
+            if ($target instanceof Terrain) return false;				
 			
 			//both source and target of fire must be in arc
 			//first check target
