@@ -10,7 +10,8 @@ and the weapon-mounted Matter Weapons Expert - and the lobby system menu opening
 committed (`9ecfd16d4`). Stage 9, the Expert Coordinator, with three system-menu refinements (§9.15), committed
 (`0436100e3`); the Expert Analyst moved to the Hard tier the same day. Stage 10 - faster reloads, the Expert Gunner's
 once-per-battle abilities and MOVING officers between posts in game (§9.16) - committed (`eae0de604`). Stage 11, the first
-Hard officer, the Expert Laser Technician (§9.17) - BUILT 2026-10-17, uncommitted.** Written
+Hard officer, the Expert Laser Technician (§9.17) - committed (`4f3a359cc`). Stage 12, the Expert Plasma Scientist, an
+officer the user added beyond the original 25 (§9.18) - BUILT 2026-10-17, uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -36,8 +37,9 @@ day they began Stage 10 with three simplifications of the Gunner's once-per-batt
 feature, moving officers between posts in Initial Orders, and ruled the four questions it raised (§9.16). On 2026-10-17
 they supplied the Expert Laser Technician's rules text with a design note ("laser weapons essentially become boostable
 with this Officer at 1 power = 1 damage, with no maxBoostLevel but a cap at the point of damage") and ruled the four
-questions it raised (Stage 11, §9.17). Each officer's own rules questions still only need ruling when that officer's
-stage starts. Next step: the rest of the Hard tier, one officer at a time.
+questions it raised (Stage 11, §9.17). The same day they added a 26th officer, the Expert Plasma Scientist, with his rules
+text, and ruled the three questions he raised (Stage 12, §9.18). Each officer's own rules questions still only need ruling
+when that officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -283,6 +285,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Analyst | `OFF_ANLY` | Scanner | 1 |
 | Expert Evangelist | `OFF_EVAN` | random primary | 1 |
 | Expert Laser Technician | `OFF_LASR` | Reactor | 1 |
+| Expert Plasma Scientist *(added 2026-10-17, §9.18)* | `OFF_PLAS` | Engine | 1 |
 | Expert Software Engineer | `OFF_SOFT` | Computer | 1 |
 | Expert Ion Technician | `OFF_ION` | Engine | 1 |
 | Expert Surge Officer | `OFF_SURG` | Mag-Grav Reactor | 1 |
@@ -424,6 +427,7 @@ masking: individual notes never reach any client.
 | Matter Weapons Expert, Gunner | `fireControl` via `isModified` | **Yes**, exactly like Gunsights |
 | Gunner, weapon-mounted MWE (Stage 10) | an added Piercing mode (the weapon's mode list and its per-mode fields); a weapon's `turnsloaded` one higher after a faster reload | The added mode: **own team only** (user request 2026-10-16 - it would point at the Gunner), and to anyone else only in the data of the turn it was FIRED (a replay, the printed log, which label the shot by it) or once the game is over; the opponent's fire control list is sent without its entry. Loading: **yes**, public anyway |
 | Moving officers (Stage 10) | where an officer is moving (`moving`), the posts he may move to (`targets`), a Gunner's spent abilities and added mode number | Own team only, in the officer payload |
+| Plasma Scientist (Stage 12) | a Plasma Web's `range` / `rangeArray`; a Plasma Battery's capacity, charge and output | **Yes, to every viewer** (user ruling 2026-10-17: a displayed stat is public). The battery's line and output were sent to everyone already; the web's range is sent while he serves (`webForJson`). His damage bonus and range relief show only as damage dealt |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
 | Scanner | the late-EW allowance | Own-team only: the client asks `officers.listFor`, which an enemy payload never carries |
@@ -568,7 +572,8 @@ committed.
 | **9** | Coordinator. **BUILT 2026-10-16** (§9.15), with three system-menu refinements. ~~Analyst~~ moved to the Hard tier (11+) | The halved cost on the row `doPivot` writes and in `canPivot`; the −1 waived short of a full 180, on both ends |
 | **10** | Loading time −1. *Plus (user, 2026-10-16) the Gunner's once-per-battle abilities and moving officers.* **BUILT 2026-10-16** (§9.16) | A mode switch keeps it; the officer lost mid-charge; the client's `isLoaded` agrees with the server |
 | **11** | Expert Laser Technician, the first Hard officer. **BUILT 2026-10-17** (§9.17) | The flat bonus per laser class and laser mode only; the boost capped at half the roll, one pool a turn over a laser's hits; the Gunner's laser; hidden from opponents; the client's Damage line and power balance |
-| **12+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **12** | Expert Plasma Scientist, added by the user (not one of the original 25). **BUILT 2026-10-17** (§9.18) | +1/+2 per class with the light ones excluded; the first two hexes of range damage ignored by every plasma rule, the Bolters' and Nexus overrides included; Plasma Batteries +1 (none destroyed), full from the deployment charge, −3 on criticals, the reactor's Initial Orders share; Plasma Webs +1 range, crippled too |
+| **13+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -602,6 +607,7 @@ committed.
 | Coordinator | **Rules text 2026-10-16** (§9.15): "may make a combat pivot for half the normal thrust cost (i.e., 1 point instead of 2) and with no weapons fire penalties as a result, unless the combat pivot was a full 180°, in which case a penalty of −1 is applied"; one-half the base cost of the fighter; one coordinator per flight. Built with defaults, not ruled: (a) "a full 180°" = this turn's combat pivots, rights against lefts, have turned the flight 3 hex sides or more (R-L-R is 60°, no penalty; four one way passed through 180°, penalty); (b) half rounded **up** (a shuttle's 3 → 2, a pivot-cost-3 flight's 5 → 3); (c) the −1 is waived on every shot of the flight that turn, ballistic launches included (the penalty's own scope). |
 | Evangelist | The fleet = this player's ships, or the whole team? His penalty is worded "if killed": does a merely **disabled** Evangelist (post destroyed, kill roll survived) cost the fleet its +1 without the −10 initiative / −1 to hit? (Default: yes, the penalty needs a kill.) Is the penalty permanent? Do reinforcements that arrive later get the bonus? |
 | Laser Technician | Lasers = `weaponClass` Laser (49 classes)? Is the power boost declared in Initial Orders? Is the +50 % cap on base damage? **Rules text and rulings 2026-10-17 (§9.17):** the text settles the first three - laser-category weapons (any weapon with a Laser mode; only a shot in that mode gains), the boost through the ordinary boost in Initial Orders (the user's design note: "boostable ... 1 power = 1 damage, with no maxBoostLevel but a cap"), the cap on the roll ("if the base roll was 12 damage, it could be raised to 18"). **RULED:** (1) a laser that hits more than once a turn shares its boost as **one pool** for the turn; (2) on a serving Expert Gunner's laser the Gunner's +1 per die **replaces the flat bonus only** - the boost still works there; (3) boosts **hidden from opponents**; (4) the owner's tooltip **Damage line shows** the flat bonus and the boost, with a **Laser boost** line. |
+| Plasma Scientist | *Added 2026-10-17 with his rules text (§9.18).* Which plasma weapons are "medium or heavy"? Does a battery start the battle holding the extra point? Are the web's range and the battery's capacity shown to opponents? **RULED 2026-10-17:** every plasma weapon but the light ones (`Officers::$plasmaClassBonus`); yes, a battery still holding its deployment charge starts full; yes, to every viewer (a displayed stat is public). |
 | Software Engineer | "Lets the computer specialist use their ability twice" and "Incompatible with Computer Specialist" contradict each other. Which one stands? "Submarine" = the Hyach stealth hulls (Alichi Kav and Tal)? Whose detection range gets +5? |
 | Ion Technician | Rad Cannons always score 12, with no roll? Forced crits on Sensors, Engine and Reactor on every hit? When is the thrust boost declared? Is "+4 on C&C crits" a penalty? |
 | Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? |
@@ -1957,7 +1963,7 @@ shot; `getFinalDamage` keeps `$rolled` and adds `laserBoostDamage` after `getDam
 `laserForJson`). Client: `officers.js` (the registry row; `needs` `laserWeapon`; `isLaserWeapon`, `isLaserMode`,
 `LASER_BONUS` by name, `laserDamageBonus`, `laserBoost`, `laserBoostText`, `laserDamageLine`; `adjustDataDisplay` rewrites a
 laser's Damage line), React `SystemInfo.js` (the Laser boost line). Docs: an Expert Laser Technician card in Ship Officers,
-and a sentence in Seeing your officers. Bundles rebuilt; statics PENDING (Docker stack down); no new PHP class.
+and a sentence in Seeing your officers. Bundles and statics rebuilt; no new PHP class.
 
 **As built:**
 - ⭐ **The boost IS the generic boost.** The server tells the owner's team the laser is `boostable` (with `boostEfficiency`
@@ -1982,7 +1988,7 @@ and a sentence in Seeing your officers. Bundles rebuilt; statics PENDING (Docker
   turn, never more than half a hit's roll" while boosted. Read at render time, never written into `system.data` (the
   shared-reference trap, [[arch_client_system_shared_reference]]).
 
-**Measured.** 654 hulls carry a laser, 575 of them may carry officers; no laser is boostable today. Static growth: PENDING.
+**Measured.** 654 hulls carry a laser, 575 of them may carry officers; no laser is boostable today. 571 offers in the statics.
 
 **Verified.**
 - `officersHarness.php` **718 / 0 with `--no-db`** (53 new: offers and prices on five hulls incl. a Civilians Hyach hull at 15%,
@@ -1992,12 +1998,109 @@ and a sentence in Seeing your officers. Bundles rebuilt; statics PENDING (Docker
   names in the statics; the boost - 4, the cap, an odd roll, the pool over three hits and a fresh turn, a Gatling's pulses,
   the phantom hit, a doctored entry, killed, the pulse mode wasted, the gate, the Gunner's laser; the payload per viewer -
   owner, enemy, another system's boost, a ship without him, a laser whose only entry is a boost, game over, killed).
-  The full DB run is PENDING (Docker stack down).
+  The full run with the database: **787 / 0**.
 - `officersClientHarness.js` **290 / 0** (34 new: the registry, `needs`, the flat bonus incl. the Gunner and his pending or
   committed move, the boost read, the Damage line in every case incl. odd rolls and a raised line, `laserBoostText`, the
   REAL SystemInfo, the REAL power.js charging 3 power for a boost of 3). Stage 8's registry-order check now states its
   intent (after every fixed-post ship officer) instead of "right after the Jump Officer".
 - **Mutation-tested: 39 breaks (26 server, 13 client), all caught.** Run in a throwaway `fv-phpcheck:8.4` container against a
   Stage-11-only copy of the harness (deleted afterwards); files byte-identical after the run.
-- `enhancementsHarness` / `enhancementsDifferential.js` (new cases `lasr`, `lasr+tech+rea`), `fvbuild -Statics`, `fvbuild
-  -Check`: PENDING (Docker stack down).
+- `enhancementsHarness` **273 / 0**: the fingerprint re-recorded (old copy `fingerprint.before-officers-stage11.txt`) after
+  proving the change is ONLY the 9 OFF_LASR offers and the 30 new case blocks (`lasr`, `lasr+tech+rea` on 15 hulls) - with
+  those stripped, the new fingerprint is byte-identical to the old. `enhancementsDifferential.js` **601 / 0** (18 new);
+  a client post moved to the Engine was caught on every laser hull. `fvbuild -Check`: autoload current, validator clean,
+  replay **153 / 0**. (Run 2026-10-17 once the Docker stack was back up.)
+
+### 9.18 Stage 12: Expert Plasma Scientist (2026-10-17)
+
+**Rules text (user, 2026-10-17) - a 26th officer, not in the original brief.** "Being masters of plasma technologies, and
+somewhat single-minded of purpose, some Pak'ma'ra have become true experts in their field ... All medium or heavy plasma
+weapons on the ship score +1 damage (this would include medium plasma cannons and larger, as well as plasma streams, plasma
+accelerators, etc.). Fuser torpedoes score +2 damage, not +1. All plasma weapons on the ship ignore the first two hexes
+traveled when reducing damage scored against an opponent. For example, a weapon which suffered -1 point of damage per 2 hexes
+which struck an enemy 10 hexes away would lose only 4 points of damage, not 5. All plasma batteries can store an extra point
+of power, and receive a -3 bonus on any critical hit roll. They cannot operate if completely destroyed (despite the +1 power
+bonus). Plasma webs receive a +1 bonus to range, even if suffering from a critical hit. Location: Engine. Cost: 10% of the
+ship's base cost for Pak'ma'ra. Availability: Any race using plasma weapons can use these officers, but the cost is doubled.
+Not available on ships without plasma weapon(s)."
+
+**Rulings (user, 2026-10-17, asked before building - all as recommended):**
+1. "Medium or heavy" = **every plasma weapon but the light ones**: Light Plasma Cannon, Light Plasma Bolter, Light Plasma
+   Projector, Light Enhanced Plasma, Light Mag Gun, Point and Heavy Point Plasma Gun, Plasma Torch, Plasma Burst (and the Plasma
+   Web, whose bonus is range). A new or custom plasma weapon is +1 until listed. Fusers = Fuser, Ranged Fuser, Fuser Array (+2).
+2. A Plasma Battery still holding its **deployment charge starts full** at its new capacity.
+3. The web's range and the battery's capacity are **shown to every viewer** - a displayed stat is public (2026-10-10 default).
+
+**Built with defaults, stated here (ask before changing):**
+- The range relief applies to **every** plasma weapon, light ones included ("All plasma weapons"), and to every range damage
+  rule: `rangeDamagePenalty` and the eleven classes with rules of their own (a Heavy Plasma Bolter's 15 free hexes become 17).
+  Only a shot whose fired mode is Plasma gains either bonus. Priced 10% for the Pak'ma'ra Confederacy, 20% for everyone else;
+  posted in the strongest Engine, so the Pak'ma'ra and Corillani bases (no Engine) are not offered him.
+- The web's +1 is its Anti-Fighter range only (3 -> 4); Defensive's 100 means "unlimited". Under its `ReducedRangeValue`
+  critical the client now takes 2 off whatever range it has ("decrease range by 2", the critical's own description) instead of
+  writing 1: identical without him (3 -> 1), 4 -> 2 with him. The server never reads that critical (the client enforces the
+  web's range; no server range check exists for it).
+- The owner's Damage line shows his +1/+2, as the Laser Technician's does (the shared `raiseDamageLine`). The range relief has
+  no tooltip line (the officer's summary says it).
+
+**Files.** Server: `Officers.php` (registry `OFF_PLAS` after OFF_LASR, `needs` `hasPlasmaWeapon`, `apply`
+`applyPlasmaScientist`; `$factionRules` Pak'ma'ra 10; `PLASMA_RANGE_RELIEF`, `PLASMA_BATTERY_BONUS`, `PLASMA_BATTERY_CRIT_MOD`,
+`PLASMA_WEB_RANGE`, `PLASMA_WEB_MODE`, `$plasmaClassBonus`, `plasmaFlatBonus`, `plasmaDamageBonus`, `plasmaRangeRelief`,
+`webForJson`, `hasPlasmaWeapon`, `isPlasmaWeapon`; `weaponForJson`, the one Weapon payload hook, now calls `laserForJson`
+(made private) and `webForJson`), `weapon.php` (`getRangeDamageDistance`; the base `getDamageMod` reads it; `getFinalDamage`
+adds `plasmaDamageBonus` beside the laser boost), `plasma.php` and `customNexus.php` (the eleven overriding `getDamageMod`s read
+`getRangeDamageDistance` - one call each, identical without him), `baseSystems.php` (`PlasmaBattery`: protected
+`$capacityBonus` and `$deploymentCharge`, `getMaxCapacity` adds the bonus while it stands, `getOutput` caps at it,
+`setCapacityBonus`, `holdsDeploymentCharge`, the stored-power note records whether it is the deployment fill). Client:
+`officers.js` (the registry row, `needs` `plasmaWeapon`, `PLASMA_BONUS` by name, `isPlasmaWeapon`, `isPlasmaMode`,
+`plasmaDamageBonus`, `plasmaDamageLine`, `batteryCapacityBonus`; the Laser Technician's line arithmetic moved into the
+shared `raiseDamageLine`), `model/system/baseSystems.js` (`PlasmaBattery.doIndividualNotesTransfer` charges up to the extra
+point), `model/weapon/plasma.js` (`PakmaraPlasmaWeb.initializationUpdate`'s crippled range). Docs: an Expert Plasma Scientist
+card and his numbers in Seeing your officers. Statics, bundles and the served copy rebuilt; no new PHP class.
+
+**As built:**
+- ⭐ **The flat bonus is in `getFinalDamage`, not `getBonusDamage`.** The three Plasma Bolters and the three Nexus Enhanced
+  Plasmas override `getDamageMod` and call the parent only to throw its result away, so anything `getBonusDamage` adds never
+  reaches them - true today of the Hyach Weapon Specialist's +3 and the Matter Weapons Expert's +1 on any such weapon
+  (observation, not changed). After `getDamageMod`, every class gets it.
+- ⭐ **ONE range rule: `Weapon::getRangeDamageDistance`.** The distance every range damage penalty counts, less his two hexes
+  for a Plasma shot from a ship he serves on (behind `$officersPresent`). The base `getDamageMod` and all eleven overriding
+  classes (the Light/Medium/Heavy Plasma Bolters and the fighter Light Plasma Bolter; the Nexus Heavy Plasma Charge, Charged
+  and Heavy Charged Plasma Guns, Light/Medium/Heavy Enhanced Plasmas and the fighter Light Enhanced Plasma) read it.
+  ⚠️ A new weapon with its own range damage rule should read it too.
+- **The battery's extra point** is the commented-out `capacityBonus` hook PlasmaBattery always had, made protected (no blueprint
+  carries it). `Reactor::effectCriticals` folds every battery's charge into each reactor's output for Initial Orders - but in
+  the per-system loop, BEFORE `Officers::apply` - so `applyPlasmaScientist` adds what he changed to each reactor the same way
+  (phase <= 1). The client charges the battery at the commit up to its new capacity (`batteryCapacityBonus`) and the server
+  takes the charge as sent, as before. "Starts full" reads the battery's last stored-power note: phase -1 (the deployment fill)
+  means untouched since, so it is read as full at the new capacity; every Initial Orders writes a new note, which ends it.
+- **The web's range** is raised at load (`rangeArray[2]`, and `range` if it is in that mode) and sent to every viewer
+  (`webForJson`) - the client merges the payload over the static blueprint's 3.
+
+**Measured.** 482 hulls carry a plasma weapon (438 may carry officers, 15 of them Pak'ma'ra); 396 offers in the statics
+(the rest have no Engine). Statics +21,503 B.
+
+**Verified.**
+- `officersHarness.php` **842 / 0 with the database** (52 new: offers and prices on five hulls incl. a Civilians one, none
+  without plasma or without an Engine, a doctored row; the post; the flat bonus through the REAL `getFinalDamage` on Medium,
+  Heavy, Mega, Fuser, Light, Heavy Plasma Bolter, Nexus Medium Enhanced and Plasma Torch; the range relief as "a shot at N
+  hexes does what it would at N - 2 without him, plus his bonus" on eight weapon/range pairs incl. the Bolter and Nexus rules;
+  the rules' own example; the Bolter's 17 free hexes; killed, gate off, a non-Plasma mode; the client's `PLASMA_BONUS`
+  against the server's over all 44 plasma names in the statics; batteries - +1, the output, destroyed, damaged, -3, full from
+  a deployment note but not a phase-1 one, the reactor's share in Initial Orders and not after, killed, the data line to an
+  enemy; webs - the range, every web, the payload to an enemy, a web without him, killed).
+- `officersClientHarness.js` **304 / 0** (14 new: the registry, `needs`, `isPlasmaWeapon`, the flat bonus by name, the Damage
+  line incl. a non-Plasma mode 1 and the Laser Technician's line through the shared helper, the REAL SystemInfo, the battery
+  bonus, the REAL `PlasmaBattery.doIndividualNotesTransfer`, the REAL `PakmaraPlasmaWeb.initializationUpdate`).
+- **Mutation-tested: 37 breaks (27 server, 10 client), all caught**, files byte-identical afterwards.
+- `enhancementsHarness` **274 / 0** - re-recorded (old copy `fingerprint.before-officers-stage12.txt`) after proving the change
+  is only the 3 OFF_PLAS offers and the 30 new case blocks (`plas`, `plas+eng+poor1`). `enhancementsDifferential.js` **607 /
+  0** (6 new); a client post moved to the reactor was caught. `fvbuild -Check`: autoload current, validator clean, replay
+  **153 / 0**.
+
+**Observations, not changed:**
+1. The Plasma Bolters and Nexus Enhanced Plasmas lose every `getBonusDamage` bonus (above) - a Hyach Weapon Specialist's +3 or
+   a Matter Weapons Expert's +1 would never land on them. Not reachable today (no Hyach or Grome hull carries one), but any
+   future bonus added there will miss them.
+2. Not tested in a real game. Worth a play test on a Pak'ma'ra ship: a Plasma Battery reading "7/7"-style in Initial Orders on
+   turn 1, a Medium Plasma's tooltip at +1, a hit at range losing two hexes less, and a web's Anti-Fighter range 4.

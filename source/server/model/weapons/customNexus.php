@@ -1667,7 +1667,7 @@ class NexusHeavyPlasmaCharge extends Torpedo{
 					else {
 					$sourcePos = $shooter->getHexPos();
 					}
-			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			$dis = $this->getRangeDamageDistance($shooter, $sourcePos, $target);				
 			if ($dis <= 10) {
 				$damage -= 0;
 				}
@@ -6564,7 +6564,7 @@ class NexusChargedPlasmaGun extends Plasma{
 					else {
 					$sourcePos = $shooter->getHexPos();
 					}
-			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			$dis = $this->getRangeDamageDistance($shooter, $sourcePos, $target);				
 			if ($dis <= 10) {
 				$damage -= 0;
 				}
@@ -6725,7 +6725,7 @@ class NexusHeavyChargedPlasmaGun extends Plasma{
 					else {
 					$sourcePos = $shooter->getHexPos();
 					}
-			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			$dis = $this->getRangeDamageDistance($shooter, $sourcePos, $target);				
 			if ($dis <= 10) {
 				$damage -= 0;
 				}
@@ -6963,7 +6963,7 @@ class NexusHeavyEnhPlasma extends Plasma{
 					else {
 					$sourcePos = $shooter->getHexPos();
 					}
-			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			$dis = $this->getRangeDamageDistance($shooter, $sourcePos, $target);				
 			if ($dis <= 12) {
 				$damage -= 0;
 				}
@@ -7020,7 +7020,7 @@ class NexusMedEnhPlasma extends Plasma{
 					else {
 					$sourcePos = $shooter->getHexPos();
 					}
-			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			$dis = $this->getRangeDamageDistance($shooter, $sourcePos, $target);				
 			if ($dis <= 7) {
 				$damage -= 0;
 				}
@@ -7077,7 +7077,7 @@ class NexusLightEnhPlasma extends Plasma{
 					else {
 					$sourcePos = $shooter->getHexPos();
 					}
-			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			$dis = $this->getRangeDamageDistance($shooter, $sourcePos, $target);				
 			if ($dis <= 3) {
 				$damage -= 0;
 				}
@@ -7141,7 +7141,7 @@ class NexusLtEnhPlasmaFtr extends LinkedWeapon{
 					else {
 					$sourcePos = $shooter->getHexPos();
 					}
-			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			$dis = $this->getRangeDamageDistance($shooter, $sourcePos, $target);				
 			if ($dis <= 2) {
 				$damage -= 0;
 				}

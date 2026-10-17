@@ -44,15 +44,20 @@ window.officers = {
 		{ id: 'OFF_ENG', label: 'Expert Engineer', post: 'engine',
 			summary: 'Repairs 1 critical per turn (a C&C critical on a d20 of 16+)' },
 		{ id: 'OFF_SCAV', label: 'Expert Scavenger', post: 'engine',
-			summary: 'Repairs 1 critical or 4 boxes per turn; once per game blocks up to 6 damage that would destroy the C&C, a reactor, a scanner, an engine or a structure block' },
+			summary: 'Repairs 1 critical or 4 boxes per turn; once per game blocks up to 6 damage that would destroy a crticial system' },
 		{ id: 'OFF_NAV', label: 'Expert Navigator', post: 'cnc', adjust: 'navigatorStat',
 			summary: 'Turn cost one level lower, pivot and roll cost -1, accel/decel cost -25%' },
 		{ id: 'OFF_JUMP', label: 'Expert Jump Officer', post: 'jump',
-			summary: 'Jump points opened 1 hex further and held 1 turn longer; jump failure chance -20%; exits scatter less (-1 on the chart, 60 degrees of facing shift cancelled); arrival initiative penalty -20' },
+			summary: 'Open Jump points +1 range and maintain +1 turn; jump failure chance -20%; incoming jump points scatter less' },
 		/* Stage 11: no stat moves - his flat bonus and the boost are the server's at damage time; the owner's tooltip
 		   shows both (adjustDataDisplay, laserBoostText), and the boost buttons come with the payload (boostable). */
 		{ id: 'OFF_LASR', label: 'Expert Laser Technician', post: 'reactor', needs: 'laserWeapon',
 			summary: 'Lasers +1 damage (Blast Lasers +2, Spinal Lasers +3). Power may be put into any laser in Initial Orders: +1 damage per point, never more than half the roll' },
+		/* Stage 12: his damage and range-damage rules are the server's at damage time (the owner's Damage line shows the
+		   +1/+2 - plasmaDamageLine); a battery's extra point is charged at the commit (batteryCapacityBonus); a web's
+		   range arrives in the payload. */
+		{ id: 'OFF_PLAS', label: 'Expert Plasma Scientist', post: 'engine', needs: 'plasmaWeapon',
+			summary: 'Plasma weapons do increased damage and ignore first 2 hexes of range damage penalty; Plasma Batteries have +1 power and -3 on crits; Plasma Webs +1 range' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -60,7 +65,7 @@ window.officers = {
 		   the C&C and his Matter weapons, as one man); `abilities` - the Gunner's once-per-battle three;
 		   `reload` - his weapon reloads a turn faster. */
 		{ id: 'OFF_GUN', label: 'Expert Gunner', placed: true, movable: true, abilities: true,
-			summary: '+1 fire control and +1 damage per die (no die above its maximum) for this weapon. Once per battle each: a turn off the reload after a shot, a Piercing shot (no penalty if the weapon may already pierce), and +15% on a called shot' },
+			summary: '+1 fire control and +1 damage per die for this weapon. Once per battle each:  +1 turn towards first reload, make a Piercing shot (or ignore Piercing FC penalty), and +15% on a called shot' },
 		{ id: 'OFF_MWEW', label: 'Matter Weapons Expert', placed: true, sameAs: 'OFF_MWE', anyDamage: true, movable: true, reload: true,
 			summary: '+1 fire control and +1 damage for this Matter weapon, which reloads a turn faster; disabled by any damage to it, killed if it is destroyed' },
 		{ id: 'OFF_DOG', label: 'Expert Dogfighter', post: 'craft', flight: true, stats: { iniativebonus: 5 },
@@ -72,7 +77,7 @@ window.officers = {
 		{ id: 'EXP_MOTIV', label: 'Expert Motivator', post: 'craft', flight: true, stats: { critRollMod: -2 },
 			summary: '-2 on dropout rolls' },
 		{ id: 'OFF_COOR', label: 'Expert Coordinator', post: 'craft', flight: true,
-			summary: 'Combat pivots cost half the thrust and give no to-hit penalty, unless they turn the flight a full 180 degrees (-5)' }
+			summary: 'Havkes combat pivot costs and gives no to-hit penalty, unless flight turns a full 180 degrees' }
 	],
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV, the Expert
@@ -218,6 +223,7 @@ window.officers = {
 	/* An officer's own test beyond having the post. ⚠️ MIRROR PAIR with Officers::isEligible's `needs`.
 	     matterWeapon  the hull carries a weapon with a Matter mode (the Matter Weapons Expert)
 	     laserWeapon   the hull carries a weapon with a Laser mode (the Expert Laser Technician)
+	     plasmaWeapon  the hull carries a weapon with a Plasma mode (the Expert Plasma Scientist)
 	     missiles      the flight carries missiles (the Expert Missileer) */
 	passesNeeds: function passesNeeds(ship, officer) {
 		if (!officer.needs) return true;
@@ -227,6 +233,9 @@ window.officers = {
 		}
 		if (officer.needs === 'laserWeapon') {
 			return this.systemsOf(ship).some(function (s) { return self.isLaserWeapon(s); });
+		}
+		if (officer.needs === 'plasmaWeapon') {
+			return this.systemsOf(ship).some(function (s) { return self.isPlasmaWeapon(s); });
 		}
 		if (officer.needs === 'missiles') return this.missilesPerCraft(ship) > 0;
 		return false;
@@ -1014,14 +1023,17 @@ window.officers = {
 		return '+' + boost + ' damage this turn, never more than half a hit\'s roll';
 	},
 
-	/* The weapon's Damage line ("min-max", or one number - Weapon::setSystemDataWindow's, which describes mode 1) with his
-	   flat bonus and this turn's boost on each end: a roll gains min(boost, half of it). The roll is read off the weapon's
-	   own min/max, so a number already raised by the line (a Hyach Weapon Specialist's +3) is carried, not halved. A line
-	   in any other shape, or one describing a non-laser mode 1, is left alone. */
+	//a laser's Damage line with his flat bonus and this turn's boost (raiseDamageLine); a line describing a non-laser mode 1 is left alone
 	laserDamageLine: function laserDamageLine(ship, system, value) {
 		if (!this.isLaserMode(system, 1)) return value;
-		var flat = this.laserDamageBonus(ship, system);
-		var boost = this.laserBoost(ship, system);
+		return this.raiseDamageLine(system, value, this.laserDamageBonus(ship, system), this.laserBoost(ship, system));
+	},
+
+	/* A weapon's Damage line ("min-max", or one number - Weapon::setSystemDataWindow's, which describes mode 1) with an
+	   officer's flat bonus and a boost on each end: a roll gains min(boost, half of it). The roll is read off the weapon's
+	   own min/max, so a number already raised by the line (a Hyach Weapon Specialist's +3) is carried, not halved. A line
+	   in any other shape is left alone. */
+	raiseDamageLine: function raiseDamageLine(system, value, flat, boost) {
 		if (!flat && !boost) return value;
 		var m = /^\s*(\d+)\s*(?:-\s*(\d+))?\s*$/.exec(String(value));
 		if (!m) return value;
@@ -1036,6 +1048,55 @@ window.officers = {
 		return (lo === hi) ? String(hi) : lo + '-' + hi;
 	},
 
+	/* ------------------------------------------------------------------ Expert Plasma Scientist (Stage 12) */
+
+	/* His flat bonus by the class's `name`: +2 a Fuser, 0 the light plasma weapons (user ruling 2026-10-17) and the Plasma
+	   Web, +1 any other plasma weapon. ⚠️ MIRROR PAIR with Officers::$plasmaClassBonus (PHP), keyed by class -
+	   officersHarness compares the two over every plasma weapon in the statics. */
+	PLASMA_BONUS: { Fuser: 2, RangedFuser: 2, FuserArray: 2, lightPlasma: 0, lightPlasmaBolter: 0, LtPlasmaProjector: 0,
+		NexusLightEnhPlasma: 0, NexusLightMagGun: 0, EWPointPlasmaGun: 0, EWHeavyPointPlasmaGun: 0, PlasmaTorch: 0,
+		TrekPlasmaBurst: 0, PakmaraPlasmaWeb: 0 },
+
+	//⚠️ MIRROR PAIR with Officers::isPlasmaWeapon (PHP)
+	isPlasmaWeapon: function isPlasmaWeapon(system) {
+		if (!system || !system.weapon) return false;
+		if (system.weaponClass === 'Plasma') return true;
+		var classes = system.weaponClassArray;
+		if (!classes || typeof classes !== 'object') return false;
+		return Object.keys(classes).some(function (mode) { return classes[mode] === 'Plasma'; });
+	},
+
+	isPlasmaMode: function isPlasmaMode(system, mode) {
+		var classes = system.weaponClassArray;
+		var cls = (classes && typeof classes === 'object' && classes[mode] !== undefined) ? classes[mode] : system.weaponClass;
+		return cls === 'Plasma';
+	},
+
+	/* What he adds to a hit from this weapon while he serves: the lobby's derived list and the owner's server list both
+	   answer; an enemy's list is empty. ⚠️ MIRROR PAIR with Officers::plasmaDamageBonus / ::plasmaFlatBonus (PHP). */
+	plasmaDamageBonus: function plasmaDamageBonus(ship, system) {
+		if (!ship || ship.flight || !this.isPlasmaWeapon(system) || !this.isActive(ship, 'OFF_PLAS')) return 0;
+		var bonus = this.PLASMA_BONUS[system.name];
+		return (bonus === undefined) ? 1 : bonus;
+	},
+
+	//a plasma weapon's Damage line with his flat bonus (raiseDamageLine); a line describing a non-plasma mode 1 is left alone
+	plasmaDamageLine: function plasmaDamageLine(ship, system, value) {
+		if (!this.isPlasmaMode(system, 1)) return value;
+		return this.raiseDamageLine(system, value, this.plasmaDamageBonus(ship, system), 0);
+	},
+
+	/* The extra point a Plasma Battery holds while he serves - and while it stands ("They cannot operate if completely
+	   destroyed"). PlasmaBattery.doIndividualNotesTransfer charges it up to this at the Initial Orders commit; the server
+	   takes the charge as sent. In game only, so own team. ⚠️ MIRROR PAIR with Officers::PLASMA_BATTERY_BONUS /
+	   PlasmaBattery::getMaxCapacity (PHP). */
+	PLASMA_BATTERY_BONUS: 1,
+	batteryCapacityBonus: function batteryCapacityBonus(ship, battery) {
+		if (!ship || ship.flight || this.isDerived(ship) || !this.isActive(ship, 'OFF_PLAS')) return 0;
+		if (!battery || battery.destroyed) return 0;
+		return this.PLASMA_BATTERY_BONUS;
+	},
+
 	/* SystemInfo's one hook into a system's data rows (and its Special text). The weapon tooltip quotes fire
 	   control only through data["Fire control (fighter/med/cap)"] - in game too, less an officer just ordered to
 	   move (pendingMoveFireControl, user request 2026-10-16) - and a jump drive its range through
@@ -1044,11 +1105,13 @@ window.officers = {
 	   (after a Jump Accelerator's +2, which lobbyEnhancements writes into both). In game the server's
 	   isModified fire control already rebuilt the one, and its payload the other.
 	   Stage 11: a laser's Damage, with an Expert Laser Technician's bonus and boost (laserDamageLine) - in game too,
-	   where the server applies both only at damage time. */
+	   where the server applies both only at damage time. Stage 12: a plasma weapon's, with an Expert Plasma Scientist's
+	   +1 or +2 (plasmaDamageLine), the same way. */
 	DATA_KEY_FIRECONTROL: 'Fire control (fighter/med/cap)',
 	adjustDataDisplay: function adjustDataDisplay(ship, system, key, value) {
 		if (!system) return value;
 		if (key === 'Damage' && this.isLaserWeapon(system)) return this.laserDamageLine(ship, system, value);
+		if (key === 'Damage' && this.isPlasmaWeapon(system)) return this.plasmaDamageLine(ship, system, value);
 		if (system.name === 'jumpEngine' && (key === 'Range' || key === 'Special')) {
 			var bonus = this.jumpRangeBonus(ship, system);
 			if (!bonus) return value;

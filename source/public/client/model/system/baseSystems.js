@@ -4461,6 +4461,8 @@ PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare indi
 	this.individualNotesTransfer = Array();
 	//note power currently remaining ON REACTOR as charge held, but no more than remaining structure - and split between batteries
 	var capacity = shipManager.systems.getRemainingHealth(this);
+	//an Expert Plasma Scientist's extra point, while the battery stands (OFFICERS_PLAN.md Stage 12; PlasmaBattery::getMaxCapacity)
+	if (capacity > 0 && window.officers) capacity += officers.batteryCapacityBonus(this.ship, this);
 	var reactorSurplus = shipManager.power.getReactorPower(this.ship, this);
 	for (var s in this.ship.systems) {
 		var system = this.ship.systems[s];

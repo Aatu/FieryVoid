@@ -545,9 +545,10 @@ class Weapon extends ShipSystem
             }
         }
 
-        /* An Expert Laser Technician aboard (OFFICERS_PLAN.md Stage 11): his team is told this laser may be boosted, and
-           everyone else gets its power entries without the boosts, which would name him. Behind the static. */
-        if (TacGamedata::$officersPresent && $ship instanceof BaseShip) Officers::laserForJson($ship, $this, $strippedSystem);
+        /* Officers (OFFICERS_PLAN.md): an Expert Laser Technician aboard (Stage 11) - his team is told this laser may be
+           boosted, and everyone else gets its power entries without the boosts, which would name him; an Expert Plasma
+           Scientist (Stage 12) - a Plasma Web's longer range, to everyone. Behind the static. */
+        if (TacGamedata::$officersPresent && $ship instanceof BaseShip) Officers::weaponForJson($ship, $this, $strippedSystem);
 
         //Turret jam (ReducedArcs crit): the static blueprint still carries the mount's FULL arc, so
         //the live reduced arc has to travel with the payload - the client merges JSON over the
@@ -3118,6 +3119,20 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
     }//endof function getSystemArmourBase
 
 
+    /* The hexes a shot's RANGE DAMAGE penalty counts, from $sourcePos to $target. Every range damage rule reads it: the
+       one in getDamageMod below, and the weapons that override getDamageMod with a rule of their own (the Plasma
+       Bolters, the Nexus Enhanced Plasmas and Charged Plasma Guns, the Nexus Heavy Plasma Charge). A plasma shot from a
+       ship with a serving Expert Plasma Scientist (OFFICERS_PLAN.md Stage 12) ignores its first two hexes - behind the
+       static, so every other shot pays one read. */
+    protected function getRangeDamageDistance($shooter, $sourcePos, $target)
+    {
+        $dis = mathlib::getDistanceHex($sourcePos, $target);
+        if (TacGamedata::$officersPresent && $this->weaponClass === 'Plasma' && $shooter instanceof BaseShip) {
+            $dis = max(0, $dis - Officers::plasmaRangeRelief($shooter));
+        }
+        return $dis;
+    }
+
     /*returns modified damage, NOT damage modifier*/
     /*this is different function that getDamageMod of unit!*/
     protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
@@ -3130,7 +3145,7 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
             } else {
                 $sourcePos = $shooter->getHexPos();
             }
-            $dis = mathlib::getDistanceHex($sourcePos, $target);
+            $dis = $this->getRangeDamageDistance($shooter, $sourcePos, $target);
             /* WALKERS OF SIGMA-957 - PLASMA ONLY: every INTERVENING hex of somebody else's
                Energy Draining Field the shot crossed counts as TWO hexes of range here, so it
                adds one apiece. Plasma's second helping on top of the doubled to-hit penalty both
@@ -3198,8 +3213,12 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);                
         /* An Expert Laser Technician's power boost (OFFICERS_PLAN.md Stage 11): +1 per point the player put into this
            laser, at most half of $rolled, from one pool for the turn - added after the weapon's own reductions, as
-           getDamageMod adds the flat bonuses. Behind the static. */
-        if (TacGamedata::$officersPresent && $shooter instanceof BaseShip) $damage += Officers::laserBoostDamage($shooter, $this, $rolled, $target, $fireOrder);
+           getDamageMod adds the flat bonuses. An Expert Plasma Scientist's +1 (+2 for a Fuser, Stage 12) - here, not
+           in getBonusDamage, because six plasma weapons override getDamageMod and drop the parent's result. Behind the static. */
+        if (TacGamedata::$officersPresent && $shooter instanceof BaseShip){
+            $damage += Officers::laserBoostDamage($shooter, $this, $rolled, $target, $fireOrder);
+            $damage += Officers::plasmaDamageBonus($shooter, $this);
+        }
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		
 		/* first attempt of StarTrek shield

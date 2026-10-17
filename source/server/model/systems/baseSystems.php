@@ -16022,7 +16022,11 @@ class PlasmaBattery extends ShipSystem{
     public $iconPath = "plasmabattery.png";
 
 	public $powerCurr = 0;
-//	public $capacityBonus = 0; //additional capacity - potentially set by enhancements
+	/* Extra capacity while the battery stands - an Expert Plasma Scientist's +1 (OFFICERS_PLAN.md Stage 12, set by
+	   Officers::applyPlasmaScientist). Protected: no blueprint carries it. */
+	protected $capacityBonus = 0;
+	//true when the last stored-power note is the deployment fill, so the charge has never been touched since
+	protected $deploymentCharge = false;
 	public $powerReceivedFromFrontEnd = 0; //communication variable	
 	public $powerReceivedFromBackEnd = 0; //communication variable
 //	public $nominalOutput = 0;//output to be used in front end display!
@@ -16048,14 +16052,22 @@ class PlasmaBattery extends ShipSystem{
 	}
  
  public function getOutput(){
-        $output = min($this->powerCurr, $this->getRemainingHealth()); //output cannot be higher than remaining health
+        $output = min($this->powerCurr, $this->getMaxCapacity()); //output cannot be higher than capacity
         return $output;
     }
 
- 	public function getMaxCapacity(){ //maximum capacity = health remaining
+ 	public function getMaxCapacity(){ //maximum capacity = health remaining, plus any bonus - but nothing once destroyed
 		$capacity = $this->getRemainingHealth();
-//		$capacity += $this->capacityBonus ;
+		if ($capacity > 0) $capacity += $this->capacityBonus;
 		return $capacity;
+	}
+
+	public function setCapacityBonus($bonus){
+		$this->capacityBonus = (int)$bonus;
+	}
+
+	public function holdsDeploymentCharge(){
+		return $this->deploymentCharge;
 	}
 
  public function stripForJson(){
@@ -16114,6 +16126,7 @@ class PlasmaBattery extends ShipSystem{
 			switch($currNote->notekey){
 				case 'powerStored': //power that should be stored at this moment
 				$this->powerCurr = $currNote->notevalue;
+				$this->deploymentCharge = ((int)$currNote->phase === -1); //still the deployment fill (Officers::applyPlasmaScientist)
 					break;			
 			}
 		}

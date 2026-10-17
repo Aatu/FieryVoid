@@ -154,7 +154,9 @@ PakmaraPlasmaWeb.prototype.constructor =  PakmaraPlasmaWeb;
 PakmaraPlasmaWeb.prototype.initializationUpdate = function () {
     if(this.firingMode == 2){
         const rangeCrit = shipManager.criticals.countCriticalOnTurn(this, "ReducedRangeValue", gamedata.turn);
-        if(rangeCrit > 0) this.range = 1;
+        //"decrease range by 2" (the critical's own description): 3 -> 1, or 4 -> 2 with an Expert Plasma Scientist aboard -
+        //his +1 holds "even if suffering from a critical hit" (OFFICERS_PLAN.md Stage 12), and his range reaches every viewer
+        if(rangeCrit > 0) this.range = Math.max(1, ((this.rangeArray && this.rangeArray[2]) || 3) - 2);
         this.data['Range'] = this.range;   
     }    
 	return this;

@@ -42,6 +42,9 @@
 
    Stage 11: the Expert Laser Technician - a flat damage bonus on every laser, and lasers the player may
    BOOST with power for more (the generic boost buttons; capped at half the roll, one pool a turn).
+   Stage 12: the Expert Plasma Scientist - +1 damage on plasma weapons bar the light ones (Fusers +2), the
+   first two hexes of every plasma shot's range damage ignored, Plasma Batteries holding one point more (and
+   tougher), Plasma Webs reaching a hex further.
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -71,6 +74,11 @@ class Officers{
 	const MAX_TRANSFER_CLAIMS = 8;       //a POST asking for more moves than any ship has movable officers is not read past this
 	const LASER_BOOST_COST = 1;          //Laser Technician: "each point of power provides +1 extra damage"
 	const LASER_BOOST_CAP = 2;           //...and "cannot be increased by more than 50%": at most the roll / 2, rounded down
+	const PLASMA_RANGE_RELIEF = 2;       //Plasma Scientist: "ignore the first two hexes traveled when reducing damage"
+	const PLASMA_BATTERY_BONUS = 1;      //...: "All plasma batteries can store an extra point of power"
+	const PLASMA_BATTERY_CRIT_MOD = -3;  //...: "and receive a -3 bonus on any critical hit roll"
+	const PLASMA_WEB_RANGE = 1;          //...: "Plasma webs receive a +1 bonus to range, even if suffering from a critical hit"
+	const PLASMA_WEB_MODE = 2;           //the web's Anti-Fighter (offensive) mode - the one with a range; Defensive's 100 is "unlimited"
 
 	/* ⭐ FACTION RULES (user request 2026-10-15) - which factions an officer is offered to, and what some
 	   of them pay. ONE table, so a faction's officers change here and nowhere else: README.md, "Officers:
@@ -97,6 +105,8 @@ class Officers{
 		//(the weapon-mounted Matter Weapons Expert is OFF_MWE at another post - `sameAs` - and reads OFF_MWE's line)
 		//"10% of the ship's base cost ... Races other than the Hyach pay 50% more" - the registry's 15, and 10 here
 		'OFF_LASR' => array('pct' => array('Hyach Gerontocracy' => 10)),
+		//"10% of the ship's base cost for Pak'ma'ra ... Any race using plasma weapons can use these officers, but the cost is doubled"
+		'OFF_PLAS' => array('pct' => array("Pak'ma'ra Confederacy" => 10)),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -196,6 +206,16 @@ class Officers{
 		   every rule is asked at damage time, and the boost buttons come from the payload. */
 		'OFF_LASR' => array('label' => 'Expert Laser Technician', 'post' => 'reactor', 'pct' => 15, 'apply' => null,
 			'needs' => 'hasLaserWeapon'),
+		/* Expert Plasma Scientist (Stage 12; rules text, user 2026-10-17), in the Engine. Every plasma weapon but the
+		   light ones scores +1, a Fuser +2 (plasmaDamageBonus); every plasma shot ignores the first two hexes of its range
+		   damage penalty (Weapon::getRangeDamageDistance); every Plasma Battery holds one point more while it stands, and
+		   rolls 3 lower for criticals; every Plasma Web's Anti-Fighter range is 1 longer, its range critical included
+		   (applyPlasmaScientist). Rulings (user 2026-10-17): "medium or heavy" = every plasma weapon but the light ones
+		   ($plasmaClassBonus); a battery still holding its deployment charge starts full at its new capacity; the web's
+		   range and the battery's capacity are shown to every viewer (a displayed stat is public). 10% for the
+		   Pak'ma'ra, 20% for everyone else ($factionRules); only for a hull carrying a plasma weapon. */
+		'OFF_PLAS' => array('label' => 'Expert Plasma Scientist', 'post' => 'engine', 'pct' => 20, 'apply' => 'applyPlasmaScientist',
+			'needs' => 'hasPlasmaWeapon'),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -1587,13 +1607,13 @@ class Officers{
 		return $boost;
 	}
 
-	/* Weapon::stripForJson, for each laser of a ship he is aboard (serving or not), behind $officersPresent:
+	/* Weapon::stripForJson (through weaponForJson), for each laser of a ship he is aboard (serving or not), behind $officersPresent:
 	   - his own team (and everybody once the game is over) is told the laser is BOOSTABLE while he serves - the
 	     client then offers the generic boost buttons, with no maximum (no laser class sets one) - and what a point
 	     costs, whenever its power entries are sent (power.js prices any boost it finds by boostEfficiency);
 	   - anyone else gets the laser's power entries WITHOUT its boosts (user ruling 2026-10-17): no laser is boostable
 	     without him, so a boosted one would name him. The extra damage still shows once the shots land. */
-	public static function laserForJson($ship, $weapon, $strippedSystem){
+	private static function laserForJson($ship, $weapon, $strippedSystem){
 		if (!self::isLaserWeapon($weapon) || !self::isAboard($ship, 'OFF_LASR')) return;
 		if (TacGamedata::$currentGameFinished || $ship->isRevealedToCurrentViewer()){
 			$strippedSystem->boostEfficiency = self::LASER_BOOST_COST;
@@ -1629,6 +1649,103 @@ class Officers{
 	private static function isLaserWeapon($weapon){
 		if ($weapon->weaponClass === 'Laser') return true;
 		return is_array($weapon->weaponClassArray) && in_array('Laser', $weapon->weaponClassArray, true);
+	}
+
+	/* Weapon::stripForJson's one officer hook, behind $officersPresent: the Laser Technician's boost (laserForJson) and the
+	   Plasma Scientist's web range (webForJson). */
+	public static function weaponForJson($ship, $weapon, $strippedSystem){
+		self::laserForJson($ship, $weapon, $strippedSystem);
+		self::webForJson($ship, $weapon, $strippedSystem);
+	}
+
+	/* ------------------------------------------------------------------ Expert Plasma Scientist (Stage 12) */
+
+	/* His flat bonus by class: "All medium or heavy plasma weapons on the ship score +1 damage (this would include medium
+	   plasma cannons and larger, as well as plasma streams, plasma accelerators, etc.). Fuser torpedoes score +2 damage,
+	   not +1." RULED (user 2026-10-17): every plasma weapon but the LIGHT ones listed here at 0 - so a new or custom
+	   plasma weapon is +1 until it is listed. The Plasma Web's bonus is its range, not damage. By class (instanceof), so a
+	   subclass inherits its parent's. ⚠️ MIRROR PAIR with officers.PLASMA_BONUS (JS), keyed by each class's $name -
+	   officersHarness compares the two over every plasma weapon in the statics. */
+	private static $plasmaClassBonus = array(
+		'Fuser' => 2, 'RangedFuser' => 2, 'FuserArray' => 2,
+		'LightPlasma' => 0, 'LightPlasmaBolter' => 0, 'LtPlasmaProjector' => 0, 'NexusLightEnhPlasma' => 0, 'NexusLightMagGun' => 0,
+		'EWPointPlasmaGun' => 0, 'EWHeavyPointPlasmaGun' => 0, 'PlasmaTorch' => 0, 'TrekPlasmaBurst' => 0, 'PakmaraPlasmaWeb' => 0,
+	);
+
+	public static function plasmaFlatBonus($weapon){
+		foreach (self::$plasmaClassBonus as $class => $bonus){
+			if ($weapon instanceof $class) return $bonus;
+		}
+		return 1;
+	}
+
+	/* His flat bonus on a hit - Weapon::getFinalDamage, behind $officersPresent, for a shot in a Plasma mode, AFTER the
+	   weapon's getDamageMod: the Plasma Bolters and the Nexus Enhanced Plasmas override that method and throw away the
+	   parent's result, so a bonus added through getBonusDamage would never reach them. */
+	public static function plasmaDamageBonus($ship, $weapon){
+		if ($weapon->weaponClass !== 'Plasma') return 0;
+		if (!self::isActive($ship, 'OFF_PLAS')) return 0;
+		return self::plasmaFlatBonus($weapon);
+	}
+
+	/* The hexes of a plasma shot's range that cost it no damage: "ignore the first two hexes traveled when reducing damage
+	   scored against an opponent ... a weapon which suffered -1 point of damage per 2 hexes which struck an enemy 10 hexes
+	   away would lose only 4 points of damage, not 5". Weapon::getRangeDamageDistance takes them off the distance every
+	   range damage rule reads - so a Plasma Bolter's free 15 hexes become 17. Every plasma weapon, light ones included. */
+	public static function plasmaRangeRelief($ship){
+		return self::isActive($ship, 'OFF_PLAS') ? self::PLASMA_RANGE_RELIEF : 0;
+	}
+
+	/* The systems he improves, at load:
+	   - every Plasma Battery holds PLASMA_BATTERY_BONUS more while it stands ("They cannot operate if completely
+	     destroyed (despite the +1 power bonus)" - PlasmaBattery::getMaxCapacity), and rolls 3 lower for its criticals;
+	     one still holding its deployment charge starts FULL at the new capacity (user ruling 2026-10-17). Reactor::
+	     effectCriticals has already folded every battery's charge into each reactor's output for Initial Orders - in the
+	     per-system loop, BEFORE this pass - so what he changed is added there too, the same way;
+	   - every Plasma Web's Anti-Fighter range is 1 longer (webForJson publishes it; the client takes 2 off it under the
+	     web's range critical, so a crippled web reaches 2, not 1 - "even if suffering from a critical hit"). */
+	private static function applyPlasmaScientist($ship, $entry, $turn){
+		$gained = 0;
+		foreach ($ship->systems as $system){
+			if ($system instanceof PlasmaBattery){
+				$before = $system->getOutput();
+				$system->setCapacityBonus(self::PLASMA_BATTERY_BONUS);
+				if ($system->holdsDeploymentCharge()) $system->powerCurr = $system->getMaxCapacity();
+				$system->critRollMod += self::PLASMA_BATTERY_CRIT_MOD;
+				$gained += $system->getOutput() - $before;
+			} else if ($system instanceof PakmaraPlasmaWeb){
+				if (isset($system->rangeArray[self::PLASMA_WEB_MODE])) $system->rangeArray[self::PLASMA_WEB_MODE] += self::PLASMA_WEB_RANGE;
+				if ((int)$system->firingMode === self::PLASMA_WEB_MODE) $system->range += self::PLASMA_WEB_RANGE;
+			}
+		}
+		if ($gained !== 0 && TacGamedata::$currentPhase <= 1){
+			foreach ($ship->systems as $system){
+				if ($system instanceof Reactor) $system->outputMod += $gained;
+			}
+		}
+	}
+
+	/* A Plasma Web's range, to EVERY viewer while he serves (user ruling 2026-10-17: a displayed stat is public, only the
+	   officer is hidden) - Weapon::stripForJson sends range only when the weapon has a critical, and the client merges
+	   the payload over the static blueprint, which reads 3. */
+	private static function webForJson($ship, $weapon, $strippedSystem){
+		if (!($weapon instanceof PakmaraPlasmaWeb) || !self::isActive($ship, 'OFF_PLAS')) return;
+		$strippedSystem->range = $weapon->range;
+		$strippedSystem->rangeArray = $weapon->rangeArray;
+	}
+
+	//"Not available on ships without plasma weapon(s)": a weapon with any Plasma mode (a Plasma Web counts)
+	private static function hasPlasmaWeapon($ship){
+		foreach ($ship->systems as $system){
+			if ($system instanceof Weapon && self::isPlasmaWeapon($system)) return true;
+		}
+		return false;
+	}
+
+	//⚠️ MIRROR PAIR with officers.isPlasmaWeapon (JS)
+	private static function isPlasmaWeapon($weapon){
+		if ($weapon->weaponClass === 'Plasma') return true;
+		return is_array($weapon->weaponClassArray) && in_array('Plasma', $weapon->weaponClassArray, true);
 	}
 
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */
