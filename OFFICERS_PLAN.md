@@ -12,7 +12,9 @@ committed (`9ecfd16d4`). Stage 9, the Expert Coordinator, with three system-menu
 once-per-battle abilities and MOVING officers between posts in game (§9.16) - committed (`eae0de604`). Stage 11, the first
 Hard officer, the Expert Laser Technician (§9.17) - committed (`4f3a359cc`). Stage 12, the Expert Plasma Scientist, an
 officer the user added beyond the original 25 (§9.18) - committed (`a80430710`). Stage 13, the Expert Security Officer,
-a second added officer (§9.19) - BUILT 2026-10-17, uncommitted.** Written
+a second added officer (§9.19) - committed (`f17a680b8`). Stage 14, the Expert Religious Leader, a third added officer
+(§9.20) - BUILT 2026-10-17, uncommitted. Stage 15, moving officers in Fleet Selection (free) with the Religious Leader's
+placed twin, and every officer on a post destroyed by pre-battle damage refunded (§9.21) - BUILT 2026-10-17, uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -41,7 +43,12 @@ with this Officer at 1 power = 1 damage, with no maxBoostLevel but a cap at the 
 questions it raised (Stage 11, §9.17). The same day they added a 26th officer, the Expert Plasma Scientist, with his rules
 text, and ruled the three questions he raised (Stage 12, §9.18). Later that day they added a 27th, the Expert Security
 Officer, with his rules text and a design note (his "shift by up to 2, as the defender chooses" is a fixed 2 in the
-defender's favour), and ruled the four questions he raised (Stage 13, §9.19). Each officer's own rules questions still
+defender's favour), and ruled the four questions he raised (Stage 13, §9.19). Later that day they added a 28th, the Expert
+Religious Leader, with his rules text, and ruled the four questions he raised (Stage 14, §9.20); the same request sorted the
+Ship Officers and Fighter Officers cards of the Ship Options document alphabetically. Then they asked for officers to be
+moved freely in Fleet Selection - the Religious Leader to any viable system, and the weapon-placed officers when the player
+changes their mind - with a Move button that keeps the System Enhancements menu's format, ruled such a move free, and re-ruled
+QX5: any officer whose post pre-battle damage destroys is refunded (Stage 15, §9.21). Each officer's own rules questions still
 only need ruling when that officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
@@ -290,6 +297,8 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Laser Technician | `OFF_LASR` | Reactor | 1 |
 | Expert Plasma Scientist *(added 2026-10-17, §9.18)* | `OFF_PLAS` | Engine | 1 |
 | Expert Security Officer *(added 2026-10-17, §9.19)* | `OFF_SECU` | C&C | 1 |
+| Expert Religious Leader *(added 2026-10-17, §9.20)* | `OFF_RELI` | C&C, movable to any primary non-weapon system | 1 |
+| Expert Religious Leader, elsewhere *(Stage 15, §9.21)* | `OFF_RELIP` | a chosen primary non-weapon system | 2 |
 | Expert Software Engineer | `OFF_SOFT` | Computer | 1 |
 | Expert Ion Technician | `OFF_ION` | Engine | 1 |
 | Expert Surge Officer | `OFF_SURG` | Mag-Grav Reactor | 1 |
@@ -488,6 +497,10 @@ masking: individual notes never reach any client.
   **disabled from the start**: the lobby shows a warning on the post and in his tooltip, and the
   player un-buys him through Edit. There is no automatic refund, because changing `pointCostEnh` from
   outside the buy dialog is exactly what WEAPON plan D5 warns against.
+  **RE-RULED 2026-10-17 (Stage 15, §9.21): any officer whose post pre-battle damage destroys is removed and refunded**,
+  track 1 too ("for simplicity"). D5's warning is about putting system enhancements INTO the dialog's buckets; a track-1
+  row zeroed together with its own `pointCostEnh` share is exactly what the next Edit would compute anyway
+  (`officers.setShipLevelRow`).
 
 ### 4.10 Fighters
 
@@ -579,7 +592,9 @@ committed.
 | **11** | Expert Laser Technician, the first Hard officer. **BUILT 2026-10-17** (§9.17) | The flat bonus per laser class and laser mode only; the boost capped at half the roll, one pool a turn over a laser's hits; the Gunner's laser; hidden from opponents; the client's Damage line and power balance |
 | **12** | Expert Plasma Scientist, added by the user (not one of the original 25). **BUILT 2026-10-17** (§9.18) | +1/+2 per class with the light ones excluded; the first two hexes of range damage ignored by every plasma rule, the Bolters' and Nexus overrides included; Plasma Batteries +1 (none destroyed), full from the deployment charge, −3 on criticals, the reactor's Initial Orders share; Plasma Webs +1 range, crippled too |
 | **13** | Expert Security Officer, the second officer the user added. **BUILT 2026-10-17** (§9.19) | +5 initiative to every viewer; -2 on his own C&C's critical rolls, his and its other officers' kill roll included; +2 on every boarding d10 against his ship (pod, claw and transporter delivery; Wreak Havoc, Sabotage, Rescue and the boarders' Capture roll), -2 on his defenders' Capture rolls; 5% EA / 7.5% elsewhere, every whole-percent price unchanged |
-| **14+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **14** | Expert Religious Leader, the third officer the user added. **BUILT 2026-10-17** (§9.20) | +10 initiative to every viewer; +1 on every hit (a pulse, a gun's shot, a raking shot once), never on a roll of 0 or a ram; once he is disabled or killed in battle, from the next turn: +20 initiative, both profiles +1, the strongest standing Scanner +1, the +1 per hit kept, the profiles published; moves to any targetable primary non-weapon system, the jump drive included; Minbari Federation, Markab, Corillani and Yolu only, 15% |
+| **15** | Moving officers in Fleet Selection, free; the Religious Leader's placed twin; any officer on a post destroyed by pre-battle damage refunded. **BUILT 2026-10-17** (§9.21) | Move from a system's menu (its Officers footer), the pick outlining every post he could be bought on; placed to placed, C&C to twin and back, points unchanged; occupied, destroyed and unoffered posts refused; the twin offered on every primary non-weapon system but the C&C, at his own price, and every effect his; a C&C destroyed in the pre-battle editor refunds its ship officers with a warning, an edit and a saved fleet too; the menu rows keep their one shape |
+| **16+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -593,7 +608,7 @@ committed.
 | **QX2** | Does a critical on his post kill an officer? | **Yes**, on a critical roll of 20 or more, modifiers included (D3) |
 | **QX3** | A cap on officers per unit, beyond one of each? | None for ships. **A flight may buy one officer in total** (D9) |
 | **QX4** | Which units may carry officers: bases, OSATs, LCVs, Ancient hulls? | **Not** Ancient hulls, OSATs (mines included) or terrain. Bases and LCVs only where the officer's post exists, so a base without a jump drive gets no Jump Officer (D9) |
-| **QX5** | Track-1 officer whose post was destroyed pre-battle: disabled with a warning, or refunded automatically? | Disabled from the start, with a warning (§4.9). Default accepted without comment |
+| **QX5** | Track-1 officer whose post was destroyed pre-battle: disabled with a warning, or refunded automatically? | Disabled from the start, with a warning (§4.9). Default accepted without comment. **RE-RULED 2026-10-17: refunded, as every officer on a destroyed post is (§9.21)** |
 
 ### Per officer (needed when that stage starts)
 
@@ -615,6 +630,7 @@ committed.
 | Laser Technician | Lasers = `weaponClass` Laser (49 classes)? Is the power boost declared in Initial Orders? Is the +50 % cap on base damage? **Rules text and rulings 2026-10-17 (§9.17):** the text settles the first three - laser-category weapons (any weapon with a Laser mode; only a shot in that mode gains), the boost through the ordinary boost in Initial Orders (the user's design note: "boostable ... 1 power = 1 damage, with no maxBoostLevel but a cap"), the cap on the roll ("if the base roll was 12 damage, it could be raised to 18"). **RULED:** (1) a laser that hits more than once a turn shares its boost as **one pool** for the turn; (2) on a serving Expert Gunner's laser the Gunner's +1 per die **replaces the flat bonus only** - the boost still works there; (3) boosts **hidden from opponents**; (4) the owner's tooltip **Damage line shows** the flat bonus and the boost, with a **Laser boost** line. |
 | Plasma Scientist | *Added 2026-10-17 with his rules text (§9.18).* Which plasma weapons are "medium or heavy"? Does a battery start the battle holding the extra point? Are the web's range and the battery's capacity shown to opponents? **RULED 2026-10-17:** every plasma weapon but the light ones (`Officers::$plasmaClassBonus`); yes, a battery still holding its deployment charge starts full; yes, to every viewer (a displayed stat is public). |
 | Security Officer | *Added 2026-10-17 with his rules text (§9.19).* The user's note settles the main one: "shift all die rolls by up to 2 in any direction desired by the defending player" is a fixed **+2** ("higher rolls are almost always worse for marine attackers ... no need to build in a player choice"). Asked: do the defenders' own Capture rolls (5 or less hits) shift too? Breaching pods only, or Grappling Claws and transporters as well? 7.5% exactly, or 8%? On a hull with two C&Cs, which gets the -2? **RULED 2026-10-17 (all as recommended):** defenders **-2** too (Elite Crew's pattern, doubled); **every boarding party**; **7.5% exactly** (a percent may now carry one decimal place); **his own C&C only**. |
+| Religious Leader | *Added 2026-10-17 with his rules text (§9.20).* Are "+10 initiative" and "+5 to its defense profiles" FV's displayed units or tabletop? What is a "volley" for his +1 damage? Does the ship keep the +1 damage once he is lost? Is the Minbari Protectorate one of the "Minbari" factions? **RULED 2026-10-17:** **FV display units** (+10, then +20; the profiles +1 point each, +5%); **+1 per hit** (each pulse, each gun's shot, a raking shot once, never per die); the frenzy **keeps** the +1 damage; **Minbari Federation only** - the Protectorate is not included. |
 | Software Engineer | "Lets the computer specialist use their ability twice" and "Incompatible with Computer Specialist" contradict each other. Which one stands? "Submarine" = the Hyach stealth hulls (Alichi Kav and Tal)? Whose detection range gets +5? |
 | Ion Technician | Rad Cannons always score 12, with no roll? Forced crits on Sensors, Engine and Reactor on every hit? When is the thrust boost declared? Is "+4 on C&C crits" a penalty? |
 | Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? |
@@ -2198,3 +2214,194 @@ the Helmsman's reach. Statics +98,199 B uncompressed.
    code rolls one d10 per attacker and one per DEFENDING marine unit. The Security Officer's -2 is on the latter.
 2. Not tested in a real game. Worth a play test: buy him on an EA ship (5%) and a non-EA one (7.5%), check the initiative in the
    ship window, then board his ship with a pod and read the combat log's rolls.
+
+### 9.20 Stage 14: Expert Religious Leader (2026-10-17)
+
+**Rules text (user, 2026-10-17) - a 28th officer, not in the original brief.** "Higher level members of the religious caste
+provide a morale boost to their crews, simply by virtue of their presence aboard ship. In addition, if they are killed, wounded
+or captured, this can stir the crew into a berserker frenzy. A religious leader provides an automatic +10 to the ship's
+initiative. In addition, each weapon the ship fires scores +1 damage per volley (not per sub-volley or per die). If he is
+wounded, captured or killed, the initiative bonus is doubled, and the ship receives + 1 to its sensors and +5 to its defense
+profiles thereafter (note that + 5 to the defense profile is not a bonus, but a penalty). Location: Any primary non-weapon
+system. (Default to CnC when bought but can be moved to other non-weapon Primary Locations during the game) Cost: 15% of the
+ship's base value. Availability: Minbari, Markab, Corillani and Yolu factions." The same request asked for the Ship Officers and
+Fighter Officers cards of the Ship Options document (`ammo-options-enhancements.php#shipofficers` / `#fighterofficers`) in
+alphabetical order.
+
+**Rulings (user, 2026-10-17, asked before building):**
+1. "+10 initiative" and "+5 to its defense profiles" are **FV's displayed units** (FV shows both x5): +10 (+20 once he is lost),
+   and the profiles **+1 point** each (+5% to be hit) - Poor Crew's and the Geneticist's way.
+2. A "volley" is **a hit**: +1 on each pulse of a pulse weapon, on each shot of a multi-gun weapon, once on a raking shot (not
+   per rake), never per die.
+3. Once he is lost the ship **keeps** the +1 damage - the frenzy adds to what he gave.
+4. **Minbari Federation**, Markab Theocracy, Corillani Theocracy and Yolu Confederation - **not** the Minbari Protectorate.
+
+**Built with defaults, stated here (ask before changing):**
+- "Wounded, captured or killed" = **disabled or killed** in battle; FV models no officer capture. The frenzy starts the turn after
+  (the turn his bonuses would end - D3) and lasts the rest of the battle. **Pre-battle damage causes no frenzy**: a post destroyed
+  before battle means he never served (out 0), so he gives nothing at all - and the lobby needs no frenzy preview. *(Stage 15,
+  §9.21: such an officer is now removed and refunded in the lobby; the game's out-0 path remains only for an old fleet or client.)*
+- **+1 sensors** = +1 output on the strongest Scanner standing at the start of the turn (not destroyed by turn - 1, output above
+  0; the first in construction order on a tie) - Improved Sensors' scanner, among the living, since a destroyed one would swallow
+  the point.
+- The +1 damage never lands on a hit whose roll is 0 (the Electro-Pulse Gun, Stun Beam, Gravity Net, Molecular Flayer and Marines
+  roll none - their effect is something else) and never on a ram ("each weapon the ship fires").
+- **Where he may move**: any system of the Primary section (location 0) that is not a weapon or Structure and can be targeted
+  (`isTargetable` - an officer in a technical system could never be disabled or killed). ⚠️ The jump drive is a `Weapon` subclass
+  in FV (it "fires" to open a jump point) and a drive in the rules: it counts. Thrusters, hangars, jammers and tractor beams count
+  where a hull puts them in the Primary section. Stage 10's rules otherwise: one move a turn, serving nowhere that turn, never
+  into a destroyed system or one another MOVABLE or placed officer holds (a Helmsman or Technician just shares the post).
+- **The turn he moves** he serves nowhere (Stage 10): no +1 damage on that turn's hits. His +10 was already in the initiative
+  rolled at the start of that turn, so that turn's order keeps it; the displayed initiative drops on that turn's later loads.
+- Frenzy numbers are public: `iniativebonus`, `forwardDefense` and `sideDefense` go to every viewer while he is lost
+  (`lostPublish`); a scanner's output always does. The officer stays hidden.
+- The owner's weapon tooltips show the +1 on their Damage line (lobby and game), after a Laser Technician's or Plasma
+  Scientist's raise; a line whose lowest roll is 0 keeps its 0.
+
+**Framework additions** (the first officer whose LOSS does something, and the first ship-level officer with more than one
+post): registry keys `lost` (a method `apply()` runs on every turn after he was disabled or killed in battle, in place of
+`apply`), `lostPublish` (`publish`'s list for those turns) and `movesTo` (a ship-level movable officer's further posts, asked by
+`postAs`); `Officers::isLost` ⚠️ MIRROR PAIR with `officers.isLost`. Officers without the new keys behave exactly as before.
+*(Stage 15, §9.21, retired `movesTo`: away from his C&C he is now the placed twin OFF_RELIP, the Matter Weapons Expert's pattern.)*
+
+**Files.** Server: `Officers.php` (registry `OFF_RELI` after OFF_SECU - now the last fixed-post ship officer - `cnc`, 15%,
+`apply` `applyReligiousLeader`, `publish` iniativebonus, `lost` `applyReligiousFrenzy`, `lostPublish` iniativebonus /
+forwardDefense / sideDefense, `movable`, `movesTo` `isPrimaryNonWeapon`; `$factionRules` `only` the four factions;
+`RELIGIOUS_INI`, `RELIGIOUS_DAMAGE`, `FRENZY_SENSORS`, `FRENZY_PROFILE`, `isLost`, `isPrimaryNonWeapon`, `applyReligiousLeader`,
+`applyReligiousFrenzy`, `religiousDamageBonus`; `apply()`, `addForJson()` and `postAs()` take the new keys), `weapon.php`
+(`getFinalDamage` adds `religiousDamageBonus` beside the laser boost and the plasma bonus - it runs once per hit, which is his
+"per volley"). Client: `officers.js` (the registry row with `movable` and `stats` iniativebonus 10, `isLost`,
+`religiousDamageBonus`, `modeOneDamage`, `religiousDamageLine`; `adjustDataDisplay`'s Damage branch now chains the laser or plasma
+line, then his). Docs: an Expert Religious Leader card; both officer card lists sorted alphabetically (the cards moved verbatim -
+same lines, other order); him in Moving an officer (with a note that officers who never move share a post) and Seeing your
+officers. Statics, bundles and the served copy rebuilt; no new PHP class.
+
+**Measured.** 71 offers in the statics (Minbari Federation 34, Corillani 14, Yolu 13, Markab 10; none for the Protectorate).
+Statics +3,877 B uncompressed.
+
+**Verified.**
+- `officersHarness.php` **951 / 0 with the database**, 882 / 0 with `--no-db` (69 new: `isLost` itself; offers and prices on five hulls across the four factions, none
+  on the Protectorate, Earth Alliance, Dilgar or Pak'ma'ra, a doctored row; the post; +10 and nothing else while he serves; +1
+  through the REAL `getFinalDamage` on a Fusion Cannon and a Neutron Laser (raking - one roll), 0 on an Electro-Pulse Gun, a roll
+  of 0 and a ram, the gate; the enemy payload (+10, no profiles, no officer); a C&C destroyed before battle - nothing; killed or
+  disabled last turn - +20, profiles +1, the Scanner +1, the +1 per hit kept; killed this turn - +10, no frenzy yet; three turns
+  on, still frenzied; two equal Scanners - the first gets it, the second once the first is destroyed; the frenzied enemy
+  payload; moved to the Reactor, the turn of the move, back to the C&C, lost at the Reactor - frenzied; refused: a weapon, the
+  Primary Structure, a front thruster, an untargetable system, a destroyed one, the Retlata's Primary Fusion Cannon; the Initial
+  Orders targets (Engine, Hangar, Jammer, Jump Engine, Reactor, Scanner, Tractor Beam on a Sharlin; the Retlata's two cargo bays and
+  two Primary thrusters among its ten); `saveTransfers`' note).
+- `officersClientHarness.js` **328 / 0** (17 new: the registry row and order, the lobby list and initiative, a pre-battle
+  destroyed C&C, a server-built list not added twice, `isLost`, `religiousDamageBonus` in every state, the Damage line alone and
+  over the Laser Technician's and Plasma Scientist's, `movableOn`, the REAL SystemInfo's Damage line and officer line, serving and
+  killed).
+- **Mutation-tested: 37 breaks (25 server, 12 client - one of them through the differential), all caught**, files byte-identical
+  afterwards. Two first survived and got a test each: `isLost`'s `>=` turned `>` (equivalent in every caller, which asks `serves`
+  first - now checked directly, as its client mirror is), and the Weapon test removed (the Sharlin has no Primary weapon - now
+  the Retlata's).
+- `enhancementsHarness` **276 / 0** - re-recorded (old copy `fingerprint.before-officers-stage14.txt`) after proving the change is
+  only the Tinashi's OFF_RELI offer and the 30 new case blocks (`reli`, `reli+helm+elite1`): with those stripped, the new
+  fingerprint is identical to the old. `enhancementsDifferential.js` **639 / 0** (2 new). `fvbuild -Check`: autoload current,
+  validator clean, replay **153 / 0**. Bundles rebuilt (`-Client`) and the served copy synced (`-Sync`).
+
+**Observations, not changed:**
+1. An officer whose loss is worth more than his service invites feeding him to the enemy: moved into a fragile primary system,
+   a Religious Leader is soon disabled, and the frenzy's +20 initiative and +1 sensors are the rule's own trade-off for +5% to be
+   hit. Built as written.
+2. Not tested in a real game. Worth a play test on a Minbari ship: the initiative in the ship window (+10), a weapon tooltip's
+   Damage line +1, a move to the Reactor in Initial Orders, then the turn after his post falls: initiative +20, profile 70/80 for
+   65/75, the Scanner one higher in the EW display.
+
+### 9.21 Stage 15: moving officers in Fleet Selection, and every officer on a destroyed post refunded (2026-10-17)
+
+**Request (user, 2026-10-17).** Let the player move the Expert Religious Leader in Fleet Selection "to freely place him in any
+viable system (since moving during game carries a disadvantage)", the same method serving the weapon-placed officers "if players
+change their mind during Fleet Selection"; "the 'Move' button should be incorporated carefully so as not to ruin the format of the
+System Enhancements menu".
+
+**Rulings (user, 2026-10-17):**
+1. **Any system destroyed by pre-battle damage that contained any officer is refunded**, "for simplicity" - QX5 re-ruled
+   (§4.9): a ship-level officer used to stay aboard disabled, with a warning.
+2. **A move in Fleet Selection is free.**
+
+**Built with defaults, stated here (ask before changing):**
+- The Religious Leader can also be **bought directly** in any primary non-weapon system's menu (his twin's offer row there), as
+  the Gunner is on any weapon - a side effect of storing his post as a per-system row.
+- **Move lives in the Officers section's footer** - the "Officers: n pts" line, with Move at its left. A system hosts one
+  officer who holds a post, so the footer's Move can only mean him, and every row above keeps its one control shape. The C&C
+  officer (bought in the buy window) gets a row of his own in the C&C's menu, `fixed`: the same ticker, inert (Edit removes
+  him), so Move has someone to move. Measured on a Sharlin: his row 28px with one box and two buttons, exactly the Hardened
+  Armour row's; the footer one line of 23px (about 5px taller than the bare total line, for the 16px Move button); the menu
+  283px wide, inside its 300px cap.
+- Move closes the menu and outlines every post he could take (the game's pick, its Officers-blue outline); the next click on
+  one moves him, a click on another system or on the page calls it off. No passive notice: the lobby has none
+  (`officers.notice` is game.php's), and the outline is the prompt.
+- **A move needs no out-of-action check in the lobby**: a weapon-mounted Matter Weapons Expert on a weapon damaged before the
+  battle (disabled from the start - damaged, not destroyed, so ruling 1 does not refund him) may be moved to a sound weapon.
+- **The server keeps trusting ship-level rows** at buy time: an honest lobby refunds the officer; a stale or doctored client
+  that sends one on a destroyed post pays for an officer who never serves (out 0), as before. Placed rows on a destroyed
+  system are dropped by the buy-time sanitiser (D11), as they always were.
+- A saved fleet is swept on load (refits too, which the buy would drop anyway), with one notice - a fleet saved before ruling 1
+  can hold such an officer. Fighters are never swept: pre-battle damage never destroys a fighter (a lost one is a smaller flight).
+
+**Design.**
+- ⭐ **`OFF_RELIP`, the Religious Leader's placed twin** - the Matter Weapons Expert's pattern (OFF_MWE / OFF_MWEW): the same
+  officer (`sameAs` OFF_RELI: his faction rules, his price, one or the other), every effect his (`apply`, `lost`, `publish`,
+  `lostPublish`), posted in any primary non-weapon system but the C&C his ship-level self holds (`hosts` `isReligiousPost`; new
+  registry key `nonWeapon` lets `Officers::mayHost` accept a non-weapon). A per-system row gives him what the lobby needed - a
+  stored post - and saved fleets, the D13 name check, the D11 refund and the buy-time sanitiser come with it. In game he moves
+  between the two ids through `postAs`, so Stage 14's `movesTo` key is gone.
+- ⭐ **The lobby move is client-side and writes rows** (`officers.lobbyMove`): a placed row re-filed to the new system, or the
+  ship-level row traded for a twin row and back - off his post first (a twin is refused while his C&C self is still bought),
+  then on; put back if refused. `officers.lobbyPostAs` is the rule (⚠️ a MIRROR of `Officers::postAs` and `mayMoveTo`'s occupancy:
+  a post he could be bought on, never his own, a destroyed one, or one another placed or movable officer holds - a Helmsman just
+  shares it; the ship cap not counting himself). The server needs nothing new: every row is re-checked at buy, save and reload.
+- ⭐ **`officers.setShipLevelRow` is THE way a ship-level officer row changes outside the buy dialog**: its count, `pointCostEnh`
+  and `pointCost` by one delta - the invariant pointCost = hull + pointCostEnh + pointCostEnh2 + pointCostSysEnh, and what the
+  next Edit recomputes from the rows anyway. A twin row moves `pointCostSysEnh` and `pointCost` (as `settleRefitCost` does).
+- `officers.dropDestroyedPosts` is ruling 1's ship-level half, beside `systemEnhancements.dropDestroyed` (D11) at its three
+  sites: the system menu's `refresh` (every damage write), `doEditShip`, and now `doLoadFleet`. One warning names both.
+
+**Files.** Server: `Officers.php` (registry `OFF_RELIP` after OFF_MWEW; `nonWeapon` documented; `mayHost` - `nonWeapon`, `hosts`
+takes the ship too, the sameAs officer's per-hull opt-out; `postAs` without `movesTo`; `isReligiousPost`;
+`religiousDamageBonus` by `rulesId`), `Enhancements.php` (per-system registry `OFF_RELIP`, `sysEnhEligibleOfficerRELIP`,
+`sysEnhPriceOfficerRELIP`). Client: `officers.js` (registry `OFF_RELIP`; `destinations` and `pickTarget`/`startPick` branch for
+the lobby; `moveFamily`, `shipLevelRow`, `lobbyPostAs`, `lobbyDestinations`, `lobbyEntryAt`, `setShipLevelRow`, `lobbyMove`,
+`afterLobbyChange`, `dropDestroyedPosts`, `decorateMenuRows`; the two "one place" messages name Move), `systemEnhancements.js`
+(the label; `menuRowsFor` hands its rows to `officers.decorateMenuRows`), `SystemEnhancementsSection.js` (the `fixed` row, the
+Officers footer with Move), `ApplyDamageMenu.js` (`startMove`, the ship-level sweep in `refresh`), `gamelobby.js` (the sweep in
+`doEditShip` and `doLoadFleet`, a page click calling a pick off). Docs: Buying officers (a system you choose, Move), Losing an
+officer (refunded), Moving an officer (Fleet Selection), the Religious Leader's card. Statics and bundles rebuilt.
+
+**Measured.** 437 OFF_RELIP offers in the statics (Minbari Federation 241, Corillani 86, Yolu 64, Markab 46), one per primary
+non-weapon system but the C&C of the hulls offered him. Statics +11,204 B uncompressed.
+
+**Verified.**
+- `officersHarness.php` **978 / 0 with the database**, 909 / 0 with `--no-db` (27 new: the twin's registry entry; offers on a Sharlin's 7 primary
+  non-weapon systems, not its C&C, at his price, limit 1, cap 1; a Retlata's 10, not its Primary Fusion Cannon; none for the
+  Protectorate, Earth Alliance or Dilgar, none with OFF_RELI opted out; the Gunner still weapons-only; a twin row posted, +10, +1
+  per hit, its frenzy and its enemy payload, the price equal to the C&C one; a doctored twin + C&C row, a twin row on the C&C or a
+  weapon; the sanitiser keeping one and dropping one on a destroyed Scanner; in game from the Reactor, the C&C among his targets;
+  and Stage 14's move tests now reading OFF_RELIP away from the C&C, plus a Reactor-to-Engine move).
+- `officersClientHarness.js` **361 / 0** (33 new: the twin; destinations from the C&C and from a twin post, and none to a C&C
+  whose hull does not offer him there; the C&C menu's fixed
+  row and the twin row's Move; C&C -> Engine -> Reactor -> C&C with the three buckets checked each time; refusals; the Gunner's
+  move and caps; the Matter Weapons Expert C&C <-> weapon; the pick - outline, move, call-off, cancel; `dropDestroyedPosts`,
+  its warning, one way, placed and flights left alone; the REAL SystemEnhancementsSection - Move beside the total, rows the same
+  shape, greyed when nowhere, the fixed row read-only).
+- `officersE2E/lobby15.mjs` (new, standalone, real bundles and clicks) **18 / 18** at 1600x1000 and at 700x900: the C&C menu's
+  shape measured, Move, the 7 outlines, C&C -> Engine -> C&C free, a Gunner bought and moved, a pick called off, the C&C
+  destroyed refunding him with the warning. `lobby8.mjs` 24 / 24.
+- **Mutation-tested: 37 breaks (12 server, 22 client, 3 through `lobby15.mjs` with the bundles rebuilt each time), 34 caught**;
+  the 3 left change nothing (`lobbyPostAs`'s own-post test - the occupancy test already refuses his own post;
+  `dropDestroyedPosts`' flight test - a flight's officers are all skipped anyway; the fixed row's `+` - already disabled at its
+  maximum). Files byte-identical afterwards. Two first survived and got a test each: the C&C as a destination on a hull without
+  his ship-level row, and the twin's lobby initiative - ⚠️ the differential compared NO ship field for a placed case until now
+  (no placed officer moved one before the twin); its placed cases now send and compare initiative and both profiles.
+- `enhancementsHarness` **277 / 0** (fingerprint unchanged - it covers ship-level offers only); `enhancementsDifferential.js`
+  **642 / 0** (3 new twin cases; the 52 placed cases now compare initiative and profiles too). `fvbuild -Check`: autoload
+  current, validator clean, replay **153 / 0**. Statics and bundles rebuilt, served copy synced.
+
+**Observations, not changed:**
+1. Every primary non-weapon system of a Minbari, Markab, Corillani or Yolu ship now shows an Officers row for him in its menu,
+   as every weapon shows the Gunner's.
+2. Not tested in a real game: buy him, move him in Fleet Selection, Ready, and check he serves where he was put.

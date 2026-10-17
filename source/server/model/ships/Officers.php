@@ -47,6 +47,10 @@
    tougher), Plasma Webs reaching a hex further.
    Stage 13: the Expert Security Officer - +5 initiative, -2 on his C&C's critical rolls, and every enemy boarding roll
    against his ship moved 2 in its favour (boardingShift).
+   Stage 14: the Expert Religious Leader - +10 initiative and +1 damage on every hit; the first officer whose LOSS has an
+   effect (`lost`: his crew's frenzy).
+   Stage 15: the Religious Leader's placed twin (OFF_RELIP, any primary non-weapon system - the Matter Weapons Expert's
+   pattern), so the lobby can post him anywhere; the lobby's own Move is client-side (officers.lobbyMove), writing rows.
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -84,6 +88,10 @@ class Officers{
 	const SECURITY_INI = 5;              //Security Officer: "a +1 bonus to the ship's initiative" - tabletop, so +5 in FV (QX1)
 	const SECURITY_CNC_CRIT_MOD = -2;    //...: "and a -2 to any critical hit rolls against the C&C"
 	const SECURITY_BOARDING_SHIFT = 2;   //...: "shift all die rolls by up to 2 in any direction desired by the defending player"
+	const RELIGIOUS_INI = 10;            //Religious Leader: "an automatic +10 to the ship's initiative" - FV units (user ruling 2026-10-17)
+	const RELIGIOUS_DAMAGE = 1;          //...: "each weapon the ship fires scores +1 damage per volley" - per hit (user ruling)
+	const FRENZY_SENSORS = 1;            //...if he is wounded, captured or killed: "the ship receives +1 to its sensors"
+	const FRENZY_PROFILE = 1;            //...: "and +5 to its defense profiles" - FV's displayed 5, one profile point (user ruling)
 
 	/* ⭐ FACTION RULES (user request 2026-10-15) - which factions an officer is offered to, and what some
 	   of them pay. ONE table, so a faction's officers change here and nowhere else: README.md, "Officers:
@@ -114,6 +122,8 @@ class Officers{
 		'OFF_PLAS' => array('pct' => array("Pak'ma'ra Confederacy" => 10)),
 		//"5% of the ship's basic value for Earth Alliance (EA) factions ... Non-EA factions increase the cost by 50%" - the registry's 7.5
 		'OFF_SECU' => array('pct' => array('Earth Alliance' => 5, 'Earth Alliance (Early)' => 5, 'Earth Alliance (defenses)' => 5)),
+		//"Availability: Minbari, Markab, Corillani and Yolu factions" - the Minbari Protectorate not included (user ruling 2026-10-17)
+		'OFF_RELI' => array('only' => array('Minbari Federation', 'Markab Theocracy', 'Corillani Theocracy', 'Yolu Confederation')),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -136,7 +146,8 @@ class Officers{
 	   Placed officers (Stage 8) carry, instead of a post key:
 	     placed      true: the player picks his post, a weapon, in that system's own menu - a per-system row
 	                 (Enhancements::$systemEnhancementRegistry), never an enhancementOptions offer
-	     hosts       (optional) a further test the weapon must pass to host him (a method taking the system)
+	     hosts       (optional) a further test the weapon must pass to host him (a method taking the system, then the ship)
+	     nonWeapon   (optional) true: his posts are systems that are NOT weapons (`hosts` says which) - Stage 15
 	     shipLimit   (optional) the method answering how many one ship may carry (default 1, "one of each")
 	     sameAs      (optional) the ship-level officer he IS, at another post: his faction rules are that
 	                 officer's, and a ship carries one or the other, never both (user ruling 2026-10-16)
@@ -147,7 +158,11 @@ class Officers{
 	                 officer sharing his rulesId moves as ONE man: the Matter Weapons Expert at the C&C is OFF_MWE
 	                 and in a weapon OFF_MWEW (user ruling 2026-10-16), whichever his new post makes him.
 	     reload      true: the weapon he serves in reloads a turn faster after every shot (fasterReload)
-	     abilities   true: the Expert Gunner's once-per-battle faster reload, Piercing and called shot */
+	     abilities   true: the Expert Gunner's once-per-battle faster reload, Piercing and called shot
+	   Stage 14:
+	     lost        (optional) the static method applying what his LOSS does, on every turn after he was disabled
+	                 or killed in battle (isLost) - in place of `apply`, which only runs while he serves
+	     lostPublish (optional) `publish`'s list for the turns `lost` runs */
 	private static $registry = array(
 		/* Expert Helmsman: +5 initiative (FV units, QX1), wins initiative ties, and -1 on the die he
 		   rolls on a meteor swarm's impact chart (user, 2026-10-10). The tie-break is
@@ -232,6 +247,16 @@ class Officers{
 		   everyone else ($factionRules) - the one price with a decimal place (price). */
 		'OFF_SECU' => array('label' => 'Expert Security Officer', 'post' => 'cnc', 'pct' => 7.5, 'apply' => 'applySecurityOfficer',
 			'publish' => array('iniativebonus')),
+		/* Expert Religious Leader (Stage 14; rules text, user 2026-10-17), at the C&C when bought, and movable to any other
+		   primary non-weapon system - where he is OFF_RELIP, his placed twin below (Stage 15). +10 initiative (applyReligiousLeader) and +1 damage on every hit his
+		   ship's weapons score (religiousDamageBonus). "If he is wounded, captured or killed" - disabled or killed in battle -
+		   his crew's frenzy from the next turn on: initiative +20 instead, +1 sensors, and both profiles +1 (the rules' "+5",
+		   in FV's displayed units) - applyReligiousFrenzy. Rulings (user 2026-10-17): FV display units; +1 per HIT (each pulse,
+		   each gun's shot, a raking shot once, never per die); the frenzy keeps the +1 damage; Minbari Federation, Markab,
+		   Corillani and Yolu only ($factionRules). 15%. */
+		'OFF_RELI' => array('label' => 'Expert Religious Leader', 'post' => 'cnc', 'pct' => 15, 'apply' => 'applyReligiousLeader',
+			'publish' => array('iniativebonus'), 'lost' => 'applyReligiousFrenzy',
+			'lostPublish' => array('iniativebonus', 'forwardDefense', 'sideDefense'), 'movable' => true),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -261,6 +286,14 @@ class Officers{
 		'OFF_MWEW' => array('label' => 'Matter Weapons Expert', 'placed' => true, 'pct' => 10, 'sameAs' => 'OFF_MWE',
 			'hosts' => 'isMatterWeapon', 'apply' => 'applyWeaponMatterExpert', 'anyDamage' => true,
 			'movable' => true, 'reload' => true),
+		/* The Expert Religious Leader away from his C&C (Stage 15, user request 2026-10-17: "freely place him in any viable
+		   system" in Fleet Selection, where moving costs nothing): the same officer as OFF_RELI (sameAs - one or the other,
+		   his faction rules and price), posted in any primary non-weapon system but that C&C (isReligiousPost). Bought, or
+		   moved to, from that system's own menu; in game he moves between the two ids as the Matter Weapons Expert does
+		   (postAs). Every effect is OFF_RELI's. */
+		'OFF_RELIP' => array('label' => 'Expert Religious Leader', 'placed' => true, 'pct' => 15, 'sameAs' => 'OFF_RELI',
+			'hosts' => 'isReligiousPost', 'nonWeapon' => true, 'apply' => 'applyReligiousLeader', 'publish' => array('iniativebonus'),
+			'lost' => 'applyReligiousFrenzy', 'lostPublish' => array('iniativebonus', 'forwardDefense', 'sideDefense'), 'movable' => true),
 
 		/* FIGHTER OFFICERS (Stage 4). A flight carries ONE officer in total (D9), posted on its first
 		   craft. He is lost with that craft - destroyed, or dropped out - and never by a dock, a partial
@@ -653,16 +686,18 @@ class Officers{
 	   hull's enhancementOptionsDisabled, his faction rules, and his own weapon test (`hosts`: the Matter
 	   expert needs a weapon with a Matter mode). Asked by the per-system registry's `eligible` wrappers,
 	   AFTER Gunsights' own weapon test ("any weapon Gunsights may be bought for", user ruling 2026-10-16) -
-	   so every host is a gun that rolls to hit. */
+	   so every host is a gun that rolls to hit. Stage 15: a `nonWeapon` officer (the Religious Leader's twin)
+	   is posted in systems that are NOT weapons, which his `hosts` names. The per-hull opt-out of the
+	   ship-level officer he IS (sameAs) covers him too. */
 	public static function mayHost($ship, $system, $id){
 		if (!self::isPlacedOfficer($id)) return false;
 		if ($ship instanceof FighterFlight || !self::mayCarryOfficers($ship)) return false;
-		if (in_array($id, $ship->enhancementOptionsDisabled)) return false; //the per-hull opt-out, as addOffers honours it
+		if (in_array($id, $ship->enhancementOptionsDisabled) || in_array(self::rulesId($id), $ship->enhancementOptionsDisabled)) return false; //the per-hull opt-out, as addOffers honours it
 		if (!self::factionAllows($ship, $id)) return false;
-		if (!($system instanceof Weapon)) return false;
+		if (empty(self::$registry[$id]['nonWeapon']) && !($system instanceof Weapon)) return false;
 		if (empty(self::$registry[$id]['hosts'])) return true;
 		$hosts = self::$registry[$id]['hosts'];
-		return (bool)self::$hosts($system);
+		return (bool)self::$hosts($system, $ship);
 	}
 
 	//the cheap test that keeps every ordinary ship (a single 'NONE' row) out of the resolver
@@ -697,8 +732,10 @@ class Officers{
 		$ship->setOfficers($list);
 
 		foreach ($list as $i => $entry){
-			if (!self::serves($entry, $turn)) continue;
-			$method = self::$registry[$entry['id']]['apply'];
+			$officer = self::$registry[$entry['id']];
+			if (self::serves($entry, $turn)) $method = $officer['apply'];
+			else if (isset($officer['lost']) && self::isLost($entry, $turn)) $method = $officer['lost']; //Stage 14: what his loss does
+			else continue;
 			if ($method !== null) self::$method($ship, $list[$i], $turn); //by reference for applyGunner, which notes his added mode
 		}
 		self::settleFiringModes($ship, $list);
@@ -764,6 +801,15 @@ class Officers{
 		if (!empty($entry['transit']) && in_array((int)$turn, $entry['transit'], true)) return false;
 		if ($entry['out'] === null) return true;
 		return ($entry['out'] >= 1) && ($entry['out'] >= (int)$turn);
+	}
+
+	/* Out of action IN BATTLE before $turn - disabled or killed: what a `lost` method answers to (Stage 14, the Religious
+	   Leader's frenzy), from the turn after it happened, as his bonuses end then. Not pre-battle damage (out 0: he never came
+	   aboard for this battle), and not a fighter officer who went with his fighter ('moved' - he serves on, elsewhere).
+	   ⚠️ MIRROR PAIR with officers.isLost (JS). */
+	private static function isLost($entry, $turn){
+		if ($entry['out'] === null || $entry['out'] < 1 || $entry['out'] >= (int)$turn) return false;
+		return $entry['how'] === 'disabled' || $entry['how'] === 'killed';
 	}
 
 	/* ------------------------------------------------------------------ moving officers (Stage 10) */
@@ -848,7 +894,7 @@ class Officers{
 	/* The officer he would be at $system - his own id, or another sharing his rulesId (the Matter Weapons Expert:
 	   OFF_MWE at the C&C, OFF_MWEW in a weapon) - or null when $system cannot host him. A placed officer needs
 	   the per-system offer he could be BOUGHT on (the lobby's own test, so a move goes where a purchase could);
-	   a ship-level one his own post. */
+	   a ship-level one his own post. (The Religious Leader moves from his C&C as OFF_RELIP, his placed twin - Stage 15.) */
 	private static function postAs($ship, $id, $system){
 		$kind = self::rulesId($id);
 		foreach (self::$registry as $candidate => $officer){
@@ -860,6 +906,22 @@ class Officers{
 			}
 		}
 		return null;
+	}
+
+	/* "Any primary non-weapon system" (the Religious Leader) - a system of the PRIMARY section that is not a weapon and not
+	   Structure. Not one that can never be targeted either (a technical system - the Hyach Specialists, an ammo magazine, a
+	   Mag-Grav "technical" reactor): an officer there could never be disabled or killed. ⚠️ A jump drive IS a Weapon in FV
+	   (it "fires" to open a jump point), and a drive, not a weapon, in the rules: it counts. */
+	private static function isPrimaryNonWeapon($ship, $system){
+		if ((int)$system->location !== 0 || empty($system->isTargetable)) return false;
+		if ($system instanceof Weapon && !($system instanceof JumpEngine)) return false;
+		return !($system instanceof Structure) && !($system instanceof Fighter);
+	}
+
+	/* OFF_RELIP's posts (`hosts`, Stage 15): any primary non-weapon system but the C&C his ship-level self is posted in -
+	   there he is OFF_RELI, bought in the Officers section, so one post never has two ways to buy him. */
+	private static function isReligiousPost($system, $ship){
+		return self::isPrimaryNonWeapon($ship, $system) && $system !== self::findPost($ship, 'cnc');
 	}
 
 	//an officer who occupies his post as far as another's move is concerned: a placed or movable one
@@ -1795,6 +1857,47 @@ class Officers{
 		return self::isActive($ship, 'OFF_SECU') ? self::SECURITY_BOARDING_SHIFT : 0;
 	}
 
+	/* ------------------------------------------------------------------ Expert Religious Leader (Stage 14) */
+
+	//+10 initiative while he serves - published to every viewer (`publish`), as the Helmsman's is
+	private static function applyReligiousLeader($ship, $entry, $turn){
+		$ship->iniativebonus += self::RELIGIOUS_INI;
+	}
+
+	/* His crew's frenzy, on every turn after he was disabled or killed in battle (`lost`, isLost): "the initiative bonus is
+	   doubled, and the ship receives +1 to its sensors and +5 to its defense profiles thereafter" - +20 initiative, +1 output
+	   on the strongest Scanner still standing at the start of this turn (Improved Sensors' scanner, among the living - a
+	   destroyed one would swallow the point), and +1 on both profiles: FV shows a profile x5, so the rules' "+5" is one
+	   point (user ruling 2026-10-17), Poor Crew's and the Geneticist's way. The fields reach every viewer (`lostPublish`);
+	   a scanner's output always does. */
+	private static function applyReligiousFrenzy($ship, $entry, $turn){
+		$ship->iniativebonus += 2 * self::RELIGIOUS_INI;
+		$ship->forwardDefense += self::FRENZY_PROFILE;
+		$ship->sideDefense += self::FRENZY_PROFILE;
+		$best = null;
+		foreach ($ship->systems as $system){
+			if (!($system instanceof Scanner) || $system->output <= 0 || $system->isDestroyed((int)$turn - 1)) continue;
+			if ($best === null || $system->output > $best->output) $best = $system;
+		}
+		if ($best !== null) $best->output += self::FRENZY_SENSORS;
+	}
+
+	/* ⭐ His +1 damage: Weapon::getFinalDamage, which runs once per HIT - each pulse of a pulse weapon, each shot of a weapon
+	   with several guns, a raking shot once however many rakes it is split into - so "+1 per volley (not per sub-volley or
+	   per die)" is one call there (user ruling 2026-10-17: per hit). While he serves AND after he is lost: the frenzy keeps
+	   it (user ruling). Never on a hit whose roll is 0 - the Electro-Pulse Gun, Stun Beam, Gravity Net and Molecular Flayer
+	   roll no damage, their effect is something else - nor on a ram, which is no weapon fired. Behind $officersPresent.
+	   ⚠️ MIRROR PAIR with officers.religiousDamageBonus (JS), which raises the owner's Damage lines. */
+	public static function religiousDamageBonus($ship, $weapon, $rolled){
+		if ($rolled <= 0 || $weapon instanceof RammingAttack) return 0;
+		foreach ($ship->getOfficers() as $entry){
+			if (self::rulesId($entry['id']) !== 'OFF_RELI') continue; //at his C&C, or anywhere else as OFF_RELIP (Stage 15)
+			$turn = TacGamedata::$currentTurn;
+			return (self::serves($entry, $turn) || self::isLost($entry, $turn)) ? self::RELIGIOUS_DAMAGE : 0;
+		}
+		return 0;
+	}
+
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */
 
 	//Expert Dogfighter: +5 initiative, ELITE_SW's line
@@ -2102,9 +2205,12 @@ class Officers{
 		$list = $ship->getOfficers();
 		if (empty($list)) return;
 		foreach ($list as $entry){
-			if (!self::serves($entry, TacGamedata::$currentTurn)) continue;
-			if (empty(self::$registry[$entry['id']]['publish'])) continue;
-			foreach (self::$registry[$entry['id']]['publish'] as $field) $strippedShip->$field = $ship->$field;
+			$officer = self::$registry[$entry['id']];
+			if (self::serves($entry, TacGamedata::$currentTurn)) $key = 'publish';
+			else if (isset($officer['lost']) && self::isLost($entry, TacGamedata::$currentTurn)) $key = 'lostPublish'; //Stage 14: what his loss moved
+			else continue;
+			if (empty($officer[$key])) continue;
+			foreach ($officer[$key] as $field) $strippedShip->$field = $ship->$field;
 		}
 		if (!TacGamedata::$currentGameFinished && !$ship->isRevealedToCurrentViewer()) return;
 		$out = array();

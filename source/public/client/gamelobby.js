@@ -4731,6 +4731,11 @@ window.gamedata = {
 			//pointCost had the OLD refit total folded in; take the refunded difference back off.
 			if (refitsDropped.length) ship.pointCost -= (sysEnhBefore - (ship.pointCostSysEnh || 0));
 		}
+		//OFFICERS_PLAN.md Stage 15 (user ruling 2026-10-17): a ship officer bought in this edit for a post the pre-battle
+		//damage destroys is refunded at once, as the placed ones above are (it moves pointCostEnh and pointCost itself)
+		if (window.officers && typeof officers.dropDestroyedPosts === 'function') {
+			refitsDropped = refitsDropped.concat(officers.dropDestroyedPosts(ship));
+		}
 
 		//The React window renders from this same mutated ship object, so no
 		//destroy/rebuild dance is needed - just re-render if it is open.
@@ -5192,6 +5197,7 @@ window.gamedata = {
 		//Reported once, after the load, so a mis-click is obvious rather than silent.
 		var declinedDamage = false;
 		var declinedCriticals = false;
+		var destroyedPostsDropped = []; //OFFICERS_PLAN.md Stage 15 - see the sweep after applyToShip below
 
 		for (var i = 0; i < fleet.length; i++) {
 			var listShip = fleet[i];
@@ -5276,6 +5282,20 @@ window.gamedata = {
 				if (available.criticals && !loaded.criticals) declinedCriticals = true;
 
 				battleDamage.applyToShip(ship);
+
+				/* OFFICERS_PLAN.md Stage 15 (user ruling 2026-10-17): an officer on a system this fleet's damage destroys is
+				   refunded - as the system menu does the moment the damage is dealt - and so is a refit (D11, which the buy
+				   would drop anyway). A fleet saved before the ruling can hold such an officer. After applyToShip, which
+				   writes the structure cascade. */
+				if (window.systemEnhancements) {
+					var sysEnhLoaded = parseFloat(ship.pointCostSysEnh) || 0;
+					var refitsGone = systemEnhancements.dropDestroyed(ship);
+					if (refitsGone.length) ship.pointCost -= (sysEnhLoaded - (parseFloat(ship.pointCostSysEnh) || 0));
+					destroyedPostsDropped = destroyedPostsDropped.concat(refitsGone);
+				}
+				if (window.officers && typeof officers.dropDestroyedPosts === 'function') {
+					destroyedPostsDropped = destroyedPostsDropped.concat(officers.dropDestroyedPosts(ship));
+				}
 			}
 
 			gamedata.updateFleet(ship);
@@ -5292,6 +5312,10 @@ window.gamedata = {
 		if (Array.isArray(sysEnhNotice) && sysEnhNotice.length > 0) {
 			confirm.fleetNotice("Enhancements changed since this fleet was saved: "
 				+ sysEnhNotice.join(" "));
+		}
+		if (destroyedPostsDropped.length && window.systemEnhancements) {
+			gamedata.calculateFleet();
+			confirm.fleetNotice(systemEnhancements.describeRemoved(destroyedPostsDropped));
 		}
 
 		//gamedata.populateFleetDropdown();
@@ -6786,5 +6810,14 @@ jQuery(function () {
 		if (!systemInfoState || !systemInfoState.menu) return;
 		if (e.target && e.target.closest && e.target.closest('#systemInfoReact')) return;
 		hideInfo(true);
+	});
+
+	/*OFFICERS_PLAN.md Stage 15: an officer waiting to be MOVED (the menu's Move) takes the next click on one of his outlined
+	  systems - SystemIcon hands it to officers.pickTarget, and stops it there. A click on the page behind the windows
+	  calls the move off instead of leaving the outline behind.*/
+	$(document).on('click.officerLobbyMove', function (e) {
+		if (!window.officers || !officers.picking) return;
+		if (e.target && e.target.closest && e.target.closest('#systemInfoReact')) return;
+		officers.cancelPick();
 	});
 });

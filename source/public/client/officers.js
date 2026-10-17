@@ -62,6 +62,11 @@ window.officers = {
 		   alone (no client shows a critical modifier or a delivery or mission roll). */
 		{ id: 'OFF_SECU', label: 'Expert Security Officer', post: 'cnc', stats: { iniativebonus: 5 },
 			summary: '+5 initiative, -2 on C&C criticals; enemy boarding rolls against this ship 2 worse' },
+		/* Stage 14: the initiative is previewed (stats); his +1 per hit raises the owner's Damage lines (religiousDamageLine);
+		   his crew's frenzy once he is lost moves fields the server publishes, and a scanner's output, which it always sends.
+		   `movable`: to any primary non-weapon system - the server's `targets` say which. */
+		{ id: 'OFF_RELI', label: 'Expert Religious Leader', post: 'cnc', movable: true, stats: { iniativebonus: 10 },
+			summary: '+10 initiative, +1 damage on every hit; once he is lost: +20 initiative, +1 sensors, +5% to be hit' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -72,6 +77,10 @@ window.officers = {
 			summary: '+1 fire control and +1 damage per die for this weapon. Once per battle each:  +1 turn towards first reload, make a Piercing shot (or ignore Piercing FC penalty), and +15% on a called shot' },
 		{ id: 'OFF_MWEW', label: 'Matter Weapons Expert', placed: true, sameAs: 'OFF_MWE', anyDamage: true, movable: true, reload: true,
 			summary: '+1 fire control and +1 damage for this Matter weapon, which reloads a turn faster; disabled by any damage to it, killed if it is destroyed' },
+		/* Stage 15: the Expert Religious Leader away from his C&C - in any other primary non-weapon system (the server's
+		   offers say which). The same officer as OFF_RELI (sameAs), with the same effects. */
+		{ id: 'OFF_RELIP', label: 'Expert Religious Leader', placed: true, sameAs: 'OFF_RELI', movable: true, stats: { iniativebonus: 10 },
+			summary: '+10 initiative, +1 damage on every hit; once he is lost: +20 initiative, +1 sensors, +5% to be hit' },
 		{ id: 'OFF_DOG', label: 'Expert Dogfighter', post: 'craft', flight: true, stats: { iniativebonus: 5 },
 			summary: '+5 initiative' },
 		{ id: 'OFF_MSL', label: 'Expert Missileer', post: 'craft', flight: true, perMissile: 1, needs: 'missiles',
@@ -393,7 +402,7 @@ window.officers = {
 		var officer = this.get(enhID);
 		if (!ship || !officer || !officer.placed) return null;
 		if (officer.sameAs && Array.isArray(ship.enhancementOptions) && this.isBought(ship, officer.sameAs)) {
-			return 'The ' + this.label(officer.sameAs) + ' is posted at the C&C (bought in the Officers section). A ship carries him in one place: remove him there first.';
+			return 'The ' + this.label(officer.sameAs) + ' is posted at the C&C (bought in the Officers section). A ship carries him in one place: use Move in the C&C\'s menu to post him here.';
 		}
 		var self = this;
 		var id = parseInt(systemid, 10);
@@ -427,7 +436,7 @@ window.officers = {
 			if (!rows.length) continue;
 			var s = this.systemById(ship, rows[0][6]);
 			return 'The ' + self.label(enhID) + ' is placed in ' + (s ? (s.displayName || s.name) : rows[0][7]) + ' #' + rows[0][6]
-				+ '. A ship carries him in one place: remove him there (that system\'s menu in the ship window) to post him at the C&C.';
+				+ '. A ship carries him in one place: use Move in that system\'s menu (in the ship window) to post him back at the C&C.';
 		}
 		return null;
 	},
@@ -465,6 +474,14 @@ window.officers = {
 		if (entry.out === undefined || entry.out === null) return true;
 		var out = parseInt(entry.out, 10);
 		return out >= 1 && out >= (parseInt(turn, 10) || 0);
+	},
+
+	/* Out of action IN BATTLE before `turn` - disabled or killed (not pre-battle damage, not a fighter officer gone with his
+	   fighter): an Expert Religious Leader's frenzy (Stage 14). ⚠️ MIRROR PAIR with Officers::isLost (PHP). */
+	isLost: function isLost(entry, turn) {
+		if (entry.out === undefined || entry.out === null) return false;
+		var out = parseInt(entry.out, 10);
+		return out >= 1 && out < (parseInt(turn, 10) || 0) && (entry.how === 'disabled' || entry.how === 'killed');
 	},
 
 	currentTurn: function currentTurn() {
@@ -611,8 +628,14 @@ window.officers = {
 		}).map(function (entry) { return { entry: entry }; });
 	},
 
-	//where he may be moved: the server's `targets`, less posts another officer has been ordered to this turn
+	/* where he may be moved: the server's `targets`, less posts another officer has been ordered to this turn. In Fleet
+	   Selection (Stage 15) the lobby's own rule (lobbyDestinations), worked out once when the pick starts. */
 	destinations: function destinations(ship, entry) {
+		if (this.isDerived(ship)) {
+			var pick = this.picking;
+			if (pick && pick.ship === ship && pick.id === entry.id && String(pick.from) === String(entry.post) && pick.dests) return pick.dests;
+			return this.lobbyDestinations(ship, entry);
+		}
 		if (!Array.isArray(entry.targets)) return [];
 		var self = this;
 		var taken = this.listFor(ship).filter(function (other) { return other !== entry; })
@@ -646,6 +669,7 @@ window.officers = {
 
 	startPick: function startPick(ship, entry) {
 		this.picking = { ship: ship, id: entry.id, from: entry.post };
+		if (this.isDerived(ship)) this.picking.dests = this.lobbyDestinations(ship, entry); //Fleet Selection: nothing changes while he is picked
 		this.notice('Click a highlighted system to move the ' + this.label(entry.id) + ' there - anything else cancels.');
 		this.repaint(ship);
 	},
@@ -667,8 +691,13 @@ window.officers = {
 		var entry = this.pickingEntry(ship);
 		if (!entry) { this.cancelPick(); return false; } //another ship's system: the pick ends, the click goes on
 		if (this.isPickTarget(ship, system)) {
-			this.setTransfer(ship, entry, system.id);
-			this.notice(this.label(entry.id) + ' ordered to ' + this.systemName(ship, system.id) + ': he serves nowhere for the rest of this turn.');
+			this.picking = null;
+			if (this.isDerived(ship)) {
+				this.lobbyMove(ship, entry, system.id); //Fleet Selection (Stage 15): moved at once, free
+			} else {
+				this.setTransfer(ship, entry, system.id);
+				this.notice(this.label(entry.id) + ' ordered to ' + this.systemName(ship, system.id) + ': he serves nowhere for the rest of this turn.');
+			}
 		} else {
 			this.notice('Move cancelled - ' + this.systemName(ship, system.id) + ' is not a post the ' + this.label(entry.id) + ' can move to.');
 		}
@@ -718,6 +747,174 @@ window.officers = {
 	//a passive notice (feedback_passive_notices): game.php's own, when it is there
 	notice: function notice(text) {
 		if (window.savedOrders && typeof savedOrders.showNotice === 'function') savedOrders.showNotice(text);
+	},
+
+	/* ------------------------------------------------------------------ moving officers in Fleet Selection (Stage 15) */
+
+	/* User request 2026-10-17: in Fleet Selection a movable officer may be moved to any post he could be bought for, free
+	   (user ruling) - nothing is lost there, unlike a move in game. The same pick as in game (startPick; SystemIcon outlines
+	   and hands over the click), started by the Move button of the system's menu (ApplyDamageMenu), but the move is made at
+	   once, by rewriting the purchase rows: a placed officer's per-system row moves to the new system; the C&C officer
+	   (OFF_RELI, OFF_MWE) and his placed twin (sameAs) trade his ship-level row for a per-system row, and back. The server
+	   needs nothing new: it re-checks every row at buy, save and reload (Enhancements::sanitiseSystemEnhancements,
+	   Officers::pickPosts / pickPlacedPosts). ⚠️ Mirrors Officers::postAs from the lobby's own data: a post he could be
+	   BOUGHT on. */
+
+	//the officers he is, at one post or another (himself and any sameAs twin) - movable ones only
+	moveFamily: function moveFamily(id) {
+		var officer = this.get(id);
+		var kind = officer ? (officer.sameAs || officer.id) : null;
+		return this.REGISTRY.filter(function (o) { return o.movable && (o.sameAs || o.id) === kind; });
+	},
+
+	//a ship-level purchase row [id, label, count, limit, price, step, option], or null when the hull does not offer him
+	shipLevelRow: function shipLevelRow(ship, id) {
+		var rows = (ship && Array.isArray(ship.enhancementOptions)) ? ship.enhancementOptions : [];
+		for (var i = 0; i < rows.length; i++) {
+			if (rows[i] && rows[i][0] === id) return rows[i];
+		}
+		return null;
+	},
+
+	/* The officer he would be at `system` in Fleet Selection, or null. Never his own post or a destroyed system, nor one
+	   another officer who holds a post (a placed or movable one) is on - one who never moves, such as a Helmsman, simply
+	   shares it. A placed officer where that system offers him and his ship cap allows (himself not counted); a ship-level
+	   one at his own post, on a hull offering him. ⚠️ MIRROR of Officers::postAs + mayMoveTo's occupancy rule (PHP). */
+	lobbyPostAs: function lobbyPostAs(ship, entry, system) {
+		if (!ship || !entry || !system || String(system.id) === String(entry.post) || this.isPostDestroyed(ship, system)) return null;
+		var self = this;
+		var held = this.listFor(ship).some(function (other) {
+			if (String(other.post) !== String(system.id)) return false;
+			var o = self.get(other.id);
+			return Boolean(o && (o.placed || o.movable));
+		});
+		if (held) return null;
+		var family = this.moveFamily(entry.id);
+		for (var i = 0; i < family.length; i++) {
+			var candidate = family[i];
+			if (candidate.placed) {
+				if (!window.systemEnhancements || !systemEnhancements.offerFor(ship, system.id, candidate.id)) continue;
+				var others = this.placedRows(ship).filter(function (row) {
+					return row[0] === candidate.id && !(row[0] === entry.id && String(row[6]) === String(entry.post));
+				}).length;
+				if (others >= this.placedLimit(ship, candidate.id)) continue;
+				return candidate.id;
+			}
+			var post = this.findPost(ship, candidate.post);
+			if (post && String(post.id) === String(system.id) && this.passesNeeds(ship, candidate) && this.shipLevelRow(ship, candidate.id)) return candidate.id;
+		}
+		return null;
+	},
+
+	//every system he could be moved to in Fleet Selection (lobbyPostAs), as ids - [] for an officer who does not move
+	lobbyDestinations: function lobbyDestinations(ship, entry) {
+		var officer = entry ? this.get(entry.id) : null;
+		if (!ship || !officer || !officer.movable || !this.isDerived(ship)) return [];
+		var self = this;
+		return this.systemsOf(ship).filter(function (s) { return s && self.lobbyPostAs(ship, entry, s) !== null; })
+			.map(function (s) { return parseInt(s.id, 10); });
+	},
+
+	//the officer posted on this system under this id in the lobby's own list, or null
+	lobbyEntryAt: function lobbyEntryAt(ship, systemId, id) {
+		return this.onPost(ship, systemId).filter(function (entry) { return entry.id === id; })[0] || null;
+	},
+
+	/* Buy (n 1) or un-buy (n 0) a ship-level officer's row from outside the buy dialog, moving pointCostEnh and pointCost by
+	   the same amount - the lobby's invariant pointCost = hull + pointCostEnh + pointCostEnh2 + pointCostSysEnh. An Edit
+	   later rebuilds pointCostEnh from the rows' counts (gamelobby doEditShip), so it agrees with what is written here.
+	   false when the hull does not offer him. */
+	setShipLevelRow: function setShipLevelRow(ship, id, n) {
+		var row = this.shipLevelRow(ship, id);
+		if (!row) return false;
+		var delta = (n - (parseInt(row[2], 10) || 0)) * (parseFloat(row[4]) || 0);
+		row[2] = n;
+		ship.pointCostEnh = (parseFloat(ship.pointCostEnh) || 0) + delta;
+		ship.pointCost = (parseFloat(ship.pointCost) || 0) + delta;
+		return true;
+	},
+
+	/* Move him to `toId` now (Fleet Selection): off his post first - a placed twin is refused while his ship-level self is
+	   still bought (placedBlock) - then onto the new one; if that is refused he is put back exactly as he was. Free: both
+	   rows cost his own price (Officers::rowPrice), and pointCost follows the refit bucket's change as
+	   ApplyDamageMenu.settleRefitCost does. true when he moved. */
+	lobbyMove: function lobbyMove(ship, entry, toId) {
+		var as = this.lobbyPostAs(ship, entry, this.systemById(ship, toId));
+		if (!as || !window.systemEnhancements) return false;
+		var self = this;
+		var sysBefore = parseFloat(ship.pointCostSysEnh) || 0;
+		var restore;
+		if (this.get(entry.id).placed) {
+			systemEnhancements.set(ship, entry.post, entry.id, 0);
+			restore = function () { systemEnhancements.set(ship, entry.post, entry.id, 1); };
+		} else {
+			this.setShipLevelRow(ship, entry.id, 0);
+			restore = function () { self.setShipLevelRow(ship, entry.id, 1); };
+		}
+		var landed = this.get(as).placed ? systemEnhancements.set(ship, toId, as, 1) === 1 : this.setShipLevelRow(ship, as, 1);
+		if (!landed) restore();
+		ship.pointCost = (parseFloat(ship.pointCost) || 0) + ((parseFloat(ship.pointCostSysEnh) || 0) - sysBefore);
+		systemEnhancements.apply(ship);
+		this.afterLobbyChange(ship);
+		return landed;
+	},
+
+	//the fleet list, the points panel and every open ship window, after a lobby write
+	afterLobbyChange: function afterLobbyChange(ship) {
+		if (window.gamedata && typeof gamedata.refreshFleetRow === 'function') gamedata.refreshFleetRow(ship);
+		if (window.gamedata && typeof gamedata.calculateFleet === 'function') gamedata.calculateFleet();
+		this.repaint(ship);
+	},
+
+	/* ⭐ USER RULING 2026-10-17 (Stage 15): any officer whose post pre-battle damage destroys is REMOVED AND REFUNDED - one
+	   rule for both tracks, "for simplicity" (it was disabled-with-a-warning for a ship-level officer, QX5). A placed
+	   officer's row goes with every refit on a destroyed system (systemEnhancements.dropDestroyed, D11); this is the
+	   ship-level half: each bought ship officer whose post (findPost) is destroyed loses his row, and pointCostEnh and
+	   pointCost give back what he cost. One-way, as D11: repairing the post does not bring him back. Flights are not swept:
+	   pre-battle damage never destroys a fighter (a lost fighter is a smaller flight). Returns dropDestroyed's shape, for
+	   systemEnhancements.describeRemoved. */
+	dropDestroyedPosts: function dropDestroyedPosts(ship) {
+		if (!ship || ship.flight || !ship.systems || !Array.isArray(ship.enhancementOptions)) return [];
+		var self = this;
+		var removed = [];
+		this.REGISTRY.forEach(function (officer) {
+			if (officer.placed || officer.flight) return;
+			var row = self.shipLevelRow(ship, officer.id);
+			var count = row ? (parseInt(row[2], 10) || 0) : 0;
+			if (count < 1) return;
+			var post = self.findPost(ship, officer.post);
+			if (!post || !self.isPostDestroyed(ship, post)) return;
+			var points = count * (parseFloat(row[4]) || 0);
+			self.setShipLevelRow(ship, officer.id, 0);
+			removed.push({ enhID: officer.id, label: officer.label, points: points, systemid: parseInt(post.id, 10),
+				systemName: post.displayName || post.name });
+		});
+		return removed;
+	},
+
+	/* The lobby menu's Officers rows (systemEnhancements.menuRowsFor builds them, SystemEnhancementsSection renders them): a
+	   bought movable officer's row carries `moveTo`, the posts he could take (the footer's Move button); and a ship-level
+	   movable officer posted HERE - the C&C's Religious Leader or Matter Weapons Expert, bought in the Officers section - gets
+	   a row of his own, `fixed`: the same shape, its ticker inert (he is bought and removed in the buy dialog), so the Move
+	   button has someone to move. Fleet Selection only. */
+	decorateMenuRows: function decorateMenuRows(ship, system, rows) {
+		if (!ship || !system || ship.flight || !this.isDerived(ship)) return rows;
+		var self = this;
+		var entries = this.onPost(ship, system.id);
+		rows.forEach(function (row) {
+			var officer = row.officer && row.count > 0 ? self.get(row.enhID) : null;
+			var entry = officer && officer.movable ? entries.filter(function (e) { return e.id === row.enhID; })[0] : null;
+			if (entry) row.moveTo = self.lobbyDestinations(ship, entry);
+		});
+		entries.forEach(function (entry) {
+			var officer = self.get(entry.id);
+			if (!officer || officer.placed || !officer.movable) return;
+			var shipRow = self.shipLevelRow(ship, entry.id);
+			var price = shipRow ? (parseFloat(shipRow[4]) || 0) : 0;
+			rows.push({ enhID: entry.id, label: officer.label, count: 1, max: 1, systemid: parseInt(system.id, 10), price: price,
+				nextPrice: price, note: '', officer: true, fixed: true, blocked: null, moveTo: self.lobbyDestinations(ship, entry) });
+		});
+		return rows;
 	},
 
 	//Is this officer aboard and serving now? ⚠️ MIRROR PAIR with Officers::isActive (PHP).
@@ -1101,6 +1298,43 @@ window.officers = {
 		return this.PLASMA_BATTERY_BONUS;
 	},
 
+	/* ------------------------------------------------------------------ Expert Religious Leader (Stage 14) */
+
+	/* What he adds to a hit from this weapon: +1, while he serves and after he is lost (his crew's frenzy keeps it) - the
+	   lobby's derived list and the owner's server list both answer; an enemy's list is empty. A weapon whose mode-1 roll
+	   cannot pass 0 (an Electro-Pulse Gun, a Stun Beam: their effect is not damage) and a ram gain nothing.
+	   ⚠️ MIRROR PAIR with Officers::religiousDamageBonus (PHP). */
+	RELIGIOUS_DAMAGE: 1,
+	religiousDamageBonus: function religiousDamageBonus(ship, system) {
+		if (!ship || ship.flight || !system || !system.weapon || system.name === 'RammingAttack') return 0;
+		if (!(parseInt(this.modeOneDamage(system.maxDamageArray, system.maxDamage), 10) > 0)) return 0;
+		var list = this.listFor(ship), turn = this.currentTurn();
+		for (var i = 0; i < list.length; i++) {
+			//at his C&C, or anywhere else as OFF_RELIP (Stage 15)
+			if (list[i].id === 'OFF_RELI' || list[i].id === 'OFF_RELIP') return (this.serves(list[i], turn) || this.isLost(list[i], turn)) ? this.RELIGIOUS_DAMAGE : 0;
+		}
+		return 0;
+	},
+
+	//a weapon's mode-1 damage figure (the one its Damage line describes): the per-mode array's, else the plain value
+	modeOneDamage: function modeOneDamage(arr, fallback) {
+		return (arr && typeof arr === 'object' && arr[1] !== undefined) ? arr[1] : fallback;
+	},
+
+	/* A Damage line ("min-max", or one number) with his +1 - on the low end only when the lowest roll is above 0, since a
+	   hit rolling 0 gains nothing (the server's rule). Applied after a Laser Technician's or Plasma Scientist's raise, so
+	   the bonuses add up. A line in any other shape is left alone. */
+	religiousDamageLine: function religiousDamageLine(ship, system, value) {
+		var bonus = this.religiousDamageBonus(ship, system);
+		if (!bonus) return value;
+		var m = /^\s*(\d+)\s*(?:-\s*(\d+))?\s*$/.exec(String(value));
+		if (!m) return value;
+		var lo = parseInt(m[1], 10), hi = (m[2] !== undefined) ? parseInt(m[2], 10) : lo;
+		if (parseInt(this.modeOneDamage(system.minDamageArray, system.minDamage), 10) !== 0) lo += bonus;
+		hi += bonus;
+		return (lo === hi) ? String(hi) : lo + '-' + hi;
+	},
+
 	/* SystemInfo's one hook into a system's data rows (and its Special text). The weapon tooltip quotes fire
 	   control only through data["Fire control (fighter/med/cap)"] - in game too, less an officer just ordered to
 	   move (pendingMoveFireControl, user request 2026-10-16) - and a jump drive its range through
@@ -1110,12 +1344,17 @@ window.officers = {
 	   isModified fire control already rebuilt the one, and its payload the other.
 	   Stage 11: a laser's Damage, with an Expert Laser Technician's bonus and boost (laserDamageLine) - in game too,
 	   where the server applies both only at damage time. Stage 12: a plasma weapon's, with an Expert Plasma Scientist's
-	   +1 or +2 (plasmaDamageLine), the same way. */
+	   +1 or +2 (plasmaDamageLine), the same way. Stage 14: every weapon's, with an Expert Religious Leader's +1 on top
+	   (religiousDamageLine). */
 	DATA_KEY_FIRECONTROL: 'Fire control (fighter/med/cap)',
 	adjustDataDisplay: function adjustDataDisplay(ship, system, key, value) {
 		if (!system) return value;
-		if (key === 'Damage' && this.isLaserWeapon(system)) return this.laserDamageLine(ship, system, value);
-		if (key === 'Damage' && this.isPlasmaWeapon(system)) return this.plasmaDamageLine(ship, system, value);
+		if (key === 'Damage') {
+			var line = value;
+			if (this.isLaserWeapon(system)) line = this.laserDamageLine(ship, system, line);
+			else if (this.isPlasmaWeapon(system)) line = this.plasmaDamageLine(ship, system, line);
+			return this.religiousDamageLine(ship, system, line);
+		}
 		if (system.name === 'jumpEngine' && (key === 'Range' || key === 'Special')) {
 			var bonus = this.jumpRangeBonus(ship, system);
 			if (!bonus) return value;

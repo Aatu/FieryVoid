@@ -3810,6 +3810,16 @@ class Enhancements{
 			'ages'      => array(1, 2),
 			'serialise' => array(),
 		),
+		//OFFICERS_PLAN.md Stage 15: the Expert Religious Leader in a primary non-weapon system other than his C&C
+		'OFF_RELIP' => array(
+			'label'     => 'Expert Religious Leader',
+			'eligible'  => 'sysEnhEligibleOfficerRELIP',
+			'price'     => 'sysEnhPriceOfficerRELIP',
+			'limit'     => 'sysEnhLimitOne',
+			'officer'   => true,
+			'ages'      => array(1, 2),
+			'serialise' => array(),
+		),
 	);
 
 	//a placed officer's row (Stage 8), not a refit: kept off the star and the summary count
@@ -4544,6 +4554,15 @@ class Enhancements{
 
 	private static function sysEnhPriceOfficerMWEW($ship, $system, $level){
 		return Officers::rowPrice($ship, 'OFF_MWEW');
+	}
+
+	//Stage 15: no Gunsights test in front - his posts are not weapons (Officers::mayHost, `nonWeapon`)
+	private static function sysEnhEligibleOfficerRELIP($ship, $system){
+		return Officers::mayHost($ship, $system, 'OFF_RELIP');
+	}
+
+	private static function sysEnhPriceOfficerRELIP($ship, $system, $level){
+		return Officers::rowPrice($ship, 'OFF_RELIP');
 	}
 
 	/* SYS_HSHLD and SYS_THR are both "output += level".

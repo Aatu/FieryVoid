@@ -855,9 +855,12 @@
   <ul>
     <li>Officers are bought with the unit in Fleet Selection, in the <b>Officers</b> section at the bottom of its buy
       window.</li>
-    <li>A few officers serve in a <b>weapon you choose</b> - the Expert Gunner, and the Matter Weapons Expert if you move him
-      out of the C&amp;C. Buy one of these once the ship is in your fleet: click the weapon in the ship window and add him
-      under <b>Officers</b> in its Enhancements menu. A weapon holds one such officer.</li>
+    <li>A few officers serve in a <b>system you choose</b> - the Expert Gunner in a weapon, the Matter Weapons Expert in a
+      Matter weapon instead of the C&amp;C, and the Expert Religious Leader in any Primary system that is not a weapon instead
+      of the C&amp;C. Buy one there once the ship is in your fleet: click the system in the ship window and add him under
+      <b>Officers</b> in its Enhancements menu. A system holds one such officer.</li>
+    <li>Changed your mind? In Fleet Selection any officer who can move can be moved, <b>for free</b> - see Moving an
+      officer.</li>
     <li>A ship may carry several officers, but only one of each type - except where a card gives a higher limit. A fighter
       flight may carry only <b>one officer in total</b>: once one is bought, the buy window refuses a second.</li>
     <li>A ship officer's price is a percentage of the ship's base cost, rounded up. A fighter officer's is a percentage of
@@ -877,9 +880,9 @@
     <li><b>Killed.</b> Whenever the post takes damage, its normal critical roll also decides the officer's fate: a roll of
       20 or more, modifiers included, kills them. The roll is made even when the damage destroys the system.</li>
     <li>Either way, the officer still serves for the rest of the turn it happens, and is gone from the next turn.</li>
-    <li>An officer whose post is destroyed by pre-battle damage never serves at all. Fleet Selection warns you, and you can
-      remove the officer by editing the ship. An officer you placed in a weapon is removed and refunded if pre-battle
-      damage destroys that weapon.</li>
+    <li>An officer whose post is destroyed by pre-battle damage is <b>removed and refunded</b> at once, and a message says so.
+      Repairing the system afterwards does not bring him back - buy him again if you want him. (A Matter Weapons Expert
+      whose weapon is only damaged before the battle stays aboard but will not serve: move him to an undamaged weapon.)</li>
     <li><b>Fighter officers</b> fly in the flight's first fighter and are lost only with it: when it is destroyed or drops
       out. There is no kill roll, and docking never loses them.</li>
     <li>If the flight splits in two - part of it launched or docked on its own, or escaping a lost hangar as a separate
@@ -889,16 +892,23 @@
 
   <h3 data-anchor="movingofficers">Moving an officer</h3>
   <ul>
-    <li>Some officers can change posts during a battle: the Expert Gunner, between weapons, and the Matter Weapons Expert,
-      between the C&amp;C and the ship's Matter weapons.</li>
+    <li>Some officers can change posts: the Expert Gunner, between weapons; the Matter Weapons Expert, between the C&amp;C and
+      the ship's Matter weapons; and the Expert Religious Leader, between the systems of the ship's Primary section that are
+      not weapons.</li>
+    <li><b>In Fleet Selection</b> a move is free and takes effect at once. Click the system the officer is posted in: its menu's
+      <b>Officers</b> section has a <b>Move</b> button beside his points. Press it, then click one of the highlighted systems
+      in the ship window; a click anywhere else calls it off. An officer bought at the C&amp;C in the buy window is shown in
+      the C&amp;C's menu, so he can be moved from there.</li>
     <li>In <b>Initial Orders</b>, click the system the officer serves in. Its menu shows an <b>Officers</b> panel: press
       <b>Move Officer</b>, then click one of the highlighted systems in the ship window. <b>Cancel Move</b> keeps him where he
       is, up until you commit your orders.</li>
     <li>He serves nowhere for the rest of that turn - none of his bonuses apply - and takes up his new post at the start of
       the next turn.</li>
-    <li>He can move to any system he could have been bought for (the Matter Weapons Expert also to the C&amp;C), but never
-      to a destroyed system, or to one another officer holds or is moving to that turn. Officers cannot swap posts in a
-      single turn. A disabled or killed officer cannot move, and an officer can move once a turn.</li>
+    <li>He can move to any system he could have been bought for (the Matter Weapons Expert also to the C&amp;C, the Religious
+      Leader to any Primary system that is not a weapon), but never
+      to a destroyed system, or to one another officer who can move holds or is moving to that turn. (Officers who never
+      move, such as a Helmsman at the C&amp;C or a Technician in the Reactor, simply share their post with him.) Officers
+      cannot swap posts in a single turn. A disabled or killed officer cannot move, and an officer can move once a turn.</li>
     <li>On the turn he moves he still counts as being at his old post: damage there can disable or kill him. If his new post
       is destroyed that turn, he arrives to a wreck and is disabled.</li>
     <li>Once-per-battle abilities belong to the officer, not the system: one he has used stays used after he moves.</li>
@@ -916,7 +926,8 @@
     <li>The ship window's gold Enhancements box counts the officers aboard, as <b>Officers (2)</b>. In the lobby, a
       fighter flight's box names its one officer instead.</li>
     <li>Your opponent sees none of these until the game is over. Some effects do show, though, because they change numbers
-      everyone can read: a Helmsman's, a Security Officer's or a Dogfighter's initiative, a Geneticist's profiles, a Technician's reactor power,
+      everyone can read: a Helmsman's, a Security Officer's, a Religious Leader's or a Dogfighter's initiative (and the initiative,
+      profiles and sensors of a ship whose Religious Leader has been lost), a Geneticist's profiles, a Technician's reactor power,
       a Matter Weapons Expert's or an Expert Gunner's fire control, a Plasma Scientist's battery capacity and Plasma Web range, a Navigator's turn, pivot, roll and accel/decel costs, a Jump Officer's jump
       range, how long his jump point stays open and his arrival initiative penalty, an Evader's offensive bonus, the
       criticals and damage an Engineer or Scavenger repairs, and a weapon's loading when an officer speeds up its reload.
@@ -930,70 +941,26 @@
   <p class="fvd-lede">The officers available so far. More will be added over time.</p>
   <div class="fvd-cards">
     <article class="fvd-card fvd-card--wide">
-      <h4>Expert Helmsman</h4>
+      <h4>Expert Engineer</h4>
       <dl class="fvd-spec">
         <dt>Post</dt>
-        <dd>C&amp;C</dd>
+        <dd>The ship's strongest Engine.</dd>
         <dt>Effect</dt>
         <dd><ul>
-          <li>+5 Initiative.</li>
-          <li>Wins initiative ties against ships without an Expert Helmsman.</li>
-          <li>-1 to the die the ship rolls on a meteor swarm's impact chart, so fewer meteors strike it.</li>
+          <li>At the end of each turn, repairs one critical hit, automatically.</li>
+          <li>A critical can only be repaired once the ship has suffered it for a full turn: one taken on turn 3 acts on
+            turn 4 and can be repaired at the end of turn 4.</li>
+          <li>A C&amp;C critical is repaired only on a roll of 16 or more on a d20. If that roll fails, he repairs nothing
+            else that turn.</li>
         </ul></dd>
         <dt>Cost</dt>
         <dd>5% of the ship's base cost.</dd>
         <dt>Limit</dt>
         <dd>1 per ship.</dd>
         <dt>Notes</dt>
-        <dd>With simultaneous movement, ships move in initiative brackets rather than one at a time, so the tie-break has
-          nothing to decide there. The +5 still counts.</dd>
-      </dl>
-    </article>
-    <article class="fvd-card fvd-card--wide">
-      <h4>Expert Scanner</h4>
-      <dl class="fvd-spec">
-        <dt>Post</dt>
-        <dd>The ship's strongest Scanner.</dd>
-        <dt>Effect</dt>
-        <dd><ul>
-          <li>The ship may save 1 point of EW and spend it after movement, in the Pre-Firing or Firing phase - the same
-            way an EW Detector allows.</li>
-          <li>Works anywhere on the map: no EW Detector needs to be present.</li>
-          <li>Adds to an EW Detector's allowance: a ship covered by one Detector and carrying an Expert Scanner may save
-            2 points.</li>
-        </ul></dd>
-        <dt>Cost</dt>
-        <dd>7% of the ship's base cost.</dd>
-        <dt>Limit</dt>
-        <dd>1 per ship.</dd>
-        <dt>Notes</dt>
-        <dd>As with a Detector, the saved point comes out of the ship's unspent EW (its DEW), so a ship that spends all its
-          EW in Initial Orders has nothing to save.</dd>
-      </dl>
-    </article>
-    <article class="fvd-card fvd-card--wide">
-      <h4>Expert Technician</h4>
-      <dl class="fvd-spec">
-        <dt>Post</dt>
-        <dd>The ship's Reactor (the largest, if it has more than one).</dd>
-        <dt>Effect</dt>
-        <dd><ul>
-          <li><b>Improved Power:</b> +2 Reactor power, and -2 on every critical roll the Reactor makes.</li>
-          <li><b>Efficient Transfers:</b> +1 power on any turn you switch off at least one system that needs power. Only one
-            system counts, however many you switch off.</li>
-          <li><b>Improved Circuit Breakers:</b> every destroyed system gives back a third (rounded down) of the power it
-            used - for example +2 for a destroyed Battle Laser, or +5 once a 9-power and a 6-power system are both lost.</li>
-          <li>All three add together.</li>
-        </ul></dd>
-        <dt>Cost</dt>
-        <dd>9% of the ship's base cost.</dd>
-        <dt>Limit</dt>
-        <dd>1 per ship.</dd>
-        <dt>Notes</dt>
-        <dd>A system forced offline by a critical hit, such as a weapon cooling down, still returns its usual power, but
-          does not earn the Efficient Transfers point. A destroyed system counts from the turn after it is lost, and stops
-          counting if it is repaired. The -2 also makes the Technician harder to kill, since his fate is decided by the
-          Reactor's critical roll.</dd>
+        <dd>He picks the most important critical first, in the same order a Self Repair system uses by default. He works
+          after any Self Repair system the ship has, never on a destroyed system, and still makes his repair at the end of
+          the turn he is lost.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
@@ -1014,34 +981,6 @@
         <dt>Notes</dt>
         <dd>Intended for scenarios - agree with your opponent before using one. Fiery Void leaves ramming to the players, so
           the ramming rule is not enforced by the game.</dd>
-      </dl>
-    </article>
-    <article class="fvd-card fvd-card--wide">
-      <h4>Matter Weapons Expert</h4>
-      <dl class="fvd-spec">
-        <dt>Post</dt>
-        <dd>C&amp;C - or one Matter weapon of your choice, instead. He can move between them during a battle (see
-          Moving an officer).</dd>
-        <dt>Effect</dt>
-        <dd><ul>
-          <li>+1 fire control (+5%) for every Matter weapon on the ship, against every target size it can engage.</li>
-          <li>+1 damage on every Matter weapon shot.</li>
-          <li>On a weapon with several firing modes, only its Matter modes benefit.</li>
-          <li><b>In a weapon:</b> the same bonuses, but for that weapon only - and it reloads a turn faster after every shot,
-            but never faster than once a turn (a weapon that already fires every turn gains nothing). Bought from the
-            weapon's own Enhancements menu, under Officers.</li>
-        </ul></dd>
-        <dt>Cost</dt>
-        <dd>10% of the ship's base cost, wherever he serves.</dd>
-        <dt>Limit</dt>
-        <dd>1 per ship - at the C&amp;C or in a weapon, never both. Grome Autocracy only, and only on ships carrying at least
-          one Matter weapon.</dd>
-        <dt>Notes</dt>
-        <dd>In a weapon he works from deep inside its machinery: he is <b>disabled</b> as soon as the weapon takes any
-          damage through its armour, and <b>killed</b> if it is destroyed (or by the usual kill roll). Best used early in a
-          battle, or on a well-protected weapon. Damage the weapon took before he moved into it does not count. On a weapon
-          an Expert Gunner serves in, the Gunner's bonuses apply instead of his. The faster reload is earned at the start
-          of each reload: losing him part way through does not take it back.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
@@ -1082,75 +1021,23 @@
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
-      <h4>Expert Engineer</h4>
+      <h4>Expert Helmsman</h4>
       <dl class="fvd-spec">
         <dt>Post</dt>
-        <dd>The ship's strongest Engine.</dd>
+        <dd>C&amp;C</dd>
         <dt>Effect</dt>
         <dd><ul>
-          <li>At the end of each turn, repairs one critical hit, automatically.</li>
-          <li>A critical can only be repaired once the ship has suffered it for a full turn: one taken on turn 3 acts on
-            turn 4 and can be repaired at the end of turn 4.</li>
-          <li>A C&amp;C critical is repaired only on a roll of 16 or more on a d20. If that roll fails, he repairs nothing
-            else that turn.</li>
+          <li>+5 Initiative.</li>
+          <li>Wins initiative ties against ships without an Expert Helmsman.</li>
+          <li>-1 to the die the ship rolls on a meteor swarm's impact chart, so fewer meteors strike it.</li>
         </ul></dd>
         <dt>Cost</dt>
         <dd>5% of the ship's base cost.</dd>
         <dt>Limit</dt>
         <dd>1 per ship.</dd>
         <dt>Notes</dt>
-        <dd>He picks the most important critical first, in the same order a Self Repair system uses by default. He works
-          after any Self Repair system the ship has, never on a destroyed system, and still makes his repair at the end of
-          the turn he is lost.</dd>
-      </dl>
-    </article>
-    <article class="fvd-card fvd-card--wide">
-      <h4>Expert Scavenger</h4>
-      <dl class="fvd-spec">
-        <dt>Post</dt>
-        <dd>The ship's strongest Engine.</dd>
-        <dt>Effect</dt>
-        <dd><ul>
-          <li>At the end of each turn, repairs one critical hit, as an Expert Engineer does (the same full-turn wait and
-            C&amp;C roll). If there is no critical left to repair, he repairs 4 boxes of damage instead.</li>
-          <li>Boxes go to the most important damaged systems first, Structure blocks included, but never to a destroyed
-            system, anything on a destroyed section, or damage taken that same turn.</li>
-          <li><b>Once per battle</b>, ignores up to 6 points of a hit that would destroy the C&amp;C, a Reactor, a
-            Scanner, an Engine or a Structure block, if that is enough to keep it standing. This happens automatically, the
-            first time it can.</li>
-        </ul></dd>
-        <dt>Cost</dt>
-        <dd>25% of the ship's base cost. Descari Committees pay 15%; Balosian Underdwellers, Raiders and Llort pay 20%.</dd>
-        <dt>Limit</dt>
-        <dd>1 per ship.</dd>
-        <dt>Notes</dt>
-        <dd>The once-per-battle save covers one hit: the other rakes or pulses of the same attack land in full. A system
-          that absorbs damage, such as a Gaim Bulkhead, takes its share first; the save is only spent if what is left would
-          still destroy the system. An Expert Engineer aboard makes his repair first; the Scavenger then picks his own.</dd>
-      </dl>
-    </article>
-    <article class="fvd-card fvd-card--wide">
-      <h4>Expert Navigator</h4>
-      <dl class="fvd-spec">
-        <dt>Post</dt>
-        <dd>C&amp;C</dd>
-        <dt>Effect</dt>
-        <dd><ul>
-          <li><b>Turn cost</b> one level lower. The levels, from highest to lowest: 2, 1.75, 1.66, 1.5, 1.33, 1.25, 1, 0.83,
-            0.75, 0.66, 0.5, 0.33, 0.25, 0.16 and 0.1 - so a turn cost of 1 becomes 0.83.</li>
-          <li><b>Pivot and roll costs</b> 1 lower each, but never below 1: 3 becomes 2, and 1 stays 1.</li>
-          <li><b>Accel/decel cost</b> 25% lower, with fractions kept until the turn's speed changes are added up, then
-            rounded up. With a cost of 2 (now 1.5), one speed change still costs 2 thrust, but two cost only 3.</li>
-        </ul></dd>
-        <dt>Cost</dt>
-        <dd>7% of the ship's base cost, rounded down.</dd>
-        <dt>Limit</dt>
-        <dd>1 per ship.</dd>
-        <dt>Notes</dt>
-        <dd>Turn delay is not changed. A ship whose pivot or roll cost is already 0 gains nothing there, and one already at
-          the lowest turn cost (0.1) keeps it. The ship window shows the lowered costs; with a fractional accel/decel cost,
-          each speed change asks for its share in turn (2, 1, 2, 1... for 1.5). A Hyach Manoeuvring Specialist uses the same
-          levels, so on the turn one is used the ship drops a second level: 1 becomes 0.83, then 0.75.</dd>
+        <dd>With simultaneous movement, ships move in initiative brackets rather than one at a time, so the tie-break has
+          nothing to decide there. The +5 still counts.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
@@ -1209,6 +1096,30 @@
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
+      <h4>Expert Navigator</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>C&amp;C</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li><b>Turn cost</b> one level lower. The levels, from highest to lowest: 2, 1.75, 1.66, 1.5, 1.33, 1.25, 1, 0.83,
+            0.75, 0.66, 0.5, 0.33, 0.25, 0.16 and 0.1 - so a turn cost of 1 becomes 0.83.</li>
+          <li><b>Pivot and roll costs</b> 1 lower each, but never below 1: 3 becomes 2, and 1 stays 1.</li>
+          <li><b>Accel/decel cost</b> 25% lower, with fractions kept until the turn's speed changes are added up, then
+            rounded up. With a cost of 2 (now 1.5), one speed change still costs 2 thrust, but two cost only 3.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>7% of the ship's base cost, rounded down.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship.</dd>
+        <dt>Notes</dt>
+        <dd>Turn delay is not changed. A ship whose pivot or roll cost is already 0 gains nothing there, and one already at
+          the lowest turn cost (0.1) keeps it. The ship window shows the lowered costs; with a fractional accel/decel cost,
+          each speed change asks for its share in turn (2, 1, 2, 1... for 1.5). A Hyach Manoeuvring Specialist uses the same
+          levels, so on the turn one is used the ship drops a second level: 1 becomes 0.83, then 0.75.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
       <h4>Expert Plasma Scientist</h4>
       <dl class="fvd-spec">
         <dt>Post</dt>
@@ -1235,6 +1146,80 @@
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
+      <h4>Expert Religious Leader</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>C&amp;C when bought in the buy window - or any other system in the ship's Primary section that is not a weapon,
+          bought from that system's menu or moved there for free in Fleet Selection. He can move between them during a
+          battle too (see Moving an officer).</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>+10 Initiative.</li>
+          <li>+1 damage on every hit the ship's weapons score: on each pulse of a pulse weapon, on each shot of a weapon with
+            several guns, and once on a raking shot (not on each rake). Never per die.</li>
+          <li><b>If he is lost</b> - disabled or killed - his crew are stirred into a frenzy for the rest of the battle: the
+            Initiative bonus doubles to +20, the ship gets +1 sensors, and +1 to both of its defence profiles (+5% to be hit -
+            a penalty). The +1 damage stays.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>15% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship. Minbari Federation, Markab Theocracy, Corillani Theocracy and Yolu Confederation only.</dd>
+        <dt>Notes</dt>
+        <dd>Weapons that do no damage, such as the Electro-Pulse Gun, Stun Beam or Gravity Net, gain nothing, and neither does
+          ramming. The frenzy starts the turn after he is lost, when a lost officer's bonuses would end. The +1 sensors goes
+          on the ship's strongest Scanner that is still standing. If his post is destroyed by pre-battle damage he never
+          serves, and there is no frenzy. On the turn he moves he serves nowhere, so there is no +1 damage that turn.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Scanner</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The ship's strongest Scanner.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>The ship may save 1 point of EW and spend it after movement, in the Pre-Firing or Firing phase - the same
+            way an EW Detector allows.</li>
+          <li>Works anywhere on the map: no EW Detector needs to be present.</li>
+          <li>Adds to an EW Detector's allowance: a ship covered by one Detector and carrying an Expert Scanner may save
+            2 points.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>7% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship.</dd>
+        <dt>Notes</dt>
+        <dd>As with a Detector, the saved point comes out of the ship's unspent EW (its DEW), so a ship that spends all its
+          EW in Initial Orders has nothing to save.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Scavenger</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The ship's strongest Engine.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>At the end of each turn, repairs one critical hit, as an Expert Engineer does (the same full-turn wait and
+            C&amp;C roll). If there is no critical left to repair, he repairs 4 boxes of damage instead.</li>
+          <li>Boxes go to the most important damaged systems first, Structure blocks included, but never to a destroyed
+            system, anything on a destroyed section, or damage taken that same turn.</li>
+          <li><b>Once per battle</b>, ignores up to 6 points of a hit that would destroy the C&amp;C, a Reactor, a
+            Scanner, an Engine or a Structure block, if that is enough to keep it standing. This happens automatically, the
+            first time it can.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>25% of the ship's base cost. Descari Committees pay 15%; Balosian Underdwellers, Raiders and Llort pay 20%.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship.</dd>
+        <dt>Notes</dt>
+        <dd>The once-per-battle save covers one hit: the other rakes or pulses of the same attack land in full. A system
+          that absorbs damage, such as a Gaim Bulkhead, takes its share first; the save is only spent if what is left would
+          still destroy the system. An Expert Engineer aboard makes his repair first; the Scavenger then picks his own.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
       <h4>Expert Security Officer</h4>
       <dl class="fvd-spec">
         <dt>Post</dt>
@@ -1257,6 +1242,59 @@
           The boarding modifier comes on top of every other modifier to the marines' rolls.</dd>
       </dl>
     </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Technician</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The ship's Reactor (the largest, if it has more than one).</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li><b>Improved Power:</b> +2 Reactor power, and -2 on every critical roll the Reactor makes.</li>
+          <li><b>Efficient Transfers:</b> +1 power on any turn you switch off at least one system that needs power. Only one
+            system counts, however many you switch off.</li>
+          <li><b>Improved Circuit Breakers:</b> every destroyed system gives back a third (rounded down) of the power it
+            used - for example +2 for a destroyed Battle Laser, or +5 once a 9-power and a 6-power system are both lost.</li>
+          <li>All three add together.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>9% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship.</dd>
+        <dt>Notes</dt>
+        <dd>A system forced offline by a critical hit, such as a weapon cooling down, still returns its usual power, but
+          does not earn the Efficient Transfers point. A destroyed system counts from the turn after it is lost, and stops
+          counting if it is repaired. The -2 also makes the Technician harder to kill, since his fate is decided by the
+          Reactor's critical roll.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Matter Weapons Expert</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>C&amp;C - or one Matter weapon of your choice, instead. He can move between them during a battle (see
+          Moving an officer).</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>+1 fire control (+5%) for every Matter weapon on the ship, against every target size it can engage.</li>
+          <li>+1 damage on every Matter weapon shot.</li>
+          <li>On a weapon with several firing modes, only its Matter modes benefit.</li>
+          <li><b>In a weapon:</b> the same bonuses, but for that weapon only - and it reloads a turn faster after every shot,
+            but never faster than once a turn (a weapon that already fires every turn gains nothing). Bought from the
+            weapon's own Enhancements menu, under Officers.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>10% of the ship's base cost, wherever he serves.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship - at the C&amp;C or in a weapon, never both. Grome Autocracy only, and only on ships carrying at least
+          one Matter weapon.</dd>
+        <dt>Notes</dt>
+        <dd>In a weapon he works from deep inside its machinery: he is <b>disabled</b> as soon as the weapon takes any
+          damage through its armour, and <b>killed</b> if it is destroyed (or by the usual kill roll). Best used early in a
+          battle, or on a well-protected weapon. Damage the weapon took before he moved into it does not count. On a weapon
+          an Expert Gunner serves in, the Gunner's bonuses apply instead of his. The faster reload is earned at the start
+          of each reload: losing him part way through does not take it back.</dd>
+      </dl>
+    </article>
   </div>
 </section>
 
@@ -1269,6 +1307,24 @@
     in full.</p>
   <div class="fvd-cards">
     <article class="fvd-card fvd-card--wide">
+      <h4>Expert Coordinator</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The flight's first fighter.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>Combat pivots in the Firing Phase cost half the normal thrust, rounded up: 1 instead of 2 for most
+            fighters, 2 instead of 3 for shuttles and breaching pods.</li>
+          <li>No -5 to hit for the flight's combat pivots - unless that turn's pivots have turned it a full 180 degrees
+            or more (three pivots the same way, each pivot back the other way cancelling one), when the usual -5 applies.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>50% of one fighter's cost, for a flight of six.</dd>
+        <dt>Limit</dt>
+        <dd>1 officer per flight.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
       <h4>Expert Dogfighter</h4>
       <dl class="fvd-spec">
         <dt>Post</dt>
@@ -1277,6 +1333,22 @@
         <dd>+5 Initiative for the flight.</dd>
         <dt>Cost</dt>
         <dd>50% of one fighter's cost, for a flight of six.</dd>
+        <dt>Limit</dt>
+        <dd>1 officer per flight.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Evader</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The flight's first fighter.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>-5 Offensive Bonus (-5% to hit) on all of the flight's weapons.</li>
+          <li>-1 damage from every hit on the flight.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>100% of one fighter's cost, for a flight of six.</dd>
         <dt>Limit</dt>
         <dd>1 officer per flight.</dd>
       </dl>
@@ -1297,22 +1369,6 @@
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
-      <h4>Expert Evader</h4>
-      <dl class="fvd-spec">
-        <dt>Post</dt>
-        <dd>The flight's first fighter.</dd>
-        <dt>Effect</dt>
-        <dd><ul>
-          <li>-5 Offensive Bonus (-5% to hit) on all of the flight's weapons.</li>
-          <li>-1 damage from every hit on the flight.</li>
-        </ul></dd>
-        <dt>Cost</dt>
-        <dd>100% of one fighter's cost, for a flight of six.</dd>
-        <dt>Limit</dt>
-        <dd>1 officer per flight.</dd>
-      </dl>
-    </article>
-    <article class="fvd-card fvd-card--wide">
       <h4>Expert Motivator</h4>
       <dl class="fvd-spec">
         <dt>Post</dt>
@@ -1326,24 +1382,6 @@
         <dt>Notes</dt>
         <dd>Formerly a fighter enhancement, with the same effect, at 10% of each fighter's cost. As an officer he now
           counts as the flight's one officer, is lost with the flight's first fighter, and is hidden from your opponent.</dd>
-      </dl>
-    </article>
-    <article class="fvd-card fvd-card--wide">
-      <h4>Expert Coordinator</h4>
-      <dl class="fvd-spec">
-        <dt>Post</dt>
-        <dd>The flight's first fighter.</dd>
-        <dt>Effect</dt>
-        <dd><ul>
-          <li>Combat pivots in the Firing Phase cost half the normal thrust, rounded up: 1 instead of 2 for most
-            fighters, 2 instead of 3 for shuttles and breaching pods.</li>
-          <li>No -5 to hit for the flight's combat pivots - unless that turn's pivots have turned it a full 180 degrees
-            or more (three pivots the same way, each pivot back the other way cancelling one), when the usual -5 applies.</li>
-        </ul></dd>
-        <dt>Cost</dt>
-        <dd>50% of one fighter's cost, for a flight of six.</dd>
-        <dt>Limit</dt>
-        <dd>1 officer per flight.</dd>
       </dl>
     </article>
   </div>

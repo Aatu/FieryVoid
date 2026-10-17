@@ -3214,10 +3214,12 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         /* An Expert Laser Technician's power boost (OFFICERS_PLAN.md Stage 11): +1 per point the player put into this
            laser, at most half of $rolled, from one pool for the turn - added after the weapon's own reductions, as
            getDamageMod adds the flat bonuses. An Expert Plasma Scientist's +1 (+2 for a Fuser, Stage 12) - here, not
-           in getBonusDamage, because six plasma weapons override getDamageMod and drop the parent's result. Behind the static. */
+           in getBonusDamage, because six plasma weapons override getDamageMod and drop the parent's result. An Expert Religious
+           Leader's +1 on every hit (Stage 14) - this method runs once per hit, which is his "per volley". Behind the static. */
         if (TacGamedata::$officersPresent && $shooter instanceof BaseShip){
             $damage += Officers::laserBoostDamage($shooter, $this, $rolled, $target, $fireOrder);
             $damage += Officers::plasmaDamageBonus($shooter, $this);
+            $damage += Officers::religiousDamageBonus($shooter, $this, $rolled);
         }
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		

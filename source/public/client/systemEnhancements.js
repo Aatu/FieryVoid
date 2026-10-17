@@ -57,7 +57,8 @@ window.systemEnhancements = {
 		SYS_ELINT: 'ELINT Sensor Module',
 		//placed officers (OFFICERS_PLAN.md Stage 8) - officers.js holds the rest of what they are
 		OFF_GUN: 'Expert Gunner',
-		OFF_MWEW: 'Matter Weapons Expert'
+		OFF_MWEW: 'Matter Weapons Expert',
+		OFF_RELIP: 'Expert Religious Leader'
 	},
 
 	/* A placed officer's row (OFFICERS_PLAN.md Stage 8), not a refit: the OFF_ prefix every officer id carries
@@ -143,7 +144,7 @@ window.systemEnhancements = {
 	menuRowsFor: function menuRowsFor(ship, system) {
 		var self = this;
 		var offers = this.offersFor(ship, system);
-		return offers.map(function (offer) {
+		var rows = offers.map(function (offer) {
 			var count = self.taken(ship, offer[4], offer[0]);
 			var officer = self.isOfficer(offer[0]);
 			return {
@@ -161,6 +162,8 @@ window.systemEnhancements = {
 				blocked: (officer && count < 1 && window.officers) ? officers.placedBlock(ship, offer[4], offer[0]) : null
 			};
 		});
+		//OFFICERS_PLAN.md Stage 15: who may be moved from here (the Officers footer's Move), and the C&C officer's own row
+		return window.officers ? officers.decorateMenuRows(ship, system, rows) : rows;
 	},
 
 	groupNote: function groupNote(offers, enhID) {
