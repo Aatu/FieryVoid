@@ -11,7 +11,8 @@ committed (`9ecfd16d4`). Stage 9, the Expert Coordinator, with three system-menu
 (`0436100e3`); the Expert Analyst moved to the Hard tier the same day. Stage 10 - faster reloads, the Expert Gunner's
 once-per-battle abilities and MOVING officers between posts in game (§9.16) - committed (`eae0de604`). Stage 11, the first
 Hard officer, the Expert Laser Technician (§9.17) - committed (`4f3a359cc`). Stage 12, the Expert Plasma Scientist, an
-officer the user added beyond the original 25 (§9.18) - BUILT 2026-10-17, uncommitted.** Written
+officer the user added beyond the original 25 (§9.18) - committed (`a80430710`). Stage 13, the Expert Security Officer,
+a second added officer (§9.19) - BUILT 2026-10-17, uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -38,8 +39,10 @@ feature, moving officers between posts in Initial Orders, and ruled the four que
 they supplied the Expert Laser Technician's rules text with a design note ("laser weapons essentially become boostable
 with this Officer at 1 power = 1 damage, with no maxBoostLevel but a cap at the point of damage") and ruled the four
 questions it raised (Stage 11, §9.17). The same day they added a 26th officer, the Expert Plasma Scientist, with his rules
-text, and ruled the three questions he raised (Stage 12, §9.18). Each officer's own rules questions still only need ruling
-when that officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
+text, and ruled the three questions he raised (Stage 12, §9.18). Later that day they added a 27th, the Expert Security
+Officer, with his rules text and a design note (his "shift by up to 2, as the defender chooses" is a fixed 2 in the
+defender's favour), and ruled the four questions he raised (Stage 13, §9.19). Each officer's own rules questions still
+only need ruling when that officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -286,6 +289,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Evangelist | `OFF_EVAN` | random primary | 1 |
 | Expert Laser Technician | `OFF_LASR` | Reactor | 1 |
 | Expert Plasma Scientist *(added 2026-10-17, §9.18)* | `OFF_PLAS` | Engine | 1 |
+| Expert Security Officer *(added 2026-10-17, §9.19)* | `OFF_SECU` | C&C | 1 |
 | Expert Software Engineer | `OFF_SOFT` | Computer | 1 |
 | Expert Ion Technician | `OFF_ION` | Engine | 1 |
 | Expert Surge Officer | `OFF_SURG` | Mag-Grav Reactor | 1 |
@@ -427,6 +431,7 @@ masking: individual notes never reach any client.
 | Matter Weapons Expert, Gunner | `fireControl` via `isModified` | **Yes**, exactly like Gunsights |
 | Gunner, weapon-mounted MWE (Stage 10) | an added Piercing mode (the weapon's mode list and its per-mode fields); a weapon's `turnsloaded` one higher after a faster reload | The added mode: **own team only** (user request 2026-10-16 - it would point at the Gunner), and to anyone else only in the data of the turn it was FIRED (a replay, the printed log, which label the shot by it) or once the game is over; the opponent's fire control list is sent without its entry. Loading: **yes**, public anyway |
 | Moving officers (Stage 10) | where an officer is moving (`moving`), the posts he may move to (`targets`), a Gunner's spent abilities and added mode number | Own team only, in the officer payload |
+| Security Officer (Stage 13) | `iniativebonus`; the C&C's `critRollMod`; the modifier on boarding rolls against his ship | `iniativebonus`: **yes, to every viewer** (the Helmsman's `publish`). The critical modifier is never sent (nothing displays one). The boarding shift is server-only; the combat log prints a mission roll as Roll(Mod), so an opponent can see a larger modifier than he expected, never who caused it |
 | Plasma Scientist (Stage 12) | a Plasma Web's `range` / `rangeArray`; a Plasma Battery's capacity, charge and output | **Yes, to every viewer** (user ruling 2026-10-17: a displayed stat is public). The battery's line and output were sent to everyone already; the web's range is sent while he serves (`webForJson`). His damage bonus and range relief show only as damage dealt |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
@@ -573,7 +578,8 @@ committed.
 | **10** | Loading time −1. *Plus (user, 2026-10-16) the Gunner's once-per-battle abilities and moving officers.* **BUILT 2026-10-16** (§9.16) | A mode switch keeps it; the officer lost mid-charge; the client's `isLoaded` agrees with the server |
 | **11** | Expert Laser Technician, the first Hard officer. **BUILT 2026-10-17** (§9.17) | The flat bonus per laser class and laser mode only; the boost capped at half the roll, one pool a turn over a laser's hits; the Gunner's laser; hidden from opponents; the client's Damage line and power balance |
 | **12** | Expert Plasma Scientist, added by the user (not one of the original 25). **BUILT 2026-10-17** (§9.18) | +1/+2 per class with the light ones excluded; the first two hexes of range damage ignored by every plasma rule, the Bolters' and Nexus overrides included; Plasma Batteries +1 (none destroyed), full from the deployment charge, −3 on criticals, the reactor's Initial Orders share; Plasma Webs +1 range, crippled too |
-| **13+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **13** | Expert Security Officer, the second officer the user added. **BUILT 2026-10-17** (§9.19) | +5 initiative to every viewer; -2 on his own C&C's critical rolls, his and its other officers' kill roll included; +2 on every boarding d10 against his ship (pod, claw and transporter delivery; Wreak Havoc, Sabotage, Rescue and the boarders' Capture roll), -2 on his defenders' Capture rolls; 5% EA / 7.5% elsewhere, every whole-percent price unchanged |
+| **14+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -608,6 +614,7 @@ committed.
 | Evangelist | The fleet = this player's ships, or the whole team? His penalty is worded "if killed": does a merely **disabled** Evangelist (post destroyed, kill roll survived) cost the fleet its +1 without the −10 initiative / −1 to hit? (Default: yes, the penalty needs a kill.) Is the penalty permanent? Do reinforcements that arrive later get the bonus? |
 | Laser Technician | Lasers = `weaponClass` Laser (49 classes)? Is the power boost declared in Initial Orders? Is the +50 % cap on base damage? **Rules text and rulings 2026-10-17 (§9.17):** the text settles the first three - laser-category weapons (any weapon with a Laser mode; only a shot in that mode gains), the boost through the ordinary boost in Initial Orders (the user's design note: "boostable ... 1 power = 1 damage, with no maxBoostLevel but a cap"), the cap on the roll ("if the base roll was 12 damage, it could be raised to 18"). **RULED:** (1) a laser that hits more than once a turn shares its boost as **one pool** for the turn; (2) on a serving Expert Gunner's laser the Gunner's +1 per die **replaces the flat bonus only** - the boost still works there; (3) boosts **hidden from opponents**; (4) the owner's tooltip **Damage line shows** the flat bonus and the boost, with a **Laser boost** line. |
 | Plasma Scientist | *Added 2026-10-17 with his rules text (§9.18).* Which plasma weapons are "medium or heavy"? Does a battery start the battle holding the extra point? Are the web's range and the battery's capacity shown to opponents? **RULED 2026-10-17:** every plasma weapon but the light ones (`Officers::$plasmaClassBonus`); yes, a battery still holding its deployment charge starts full; yes, to every viewer (a displayed stat is public). |
+| Security Officer | *Added 2026-10-17 with his rules text (§9.19).* The user's note settles the main one: "shift all die rolls by up to 2 in any direction desired by the defending player" is a fixed **+2** ("higher rolls are almost always worse for marine attackers ... no need to build in a player choice"). Asked: do the defenders' own Capture rolls (5 or less hits) shift too? Breaching pods only, or Grappling Claws and transporters as well? 7.5% exactly, or 8%? On a hull with two C&Cs, which gets the -2? **RULED 2026-10-17 (all as recommended):** defenders **-2** too (Elite Crew's pattern, doubled); **every boarding party**; **7.5% exactly** (a percent may now carry one decimal place); **his own C&C only**. |
 | Software Engineer | "Lets the computer specialist use their ability twice" and "Incompatible with Computer Specialist" contradict each other. Which one stands? "Submarine" = the Hyach stealth hulls (Alichi Kav and Tal)? Whose detection range gets +5? |
 | Ion Technician | Rad Cannons always score 12, with no roll? Forced crits on Sensors, Engine and Reactor on every hit? When is the thrust boost declared? Is "+4 on C&C crits" a penalty? |
 | Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? |
@@ -2104,3 +2111,90 @@ card and his numbers in Seeing your officers. Statics, bundles and the served co
    future bonus added there will miss them.
 2. Not tested in a real game. Worth a play test on a Pak'ma'ra ship: a Plasma Battery reading "7/7"-style in Initial Orders on
    turn 1, a Medium Plasma's tooltip at +1, a hit at range losing two hexes less, and a web's Anti-Fighter range 4.
+
+### 9.19 Stage 13: Expert Security Officer (2026-10-17)
+
+**Rules text (user, 2026-10-17) - a 27th officer, not in the original brief.** "The security officer is vital for maintaining
+order, catching spies, and controlling dissent among the crew. His presence improves morale and ensures command and control
+operations proceed smoothly. This provides a +1 bonus to the ship's initiative, and a -2 to any critical hit rolls against the
+C&C. The security officer provides improved defenses against raids by enemy boarding parties. Whenever a breaching pod
+attacks, shift all die rolls by up to 2 in any direction desired by the defending player (after the roll is made), if desired.
+For example, if an enemy attempts a Wreak Havoc mission and rolls a 10, the defender could change this to an 8, 9, 10, 11, or
+12, depending on which result he feels is the least painful. If the attacker has any modifiers to his roll, he must add these
+in before the security officer makes his alterations. Location: C&C. Cost: 5% of the ship's basic value for Earth Alliance (EA)
+factions. Availability: Non-EA factions increase the cost by 50%." The user's note: "The 2 either way on Marine missions rolls
+can just be a +2 to the roll since higher rolls are almost always worse for marine attackers. There's no need to build in a
+player choice."
+
+**Rulings (user, 2026-10-17, asked before building - all as recommended):**
+1. In Capture combat the ship's own defending marines (who hit on 5 or less) get **-2** too: every boarding roll moves 2 in the
+   defender's favour - Elite Crew's pattern (+1 on the boarders' rolls, -1 on the defenders'), doubled.
+2. **Every boarding party**: breaching pods, Grappling Claws and the Trek Combat Transporter alike (each has its own delivery
+   roll; Elite Crew already applies in all three).
+3. **7.5% exactly** outside the Earth Alliance: a percent may now carry one decimal place.
+4. On a hull with two C&Cs, **his own C&C only** - as the Technician's -2 is his own reactor's.
+
+**Built with defaults, stated here (ask before changing):**
+- "+1 initiative" is tabletop, so **+5** in FV (QX1 - the Evangelist's -2 became -10 the same way). Published to every viewer
+  through the registry's `publish` list, as the Helmsman's is.
+- The -2 is his post's own `critRollMod`, so it also eases the kill roll of every officer posted on that C&C (D3, "including any
+  modifications") - the Technician's precedent. ⚠️ Asking about "two C&Cs" I said "about 20 hulls, most Pak'ma'ra"; measured
+  afterwards, FV has **3** hulls with two real C&Cs (EmperorsTransport, palaceship, gaimShamor) and **60** with a C&C plus a
+  `SecondaryCnC` (most Pak'ma'ra, the Ja'Stat, the Colotnar bases...). `SecondaryCnC` is not a `CnC` subclass, so it is never his
+  post, and under ruling 4 it gets no -2 either way.
+- EA = the faction strings `Earth Alliance`, `Earth Alliance (Early)` and `Earth Alliance (defenses)` (the last is one hull,
+  HephaestusAM). `Earth Alliance (Custom)` has no hull today (its static file is an orphan from January), so it is not listed.
+- The shift is summed with the roll's other modifiers before `max(0, ...)` - the rule's "add these in before" cannot differ in a
+  sum. A captured ship's automatic delivery (`ShipDisabled` sets the roll to 1) is untouched.
+
+**Files.** Server: `Officers.php` (registry `OFF_SECU` after OFF_PLAS - the last fixed-post ship officer - posted `cnc`, pct
+7.5, `apply` `applySecurityOfficer`, `publish` iniativebonus; `$factionRules` the three EA factions at 5; `SECURITY_INI`,
+`SECURITY_CNC_CRIT_MOD`, `SECURITY_BOARDING_SHIFT`, `applySecurityOfficer`, `boardingShift`; `price` and `craftPrice` count the
+percent in tenths through `pctTenths`, and `pctFor` / `shipPrice` no longer cast it to int), `ShipSystem.php`
+(`getMarineRollMod` adds the shift - Wreak Havoc, Sabotage, Rescue and the boarders' Capture roll all read it;
+`doCaptureMission` takes it off the defenders'), `specialWeapons.php` (`Marines::getDeliveryRollMod`,
+`GrapplingClaw::getDeliveryRollMod`), `customTrek.php` (`CombatTransporter::getDeliveryRollMod` - no hull mounts one today,
+every use is commented out). Client: `officers.js` (the registry row, `stats` iniativebonus 5). Docs: an Expert Security Officer
+card in Ship Officers, his initiative in Seeing your officers, and a -20% line in both of the FAQ's Boarding Actions modifier
+lists. Statics and bundles rebuilt; no new PHP class.
+
+**As built:**
+- ⭐ **`Officers::boardingShift($ship)` is THE boarding shift**: 2 while he serves on `$ship`, else 0. Five call sites, all one
+  line: three delivery rolls (`+`, on the target), `getMarineRollMod` (`+`, every mission roll and the boarders' Capture roll) and
+  `doCaptureMission` (`-`, the defenders). ⚠️ A new boarding roll anywhere should ask it too. No `$officersPresent` gate: these
+  rolls are rare, and `isActive` on a ship without officers is an empty loop.
+- No client mirror for the boarding shift or the critical modifier: the client previews only a boarding unit's ATTACH chance,
+  which no crew quality affects, and displays no critical modifier.
+- **Prices with a decimal.** `price()` was ceil(hundredths x pct / 10000); it is now ceil(hundredths x tenths / 100000) - for a
+  whole percent the same number by construction, and proved so over every percent 1-100 on 432 costs, rounded both ways, and for
+  `craftPrice` at 1 and 6 craft. officersHarness's faction-table check now accepts a percent with one decimal place, and also
+  checks the registry's own.
+
+**Measured.** 1,818 offers in the statics (92 Earth Alliance, 1,726 others) - every hull with a C&C that may carry officers,
+the Helmsman's reach. Statics +98,199 B uncompressed.
+
+**Verified.**
+- `officersHarness.php` **882 / 0 with the database**, 814 / 0 with `--no-db` (new: offers and prices on six hulls across all
+  three EA factions and three others; 7.5% arithmetic, both roundings, and "up" for the smallest fraction; the whole-percent
+  identity sweep; no offer without a C&C, on an Ancient or an OSAT; the
+  post, the first of two C&Cs; +5, -2 on his C&C only - a second C&C and a SecondaryCnC untouched; stacking with a Helmsman and
+  Elite Crew; the kill roll through the REAL `testCritical` - 20 reads 18 and he and the Helmsman beside him survive, 22 reads 20
+  and both die; killed last turn: nothing; the enemy payload; the mission modifier on four mission classes; the delivery modifier
+  for a pod, a claw and a transporter; a REAL Wreak Havoc roll (a 7 stays aboard without him, is eliminated with him); a REAL
+  Capture combat - the boarder's 4 and the defenders' 6s - with and without him).
+- `officersClientHarness.js` **311 / 0** (7 new: the registry row and order, the lobby list and initiative alone and with a
+  Helmsman, a pre-battle destroyed C&C, a server-built list not added twice, the REAL SystemInfo line serving and killed).
+- **Mutation-tested: 19 breaks (16 server, 3 client), all caught**, files byte-identical afterwards. Two (the ceil constant
+  in `price` and `craftPrice`, off by a few units) first survived: with whole-point costs the remainder is never 1-9, so they
+  change nothing real. A check that 0.1% of 0.01 points still costs 1 now kills both.
+- `enhancementsHarness` **275 / 0** - re-recorded (old copy `fingerprint.before-officers-stage13.txt`) after proving the change
+  is only the 15 OFF_SECU offers and the 30 new case blocks (`secu`, `secu+helm+elite1`): with those stripped, the new
+  fingerprint is identical to the old - so the price rewrite moved no existing price either. `enhancementsDifferential.js`
+  **637 / 0** (30 new). `fvbuild -Check`: autoload current, validator clean, replay **153 / 0**. Bundles rebuilt
+  (`-Client`) and the served copy synced (`-Sync`).
+
+**Observations, not changed:**
+1. The FAQ's Capture paragraph describes "two rolls" per attacker (one to kill a defender, one to be eliminated, at 25%); the
+   code rolls one d10 per attacker and one per DEFENDING marine unit. The Security Officer's -2 is on the latter.
+2. Not tested in a real game. Worth a play test: buy him on an EA ship (5%) and a non-EA one (7.5%), check the initiative in the
+   ship window, then board his ship with a pod and read the combat log's rolls.

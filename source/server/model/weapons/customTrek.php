@@ -3077,6 +3077,7 @@ public function calculateHitBase($gamedata, $fireOrder)
 		        if ($enhID == 'MARK_FERV') $rollMod += $enhCount; //Markab Fervor causes defenders to fight harder.		        	
 			}
 		}
+		$rollMod += Officers::boardingShift($target); //An Expert Security Officer moves every boarding roll 2 in the defender's favour.
 
         return $rollMod;
         		

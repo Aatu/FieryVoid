@@ -662,6 +662,7 @@ public function setParentFighter($fighter) {
 		        	if ($enhID == 'MARK_FERV') $rollMod += $enhCount; //Markab Fervor causes defenders to fight harder.
 				}
 		}
+		$rollMod += Officers::boardingShift($ship); //An Expert Security Officer moves every boarding roll 2 in the defender's favour.
 		
 		//Capture Ship missions chances of getting 'caught' doesn't increase every two turns, they are in open battle from the start!
 		if(!($critical->phpclass == "CaptureShip" || $critical->phpclass == "CaptureShipElite") && $critical->turn <= $gamedata->turn){
@@ -1008,6 +1009,7 @@ public function setParentFighter($fighter) {
 				if ($enhID == 'MARK_FERV') $defenderRollMod -= $enhCount;
 			}
 		}
+		$defenderRollMod -= Officers::boardingShift($ship); //An Expert Security Officer helps his own defenders too (lower is better for them).
 
 		$defenderHits = 0;
 		for ($i = 0; $i < $currentMarines; $i++) {

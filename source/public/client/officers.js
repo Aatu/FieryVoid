@@ -58,6 +58,10 @@ window.officers = {
 		   range arrives in the payload. */
 		{ id: 'OFF_PLAS', label: 'Expert Plasma Scientist', post: 'engine', needs: 'plasmaWeapon',
 			summary: 'Plasma weapons do increased damage and ignore first 2 hexes of range damage penalty; Plasma Batteries have +1 power and -3 on crits; Plasma Webs +1 range' },
+		/* Stage 13: the initiative is previewed (stats); his -2 on the C&C's criticals and the boarding shift are the server's
+		   alone (no client shows a critical modifier or a delivery or mission roll). */
+		{ id: 'OFF_SECU', label: 'Expert Security Officer', post: 'cnc', stats: { iniativebonus: 5 },
+			summary: '+5 initiative, -2 on C&C criticals; enemy boarding rolls against this ship 2 worse' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.

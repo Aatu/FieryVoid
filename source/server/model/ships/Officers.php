@@ -45,6 +45,8 @@
    Stage 12: the Expert Plasma Scientist - +1 damage on plasma weapons bar the light ones (Fusers +2), the
    first two hexes of every plasma shot's range damage ignored, Plasma Batteries holding one point more (and
    tougher), Plasma Webs reaching a hex further.
+   Stage 13: the Expert Security Officer - +5 initiative, -2 on his C&C's critical rolls, and every enemy boarding roll
+   against his ship moved 2 in its favour (boardingShift).
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -79,6 +81,9 @@ class Officers{
 	const PLASMA_BATTERY_CRIT_MOD = -3;  //...: "and receive a -3 bonus on any critical hit roll"
 	const PLASMA_WEB_RANGE = 1;          //...: "Plasma webs receive a +1 bonus to range, even if suffering from a critical hit"
 	const PLASMA_WEB_MODE = 2;           //the web's Anti-Fighter (offensive) mode - the one with a range; Defensive's 100 is "unlimited"
+	const SECURITY_INI = 5;              //Security Officer: "a +1 bonus to the ship's initiative" - tabletop, so +5 in FV (QX1)
+	const SECURITY_CNC_CRIT_MOD = -2;    //...: "and a -2 to any critical hit rolls against the C&C"
+	const SECURITY_BOARDING_SHIFT = 2;   //...: "shift all die rolls by up to 2 in any direction desired by the defending player"
 
 	/* ⭐ FACTION RULES (user request 2026-10-15) - which factions an officer is offered to, and what some
 	   of them pay. ONE table, so a faction's officers change here and nowhere else: README.md, "Officers:
@@ -107,13 +112,15 @@ class Officers{
 		'OFF_LASR' => array('pct' => array('Hyach Gerontocracy' => 10)),
 		//"10% of the ship's base cost for Pak'ma'ra ... Any race using plasma weapons can use these officers, but the cost is doubled"
 		'OFF_PLAS' => array('pct' => array("Pak'ma'ra Confederacy" => 10)),
+		//"5% of the ship's basic value for Earth Alliance (EA) factions ... Non-EA factions increase the cost by 50%" - the registry's 7.5
+		'OFF_SECU' => array('pct' => array('Earth Alliance' => 5, 'Earth Alliance (Early)' => 5, 'Earth Alliance (defenses)' => 5)),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
 	     label    the name in the buy dialog, the stored enhname and the kill note's notekey_human
 	     post     a key into findPost()
 	     pct      price in percent of the hull's blueprint pointCost, rounded up (D8) - of ONE CRAFT for
-	              a fighter officer
+	              a fighter officer. At most one decimal place (the Security Officer's 7.5 - price)
 	     roundDown  (optional) true: pct is rounded DOWN instead, where the officer's own text says so
 	     apply    the static method that applies his stat changes while he serves, or null when every
 	              rule he carries is asked for elsewhere (isActive)
@@ -216,6 +223,15 @@ class Officers{
 		   Pak'ma'ra, 20% for everyone else ($factionRules); only for a hull carrying a plasma weapon. */
 		'OFF_PLAS' => array('label' => 'Expert Plasma Scientist', 'post' => 'engine', 'pct' => 20, 'apply' => 'applyPlasmaScientist',
 			'needs' => 'hasPlasmaWeapon'),
+		/* Expert Security Officer (Stage 13; rules text, user 2026-10-17), in the C&C. +5 initiative (tabletop +1, QX1) and -2
+		   on his C&C's critical rolls (applySecurityOfficer); and "whenever a breaching pod attacks, shift all die rolls by up
+		   to 2 in any direction desired by the defending player" - built as a fixed 2 in his ship's favour (the user's note:
+		   higher is worse for the boarders on every table), on every boarding roll against his ship (boardingShift). Rulings
+		   (user 2026-10-17): the defenders' own Capture rolls get -2 too; every boarding party - breaching pod, Grappling
+		   Claw or transporter; the -2 on his own C&C only (a Pak'ma'ra hull has two). 5% for the Earth Alliance, 7.5% for
+		   everyone else ($factionRules) - the one price with a decimal place (price). */
+		'OFF_SECU' => array('label' => 'Expert Security Officer', 'post' => 'cnc', 'pct' => 7.5, 'apply' => 'applySecurityOfficer',
+			'publish' => array('iniativebonus')),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -336,8 +352,8 @@ class Officers{
 	public static function pctFor($ship, $id){
 		$faction = (string)$ship->faction;
 		$rules = self::rulesId($id);
-		if (isset(self::$factionRules[$rules]['pct'][$faction])) return (int)self::$factionRules[$rules]['pct'][$faction];
-		return (int)self::$registry[$id]['pct'];
+		if (isset(self::$factionRules[$rules]['pct'][$faction])) return self::$factionRules[$rules]['pct'][$faction];
+		return self::$registry[$id]['pct'];
 	}
 
 	/* D9: never on Ancient hulls, OSATs (mines extend OSAT) or terrain - one shared test in front of
@@ -384,23 +400,29 @@ class Officers{
 	   faction's pct (pctFor), unless $byFaction is false: legacyPrice, for rows saved before there were
 	   faction prices. */
 	private static function shipPrice($ship, $id, $byFaction = true){
-		$pct = $byFaction ? self::pctFor($ship, $id) : (int)self::$registry[$id]['pct'];
+		$pct = $byFaction ? self::pctFor($ship, $id) : self::$registry[$id]['pct'];
 		return self::price($ship->pointCost, $pct, !empty(self::$registry[$id]['roundDown']));
 	}
 
 	/* ceil(pct% of the blueprint cost), in whole numbers: 0.07 x 100 is 7.000000000000001 in floats,
 	   and ceil() would charge 8 for it (SHIP_ENHANCEMENTS_PLAN.md Stage 5 hit the same trap). $down:
-	   floor instead ("dropping fractions" - the Navigator), in the same whole numbers. */
+	   floor instead ("dropping fractions" - the Navigator), in the same whole numbers. The pct is counted
+	   in TENTHS (pctTenths), so 7.5% is exact; a whole percent prices exactly as it did before. */
 	public static function price($pointCost, $pct, $down = false){
 		$hundredths = max(0, (int)round($pointCost * 100));
-		return intdiv($hundredths * (int)$pct + ($down ? 0 : 9999), 10000);
+		return intdiv($hundredths * self::pctTenths($pct) + ($down ? 0 : 99999), 100000);
 	}
 
 	/* ceil(pct% of ONE craft), in whole numbers: pointCost is for a standard flight (standardFlight). */
 	public static function craftPrice($flight, $pct){
 		$hundredths = max(0, (int)round($flight->pointCost * 100));
-		$den = 10000 * self::standardFlight($flight);
-		return intdiv($hundredths * (int)$pct + $den - 1, $den);
+		$den = 100000 * self::standardFlight($flight);
+		return intdiv($hundredths * self::pctTenths($pct) + $den - 1, $den);
+	}
+
+	//a percent in tenths of a percent, as a whole number (7.5 -> 75); a finer fraction is rounded to a tenth
+	private static function pctTenths($pct){
+		return (int)round((float)$pct * 10);
 	}
 
 	/* How many craft a flight's pointCost is for, so the flight its officer's listed price is for: ONE
@@ -1746,6 +1768,31 @@ class Officers{
 	private static function isPlasmaWeapon($weapon){
 		if ($weapon->weaponClass === 'Plasma') return true;
 		return is_array($weapon->weaponClassArray) && in_array('Plasma', $weapon->weaponClassArray, true);
+	}
+
+	/* ------------------------------------------------------------------ Expert Security Officer (Stage 13) */
+
+	/* +5 initiative (published to every viewer: `publish`), and -2 on the critical rolls of the C&C he sits in - its own
+	   critRollMod, which ShipSystem::testCritical reads, so it also eases the kill roll of every officer posted there ("including
+	   any modifications", D3), as the Technician's -2 does on his reactor. Another C&C on the hull is not his (user ruling
+	   2026-10-17). The lobby previews the initiative (officers.js `stats`); nothing displays a critical modifier. */
+	private static function applySecurityOfficer($ship, $entry, $turn){
+		$ship->iniativebonus += self::SECURITY_INI;
+		$cnc = $ship->getSystemById($entry['post']);
+		if ($cnc !== null) $cnc->critRollMod += self::SECURITY_CNC_CRIT_MOD;
+	}
+
+	/* ⭐ THE boarding shift: how far every boarding roll against $ship moves in its favour while he serves. "Shift all die
+	   rolls by up to 2 in any direction desired by the defending player" is built as a fixed 2 (user's note: higher is
+	   worse for the boarders on every table), summed with the roll's other modifiers ("the attacker ... must add these in
+	   before the security officer makes his alterations" - in a sum the order cannot matter). Every d10 a
+	   boarding party rolls against his ship - its delivery (Marines, GrapplingClaw and the Trek transporter's
+	   getDeliveryRollMod) and its missions (ShipSystem::getMarineRollMod: Wreak Havoc, Sabotage, Rescue and its Capture
+	   combat roll) - adds it; his ship's own defending marines, who need 5 or less in Capture combat, subtract it (user
+	   rulings 2026-10-17: every boarding party, the defenders' rolls too). Server only: the client previews only the
+	   attach chance, which no crew affects. */
+	public static function boardingShift($ship){
+		return self::isActive($ship, 'OFF_SECU') ? self::SECURITY_BOARDING_SHIFT : 0;
 	}
 
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */
