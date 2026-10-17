@@ -11048,8 +11048,8 @@ class JumpEngine extends Weapon{
         $recharge = max(1, (int)$this->delay);
 
         $this->data["Special"]  = "<br>Select this system in Initial Orders and target a hex within " . $this->range . " hexes.";
-        $this->data["Special"] .= "Set the vortex FACING with the on-map arrow, then confirm. The jump point forms at the end of that turn and can be entered from the NEXT turn.";
-        $this->data["Special"] .= "<br>A damaged Jump Engine may fail: at the end of every turn it opens or maintains a jump point, the ship is destroyed on a d100 roll at or under the percentage of Jump Engine boxes lost.";
+        $this->data["Special"] .= "Set vortex FACING and then confirm. Jump point forms at the end of that turn and can be entered from the NEXT turn.";
+        $this->data["Special"] .= "<br>A damaged Jump Engine may fail: at the end of every turn it opens or maintains a jump point.";
         /* ⭐⭐ STAGE H3 - THE VORLON UPKEEP, STATED WHERE THE PLAYER MEETS IT. Two rules of this
            tooltip's text are simply untrue for a capacitor-fed drive - the four-turn cap and the
            all-systems-dark requirement - so the sentence replaces them rather than being appended to
@@ -11061,7 +11061,7 @@ class JumpEngine extends Weapon{
             $this->data["Special"] .= "<br>UPKEEP: The ship does NOT have to shut its systems down to hold the jump point open, and jump point turn";
         }
         //Stage H3 follow-up (user request 2026-09-18): JumpEngine.continueVortexMaintain re-declares it each turn.
-        $this->data["Special"] .= "<br>Once you set Maintain, it carries over to the following turns automatically until you turn it OFF.";
+        $this->data["Special"] .= "<br>Maintain carries over to following turns until you turn it OFF.";
         $this->data["Special"] .= $this->getAdvancedChargingText();
         $this->data["Special"] .= "<br>See FAQ for full rules for Jump Drives.";
         $this->data["Special"] .= "<br>SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
