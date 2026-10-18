@@ -5,6 +5,11 @@ class InitialOrdersGamePhase implements Phase
 
 public function advance(TacGamedata $gameData, DBManager $dbManager)
 {
+    // TRIAD COMMAND NODE (TRIAD_ADVANCED_FEATURES_PLAN.md §4) - FIRST, before the first active ship is
+    // picked below: that pick reads initiative, and a node nominated in the Initial Orders that just
+    // closed changes it. Returns at once in a game where no node was nominated this turn.
+    CnC::applyTriadCommandNodes($gameData, $dbManager);
+
     $dbManager->setPlayersWaitingStatusInGame($gameData->id, true);
     $gameData->setPhase(2);
 

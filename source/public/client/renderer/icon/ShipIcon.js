@@ -799,6 +799,16 @@ window.ShipIcon = function () {
             return null;
         }
 
+        /* KIRISHIAC_ORBITAL_REFITS_PLAN.md §8.7 - AN ELINT SENSOR MODULE'S ARC (user request 2026-10-08).
+           Not a weapon, but its arc decides what its points can reach (§8.3), so it is drawn the way a
+           weapon's is: the hex-edged range arc, out to the 30 hexes DIST, SOEW and Jamming reach, in the
+           ELINT teal of the ship window's EW panel. getArcs mirrors it when the ship is rolled. */
+        if (weapon.name === 'KirishiacElintModule') {
+            this.showRangeArc(ELINT_ARC_HEXES, window.coordinateConverter.getHexDistance(),
+                              [shipManager.systems.getArcs(ship, weapon)], ELINT_ARC_COLOUR, ELINT_ARC_FILL_OPACITY);
+            return null;
+        }
+
         if (!(weapon instanceof Weapon) && !(weapon instanceof Thruster) && !(weapon.defensiveSystem)) return null; // Only show arcs for weapons
         if(weapon.stowed && weapon.stowedArcStart == null) return null; //stowed weapon with no stowed arc (Kirishiac Orbital docked) - non-operational, no arc to show. A stowed arc set (Heavy Orbital) keeps the weapon live: draw its current (reduced) arc.
 
@@ -952,6 +962,13 @@ window.ShipIcon = function () {
        it is a 20-hex disc, so a normal firing-arc fill would wash out everything under it. */
     var EW_DETECTOR_ARC_COLOUR = "rgb(224,211,154)";
     var EW_DETECTOR_ARC_FILL_OPACITY = 0.15;         //a 1,261-hex disc - see VORTEX_ARC_FILL_OPACITY
+
+    /* Kirishiac ELINT Sensor Module (KIRISHIAC_ORBITAL_REFITS_PLAN.md §8.7). #9ad4cf is the ELINT row of the
+       ship window's EW panel; filled as quietly as the EW Detector's disc, for the same reason - a 30-hex
+       half-disc is some 1,400 hexes, and a firing-arc fill would wash out the map under it. */
+    var ELINT_ARC_COLOUR = "rgb(154,212,207)";
+    var ELINT_ARC_FILL_OPACITY = 0.15;
+    var ELINT_ARC_HEXES = 30;                        //DIST, SOEW and Jamming reach (shipTooltipInitialOrdersMenu isInElintDistance(30))
 
     /* This system's detection reach in hexes, or 0 if it is not a detector (or is dead/unpowered).
        ⚠️ SAME READ AS ew.collectEwDetectors, INCLUDING THE FALLBACK: `effectiveRange` is the

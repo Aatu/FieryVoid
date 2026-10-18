@@ -19,7 +19,7 @@ $fvDocPages = array(
     'starter'  => array('file' => 'starter-guide.html',  'title' => 'Starter Guide',                'bg' => 'img/maps/24.PurpleArch.jpg'),
     'faq'      => array('file' => 'faq.html',            'title' => 'FAQ',                          'bg' => 'img/webBackgrounds/faq.jpg'),
     'factions' => array('file' => 'factions-tiers.html', 'title' => 'Factions & Tiers',             'bg' => 'img/maps/3.StarFormation.jpg'),
-    'ammo'     => array('file' => 'ammo-options.html',   'title' => 'Ammo, Options & Enhancements', 'bg' => 'img/webBackgrounds/aoe.jpg'),
+    'ammo'     => array('file' => 'ammo-options.html',   'title' => 'Ship Options',                 'bg' => 'img/webBackgrounds/aoe.jpg'),
     'fleet'    => array('file' => 'fleet-checker.html',  'title' => 'Fleet Checker Rules',          'bg' => 'img/webBackgrounds/faq.jpg')
 );
 $fvDocPage = $fvDocPages[$fvDocKey];

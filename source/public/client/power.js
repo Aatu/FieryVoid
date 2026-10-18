@@ -561,6 +561,9 @@ shipManager.power = {
 			var reactors = shipManager.power.getAllReactors(ship);
 
 			output = reactors[0].output;
+			//Expert Technician (OFFICERS_PLAN.md Stage 3): the lobby's read-time preview. In game the
+			//server has already raised the post's output; 0 there, and 0 on any reactor but his post.
+			if (window.officers) output += officers.reactorBonus(ship, reactors[0]);
 
 			for (var i = 0; i < reactors.length; i++) {
 				var reactor = reactors[i];
@@ -583,6 +586,7 @@ shipManager.power = {
 		} else {
 			var reactor = shipManager.systems.getSystemByName(ship, "reactor");
 			output = reactor.output + reactor.outputMod;
+			if (window.officers) output += officers.reactorBonus(ship, reactor); //Expert Technician - see the base branch
 			/* Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 2.2): the Energy Draining Field takes
 			   power off the reactor for one turn, published as edfDrain by Reactor::stripForJson
 			   (it cannot ride outputMod - see the plan's note on turn-filtered param criticals).

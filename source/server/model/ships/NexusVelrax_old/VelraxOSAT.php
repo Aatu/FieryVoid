@@ -9,7 +9,7 @@ class VelraxOSAT extends OSAT{
         $this->phpclass = "VelraxOSAT";
         $this->imagePath = "img/ships/Nexus/velraxOSAT.png";
 			$this->canvasSize = 90; //img has 100px per side
-        $this->shipClass = "Standard OSAT";
+        $this->shipClass = "Tesskith OSAT";
 //	    $this->variantOf = "Brixadii Weapons Platform";
 //		$this->limited = 33;
 		$this->unofficial = true;
@@ -50,13 +50,7 @@ class VelraxOSAT extends OSAT{
 				16 => "Thruster",
 				18 => "Scanner",
 				20 => "Reactor",
-			),
-			1=> array(
-				20 => "Primary",
-			),
-			2=> array(
-				20 => "Primary",
-			),
+			)
         );
     }
 }

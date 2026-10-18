@@ -86,10 +86,9 @@ class AndorianKumariCommand extends HeavyCombatVesselLeftRight{
             0=> array(
 				1 => "3:Nacelle",	
 				2 => "4:Nacelle",	
-				7 => "Structure",
-				9 => "1:Particle Cannon",
-				11 => "2:Standard Particle Beam",	
-				13 => "Hangar",
+				9 => "Structure",
+				11 => "1:Particle Cannon",
+				13 => "2:Standard Particle Beam",	
 				15 => "Scanner",
 				17 => "Engine",
 				19 => "Reactor",

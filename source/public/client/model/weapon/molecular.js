@@ -505,7 +505,8 @@ function openSlicerSelfInterceptDialog() {
    generic "one order per gun" allocation would misprice all three sizes and corrupt the pool
    arithmetic, so it stays out of weaponManager's per-gun path. It is NOT out of manual
    interception - it declares through the two hooks below (Stage 7). The Hyperplasma Cutter sets
-   the same flag and implements neither, which is what keeps it out entirely (§11.5). */
+   the same flag and implements the same two hooks in its own currency (one die per click,
+   TRIAD_ADVANCED_FEATURES_PLAN.md §2). */
 MolecularSlicerBeamL.prototype.usesCustomInterceptAllocation = true;
 
 /* ── Manual interception (MANUAL_INTERCEPTION_PLAN.md Stage 7) ─────────────────────────────────

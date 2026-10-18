@@ -57,7 +57,6 @@ const bundles = [
             // AssetLoader::getAssetUrl() <?php> tag, which extractScriptSources already
             // skips — so it never enters the legacy bundle. (The old vendored
             // three.min.js literal lived here before perf #5.)
-            'client/lib/THREE.MeshLine.js',
             'client/UI/reactJs/UI.bundle.js',
             'static/ships.js',
             'client/game.legacy.bundle.js'
@@ -69,8 +68,7 @@ const bundles = [
         outputFile: 'source/public/client/gamelobby.legacy.bundle.js',
         excluded: [
             'static/ships.js',
-            'client/gamelobby.legacy.bundle.js',
-            'client/lib/jquery-ui-1.8.15.custom.min.js' // It's in the top section
+            'client/gamelobby.legacy.bundle.js'
         ]
     }
 ];

@@ -82,14 +82,19 @@ window.botPanel = {
 			.attr("title", large ? "Collapse log panel" : "Expand log panel")
 			.find(".chevron").html(large ? "&#9660;" : "&#9650;");
 
-		// Hide iniGui if logcontainer is large
+		/* Hide iniGui if logcontainer is large. Collapsing hands back whatever state the
+		   drawer was in BEFORE the expand, rather than forcing it open - a player who had
+		   it shut (and on a phone it starts shut) does not want it reappearing.
+		   gamedata.sliderToggle drops the remembered state, so a drawer the player opens
+		   or closes while the panel is large stays as they left it. */
 		if (large) {
+			$(backDiv).data("reopenOnCollapse", $(backDiv).data("on") == 1);
 			$(iniGui).addClass("closed");
 			$(backDiv).addClass("closed");
 			$(backDiv).data("on", 0);
 			document.getElementById("iniSlider").src = "img/pullOut.png";
-		} else {
-			// If not large, ensure it behaves normally
+		} else if ($(backDiv).data("reopenOnCollapse")) {
+			$(backDiv).removeData("reopenOnCollapse");
 			$(iniGui).removeClass("closed");
 			$(backDiv).removeClass("closed");
 			$(backDiv).data("on", 1);

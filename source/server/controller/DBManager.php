@@ -1811,6 +1811,24 @@ class DBManager
 
     }
 
+    /* TRIAD COMMAND NODE (TRIAD_ADVANCED_FEATURES_PLAN.md §4) - rewrite one unit's initiative for a turn
+     * AFTER the roll, when Initial Orders close. CnC::applyTriadCommandNodes is the only caller; the row
+     * was inserted by submitIniative at the turn change. */
+    public function updateIniative($gameid, $turn, $shipid, $iniative, $unmodified)
+    {
+        $stmt = $this->connection->prepare(
+            "UPDATE `tac_iniative` SET iniative = ?, unmodified_iniative = ? WHERE gameid = ? AND turn = ? AND shipid = ?"
+        );
+        $ini = (int)$iniative;
+        $unmod = ($unmodified === null) ? null : (int)$unmodified;
+        $gid = (int)$gameid;
+        $t = (int)$turn;
+        $sid = (int)$shipid;
+        $stmt->bind_param('iiiii', $ini, $unmod, $gid, $t, $sid);
+        $stmt->execute();
+        $stmt->close();
+    }
+
     public function updatePlayerStatus($gameid, $userid, $phase, $turn, $slots = null)
     {
         try {
@@ -2160,6 +2178,30 @@ class DBManager
         $sql = "INSERT INTO `tac_ew` VALUES (null, $gameid, $shipid, $turn, '$type', $amount, $targetid)";
 
         $this->update($sql);
+    }
+
+    /* KIRISHIAC_ORBITAL_REFITS_PLAN.md §8.4 - the after-movement ELINT module check cuts a row to
+       what its modules can still carry, or deletes it. By ROW ID: the check holds the loaded
+       EWentry objects, and (type, targetid) is not unique enough to aim an UPDATE with. A row cut
+       to 0 must be DELETED, not kept - the client counts an OEW row as a target whatever its
+       amount (plan D11), which is why adjustEwAmount (clamps at 0, keeps the row) is not used. */
+    public function setEwAmountById($gameid, $id, $amount)
+    {
+        $gameid = (int)$gameid;
+        $id     = (int)$id;
+        $amount = (int)$amount;
+        if ($id <= 0 || $amount <= 0) return;
+
+        $this->update("UPDATE `tac_ew` SET amount = $amount WHERE gameid = $gameid AND id = $id LIMIT 1");
+    }
+
+    public function deleteEwEntryById($gameid, $id)
+    {
+        $gameid = (int)$gameid;
+        $id     = (int)$id;
+        if ($id <= 0) return;
+
+        $this->update("DELETE FROM `tac_ew` WHERE gameid = $gameid AND id = $id LIMIT 1");
     }
 
 /* no longer needed, Adaptive Armor redone
@@ -3276,6 +3318,12 @@ class DBManager
                     $ship->pointCostSysEnh += (float)$entry[5];
                 }
             }
+
+            /* KIRISHIAC_ORBITAL_REFITS_PLAN.md D4 - a refit that swaps an orbital's weapon for a
+               system of another class has to do it HERE, after its rows are validated and before
+               the damage, critical, power and fire-order queries below resolve anything by id.
+               One empty() for every ship without a refit. */
+            Enhancements::mountSystemEnhancementSystems($ship);
         }
     } //endof function getEnhancementsForShips
 
@@ -3750,6 +3798,18 @@ class DBManager
             $shipNotes = isset($allNotes[$ship->id]) ? $allNotes[$ship->id] : array();
             
 			foreach ($shipNotes as $currNote){
+				/* OFFICERS_PLAN.md §4.4 - an officer's death is recorded on the SHIP and never handed
+				   to its post: a Jump Engine takes any note it does not recognise for its pre-jump
+				   combat value, and HyachComputer never calls its parent. */
+				if (Officers::isKillNote($currNote)){
+					$ship->recordOfficerKill($currNote->notevalue, $currNote->turn);
+					continue;
+				}
+				//...and so is a fighter officer's move with his fighter to another flight row (Stage 4)
+				if (Officers::isMoveNote($currNote)){
+					$ship->recordOfficerMove($currNote->notevalue, $currNote->turn);
+					continue;
+				}
 				$system = $ship->getSystemById($currNote->systemid);
                 if ($system) // Robustness check
 				    $system->addIndividualNote($currNote);
@@ -4698,20 +4758,25 @@ class DBManager
 
     public function getGamesToBeDeleted()
     {
+        global $keep_idle_games;
+        // Local Docker sets $keep_idle_games (docker/php/varconfig.php) so old test games survive:
+        // they are the replay harness corpus, and this runs on every game.php load. Idle LOBBY games
+        // are still cleared. Unset on live, so live behaviour is unchanged.
+        $idleRule = empty($keep_idle_games) ? "DATE_ADD(p.lastactivity, INTERVAL 3 MONTH) < NOW() OR" : "";
+
         $ids = array();
         $stmt = $this->connection->prepare("
-            SELECT 
+            SELECT
                 g.id
-            FROM 
+            FROM
                 tac_game g
-            JOIN 
+            JOIN
                 tac_playeringame p
             ON
                 p.gameid = g.id
             WHERE
-                DATE_ADD(p.lastactivity, INTERVAL 3 MONTH) < NOW()
-            OR
-                (DATE_ADD(p.lastactivity, INTERVAL 5 DAY) < NOW() 
+                $idleRule
+                (DATE_ADD(p.lastactivity, INTERVAL 5 DAY) < NOW()
                 AND
                 g.status = 'LOBBY')
 

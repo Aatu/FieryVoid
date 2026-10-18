@@ -1678,6 +1678,8 @@ class Enhancements{
 	  } //end of magazine-requiring options
 	  
 	  
+	  //Expert officers (OFFICERS_PLAN.md): availability, posts and prices live in the Officers registry
+	  Officers::addOffers($ship);
   } //endof function setEnhancementOptionsShip
 	
 	
@@ -1709,21 +1711,10 @@ class Enhancements{
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }  	  
 	  
-		//Expert Motivator: -2 dropout modifier, cost: 10% craft price (round up), limit: 1
-	  $enhID = 'EXP_MOTIV';	  
-	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option needs to be specifically enabled
-		  $enhName = 'Expert Motivator';
-		  $enhLimit = 1;	
-		  if($flight instanceof SuperHeavyFighter){//single-craft flight! 
-			$enhPrice = ceil($flight->pointCost/10);
-		  }else{
-		  	$enhPrice = ceil($flight->pointCost/60); //price per craft, while flight price is per 6-craft flight	  
-		  }
-		  $enhPriceStep = 0;
-		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
-	  }
-	  
-	  //Extra Ammo for Fighters with a limited supply, cost: 3 per extra shot, limit: 5	  	
+	  //Expert Motivator (EXP_MOTIV) is an officer since OFFICERS_PLAN.md Stage 4: offered, priced and
+	  //applied by Officers (Officers::addOffers below), under the same id, price and -2 dropout.
+
+	  //Extra Ammo for Fighters with a limited supply, cost: 3 per extra shot, limit: 5
 	  $enhID = 'EXT_AMMO';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 		  $enhName = 'Additional Ammo for Gun';
@@ -2005,10 +1996,11 @@ class Enhancements{
 			$enhPrice = $ammoClass->getPrice($flight); 
 			$enhPriceStep = 0; //flat rate
 			$flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
-		  }		  
+		  }
 	  } //end of magazine-requiring options
-	  
-	  
+
+	  //Fighter officers (OFFICERS_PLAN.md Stage 4): availability, posts and prices live in the Officers registry
+	  Officers::addOffers($flight);
   } //endof function setEnhancementOptionsFighter
 	    
     
@@ -2255,7 +2247,8 @@ class Enhancements{
 			$enhCount = $entry[2];
 			$enhDescription = $entry[1];
 			if($enhCount > 0) {
-				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'STEALTH_CT'){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
+				//officers never enter this PUBLIC tooltip (OFFICERS_PLAN.md D4) - their own team reads the officers payload
+				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'STEALTH_CT' && !Officers::isOfficerId($enhID)){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
 				if($flight->enhancementTooltip != "") $flight->enhancementTooltip .= "<br>";
 				//if($enhID == 'DEPLOY' && $enhCount > 1){ //Special type of Enhancement, clarify what it means.
 				//	$flight->enhancementTooltip .= "Flight deploys on Turn $enhCount";
@@ -2283,9 +2276,7 @@ class Enhancements{
 						$flight->forwardDefense -= $enhCount;
 						$flight->sideDefense -= $enhCount;
 						break;
-					case 'EXP_MOTIV': //Expert Motivator: -2 on dropout rolls
-						$flight->critRollMod -= $enhCount*2;
-						break;
+					//EXP_MOTIV (Expert Motivator): an officer now - Officers::applyMotivator, while his craft flies
 					case 'EXT_AMMO'://Extra ammo, for fighter with a limited supply.  Max 5 extra shots.
 						foreach($flight->systems as $ftr) foreach($ftr->systems as $sys)
 							//Find relevant weapons 
@@ -2536,8 +2527,9 @@ class Enhancements{
 				//is an index - the generic line would read "kendariUpgraded (x7)". SHAD_TEND's count is
 				//a capacity in fives, so the generic line would read "(x2)" where the player bought a
 				//10-capacity tendril. Both write their own line below. ADV_ENG says whether it is lost;
-				//STEALTH_CT's count is a coverage index, so it names the coverage instead.
-				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'CHAM_DISG' && $enhID !== 'SHAD_TEND' && $enhID !== 'ADV_ENG' && $enhID !== 'STEALTH_CT'){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
+				//STEALTH_CT's count is a coverage index, so it names the coverage instead. Officers never
+				//enter this PUBLIC tooltip at all (OFFICERS_PLAN.md D4): their own team reads the officers payload.
+				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'CHAM_DISG' && $enhID !== 'SHAD_TEND' && $enhID !== 'ADV_ENG' && $enhID !== 'STEALTH_CT' && !Officers::isOfficerId($enhID)){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
 				if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
 				//if($enhID == 'DEPLOY'){ //Special type of Enhancement, clarify what it means.
 				//	$ship->enhancementTooltip .= "Ship deploys on Turn $enhCount";
@@ -3231,15 +3223,7 @@ class Enhancements{
 							}
 							break;
 														
-						case 'EXP_MOTIV': //Expert Motivator: modify dropout modifier
-							/* actually irrelevant for front end
-							if($ship instanceof FighterFlight){
-								$strippedShip->critRollMod = $ship->critRollMod;
-							}
-							*/
-							break;
-							
-						case 'IMPR_OB': //Improved Targeting Computer: modify offensive bonus 
+						case 'IMPR_OB': //Improved Targeting Computer: modify offensive bonus
 							if($ship instanceof FighterFlight){
 								$strippedShip->offensivebonus = $ship->offensivebonus;
 							}
@@ -3746,6 +3730,58 @@ class Enhancements{
 			'ages'      => array(3),
 			'serialise' => array('wideBeamFitted'),
 		),
+		/* ⭐ KIRISHIAC ORBITAL REFITS (KIRISHIAC_ORBITAL_REFITS_PLAN.md) - THE FIRST REFITS THAT CHANGE A
+		   SYSTEM'S CLASS. Bought on the ORBITAL (D1: its mounted weapon is untargetable, so the lobby
+		   offers it nothing, and its identity changes under the swap - the orbital's never does). Two
+		   slots no earlier refit needed:
+		     mount      the STRUCTURAL half - swaps the orbital's weapon for the new system at game
+		                load, before damage and criticals are read (mountSystemEnhancementSystems).
+		                `apply` keeps the stat half, as for every other refit.
+		     group      mutual exclusion on one orbital, by groupRank: rows of EQUAL rank combine (the
+		                two shield generators), a higher rank removes every lower one (an ELINT module
+		                removes the generators). Decides what survives a doctored or stale list too.
+		   ⚠️ ages array(3, 4) makes the shields the first refits open to a PRIMORDIAL hull (the
+		   Conqueror); only orbitals pass `eligible`, so nothing else on such a hull is offered.
+		   `serialise` is empty: nothing on the orbital itself changes, and the new systems send
+		   their own blueprint fields. */
+		'SYS_AGS' => array(
+			'label'     => 'Adv. Gravitic Shield',
+			'eligible'  => 'sysEnhEligibleAGS',
+			'price'     => 'sysEnhPriceAGS',
+			'limit'     => 'sysEnhLimitAGS',
+			'mount'     => 'sysEnhMountAGS',
+			'group'     => 'orbitalMount',
+			'groupRank' => 1,
+			'ages'      => array(3, 4),
+			'serialise' => array(),
+		),
+		/* a SECOND generator with its OWN rating (user 2026-10-08, superseding R1's shared rating) -
+		   standard orbitals only (A7). Bought alone it is simply the orbital's one generator; with
+		   SYS_AGS it is appended (R4). Redundant shields never add (A3), so the higher rating counts. */
+		'SYS_AGS2' => array(
+			'label'     => '2nd Adv. Gravitic Shield',
+			'eligible'  => 'sysEnhEligibleAGS2',
+			'price'     => 'sysEnhPriceAGS',
+			'limit'     => 'sysEnhLimitAGS',
+			'mount'     => 'sysEnhMountAGS',
+			'group'     => 'orbitalMount',
+			'groupRank' => 1,
+			'ages'      => array(3, 4),
+			'serialise' => array(),
+		),
+		//"any Ancient-timeframe Mastership" (E8): only augmenter orbitals pass `eligible`, so ages array(3) is the whole rest of the rule
+		'SYS_ELINT' => array(
+			'label'     => 'ELINT Sensor Module',
+			'eligible'  => 'sysEnhEligibleELINT',
+			'price'     => 'sysEnhPriceELINT',
+			'limit'     => 'sysEnhLimitOne',
+			'mount'     => 'sysEnhMountELINT',
+			'apply'     => 'sysEnhApplyELINT',
+			'group'     => 'orbitalMount',
+			'groupRank' => 2,
+			'ages'      => array(3),
+			'serialise' => array(),
+		),
 	);
 
 	/* The registry, for anything that needs to read it (the JSON fixups, the client label map
@@ -3932,8 +3968,36 @@ class Enhancements{
 					self::systemEnhancementPriceStep($ship, $system, $enhID),
 					(int)$system->id,
 				);
+				self::addSwapPreview($ship, $system, $enhID);
 			}
 		}
+	}
+
+	/* KIRISHIAC_ORBITAL_REFITS_PLAN.md §9.3 - what the lobby preview needs (see
+	   BaseShip::$systemEnhancementSwapPreviews), in two parts:
+	     mounts     orbital id -> the id of the system mounted on it. The orbital's pairing is
+	                server-only state, and the preview has to know WHICH system it swaps.
+	     templates  one blueprint entry per new class, built on a THROWAWAY system - never mounted,
+	                never wired to the orbital, so the hull being described is not touched.
+	                linkedOrbital stays null: json_encode would otherwise walk into the orbital and
+	                the whole ship. */
+	private static function addSwapPreview($ship, $orbital, $enhID){
+		if(empty(self::$systemEnhancementRegistry[$enhID]['mount'])) return;
+		$old = $orbital->getOrbitalWeapon();
+		if($old === null) return;
+		$ship->systemEnhancementSwapPreviews['mounts'][(int)$orbital->id] = (int)$old->id;
+		if($enhID === 'SYS_ELINT'){
+			$template = KirishiacElintModule::forOrbital($orbital, $old);
+		}else{
+			$template = KirishiacAdvGravShield::forOrbital($orbital, $old, 1, 1);
+		}
+		if(isset($ship->systemEnhancementSwapPreviews['templates'][$template->name])) return;
+		$template->setId($old->id);
+		$template->location = $old->location;
+		$template->isTargetable = false;
+		$template->setSystemDataWindow(1);
+		$ship->systemEnhancementSwapPreviews['templates'][$template->name] =
+			ShipCompactor::compactSystem(json_decode(json_encode($template), true));
 	}
 
 	/* The tuple's priceStep slot. The lobby totals N levels as sum(price + i*step), which is what
@@ -4272,6 +4336,144 @@ class Enhancements{
 		$system->enableWideBeam();
 	}
 
+	/* ------------------------------------------------------------------ Kirishiac orbital refits */
+
+	/* KIRISHIAC_ORBITAL_REFITS_PLAN.md §5.1. $system is the ORBITAL (D1). Eligibility reads the
+	   orbital's CLASS and what is mounted on it, both fixed by the hull constructor:
+	     one generator    any orbital but a Heavy one ("Heavy Weapon Orbitals never" - A7)
+	     two generators   a standard orbital only - a Light orbital takes exactly one (A7)
+	     ELINT module     a standard orbital whose mount is a Gravitic Augmenter (E8)
+	   ⚠️ get_class, not instanceof, for "standard": Light and Heavy both EXTEND KirishiacOrbital. */
+	private static function sysEnhEligibleAGS($ship, $system){
+		if(!($system instanceof KirishiacOrbital) || ($system instanceof KirishiacHeavyOrbital)) return false;
+		return $system->getOrbitalWeapon() !== null;
+	}
+
+	private static function sysEnhEligibleAGS2($ship, $system){
+		return self::sysEnhEligibleAGS($ship, $system) && get_class($system) === 'KirishiacOrbital';
+	}
+
+	private static function sysEnhEligibleELINT($ship, $system){
+		return self::sysEnhEligibleAGS2($ship, $system) && ($system->getOrbitalWeapon() instanceof GraviticAugmenter);
+	}
+
+	//the shield RATING is the count: Primordial hulls to 3, Ancient to 5 (A8)
+	private static function sysEnhLimitAGS($ship, $system){
+		return ((int)$ship->factionAge >= 4) ? 3 : 5;
+	}
+
+	//"150 points per generator x shield rating" (A6) - each generator is its own row, SYS_AGS2 included
+	private static function sysEnhPriceAGS($ship, $system, $level){
+		return 150;
+	}
+
+	private static function sysEnhPriceELINT($ship, $system, $level){
+		return 700;
+	}
+
+	/* MOUNT - the structural half (plan §6.1). Each returns true when it mounted something. The
+	   ELINT module refuses an orbital whose weapon has already been swapped; a generator row on one
+	   only ever adds the SECOND generator. A row of a lower rank can reach here only from a stale
+	   list, and the higher rank has already won (mountSystemEnhancementSystems). */
+	private static function sysEnhOrbitalMountIsOriginal($orbital){
+		$old = $orbital->getOrbitalWeapon();
+		if($old === null) return false;
+		return !($old instanceof KirishiacAdvGravShield) && !($old instanceof KirishiacElintModule);
+	}
+
+	/* SYS_AGS and SYS_AGS2 both mount here: one generator per row, rated by that row's own count.
+	   The first row on an orbital (SYS_AGS before SYS_AGS2, see mountSystemEnhancementSystems) takes
+	   the weapon's place; the second is APPENDED (D5) - the next free id, rebuilt identically on every
+	   load because the rows are mounted in ascending orbital id. Never a third, never on a Light
+	   orbital (A7 - eligibility already keeps SYS_AGS2 off one). */
+	private static function sysEnhMountAGS($ship, $orbital, $count){
+		$rating = max(1, (int)$count);
+		if(self::sysEnhOrbitalMountIsOriginal($orbital)){
+			$old = $orbital->getOrbitalWeapon();
+			$generator = KirishiacAdvGravShield::forOrbital($orbital, $old, $rating, 1);
+			$ship->replaceEnhancementSystem($old->id, $generator);
+			$orbital->replaceOrbitalWeapon($generator);
+			return true;
+		}
+		$first = $orbital->getOrbitalWeapon();
+		if(!($first instanceof KirishiacAdvGravShield)) return false;
+		if(get_class($orbital) !== 'KirishiacOrbital' || count($orbital->getMountedSystems()) > 1) return false;
+		$second = KirishiacAdvGravShield::forOrbital($orbital, $first, $rating, 2);
+		$ship->addEnhancementSystem($second, $orbital->location);
+		$orbital->addMountedSystem($second);
+		return true;
+	}
+
+	private static function sysEnhMountELINT($ship, $orbital, $count){
+		if(!self::sysEnhOrbitalMountIsOriginal($orbital)) return false;
+		$old = $orbital->getOrbitalWeapon();
+		if(!($old instanceof GraviticAugmenter)) return false;
+		$module = KirishiacElintModule::forOrbital($orbital, $old);
+		$ship->replaceEnhancementSystem($old->id, $module);
+		$orbital->replaceOrbitalWeapon($module);
+		$ship->registerElintModule($module);
+		return true;
+	}
+
+	/* APPLY - the stat half: "normal EW -2 per module, cumulative" (E8), taken off the strongest
+	   Scanner and kept even after the module dies (R14). Only when the module was really mounted:
+	   a POST-side ship is never swapped (D7) and so never pays it either - it carries no EW anyone
+	   reads. ⚠️ MIRROR PAIR with systemEnhancements.apply (JS), the lobby preview. */
+	private static function sysEnhApplyELINT($ship, $orbital, $count){
+		if(!($orbital instanceof KirishiacOrbital)) return;
+		if(!($orbital->getOrbitalWeapon() instanceof KirishiacElintModule)) return;
+		$scanner = self::strongestSystem($ship, 'Scanner', 'output');
+		if($scanner !== null) $scanner->output = max(0, (int)$scanner->output - 2);
+	}
+
+	/* ⭐ THE MOUNT STEP (plan D4, §6.1) - called by DBManager::getEnhancementsForShips the moment a
+	   ship's refit rows are known, BEFORE damage, criticals, power, fire orders and notes are read:
+	   every one of those resolves its row through getSystemById and drops, silently, whatever does
+	   not resolve - so the replacement has to be at its id by then.
+	   ⚠️ Rows are mounted in ASCENDING ORBITAL ID (D5), so an appended second generator gets the
+	   same id on every load, in the lobby preview and in game alike. On one orbital the row with
+	   the highest groupRank goes first (a lower rank then finds the weapon gone), and equal ranks go
+	   in enhID order - SYS_AGS in place, SYS_AGS2 appended.
+	   Once per object (BaseShip::claimSystemEnhancementMount), like Extra Tendrils' enhancementSystemsAdded.
+	   Every ship without a mounting refit leaves on the first line. */
+	public static function mountSystemEnhancementSystems($ship){
+		if(empty($ship->systemEnhancements)) return;
+		if(!$ship->claimSystemEnhancementMount()) return;
+
+		$byOrbital = array();
+		foreach($ship->systemEnhancements as $row){
+			$enhID = isset($row[0]) ? (string)$row[0] : '';
+			$count = isset($row[2]) ? (int)$row[2] : 0;
+			if($count < 1) continue;
+			if(empty(self::$systemEnhancementRegistry[$enhID]['mount'])) continue;
+			$byOrbital[(int)$row[6]][] = array($enhID, $count);
+		}
+		if(empty($byOrbital)) return;
+		ksort($byOrbital);
+
+		foreach($byOrbital as $systemid => $rows){
+			$orbital = $ship->getSystemById($systemid);
+			if(!($orbital instanceof KirishiacOrbital)) continue;    //stale id - drop, never guess
+			usort($rows, function($a, $b){
+				return (self::systemEnhancementGroupRank($b[0]) - self::systemEnhancementGroupRank($a[0]))
+					?: strcmp($a[0], $b[0]);
+			});
+			foreach($rows as $r){
+				self::regCall($r[0], 'mount', array($ship, $orbital, $r[1]));
+			}
+		}
+	}
+
+	private static function systemEnhancementGroupRank($enhID){
+		return isset(self::$systemEnhancementRegistry[$enhID]['groupRank'])
+			? (int)self::$systemEnhancementRegistry[$enhID]['groupRank'] : 0;
+	}
+
+	private static function systemEnhancementGroup($enhID){
+		return isset(self::$systemEnhancementRegistry[$enhID]['group'])
+			? (string)self::$systemEnhancementRegistry[$enhID]['group'] : '';
+	}
+
 	/* ------------------------------------------------------------------ shared appliers */
 
 	private static function sysEnhLimitOne($ship, $system){
@@ -4467,6 +4669,40 @@ class Enhancements{
 			);
 			$out['total'] += $total;
 		}
+		return self::sanitiseSystemEnhancementGroups($out);
+	}
+
+	/* MUTUAL EXCLUSION (KIRISHIAC_ORBITAL_REFITS_PLAN.md §9.2): per (system, group) only the rows of
+	   the highest groupRank survive - equal ranks combine (the two shield generators). Run on rows
+	   that have ALREADY passed every other check, so a row that was going to be dropped anyway (an
+	   ELINT module on a beam orbital) cannot knock out a valid one. The lobby zeroes the rest as the
+	   player buys; this is the guarantee for a doctored or stale list. Refits without a group pass
+	   straight through, in their original order. */
+	private static function sanitiseSystemEnhancementGroups($out){
+		$winner = array();
+		foreach($out['rows'] as $i => $row){
+			$group = self::systemEnhancementGroup($row[0]);
+			if($group === '') continue;
+			$key = (int)$row[6] . '|' . $group;
+			if(!isset($winner[$key]) || self::systemEnhancementGroupRank($row[0]) > self::systemEnhancementGroupRank($out['rows'][$winner[$key]][0])){
+				$winner[$key] = $i;
+			}
+		}
+		if(empty($winner)) return $out;
+
+		$kept = array();
+		$out['total'] = 0;
+		foreach($out['rows'] as $i => $row){
+			$group = self::systemEnhancementGroup($row[0]);
+			if($group !== '' && self::systemEnhancementGroupRank($row[0]) < self::systemEnhancementGroupRank($out['rows'][$winner[(int)$row[6] . '|' . $group]][0])){
+				$won = $out['rows'][$winner[(int)$row[6] . '|' . $group]];
+				$out['notices'][] = self::systemEnhancementLabel($row[0]) . " on {$row[7]} #{$row[6]} was removed: it cannot be combined with " . self::systemEnhancementLabel($won[0]) . ".";
+				continue;
+			}
+			$kept[] = $row;
+			$out['total'] += $row[4];
+		}
+		$out['rows'] = $kept;
 		return $out;
 	}
 

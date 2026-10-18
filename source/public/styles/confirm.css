@@ -1155,6 +1155,158 @@
     background-color: #9e5a5a;
     box-shadow: 0 0 8px rgba(189, 128, 128, 0.55);
 }
+
+/* === Hyperplasma Cutter dialogs (Triad) ===================================
+   Green, layered on .multi-value-confirm for the row/input layout, so the cutter's two dialogs - the
+   target allocation (askForMultipleValues with cssClass 'hpcConfirm') and Commit to interception
+   (confirm.hyperplasmaIntercept, which adds .hpcIntercept) - stop wearing the purple that belongs to
+   the Molecular Slicer (user request 2026-10-09, TRIAD_ADVANCED_FEATURES_PLAN.md §9). One class above
+   the base rules' specificity, so source order does not matter. */
+.confirm.multi-value-confirm.hpcConfirm {
+    background: #03130a;
+    border: 3px solid #2e8b46;
+    box-shadow: 0 0 8px rgba(82, 179, 82, 0.35);
+    color: #dcf3e1;
+}
+
+.confirm.multi-value-confirm.hpcConfirm .multi-value-header {
+    color: #6fdc84;
+    text-shadow: 0 0 5px rgba(82, 179, 82, 0.5);
+    border-bottom: 1px solid rgba(46, 139, 70, 0.6);
+}
+
+.confirm.multi-value-confirm.hpcConfirm .multi-value-label,
+.confirm.multi-value-confirm.hpcConfirm .multi-value-name,
+.confirm.multi-value-confirm.hpcConfirm .multi-value-max {
+    color: #dcf3e1;
+}
+
+.confirm.multi-value-confirm.hpcConfirm .multi-value-row:hover {
+    background: rgba(82, 179, 82, 0.08);
+    border-color: #2e8b46;
+}
+
+.confirm.multi-value-confirm.hpcConfirm .multi-value-input {
+    background: #04170c;
+    border: 1px solid #2e8b46;
+}
+
+.confirm.multi-value-confirm.hpcConfirm .multi-value-input:focus {
+    border-color: #6fdc84;
+    box-shadow: 0 0 10px rgba(82, 179, 82, 0.6);
+    background: #000;
+}
+
+.confirm.multi-value-confirm.hpcConfirm .multi-value-step.up::before {
+    border-bottom-color: #3aa356;
+}
+
+.confirm.multi-value-confirm.hpcConfirm .multi-value-step.down::before {
+    border-top-color: #3aa356;
+}
+
+.confirm.multi-value-confirm.hpcConfirm .multi-value-step.up:hover::before {
+    border-bottom-color: #7be08f;
+}
+
+.confirm.multi-value-confirm.hpcConfirm .multi-value-step.down:hover::before {
+    border-top-color: #7be08f;
+}
+
+.confirm.multi-value-confirm.hpcConfirm .multi-value-step:hover {
+    filter: drop-shadow(0 0 4px rgba(82, 179, 82, 0.75));
+}
+
+.confirm.multi-value-confirm.hpcConfirm .multi-value-step:active {
+    filter: drop-shadow(0 0 6px rgba(123, 224, 143, 0.9));
+}
+
+/* Commit to interception: one row per intercept shot, under a one-line reminder of the pool, and a
+   footer holding "+ Add another intercept shot" and what is left. */
+.confirm.multi-value-confirm.hpcIntercept .hpcSubheader {
+    color: #b7dcbf;
+    font-size: 12px;
+    font-weight: normal;
+    font-style: italic;
+    text-align: center;
+    margin: -5px 0 12px 0;
+}
+
+.confirm.multi-value-confirm.hpcIntercept .hpcShotRows {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.confirm.multi-value-confirm.hpcIntercept .hpcShotInputs {
+    display: flex;
+    align-items: center;
+}
+
+.confirm.multi-value-confirm.hpcIntercept .hpcUnit {
+    margin-left: 5px;
+}
+
+/* The shot's price beside its name, in a fixed column so the names line up down the list. */
+.confirm.multi-value-confirm.hpcIntercept .hpcShotPct {
+    display: inline-block;
+    min-width: 52px;
+    text-align: left;
+    font-family: 'Consolas', monospace;
+}
+
+.confirm.multi-value-confirm.hpcIntercept .hpcRemoveShot {
+    cursor: pointer;
+    width: 14px;
+    margin-left: 10px;
+    color: #6fdc84;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.confirm.multi-value-confirm.hpcIntercept .hpcRemoveShot:hover {
+    color: #a6f0b5;
+    text-shadow: 0 0 6px rgba(82, 179, 82, 0.7);
+}
+
+.confirm.multi-value-confirm.hpcIntercept .hpcFooterRow,
+.confirm.multi-value-confirm.hpcIntercept .hpcFooterRow:hover {
+    background: none;
+    border-color: transparent;
+}
+
+.confirm.multi-value-confirm.hpcIntercept .hpcAddShot {
+    cursor: pointer;
+    color: #6fdc84;
+    text-decoration: underline;
+    font-size: 14px;
+    font-weight: normal;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.confirm.multi-value-confirm.hpcIntercept .hpcAddShot:hover {
+    color: #a6f0b5;
+    text-shadow: 0 0 6px rgba(82, 179, 82, 0.7);
+}
+
+.confirm.multi-value-confirm.hpcIntercept .hpcAddShot.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.confirm.multi-value-confirm.hpcIntercept .hpcLeft {
+    margin-left: 15px;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    opacity: 0.75;
+}
+
+/* Every die committed - highlight rather than fade, as the Slicer's readout does. */
+.confirm.multi-value-confirm.hpcIntercept .hpcLeft.depleted {
+    color: #7be08f;
+    opacity: 1;
+}
 /* ── Saved-fleet dialogs ──────────────────────────────────────────────────────────────
  * Save Fleet / Load Fleet / the fleet result notice, built by confirm.fleetDialogShell.
  *
@@ -1730,35 +1882,99 @@
     border: 1px solid var(--fv-line-soft);
     border-radius: 2px;
     overflow: hidden;
-    /* Each section wears its own metal (SHIP_ENHANCEMENTS_PLAN.md §5.1, palette A): the bar, the
-       wash's hue as an "r, g, b" triplet (the head builds every alpha from it, so a fill never meets
-       element opacity), the title and the icon tint. Scoped properties, not a second :root block.
-       The default is today's blue, which the reserved Officers section keeps. */
+}
+
+/* Each section wears its own metal (SHIP_ENHANCEMENTS_PLAN.md §5.1, palette A): the bar, the wash's
+   hue as an "r, g, b" triplet (the head builds every alpha from it, so a fill never meets element
+   opacity), the title and the icon tint. Scoped properties, not a second :root block. The default is
+   the blue the Officers section keeps.
+   ONE definition per section, worn by the section AND its filter chip (OFFICERS_PLAN.md D13) - the
+   chip carries the same data-section. ⚠️ Only these TOKEN blocks may use the bare [data-section]
+   selector: a layout rule written against it would hit the chips too. */
+.confirm.buyDialog .buySection,
+.confirm.buyDialog .buyChip {
     --buy-sec-bar: #90b1ee;
     --buy-sec-rgb: 144, 177, 238;
     --buy-sec-title: var(--fv-text-bright);
     --buy-sec-icon: var(--fv-text-bright);
 }
 
-.confirm.buyDialog .buySection[data-section="ammo"] {          /* gunmetal */
+.confirm.buyDialog [data-section="ammo"] {          /* gunmetal */
     --buy-sec-bar: var(--fv-gunmetal);
     --buy-sec-rgb: 142, 154, 166;
     --buy-sec-title: #eef2f5;
     --buy-sec-icon: #c9d2da;
 }
 
-.confirm.buyDialog .buySection[data-section="enhancements"] {  /* bronze - the ship window's gold set */
+.confirm.buyDialog [data-section="enhancements"] {  /* bronze - the ship window's gold set */
     --buy-sec-bar: var(--fv-bronze);
-    --buy-sec-rgb: 169, 128, 56;                                /* --fv-enh-bg's hue */
+    --buy-sec-rgb: 169, 128, 56;                     /* --fv-enh-bg's hue */
     --buy-sec-title: var(--fv-enh-title);
     --buy-sec-icon: var(--fv-enh-title);
 }
 
-.confirm.buyDialog .buySection[data-section="options"] {       /* verdigris */
+.confirm.buyDialog [data-section="options"] {       /* verdigris */
     --buy-sec-bar: var(--fv-verdigris);
     --buy-sec-rgb: 79, 167, 154;
     --buy-sec-title: #dcf3ee;
     --buy-sec-icon: #8fd3c7;
+}
+
+/* ── The filter chips (OFFICERS_PLAN.md D13, confirm.addBuyChips): All, then one per section that has
+   rows, in the slot the commented-out filter box had. A chip HIDES the other sections - it never
+   empties one, so every row is still bought, totalled and read back. A picked chip wears its own
+   section's colours, recipe of the section head; All wears the dialog's neutral accent. Wraps on a
+   phone. ── */
+
+.confirm.buyDialog .buyChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+.confirm.buyDialog .buyChips[hidden],
+.confirm.buyDialog .buyChip[hidden] {
+    display: none;
+}
+
+.confirm.buyDialog .buyChip {
+    margin: 0;
+    padding: 3px 9px;
+    min-height: 24px;
+    font-family: var(--fv-display);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--fv-text-dim);
+    background-color: transparent;
+    border: 1px solid var(--fv-line-soft);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.confirm.buyDialog .buyChip:hover {
+    color: var(--fv-text);
+    border-color: rgba(var(--buy-sec-rgb), 0.6);
+}
+
+.confirm.buyDialog .buyChip[aria-pressed="true"] {
+    color: var(--buy-sec-title);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+    background-color: rgba(var(--buy-sec-rgb), 0.22);
+    border-color: var(--buy-sec-bar);
+}
+
+.confirm.buyDialog .buyChip[data-chip="all"][aria-pressed="true"] {
+    color: var(--fv-text-bright);
+    background-color: rgba(139, 202, 242, 0.16);   /* --fv-accent's hue */
+    border-color: var(--fv-accent);
+}
+
+.confirm.buyDialog .buyChip:focus-visible {
+    outline: 1px solid var(--fv-accent);
+    outline-offset: 1px;
 }
 
 .confirm.buyDialog .buySectionHead {
@@ -1908,6 +2124,25 @@
     margin: 6px 0 0;
     font-size: 11.5px;
     color: var(--fv-text-dim);
+}
+
+/* "A flight may carry only one officer." (OFFICERS_PLAN.md D9). A second officer is refused with this
+   line flashing in the warning yellow and fading back - a passive notice, never a dialog
+   (confirm.officerBlocked restarts it on every refusal). */
+.confirm.buyDialog .buyOfficerNote.is-flash {
+    animation: buyOfficerNoteFlash 1.6s ease-out;
+}
+
+@keyframes buyOfficerNoteFlash {
+    0%, 30% { color: var(--fv-warning); }
+    100% { color: var(--fv-text-dim); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .confirm.buyDialog .buyOfficerNote.is-flash {
+        animation: none;
+        color: var(--fv-warning);
+    }
 }
 
 /* ── One row: name over its price note | cost | − value +  (the cost left of the spinner, so every
@@ -2264,6 +2499,11 @@
 
     .confirm.buyDialog .buyFilterInput {
         height: 36px;
+    }
+
+    .confirm.buyDialog .buyChip {
+        min-height: 34px;
+        padding: 6px 12px;
     }
 
     /* 16px on everything that takes typing: iOS zooms the page into any smaller field on focus. */

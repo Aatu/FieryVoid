@@ -219,11 +219,12 @@
             $FDEW = 0;
             foreach ($gamedata->ships as $ship)
             {
-                if ( ($ship->team == $target->team) 
+                if ( ($ship->team == $target->team)
 					&& $ship->isElint()
                     && Mathlib::getDistanceHex($target, $ship) <= 20
 				){
-                    $blanket = $ship->getBlanketDEW($gamedata->turn);
+					//Kirishiac ELINT modules: only what the modules whose arc holds this friendly pay (refits plan R10)
+                    $blanket = empty($ship->getElintModules()) ? $ship->getBlanketDEW($gamedata->turn) : ElintModules::areaPointsReaching($ship, $target, 'BDEW', $gamedata);
                     if ( $blanket > $FDEW ) $FDEW = $blanket;
                 }
             }
@@ -546,7 +547,12 @@
 		public static function getDetectorAllowance($gamedata, $ship, $detectors = null, $turn = null){
 			if ($turn === null) $turn = $gamedata->turn;
 			if ($detectors === null) $detectors = self::collectEwDetectors($gamedata, $turn);
-			if (empty($detectors)) return 0;
+			/* OFFICERS_PLAN.md Stage 3 - an EXPERT SCANNER aboard is the detectors' rule carried by the
+			   ship itself ("the same mechanically as an EW Detector"): one more point, ON TOP of the
+			   ladder (user ruling 2026-10-10), and wherever the ship is - he needs no detector on the
+			   board, so the empty-board exit must not skip his ship. */
+			$officer = TacGamedata::$officersPresent ? Officers::savedEwBonus($ship, $turn) : 0;
+			if (empty($detectors) && $officer === 0) return 0;
 
 			/* ⭐ FLIGHTS ARE IN (user ruling 2026-09-10: "the effect applies to all Walker units").
 			   No test for one is needed and none is wanted: the ladder is a question about POSITION, and
@@ -563,7 +569,7 @@
 
 			$count = self::countEwDetectorsCovering($detectors, (int)$ship->team, $position);
 
-			return self::savedEwAllowanceFromDetectors($count);
+			return self::savedEwAllowanceFromDetectors($count) + $officer;
 		}
 
 		/* HOW MANY EW POINTS THIS SHIP MAY ACTUALLY HOLD BACK - the ladder, clamped by the unspent
@@ -636,7 +642,8 @@
 			if (!$anyOwn) return;
 
 			$detectors = self::collectEwDetectors($gameData, $turn);
-			if (empty($detectors)) return;
+			//an Expert Scanner needs no detector on the board (Stage 3 of OFFICERS_PLAN.md)
+			if (empty($detectors) && !TacGamedata::$officersPresent) return;
 
 			foreach ($ships as $postShip){
 				if ($postShip->userid != $gameData->forPlayer) continue;
@@ -654,7 +661,11 @@
 				if ($budget <= 0) continue;
 
 				$spent = 0;
+				$moduleShip = !empty($serverShip->getElintModules());
 				foreach (self::diffLateEw($serverShip, $postShip, $turn) as $delta){
+					/* KIRISHIAC_ORBITAL_REFITS_PLAN.md §8.2: late points come out of DEW - SCANNER
+					   points - and a module ship's scanner may not pay for an ELINT function (R8). */
+					if ($moduleShip && ElintModules::isModuleOnlyType($delta['type'])) continue;
 					/* ALL OR NOTHING PER ENTRY, deliberately. A Disruption allocation is 3 points
 					   (4 for ConstrainedEW) and means nothing at 1 or 2, so a budget that cannot
 					   take the whole entry takes none of it rather than writing a fragment. */

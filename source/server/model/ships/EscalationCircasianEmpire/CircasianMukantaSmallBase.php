@@ -110,8 +110,7 @@ class CircasianMukantaSmallBase extends SmallStarBaseFourSections{
 
 		$this->hitChart = array(			
 			0=> array(
-				10 => "Structure",
-				13 => "Cargo Bay",
+				11 => "Structure",
 				14 => "Scanner",
 				16 => "Hangar",
 				19 => "Reactor",

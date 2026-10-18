@@ -51,11 +51,45 @@ window.systemEnhancements = {
 		SYS_HARM: 'Hardened Armour',
 		SYS_THR: 'Improved Thrust Rating',
 		SYS_WBLA: 'Wide-Beam Lightning Array',
-		SYS_WBMLA: 'Wide-Beam Medium Lightning Array'
+		SYS_WBMLA: 'Wide-Beam Medium Lightning Array',
+		SYS_AGS: 'Adv. Gravitic Shield',
+		SYS_AGS2: '2nd Adv. Gravitic Shield',
+		SYS_ELINT: 'ELINT Sensor Module'
+	},
+
+	/* MUTUAL EXCLUSION (KIRISHIAC_ORBITAL_REFITS_PLAN.md §9.2): enhID -> [group, rank]. On one system,
+	   rows of EQUAL rank in a group combine (the two shield generators) and buying a row of another
+	   rank removes them (set). The rank orders the swaps in applySwaps exactly as the server's mount
+	   step orders them, and decides which rows the server keeps when a stale list mixes ranks.
+	   ⚠️ MIRROR PAIR with the registry's `group` / `groupRank` slots in Enhancements.php. */
+	GROUPS: {
+		SYS_AGS: ['orbitalMount', 1],
+		SYS_AGS2: ['orbitalMount', 1],
+		SYS_ELINT: ['orbitalMount', 2]
+	},
+
+	/* Shown on the menu row's hover, so the exclusion is never a surprise. `clash` only where this
+	   system is also offered a refit of the same group it cannot be combined with. */
+	GROUP_NOTES: {
+		orbitalMount: {
+			always: "Replaces the orbital's weapon.",
+			clash: "Shield generators and an ELINT module cannot share an orbital - buying one removes the other."
+		}
 	},
 
 	/* Where a system stashes the blueprint values a refit overwrote. See apply(). */
 	BASE_KEY: 'sysEnhBase',
+
+	/* Where a SHIP stashes the systems a swap refit replaced and the ids it appended. See applySwaps. */
+	SWAP_KEY: 'sysEnhSwap',
+
+	groupOf: function groupOf(enhID) {
+		return this.GROUPS[enhID] ? this.GROUPS[enhID][0] : '';
+	},
+
+	rankOf: function rankOf(enhID) {
+		return this.GROUPS[enhID] ? this.GROUPS[enhID][1] : 0;
+	},
 
 	label: function label(enhID) {
 		return this.LABELS[enhID] || enhID;
@@ -98,7 +132,8 @@ window.systemEnhancements = {
 	   The section component is a RENDERER - it never asks "what may this system have". */
 	menuRowsFor: function menuRowsFor(ship, system) {
 		var self = this;
-		return this.offersFor(ship, system).map(function (offer) {
+		var offers = this.offersFor(ship, system);
+		return offers.map(function (offer) {
 			var count = self.taken(ship, offer[4], offer[0]);
 			return {
 				enhID: offer[0],
@@ -108,9 +143,21 @@ window.systemEnhancements = {
 				systemid: parseInt(offer[4], 10),
 				//points this row costs RIGHT NOW, and what one more level would add
 				price: self.priceFor(offer, count),
-				nextPrice: self.priceForLevel(offer, count)
+				nextPrice: self.priceForLevel(offer, count),
+				note: self.groupNote(offers, offer[0])
 			};
 		});
+	},
+
+	groupNote: function groupNote(offers, enhID) {
+		var self = this;
+		var group = this.groupOf(enhID);
+		var note = group && this.GROUP_NOTES[group];
+		if (!note) return '';
+		var clashes = offers.some(function (other) {
+			return self.groupOf(other[0]) === group && self.rankOf(other[0]) !== self.rankOf(enhID);
+		});
+		return clashes ? note.always + ' ' + note.clash : note.always;
 	},
 
 	offerFor: function offerFor(ship, systemid, enhID) {
@@ -241,6 +288,21 @@ window.systemEnhancements = {
 
 		var rows = this.rows(ship);
 		var id = parseInt(systemid, 10);
+
+		/* One RANK per (system, group) - §9.2. Buying a row removes the same group's rows of another
+		   rank on the same system (an ELINT module removes both generators, and the other way round),
+		   in place (the array is the ship's own), BEFORE the index below is looked up. The menu
+		   re-renders the removed row at 0, and its hover note says why. */
+		var group = this.groupOf(enhID);
+		if (n > 0 && group) {
+			for (var g = rows.length - 1; g >= 0; g--) {
+				if (rows[g][0] !== enhID && parseInt(rows[g][6], 10) === id && this.groupOf(rows[g][0]) === group
+					&& this.rankOf(rows[g][0]) !== this.rankOf(enhID)) {
+					rows.splice(g, 1);
+				}
+			}
+		}
+
 		var index = -1;
 		for (var i = 0; i < rows.length; i++) {
 			if (rows[i][0] === enhID && parseInt(rows[i][6], 10) === id) { index = i; break; }
@@ -333,6 +395,137 @@ window.systemEnhancements = {
 			}
 			delete system[key];
 		}
+		this.revertSwaps(ship);
+	},
+
+	/* Undo applySwaps: drop the appended systems (always the LAST ids - they were pushed after
+	   every hull system) and put the replaced ones back under their ids. */
+	revertSwaps: function revertSwaps(ship) {
+		var stash = ship[this.SWAP_KEY];
+		if (!stash) return;
+		for (var a = stash.appended.length - 1; a >= 0; a--) {
+			var appendedId = stash.appended[a];
+			if (Array.isArray(ship.systems) && appendedId === ship.systems.length - 1) ship.systems.pop();
+			else delete ship.systems[appendedId];
+		}
+		for (var id in stash.replaced) {
+			if (Object.prototype.hasOwnProperty.call(stash.replaced, id)) ship.systems[id] = stash.replaced[id];
+		}
+		delete ship[this.SWAP_KEY];
+	},
+
+	/* ---------------------------------------------------------------- swap refits (R15) */
+
+	/* KIRISHIAC_ORBITAL_REFITS_PLAN.md §9.3 - THE LOBBY HALF OF THE MOUNT STEP. A Kirishiac orbital
+	   refit puts a system of ANOTHER CLASS where the orbital's weapon was (and a second shield generator
+	   is appended), so the preview swaps the system object itself rather than moving a field.
+	   ⚠️ MIRROR PAIR with Enhancements::mountSystemEnhancementSystems / sysEnhMountAGS (PHP): ascending
+	   orbital id, the highest rank first on one orbital, equal ranks in enhID order. The first row
+	   swaps the mount; after that only a second shield generator beside a first one is added.
+	   ⚠️ Per SHIP: a bought ship's systems array is its own deep copy (gamedata.getShipByType), so
+	   writing ship.systems[id] here can never show on a second hull of the same class. */
+	applySwaps: function applySwaps(ship) {
+		var previews = ship.systemEnhancementSwapPreviews;
+		if (!previews || !previews.mounts || !previews.templates) return;
+
+		var self = this;
+		var swaps = [];
+		this.rows(ship).forEach(function (row) {
+			var count = parseInt(row[2], 10) || 0;
+			if (count < 1 || !self.groupOf(row[0])) return;
+			var orbital = self.systemById(ship, row[6]);
+			if (!orbital) return;                                            //stale id - drop, never guess
+			if (row[7] && String(orbital.name) !== String(row[7])) return;  //D13
+			swaps.push({ enhID: row[0], count: count, orbital: orbital, orbitalId: parseInt(row[6], 10) });
+		});
+		if (!swaps.length) return;
+		swaps.sort(function (a, b) {
+			return (a.orbitalId - b.orbitalId) || (self.rankOf(b.enhID) - self.rankOf(a.enhID))
+				|| (a.enhID < b.enhID ? -1 : (a.enhID > b.enhID ? 1 : 0));
+		});
+
+		var stash = { replaced: {}, appended: [] };
+		var seconds = {}; //orbital id -> its second generator is in
+		ship[this.SWAP_KEY] = stash;
+		swaps.forEach(function (swap) {
+			var mountId = parseInt(previews.mounts[swap.orbitalId], 10);
+			if (isNaN(mountId)) return;
+			var className = (swap.enhID === 'SYS_ELINT') ? 'KirishiacElintModule' : 'KirishiacAdvGravShield';
+			if (!stash.replaced[mountId]) {
+				var old = ship.systems[mountId];
+				if (!old) return;
+				var first = self.buildSwapSystem(ship, swap.orbital, old, className, mountId, swap.count, 1);
+				if (!first) return;
+				stash.replaced[mountId] = old;
+				ship.systems[mountId] = first;
+				return;
+			}
+			//the mount is already swapped: only a second generator may join a first one, never a third
+			var current = ship.systems[mountId];
+			if (className !== 'KirishiacAdvGravShield' || !current || current.name !== className || seconds[swap.orbitalId]) return;
+			var newId = ship.systems.length;
+			var second = self.buildSwapSystem(ship, swap.orbital, current, className, newId, swap.count, 2);
+			if (!second) return;
+			ship.systems[newId] = second;
+			stash.appended.push(newId);
+			seconds[swap.orbitalId] = true;
+		});
+	},
+
+	/* One replacement system, from the hull's template for its class (BaseShip::
+	   $systemEnhancementSwapPreviews), at `id`, in `arcSource`'s section and arc (R3), named after the
+	   orbital ("Adv. Gravitic Shield A" / "A2"). Built through SystemFactory, so it is a real
+	   KirishiacAdvGravShield / KirishiacElintModule - the same class the game will build. */
+	buildSwapSystem: function buildSwapSystem(ship, orbital, arcSource, className, id, rating, ordinal) {
+		var previews = ship.systemEnhancementSwapPreviews;
+		var template = previews && previews.templates && previews.templates[className];
+		if (!template || !window.SystemFactory) return null;
+
+		var json = this.copyValue(template);
+		var pairing = String(orbital.displayName || '').split(' ').pop();
+		var baseName = String(template.displayName || className).replace(/\s+\S+$/, '');
+		json.id = id;
+		json.location = arcSource.location;
+		json.startArc = arcSource.startArc;
+		json.endArc = arcSource.endArc;
+		if (arcSource.structureHomeLocation !== undefined && arcSource.structureHomeLocation !== null) {
+			json.structureHomeLocation = arcSource.structureHomeLocation;
+		} else {
+			delete json.structureHomeLocation;
+		}
+		json.displayName = baseName + ' ' + pairing + (ordinal > 1 ? String(ordinal) : '');
+		json.isTargetable = false;
+		json.data = json.data || {};
+		json.data.ID = id;
+		json.data.Arc = json.startArc + '..' + json.endArc;
+		if (className === 'KirishiacAdvGravShield') {
+			json.output = rating;
+			json.data['Shield rating'] = this.agsRatingLine(rating);
+		}
+		return SystemFactory.createSystemFromJson(json, json, ship);
+	},
+
+	/* ⚠️ MIRROR PAIR with KirishiacAdvGravShield::ratingLine (PHP) - same words, so the lobby
+	   tooltip reads what the game's will. */
+	agsRatingLine: function agsRatingLine(rating) {
+		var r = parseInt(rating, 10) || 0;
+		return r + ' (incoming shots -' + (r * 5) + ' to hit, -' + r + ' damage)';
+	},
+
+	//the class name now mounted on an orbital, after applySwaps (null if it cannot tell)
+	mountedName: function mountedName(ship, orbitalId) {
+		var previews = ship.systemEnhancementSwapPreviews;
+		if (!previews || !previews.mounts) return null;
+		var mountId = parseInt(previews.mounts[parseInt(orbitalId, 10)], 10);
+		var system = isNaN(mountId) ? null : ship.systems[mountId];
+		return system ? String(system.name) : null;
+	},
+
+	/* Ships carrying any Advanced Gravitic Shield refit - the Fleet Check's 25% row (R6). */
+	carriesAdvGravShields: function carriesAdvGravShields(ship) {
+		return this.rows(ship).some(function (row) {
+			return (row[0] === 'SYS_AGS' || row[0] === 'SYS_AGS2') && (parseInt(row[2], 10) || 0) > 0;
+		});
 	},
 
 	/* Apply every purchased refit to the ship's systems.
@@ -353,6 +546,7 @@ window.systemEnhancements = {
 		if (!ship || !ship.systems) return;
 
 		this.revert(ship);   //back to blueprint, so what follows cannot compound
+		this.applySwaps(ship); //the structural half first, as the server mounts before it applies (D4)
 
 		var self = this;
 		this.rows(ship).forEach(function (row) {
@@ -427,6 +621,18 @@ window.systemEnhancements = {
 					self.rememberBase(system, 'specialHitChanceCalculation');
 					system.canSplitShots = true;
 					system.specialHitChanceCalculation = true;
+					break;
+
+				/* ELINT Sensor Module: "normal EW -2 per module, cumulative" (E8), off the strongest
+				   scanner - and only when applySwaps really put the module in, exactly as
+				   Enhancements::sysEnhApplyELINT asks. The shield refits have no stat half. */
+				case 'SYS_ELINT':
+					if (self.mountedName(ship, row[6]) !== 'KirishiacElintModule') break;
+					if (!window.lobbyEnhancements || !window.shipManager) break;
+					var scanner = lobbyEnhancements.strongestOf(shipManager.systems.getScannerList(ship), 'output');
+					if (!scanner) break;
+					self.rememberBase(scanner, 'output');
+					scanner.output = Math.max(0, (parseInt(scanner.output, 10) || 0) - 2);
 					break;
 
 				case 'SYS_HSHLD':

@@ -4,8 +4,8 @@
 // esbuild bundles the shim entry (which imports ONLY the THREE symbols FV uses)
 // into a single plain IIFE script. Tree-shaking drops every unused part of the
 // engine, then minification shrinks the rest. Output is a classic <script> (NOT
-// an ES module) so it runs before the non-module legacy bundle + MeshLine and
-// installs window.THREE in time for them.
+// an ES module) so it runs before the non-module legacy bundle and
+// installs window.THREE in time for it.
 //
 // Output replaces the role of the old vendored client/lib/three.min.js. Like the
 // legacy bundles, it is a generated artifact regenerated per build.

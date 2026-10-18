@@ -879,7 +879,7 @@ class NexusDartInterceptor extends Weapon{
         public $projectilespeed = 12;
         public $animationWidth = 4;
         public $trailLength = 100;    
-		public $guns = 2;
+//		public $guns = 2;
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
@@ -947,7 +947,7 @@ class NexusStreakInterceptor extends Weapon{
         public $projectilespeed = 12;
         public $animationWidth = 4;
         public $trailLength = 100;    
-		public $guns = 2;
+//		public $guns = 2;
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile

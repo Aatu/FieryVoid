@@ -2587,9 +2587,13 @@ getActiveShipName: function getActiveShipName() {
 
         var backDiv = document.getElementById("backDiv");
 
-        // Preserve state
+        // Preserve state. Undefined only on the first draw (page load): the drawer starts open,
+        // except at the portrait-mobile breakpoint (tactical.css), where its 200px would cover
+        // half the map - the player pulls it out from #backDiv when they want it.
         var isOpen = $(backDiv).data("on");
-        if (isOpen === undefined) isOpen = 1; // Default to open
+        if (isOpen === undefined) {
+            isOpen = (window.matchMedia && window.matchMedia("(max-width: 765px)").matches) ? 0 : 1;
+        }
 
         backDiv.innerHTML = "";
 
@@ -2687,6 +2691,9 @@ getActiveShipName: function getActiveShipName() {
     sliderToggle: function sliderToggle() {
         var backDiv = document.getElementById("backDiv");
         var iniGui = document.getElementById("iniGui");
+
+        // The player's own choice outranks botPanel.toggleExpanded's restore-on-collapse.
+        $(backDiv).removeData("reopenOnCollapse");
 
         if ($(backDiv).data("on") == 1) { // If open, close it
             $(iniGui).addClass("closed");

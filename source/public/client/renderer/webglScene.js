@@ -79,7 +79,9 @@ window.webglScene = function () {
             : function(){};
 
         //this.scene.add(new THREE.AmbientLight(0xff0000));
-        this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        // stencil: DeploymentIcon cuts the enemy-zone holes out of the mine deployment area with
+        // the stencil buffer. three r163+ no longer allocates one unless asked.
+        this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, stencil: true });
         this.renderer.setSize(this.width, this.height);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;

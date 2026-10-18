@@ -90,7 +90,9 @@ window.ShipTooltipBallisticsMenu = function () {
 			} finally {
 				weaponManager.restoreFiringMode(ballistic.weapon, restoreMode);
 			}
-			const key = ballistic.shooter.id + '-' +  ballistic.weapon.displayName + '-' +  ballistic.fireOrder.firingMode +'-' + hitChance + '-' + (launchHex ? launchHex.q + ',' + launchHex.r : '');
+			//The NAME the row prints, not the bare displayName: a weapon that is one gun spread over several
+			//systems (a ship's Hyperplasma Cutters) answers for itself in incomingName, so its shots share a row.
+			const key = ballistic.shooter.id + '-' +  incomingName(ballistic.weapon, ballistic.fireOrder) + '-' +  ballistic.fireOrder.firingMode +'-' + hitChance + '-' + (launchHex ? launchHex.q + ',' + launchHex.r : '');
 
             if (listObject[key]) {
                 listObject[key].members.push(ballistic);
@@ -215,7 +217,7 @@ window.ShipTooltipBallisticsMenu = function () {
                 // getIncomingShotCount, so the row reads "2x Lightning Array (Combined Fire)".
                 // `amount` stays the MEMBER count, because that is what the disclosure caret opens
                 // into and what the per-shot interception sub-rows are.
-                var textToDisplay = shotsInGroup(ball.weapon, members) + 'x ' + ball.weapon.displayName
+                var textToDisplay = shotsInGroup(ball.weapon, members) + 'x ' + incomingName(ball.weapon, ball.fireOrder)
                     + ' (' + modeName(ball.weapon, ball.fireOrder) + ')'
                     + diceSuffix(ball.weapon, members);
                 jQuery(".weapon", ballElement).html(textToDisplay).attr('title', textToDisplay);
@@ -443,7 +445,7 @@ window.ShipTooltipBallisticsMenu = function () {
                         var subElement = jQuery(template);
                         subElement.addClass('ballsub');
 
-                        var subText = ball.weapon.displayName
+                        var subText = incomingName(ball.weapon, member.fireOrder)
                             + ' (' + modeName(ball.weapon, member.fireOrder) + ')'
                             + diceSuffix(ball.weapon, [member]);
                         jQuery(".weapon", subElement).html(subText).attr('title', subText);
@@ -540,11 +542,24 @@ window.ShipTooltipBallisticsMenu = function () {
         return (weapon && weapon.firingModes) ? weapon.firingModes[fireOrder.firingMode] : '';
     }
 
+    /* The weapon name a row prints AND groups on. displayName for everything in the game; the hook exists
+       for a weapon that is one gun spread over several systems - a ship's Hyperplasma Cutters, whose
+       blueprints letter them A/B/C - so its shots read, and collapse, as one weapon (user request
+       2026-10-09). Same typeof guard as modeName below, for the same reason. */
+    function incomingName(weapon, fireOrder) {
+        if (weapon && typeof weapon.getIncomingDisplayName === "function") {
+            return weapon.getIncomingDisplayName(fireOrder);
+        }
+        return weapon ? weapon.displayName : '';
+    }
+
     /* "(3d + 12)" - the dice and set damage a Shadow split weapon has committed to a row's shots.
 
-       Only Molecular Slicers reach this: "Offensive Dice" is written by
-       MolecularSlicerBeamL.initializationUpdate, in the Firing phase only. Everything else gets an
-       empty string, so ordinary ballistic rows are untouched.
+       Molecular Slicers reach the body below: "Offensive Dice" is written by
+       MolecularSlicerBeamL.initializationUpdate, in the Firing phase only. A weapon that prices its
+       shots in dice some other way answers for itself through getIncomingDiceText (the Hyperplasma
+       Cutter's "(15d10)", user request 2026-10-09). Everything else gets an empty string, so ordinary
+       ballistic rows are untouched.
 
        Summed over the ROW's own shots, because that is what the row describes - a collapsed group
        reads as the whole group's allocation, and each expanded sub-row as its own. (The "(N dice)"
@@ -552,6 +567,10 @@ window.ShipTooltipBallisticsMenu = function () {
        group it fell into, so a Slicer whose shots landed in two groups over-counted in both. It
        also never mentioned the set-damage half of the allocation at all.) */
     function diceSuffix(weapon, members) {
+        if (weapon && typeof weapon.getIncomingDiceText === "function") {
+            var text = weapon.getIncomingDiceText(members.map(function (member) { return member.fireOrder; }));
+            return text ? ' (' + text + ')' : '';
+        }
         if (!weapon || !weapon.data || !weapon.data["Offensive Dice"]) return '';
 
         var dice = 0;

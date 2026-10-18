@@ -121,10 +121,309 @@ window.ew = {
        flight without a pool) and EW::clampFlightEw drops it server-side either way - but the
        two-pool rule has to hold HERE, where the arithmetic is, not only at the two places that
        currently happen to guard it. */
-    getEwLeftFor: function getEwLeftFor(ship, type) {
+    getEwLeftFor: function getEwLeftFor(ship, type, target) {
         if (ship && ship.flight && ew.isFlightEwType(type)) return ew.getFlightEwLeft(ship);
+        //Kirishiac ELINT Sensor Modules: two pools, and OEW's depends on its target - see below
+        if (ew.hasElintModules(ship)) return ew.getElintModuleEwLeftFor(ship, type, target);
 
         return ew.getEWLeft(ship);
+    },
+
+    /* ==================== KIRISHIAC ELINT SENSOR MODULES (KIRISHIAC_ORBITAL_REFITS_PLAN.md §8) ====
+       A Mastership refitted with ELINT Sensor Modules spends EW out of TWO pools (rulings R7, R8):
+
+         N  the scanner    (getScannerOutput, already -2 per module)  OEW, DEW, CCEW, Detect Mines
+         M  the modules    (live modules' output)                     OEW and the six ELINT functions,
+                                                                      only toward units in arc
+
+       N can never pay for an ELINT function; M never becomes DEW. Allocation is NOT blocked by the
+       arcs (R16) - the after-movement check (ElintModules.php) cuts whatever is then out of arc, and
+       those points are simply lost (R9). This block only decides WHICH pool pays (plan D15):
+         ELINT functions                       from M
+         OEW on a unit inside a live arc NOW   from N first, then from what M has left
+         every other OEW                       from N only - module points spent there would only be lost
+       OEW is a normal function, so the scanner pays it first: scanner-paid OEW survives the target
+       leaving the arc, module-paid OEW does not (and losing it can cost the lock - user, 2026-10-08).
+       The split is worked out from this turn's totals every time, so click order never matters.
+       BDEW reaches each friendly with only its covering modules' share (getElintAreaPointsReaching).
+       ⚠️ MIRROR SET with ElintModules.php (the type lists, the coverage rule, the routing and the area share).
+       ⚠️ Every caller sits behind hasElintModules(), an empty list on every other unit in the game. */
+    ELINT_MODULE_ONLY: { 'SOEW': true, 'SDEW': true, 'BDEW': true, 'DIST': true, 'Detect Stealth': true, 'JAM': true },
+
+    //the ship's ELINT modules, alive or not. Cached against the systems array, which never changes in game.
+    getElintModules: function getElintModules(ship) {
+        if (!ship || ship.flight || !ship.systems) return [];
+        if (ship._elintModulesOf === ship.systems) return ship._elintModules;
+        var modules = [];
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            if (system && system.name === 'KirishiacElintModule') modules.push(system);
+        }
+        ship._elintModules = modules;
+        ship._elintModulesOf = ship.systems;
+        return modules;
+    },
+
+    hasElintModules: function hasElintModules(ship) {
+        return ew.getElintModules(ship).length > 0;
+    },
+
+    getLiveElintModules: function getLiveElintModules(ship) {
+        return ew.getElintModules(ship).filter(function (module) {
+            return !shipManager.systems.isDestroyed(ship, module) && !shipManager.power.isOffline(ship, module);
+        });
+    },
+
+    //M - what the live modules can pay
+    getElintModulePool: function getElintModulePool(ship) {
+        var pool = 0;
+        ew.getLiveElintModules(ship).forEach(function (module) {
+            pool += shipManager.systems.getOutput(ship, module);
+        });
+        return pool;
+    },
+
+    /* Is `unit` inside a live module's arc at the ship's CURRENT position and facing? The ship itself
+       always is. ⚠️ MIRROR of ElintModules::coversUnit. */
+    isCoveredByElintModule: function isCoveredByElintModule(ship, unit) {
+        if (!unit) return false;
+        if (unit.id === ship.id) return true;
+        return ew.getLiveElintModules(ship).some(function (module) {
+            return ew.elintModuleCovers(ship, module, unit);
+        });
+    },
+
+    /* Is `unit` inside THIS module's arc? The module's arc is tested as a weapon's is - turned with the
+       ship's facing and mirrored when it is rolled (the server's getBearingOnUnit mirrors the bearing
+       instead, which is the same test). Whether the module is live is the caller's question.
+       ⚠️ MIRROR of KirishiacElintModule::coversUnit. */
+    elintModuleCovers: function elintModuleCovers(ship, module, unit) {
+        if (!unit) return false;
+        if (unit.id === ship.id) return true;
+        return weaponManager.isOnWeaponArc(ship, unit, module);
+    },
+
+    //R10 - no single subject: any live module may pay, and each unit gets only its covering modules' share
+    ELINT_AREA_TYPES: { 'BDEW': true, 'Detect Stealth': true },
+
+    /* Which pool carries each point of this turn's OEW and module-only rows, at the positions held NOW:
+       { rows, modules (live), flow[row][sink] } - sink 0 is the scanner, sink k + 1 the k-th live module.
+       Before the commit there is no DEW row, so the scanner offers whatever the scanner-only types
+       leave; afterwards the committed row comes off it, exactly as on the server.
+       ⚠️ MIRROR of ElintModules::route / maxFlow / findPath: the same rows in the same order (the
+       server loads them by id, i.e. in the order they were committed), the same search order, and
+       Disruption carried in whole steps. Used to split an area function between the modules. */
+    routeElintModuleRows: function routeElintModuleRows(ship) {
+        var modules = ew.getLiveElintModules(ship);
+        var rows = [], scannerOnly = 0, dew = 0;
+        for (var i in ship.EW) {
+            var entry = ship.EW[i];
+            if (entry.turn != gamedata.turn || !(entry.amount > 0)) continue;
+            if (entry.type === 'DEW') { dew += entry.amount; continue; }
+            if (entry.type === 'OEW' || ew.ELINT_MODULE_ONLY[entry.type]) { rows.push(entry); continue; }
+            scannerOnly += entry.amount;
+        }
+        if (!rows.length) return { rows: rows, modules: modules, flow: [] };
+
+        var capacity = [Math.max(0, ew.getScannerOutput(ship) - scannerOnly - dew)];
+        modules.forEach(function (module) { capacity.push(Math.max(0, shipManager.systems.getOutput(ship, module))); });
+
+        var distStep = shipManager.hasSpecialAbility(ship, "ConstrainedEW") ? 4 : 3;
+        var reach = [], steps = [];
+        rows.forEach(function (entry, i) {
+            var sinks = [];
+            if (entry.type === 'OEW') sinks.push(0);
+            if (ew.ELINT_AREA_TYPES[entry.type]) {
+                modules.forEach(function (module, k) { sinks.push(k + 1); });
+            } else {
+                var subject = gamedata.getShip(entry.targetid);
+                modules.forEach(function (module, k) {
+                    if (subject && ew.elintModuleCovers(ship, module, subject)) sinks.push(k + 1);
+                });
+            }
+            reach[i] = sinks;
+            steps[i] = (entry.type === 'DIST') ? distStep : 1;
+        });
+
+        return { rows: rows, modules: modules, flow: ew.elintMaxFlow(rows, reach, capacity, steps) };
+    },
+
+    //augmenting paths, one point at a time; a step that cannot be carried in full is rolled back
+    elintMaxFlow: function elintMaxFlow(rows, reach, capacity, steps) {
+        var flow = rows.map(function () { return capacity.map(function () { return 0; }); });
+        var used = capacity.map(function () { return 0; });
+        for (var i = 0; i < rows.length; i++) {
+            var wholeSteps = Math.floor(Math.max(0, rows[i].amount) / steps[i]);
+            for (var s = 0; s < wholeSteps; s++) {
+                var flowBefore = flow.map(function (bySink) { return bySink.slice(); });
+                var usedBefore = used.slice();
+                var carried = true;
+                for (var unit = 0; unit < steps[i]; unit++) {
+                    var path = ew.elintFindPath(i, reach, flow, capacity, used);
+                    if (!path) { carried = false; break; }
+                    for (var m = 0; m < path.moves.length; m++) flow[path.moves[m][0]][path.moves[m][1]] += path.moves[m][2];
+                    used[path.free] += 1;
+                }
+                if (!carried) { flow = flowBefore; used = usedBefore; break; }
+            }
+        }
+        return flow;
+    },
+
+    //breadth-first from row `start` over the sinks; a full sink hands the search on to the rows drawing on it
+    elintFindPath: function elintFindPath(start, reach, flow, capacity, used) {
+        var parent = {}; //sink -> [previous sink or -1, the row that moves a point onto this sink]
+        var queue = [];
+        var k;
+        for (k = 0; k < reach[start].length; k++) {
+            if (parent[reach[start][k]] !== undefined) continue;
+            parent[reach[start][k]] = [-1, start];
+            queue.push(reach[start][k]);
+        }
+        while (queue.length) {
+            var sink = queue.shift();
+            if (used[sink] < capacity[sink]) {
+                var moves = [];
+                var at = sink;
+                while (at !== -1) {
+                    var prev = parent[at][0], row = parent[at][1];
+                    moves.push([row, at, 1]);
+                    if (prev !== -1) moves.push([row, prev, -1]);
+                    at = prev;
+                }
+                return { moves: moves, free: sink };
+            }
+            for (var r = 0; r < flow.length; r++) {
+                if (flow[r][sink] <= 0) continue;
+                for (k = 0; k < reach[r].length; k++) {
+                    if (parent[reach[r][k]] !== undefined) continue;
+                    parent[reach[r][k]] = [sink, r];
+                    queue.push(reach[r][k]);
+                }
+            }
+        }
+        return null;
+    },
+
+    /* R10, refined by the user 2026-10-08: an area function (BDEW, Detect Stealth) reaches `unit` with
+       only the points of the modules whose arc holds it - modules add up only where arcs overlap. The
+       ship itself sits on every module. ⚠️ MIRROR of ElintModules::areaPointsReaching. */
+    getElintAreaPointsReaching: function getElintAreaPointsReaching(elint, unit, type) {
+        if (!unit) return 0;
+        if (!ew.getEWByType(type, elint)) return 0; //nothing of this type: no routing to run (every hit-chance preview asks)
+        var routing = ew.routeElintModuleRows(elint);
+        var isSelf = unit.id === elint.id;
+        var points = 0;
+        routing.rows.forEach(function (entry, i) {
+            if (entry.type !== type) return;
+            routing.modules.forEach(function (module, k) {
+                if (isSelf || ew.elintModuleCovers(elint, module, unit)) points += routing.flow[i][k + 1];
+            });
+        });
+        return points;
+    },
+
+    /* Who pays for this turn's rows so far (D15):
+         E      ELINT-function points           - module points only
+         S      CCEW, Detect Mines, ...         - scanner points only (DEW is the remainder, not a use)
+         Oc/Ou  OEW on units in / out of a live arc right now
+         inN    in-arc OEW the scanner carries - all of it that fits after S and Ou
+         spill  in-arc OEW the scanner has no room for, so the modules carry it
+         nUsed  scanner points used = S + Ou + inN
+         freeM  module points nobody has used
+       ⚠️ N ignores EW-boosted systems (getEWLeft subtracts them afterwards); no Kirishiac hull has one. */
+    getElintModuleSplit: function getElintModuleSplit(ship) {
+        var N = ew.getScannerOutput(ship);
+        var M = ew.getElintModulePool(ship);
+        var E = 0, S = 0, Oc = 0, Ou = 0;
+        for (var i in ship.EW) {
+            var entry = ship.EW[i];
+            if (entry.turn != gamedata.turn) continue;
+            if (entry.type === 'DEW') continue;
+            if (ew.ELINT_MODULE_ONLY[entry.type]) {
+                E += entry.amount;
+            } else if (entry.type === 'OEW') {
+                var subject = gamedata.getShip(entry.targetid);
+                if (subject && ew.isCoveredByElintModule(ship, subject)) Oc += entry.amount;
+                else Ou += entry.amount;
+            } else {
+                S += entry.amount;
+            }
+        }
+        var inN = Math.min(Oc, Math.max(0, N - S - Ou));
+        var spill = Oc - inN;
+        return { M: M, E: E, S: S, Oc: Oc, Ou: Ou, inN: inN, spill: spill, nUsed: S + Ou + inN, freeM: Math.max(0, M - E - spill) };
+    },
+
+    /* getEwLeftFor for a module ship. `target` matters only to OEW: module points can pay for OEW
+       on a unit in arc, never on one out of it. An ELINT function is never paid late (EW Detector
+       window): late points come out of DEW, i.e. the scanner, which may not pay for one (R8) - and
+       nothing moves onto the modules late either. */
+    getElintModuleEwLeftFor: function getElintModuleEwLeftFor(ship, type, target) {
+        var scannerLeft = ew.getEWLeft(ship);
+        if (gamedata.gamephase != 1) return ew.ELINT_MODULE_ONLY[type] ? 0 : scannerLeft;
+        var split = ew.getElintModuleSplit(ship);
+        //an ELINT point needs a free module point: in-arc OEW on the modules is there only because the scanner is full
+        if (ew.ELINT_MODULE_ONLY[type]) return split.freeM;
+        if (type === 'OEW' && target && ew.isCoveredByElintModule(ship, target)) return scannerLeft + split.freeM;
+        //a scanner-only point may push in-arc OEW off the scanner onto free module points
+        return scannerLeft + Math.min(split.inN, split.freeM);
+    },
+
+    /* R16 - allocation is never blocked by the arcs, but the player is told, passively, when a click
+       puts points where the after-movement check would cut them AT THE CURRENT POSITIONS: on a unit
+       outside every live module arc, or more on a unit than the modules covering it can pay (user
+       request 2026-10-08 - the arc rule is per module, so DIST 6 on a unit only one 4-point module
+       covers loses 3 even if nothing moves). The pools above are module-wide and cannot see that.
+
+       Asked of the same routing the server's check runs, BEFORE and AFTER the click: the notice fires
+       only when the click made the shortfall grow, so a shortfall the player already knows about does
+       not come back on every later click - and a click that starves ANOTHER row is caught too (a CCEW
+       point can push in-arc OEW onto the module an SOEW was using). Initial Orders only: afterwards the
+       committed DEW row sits on the scanner and the routing no longer describes an allocation.
+
+       getElintShortfalls(ship) is the BEFORE: null when there is nothing to watch, else a Map of each
+       row the routing cannot carry in full -> the points it is short. */
+    getElintShortfalls: function getElintShortfalls(ship) {
+        if (gamedata.gamephase != 1 || !ew.hasElintModules(ship)) return null;
+        var routing = ew.routeElintModuleRows(ship);
+        var short = new Map();
+        routing.rows.forEach(function (entry, i) {
+            var carried = routing.flow[i].reduce(function (a, b) { return a + b; }, 0);
+            if (carried < entry.amount) short.set(entry, entry.amount - carried);
+        });
+        return short;
+    },
+
+    //the AFTER: `clicked` is the row the click added to (null for a self-EW type), told about first if it grew
+    noteElintShortfall: function noteElintShortfall(ship, before, clicked) {
+        if (!before || !window.savedOrders || typeof savedOrders.showNotice !== 'function') return;
+        var after = ew.getElintShortfalls(ship);
+        if (!after) return;
+        var grew = [];
+        after.forEach(function (points, entry) {
+            if (points > (before.get(entry) || 0)) grew.push(entry);
+        });
+        if (!grew.length) return;
+        var entry = grew.indexOf(clicked) !== -1 ? clicked : grew[0];
+        var lost = after.get(entry);
+        var subject = entry.targetid > 0 ? gamedata.getShip(entry.targetid) : null;
+        var name = subject ? (subject.name || 'that unit') : null;
+        var rest = (lost === 1) ? 'the other point is lost' : 'the other ' + lost + ' are lost';
+
+        if (subject && ew.ELINT_MODULE_ONLY[entry.type] && !ew.isCoveredByElintModule(ship, subject)) {
+            savedOrders.showNotice(name + ' is outside every ELINT module arc - these ' + entry.type
+                + ' points are lost unless it is in arc after Movement.');
+            return;
+        }
+        if (!subject) { //an area function (BDEW, Detect Stealth): every live module may pay, so only the pool is short
+            savedOrders.showNotice('Only ' + (entry.amount - lost) + ' of the ' + entry.amount + ' ' + entry.type
+                + ' points can be paid by the ELINT modules - ' + rest + ' after Movement.');
+            return;
+        }
+        var payers = (entry.type === 'OEW') ? 'the scanner and the ELINT modules covering it' : 'the ELINT modules covering it';
+        savedOrders.showNotice('Only ' + (entry.amount - lost) + ' of the ' + entry.amount + ' ' + entry.type + ' points on '
+            + name + ' can be paid by ' + payers + ' - ' + rest + ' after Movement unless more modules cover it then.');
     },
 
     /* A FLIGHT'S DEFENSIVE EW, and the mirror of the server's FighterFlight::getDEW().
@@ -179,6 +478,13 @@ window.ew = {
     },
 
     getDefensiveEW: function getDefensiveEW(ship) {
+        /* Kirishiac ELINT modules (refits plan §8.2): once the orders are committed the DEW ROW is the
+           truth. The after-movement check cuts OEW and ELINT rows but never DEW (R9), and the live
+           recompute below re-splits the pools against positions that have since moved. */
+        if (gamedata.gamephase != 1 && ew.hasElintModules(ship)) {
+            var listed = ew.getListedDEW(ship);
+            if (listed !== null && listed !== undefined) return listed;
+        }
         return ew.getEWLeft(ship);//turns out to be an alias now, effectively
         /* defensive == everything not allocated for other functions!
         var listed = ew.getListedDEW(ship);
@@ -360,12 +666,17 @@ window.ew = {
         var isFlightEwUnit = ew.isFlightEwPool(ship);
 
         var usedEW = 0;
-        for (var i in ship.EW) {
-            var entry = ship.EW[i];
-            if (entry.turn != gamedata.turn) continue;
-            if (isFlightEwUnit && ew.isFlightEwType(entry.type)) continue;
-            if (entry.type != "DEW") {
-                usedEW += entry.amount;
+        if (ew.hasElintModules(ship)) {
+            //Kirishiac ELINT modules: only what the SCANNER pays counts against it (refits plan §8.2, D15)
+            usedEW = ew.getElintModuleSplit(ship).nUsed;
+        } else {
+            for (var i in ship.EW) {
+                var entry = ship.EW[i];
+                if (entry.turn != gamedata.turn) continue;
+                if (isFlightEwUnit && ew.isFlightEwType(entry.type)) continue;
+                if (entry.type != "DEW") {
+                    usedEW += entry.amount;
+                }
             }
         }
         /*		
@@ -557,8 +868,9 @@ window.ew = {
         //var left = ew.getDefensiveEW(selected);
         //Stage 12 (3.11): a Mapmaker's OEW is budgeted against its 3-point flight pool, not
         //against the mine-detection allowance getEWLeft() answers with for a flight. Every other
-        //unit in the game gets getEWLeft(), unchanged.
-        var left = ew.getEwLeftFor(selected, type);
+        //unit in the game gets getEWLeft(), unchanged. The target matters to a Kirishiac ELINT
+        //module ship only (module points pay OEW in arc - refits plan D15).
+        var left = ew.getEwLeftFor(selected, type, ship);
 
         var mod = 0;
         if (shipManager.hasSpecialAbility(selected, "ConstrainedEW")) mod += 1;//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
@@ -603,7 +915,10 @@ window.ew = {
         var amount = 1;
         if (type == "DIST") amount = (3 + mod);
 
-        selected.EW.push({ shipid: selected.id, type: type, amount: amount, targetid: ship.id, turn: gamedata.turn });
+        var elintBefore = ew.getElintShortfalls(selected); //Kirishiac ELINT modules: null on every other unit
+        var created = { shipid: selected.id, type: type, amount: amount, targetid: ship.id, turn: gamedata.turn };
+        selected.EW.push(created);
+        ew.noteElintShortfall(selected, elintBefore, created); //R16: allowed, but said
         webglScene.customEvent("ShipEwChanged", { ship: selected });
     },
 
@@ -631,8 +946,10 @@ window.ew = {
             if (incTargetId !== null && incTargetId !== undefined
                 && ew.isEwSuspended(gamedata.getShip(incTargetId))) return;
         }
-        //var left = ew.getDefensiveEW(ship);		
-        var left = ew.getEwLeftFor(ship, entryType);
+        //var left = ew.getDefensiveEW(ship);
+        var entryTarget = (typeof entry === 'object' && entry && entry.targetid !== undefined && entry.targetid !== -1)
+            ? gamedata.getShip(entry.targetid) : null; //OEW on a Kirishiac ELINT module ship: in arc or not (D15)
+        var left = ew.getEwLeftFor(ship, entryType, entryTarget);
 
 
         if (left < 1) return;
@@ -652,6 +969,8 @@ window.ew = {
         //Stage 10B - see the note in AssignOEW. `entry` is a STRING for the self-EW types and an
         //EW entry object for the rest, so the Disruption cost is read defensively.
         if (!ew.canAllocateEwNow(ship, (entry && entry.type == "DIST") ? (3 + mod) : 1)) return;
+
+        var elintBefore = ew.getElintShortfalls(ship); //Kirishiac ELINT modules (R16 notice below): null on every other unit
 
         if (entry == "CCEW") {
             ship.EW.push({ shipid: ship.id, type: "CCEW", amount: 1, targetid: -1, turn: gamedata.turn });
@@ -675,6 +994,7 @@ window.ew = {
             entry.amount++;
         }
 
+        ew.noteElintShortfall(ship, elintBefore, (typeof entry === 'object') ? entry : null);
         webglScene.customEvent("ShipEwChanged", { ship: ship });
     },
 
@@ -921,10 +1241,14 @@ window.ew = {
 
             if (!ew.checkInELINTDistance(ship, elint, 20)) continue;
 
+            //Kirishiac ELINT modules: only what the modules whose arc holds this friendly pay (refits plan R10;
+            //mirror of EW::getBlanketDEW)
+            var blanket = ew.hasElintModules(elint) ? ew.getElintAreaPointsReaching(elint, ship, 'BDEW') : ew.getEWByType("BDEW", elint);
+
             if (shipManager.hasSpecialAbility(elint, "ConstrainedEW")) {//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
-                var fdew = ew.getEWByType("BDEW", elint) * 0.2;
+                var fdew = blanket * 0.2;
             } else {
-                var fdew = ew.getEWByType("BDEW", elint) * 0.25;
+                var fdew = blanket * 0.25;
             }
 
             if (fdew > amount) amount = fdew;
@@ -1093,7 +1417,11 @@ window.ew = {
     getDetectorAllowance: function getDetectorAllowance(ship, detectors) {
         if (!ship) return 0;
         if (detectors === undefined || detectors === null) detectors = ew.collectEwDetectors();
-        if (detectors.length === 0) return 0;
+        /* OFFICERS_PLAN.md Stage 3 - an EXPERT SCANNER aboard adds one point ON TOP of the ladder (user
+           ruling 2026-10-10), wherever the ship is, so the empty-board exit must not skip his ship. Only
+           the owner's team is sent the officer list, so an enemy ship answers 0 here. */
+        var officer = window.officers ? officers.savedEwBonus(ship) : 0;
+        if (detectors.length === 0 && officer === 0) return 0;
 
         /* ⭐ FLIGHTS ARE IN (user ruling 2026-09-10: "the effect applies to all Walker units").
            No test for one is needed and none is wanted: the ladder is a question about POSITION,
@@ -1110,7 +1438,7 @@ window.ew = {
 
         var count = ew.countEwDetectorsCovering(detectors, ship.team, position);
 
-        return ew.savedEwAllowanceFromDetectors(count);
+        return ew.savedEwAllowanceFromDetectors(count) + officer;
     },
 
     /* ============================== STAGE 10B - THE POOL AND THE WINDOW =========================

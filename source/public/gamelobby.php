@@ -200,7 +200,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         <!-- The redesigned top of the page (Stage 4). After lobby.css and gamesNew.css, which it overrides. -->
         <link href="<?php echo AssetLoader::getAssetUrl('styles/gameLobby.css'); ?>" rel="stylesheet" type="text/css">
         <!-- The DATA ARCHIVE window (client/UI/docViewer.js, bundled below): the FAQ, Factions & Tiers,
-             Ammo & Options and Fleet Checker links open it over the lobby instead of a new tab. -->
+             Ship Options and Fleet Checker links open it over the lobby instead of a new tab. -->
         <link href="<?php echo AssetLoader::getAssetUrl('styles/docViewer.css'); ?>" rel="stylesheet" type="text/css">
         <!-- jQuery + jQuery-UI self-hosted (same-origin HTTP/2 + cache-control, no 3rd-party
              TLS). Both kept SYNCHRONOUS: the lobby's synchronous client/*.js scripts run
@@ -241,6 +241,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         <script src="client/systems.js"></script>
         <script src="client/battleDamage.js"></script>
         <script src="client/systemEnhancements.js"></script>
+        <script src="client/officers.js"></script>
         <script src="client/savedFleets.js"></script>
         <script src="client/power.js"></script>
         <script src="client/movement.js"></script>
@@ -562,7 +563,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		    <a class="lb-link" href="./factions-tiers.php" target="_blank" rel="noopener noreferrer"
 		       title="Overview of Fiery Void factions and their approximate strengths">Factions &amp; Tiers</a>
 		    <a class="lb-link" href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer"
-		       title="Details of all the extras available to Fiery Void units, e.g. missiles">Ammo &amp; Options</a>
+		       title="Details of all the extras available to Fiery Void units, e.g. missiles">Ship Options</a>
 		  </div>
 		</div>';
 

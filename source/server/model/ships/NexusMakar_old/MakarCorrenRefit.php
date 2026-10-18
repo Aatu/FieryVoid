@@ -51,23 +51,7 @@ class MakarCorrenRefit extends OSAT{
 					16 => "1:Defense Gun",
 					18 => "0:Scanner",
 					20 => "0:Reactor",
-			),
-			1=> array(
-					9 => "Structure",
-					11 => "2:Thruster",
-					14 => "1:Ranged Dual Heavy Rocket Launcher",
-					16 => "1:Defense Gun",
-					18 => "0:Scanner",
-					20 => "0:Reactor",
-			),
-			2=> array(
-					9 => "Structure",
-					11 => "2:Thruster",
-					14 => "1:Ranged Dual Heavy Rocket Launcher",
-					16 => "1:Defense Gun",
-					18 => "0:Scanner",
-					20 => "0:Reactor",
-			),
+			)
 		);
     
     

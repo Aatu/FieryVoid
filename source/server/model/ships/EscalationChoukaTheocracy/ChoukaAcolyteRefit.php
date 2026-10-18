@@ -9,7 +9,7 @@ class ChoukaAcolyteRefit extends HeavyCombatVessel{
         $this->phpclass = "ChoukaAcolyteRefit";
         $this->imagePath = "img/ships/EscalationWars/ChoukaAcolyte.png";
 			$this->canvasSize = 110; //img has 200px per side
-        $this->shipClass = "Acolyte Patrol Frigate (1960 Refit)";
+        $this->shipClass = "Acolyte Patrol Frigate (1960)";
 			$this->variantOf = "Acolyte Patrol Frigate";
 			$this->occurence = "common";
 			$this->unofficial = true;
@@ -60,7 +60,7 @@ class ChoukaAcolyteRefit extends HeavyCombatVessel{
             0=> array(
                     8 => "Structure",
                     11 => "Thruster",
-					13 => "Cargo",
+					13 => "Cargo Bay",
 					15 => "Scanner",
                     17 => "Engine",
                     19 => "Reactor",

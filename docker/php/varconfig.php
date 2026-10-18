@@ -17,6 +17,10 @@ $discord_webhook_url = '';
 $game_base_url = 'http://localhost/';
 $discord_notify_idle_secs = 300;
 
+// Keep games whose players have been idle 3+ months (DBManager::getGamesToBeDeleted). Live
+// deletes them; locally they are the replay harness corpus. Idle LOBBY games still go after 5 days.
+$keep_idle_games = true;
+
 // Local, uncommitted overrides (bot token etc.) — gitignored, never committed.
 $__localVarconfig = __DIR__ . '/varconfig.local.php';
 if (is_file($__localVarconfig)) include $__localVarconfig;

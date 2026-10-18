@@ -8,7 +8,7 @@ class ChoukaRetributionRefit extends BaseShip{
 	$this->faction = "Escalation Wars Chouka Theocracy";
         $this->phpclass = "ChoukaRetributionRefit";
         $this->imagePath = "img/ships/EscalationWars/ChoukaRetribution.png";
-        $this->shipClass = "Retribution Battlecruiser (1962 Refit)";
+        $this->shipClass = "Retribution Battlecruiser (1962)";
 			$this->variantOf = "Retribution Battlecruiser";
 			$this->occurence = "common";			
         $this->limited = 33;
@@ -78,8 +78,8 @@ class ChoukaRetributionRefit extends BaseShip{
 			),
 			1=> array(
 					4 => "Thruster",
-					7 => "Heavy Plasma Cannon",
-					9 => "Medium Plasma Cannon",
+					7 => "Twin Laser Cannon",
+					9 => "Heavy Point Plasma Gun",
 					11 => "Light Laser",
 					18 => "Structure",
 					20 => "Primary",
@@ -87,7 +87,7 @@ class ChoukaRetributionRefit extends BaseShip{
 			2=> array(
 					6 => "Thruster",
 					8 => "Jump Engine",
-					10 => "Heavy Plasma Cannon",
+					10 => "Twin Laser Cannon",
 					12 => "Light Laser",
 					18 => "Structure",
 					20 => "Primary",

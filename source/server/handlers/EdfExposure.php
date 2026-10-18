@@ -366,7 +366,10 @@ class EdfExposure
        null on every standard mount, which is what keeps this free for the rest of the game. */
     private static function isPowerLocked($system)
     {
-        return (!empty($system->linkedOrbital) && empty($system->stowed));
+        /* Read off the ORBITAL, not the mount's `stowed`: a weapon's stowed IS its orbital's docked
+           state, but a Kirishiac refit (an ELINT module) is never stowed and is still switchable
+           while docked (KIRISHIAC_ORBITAL_REFITS_PLAN.md D9). Identical for every weapon mount. */
+        return (!empty($system->linkedOrbital) && !$system->linkedOrbital->activeEffective);
     }
 
     /* ---------------------------------------------------------------- dropouts ------- */

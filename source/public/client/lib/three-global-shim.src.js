@@ -1,6 +1,6 @@
 // FV THREE global shim — perf roadmap #5 (see project_three_modularize_plan memory).
 //
-// FV's ~41 legacy client files (plus the THREE.MeshLine extension) reach for a
+// FV's ~41 legacy client files reach for a
 // global `window.THREE`. The full vendored UMD `three.min.js` (r160, ~670KB) ships
 // the entire engine — animation, skinning, audio, WebXR, loaders, post-processing —
 // none of which FV uses. This entry imports ONLY the symbols FV actually references

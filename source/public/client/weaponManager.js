@@ -2087,8 +2087,9 @@ window.weaponManager = {
 
             if (weapon.ballistic) {
                 //A ballistic's bonus is a CONDITIONAL GRANT, not a lock, and flight OEW plays no
-                //part in it - the server sets $oew = 0 and then re-grants $effectiveOB alone.
-                oew = effectiveOB;
+                //part in it - the server sets $oew = 0 and then re-grants $effectiveOB alone, 1 more
+                //with an Expert Missileer aboard (⚠️ MIRROR PAIR with $ballisticOB in weapon.php).
+                oew = effectiveOB + (window.officers ? officers.missileObBonus(shooter) : 0);
 
                 var shooterLoSBlocked = false;
                 var blockedLosHex = gamedata.blockedHexes;
@@ -3198,7 +3199,9 @@ window.weaponManager = {
         //generic gun accounting below is meaningless for them, so they answer for themselves:
         //  - Molecular Slicer  - implements the pair of hooks and spends a die or a block of set
         //                        damage per engagement (Stage 7).
-        //  - Hyperplasma Cutter - permanently out of scope (§11.5); no hook, so still refused.
+        //  - Hyperplasma Cutter - one die (-5%) per click, carried on the intercept order itself
+        //                        (TRIAD_ADVANCED_FEATURES_PLAN.md §2).
+        //A custom weapon WITHOUT the hooks is still refused.
         if (weapon.usesCustomInterceptAllocation) {
             if (typeof weapon.canDeclareManualIntercept !== 'function') return false;
             if (!weapon.canDeclareManualIntercept(ship)) return false;
@@ -3275,7 +3278,17 @@ window.weaponManager = {
             return a.id - b.id;
         });
 
-        return eligible;
+        //Weapons that spend ONE shared pool (a ship's Hyperplasma Cutters - getInterceptPoolKey) answer a
+        //click once between them: the first-ranked eligible one stands for the lot, so selecting all three
+        //cutters still puts one die on the shot, not three.
+        var poolsSeen = {};
+        return eligible.filter(function (weapon) {
+            if (typeof weapon.getInterceptPoolKey !== 'function') return true;
+            var key = weapon.getInterceptPoolKey(ship);
+            if (poolsSeen[key]) return false;
+            poolsSeen[key] = true;
+            return true;
+        });
     },
 
     /* Why is the INTERCEPT button on this row disabled? Null when it is not. */
@@ -3287,7 +3300,7 @@ window.weaponManager = {
 
         //Nothing eligible - say which of the two reasons it is, since they call for opposite actions.
         //A custom-allocation weapon counts as an interceptor only if it implements the manual hooks
-        //(the Slicer does; the Hyperplasma Cutter deliberately does not - §11.5).
+        //(the Slicer and the Hyperplasma Cutter both do).
         var anyInterceptorSelected = gamedata.selectedSystems.some(function (weapon) {
             if (weapon.usesCustomInterceptAllocation
                 && typeof weapon.canDeclareManualIntercept !== 'function') return false;

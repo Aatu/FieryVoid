@@ -26,6 +26,7 @@ class captorMineNexoriA extends Mine{
         $this->pivotcost = 0;	
         $this->iniativebonus = -200; 
         $this->mineType = 'Captor';         
+        $this->IFFSystem = true;         
        		    	    	    	    
         //Block all enhancements for Mine units when bought
 		Enhancements::nonstandardEnhancementSet($this, 'Mines');	 

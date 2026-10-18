@@ -18,17 +18,16 @@ Make sure you have the following installed on your machine:
 
 Docker runs the server (Nginx/PHP/MariaDB), but the client-side JS bundling (`yarn build` / `yarn watch:legacy`) runs on your host machine, so Node.js and Yarn need to be installed locally.
 
-1. Install Node.js (this also installs npm). Use the current LTS release.
+1. Install Node.js (this also installs npm). Use an LTS release; the build was last verified on Node 24 LTS (2026-10-08).
    - Windows: download the LTS installer from https://nodejs.org/, or run `winget install OpenJS.NodeJS.LTS`
    - macOS: `brew install node`
    - Linux: use your distro's package manager (e.g. `sudo apt install nodejs npm`) or https://github.com/nvm-sh/nvm
 
-2. Enable Yarn. Modern Node.js ships with Corepack, which is the recommended way to get Yarn — no separate install needed:
+2. Install Yarn 1 ("classic"). The repo's yarn.lock is a Yarn 1 lockfile:
 
-   corepack enable
-   corepack prepare yarn@stable --activate
+   npm install -g yarn
 
-   (Alternatively, the classic global install still works: `npm install -g yarn`.)
+   (Avoid `corepack prepare yarn@stable`, which activates Yarn 4 and rewrites yarn.lock. Node 25 and later don't include Corepack anyway.)
 
 3. Verify both are available by running `node -v` and `yarn -v` in a terminal. Once they report versions you're ready for the "Setup Client-Side Development (Yarn)" step below.
 
@@ -58,6 +57,12 @@ Database Access: You can connect to the database from a local client at localhos
 User: root
 Password: fieryvoid (or possibly just leave blank)
 Database: B5CGM
+
+The database is MariaDB 11.4.5, the same version as the live server, with live's settings: Central European time, `utf8mb4_unicode_ci` server collation, and a `utf8mb3_general_ci` database default. For a SQL prompt inside the container:
+
+docker exec -it fieryvoid-mariadb-1 mariadb -uroot -pfieryvoid B5CGM
+
+MariaDB 11 has no `mysql` command, so use `mariadb`, `mariadb-dump` and `mariadb-admin`. Until 2026-10-08 the local database was MariaDB 10.3. An older data volume is upgraded in place the first time the new container starts (`docker-compose up -d --build`). Back it up first if your local games matter (see "Backing up the local database" below).
 
 3. Setup Client-Side Development (Yarn)
 Since FieryVoid bundles legacy code, you'll need to install the Node dependencies locally so things recompile when you make edits by running these commands in project root folder.  
@@ -104,7 +109,7 @@ Make sure the stack is up:
 docker compose ps
 Confirm the mariadb container shows Up and the port mapping is 0.0.0.0:3306->3306/tcp.
 
-Find the DB credentials. They're in the Fiery Void repo — check docker-compose.yml (look for MYSQL_ROOT_PASSWORD, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE) and/or any .env file the compose file references. Whatever values are there are what Workbench needs.
+Find the DB credentials. They're set in docker/mariadb/Dockerfile (MYSQL_ROOT_PASSWORD, MYSQL_DATABASE): user root, password fieryvoid, database B5CGM.
 
 In MySQL Workbench → "+" next to MySQL Connections:
 
@@ -118,7 +123,21 @@ Password	"Store in Vault…" → paste from compose/.env
 Default Schema	leave blank, or the DB name from compose
 Click Test Connection → should succeed → OK.
 
+(MariaDB 11.4 offers TLS with its own self-signed certificate. Workbench's SSL setting "If available" or "Require" connects; the "Verify" options don't.)
+
 Open the connection and the Fiery Void schema(s) will show up in the left-hand SCHEMAS panel. Browse tables, run queries, etc. — same as any local DB.
+
+7. Backing up the local database
+
+Your local games are also the replay harness's test corpus, so back them up before anything that could lose the data volume. Write the dump inside the container and copy it out with `docker cp`. Don't redirect `mariadb-dump` output with PowerShell's `>`, which re-encodes the text and can corrupt the dump.
+
+docker exec fieryvoid-mariadb-1 mariadb-dump -uroot -pfieryvoid --single-transaction --hex-blob --default-character-set=utf8mb4 --databases B5CGM --result-file=/tmp/B5CGM.sql
+docker cp fieryvoid-mariadb-1:/tmp/B5CGM.sql .
+
+To restore it:
+
+docker cp B5CGM.sql fieryvoid-mariadb-1:/tmp/B5CGM.sql
+docker exec fieryvoid-mariadb-1 sh -c "mariadb -uroot -pfieryvoid < /tmp/B5CGM.sql"
 
 
 
@@ -268,9 +287,6 @@ When you do NOT need to rebuild it (i.e. almost all the time):
 - Normal work — ships, weapons, systems, game rules, tooltips, React UI, and any renderer/effect code that only uses THREE features already in the list — does NOT touch the THREE bundle. Just rebuild the legacy/UI bundle as usual (`yarn watch:legacy` / `yarn build`).
 
 When in doubt: just run `yarn build`. It runs all three steps in order (THREE shim → Vite/React → legacy bundle), so you can never end up with a stale THREE bundle by running the full build. The standalone `yarn build:three` is only there to save time when you KNOW the THREE bundle is the only thing that changed.
-
-(The old `client/lib/three.min.js` is now unused and can be deleted.)
-
 
 
 # Replay regression harness (tests/replay):

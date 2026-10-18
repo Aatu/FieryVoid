@@ -67,8 +67,7 @@
 # ?v=mtime cache-buster, so the URL changes only when the file is upgraded. Same
 # immutable contract as the bundles above. (THREE is now shipped as the tree-shaken
 # three.shim.bundle.js — versioned via ?v=mtime AND matched by the .bundle.js rule
-# above, so it is safely immutable. The vestigial THREE.MeshLine.js is still loaded
-# without a ?v= query, so it keeps the generic 1-month expiry — do not list it here.)
+# above, so it is safely immutable.)
 <FilesMatch "(jquery-[0-9][^/]*\.min\.js|jquery-ui-[0-9][^/]*\.min\.js)$">
   <IfModule mod_headers.c>
     Header set Cache-Control "max-age=31536000, public, immutable"

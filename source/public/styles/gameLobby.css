@@ -1496,6 +1496,25 @@
   flex-basis: 100%;
 }
 
+/* One enhancement line: its name, and its own cost on the right under the row's - the row's cost
+   leaves the enhancements out (gamedata.rowDisplay), so the column adds up. */
+.lb-fleet .ship.bought .ship-enhancement-entry {
+  display: flex;
+  align-items: baseline;
+}
+
+.lb-fleet .ship.bought .ship-enhancement-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.lb-fleet .ship.bought .ship-enhancement-cost {
+  margin-left: auto;
+  padding-left: 10px;
+  white-space: nowrap;
+  color: #d0dbec; /* the row cost's colour (lobby.css .boughtPointCost) */
+}
+
 /* Nothing bought yet - and no MAIN FLEET / REINFORCEMENTS headers, which only a game with
    reinforcements draws. */
 .lb-fleet #fleet:empty::before {

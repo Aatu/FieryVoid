@@ -30,7 +30,7 @@ class AndorianKumari extends HeavyCombatVesselLeftRight{
 	$this->addPrimarySystem(new CnC(4, 15, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 6, 5));
-	$this->addPrimarySystem(new Hangar(3, 3));
+	$this->addPrimarySystem(new Hangar(3, 3, 3));
 	$this->addPrimarySystem(new SWTractorBeam(2,0,360,1));
 	$impulseDrive = new TrekImpulseDrive(4,20,0,2,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		
@@ -95,7 +95,6 @@ class AndorianKumari extends HeavyCombatVesselLeftRight{
 				7 => "Particle Cannon",
 				9 => "Light Particle Cannon",
 				10 => "Standard Particle Beam",
-				12 => "Hangar",
 				18 => "Structure",
 				20 => "Primary",
             ),
@@ -105,7 +104,6 @@ class AndorianKumari extends HeavyCombatVesselLeftRight{
 				7 => "Particle Cannon",
 				9 => "Light Particle Cannon",
 				10 => "Standard Particle Beam",
-				12 => "Hangar",
 				18 => "Structure",
 				20 => "Primary",
         		),

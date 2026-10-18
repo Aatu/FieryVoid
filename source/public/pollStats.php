@@ -33,7 +33,9 @@ if (is_file($csv)) {
     $lines = file($csv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     array_shift($lines);                       // header
     foreach (array_reverse($lines) as $line) { // newest first
-        $rows[] = str_getcsv($line);
+        // Escape passed explicitly: PHP 8.4 deprecates relying on its default, and
+        // global.php's error handler turns that deprecation into a fatal.
+        $rows[] = str_getcsv($line, ',', '"', '\\');
     }
 }
 
