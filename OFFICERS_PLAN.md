@@ -13,8 +13,9 @@ once-per-battle abilities and MOVING officers between posts in game (§9.16) - c
 Hard officer, the Expert Laser Technician (§9.17) - committed (`4f3a359cc`). Stage 12, the Expert Plasma Scientist, an
 officer the user added beyond the original 25 (§9.18) - committed (`a80430710`). Stage 13, the Expert Security Officer,
 a second added officer (§9.19) - committed (`f17a680b8`). Stage 14, the Expert Religious Leader, a third added officer
-(§9.20) - BUILT 2026-10-17, uncommitted. Stage 15, moving officers in Fleet Selection (free) with the Religious Leader's
-placed twin, and every officer on a post destroyed by pre-battle damage refunded (§9.21) - BUILT 2026-10-17, uncommitted.** Written
+(§9.20), and Stage 15, moving officers in Fleet Selection (free) with the Religious Leader's placed twin, and every officer on
+a post destroyed by pre-battle damage refunded (§9.21) - committed (`68f1c82b3`). Stage 16, the Expert Surge Officer (Ipsha),
+with FV's EM hardening rebuilt to the tabletop rules first (§9.22) - BUILT 2026-10-18, uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -48,8 +49,11 @@ Religious Leader, with his rules text, and ruled the four questions he raised (S
 Ship Officers and Fighter Officers cards of the Ship Options document alphabetically. Then they asked for officers to be
 moved freely in Fleet Selection - the Religious Leader to any viable system, and the weapon-placed officers when the player
 changes their mind - with a Move button that keeps the System Enhancements menu's format, ruled such a move free, and re-ruled
-QX5: any officer whose post pre-battle damage destroys is refunded (Stage 15, §9.21). Each officer's own rules questions still
-only need ruling when that officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
+QX5: any officer whose post pre-battle damage destroys is refunded (Stage 15, §9.21). On 2026-10-18 they supplied the Expert
+Surge Officer's rules text; the first ruling round showed FV's EM hardening to be a simplification (treated as Advanced Armor,
+plus a flat -1 on every critical), so they supplied the tabletop hardening rules and asked for those to be built first, the
+Ring Base hardened, and the officer on top - ruling five questions on the way (Stage 16, §9.22). Each officer's own rules
+questions still only need ruling when that officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -239,7 +243,7 @@ Medium-sized job (§3.4).
 | **Expert Laser Technician** | "+1 damage per power point sent, up to +50 %" needs a new per-turn allocation UI, persistence and a cap. *Built in Stage 11 (§9.17) with no new UI or persistence: the user's design note made every laser use the existing BOOST (power entries type 2, the generic boost buttons), so the allocation, its storage and the power balance all came free; what was new is the cap, a per-turn pool, and hiding the boosts from opponents.* | +3 Spinal / +2 Blast / +1 other lasers, through `getBonusDamage` (`SpinalLaser`, `BlastLaser`, `ImprovedBlastLaser`, `LtBlastLaser` exist) |
 | **Expert Software Engineer** | Bonus fire-control points spendable in the Firing phase need a new allocation window (`HyachComputer` only allocates in Initial Orders, [baseSystems.php:12862](source/server/model/systems/baseSystems.php#L12862)). Also a "first point of damage ignored" rule in the damage path, a submarine detection range, and a self-contradictory specialist clause (§6, Software Engineer) | — |
 | **Expert Ion Technician** | "3 thrust → 1d10+1 on one ion weapon" is a per-turn spend with UI | +1 per die and +1 flat on Ion-class weapons; +4 on C&C crits; the Rad Cannon's flat 12 and forced crits are Medium |
-| **Expert Surge Officer** | Six unrelated hooks: EM damage, combined Surge Cannon shots, capacitor power by ship size, EM-hardening −3, a d6 to resist deactivation, Spark Field −1 | +1 damage on Electromagnetic-class weapons |
+| **Expert Surge Officer** | Six unrelated hooks: EM damage, combined Surge Cannon shots, capacitor power by ship size, EM-hardening −3, a d6 to resist deactivation, Spark Field −1. *Built in Stage 16 (§9.22): the rules text made it reactor power by ship size; his two hardening clauses needed FV's EM hardening rebuilt to the tabletop rules first (WeaponEM), the bigger half of the stage.* | +1 damage on Electromagnetic-class weapons |
 | **Expert Ballistic Officer** | "+1 magazine round per launcher" moves the lobby's ammo limits, which are derived from magazine capacity at offer time. Free missile swaps are lobby ammo pricing | +5 launch range (`range` **and** `rangeArray` — the same mode-switch trap — and sent to the client) |
 | **Expert Anticipator** | A free **turn** for a ship in the Firing phase is a new phase-3 movement for ships (today only flights move there, as combat pivots), with masking, validation and animation | Rolling initiative twice is Easy. Re-rolling the lowest die is Medium: a `Dice`-level flag, which the replay harness's own `Dice` stub must mirror ([[project_replay_harness]]) |
 | **Expert Gunner, once-per-battle abilities** | A Piercing mode injected into a weapon that lacks one, and +15 % on one called shot, each once per battle and not combinable: firing-mode injection, a persisted "used", and UI. *Built in Stage 10 (§9.16), all three automatic (user simplifications), with moving officers.* | — |
@@ -327,7 +331,7 @@ budget, drop the label from the wire, since the client holds the labels anyway.
 | Engine | the strongest `Engine` by `output` | `strongestSystem()` semantics: the first in construction order wins a tie |
 | Sensor Array, Sensors | the strongest `Scanner` by `output` | includes `ElintScanner` |
 | Reactor | the biggest `Reactor` by `maxhealth` | `ELITE_CREW`'s rule ([Enhancements.php:2485](source/server/model/ships/Enhancements.php#L2485)); `MagGravReactor` extends `Reactor` |
-| Mag-Grav Reactor | the first `MagGravReactor` | Surge Officer |
+| Mag-Grav Reactor | the first `MagGravReactor` that can be hit (never a `MagGravReactorTechnical`) | Surge Officer (Stage 16: every Ipsha hull has exactly one) |
 | Jump Drive | the first engine `JumpEngine::getUnitJumpEngines($ship)` returns that is neither legacy nor a gate | never a bare sweep of `$ship->systems` ([[project_jump_points]]) |
 | Computer | the `HyachComputer` | |
 | Random primary system | a hash of (game id, ship id, officer id), **salted with `$secret_phrase`**, over location-0 systems that are targetable, not Structure and not pseudo-systems | FV is open source: an unsalted formula would let an opponent work out where the Evangelist sits and call-shot it. In the lobby there is no game id yet, so it reads "posted at battle start". Positional-id caveat in §7. |
@@ -442,6 +446,7 @@ masking: individual notes never reach any client.
 | Moving officers (Stage 10) | where an officer is moving (`moving`), the posts he may move to (`targets`), a Gunner's spent abilities and added mode number | Own team only, in the officer payload |
 | Security Officer (Stage 13) | `iniativebonus`; the C&C's `critRollMod`; the modifier on boarding rolls against his ship | `iniativebonus`: **yes, to every viewer** (the Helmsman's `publish`). The critical modifier is never sent (nothing displays one). The boarding shift is server-only; the combat log prints a mission roll as Roll(Mod), so an opponent can see a larger modifier than he expected, never who caused it |
 | Plasma Scientist (Stage 12) | a Plasma Web's `range` / `rangeArray`; a Plasma Battery's capacity, charge and output | **Yes, to every viewer** (user ruling 2026-10-17: a displayed stat is public). The battery's line and output were sent to everyone already; the web's range is sent while he serves (`webForJson`). His damage bonus and range relief show only as damage dealt |
+| Surge Officer (Stage 16) | the Mag-Gravitic Reactor's `output` | **Yes**, as the Technician's: `output` is sent unconditionally. His +1 per EM hit, the hardening he eases and the Spark Field relief show only as their results (damage dealt, criticals rolled, a "shutdown resisted" line in the log - which a hardened ship's own d6 also writes) |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
 | Scanner | the late-EW allowance | Own-team only: the client asks `officers.listFor`, which an enemy payload never carries |
@@ -594,7 +599,8 @@ committed.
 | **13** | Expert Security Officer, the second officer the user added. **BUILT 2026-10-17** (§9.19) | +5 initiative to every viewer; -2 on his own C&C's critical rolls, his and its other officers' kill roll included; +2 on every boarding d10 against his ship (pod, claw and transporter delivery; Wreak Havoc, Sabotage, Rescue and the boarders' Capture roll), -2 on his defenders' Capture rolls; 5% EA / 7.5% elsewhere, every whole-percent price unchanged |
 | **14** | Expert Religious Leader, the third officer the user added. **BUILT 2026-10-17** (§9.20) | +10 initiative to every viewer; +1 on every hit (a pulse, a gun's shot, a raking shot once), never on a roll of 0 or a ram; once he is disabled or killed in battle, from the next turn: +20 initiative, both profiles +1, the strongest standing Scanner +1, the +1 per hit kept, the profiles published; moves to any targetable primary non-weapon system, the jump drive included; Minbari Federation, Markab, Corillani and Yolu only, 15% |
 | **15** | Moving officers in Fleet Selection, free; the Religious Leader's placed twin; any officer on a post destroyed by pre-battle damage refunded. **BUILT 2026-10-17** (§9.21) | Move from a system's menu (its Officers footer), the pick outlining every post he could be bought on; placed to placed, C&C to twin and back, points unchanged; occupied, destroyed and unoffered posts refused; the twin offered on every primary non-weapon system but the C&C, at his own price, and every effect his; a C&C destroyed in the pre-battle editor refunds its ship officers with a warning, an edit and a saved fleet too; the menu rows keep their one shape |
-| **16+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **16** | FV's EM hardening rebuilt to the tabletop rules, the Ring Base hardened; the Expert Surge Officer on top. **BUILT 2026-10-18** (§9.22) | Hardened units no longer immune: -2 once a turn on the critical (dropout) roll of a system an EM weapon affects, through the real `doDamage`; a forced dropout ignored on 1-2, a forced shutdown resisted on 1, power losses one less, at the Burst Beam family, Shock Cannon and others; other EM effects and armour-ignoring damage as against anyone; the flat -1 stand-in gone from every Ipsha hull. The officer: Ipsha only, 10%, the Mag-Gravitic Reactor; +2/+1 power by size, previewed in the lobby; +1 per EM hit, +N on an N-cannon Surge Cannon shot, his own Spark Field too; -3 and 1-2 on his ship; Spark Fields 1 weaker against him |
+| **17+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -633,7 +639,7 @@ committed.
 | Religious Leader | *Added 2026-10-17 with his rules text (§9.20).* Are "+10 initiative" and "+5 to its defense profiles" FV's displayed units or tabletop? What is a "volley" for his +1 damage? Does the ship keep the +1 damage once he is lost? Is the Minbari Protectorate one of the "Minbari" factions? **RULED 2026-10-17:** **FV display units** (+10, then +20; the profiles +1 point each, +5%); **+1 per hit** (each pulse, each gun's shot, a raking shot once, never per die); the frenzy **keeps** the +1 damage; **Minbari Federation only** - the Protectorate is not included. |
 | Software Engineer | "Lets the computer specialist use their ability twice" and "Incompatible with Computer Specialist" contradict each other. Which one stands? "Submarine" = the Hyach stealth hulls (Alichi Kav and Tal)? Whose detection range gets +5? |
 | Ion Technician | Rad Cannons always score 12, with no roll? Forced crits on Sensors, Engine and Reactor on every hit? When is the thrust boost declared? Is "+4 on C&C crits" a penalty? |
-| Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? |
+| Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? **Rules text 2026-10-18 (§9.22)** settles the first: "Capital ships and larger receive +2 points of power, while medium ships and HCVs get +1" - the reactor. **RULED 2026-10-18:** the −3 is "−1 on EM-hit systems" (the tabletop −2 → −3 step, where the rule says); then, the user finding FV's hardening to be a simplification, **FV's EM hardening rebuilt to the tabletop rules** (supplied) and the Ring Base hardened, the officer on top; the −2 **once per system per turn**; EM effects the tabletop hardening does not list **apply normally** (the old immunity lines commented out with a note, to revisit); armour-ignoring EM weapons **ignore Ipsha armour fully**; the flat −1 stand-in **removed** from every Ipsha hull; **his own Spark Field gains the +1**. |
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? |
 | Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). **RULED 2026-10-15: Grome Autocracy only** (§9.12); the Matter-weapon hull test is kept beside it. **Rules text and rulings 2026-10-16 (§9.14):** "moved into one specific weapon instead of his normal station" - **one or the other, never both**; that weapon gets the +1 / +1 "but no others do", and its rate of fire +1 (Stage 10); "disabled if the weapon takes any damage at all (after armor), and automatically killed if the weapon is destroyed" - **and the ordinary kill roll too**. |
@@ -2405,3 +2411,140 @@ non-weapon system but the C&C of the hulls offered him. Statics +11,204 B uncomp
 1. Every primary non-weapon system of a Minbari, Markab, Corillani or Yolu ship now shows an Officers row for him in its menu,
    as every weapon shows the Gunner's.
 2. Not tested in a real game: buy him, move him in Fleet Selection, Ready, and check he serves where he was put.
+
+### 9.22 Stage 16: EM hardening rebuilt to the tabletop rules, and the Expert Surge Officer (2026-10-18)
+
+**Rules text (user, 2026-10-18) - the officer.** "An example of Ipsha specialization in electromagnetic technology, this officer
+optimizes his ship's EM weapons as well as its resistance to similar devices. The following advantages are gained. All
+electromagnetic-category weapons add +1 damage. A surge cannon adds +1 for each weapon involved in any combined shot, so a
+five-weapon blast would score +5 damage. EM pulsars receive +1 damage per pulse. Capital ships and larger receive +2 points of
+power, while medium ships and HCVs get +1 extra power. LCVs and smaller units gain no extra benefits. Electromagnetic weapons that
+hit the ship suffer a -3 penalty (not -2) to their critical hit roll against any affected system. If the hit forces the
+deactivation of a system, the system resists the effect if it rolls a 1 or 2 on a d6. Any spark field affecting the ship reduces
+its damage by 1 point. Cost: 10%. Location: Mag-gravitic reactor. Availability: Ipsha only."
+
+**Rules text (user, 2026-10-18) - EM hardening**, supplied when the first ruling round showed FV's to be a simplification:
+"Any electromagnetic weapon suffers a -2 reduction to its critical hit roll against an affected system. Similarly, any fighter hit
+by an EM weapon has a -2 shift (bonus) to its dropout roll. These are cumulative with all other bonuses or penalties including those
+caused by other weapons on the same turn. Any Ipsha fighter hit by an EM weapon which automatically forces dropout can roll a single
+d6. If the roll is a 1 or 2, the fighter ignores the forced dropout effect. If the weapon also caused damage, the fighter will still
+take this damage, and as a result may need to make a normal dropout roll in the proper sequence. An EM weapon which forces the
+deactivation of a system permits that system a roll on a single d6. If a 1 is rolled, the system is not deactivated, but resists
+the effect. If any damage was caused by the attack, this is still suffered normally. EM weapons which reduce power levels reduce
+their effect by 1. For example, a shock cannon hitting an Ipsha ship and causing the loss of 2 points of power would instead only
+lower it by 1 point. If only 1 point was to be lost, this is reduced to zero!"
+
+**What FV had.** `WeaponEM::isTargetEMResistant` treated `$EMHardened` as Advanced Armor ("for simplicity"): hardened units were
+immune to every EM special effect (critical bonuses, forced dropouts and shutdowns, power loss, sensor and initiative cuts), the
+armour-ignoring EM weapons halved their armour instead, and every Ipsha hull carried a flat `critRollMod = -1` in place of the
+tabletop's -2 against EM criticals. The Ring Base had no hardening at all.
+
+**Rulings (user, 2026-10-18, asked before building):**
+1. The officer's "-3 (not -2)" is the tabletop step where the rule puts it: on systems an EM weapon hit. Then, the user finding FV's
+   hardening a simplification: **build the tabletop rules, apply the hardening correctly, and harden the Ring Base**; the officer on top.
+2. The -2 is **once per system per turn** (the system's one critical roll), however many EM hits it takes; the EM weapons' own +X still
+   add up.
+3. EM effects the tabletop hardening does not list (sensor/OB and initiative cuts, the EM Bolter's +1 to all criticals) **apply
+   normally** - "but please only comment out the lines with the previous EMHardened immunity with a note in case I need to revisit".
+4. Armour-ignoring EM weapons **ignore Ipsha armour fully** (no more halving).
+5. FV's flat stand-in **removed** from every Ipsha hull: ships and the OSAT -1 -> 0, the Anemone -2 -> -1, the Urchin -3 -> -2 (their
+   own comments gave these values).
+6. **His own ship's Spark Field gains the +1** (it is an EM weapon, and hits friend and foe).
+
+**Built with defaults, stated here (ask before changing):**
+- Availability "Ipsha only" = the `Ipsha Baronies` faction: not the Civilians' Ipsha-built Cargo Hauler (hardened, with a Mag-Grav
+  reactor). 14 hulls are offered him - every Ipsha warship and the Ring Base; the OSAT, mines and fighters never are (D9).
+- His post is the first Mag-Gravitic Reactor that can be hit (`maggrav`); every Ipsha hull has exactly one. A Technician shares it
+  (the 'reactor' post picks the same system there), and both raises add up.
+- Power: "capital ships and larger" = size class 3 or `$Enormous` (+2: the Battleglobe-style capitals on HCV layouts, the Ring Base),
+  medium ships and HCVs = 1 and 2 (+1), LCVs 0 (none exist among the Ipsha).
+- +1 per HIT (the Religious Leader's rule - `getFinalDamage` runs once per hit): each EM Pulsar pulse, each section a Resonance
+  Generator strikes, a raking Surge Cannon once - +N on a combined shot of N cannons (its `firingMode`; a combine that falls back to
+  single shots gets +1 each). Never on a roll of 0 (the Burst Beams and Electro-Pulse Gun; a Spark Field boosted down to 0 stays 0).
+  Only shots in an Electromagnetic mode.
+- The -2 (-3) also reaches a critical forced by a weapon (the Burst Beam's "+4 forced roll" becomes +2), and a fighter's dropout roll.
+  It eases the kill roll of any officer posted in the system, as every critical modifier does.
+- A resisted dropout or shutdown writes " EM hardening: dropout resisted." / "... shutdown resisted." into the shot's public log; the
+  Surge Officer's 1-2 is not named there.
+- Power losses: one point less per attack (a Burst Beam's Structure hit 1 -> none, a Medium Burst Beam's 2 -> 1, a Heavy's 4 -> 3, a
+  Shock Cannon's floor(damage/4) - 1, the CW Ion Cannons' 2 -> 1 and 4 -> 3, the BSG EM missile's 1 -> none, the Neutron Burst's 2 -> 1
+  and its per-powerReq loss one less). A resisted Neutron Burst shutdown also takes no power with it (that loss IS the deactivated
+  system's power).
+- Spark Field relief: on each hit any Spark Field (his fleet's, an enemy's, a mine's) scores on his ship, never below 0 - so his own
+  field's +1 and another Surge Officer's -1 cancel.
+- Stun Beam: it never used the old immunity (a contributor had kept Ipsha "still affected"); its weapon/jammer/jump-drive shutdown and
+  its fighter dropout now get the hardening d6, its other effects stay as they were.
+
+**Design.**
+- ⭐ `WeaponEM` (specialWeapons.php) holds the tabletop rules: `isHardened`, `hardenedCriticalRoll` (one hook in `Weapon::doDamage`,
+  beside its single `onDamagedSystem` call - so EVERY EM weapon gets the -2; none overrides `doDamage`), `resistsDropout`,
+  `resistsShutdown`, `powerLoss`. The last three are called at each weapon site that forces a dropout or shutdown or cuts power; the
+  per-system "once a turn" is a WeakMap of system -> turn.
+- `isTargetEMResistant` keeps Advanced Armor and mines; its two hardening lines are commented out with the note the user asked for.
+  Every other caller - the "other effects", the armour bases, the Masers (a Laser that borrowed the helper) - follows with no edit.
+- The officer: `Officers.php` registry `OFF_SURG` after OFF_RELI (`maggrav`, 10%, `apply` `applySurgeOfficer`); `$factionRules` `only`
+  Ipsha Baronies; `surgePower` (⚠️ MIRROR PAIR with `officers.surgePower`), `surgeDamageBonus` (in `getFinalDamage` beside the other
+  officers' - ⚠️ MIRROR PAIR with `officers.surgeDamageBonus`), `surgeHardening` (asked by WeaponEM), `sparkFieldRelief`
+  (`SparkField::beforeDamage`). No new payload: the reactor's `output` is public.
+
+**Files.** Server: `specialWeapons.php` (WeaponEM; Shock Cannon, Burst Beam, Burst Pulse Cannon, Medium/Heavy Burst Beam, Electro-Pulse
+Gun, Stun Beam, Neutron Burst; Spark Field relief), `weapon.php` (the hook; `getFinalDamage`), `customBSG.php` (Lt/Med/Hvy Guided
+Missile S, EM Missile), `customCW.php` (Ion Cannon, Heavy Ion Cannon), `customDevelopment.php` (Ancient Burst Beam, Ancient Shock
+Cannon), `customEscalation.php` (EM Torpedo, Electron Polarizer), `customNexus.php` (Light Burst Beam), `defensive.php` (EM Wave
+Disruptor), `Officers.php`; the 21 Ipsha hull files (the stand-in commented out with a note and the header comment updated; the Ring
+Base hardened). Client: `officers.js` (registry row; `findPost` `maggrav`; `reactorBonus` adds his power; `surgePower`,
+`surgeDamageBonus`, `surgeDamageLine`; `hitBonusLine` shared with `religiousDamageLine`; `adjustDataDisplay` chains his line). Docs: an
+Expert Surge Officer card (ammo-options.html, alphabetical), the Ipsha "EM Hardened" section (factions-tiers.html) and FV_factions.txt
+(the Ipsha entry; the Streib note). Statics and bundles rebuilt; no new PHP class.
+
+**Measured.** 14 OFF_SURG offers in the statics, all Ipsha Baronies (10% rounded up): Battleglobe 70, Battlehex 50, Boltglobe 75,
+Carrier Cube 80, Heavy Carrier Cube 80, Jumpsphere 100, Resohex 60, Rhombus Escort 39, Scout Wheel 80, Surgesphere 105, Tetra Escort
+40, Tetraship 35, Warsphere 100, Ring Base 320 - about 0.7 KB of statics.
+
+**Verified.**
+- `officersHarness.php` **1050 / 0 with the database**, 981 / 0 with `--no-db` (72 new). EM hardening: every Ipsha unit hardened with
+  its tabletop critRollMod; `isTargetEMResistant` (hardened no, Advanced Armor and mines yes); through the REAL `doDamage`: an EM
+  Pulsar's +1 and -2 on a C&C, a second hit that turn +1 only, the next turn's own -2, a Resonance Generator -2 alone, a laser nothing,
+  an unhardened ship +1 only, an Urchin's dropout +2 -2; dropout saves (2 yes, 3 no, no die for an unhardened unit; a Burst Beam on an
+  Urchin - resisted with its log line, or out with no fall-through to the forced-critical branch; a Shock Cannon); shutdown saves (Burst
+  Beam 1 / 2, an unhardened ship with no die, a Heavy Burst Beam's 3-turn one); power (1/2/4 -> 0/1/3; Burst Beam, Heavy Burst Beam and
+  Shock Cannon on Structure, against an Omega's full losses); a Comm Jammer's initiative cut now landing; Burst Beam armour 0 on Ipsha,
+  still halved by Advanced Armor; a Maser's critical bonus applying. The officer: offers and prices on four hulls, none on the Cargo
+  Hauler, the OSAT, an Omega or an Urchin flight, a doctored row; the post, and a technical reactor skipped; power +2 / +2 / +1 / +1 on
+  a Carrier Cube, the Ring Base, a Battlehex, a Tetraship, none on an LCV, +2 on anything enormous; +1 through the REAL
+  `getFinalDamage` on an EM Pulsar, a Resonance Generator, a single Surge Cannon, +5 and +3 on combined shots, his own Spark Field; 0
+  on a roll of 0, a ram, without him, a Burst Beam; the gate; Spark Field relief through a real `SparkField::beforeDamage` (an enemy's
+  field -1, his own +1 on others and 0 on his ship); the enemy payload (raised output, no officer); killed last turn - nothing; his
+  hardening -3 once, on his reactor too, shutdown 2 resisted / 3 not, gate off, without him or killed back to -2 and 1.
+- `officersClientHarness.js` **379 / 0** (18 new: the registry row and order; the lobby post and `maggrav` skipping a plain or an
+  untargetable reactor; `surgePower`; `reactorBonus` capital / HCV / with a Technician / in game / destroyed; the REAL power.js
+  `getReactorPower` +2; `surgeDamageBonus` in every state and mode-1 rule; the Damage lines (9 -> 10, 2-11 -> 3-12, a Spark Field's 0
+  kept), with a Religious Leader's too; the REAL SystemInfo).
+- **Mutation-tested: 44 breaks (34 server, 9 client, 1 through the differential), all caught**, files byte-identical afterwards:
+  the immunity restored, the -2's size, its once-a-turn guard (removed, or forgetting the turn), the `doDamage` hook (removed, or for
+  every weapon class), both saves' sizes and their unhardened guard, the officer's two easings, the power relief and four weapon
+  sites' guards, the log line; every officer clause (combined shots, a roll of 0, the class test, the serving test, each size step,
+  the reactor raise, the Spark Field relief in both places, `getFinalDamage`'s call, the technical-reactor skip, the faction rule, the
+  gate) and their JS mirrors, one through the lobby/server differential. Two first went untested and got a check each before the run:
+  the server's untargetable-reactor skip and its `$Enormous` clause. Two dead checks in `surgeHardening` (a BaseShip / FighterFlight
+  test - every caller has already asked `isHardened`, and no flight carries him) were removed instead.
+- `enhancementsHarness` **278 / 0** - re-recorded (old copy `fingerprint.before-officers-stage16.txt`) after proving the change is only
+  the Jumpsphere's (an Ipsha capital among its hulls): its ship crit +1 (the stand-in gone), its payload hash (a shorter auto-note), its
+  OFF_SURG offer - and the 30 new case blocks (`surg`, `surg+tech+rea`). `enhancementsDifferential.js` **644 / 0** (2 new, the
+  Jumpsphere's reactor compared as the lobby shows it: output + `officers.reactorBonus`).
+- `fvbuild -Check`: autoload current, validator clean, replay **151 / 2** - games **4248 and 4336**, the corpus's Ipsha games, differ
+  ONLY in each Ipsha ship's auto-generated notes line "Critical roll modifier: -1" (the stand-in removed); no damage or critical row
+  moved. Not re-recorded: shown to the user first.
+
+**Observations, not changed:**
+1. ~~The Medium and Heavy Burst Beams (and the Heavy Guided Missile S) create an `OutputReduced1` critical object but save it as
+   `OutputReduced2` / `OutputReduced4`.~~ **Fixed the same day (user: "ensure consistency of effect")**: each is now built as the
+   class it is saved as (`new $loss(...)`, the CW Ion Cannons' pattern). Every later load always read the saved name, so the player
+   saw the full loss from the next turn on before and after; only the firing request's own object was the 1-point class. A
+   whole-tree scan found no other critical built under another name. officersHarness checks the class of all three (1050 / 0), and
+   reverting either file's site fails it.
+2. The EM Torpedo and Electron Polarizer say "+2 to dropout rolls" but their line for it is `if ($ship instanceof FighterFlight) 2;` -
+   a statement that does nothing.
+3. Not tested in a real game. Worth a play test with Ipsha against Ipsha: Surge Cannon rakes on a hardened ship (+2 per rake -2 once),
+   a Burst Beam's "shutdown resisted" line, then a Surge Officer: the reactor's power +2 in Initial Orders, an EM Pulsar's Damage line
+   10, a five-cannon shot +5 in the log.

@@ -6,17 +6,79 @@
 ********************************
 */
 
-class WeaponEM  {	
-	public static function isTargetEMResistant($ship,$system = null){ //returns true if target has Advanced Armor or EM Hardening (which, for simplicity, in FV is treated as AA would be for EM weapons)
+class WeaponEM  {
+	public static function isTargetEMResistant($ship,$system = null){ //returns true if target has Advanced Armor (or is a mine) - EM Hardening is the tabletop rules below
 		if($ship){
-			$EMHardened = $ship->getEMHardened();
+			/* EM HARDENING used to count as Advanced Armor here: hardened units were immune to every EM special effect, and
+			   the armour-ignoring EM weapons halved their armour instead. Replaced 2026-10-18 by the tabletop rules (the
+			   hardening helpers below - OFFICERS_PLAN.md §9.22). Restoring these two lines makes hardened units immune again
+			   to EVERYTHING this method guards - including the effects the tabletop hardening never covered (sensor, OB and
+			   initiative cuts, the EM Bolter's +1 to all criticals), which hit them normally since (user ruling 2026-10-18).
+			   The helpers below would still apply on top. */
+			//$EMHardened = $ship->getEMHardened();
+			//if($EMHardened) return true;
 			if($ship->advancedArmor) return true;
-			if($EMHardened) return true;
 			if($ship instanceof Mine) return true;
 		}else if ($system){
 			if($system->advancedArmor) return true;
 		}
 		return false;
+	}
+
+	/* ------------------------------------------------------------ EM HARDENING - the tabletop rules (Ipsha, Militaries
+	   of the League 2), user request 2026-10-18 (OFFICERS_PLAN.md §9.22). A hardened unit ($EMHardened) is NOT immune: an
+	   EM weapon's effects reach it, each eased by one of the rules below. An Expert Surge Officer serving aboard a hardened
+	   ship eases two of them further (Officers::surgeHardening). */
+	const HARDENED_CRIT_MOD = 2;       //"Any electromagnetic weapon suffers a -2 reduction to its critical hit roll against an affected system" (and a fighter's dropout roll)
+	const HARDENED_DROPOUT_SAVE = 2;   //"...can roll a single d6. If the roll is a 1 or 2, the fighter ignores the forced dropout effect"
+	const HARDENED_SHUTDOWN_SAVE = 1;  //"...permits that system a roll on a single d6. If a 1 is rolled, the system is not deactivated"
+	const HARDENED_POWER_RELIEF = 1;   //"EM weapons which reduce power levels reduce their effect by 1"
+
+	private static $hardenedCrit = null; //system => the turn it took its -2 (once a turn - hardenedCriticalRoll)
+
+	public static function isHardened($ship){
+		return ($ship instanceof BaseShip) && $ship->getEMHardened();
+	}
+
+	/* ⭐ Weapon::doDamage, beside its one onDamagedSystem call, for every system an Electromagnetic shot affects - so every EM
+	   weapon has it, whatever its own effects: -2 on that system's critical roll (a fighter's dropout roll), ONCE a turn
+	   however many EM hits it takes (user ruling 2026-10-18), and "cumulative with all other bonuses or penalties", the EM
+	   weapons' own +X included. -3 on a ship whose Expert Surge Officer serves. critRollMod is the in-memory modifier
+	   ShipSystem::testCritical (and a fighter's dropout test) reads at the end of this same firing request - the one every
+	   EM weapon's own +X uses. */
+	public static function hardenedCriticalRoll($ship, $system, $turn){
+		if (!self::isHardened($ship)) return;
+		if (self::$hardenedCrit === null) self::$hardenedCrit = new WeakMap();
+		if (isset(self::$hardenedCrit[$system]) && self::$hardenedCrit[$system] === (int)$turn) return;
+		self::$hardenedCrit[$system] = (int)$turn;
+		$system->critRollMod -= self::HARDENED_CRIT_MOD + Officers::surgeHardening($ship);
+	}
+
+	/* An EM weapon forcing a hardened fighter out: "can roll a single d6. If the roll is a 1 or 2, the fighter ignores the
+	   forced dropout effect. If the weapon also caused damage, the fighter will still take this damage, and as a result may
+	   need to make a normal dropout roll". true = RESISTED - the caller skips its DisengagedFighter, nothing else. */
+	public static function resistsDropout($ship, $fireOrder = null){
+		if (!self::isHardened($ship)) return false;
+		if (Dice::d(6) > self::HARDENED_DROPOUT_SAVE) return false;
+		if ($fireOrder) $fireOrder->pubnotes .= " EM hardening: dropout resisted. ";
+		return true;
+	}
+
+	/* An EM weapon forcing a system of a hardened unit offline: "permits that system a roll on a single d6. If a 1 is rolled,
+	   the system is not deactivated, but resists the effect. If any damage was caused by the attack, this is still suffered
+	   normally" - 1 or 2 on a ship whose Expert Surge Officer serves. true = RESISTED - the caller skips the shutdown. */
+	public static function resistsShutdown($ship, $fireOrder = null){
+		if (!self::isHardened($ship)) return false;
+		if (Dice::d(6) > self::HARDENED_SHUTDOWN_SAVE + Officers::surgeHardening($ship)) return false;
+		if ($fireOrder) $fireOrder->pubnotes .= " EM hardening: shutdown resisted. ";
+		return true;
+	}
+
+	/* The power an EM attack takes off a hardened unit: one less - "a shock cannon hitting an Ipsha ship and causing the loss
+	   of 2 points of power would instead only lower it by 1 point. If only 1 point was to be lost, this is reduced to zero!" */
+	public static function powerLoss($ship, $points){
+		if (!self::isHardened($ship)) return (int)$points;
+		return max(0, (int)$points - self::HARDENED_POWER_RELIEF);
 	}
 }
 
@@ -282,7 +344,7 @@ class ShockCannon extends Weapon{
 				$dmgToReturn = 0; //no Structure damage
 				if (!WeaponEM::isTargetEMResistant($ship,$system)){ //advanced armor prevents non-damaging EM effects
 					$reactor = $ship->getSystemByName("Reactor");
-					$outputMod = -floor($damage/4);
+					$outputMod = -WeaponEM::powerLoss($ship, floor($damage/4)); //EM hardening: one point less (tabletop)
 					//modifying how the critical is applied - Marcin Sawicki 06.06.2023
 					while($outputMod<=-4){
 						$crit = new OutputReduced4(-1, $ship->id, $reactor->id, "OutputReduced4", $gamedata->turn);
@@ -324,7 +386,7 @@ class ShockCannon extends Weapon{
 			//effects on Structure hits already handled by beforeDamagedSystem
 			if (!WeaponEM::isTargetEMResistant($ship,$system)){ //advanced armor prevents non-damaging EM effects
 				$crit = null;
-				if ($system instanceof Fighter && !($ship->superheavy)){
+				if ($system instanceof Fighter && !($ship->superheavy) && !WeaponEM::resistsDropout($ship, $fireOrder)){ //EM hardening: a d6 of 1-2 resists
 					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 					$crit->updated = true;
 					$crit->inEffect = true;
@@ -436,18 +498,22 @@ class BurstBeam extends Weapon{
 		
 		if (!WeaponEM::isTargetEMResistant($ship,$system)){ //no effect at all vs Advanced Armor
 			if ($system instanceof Fighter && !($ship->superheavy)){
-				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-				$crit->updated = true;
-				$crit->inEffect = true;
-				$system->setCritical($crit); //$system->criticals[] =  $crit;
-				$fireOrder->pubnotes .= " DROPOUT! ";
+				if (!WeaponEM::resistsDropout($ship, $fireOrder)){ //EM hardening: a d6 of 1-2 resists the dropout (tabletop)
+					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->setCritical($crit); //$system->criticals[] =  $crit;
+					$fireOrder->pubnotes .= " DROPOUT! ";
+				}
 			}else if ($system instanceof Structure){
-				$reactor = $ship->getSystemByName("Reactor");
-				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
-				$crit->updated = true;
-				$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
+				if (WeaponEM::powerLoss($ship, 1) > 0){ //EM hardening: a 1-point power loss becomes none (tabletop)
+					$reactor = $ship->getSystemByName("Reactor");
+					$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
+					$crit->updated = true;
+					$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
+				}
 			}else if ($system->powerReq > 0 || $system->canOffLine ){
-				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+				if (!WeaponEM::resistsShutdown($ship, $fireOrder)) $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata); //EM hardening: a d6 of 1 resists the shutdown (tabletop)
 			} else { //force critical roll at +4
 				$system->forceCriticalRoll = true;
 				$system->critRollMod += 4;
@@ -552,18 +618,22 @@ class BurstPulseCannon extends Pulse {
 		
 		if (!WeaponEM::isTargetEMResistant($ship,$system)){ //no effect at all vs Advanced Armor
 			if ($system instanceof Fighter && !($ship->superheavy)){
-				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-				$crit->updated = true;
-				$crit->inEffect = true;
-				$system->setCritical($crit); //$system->criticals[] =  $crit;
-				$fireOrder->pubnotes .= " DROPOUT! ";
+				if (!WeaponEM::resistsDropout($ship, $fireOrder)){ //EM hardening: a d6 of 1-2 resists the dropout (tabletop)
+					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->setCritical($crit); //$system->criticals[] =  $crit;
+					$fireOrder->pubnotes .= " DROPOUT! ";
+				}
 			}else if ($system instanceof Structure){
-				$reactor = $ship->getSystemByName("Reactor");
-				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
-				$crit->updated = true;
-				$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
+				if (WeaponEM::powerLoss($ship, 1) > 0){ //EM hardening: a 1-point power loss becomes none (tabletop)
+					$reactor = $ship->getSystemByName("Reactor");
+					$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
+					$crit->updated = true;
+					$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
+				}
 			}else if ($system->powerReq > 0 || $system->canOffLine ){
-				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+				if (!WeaponEM::resistsShutdown($ship, $fireOrder)) $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata); //EM hardening: a d6 of 1 resists the shutdown (tabletop)
 			} else { //force critical roll at +4
 				$system->forceCriticalRoll = true;
 				$system->critRollMod += 4;
@@ -642,23 +712,28 @@ class MediumBurstBeam extends BurstBeam{
 		if ($system instanceof Fighter){ //regular fighter drops out automatically, superheavy on a roll of 1 on d6
 			$roll = Dice::d(6);
 			if ((!$ship->superheavy) || ($roll < 2)){
-				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-				$crit->updated = true;
-				$crit->inEffect = true;
-				$system->setCritical($crit); //$system->criticals[] =  $crit;
-				$fireOrder->pubnotes .= " DROPOUT! ";
+				if (!WeaponEM::resistsDropout($ship, $fireOrder)){ //EM hardening: a d6 of 1-2 resists the dropout (tabletop)
+					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->setCritical($crit); //$system->criticals[] =  $crit;
+					$fireOrder->pubnotes .= " DROPOUT! ";
+				}
 			}
 		}
 		else if ($system instanceof Structure){
 			$reactor = $ship->getSystemByName("Reactor");
-			$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced2", $gamedata->turn);
+			$loss = 'OutputReduced' . WeaponEM::powerLoss($ship, 2); //EM hardening: one point less (tabletop)
+			$crit = new $loss(-1, $ship->id, $reactor->id, $loss, $gamedata->turn); //built as the class it is saved as (was an OutputReduced1 saved as OutputReduced2)
 			$crit->updated = true;
 			$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
 		}
 		else if ($system->powerReq > 0 || $system->canOffLine ){
-			$crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, $gamedata->turn+2);
-			$crit->updated = true;
-			$system->setCritical($crit); //$system->criticals[] = $crit;
+			if (!WeaponEM::resistsShutdown($ship, $fireOrder)){ //EM hardening: a d6 of 1 resists the shutdown (tabletop)
+				$crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, $gamedata->turn+2);
+				$crit->updated = true;
+				$system->setCritical($crit); //$system->criticals[] = $crit;
+			}
 		}
 		else {//force critical roll at +6
 			$system->forceCriticalRoll = true;
@@ -725,23 +800,28 @@ class HeavyBurstBeam extends BurstBeam{
 		if ($system instanceof Fighter){ //regular fighter drops out automatically, superheavy on a roll of 1 on d3
 			$roll = Dice::d(3);
 			if ((!$ship->superheavy) || ($roll < 2)){
-				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-				$crit->updated = true;
-				$crit->inEffect = true;
-				$system->setCritical($crit); //$system->criticals[] =  $crit;
-				$fireOrder->pubnotes .= " DROPOUT! ";
+				if (!WeaponEM::resistsDropout($ship, $fireOrder)){ //EM hardening: a d6 of 1-2 resists the dropout (tabletop)
+					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->setCritical($crit); //$system->criticals[] =  $crit;
+					$fireOrder->pubnotes .= " DROPOUT! ";
+				}
 			}
 		}
 		else if ($system instanceof Structure){
 			$reactor = $ship->getSystemByName("Reactor");
-			$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced4", $gamedata->turn);
+			$loss = 'OutputReduced' . WeaponEM::powerLoss($ship, 4); //EM hardening: one point less (tabletop)
+			$crit = new $loss(-1, $ship->id, $reactor->id, $loss, $gamedata->turn); //built as the class it is saved as (was an OutputReduced1 saved as OutputReduced4)
 			$crit->updated = true;
 			$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
 		}
 		else if ($system->powerReq > 0 || $system->canOffLine ){
-			$crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, $gamedata->turn+3);
-			$crit->updated = true;
-			$system->setCritical($crit); //$system->criticals[] = $crit;
+			if (!WeaponEM::resistsShutdown($ship, $fireOrder)){ //EM hardening: a d6 of 1 resists the shutdown (tabletop)
+				$crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, $gamedata->turn+3);
+				$crit->updated = true;
+				$system->setCritical($crit); //$system->criticals[] = $crit;
+			}
 		}
 		else {//force critical roll at +8
 			$system->forceCriticalRoll = true;
@@ -826,7 +906,7 @@ class ElectroPulseGun extends Weapon{
 			}
 			}
 
-			if ( ($system instanceof Fighter) && (!($ship->superheavy)) && ($affect > 0)){
+			if ( ($system instanceof Fighter) && (!($ship->superheavy)) && ($affect > 0) && !WeaponEM::resistsDropout($ship, $fireOrder)){ //EM hardening: a d6 of 1-2 resists (tabletop)
 			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = true;
@@ -909,7 +989,7 @@ class StunBeam extends Weapon{
 		return; 
 		}else if ($system instanceOf Weapon || $system instanceOf JumpEngine || $system instanceOf Jammer){ //Deactivate for 1 turn.
 			if ($system->powerReq > 0 || $system->canOffLine ){
-			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+			if (!WeaponEM::resistsShutdown($ship, $fireOrder)) $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata); //EM hardening: a d6 of 1 resists the shutdown (tabletop)
 			}
 		}else if ($system instanceOf Thruster){ //Can't deactivate thurster, but can render it unusable for 1 turn using mulitple FirstThrustIgnored crits.
 			$thrusterOutput = $system->getOutput();	
@@ -924,6 +1004,7 @@ class StunBeam extends Weapon{
 		}else if($system instanceOf Scanner || $system instanceOf Engine) { //Halve output for 1 turn.					
 			$system->addCritical($ship->id, "OutputHalvedOneTurn", $gamedata);								
 		}else if ($system instanceof Fighter && !($ship->superheavy)){ //Dropout unless super heavy fighter.
+			if (WeaponEM::resistsDropout($ship, $fireOrder)) return; //EM hardening: a d6 of 1-2 resists the dropout (tabletop)
 			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = true;
@@ -1595,6 +1676,8 @@ class SparkField extends Weapon implements DefensiveSystem{
 	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
 		if (!($target instanceof FighterFlight)){ //ship - as usual
 			$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+			//an Expert Surge Officer aboard the target: "any spark field affecting the ship reduces its damage by 1 point" (OFFICERS_PLAN.md §9.22)
+			if (TacGamedata::$officersPresent) $damage = max(0, $damage - Officers::sparkFieldRelief($target));
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
 		}else{//fighter flight - separate hit on each fighter!
 			foreach ($target->systems as $fighter){
@@ -10829,6 +10912,7 @@ class NeutronBurst extends Weapon {
         // --- Fighter hit ---
         if ($system instanceof Fighter) {
             if (!$ship->superheavy) {
+                if (WeaponEM::resistsDropout($ship, $fireOrder)) return; //EM hardening: a d6 of 1-2 resists the dropout (tabletop)
                 $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
                 $crit->updated = true;
                 $crit->inEffect = true;
@@ -10857,13 +10941,13 @@ class NeutronBurst extends Weapon {
                     // Reactor vessel: apply two one-turn OutputReduced1 criticals
                     $reactor = $ship->getSystemByName("Reactor");
                     if ($reactor) {
-                        $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn, $gamedata->turn + 1);
-                        $crit->updated = true;
-                        $reactor->setCritical($crit);
-                        $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn, $gamedata->turn + 1);
-                        $crit->updated = true;
-                        $reactor->setCritical($crit);
-                        $fireOrder->pubnotes .= " [Neutron Burst: -2 power output next turn] ";
+                        $loss = WeaponEM::powerLoss($ship, 2); //EM hardening: one point less (tabletop)
+                        for ($i = 0; $i < $loss; $i++) {
+                            $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn, $gamedata->turn + 1);
+                            $crit->updated = true;
+                            $reactor->setCritical($crit);
+                        }
+                        $fireOrder->pubnotes .= " [Neutron Burst: -{$loss} power output next turn] ";
                     }
                 }
             }
@@ -10881,7 +10965,7 @@ class NeutronBurst extends Weapon {
 
         // --- Weapon hit: deactivate for one turn, power is lost ---
         if ($system instanceof Weapon) {
-            if (!$system->isDestroyed()) {
+            if (!$system->isDestroyed() && !WeaponEM::resistsShutdown($ship, $fireOrder)) { //EM hardening: a d6 of 1 resists the shutdown, and its power loss with it (tabletop)
                 $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
                 $fireOrder->pubnotes .= " [Neutron Burst: weapon deactivated] ";
                 $capacitor = $ship->getSystemByName("PowerCapacitor");
@@ -10899,7 +10983,7 @@ class NeutronBurst extends Weapon {
                     if ($system->powerReq > 0) {
                         $reactor = $ship->getSystemByName("Reactor");
                         if ($reactor) {
-                            for ($i = 0; $i < $system->powerReq; $i++) {
+                            for ($i = 0; $i < WeaponEM::powerLoss($ship, $system->powerReq); $i++) { //EM hardening: one point less (tabletop)
                                 $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn, $gamedata->turn + 1);
                                 $crit->updated = true;
                                 $reactor->setCritical($crit);
@@ -10915,12 +10999,13 @@ class NeutronBurst extends Weapon {
         // --- Non-weapon, non-powered system hit: forced +5 critical roll ---
         // Covers engines, thrusters, sensors, C&C, etc.
         if ($system->powerReq > 0 || (!empty($system->canOffLine))) {
+            if (WeaponEM::resistsShutdown($ship, $fireOrder)) return; //EM hardening: a d6 of 1 resists the shutdown, and its power loss with it (tabletop)
             $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
             $fireOrder->pubnotes .= " [Neutron Burst: system deactivated] ";
             if ($system->powerReq > 0) {
                 $reactor = $ship->getSystemByName("Reactor");
                 if ($reactor) {
-                    for ($i = 0; $i < $system->powerReq; $i++) {
+                    for ($i = 0; $i < WeaponEM::powerLoss($ship, $system->powerReq); $i++) { //EM hardening: one point less (tabletop)
                         $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn, $gamedata->turn + 1);
                         $crit->updated = true;
                         $reactor->setCritical($crit);

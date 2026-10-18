@@ -52,7 +52,7 @@ window.officers = {
 		/* Stage 11: no stat moves - his flat bonus and the boost are the server's at damage time; the owner's tooltip
 		   shows both (adjustDataDisplay, laserBoostText), and the boost buttons come with the payload (boostable). */
 		{ id: 'OFF_LASR', label: 'Expert Laser Technician', post: 'reactor', needs: 'laserWeapon',
-			summary: 'Lasers +1 damage (Blast Lasers +2, Spinal Lasers +3). Power may be put into any laser in Initial Orders: +1 damage per point, never more than half the roll' },
+			summary: 'Lasers +1 damage (Blast Lasers +2, Spinal Lasers +3). Power may be put into any laser in Initial Orders: +1 damage per point' },
 		/* Stage 12: his damage and range-damage rules are the server's at damage time (the owner's Damage line shows the
 		   +1/+2 - plasmaDamageLine); a battery's extra point is charged at the commit (batteryCapacityBonus); a web's
 		   range arrives in the payload. */
@@ -67,6 +67,10 @@ window.officers = {
 		   `movable`: to any primary non-weapon system - the server's `targets` say which. */
 		{ id: 'OFF_RELI', label: 'Expert Religious Leader', post: 'cnc', movable: true, stats: { iniativebonus: 10 },
 			summary: '+10 initiative, +1 damage on every hit; once he is lost: +20 initiative, +1 sensors, +5% to be hit' },
+		/* Stage 16: the reactor's extra power is previewed in the lobby (reactorBonus - in game the server raised `output`); his +1 per
+		   EM hit raises the owner's Damage lines (surgeDamageLine); his hardening and the Spark Field relief are the server's alone. */
+		{ id: 'OFF_SURG', label: 'Expert Surge Officer', post: 'maggrav',
+			summary: 'EM weapons +1 damage; Extra power from Reactor; EM criticals -3, Shutdowns resisted on 1-2; Spark Fields deal 1 less damage to this ship' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -74,9 +78,9 @@ window.officers = {
 		   the C&C and his Matter weapons, as one man); `abilities` - the Gunner's once-per-battle three;
 		   `reload` - his weapon reloads a turn faster. */
 		{ id: 'OFF_GUN', label: 'Expert Gunner', placed: true, movable: true, abilities: true,
-			summary: '+1 fire control and +1 damage per die for this weapon. Once per battle each:  +1 turn towards first reload, make a Piercing shot (or ignore Piercing FC penalty), and +15% on a called shot' },
+			summary: '+1 fire control and +1 damage per die. Once per battle each:  +1 turn towards reload, Piercing shot (or ignore Piercing FC penalty), +15% on called shot' },
 		{ id: 'OFF_MWEW', label: 'Matter Weapons Expert', placed: true, sameAs: 'OFF_MWE', anyDamage: true, movable: true, reload: true,
-			summary: '+1 fire control and +1 damage for this Matter weapon, which reloads a turn faster; disabled by any damage to it, killed if it is destroyed' },
+			summary: '+1 fire control and +1 damage for this Matter weapon, which reloads a turn faster;' },
 		/* Stage 15: the Expert Religious Leader away from his C&C - in any other primary non-weapon system (the server's
 		   offers say which). The same officer as OFF_RELI (sameAs), with the same effects. */
 		{ id: 'OFF_RELIP', label: 'Expert Religious Leader', placed: true, sameAs: 'OFF_RELI', movable: true, stats: { iniativebonus: 10 },
@@ -124,6 +128,8 @@ window.officers = {
 	     scanner  the strongest scanner by output - the list and the pick Elite Crew's lobby mirror uses
 	     reactor  the biggest reactor by maxhealth - likewise
 	     engine   the strongest engine by output - the pick Poor Crew's and ADV_ENG's lobby mirrors use
+	     maggrav  the first Mag-Gravitic Reactor that can be hit: a reactor with fixedPower (the Thirdspace drive has it
+	              too, but it is Ancient - no officers) that is targetable (never a MagGravReactorTechnical)
 	     jump     the first jump drive that opens jump points: a legacy drive's range is 0 (markLegacy), the
 	              lobby JUMP_ACC case's own test. The one gate drive (JumpgateCapital) is on terrain, which
 	              carries no officers.
@@ -158,6 +164,13 @@ window.officers = {
 		}
 		if (post === 'engine') {
 			return this.strongest(ship, systems.filter(function (s) { return s && s.name === 'engine'; }), 'output', -1);
+		}
+		if (post === 'maggrav') {
+			for (var m = 0; m < systems.length; m++) {
+				var r = systems[m];
+				if (r && r.name === 'reactor' && r.fixedPower && r.isTargetable !== false) return r;
+			}
+			return null;
 		}
 		if (post === 'jump') {
 			for (var j = 0; j < systems.length; j++) {
@@ -1095,12 +1108,17 @@ window.officers = {
 	/* Expert Technician, in the lobby: what he adds to THIS reactor's output - 0 unless it is his post.
 	   +2, plus a third (rounded down, per system) of the powerReq of every destroyed system, which in the
 	   lobby can only be pre-battle damage. power.js getReactorPower adds it to the balance.
-	   ⚠️ MIRROR PAIR with Officers::technicianBonus (PHP). */
+	   ⚠️ MIRROR PAIR with Officers::technicianBonus (PHP).
+	   Stage 16: an Expert Surge Officer's power on his Mag-Gravitic Reactor too (surgePower) - one may share it with a
+	   Technician, so the two add up. */
 	reactorBonus: function reactorBonus(ship, system) {
 		if (!system) return 0;
 		var serving = this.servingDerived(ship);
+		var total = 0;
 		for (var i = 0; i < serving.length; i++) {
-			if (serving[i].id !== 'OFF_TECH' || String(serving[i].post) !== String(system.id)) continue;
+			if (String(serving[i].post) !== String(system.id)) continue;
+			if (serving[i].id === 'OFF_SURG') total += this.surgePower(ship);
+			if (serving[i].id !== 'OFF_TECH') continue;
 			var bonus = 2;
 			var self = this;
 			this.systemsOf(ship).forEach(function (s) {
@@ -1108,8 +1126,17 @@ window.officers = {
 				var req = parseInt(s.powerReq, 10) || 0;
 				if (req > 0 && self.isPostDestroyed(ship, s)) bonus += Math.floor(req / 3);
 			});
-			return bonus;
+			total += bonus;
 		}
+		return total;
+	},
+
+	/* Expert Surge Officer: +2 power on a capital ship or larger, +1 on a medium ship or HCV, none on an LCV.
+	   ⚠️ MIRROR PAIR with Officers::surgePower (PHP). */
+	surgePower: function surgePower(ship) {
+		if (!ship) return 0;
+		if (ship.Enormous || Number(ship.shipSizeClass) >= 3) return 2;
+		if (Number(ship.shipSizeClass) >= 1) return 1;
 		return 0;
 	},
 
@@ -1325,7 +1352,11 @@ window.officers = {
 	   hit rolling 0 gains nothing (the server's rule). Applied after a Laser Technician's or Plasma Scientist's raise, so
 	   the bonuses add up. A line in any other shape is left alone. */
 	religiousDamageLine: function religiousDamageLine(ship, system, value) {
-		var bonus = this.religiousDamageBonus(ship, system);
+		return this.hitBonusLine(system, value, this.religiousDamageBonus(ship, system));
+	},
+
+	//a Damage line with a flat bonus on every hit - religiousDamageLine's rule, shared with surgeDamageLine (Stage 16)
+	hitBonusLine: function hitBonusLine(system, value, bonus) {
 		if (!bonus) return value;
 		var m = /^\s*(\d+)\s*(?:-\s*(\d+))?\s*$/.exec(String(value));
 		if (!m) return value;
@@ -1333,6 +1364,27 @@ window.officers = {
 		if (parseInt(this.modeOneDamage(system.minDamageArray, system.minDamage), 10) !== 0) lo += bonus;
 		hi += bonus;
 		return (lo === hi) ? String(hi) : lo + '-' + hi;
+	},
+
+	/* ------------------------------------------------------------------ Expert Surge Officer (Stage 16) */
+
+	/* What he adds to a hit from this weapon in mode 1 (the mode its Damage line describes): +1 for an Electromagnetic mode 1
+	   while he serves - a Surge Cannon's mode 1 is one cannon, so +1 too (a combined shot's +1 per cannon is the server's,
+	   and the officer's summary says it). A weapon whose mode-1 roll cannot pass 0 (a Burst Beam) gains nothing. The lobby's
+	   derived list and the owner's server list both answer; an enemy's list is empty.
+	   ⚠️ MIRROR PAIR with Officers::surgeDamageBonus (PHP). */
+	SURGE_DAMAGE: 1,
+	surgeDamageBonus: function surgeDamageBonus(ship, system) {
+		if (!ship || ship.flight || !system || !system.weapon) return 0;
+		var classes = system.weaponClassArray;
+		var cls = (classes && typeof classes === 'object' && classes[1] !== undefined) ? classes[1] : system.weaponClass;
+		if (cls !== 'Electromagnetic') return 0;
+		if (!(parseInt(this.modeOneDamage(system.maxDamageArray, system.maxDamage), 10) > 0)) return 0;
+		return this.isActive(ship, 'OFF_SURG') ? this.SURGE_DAMAGE : 0;
+	},
+
+	surgeDamageLine: function surgeDamageLine(ship, system, value) {
+		return this.hitBonusLine(system, value, this.surgeDamageBonus(ship, system));
 	},
 
 	/* SystemInfo's one hook into a system's data rows (and its Special text). The weapon tooltip quotes fire
@@ -1345,7 +1397,7 @@ window.officers = {
 	   Stage 11: a laser's Damage, with an Expert Laser Technician's bonus and boost (laserDamageLine) - in game too,
 	   where the server applies both only at damage time. Stage 12: a plasma weapon's, with an Expert Plasma Scientist's
 	   +1 or +2 (plasmaDamageLine), the same way. Stage 14: every weapon's, with an Expert Religious Leader's +1 on top
-	   (religiousDamageLine). */
+	   (religiousDamageLine). Stage 16: an EM weapon's, with an Expert Surge Officer's +1 (surgeDamageLine). */
 	DATA_KEY_FIRECONTROL: 'Fire control (fighter/med/cap)',
 	adjustDataDisplay: function adjustDataDisplay(ship, system, key, value) {
 		if (!system) return value;
@@ -1353,7 +1405,7 @@ window.officers = {
 			var line = value;
 			if (this.isLaserWeapon(system)) line = this.laserDamageLine(ship, system, line);
 			else if (this.isPlasmaWeapon(system)) line = this.plasmaDamageLine(ship, system, line);
-			return this.religiousDamageLine(ship, system, line);
+			return this.surgeDamageLine(ship, system, this.religiousDamageLine(ship, system, line));
 		}
 		if (system.name === 'jumpEngine' && (key === 'Range' || key === 'Special')) {
 			var bonus = this.jumpRangeBonus(ship, system);

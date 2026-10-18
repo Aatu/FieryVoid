@@ -16,7 +16,7 @@ class FtrUrchin extends FighterFlight{
         //no need to make a note, this is commented in standard now
         //$this->notes .= '<br>-3 critical roll bonus'; //Urchin should have -2, and additional -1 replaces bonus vs EM weapons for all Ipsha
         $this->EMHardened = true; //EM Hardening - some weapons would check for this value!
-        $this->critRollMod = -3; //generalbonus to critical/dropout rolls!
+        $this->critRollMod = -2; //generalbonus to critical/dropout rolls! (was -3: the extra -1 was FV's old stand-in for EM hardening, replaced by the tabletop rules (WeaponEM, OFFICERS_PLAN.md §9.22, 2026-10-18))
         
         $this->forwardDefense = 8;
         $this->sideDefense = 8;

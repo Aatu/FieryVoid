@@ -51,6 +51,8 @@
    effect (`lost`: his crew's frenzy).
    Stage 15: the Religious Leader's placed twin (OFF_RELIP, any primary non-weapon system - the Matter Weapons Expert's
    pattern), so the lobby can post him anywhere; the lobby's own Move is client-side (officers.lobbyMove), writing rows.
+   Stage 16: the Expert Surge Officer (Ipsha) - +1 damage on EM weapons, reactor power by size, his ship's EM hardening (the
+   tabletop rules, rebuilt the same stage in WeaponEM) eased further, and Spark Fields 1 weaker against him.
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -92,6 +94,11 @@ class Officers{
 	const RELIGIOUS_DAMAGE = 1;          //...: "each weapon the ship fires scores +1 damage per volley" - per hit (user ruling)
 	const FRENZY_SENSORS = 1;            //...if he is wounded, captured or killed: "the ship receives +1 to its sensors"
 	const FRENZY_PROFILE = 1;            //...: "and +5 to its defense profiles" - FV's displayed 5, one profile point (user ruling)
+	const SURGE_DAMAGE = 1;              //Surge Officer: "All electromagnetic-category weapons add +1 damage" - per hit; a combined Surge Cannon shot +1 per cannon
+	const SURGE_POWER_CAPITAL = 2;       //...: "Capital ships and larger receive +2 points of power"
+	const SURGE_POWER_MEDIUM = 1;        //...: "while medium ships and HCVs get +1 extra power. LCVs and smaller units gain no extra benefits"
+	const SURGE_HARDENING = 1;           //...: EM criticals "-3 penalty (not -2)", and a forced shutdown resisted on "a 1 or 2" (not 1) - WeaponEM
+	const SURGE_SPARK_RELIEF = 1;        //...: "Any spark field affecting the ship reduces its damage by 1 point"
 
 	/* ⭐ FACTION RULES (user request 2026-10-15) - which factions an officer is offered to, and what some
 	   of them pay. ONE table, so a faction's officers change here and nowhere else: README.md, "Officers:
@@ -124,6 +131,8 @@ class Officers{
 		'OFF_SECU' => array('pct' => array('Earth Alliance' => 5, 'Earth Alliance (Early)' => 5, 'Earth Alliance (defenses)' => 5)),
 		//"Availability: Minbari, Markab, Corillani and Yolu factions" - the Minbari Protectorate not included (user ruling 2026-10-17)
 		'OFF_RELI' => array('only' => array('Minbari Federation', 'Markab Theocracy', 'Corillani Theocracy', 'Yolu Confederation')),
+		//"Availability: Ipsha only" - not the Civilians' Ipsha-built Cargo Hauler
+		'OFF_SURG' => array('only' => array('Ipsha Baronies')),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -257,6 +266,14 @@ class Officers{
 		'OFF_RELI' => array('label' => 'Expert Religious Leader', 'post' => 'cnc', 'pct' => 15, 'apply' => 'applyReligiousLeader',
 			'publish' => array('iniativebonus'), 'lost' => 'applyReligiousFrenzy',
 			'lostPublish' => array('iniativebonus', 'forwardDefense', 'sideDefense'), 'movable' => true),
+		/* Expert Surge Officer (Stage 16; rules text, user 2026-10-18), in the Mag-Gravitic Reactor. Every hit his ship's
+		   Electromagnetic weapons score +1 - a combined Surge Cannon shot +1 per cannon in it, an EM Pulsar +1 per pulse, his own
+		   Spark Field too (surgeDamageBonus); the reactor +2 power on a capital ship or larger, +1 on a medium ship or HCV, none
+		   smaller (applySurgeOfficer); his ship's EM hardening eased further - EM critical rolls -3 instead of -2, a forced shutdown
+		   resisted on 1-2 instead of 1 (surgeHardening, asked by WeaponEM); and any Spark Field's damage on his ship -1
+		   (sparkFieldRelief). Rulings (user 2026-10-18): EM hardening rebuilt to the tabletop rules first (WeaponEM); the -3 is once
+		   per system per turn, as the -2; his own Spark Field gains the +1. 10%, Ipsha only ($factionRules). */
+		'OFF_SURG' => array('label' => 'Expert Surge Officer', 'post' => 'maggrav', 'pct' => 10, 'apply' => 'applySurgeOfficer'),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -507,6 +524,8 @@ class Officers{
 	     reactor  the biggest Reactor by maxhealth - Elite Crew's rule (a malus would sit on the main
 	              reactor too); Mag-Grav reactors included.
 	     engine   the strongest Engine by output - the one Poor Crew and ADV_ENG move (Stage 5)
+	     maggrav  the first Mag-Gravitic Reactor that can be hit (Stage 16): never a MagGravReactorTechnical, which can
+	              never be damaged - so its officer could never be disabled or killed. Every Ipsha hull has exactly one.
 	     jump     the first jump drive that opens jump points (Stage 7): not a legacy drive (the one-click
 	              Hyperdrive / FTL Drive / Phasing Drive / Trek Nacelle, and every Ancient's), not a fixed
 	              gate's. Through getUnitJumpEngines, never a sweep of $ship->systems ([[project_jump_points]]).
@@ -532,6 +551,11 @@ class Officers{
 				return self::strongest($ship, 'Scanner', 'output', -1);
 			case 'reactor':
 				return self::strongest($ship, 'Reactor', 'maxhealth', -1000);
+			case 'maggrav':
+				foreach ($ship->systems as $system){
+					if ($system instanceof MagGravReactor && $system->isTargetable) return $system;
+				}
+				return null;
 			case 'engine':
 				return self::strongest($ship, 'Engine', 'output', -1);
 			case 'jump':
@@ -1896,6 +1920,51 @@ class Officers{
 			return (self::serves($entry, $turn) || self::isLost($entry, $turn)) ? self::RELIGIOUS_DAMAGE : 0;
 		}
 		return 0;
+	}
+
+	/* ------------------------------------------------------------------ Expert Surge Officer (Stage 16) */
+
+	/* +2 power on a capital ship or larger, +1 on a medium ship or HCV, none on an LCV - the Mag-Gravitic Reactor's output, raised
+	   at load as the Technician's is: `output` reaches every client and power.js reads it, so the game's power balance needs
+	   nothing more (the lobby previews it - officers.reactorBonus). */
+	private static function applySurgeOfficer($ship, $entry, $turn){
+		$reactor = $ship->getSystemById($entry['post']);
+		if ($reactor !== null) $reactor->output += self::surgePower($ship);
+	}
+
+	/* "Capital ships and larger" - size class 3, and FV's enormous units ($Enormous); "medium ships and HCVs" - 1 and 2;
+	   "LCVs and smaller" - 0. ⚠️ MIRROR PAIR with officers.surgePower (JS). */
+	public static function surgePower($ship){
+		if (!empty($ship->Enormous) || (int)$ship->shipSizeClass >= 3) return self::SURGE_POWER_CAPITAL;
+		if ((int)$ship->shipSizeClass >= 1) return self::SURGE_POWER_MEDIUM;
+		return 0;
+	}
+
+	/* ⭐ His +1 damage: Weapon::getFinalDamage, which runs once per HIT, for a shot in an Electromagnetic mode - so an EM Pulsar
+	   gains it on every pulse ("+1 damage per pulse"), a Resonance Generator on every section it strikes, and a raking Surge
+	   Cannon once per shot: +1 for each cannon in it ("a five-weapon blast would score +5 damage") - its firingMode is the
+	   number of cannons combined, and the shot it falls back to when too few join is mode 1. His own ship's Spark Field gains
+	   it too (user ruling 2026-10-18). Never on a hit whose roll is 0 (the Burst Beams and Electro-Pulse Gun roll none - their
+	   effect is something else; a Spark Field boosted down to 0 stays 0), the Religious Leader's rule. Behind $officersPresent.
+	   ⚠️ MIRROR PAIR with officers.surgeDamageBonus (JS), which raises the owner's Damage lines. */
+	public static function surgeDamageBonus($ship, $weapon, $rolled){
+		if ($rolled <= 0 || $weapon->weaponClass !== 'Electromagnetic') return 0;
+		if (!self::isActive($ship, 'OFF_SURG')) return 0;
+		if ($weapon instanceof SurgeCannon) return max(1, (int)$weapon->firingMode) * self::SURGE_DAMAGE;
+		return self::SURGE_DAMAGE;
+	}
+
+	/* How much further he eases his ship's EM hardening: 1 while he serves - "a -3 penalty (not -2)" on an EM weapon's critical
+	   roll, and a forced shutdown resisted on "a 1 or 2" instead of a 1. WeaponEM asks it only for a hardened unit. */
+	public static function surgeHardening($ship){
+		if (!TacGamedata::$officersPresent) return 0;
+		return self::isActive($ship, 'OFF_SURG') ? self::SURGE_HARDENING : 0;
+	}
+
+	/* "Any spark field affecting the ship reduces its damage by 1 point" - SparkField::beforeDamage, on each hit a field (his
+	   fleet's, an enemy's or a mine's) scores on his ship; never below 0. */
+	public static function sparkFieldRelief($ship){
+		return self::isActive($ship, 'OFF_SURG') ? self::SURGE_SPARK_RELIEF : 0;
 	}
 
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */

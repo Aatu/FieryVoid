@@ -3215,11 +3215,13 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
            laser, at most half of $rolled, from one pool for the turn - added after the weapon's own reductions, as
            getDamageMod adds the flat bonuses. An Expert Plasma Scientist's +1 (+2 for a Fuser, Stage 12) - here, not
            in getBonusDamage, because six plasma weapons override getDamageMod and drop the parent's result. An Expert Religious
-           Leader's +1 on every hit (Stage 14) - this method runs once per hit, which is his "per volley". Behind the static. */
+           Leader's +1 on every hit (Stage 14) - this method runs once per hit, which is his "per volley". An Expert Surge
+           Officer's +1 on every Electromagnetic hit, +1 per cannon on a combined Surge Cannon shot (Stage 16). Behind the static. */
         if (TacGamedata::$officersPresent && $shooter instanceof BaseShip){
             $damage += Officers::laserBoostDamage($shooter, $this, $rolled, $target, $fireOrder);
             $damage += Officers::plasmaDamageBonus($shooter, $this);
             $damage += Officers::religiousDamageBonus($shooter, $this, $rolled);
+            $damage += Officers::surgeDamageBonus($shooter, $this, $rolled);
         }
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		
@@ -3316,6 +3318,8 @@ full Advanced Armor effects (by rules) for reference:
 			$damage = $this->beforeDamagedSystem($target, $system, $damage, $armour, $gamedata, $fireOrder);
 			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos, $damageWasDealt); //Also applies armor pierced for sustained shots  - DK 02.25
 			$this->onDamagedSystem($target, $system, $effects["dmgDealt"], $effects["armorPierced"], $gamedata, $fireOrder);//weapons that do effects on hitting something
+			//EM hardening (tabletop, OFFICERS_PLAN.md §9.22): -2 on the critical roll of a hardened unit's system an EM shot affects, once a turn
+			if ($this->weaponClass === 'Electromagnetic') WeaponEM::hardenedCriticalRoll($target, $system, $gamedata->turn);
 			$damage = $effects["dmgRemaining"];
 			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier. All Sustained weapons are currently raking, so they can use standard method here - DK
 				$armourIgnored = $armourIgnored + $effects["armorPierced"]; 

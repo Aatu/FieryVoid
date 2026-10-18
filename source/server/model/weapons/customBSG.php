@@ -1447,13 +1447,15 @@ class BSGHypergunVA extends Pulse{
 		
 				if (!WeaponEM::isTargetEMResistant($ship,$system)){ //no effect at all vs Advanced Armor
 					if ($system instanceof Fighter && !($ship->superheavy)){
-						$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-						$crit->updated = true;
-						$crit->inEffect = true;
-						$system->criticals[] =  $crit;
-						$fireOrder->pubnotes .= " DROPOUT! ";
+						if (!WeaponEM::resistsDropout($ship, $fireOrder)){ //EM hardening: a d6 of 1-2 resists the dropout (tabletop)
+							$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+							$crit->updated = true;
+							$crit->inEffect = true;
+							$system->criticals[] =  $crit;
+							$fireOrder->pubnotes .= " DROPOUT! ";
+						}
 					}else if ($system->powerReq > 0 || $system->canOffLine ){
-						$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+						if (!WeaponEM::resistsShutdown($ship, $fireOrder)) $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata); //EM hardening: a d6 of 1 resists the shutdown (tabletop)
 					} else { //force critical roll at +4
 						$system->forceCriticalRoll = true;
 						$system->critRollMod += 1;
@@ -1608,18 +1610,22 @@ class BSGHypergunVA extends Pulse{
 		
 				if (!WeaponEM::isTargetEMResistant($ship,$system)){ //no effect at all vs Advanced Armor
 					if ($system instanceof Fighter && !($ship->superheavy)){
-						$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-						$crit->updated = true;
-						$crit->inEffect = true;
-						$system->criticals[] =  $crit;
-						$fireOrder->pubnotes .= " DROPOUT! ";
+						if (!WeaponEM::resistsDropout($ship, $fireOrder)){ //EM hardening: a d6 of 1-2 resists the dropout (tabletop)
+							$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+							$crit->updated = true;
+							$crit->inEffect = true;
+							$system->criticals[] =  $crit;
+							$fireOrder->pubnotes .= " DROPOUT! ";
+						}
 					}else if ($system instanceof Structure){
-						$reactor = $ship->getSystemByName("Reactor");
-						$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
-						$crit->updated = true;
-						$reactor->criticals[] =  $crit;
+						if (WeaponEM::powerLoss($ship, 1) > 0){ //EM hardening: a 1-point power loss becomes none (tabletop)
+							$reactor = $ship->getSystemByName("Reactor");
+							$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
+							$crit->updated = true;
+							$reactor->criticals[] =  $crit;
+						}
 					}else if ($system->powerReq > 0 || $system->canOffLine ){
-						$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+						if (!WeaponEM::resistsShutdown($ship, $fireOrder)) $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata); //EM hardening: a d6 of 1 resists the shutdown (tabletop)
 					} else { //force critical roll at +4
 						$system->forceCriticalRoll = true;
 						$system->critRollMod += 4;
@@ -1768,29 +1774,36 @@ class BSGHypergunVA extends Pulse{
 		
 				if (!WeaponEM::isTargetEMResistant($ship,$system)){ //no effect at all vs Advanced Armor
 					if ($system instanceof Fighter && !($ship->superheavy)){
-						$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-						$crit->updated = true;
-						$crit->inEffect = true;
-						$system->criticals[] =  $crit;
-						$fireOrder->pubnotes .= " DROPOUT! ";
-					}else if ($system instanceof Fighter && ($ship->superheavy)){
-//						$roll = Dice::d(3);
-//						if ($roll < 2){
+						if (!WeaponEM::resistsDropout($ship, $fireOrder)){ //EM hardening: a d6 of 1-2 resists the dropout (tabletop)
 							$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 							$crit->updated = true;
 							$crit->inEffect = true;
 							$system->criticals[] =  $crit;
 							$fireOrder->pubnotes .= " DROPOUT! ";
-//						}
+						}
+					}else if ($system instanceof Fighter && ($ship->superheavy)){
+						if (!WeaponEM::resistsDropout($ship, $fireOrder)){ //EM hardening: a d6 of 1-2 resists the dropout (tabletop)
+	//						$roll = Dice::d(3);
+	//						if ($roll < 2){
+								$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+								$crit->updated = true;
+								$crit->inEffect = true;
+								$system->criticals[] =  $crit;
+								$fireOrder->pubnotes .= " DROPOUT! ";
+	//						}
+						}
 					}else if ($system instanceof Structure){
 						$reactor = $ship->getSystemByName("Reactor");
-						$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced2", $gamedata->turn);
+						$loss = 'OutputReduced' . WeaponEM::powerLoss($ship, 2); //EM hardening: one point less (tabletop)
+						$crit = new $loss(-1, $ship->id, $reactor->id, $loss, $gamedata->turn); //built as the class it is saved as (was an OutputReduced1 saved as OutputReduced2)
 						$crit->updated = true;
 						$reactor->criticals[] =  $crit;
 					}else if ($system->powerReq > 0 || $system->canOffLine ){
-						$crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, $gamedata->turn+2);
-						$crit->updated = true;
-						$system->criticals[] = $crit;
+						if (!WeaponEM::resistsShutdown($ship, $fireOrder)){ //EM hardening: a d6 of 1 resists the shutdown (tabletop)
+							$crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, $gamedata->turn+2);
+							$crit->updated = true;
+							$system->criticals[] = $crit;
+						}
 					} else { //force critical roll at +6
 						$system->forceCriticalRoll = true;
 						$system->critRollMod += 6;
@@ -1987,16 +2000,20 @@ class BSGHypergunVA extends Pulse{
 			case 3:
 
 				if ($system instanceof Fighter && !($ship->superheavy)){
-					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-					$crit->updated = true;
-					$crit->inEffect = true;
-					$system->criticals[] =  $crit;
-					$fireOrder->pubnotes .= " DROPOUT! ";
+					if (!WeaponEM::resistsDropout($ship, $fireOrder)){ //EM hardening: a d6 of 1-2 resists the dropout (tabletop)
+						$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+						$crit->updated = true;
+						$crit->inEffect = true;
+						$system->criticals[] =  $crit;
+						$fireOrder->pubnotes .= " DROPOUT! ";
+					}
 				}else {
-					$reactor = $ship->getSystemByName("Reactor");
-					$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
-					$crit->updated = true;
-					$reactor->criticals[] =  $crit;
+					if (WeaponEM::powerLoss($ship, 1) > 0){ //EM hardening: a 1-point power loss becomes none (tabletop)
+						$reactor = $ship->getSystemByName("Reactor");
+						$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
+						$crit->updated = true;
+						$reactor->criticals[] =  $crit;
+					}
 				}
 				
 				break;

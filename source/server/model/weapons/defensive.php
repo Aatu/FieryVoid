@@ -460,11 +460,13 @@
 		if (!$system->advancedArmor){
 //		}elseif (!$system->hardAdvancedArmor){//hardened advanced armor prevents effect - GTS
 			if ($system instanceof Fighter && !($ship->superheavy)){
-				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-				$crit->updated = true;
-				$crit->inEffect = true;
-				$system->criticals[] =  $crit;
-				$fireOrder->pubnotes .= " DROPOUT! ";
+				if (!WeaponEM::resistsDropout($ship, $fireOrder)){ //EM hardening: a d6 of 1-2 resists the dropout (tabletop)
+					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+					$fireOrder->pubnotes .= " DROPOUT! ";
+				}
 			}
 		}
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
