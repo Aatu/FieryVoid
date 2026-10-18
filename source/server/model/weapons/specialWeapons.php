@@ -3668,10 +3668,12 @@ class RadCannon extends Weapon{
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		$shooterID = $shooter->id;
 		$remHealth = $system->getRemainingHealth();
-		
+		//OFFICERS_PLAN.md Stage 17 - an Expert Ion Technician aboard the shooter: 12 Structure boxes, C&C at +4, and a critical roll forced on Scanner, Engine and reactor
+		$ionExpert = Officers::improvesRadCannon($shooter);
+
 		if($system instanceOf Structure) { //Structure: mark 10 damage (but no more than Structure actually possesses!)
             $destroyed = false;
-			$dmgToDo = min(10,$remHealth);			
+			$dmgToDo = min($ionExpert ? Officers::RAD_STRUCTURE_BOXES : 10, $remHealth);
 			if($dmgToDo >= $remHealth) $destroyed = true;	
 			if($dmgToDo > 0 ) {			
 				$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, 0, 0, $fireOrder->id, $destroyed, false, "", $this->weaponClass, $shooterID, $this->id);
@@ -3702,20 +3704,24 @@ class RadCannon extends Weapon{
 			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, false, "", $this->weaponClass, $shooterID, $this->id);
 			$damageEntry->updated = true;
 			$system->damage[] = $damageEntry;
-		} else if($system instanceOf CnC) { //C&C: critical roll forced (at +2).
+		} else if($system instanceOf CnC) { //C&C: critical roll forced (at +2; +4 with an Expert Ion Technician).
 			$system->forceCriticalRoll = true;
-			$system->critRollMod += 2;
-		} else if($system instanceOf Scanner) { //Scanner: output reduced by 1.
+			$system->critRollMod += $ionExpert ? Officers::RAD_CNC_CRIT_MOD : 2;
+		} else if($system instanceOf Scanner) { //Scanner: output reduced by 1 (and a critical roll forced, with an Expert Ion Technician).
 			$crit = new OutputReduced1(-1, $ship->id, $system->id, "OutputReduced1", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = false;
 			$system->setCritical($crit); //$system->criticals[] =  $crit;
-		} else if($system instanceOf Engine) { //Engine: output reduced by 2.
+			if ($ionExpert) $system->forceCriticalRoll = true;
+		} else if($system instanceOf Engine) { //Engine: output reduced by 2 (and a critical roll forced, with an Expert Ion Technician).
 			$crit = new OutputReduced2(-1, $ship->id, $system->id, "OutputReduced2", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = false;
 			$system->setCritical($crit); //$system->criticals[] =  $crit;
-		} //other systems: no effect!			 
+			if ($ionExpert) $system->forceCriticalRoll = true;
+		} else if($ionExpert && (($system instanceOf Reactor) || ($system instanceOf SubReactorUniversal))) { //Reactor, a Sub Reactor too: critical roll forced, with an Expert Ion Technician
+			$system->forceCriticalRoll = true;
+		} //other systems: no effect!
 	}//endof function onDamagedSystem
 			
 	public function getDamage($fireOrder){       return 0; /*no actual damage, just various effects*/  }

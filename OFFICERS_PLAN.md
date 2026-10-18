@@ -15,7 +15,9 @@ officer the user added beyond the original 25 (§9.18) - committed (`a80430710`)
 a second added officer (§9.19) - committed (`f17a680b8`). Stage 14, the Expert Religious Leader, a third added officer
 (§9.20), and Stage 15, moving officers in Fleet Selection (free) with the Religious Leader's placed twin, and every officer on
 a post destroyed by pre-battle damage refunded (§9.21) - committed (`68f1c82b3`). Stage 16, the Expert Surge Officer (Ipsha),
-with FV's EM hardening rebuilt to the tabletop rules first (§9.22) - BUILT 2026-10-18, uncommitted.** Written
+with FV's EM hardening rebuilt to the tabletop rules first (§9.22) - committed (`318058ac0`). Stage 17, the Expert Ion Technician
+(Cascor), whose thrust boost rides the generic boost the way the Hypergraviton Blaster's does (§9.23) - BUILT 2026-10-18,
+uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -52,8 +54,11 @@ changes their mind - with a Move button that keeps the System Enhancements menu'
 QX5: any officer whose post pre-battle damage destroys is refunded (Stage 15, §9.21). On 2026-10-18 they supplied the Expert
 Surge Officer's rules text; the first ruling round showed FV's EM hardening to be a simplification (treated as Advanced Armor,
 plus a flat -1 on every critical), so they supplied the tabletop hardening rules and asked for those to be built first, the
-Ring Base hardened, and the officer on top - ruling five questions on the way (Stage 16, §9.22). Each officer's own rules
-questions still only need ruling when that officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
+Ring Base hardened, and the officer on top - ruling five questions on the way (Stage 16, §9.22). Later that day they supplied the
+Expert Ion Technician's rules text, pointing at the Hypergraviton Blaster's thrust boost as the way to build his, and ruled the three
+questions it raised: the boost repeatable (then, once built, re-ruled to one level per gun), the discharge of a boosted gun that does
+not fire built, and a Sub Reactor counted as the reactor (Stage 17, §9.23). Each officer's own rules questions still only need ruling when that officer's stage starts. Next step: the
+rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -242,7 +247,7 @@ Medium-sized job (§3.4).
 | **Expert Evangelist** | Fleet-wide state: +1 to hit while he serves, then −10 initiative (QX1) and −1 to hit if he is **killed**, for every ship, with a client to-hit mirror. Also a fleet-% price, a random post, and the CPN/OSF gate exists only in notes prose | — |
 | **Expert Laser Technician** | "+1 damage per power point sent, up to +50 %" needs a new per-turn allocation UI, persistence and a cap. *Built in Stage 11 (§9.17) with no new UI or persistence: the user's design note made every laser use the existing BOOST (power entries type 2, the generic boost buttons), so the allocation, its storage and the power balance all came free; what was new is the cap, a per-turn pool, and hiding the boosts from opponents.* | +3 Spinal / +2 Blast / +1 other lasers, through `getBonusDamage` (`SpinalLaser`, `BlastLaser`, `ImprovedBlastLaser`, `LtBlastLaser` exist) |
 | **Expert Software Engineer** | Bonus fire-control points spendable in the Firing phase need a new allocation window (`HyachComputer` only allocates in Initial Orders, [baseSystems.php:12862](source/server/model/systems/baseSystems.php#L12862)). Also a "first point of damage ignored" rule in the damage path, a submarine detection range, and a self-contradictory specialist clause (§6, Software Engineer) | — |
-| **Expert Ion Technician** | "3 thrust → 1d10+1 on one ion weapon" is a per-turn spend with UI | +1 per die and +1 flat on Ion-class weapons; +4 on C&C crits; the Rad Cannon's flat 12 and forced crits are Medium |
+| **Expert Ion Technician** | "3 thrust → 1d10+1 on one ion weapon" is a per-turn spend with UI. *Built in Stage 17 (§9.23) with no new UI or storage: the user's note pointed at the Hypergraviton Blaster, whose boost is the generic one priced in thrust - so the Laser Technician's payload pattern with `thrustBoosted` gave the buttons, the thrust balance and the commit check for free; what was new is the discharge of a boosted gun that does not fire, at the turn change.* | +1 per die and +1 flat on Ion-class weapons; +4 on C&C crits; the Rad Cannon's flat 12 and forced crits are Medium |
 | **Expert Surge Officer** | Six unrelated hooks: EM damage, combined Surge Cannon shots, capacitor power by ship size, EM-hardening −3, a d6 to resist deactivation, Spark Field −1. *Built in Stage 16 (§9.22): the rules text made it reactor power by ship size; his two hardening clauses needed FV's EM hardening rebuilt to the tabletop rules first (WeaponEM), the bigger half of the stage.* | +1 damage on Electromagnetic-class weapons |
 | **Expert Ballistic Officer** | "+1 magazine round per launcher" moves the lobby's ammo limits, which are derived from magazine capacity at offer time. Free missile swaps are lobby ammo pricing | +5 launch range (`range` **and** `rangeArray` — the same mode-switch trap — and sent to the client) |
 | **Expert Anticipator** | A free **turn** for a ship in the Firing phase is a new phase-3 movement for ships (today only flights move there, as combat pivots), with masking, validation and animation | Rolling initiative twice is Easy. Re-rolling the lowest die is Medium: a `Dice`-level flag, which the replay harness's own `Dice` stub must mirror ([[project_replay_harness]]) |
@@ -447,6 +452,7 @@ masking: individual notes never reach any client.
 | Security Officer (Stage 13) | `iniativebonus`; the C&C's `critRollMod`; the modifier on boarding rolls against his ship | `iniativebonus`: **yes, to every viewer** (the Helmsman's `publish`). The critical modifier is never sent (nothing displays one). The boarding shift is server-only; the combat log prints a mission roll as Roll(Mod), so an opponent can see a larger modifier than he expected, never who caused it |
 | Plasma Scientist (Stage 12) | a Plasma Web's `range` / `rangeArray`; a Plasma Battery's capacity, charge and output | **Yes, to every viewer** (user ruling 2026-10-17: a displayed stat is public). The battery's line and output were sent to everyone already; the web's range is sent while he serves (`webForJson`). His damage bonus and range relief show only as damage dealt |
 | Surge Officer (Stage 16) | the Mag-Gravitic Reactor's `output` | **Yes**, as the Technician's: `output` is sent unconditionally. His +1 per EM hit, the hardening he eases and the Spark Field relief show only as their results (damage dealt, criticals rolled, a "shutdown resisted" line in the log - which a hardened ship's own d6 also writes) |
+| Ion Technician (Stage 17) | an ion gun's `boostable` / `boostEfficiency` / `thrustBoosted` / `thrustPerBoost`, its boost (type-2 power entries), and the thrust it takes off the engine | **Own team only**, as the Laser Technician's: "Weapons being charged in this manner will be detected (and their strength known) by anything that detects special weapon arming modes, such as the Expert Analyst" - by nothing else until the Analyst's stage. An opponent's payload carries the gun's power entries without its boosts while he is aboard; game over discloses all. His +1s, the boost and the Rad Cannon's improved effects show only as their results; a discharge shows as the gun's loading, which is public |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
 | Scanner | the late-EW allowance | Own-team only: the client asks `officers.listFor`, which an enemy payload never carries |
@@ -600,7 +606,8 @@ committed.
 | **14** | Expert Religious Leader, the third officer the user added. **BUILT 2026-10-17** (§9.20) | +10 initiative to every viewer; +1 on every hit (a pulse, a gun's shot, a raking shot once), never on a roll of 0 or a ram; once he is disabled or killed in battle, from the next turn: +20 initiative, both profiles +1, the strongest standing Scanner +1, the +1 per hit kept, the profiles published; moves to any targetable primary non-weapon system, the jump drive included; Minbari Federation, Markab, Corillani and Yolu only, 15% |
 | **15** | Moving officers in Fleet Selection, free; the Religious Leader's placed twin; any officer on a post destroyed by pre-battle damage refunded. **BUILT 2026-10-17** (§9.21) | Move from a system's menu (its Officers footer), the pick outlining every post he could be bought on; placed to placed, C&C to twin and back, points unchanged; occupied, destroyed and unoffered posts refused; the twin offered on every primary non-weapon system but the C&C, at his own price, and every effect his; a C&C destroyed in the pre-battle editor refunds its ship officers with a warning, an edit and a saved fleet too; the menu rows keep their one shape |
 | **16** | FV's EM hardening rebuilt to the tabletop rules, the Ring Base hardened; the Expert Surge Officer on top. **BUILT 2026-10-18** (§9.22) | Hardened units no longer immune: -2 once a turn on the critical (dropout) roll of a system an EM weapon affects, through the real `doDamage`; a forced dropout ignored on 1-2, a forced shutdown resisted on 1, power losses one less, at the Burst Beam family, Shock Cannon and others; other EM effects and armour-ignoring damage as against anyone; the flat -1 stand-in gone from every Ipsha hull. The officer: Ipsha only, 10%, the Mag-Gravitic Reactor; +2/+1 power by size, previewed in the lobby; +1 per EM hit, +N on an N-cannon Surge Cannon shot, his own Spark Field too; -3 and 1-2 on his ship; Spark Fields 1 weaker against him |
-| **17+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **17** | Expert Ion Technician (Cascor), his thrust boost on the Hypergraviton Blaster's path. **BUILT 2026-10-18** (§9.23) | +1 per die (capped at the face) on rolled ion weapons, +1 a hit on fixed ones (the Ion Torpedo, a Ballistic weapon in FV, included), nothing on a roll of 0; stacking with Elite Crew, replaced by a Gunner's; Rad Cannons 12 boxes, the C&C at +4, criticals forced on Scanner, Engine, Reactor and Sub Reactor; the boost - 3 thrust for 1d10+1, one level per gun (a second refused in the real power.js), once a turn, a loaded rolled gun only, hidden from opponents, the engine's thrust lowered in the real movement.js; a boosted gun that does not fire discharges at the turn change; Cascor only, 10%, in the Engine |
+| **18+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -638,7 +645,7 @@ committed.
 | Security Officer | *Added 2026-10-17 with his rules text (§9.19).* The user's note settles the main one: "shift all die rolls by up to 2 in any direction desired by the defending player" is a fixed **+2** ("higher rolls are almost always worse for marine attackers ... no need to build in a player choice"). Asked: do the defenders' own Capture rolls (5 or less hits) shift too? Breaching pods only, or Grappling Claws and transporters as well? 7.5% exactly, or 8%? On a hull with two C&Cs, which gets the -2? **RULED 2026-10-17 (all as recommended):** defenders **-2** too (Elite Crew's pattern, doubled); **every boarding party**; **7.5% exactly** (a percent may now carry one decimal place); **his own C&C only**. |
 | Religious Leader | *Added 2026-10-17 with his rules text (§9.20).* Are "+10 initiative" and "+5 to its defense profiles" FV's displayed units or tabletop? What is a "volley" for his +1 damage? Does the ship keep the +1 damage once he is lost? Is the Minbari Protectorate one of the "Minbari" factions? **RULED 2026-10-17:** **FV display units** (+10, then +20; the profiles +1 point each, +5%); **+1 per hit** (each pulse, each gun's shot, a raking shot once, never per die); the frenzy **keeps** the +1 damage; **Minbari Federation only** - the Protectorate is not included. |
 | Software Engineer | "Lets the computer specialist use their ability twice" and "Incompatible with Computer Specialist" contradict each other. Which one stands? "Submarine" = the Hyach stealth hulls (Alichi Kav and Tal)? Whose detection range gets +5? |
-| Ion Technician | Rad Cannons always score 12, with no roll? Forced crits on Sensors, Engine and Reactor on every hit? When is the thrust boost declared? Is "+4 on C&C crits" a penalty? |
+| Ion Technician | Rad Cannons always score 12, with no roll? Forced crits on Sensors, Engine and Reactor on every hit? When is the thrust boost declared? Is "+4 on C&C crits" a penalty? **Rules text 2026-10-18 (§9.23)** settles all four: 12 Structure boxes instead of 10 (the Rad Cannon rolls nothing anyway); a forced critical roll on a sensors, engine or reactor hit; the boost "is made at the same time systems are activated or deactivated for extra power" - Initial Orders; the C&C's roll "at +4 on the die instead of the listed +2" - his ship's Rad Cannons hitting an enemy C&C. Asked: may one gun take more than one boost? A boosted gun that does not fire - build the discharge? Does a Sub Reactor count as the reactor? **RULED 2026-10-18:** the boost was first ruled **repeatable** (every 3 thrust another 1d10+1), then, once built, **re-ruled to one level per gun** a turn (the recommendation); the **discharge is built**, with a tooltip line; a **Sub Reactor counts**. |
 | Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? **Rules text 2026-10-18 (§9.22)** settles the first: "Capital ships and larger receive +2 points of power, while medium ships and HCVs get +1" - the reactor. **RULED 2026-10-18:** the −3 is "−1 on EM-hit systems" (the tabletop −2 → −3 step, where the rule says); then, the user finding FV's hardening to be a simplification, **FV's EM hardening rebuilt to the tabletop rules** (supplied) and the Ring Base hardened, the officer on top; the −2 **once per system per turn**; EM effects the tabletop hardening does not list **apply normally** (the old immunity lines commented out with a note, to revisit); armour-ignoring EM weapons **ignore Ipsha armour fully**; the flat −1 stand-in **removed** from every Ipsha hull; **his own Spark Field gains the +1**. |
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? |
@@ -2548,3 +2555,157 @@ Carrier Cube 80, Heavy Carrier Cube 80, Jumpsphere 100, Resohex 60, Rhombus Esco
 3. Not tested in a real game. Worth a play test with Ipsha against Ipsha: Surge Cannon rakes on a hardened ship (+2 per rake -2 once),
    a Burst Beam's "shutdown resisted" line, then a Surge Officer: the reactor's power +2 in Initial Orders, an EM Pulsar's Damage line
    10, a five-cannon shot +5 in the log.
+
+### 9.23 Stage 17: Expert Ion Technician (2026-10-18)
+
+**Rules text (user, 2026-10-18).** "Expert Ion technician: This expert knows ways to channel power from the ship's ion engines into its
+weaponry for added effect. The following abilities are provided: All ion-based weapons (including the ioniclaser) score +1 damage per
+die, but no die can be increased above its maximum roll (e.g., a d10 would score 10 damage on a roll of either 9 or 10). Weapons scoring
+a flat amount of damage, like the dual ion bolter or ion torpedo, add +1 only. Rad cannons score 12 damage on structure instead of 10
+(this supersedes the above benefit), and force a critical roll if they hit the sensors, engine or reactor. If they hit C&C, the critical
+roll is at +4 on the die instead of the listed +2. Using the ionic drive system, this expert can shunt thrust into one or more of the
+ship's guns. This decision is made at the same time systems are activated or deactivated for extra power. Three points of thrust produce
+an extra 1d10+1 damage, should the weapon score a hit. This power must be applied on the turn of firing, and if applied, the weapon must
+fire on that turn (if it does not, it discharges and is treated as having fired anyway). This ability will not function on non-ionic
+weapons or with those that score a fixed amount of damage. Weapons being charged in this manner will be detected (and their strength
+known) by anything that detects special weapon arming modes, such as the Expert Analyst. Cost: 10%. Location: Engine. Availability:
+Cascor only." The user's note: "There is already a method for using thrust to boost a weapon's damage, see Kirishiac Hypergravation
+Blaster for an example."
+
+**Rulings (user, 2026-10-18, asked before building):**
+1. **One boost level per gun a turn**: 3 thrust, +1d10+1; more thrust is spent by boosting more guns ("into one or more of the ship's
+   guns"). First ruled repeatable (every 3 thrust another 1d10+1) and built so; **re-ruled the same day, after the build**: "it is best
+   if we limit the boost to just one level per Ion weapon".
+2. The **discharge is built**: a boosted gun that does not fire that turn loses its charge as if it had fired, and its tooltip says it
+   must fire (as recommended).
+3. A **Sub Reactor counts as the reactor** for the Rad Cannon's forced critical (as recommended): `SubReactorUniversal` is not a
+   `Reactor` subclass in FV, and a Rad Cannon did nothing to one before.
+
+**Built with defaults, stated here (ask before changing):**
+- **Ion weapons** = any weapon with an Ion mode - the Ionic Laser is Ion-class in FV - and the **Ion Torpedo**, which FV files as a
+  Ballistic weapon (a `Torpedo`) though the rules name it: by class on the server (`instanceof IonTorpedo`), by `name` (`ionTorpedo`)
+  on the client. On Cascor ships: Dual Ion Bolter, Ion Torpedo, Ion Cannon, Ionic Laser, Rad Cannon, Ion Field Generator.
+- **"A flat amount of damage"** = the weapon's damage in the fired mode is one number (`minDamageArray` = `maxDamageArray`, which a
+  ReducedDamage critical scales alike): the Dual Ion Bolter's 8 and the Ion Torpedo's 15 get +1 a hit (on each of a bolter's two guns);
+  the rolled ones +1 per die through `Dice::$perDieBonus`, each die capped at its face. Never on a roll of 0, so the Rad Cannon ("this
+  supersedes the above benefit") and the Ion Field Generator gain nothing.
+- **Stacking**: with Elite Crew's +1 per die (+2 a die, still capped - Elite Crew is no officer). On a weapon a serving Expert Gunner
+  holds, the Gunner's +1 per die replaces his +1, per die or flat - the Laser Technician's ruling (§9.17: only the flat bonus is the
+  Gunner's to replace); his thrust boost and the Rad Cannon's rules still work there (they are abilities and the weapon's own effects).
+- **Rad Cannon**: min(12, boxes left) on Structure; a Scanner keeps its output -1 and an Engine its -2, AND each rolls a critical; a
+  Reactor or Sub Reactor rolls one; the C&C at +4 instead of +2. The forced rolls are the systems' ordinary ones (d20 + their damage +
+  their modifiers, no extra term), through Pass 1 (`isDamagedOnTurn` honours `forceCriticalRoll`). Only his own ship's Rad Cannons.
+- **Thrust boost**: only on an ion gun whose damage is rolled (the Ion Cannon and Ionic Laser on Cascor hulls - "will not function ...
+  with those that score a fixed amount of damage"); only on a gun ready to fire this turn ("must be applied on the turn of firing" - the
+  buttons are sent only then, since a boost on a gun still charging would only discharge it); exactly 1d10+1 a level - neither his +1 per
+  die nor Elite Crew's touches the boost's die; added once a turn, to the gun's first hit (no Cascor gun hits twice); a hit on a
+  Chameleon simulacrum alone rolls it but spends nothing (the Laser Technician's rule).
+- **Discharge**: an interception counts as firing (FV's own `firedOnTurn`); a discharge is no firing for the Expert Gunner's faster
+  reload (`fasterReload` reads the fire orders); a gun switched off loses its loading anyway.
+- **Hidden** from opponents, as the Laser Technician's boosts: the rules say only "anything that detects special weapon arming modes,
+  such as the Expert Analyst" sees the charge, and the Analyst is not built. ⚠️ His stage should reveal what `ionForJson` (and
+  `laserForJson`) strip.
+- **Availability**: "Cascor only" = `Cascor Commonwealth` - not the Civilians' Cascor-built Calacca and Caracti. Only on a hull carrying
+  an ion weapon (`needs`: the rules do not say so, but he would do nothing; every Cascor warship carries some). 10% of the base cost.
+  Post: the strongest Engine - the Traqintor bases and the Ruqacc OSAT have none (and an OSAT never carries officers).
+
+**Design.**
+- ⭐ **The thrust boost IS the generic boost, priced in thrust** - the Hypergraviton Blaster's path (the user's note) on the Laser
+  Technician's payload pattern. `Officers::ionForJson`, from `weaponForJson`, tells the owner's team the gun is `boostable` (while he
+  serves and it is loaded) at `boostEfficiency` 0 with `thrustBoosted` and `thrustPerBoost` 3; movement.js `getRemainingEngineThrust`
+  already takes every thrust-boosted system's boosts off the engine, and the Initial Orders commit already refuses a ship whose thrust
+  goes negative (DK's check for the Blaster). No new UI, storage or client cost logic; the server sets nothing on the weapon object and
+  trusts boost entries as ever - `ionBoostDamage` answers a doctored one at damage time.
+- **One level per gun** (ruling 1): `Officers::ION_BOOST_MAX` - `ionBoostDamage` counts at most one level, so a doctored entry of more
+  adds nothing - ⚠️ MIRROR PAIR with `officers.ION_BOOST_MAX`. The client's own cap (`system.hasMaxBoost()` + `maxBoostLevel`) is a
+  per-class JS prototype method that the ion guns do not override, so `power.js clickPlus` asks `officers.ionBoostFull` beside it (the
+  `efficientTransferBonus` precedent of an officer hook in power.js) and refuses a second level with the usual "You can not boost this
+  system any further."; `officers.ionBoost` reads at most one level, so the tooltip agrees with the server.
+- **Damage**: `ionDieBonus` joins the Gunner's in getFinalDamage's `$dieBonus`; `ionFlatBonus` and `ionBoostDamage` sit beside the other
+  officers' after `getDamageMod`. The boost's once-a-turn record is in memory (a WeakMap), as the laser pool is.
+- ⭐ **Discharge**: one condition beside `firedOnTurn` in `Weapon::calculateLoadingFromLastTurn` - `Officers::ionDischarged` - so the
+  turn change writes the loading row a firing would. It reads only Initial Orders power entries and the declared orders, both present
+  in the pre-firing gamedata the turn change runs on (§9.16). The client follows the loading row: no mirror.
+- **Rad Cannon**: `Officers::improvesRadCannon($shooter)`, asked once in `RadCannon::onDamagedSystem`.
+- Shared now: the Laser Technician's boost stripping is `stripBoosts`; the client's "a Gunner serves on this weapon" is
+  `officers.gunnerServesOn` (laserDamageBonus and ionDamageBonus).
+
+**Files.** Server: `Officers.php` (`ION_*` / `RAD_*` constants; `$factionRules` OFF_ION; registry `OFF_ION` after OFF_SURG - now the last
+fixed-post ship officer - `engine`, 10%, `needs` `hasIonWeapon`, no `apply`; `isIonWeapon`, `isIonShot`, `scoresFlat`, `boostableIon`,
+`ionServesFor`, `ionDieBonus`, `ionFlatBonus`, `$ionBoostSpent`, `ionBoostDamage`, `ionDischarged`, `ionForJson`, `improvesRadCannon`,
+`hasIonWeapon`; `stripBoosts` out of laserForJson; weaponForJson calls ionForJson), `weapon.php` (`getFinalDamage`;
+`calculateLoadingFromLastTurn`'s discharge), `specialWeapons.php` (`RadCannon::onDamagedSystem`). Client: `officers.js` (the registry
+row; `needs` `ionWeapon`; `isIonWeapon` ⚠️ MIRROR PAIR, `isIonMode`, `ionScoresFlat` ⚠️ MIRROR PAIR, `ionDamageBonus` ⚠️ MIRROR PAIR,
+`ionBoost`, `ionBoostText`, `ionDamageLine`, `radCannonSpecial`, `gunnerServesOn`; `adjustDataDisplay`'s Damage chain and the Rad
+Cannon's Special text), React `SystemInfo.js` (the Thrust boost line). Docs: an Expert Ion Technician card in Ship Officers
+(alphabetical, after the Helmsman) and his boosts in Seeing your officers. Statics, bundles and the served copy rebuilt; no new PHP class.
+
+**As built - the owner's tooltip:** a fixed-damage ion weapon's Damage line +1 (8 reads 9); the Rad Cannon's 10 reads 12 and its Special
+text is rewritten (12 boxes, the C&C at +4, Scanner and Engine criticals forced, a Reactor or Sub Reactor line) - each rewrite is matched
+against the server's own sentence, so a reworded sentence is left as it is; a boosted gun's line + 2n on the low end and + 11n on the high
+(12-30 boosted reads 14-41) and a **Thrust boost** line: "+1d10+1 damage if it hits (3 thrust). It must fire this turn, or it
+discharges as if it had". His +1 per die is not shown on a rolled weapon's line, as Elite Crew's and the Gunner's are not (the client
+cannot count dice).
+
+**Measured.** 10 OFF_ION offers, all Cascor Commonwealth warships, 10% rounded up: Coqari 75, Crocti 42, Drocca 60, Nesacc 70, Norsca 70,
+Norscator 83, Qoccata 95, Qoricc 50, Tacacci 44, Talacca 50. Statics +510 B uncompressed. 12 ion weapon names exist in the statics (the six
+Cascor ones, the Balosian Improved Ion Cannon, the Nexus Ion Gun, Twin Ion Gun, Ion Bolter and Light Rad Cannon, the Shadows' Vortex
+Disruptor); only Cascor ships carry him.
+
+**Verified.**
+- `officersHarness.php` **1132 / 0 with the database**, 1064 / 0 with `--no-db` (83 new): offers and prices on five hulls; none on the
+  Civilians' Calacca, a base, the OSAT, an Omega, a flight, or a Norsca stripped of its ion weapons; the post; `hasIonWeapon`,
+  `isIonWeapon` (the Ion Torpedo Ballistic, the Ionic Laser); the client's ion and flat tests against the server's over every weapon in the
+  statics; through the REAL `getFinalDamage` - an Ion Cannon +2 (5, 5), 9 and 10 reading 10 and 10, the Ionic Laser +3, a Dual Ion Bolter
+  and an Ion Torpedo +1, a Rad Cannon and an Ion Field Generator 0, Elite Crew +2 a die and still capped, the gate, killed, the Gunner's
+  gun and bolter; the boost - one level, a doctored entry of 3 counting one, a d10 (300 seeded rolls span 2..11), the die untouched by Elite Crew, once a turn, the next
+  turn's own, a phantom, the Ionic Laser, none on fixed guns, without him, killed, the gate, a Gunner's gun; the discharge through the REAL
+  `calculateLoading` (boosted and unfired 1, unboosted 2, fired 1, an interception 1, last turn's boost, killed, without him, the gate) and
+  `onAdvancingGamedata`'s loading row; the payload per viewer (a loaded gun boostable at 0 power and 3 thrust, a charging one priced but
+  not boostable, fixed guns untouched, the enemy's stripped, game over, killed); the Rad Cannon through its REAL `onDamagedSystem` (12 /
+  10 boxes, +4 / +2, the Scanner, Engine, Reactor and a Traqintor's Sub Reactor forced, a hangar and a weapon as before, 5 boxes left,
+  killed, the gate).
+- `officersClientHarness.js` **407 / 0** (28 new, on the Norsca's REAL static systems): the registry, `needs`, the ion and flat tests, the
+  +1 in every state, the Damage lines, the boost and its text, the Rad Cannon's Special against the server's own wording, the REAL
+  SystemInfo, the REAL power.js `clickPlus` (a first level taken, a second refused, another system uncapped by him), and the REAL
+  movement.js `getRemainingEngineThrust` (with systems.js's own thrust-boost list): 12, one gun boosted 9, two 6, three 3.
+- **Mutation-tested: 77 breaks (49 server, 26 client - two through the SystemInfo source, one through power.js - and 2 through the
+  differential), 76 caught**, files byte-identical afterwards (the four for the one-level cap run after the re-ruling). The one left is equivalent: `scoresFlat` reading a mode the weapon lacks falls back to its
+  current min/max, which on every single-mode ion weapon is the same number. Two went untested at first and got a check before the run:
+  the boost die's size (the harness's forced dice ignore it - 300 seeded unforced rolls now cover it); and `needs` (every Cascor warship has an
+  ion weapon - a Norsca stripped of its own now covers it).
+- `enhancementsHarness` **279 / 0** - re-recorded (old copy `fingerprint.before-officers-stage17.txt`) after proving the change is only the
+  Norsca's hull block (a new test hull - none was Cascor) and the 32 new case blocks (`ion`, `ion+eng+poor1`): with those stripped, the new
+  fingerprint is identical to the old. `enhancementsDifferential.js` **686 / 0** (the Norsca's cases among them; a client post moved to the
+  reactor, or the `needs` test broken, is caught). `fvbuild -Check`: autoload current, validator clean, replay **156 / 0** (game 4488 SKIP:
+  surrendered since it was recorded - re-record it). Statics, bundles (`-Client`) and the served copy (`-Sync`) rebuilt.
+
+**Observations, not changed:**
+1. A Rad Cannon's Damage line reads 10 (its min/max, "for display and interception purposes") while it rolls 0, so a Religious Leader's
+   client line would show it +1 though the server gives none. No Minbari, Markab, Corillani or Yolu hull carries one.
+2. Play-tested by the user in game 4491 (below). Worth a further test on a Norsca: boost both Ion Cannons in Initial Orders (the Engine's
+   12 thrust reads 6 in Movement; a second click on one is refused), fire them (+1d10+1 each in the log), then check the next turn shows
+   them unboosted; boost one and hold its fire (it starts the next turn reloading); a Rad Cannon on an enemy's
+   Structure (12 boxes).
+
+**Play test 4491 (user, 2026-10-18) - a boost carried onto recharging guns.** Firing worked, but on the next turn both boosted guns were
+still boosted, still took Engine thrust, and could not be un-boosted. Cause: at the start of every Initial Orders the client copies last
+turn's power entries onto the new turn (`shipManager.power.repeatLastTurnPower` -> `copyLastTurnPower`), boosts included - FV's own
+carry-over for every system. A gun that has just fired is recharging, so the server sent it no `boostable` (ionForJson), and the boost
+buttons need it (SystemInfoButtons): nothing could take the copied boost off. Worse, once committed (4491's turn-2 rows were saved), the
+discharge rule would have reset both guns' reload at every turn change, so they would never have fired again. The user's rule: **"if a
+weapon is recharging (and therefore cannot fire that turn) we should remove its boost."** Built:
+- **Client, every weapon** - `copyLastTurnPower` carries no boost onto a weapon that is not loaded this turn (`weaponManager.isLoaded`;
+  the weapon's other entries, a switch-off, still carry). Checked first: every boostable weapon class reads its boost on the turn it
+  fires - the Heavy Gravitic Bolt and Gravitic Cutter charge past their loading time but are loaded by then, the Sensor Charge
+  Transceiver spends its boost only on a charge it sends - so a boost on a recharging weapon was only ever wasted. A drive that charges
+  by boosting keeps its own rule (`getRepeatableBoost`, the Jump Engine - itself a Weapon); shields are not weapons.
+- **Server, the discharge** - `Officers::ionDischarged` only for a gun that was loaded on that turn (calculateLoadingFromLastTurn asks
+  before setLoading, so the weapon still holds that turn's loading): a boost on a gun that could not fire was never "applied on the turn
+  of firing", from an old client, a doctored entry or a row already saved.
+- Tests: officersHarness 1133 / 0 (a recharging boosted gun goes on charging, 1 -> 2), officersClientHarness 410 / 0 (the REAL
+  copyLastTurnPower: a recharging gun gets no boost, a loaded one keeps it, a recharging gun's switch-off still carries, a non-weapon with
+  a loading time and a charging drive carry as before). Mutation: 3 more breaks, all caught (one only after the non-weapon fixture got a
+  loading time). `fvbuild -Check` replay 156 / 0. Bundles rebuilt, served copy synced.
+- ⚠️ Game 4491 itself: its turn-2 boost rows (Norsca #3, systems 24 and 25) were saved before the fix, so that turn's Movement still
+  shows the thrust taken; the server no longer discharges either gun for them.

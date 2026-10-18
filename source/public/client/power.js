@@ -61,6 +61,14 @@ shipManager.power = {
 					newPower.amount = system.getRepeatableBoost(parseInt(power.amount, 10) || 0);
 					if (!(newPower.amount > 0)) continue;
 				}
+				/* A weapon still recharging cannot fire this turn, so last turn's boost is not carried onto it (user rule,
+				   2026-10-18, OFFICERS_PLAN.md §9.23): every boostable weapon reads its boost on the turn it fires, so a carried
+				   boost would only spend power or thrust for nothing - an Expert Ion Technician's gun would even discharge it, and
+				   the server offers a recharging gun no boost buttons to take it off with. A drive that charges by boosting has
+				   its own rule above (getRepeatableBoost). */
+				else if (power.type == 2 && system.weapon && Number(system.loadingtime) > 0 && !weaponManager.isLoaded(system)) {
+					continue;
+				}
 				powers.push(newPower);
 			}
 		}
@@ -1315,6 +1323,11 @@ shipManager.power = {
 				confirm.error("You can not boost this system any further.");
 				return;
 			}
+		}
+		//OFFICERS_PLAN.md Stage 17: an Expert Ion Technician's gun takes one thrust boost a turn
+		if (window.officers && officers.ionBoostFull(ship, system)) {
+			confirm.error("You can not boost this system any further.");
+			return;
 		}
 
 		//New function to check for things like Pak'ma'ra power boosting exceptions - DK 10/24

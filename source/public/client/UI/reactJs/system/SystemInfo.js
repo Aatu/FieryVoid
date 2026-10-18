@@ -176,6 +176,8 @@ class SystemInfo extends React.Component {
            power entries like the boost highlight, so it moves the instant the player clicks; only the owner's team has
            an officer list, so it is null for anyone else (and in the lobby, where nothing is boosted). */
         var laserBoost = window.officers ? officers.laserBoostText(ship, system) : null;
+        //Stage 17: the thrust put into an ion gun this turn under an Expert Ion Technician, and that it must fire - the same reading
+        var ionBoost = window.officers ? officers.ionBoostText(ship, system) : null;
 
         let isUnrevealedMine = false;
         if (ship.mine) {
@@ -210,6 +212,8 @@ class SystemInfo extends React.Component {
                 {abductionTarget !== null && getEntry('Abduction target', abductionTarget)}
 
                 {laserBoost !== null && !isUnrevealedMine && getEntry('Laser boost', laserBoost)}
+
+                {ionBoost !== null && !isUnrevealedMine && getEntry('Thrust boost', ionBoost)}
 
                 {Object.keys(specialEntry).length > 0 && <Entry key={`special-${reactKey++}`}><Header>Special: </Header>&nbsp;</Entry>}
                 {Object.keys(specialEntry).length > 0 &&

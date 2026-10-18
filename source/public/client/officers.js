@@ -57,7 +57,7 @@ window.officers = {
 		   +1/+2 - plasmaDamageLine); a battery's extra point is charged at the commit (batteryCapacityBonus); a web's
 		   range arrives in the payload. */
 		{ id: 'OFF_PLAS', label: 'Expert Plasma Scientist', post: 'engine', needs: 'plasmaWeapon',
-			summary: 'Plasma weapons do increased damage and ignore first 2 hexes of range damage penalty; Plasma Batteries have +1 power and -3 on crits; Plasma Webs +1 range' },
+			summary: 'Plasma weapons +1 damage and ignore 2 hexes of range damage penalty; Plasma Batteries have +1 power and -3 on crits; Plasma Webs +1 range' },
 		/* Stage 13: the initiative is previewed (stats); his -2 on the C&C's criticals and the boarding shift are the server's
 		   alone (no client shows a critical modifier or a delivery or mission roll). */
 		{ id: 'OFF_SECU', label: 'Expert Security Officer', post: 'cnc', stats: { iniativebonus: 5 },
@@ -71,6 +71,11 @@ window.officers = {
 		   EM hit raises the owner's Damage lines (surgeDamageLine); his hardening and the Spark Field relief are the server's alone. */
 		{ id: 'OFF_SURG', label: 'Expert Surge Officer', post: 'maggrav',
 			summary: 'EM weapons +1 damage; Extra power from Reactor; EM criticals -3, Shutdowns resisted on 1-2; Spark Fields deal 1 less damage to this ship' },
+		/* Stage 17: no stat moves - his bonuses are the server's at damage time. The owner's Damage line shows a fixed-damage ion
+		   weapon's +1, the Rad Cannon's 12 and this turn's thrust boost (ionDamageLine); his +1 per die, like Elite Crew's and a
+		   Gunner's, is in the summary only. The boost buttons come with the payload (boostable, priced in thrust). */
+		{ id: 'OFF_ION', label: 'Expert Ion Technician', post: 'engine', needs: 'ionWeapon',
+			summary: 'Ion weapons have increased damage; Rad Cannons stronger; Boost ion weapons with thrust' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -94,7 +99,7 @@ window.officers = {
 		{ id: 'EXP_MOTIV', label: 'Expert Motivator', post: 'craft', flight: true, stats: { critRollMod: -2 },
 			summary: '-2 on dropout rolls' },
 		{ id: 'OFF_COOR', label: 'Expert Coordinator', post: 'craft', flight: true,
-			summary: 'Havkes combat pivot costs and gives no to-hit penalty, unless flight turns a full 180 degrees' }
+			summary: 'Halves combat pivot costs and gives no to-hit penalty, unless flight turns a full 180 degrees' }
 	],
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV, the Expert
@@ -250,6 +255,7 @@ window.officers = {
 	     matterWeapon  the hull carries a weapon with a Matter mode (the Matter Weapons Expert)
 	     laserWeapon   the hull carries a weapon with a Laser mode (the Expert Laser Technician)
 	     plasmaWeapon  the hull carries a weapon with a Plasma mode (the Expert Plasma Scientist)
+	     ionWeapon     the hull carries a weapon with an Ion mode, or an Ion Torpedo (the Expert Ion Technician)
 	     missiles      the flight carries missiles (the Expert Missileer) */
 	passesNeeds: function passesNeeds(ship, officer) {
 		if (!officer.needs) return true;
@@ -262,6 +268,9 @@ window.officers = {
 		}
 		if (officer.needs === 'plasmaWeapon') {
 			return this.systemsOf(ship).some(function (s) { return self.isPlasmaWeapon(s); });
+		}
+		if (officer.needs === 'ionWeapon') {
+			return this.systemsOf(ship).some(function (s) { return self.isIonWeapon(s); });
 		}
 		if (officer.needs === 'missiles') return this.missilesPerCraft(ship) > 0;
 		return false;
@@ -1226,13 +1235,17 @@ window.officers = {
 	   ⚠️ MIRROR PAIR with Officers::laserDamageBonus (PHP). */
 	laserDamageBonus: function laserDamageBonus(ship, system) {
 		if (!ship || ship.flight || !this.isLaserWeapon(system) || !this.isActive(ship, 'OFF_LASR')) return 0;
+		if (this.gunnerServesOn(ship, system)) return 0;
+		return this.LASER_BONUS[system.name] || 1;
+	},
+
+	//a serving Expert Gunner holds this weapon, and is not ordered off it this turn - his +1 per die replaces another officer's flat bonus there
+	gunnerServesOn: function gunnerServesOn(ship, system) {
 		var self = this;
 		var turn = this.currentTurn();
-		var gunner = this.listFor(ship).some(function (entry) {
+		return this.listFor(ship).some(function (entry) {
 			return entry.id === 'OFF_GUN' && String(entry.post) === String(system.id) && self.serves(entry, turn) && self.transferOf(ship, entry) === null;
 		});
-		if (gunner) return 0;
-		return this.LASER_BONUS[system.name] || 1;
 	},
 
 	/* The points of power the player has put into this laser this turn while he serves - in game only (the lobby boosts
@@ -1387,6 +1400,91 @@ window.officers = {
 		return this.hitBonusLine(system, value, this.surgeDamageBonus(ship, system));
 	},
 
+	/* ------------------------------------------------------------------ Expert Ion Technician (Stage 17) */
+
+	//⚠️ MIRROR PAIR with Officers::isIonWeapon (PHP): an Ion mode, or the Ion Torpedo (a Ballistic weapon in FV)
+	isIonWeapon: function isIonWeapon(system) {
+		if (!system || !system.weapon) return false;
+		if (system.name === 'ionTorpedo' || system.weaponClass === 'Ion') return true;
+		var classes = system.weaponClassArray;
+		if (!classes || typeof classes !== 'object') return false;
+		return Object.keys(classes).some(function (mode) { return classes[mode] === 'Ion'; });
+	},
+
+	isIonMode: function isIonMode(system, mode) {
+		if (system.name === 'ionTorpedo') return true;
+		var classes = system.weaponClassArray;
+		var cls = (classes && typeof classes === 'object' && classes[mode] !== undefined) ? classes[mode] : system.weaponClass;
+		return cls === 'Ion';
+	},
+
+	//its mode-1 damage is one number. ⚠️ MIRROR PAIR with Officers::scoresFlat (PHP)
+	ionScoresFlat: function ionScoresFlat(system) {
+		return parseInt(this.modeOneDamage(system.minDamageArray, system.minDamage), 10) === parseInt(this.modeOneDamage(system.maxDamageArray, system.maxDamage), 10);
+	},
+
+	/* What he adds to a hit from a fixed-damage ion weapon (a Dual Ion Bolter, an Ion Torpedo): +1 while he serves, but not on a weapon a
+	   serving Expert Gunner holds. A weapon whose mode-1 damage is 0 gains nothing, and the Rad Cannon has its own rules (its 10 is a
+	   number of Structure boxes; its roll is 0). His +1 per die is not shown, as Elite Crew's and a Gunner's are not. The lobby's derived
+	   list and the owner's server list both answer; an enemy's list is empty. ⚠️ MIRROR PAIR with Officers::ionFlatBonus (PHP). */
+	ION_FLAT_BONUS: 1,
+	ionDamageBonus: function ionDamageBonus(ship, system) {
+		if (!ship || ship.flight || !this.isIonWeapon(system) || !this.isIonMode(system, 1) || system.name === 'RadCannon') return 0;
+		if (!this.ionScoresFlat(system) || !(parseInt(this.modeOneDamage(system.maxDamageArray, system.maxDamage), 10) > 0)) return 0;
+		if (!this.isActive(ship, 'OFF_ION') || this.gunnerServesOn(ship, system)) return 0;
+		return this.ION_FLAT_BONUS;
+	},
+
+	/* The level of thrust boost the player has put into this ion gun this turn while he serves - in game only, on the owner's side,
+	   the one the server tells the gun is boostable (ION_BOOST_THRUST thrust, +1d10+1 if it hits - Officers::ionBoostDamage). At most
+	   ION_BOOST_MAX, as the server counts it (user ruling 2026-10-18, revised: one level per gun). */
+	ION_BOOST_THRUST: 3,
+	ION_BOOST_MAX: 1,
+	ionBoost: function ionBoost(ship, system) {
+		if (!ship || ship.flight || this.isDerived(ship) || !this.isIonWeapon(system) || this.ionScoresFlat(system) || !this.isActive(ship, 'OFF_ION')) return 0;
+		if (!window.shipManager || !shipManager.power || typeof shipManager.power.getBoost !== 'function') return 0;
+		return Math.min(this.ION_BOOST_MAX, parseInt(shipManager.power.getBoost(system), 10) || 0);
+	},
+
+	//power.js clickPlus asks it: this ion gun already holds his one boost level this turn. ⚠️ MIRROR PAIR with Officers::ION_BOOST_MAX (PHP)
+	ionBoostFull: function ionBoostFull(ship, system) {
+		return this.ionBoost(ship, system) >= this.ION_BOOST_MAX;
+	},
+
+	//SystemInfo's "Thrust boost" line, or null with no boost - with the rule a boosted gun lives by (Officers::ionDischarged)
+	ionBoostText: function ionBoostText(ship, system) {
+		var n = this.ionBoost(ship, system);
+		if (!n) return null;
+		return '+' + n + 'd10+' + n + ' damage if it hits (' + (n * this.ION_BOOST_THRUST) + ' thrust). It must fire this turn, or it discharges as if it had';
+	},
+
+	/* An ion weapon's Damage line: a fixed-damage weapon's +1 (hitBonusLine), and this turn's boost on each end (n x 1d10+1: +2n low,
+	   +11n high); the Rad Cannon's 10 Structure boxes read 12. A line describing a non-ion mode 1, or in any other shape, is left alone. */
+	RAD_STRUCTURE_BOXES: 12,
+	ionDamageLine: function ionDamageLine(ship, system, value) {
+		if (system.name === 'RadCannon') {
+			return (!ship.flight && this.isActive(ship, 'OFF_ION') && String(value).trim() === '10') ? String(this.RAD_STRUCTURE_BOXES) : value;
+		}
+		if (!this.isIonMode(system, 1)) return value;
+		var line = this.hitBonusLine(system, value, this.ionDamageBonus(ship, system));
+		var n = this.ionBoost(ship, system);
+		var m = n ? /^\s*(\d+)\s*-\s*(\d+)\s*$/.exec(String(line)) : null;
+		if (!m) return line;
+		return (parseInt(m[1], 10) + 2 * n) + '-' + (parseInt(m[2], 10) + 11 * n);
+	},
+
+	/* The Rad Cannon's Special text as the owner's tooltip shows it while he serves (Officers::improvesRadCannon): 12 Structure boxes,
+	   the C&C's roll at +4, and a critical roll forced on a Scanner, an Engine and a reactor (a Sub Reactor too). A sentence worded
+	   otherwise is left as it is. */
+	radCannonSpecial: function radCannonSpecial(ship, value) {
+		if (!ship || ship.flight || !this.isActive(ship, 'OFF_ION')) return value;
+		return String(value)
+			.replace('Structure: 10 boxes', 'Structure: ' + this.RAD_STRUCTURE_BOXES + ' boxes')
+			.replace('critical roll forced (at +2)', 'critical roll forced (at +4)')
+			.replace('Scanner: output reduced by 1.', 'Scanner: output reduced by 1, and critical roll forced.')
+			.replace('Engine: output reduced by 2.', 'Engine: output reduced by 2, and critical roll forced.<br> - Reactor or Sub Reactor: critical roll forced.');
+	},
+
 	/* SystemInfo's one hook into a system's data rows (and its Special text). The weapon tooltip quotes fire
 	   control only through data["Fire control (fighter/med/cap)"] - in game too, less an officer just ordered to
 	   move (pendingMoveFireControl, user request 2026-10-16) - and a jump drive its range through
@@ -1397,7 +1495,8 @@ window.officers = {
 	   Stage 11: a laser's Damage, with an Expert Laser Technician's bonus and boost (laserDamageLine) - in game too,
 	   where the server applies both only at damage time. Stage 12: a plasma weapon's, with an Expert Plasma Scientist's
 	   +1 or +2 (plasmaDamageLine), the same way. Stage 14: every weapon's, with an Expert Religious Leader's +1 on top
-	   (religiousDamageLine). Stage 16: an EM weapon's, with an Expert Surge Officer's +1 (surgeDamageLine). */
+	   (religiousDamageLine). Stage 16: an EM weapon's, with an Expert Surge Officer's +1 (surgeDamageLine). Stage 17: an ion
+	   weapon's, with an Expert Ion Technician's +1 and thrust boost (ionDamageLine), and the Rad Cannon's Special text. */
 	DATA_KEY_FIRECONTROL: 'Fire control (fighter/med/cap)',
 	adjustDataDisplay: function adjustDataDisplay(ship, system, key, value) {
 		if (!system) return value;
@@ -1405,8 +1504,10 @@ window.officers = {
 			var line = value;
 			if (this.isLaserWeapon(system)) line = this.laserDamageLine(ship, system, line);
 			else if (this.isPlasmaWeapon(system)) line = this.plasmaDamageLine(ship, system, line);
+			else if (this.isIonWeapon(system)) line = this.ionDamageLine(ship, system, line);
 			return this.surgeDamageLine(ship, system, this.religiousDamageLine(ship, system, line));
 		}
+		if (system.name === 'RadCannon' && key === 'Special') return this.radCannonSpecial(ship, value);
 		if (system.name === 'jumpEngine' && (key === 'Range' || key === 'Special')) {
 			var bonus = this.jumpRangeBonus(ship, system);
 			if (!bonus) return value;

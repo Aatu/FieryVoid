@@ -53,6 +53,8 @@
    pattern), so the lobby can post him anywhere; the lobby's own Move is client-side (officers.lobbyMove), writing rows.
    Stage 16: the Expert Surge Officer (Ipsha) - +1 damage on EM weapons, reactor power by size, his ship's EM hardening (the
    tabletop rules, rebuilt the same stage in WeaponEM) eased further, and Spark Fields 1 weaker against him.
+   Stage 17: the Expert Ion Technician (Cascor) - +1 per die (or +1) on ion weapons, stronger Rad Cannons, and ion guns the player
+   may BOOST with thrust for +1d10+1 a level (the generic boost, priced in thrust) - a boosted gun that does not fire discharges.
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -99,6 +101,14 @@ class Officers{
 	const SURGE_POWER_MEDIUM = 1;        //...: "while medium ships and HCVs get +1 extra power. LCVs and smaller units gain no extra benefits"
 	const SURGE_HARDENING = 1;           //...: EM criticals "-3 penalty (not -2)", and a forced shutdown resisted on "a 1 or 2" (not 1) - WeaponEM
 	const SURGE_SPARK_RELIEF = 1;        //...: "Any spark field affecting the ship reduces its damage by 1 point"
+	const ION_DIE_BONUS = 1;             //Ion Technician: "All ion-based weapons ... score +1 damage per die, but no die can be increased above its maximum roll"
+	const ION_FLAT_BONUS = 1;            //...: "Weapons scoring a flat amount of damage, like the dual ion bolter or ion torpedo, add +1 only"
+	const ION_BOOST_THRUST = 3;          //...: "Three points of thrust produce an extra 1d10+1 damage"
+	const ION_BOOST_MAX = 1;             //...one level per gun a turn (user ruling 2026-10-18, revised the same day) - officers.ION_BOOST_MAX (JS)
+	const ION_BOOST_DIE = 10;            //...the boost's 1d10
+	const ION_BOOST_FLAT = 1;            //...and its +1
+	const RAD_STRUCTURE_BOXES = 12;      //...: "Rad cannons score 12 damage on structure instead of 10"
+	const RAD_CNC_CRIT_MOD = 4;          //...: "If they hit C&C, the critical roll is at +4 on the die instead of the listed +2"
 
 	/* ⭐ FACTION RULES (user request 2026-10-15) - which factions an officer is offered to, and what some
 	   of them pay. ONE table, so a faction's officers change here and nowhere else: README.md, "Officers:
@@ -133,6 +143,8 @@ class Officers{
 		'OFF_RELI' => array('only' => array('Minbari Federation', 'Markab Theocracy', 'Corillani Theocracy', 'Yolu Confederation')),
 		//"Availability: Ipsha only" - not the Civilians' Ipsha-built Cargo Hauler
 		'OFF_SURG' => array('only' => array('Ipsha Baronies')),
+		//"Availability: Cascor only" - not the Civilians' Cascor-built Calacca and Caracti
+		'OFF_ION'  => array('only' => array('Cascor Commonwealth')),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -274,6 +286,16 @@ class Officers{
 		   (sparkFieldRelief). Rulings (user 2026-10-18): EM hardening rebuilt to the tabletop rules first (WeaponEM); the -3 is once
 		   per system per turn, as the -2; his own Spark Field gains the +1. 10%, Ipsha only ($factionRules). */
 		'OFF_SURG' => array('label' => 'Expert Surge Officer', 'post' => 'maggrav', 'pct' => 10, 'apply' => 'applySurgeOfficer'),
+		/* Expert Ion Technician (Stage 17; rules text, user 2026-10-18), in the Engine. Every ion weapon (the Ion Torpedo included)
+		   scores +1 per die, each die capped at its face, or +1 on a hit whose damage is one number (ionDieBonus, ionFlatBonus); his
+		   ship's Rad Cannons mark 12 Structure boxes instead of 10, force a critical roll on a Scanner, an Engine or a reactor, and
+		   roll a C&C's at +4 instead of +2 (improvesRadCannon); and the player may put 3 thrust into an ion gun whose damage is
+		   rolled for +1d10+1 if it hits - the generic boost, priced in thrust (ionForJson, ionBoostDamage) - but a boosted gun that
+		   does not fire that turn discharges as if it had (ionDischarged). Rulings (user 2026-10-18): ONE boost level per gun a turn
+		   (revised the same day from repeatable); the discharge is built; a sub-reactor counts as the reactor. 10%, Cascor only ($factionRules);
+		   only for a hull carrying an ion weapon. No stat moves at load: every rule is asked at damage time. */
+		'OFF_ION'  => array('label' => 'Expert Ion Technician', 'post' => 'engine', 'pct' => 10, 'apply' => null,
+			'needs' => 'hasIonWeapon'),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -1728,6 +1750,11 @@ class Officers{
 			if (self::isActive($ship, 'OFF_LASR')) $strippedSystem->boostable = true;
 			return;
 		}
+		self::stripBoosts($strippedSystem);
+	}
+
+	//a system's payload power entries without its boosts (type 2) - no power key at all when nothing else is left
+	private static function stripBoosts($strippedSystem){
 		if (empty($strippedSystem->power)) return;
 		$kept = array();
 		foreach ($strippedSystem->power as $power){
@@ -1759,11 +1786,12 @@ class Officers{
 		return is_array($weapon->weaponClassArray) && in_array('Laser', $weapon->weaponClassArray, true);
 	}
 
-	/* Weapon::stripForJson's one officer hook, behind $officersPresent: the Laser Technician's boost (laserForJson) and the
-	   Plasma Scientist's web range (webForJson). */
+	/* Weapon::stripForJson's one officer hook, behind $officersPresent: the Laser Technician's boost (laserForJson), the
+	   Plasma Scientist's web range (webForJson) and the Ion Technician's thrust boost (ionForJson). */
 	public static function weaponForJson($ship, $weapon, $strippedSystem){
 		self::laserForJson($ship, $weapon, $strippedSystem);
 		self::webForJson($ship, $weapon, $strippedSystem);
+		self::ionForJson($ship, $weapon, $strippedSystem);
 	}
 
 	/* ------------------------------------------------------------------ Expert Plasma Scientist (Stage 12) */
@@ -1965,6 +1993,144 @@ class Officers{
 	   fleet's, an enemy's or a mine's) scores on his ship; never below 0. */
 	public static function sparkFieldRelief($ship){
 		return self::isActive($ship, 'OFF_SURG') ? self::SURGE_SPARK_RELIEF : 0;
+	}
+
+	/* ------------------------------------------------------------------ Expert Ion Technician (Stage 17) */
+
+	/* "All ion-based weapons (including the ioniclaser)": a weapon with an Ion mode - the Ionic Laser is Ion-class in FV - and the
+	   Ion Torpedo, which FV files as a Ballistic weapon (a Torpedo) although the rules name it. ⚠️ MIRROR PAIR with
+	   officers.isIonWeapon (JS). */
+	private static function isIonWeapon($weapon){
+		if ($weapon instanceof IonTorpedo || $weapon->weaponClass === 'Ion') return true;
+		return is_array($weapon->weaponClassArray) && in_array('Ion', $weapon->weaponClassArray, true);
+	}
+
+	//a shot in an Ion mode - weaponClass is the fired mode's by then - or the Ion Torpedo's
+	private static function isIonShot($weapon){
+		return $weapon instanceof IonTorpedo || $weapon->weaponClass === 'Ion';
+	}
+
+	/* "Weapons scoring a flat amount of damage ... add +1 only", and the boost "will not function ... with those that score a fixed
+	   amount of damage": a weapon whose damage in this mode is one number - its Damage line's, from minDamageArray / maxDamageArray
+	   (filled per mode at construction; a ReducedDamage critical scales both ends alike). The Rad Cannon (10) and the Ion Field
+	   Generator (0) are flat too. ⚠️ MIRROR PAIR with officers.ionScoresFlat (JS), which reads mode 1. */
+	private static function scoresFlat($weapon, $mode = null){
+		if ($mode === null) $mode = $weapon->firingMode;
+		$min = isset($weapon->minDamageArray[$mode]) ? $weapon->minDamageArray[$mode] : $weapon->minDamage;
+		$max = isset($weapon->maxDamageArray[$mode]) ? $weapon->maxDamageArray[$mode] : $weapon->maxDamage;
+		return (int)$min === (int)$max;
+	}
+
+	//an ion weapon he can boost: its damage is rolled (mode 1 - every Cascor weapon has one mode)
+	private static function boostableIon($weapon){
+		return self::isIonWeapon($weapon) && !self::scoresFlat($weapon, 1);
+	}
+
+	//he serves, and not on a weapon a serving Expert Gunner holds - the Gunner's +1 per die replaces his +1 there (the Laser
+	//Technician's ruling, user 2026-10-17: only the flat bonus is the Gunner's to replace; the boost still works)
+	private static function ionServesFor($ship, $weapon){
+		$turn = TacGamedata::$currentTurn;
+		return self::isActive($ship, 'OFF_ION', $turn) && !self::servesOn($ship, 'OFF_GUN', $weapon, $turn);
+	}
+
+	/* His +1 per die: Weapon::getFinalDamage adds it to Elite Crew's (and a Gunner's) Dice::$perDieBonus for an ion shot whose damage
+	   is rolled, behind $officersPresent - each die capped at its face ("a d10 would score 10 damage on a roll of either 9 or 10"). */
+	public static function ionDieBonus($ship, $weapon){
+		if (!self::isIonShot($weapon) || self::scoresFlat($weapon)) return 0;
+		return self::ionServesFor($ship, $weapon) ? self::ION_DIE_BONUS : 0;
+	}
+
+	/* "Weapons scoring a flat amount of damage, like the dual ion bolter or ion torpedo, add +1 only" - per hit, so on each of a Dual
+	   Ion Bolter's two guns. Never on a roll of 0: the Rad Cannon's own rules "supersede the above benefit" (improvesRadCannon), and
+	   the Ion Field Generator deals none - their effect is something else. Behind $officersPresent.
+	   ⚠️ MIRROR PAIR with officers.ionDamageBonus (JS), which raises the owner's Damage lines. */
+	public static function ionFlatBonus($ship, $weapon, $rolled){
+		if ($rolled <= 0 || !self::isIonShot($weapon) || !self::scoresFlat($weapon)) return 0;
+		return self::ionServesFor($ship, $weapon) ? self::ION_FLAT_BONUS : 0;
+	}
+
+	/* What each ion gun has used of its boost: weapon => array(turn => true). In memory only, as the Laser Technician's pool. */
+	private static $ionBoostSpent = null;
+
+	/* ⭐ THE THRUST BOOST - Weapon::getFinalDamage, behind $officersPresent: "Three points of thrust produce an extra 1d10+1 damage,
+	   should the weapon score a hit." Each level of the generic boost (type-2 power entries) costs ION_BOOST_THRUST thrust - the
+	   client takes it off the engine (ionForJson) - and adds 1d10+1; ONE level per gun a turn (user ruling 2026-10-18, revised the
+	   same day from "as many as the thrust allows"): further levels a doctored entry carries add nothing. Only an ion shot whose damage is rolled ("will not function on non-ionic weapons or with those that score a fixed amount of
+	   damage"), and only while he serves on the order's turn: the server takes boost entries as sent, so a doctored one is answered
+	   here. Rolled as written - his +1 per die, and Elite Crew's, are for the weapon's own dice. ONCE a turn, on the gun's first
+	   hit: every hit a weapon makes in a turn is resolved in one request on one weapon object (and no Cascor gun hits twice). A hit
+	   on a Chameleon simulacrum alone is rolled but spends nothing (the Laser Technician's rule). */
+	public static function ionBoostDamage($ship, $weapon, $target, $fireOrder){
+		if (!self::isIonShot($weapon) || self::scoresFlat($weapon)) return 0;
+		$turn = (int)$fireOrder->turn;
+		if (!self::isActive($ship, 'OFF_ION', $turn)) return 0;
+		$levels = min(self::ION_BOOST_MAX, self::boostOn($weapon, $turn));
+		if ($levels < 1) return 0;
+		if (self::$ionBoostSpent === null) self::$ionBoostSpent = new WeakMap();
+		$spent = isset(self::$ionBoostSpent[$weapon]) ? self::$ionBoostSpent[$weapon] : array();
+		if (!empty($spent[$turn])) return 0;
+		$add = Dice::d(self::ION_BOOST_DIE, $levels) + $levels * self::ION_BOOST_FLAT;
+		if (empty($target->chameleonIsPhantom)){
+			$spent[$turn] = true;
+			self::$ionBoostSpent[$weapon] = $spent;
+		}
+		return $add;
+	}
+
+	/* "If applied, the weapon must fire on that turn (if it does not, it discharges and is treated as having fired anyway)" -
+	   Weapon::calculateLoadingFromLastTurn asks it beside firedOnTurn at the turn change, behind $officersPresent: a gun he boosted
+	   on $turn that made no fire order then loses its loading as if it had fired. The turn change runs on the gamedata loaded BEFORE
+	   the firing resolved (§9.16), which holds every order declared and every power entry of Initial Orders - all this reads. The
+	   client follows the loading row the turn change writes, so it needs no mirror. An Expert Gunner's faster reload is for a
+	   firing (fasterReload), so a discharge never spends it.
+	   Only a gun that was LOADED on $turn discharges: one still recharging could not have fired, so a boost on it was never
+	   "applied on the turn of firing" (user rule, 2026-10-18 - game 4491: a boost the client carried onto two recharging guns
+	   would otherwise have reset their reload every turn). calculateLoadingFromLastTurn asks before setLoading, so the weapon
+	   still holds $turn's loading. */
+	public static function ionDischarged($weapon, $turn){
+		$ship = $weapon->getUnit();
+		if (!($ship instanceof BaseShip) || !self::boostableIon($weapon)) return false;
+		if ($weapon->getTurnsloaded() < $weapon->getLoadingTime()) return false;
+		if (self::boostOn($weapon, $turn) < 1) return false;
+		return self::isActive($ship, 'OFF_ION', $turn);
+	}
+
+	/* Weapon::stripForJson (through weaponForJson), for each ion gun he can boost, on a ship he is aboard (serving or not) - the
+	   Laser Technician's pattern (laserForJson), with THRUST for power, the Hypergraviton Blaster's path:
+	   - his own team (and everybody once the game is over) is told what a boost level costs - no power (boostEfficiency 0) and
+	     ION_BOOST_THRUST thrust (thrustBoosted / thrustPerBoost: movement.js getRemainingEngineThrust takes it off the engine, and
+	     the Initial Orders commit already refuses a ship whose thrust goes negative) - whenever its power entries are sent; and
+	     that the gun is BOOSTABLE while he serves and it is ready to fire this turn ("This power must be applied on the turn of
+	     firing": a boosted gun that does not fire discharges, so one still charging is never offered the buttons);
+	   - anyone else gets its power entries WITHOUT the boosts: "Weapons being charged in this manner will be detected (and their
+	     strength known) by anything that detects special weapon arming modes, such as the Expert Analyst" - and by nothing else. */
+	private static function ionForJson($ship, $weapon, $strippedSystem){
+		if (!self::boostableIon($weapon) || !self::isAboard($ship, 'OFF_ION')) return;
+		if (TacGamedata::$currentGameFinished || $ship->isRevealedToCurrentViewer()){
+			$strippedSystem->boostEfficiency = 0;
+			$strippedSystem->thrustBoosted = true;
+			$strippedSystem->thrustPerBoost = self::ION_BOOST_THRUST;
+			if (self::isActive($ship, 'OFF_ION') && $weapon->getLoadingTime() <= $weapon->getTurnsloaded()) $strippedSystem->boostable = true;
+			return;
+		}
+		self::stripBoosts($strippedSystem);
+	}
+
+	/* The Rad Cannon, fired by HIS ship: "Rad cannons score 12 damage on structure instead of 10 (this supersedes the above benefit),
+	   and force a critical roll if they hit the sensors, engine or reactor. If they hit C&C, the critical roll is at +4 on the die
+	   instead of the listed +2." RadCannon::onDamagedSystem asks it for the shooter. A sub-reactor counts as the reactor (user ruling
+	   2026-10-18). Kept on a Gunner's Rad Cannon: these are the weapon's own rules improved, not a bonus he could replace. */
+	public static function improvesRadCannon($shooter){
+		if (!TacGamedata::$officersPresent || !($shooter instanceof BaseShip)) return false;
+		return self::isActive($shooter, 'OFF_ION');
+	}
+
+	//only for a hull carrying an ion weapon: the rules do not say so, but he does nothing without one (the Laser Technician's test)
+	private static function hasIonWeapon($ship){
+		foreach ($ship->systems as $system){
+			if ($system instanceof Weapon && self::isIonWeapon($system)) return true;
+		}
+		return false;
 	}
 
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */

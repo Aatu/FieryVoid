@@ -1326,8 +1326,9 @@ public function getFullStartLoading()
         }
 
 
-        if ($this->firedOnTurn($gamedata->turn -1)) {
-            if ($this->firedUsingMode($gamedata->turn -1)==1) {//only basic mode counts for sustaining! otherwise shot was just not sustained 
+        //OFFICERS_PLAN.md Stage 17 - a gun an Expert Ion Technician boosted with thrust that did not fire "discharges and is treated as having fired anyway"
+        if ($this->firedOnTurn($gamedata->turn -1) || (TacGamedata::$officersPresent && Officers::ionDischarged($this, $gamedata->turn -1))) {
+            if ($this->firedUsingMode($gamedata->turn -1)==1) {//only basic mode counts for sustaining! otherwise shot was just not sustained
                 if ($this->overloadshots > 0) {
                     $newExtraShots = $this->overloadshots - 1;
                     //if you have extra shots use them
@@ -3200,8 +3201,9 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
            offered to ships (Enhancements::setEnhancementOptionsShip). */
         $dieBonus = ($shooter instanceof BaseShip) ? $shooter->getCrewDieDamageBonus() : 0;
         /* An Expert Gunner in THIS weapon (OFFICERS_PLAN.md Stage 8): +1 per die more, on top of Elite Crew's
-           (not an officer, so they stack) - each die still capped at its face. Behind the static. */
-        if (TacGamedata::$officersPresent && $shooter instanceof BaseShip) $dieBonus += Officers::gunnerDieBonus($shooter, $this);
+           (not an officer, so they stack) - each die still capped at its face. An Expert Ion Technician's +1 per die on an
+           ion weapon's dice (Stage 17), likewise - but not on a Gunner's weapon, whose +1 replaces his. Behind the static. */
+        if (TacGamedata::$officersPresent && $shooter instanceof BaseShip) $dieBonus += Officers::gunnerDieBonus($shooter, $this) + Officers::ionDieBonus($shooter, $this);
         $previousDieBonus = Dice::$perDieBonus;
         Dice::$perDieBonus = $dieBonus;
         try {
@@ -3216,12 +3218,15 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
            getDamageMod adds the flat bonuses. An Expert Plasma Scientist's +1 (+2 for a Fuser, Stage 12) - here, not
            in getBonusDamage, because six plasma weapons override getDamageMod and drop the parent's result. An Expert Religious
            Leader's +1 on every hit (Stage 14) - this method runs once per hit, which is his "per volley". An Expert Surge
-           Officer's +1 on every Electromagnetic hit, +1 per cannon on a combined Surge Cannon shot (Stage 16). Behind the static. */
+           Officer's +1 on every Electromagnetic hit, +1 per cannon on a combined Surge Cannon shot (Stage 16). An Expert Ion
+           Technician's +1 on an ion hit whose damage is one number, and his thrust boost's 1d10+1 a level (Stage 17). Behind the static. */
         if (TacGamedata::$officersPresent && $shooter instanceof BaseShip){
             $damage += Officers::laserBoostDamage($shooter, $this, $rolled, $target, $fireOrder);
             $damage += Officers::plasmaDamageBonus($shooter, $this);
             $damage += Officers::religiousDamageBonus($shooter, $this, $rolled);
             $damage += Officers::surgeDamageBonus($shooter, $this, $rolled);
+            $damage += Officers::ionFlatBonus($shooter, $this, $rolled);
+            $damage += Officers::ionBoostDamage($shooter, $this, $target, $fireOrder);
         }
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		
