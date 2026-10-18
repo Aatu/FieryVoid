@@ -109,6 +109,22 @@ class ShipSystem {
         $this->survivesStructureDestruction = (bool)$survives;
     }
 
+    /* Carried by a Kirishiac Orbital (its weapon, Self Repair or refit module) - set by the orbital's
+       wiring. Such a system is isTargetable = false by RULE (no called shots on orbital systems) but is
+       still a real box, and the lobby's pre-battle damage pseudo-system test reads this to tell it from
+       an ability (RammingAttack and friends). PROTECTED for the reason given on
+       $survivesStructureDestruction above; reaches the static blueprint only, via
+       ShipCompactor::annotateSystems. */
+    protected $orbitalMounted = false;
+
+    public function getOrbitalMounted(){
+        return $this->orbitalMounted;
+    }
+
+    public function setOrbitalMounted($mounted = true){
+        $this->orbitalMounted = (bool)$mounted;
+    }
+
     /* The critical classes this system's hit chart can produce, flattened and deduped.
        $possibleCriticals stays PROTECTED - only the derived list is exposed, and only for
        the lobby's pre-battle crit picker (systemCriticals.php -> Manager::getSystemCriticals).

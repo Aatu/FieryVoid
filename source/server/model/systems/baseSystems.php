@@ -11502,6 +11502,7 @@ class KirishiacOrbital extends ShipSystem{
 	private function wireMountedSystem($system){
 		$system->linkedOrbital = $this; //back-reference: overkill routing + stowed/power state
 		$system->isTargetable = false; //"called shots may not be made on orbitals or weapons attached to them"
+		$system->setOrbitalMounted(); //...but still a real box: lobby pre-battle damage must not read it as an ability
 		$system->repairPriority = 0; //DEPLOYED default - SelfRepair may service it only while docked (priority 6, set on notes-load)
 		if ($this->structureHomeLocation !== null) $system->structureHomeLocation = $this->structureHomeLocation; //docks to the same block
 	}
@@ -12040,6 +12041,7 @@ class KirishiacHeavyOrbital extends KirishiacOrbital{
 		$selfRepair->linkedOrbital = $this; //overkill routing back into the orbital + data window
 		$selfRepair->displayName = 'Orbital Self Repair ' . $this->getPairing(); //carries its orbital's letter, distinct from the ship's own Self Repair
 		$selfRepair->isTargetable = false; //"called shots may not be made on orbitals or weapons attached to them"
+		$selfRepair->setOrbitalMounted(); //...but still a real box: lobby pre-battle damage must not read it as an ability
 		if ($this->structureHomeLocation !== null) $selfRepair->structureHomeLocation = $this->structureHomeLocation;
 	}
 

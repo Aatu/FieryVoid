@@ -3907,7 +3907,10 @@ class Enhancements{
 	}
 
 	/* The gate every one of the five sits behind (§4.3). Deliberately mirrors the client's
-	   isPseudoSystem in SystemInfoButtons.js - ⚠️ MIRROR PAIR, change both. */
+	   isPseudoSystem in SystemInfoButtons.js - ⚠️ MIRROR PAIR, change both.
+	   ONE intended divergence: the client exempts orbitalMounted systems so they can take
+	   pre-battle DAMAGE; this gate does not, so they get no enhancement offers (user ruling
+	   2026-10-18). Do not "re-sync" either side. */
 	public static function systemMayBeEnhanced($ship, $system){
 		if(!is_object($ship) || !is_object($system)) return false;
 		//D6 - hull age is still the primary gate, but it is now a PER-ENHANCEMENT question

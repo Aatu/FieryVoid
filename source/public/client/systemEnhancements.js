@@ -538,6 +538,7 @@ window.systemEnhancements = {
 		}
 		json.displayName = baseName + ' ' + pairing + (ordinal > 1 ? String(ordinal) : '');
 		json.isTargetable = false;
+		json.orbitalMounted = true; //as ShipSystem::setOrbitalMounted - keeps the swapped-in module pre-damageable
 		json.data = json.data || {};
 		json.data.ID = id;
 		json.data.Arc = json.startArc + '..' + json.endArc;

@@ -883,9 +883,13 @@ export const canApplyMineDamage = (ship) =>
 
 //A system with no structure of its own, hidden from the icon grid, or untargetable by
 //construction (RammingAttack and friends) is an ABILITY, not a box on the SCS.
+//orbitalMounted: a Kirishiac Orbital's weapon / Self Repair / refit module is untargetable by
+//RULE (no called shots), not by construction - a real box, so it may be pre-damaged.
+//⚠️ Deliberately NOT mirrored in Enhancements::systemMayBeEnhanced: mounted systems get no
+//enhancement offers (user ruling 2026-10-18), and canApplySystemEnhancements also needs an offer.
 const isPseudoSystem = (system) => !system
 	|| !(system.maxhealth > 0)
-	|| system.isTargetable === false
+	|| (system.isTargetable === false && !system.orbitalMounted)
 	|| Boolean(system.hideInShipWindow)
 	|| Array.isArray(system.systems);   //a fighter unit inside a flight
 
