@@ -3813,7 +3813,7 @@ class DBManager
 				if (Officers::takeNote($ship, $currNote)) continue;
 				//...and so is a fighter officer's move with his fighter to another flight row (Stage 4)
 				if (Officers::isMoveNote($currNote)){
-					$ship->recordOfficerMove($currNote->notevalue, $currNote->turn);
+					$ship->recordOfficerMove($currNote->notevalue, $currNote->turn, $currNote->systemid);
 					continue;
 				}
 				//...and the Expert Scavenger's spent save (Stage 5), which sits on his post, an Engine

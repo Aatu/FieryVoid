@@ -99,7 +99,13 @@ window.officers = {
 		{ id: 'EXP_MOTIV', label: 'Expert Motivator', post: 'craft', flight: true, stats: { critRollMod: -2 },
 			summary: '-2 on dropout rolls' },
 		{ id: 'OFF_COOR', label: 'Expert Coordinator', post: 'craft', flight: true,
-			summary: 'Halves combat pivot costs and gives no to-hit penalty, unless flight turns a full 180 degrees' }
+			summary: 'Halves combat pivot costs and gives no to-hit penalty, unless flight turns a full 180 degrees' },
+		/* Stage 18: bought as a COUNT (`multi`) - one in each of the flight's first crafts, every one adding his OB (stats, per
+		   entry) and a free jinking level beyond the limit (freeJinks, read by movement.js). His Spark Field relief is the
+		   server's alone. The count's limit arrives in the offer (Officers::maxCount: 4, Raiders 2), and rowMax holds it to the
+		   flight size in the buy dialog. */
+		{ id: 'OFF_PILOT', label: 'Expert Pilot', post: 'craft', flight: true, multi: true, stats: { offensivebonus: 1 },
+			summary: 'Each: +5 offensive bonus and one free jinking level beyond the limit' }
 	],
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV, the Expert
@@ -309,7 +315,9 @@ window.officers = {
 
 	/* Every officer aboard, as array({id, post, out?, how?}) in registry order. See the header for
 	   which of the two sources answers. A flight's derived list holds ONE officer at most (D9), the
-	   first bought in registry order, as Officers::pickPosts serves. */
+	   first bought in registry order, as Officers::pickPosts serves - or, for an officer bought as a
+	   count (`multi`, Stage 18), that many entries: one in each of its first crafts, held to the row's
+	   limit and the flight's size. A lobby flight holds a single craft card, so there they share it. */
 	listFor: function listFor(ship) {
 		if (!ship) return [];
 		if (Array.isArray(ship.officers)) return ship.officers;
@@ -323,16 +331,49 @@ window.officers = {
 			if (!this.isBought(ship, officer.id)) continue;
 			var post = this.findPost(ship, officer.post);
 			if (!post || !this.passesNeeds(ship, officer)) continue;
-			var entry = { id: officer.id, post: post.id };
-			if (this.isPostDestroyed(ship, post)) {
-				entry.out = 0; //pre-battle damage: he never serves (Officers::serves)
-				entry.how = 'disabled';
+			if (officer.multi && ship.flight) {
+				var n = Math.min(this.boughtCount(ship, officer.id), this.rowLimit(ship, officer.id), parseInt(ship.flightSize, 10) || 1);
+				for (var k = 1; k <= n; k++) list.push(this.derivedEntry(ship, officer.id, this.nthCraft(ship, k) || post));
+				break;
 			}
-			list.push(entry);
+			list.push(this.derivedEntry(ship, officer.id, post));
 			if (ship.flight) break;
 		}
 		if (!ship.flight) list = list.concat(this.placedEntries(ship, list));
 		return list;
+	},
+
+	derivedEntry: function derivedEntry(ship, id, post) {
+		var entry = { id: id, post: post.id };
+		if (this.isPostDestroyed(ship, post)) {
+			entry.out = 0; //pre-battle damage: he never serves (Officers::serves)
+			entry.how = 'disabled';
+		}
+		return entry;
+	},
+
+	//a flight's k-th craft (1 = the first), or null when it holds fewer - a lobby flight holds one
+	nthCraft: function nthCraft(ship, k) {
+		var crafts = this.systemsOf(ship).filter(function (s) { return Boolean(s); });
+		return crafts[k - 1] || null;
+	},
+
+	//the limit his bought row carries (the offer's: Officers::maxCount), 1 when it says none
+	rowLimit: function rowLimit(ship, id) {
+		for (var i = 0; i < ship.enhancementOptions.length; i++) {
+			var row = ship.enhancementOptions[i];
+			if (row && row[0] === id) return Math.max(1, parseInt(row[3], 10) || 1);
+		}
+		return 1;
+	},
+
+	/* The most of this row the buy dialog lets a flight of `size` take: its limit, and for an officer bought as a count
+	   (Stage 18) never more than the flight's craft ("not more than the flightSize" - user notes 2026-10-19). */
+	rowMax: function rowMax(enhID, limit, size) {
+		var officer = this.get(enhID);
+		var max = parseInt(limit, 10) || 0;
+		if (officer && officer.multi) max = Math.min(max, Math.max(1, parseInt(size, 10) || 1));
+		return max;
 	},
 
 	/* ------------------------------------------------------------------ placed officers (Stage 8) */
@@ -469,11 +510,17 @@ window.officers = {
 	},
 
 	isBought: function isBought(ship, id) {
+		return this.boughtCount(ship, id) > 0;
+	},
+
+	//the count on his bought row (0 when none)
+	boughtCount: function boughtCount(ship, id) {
 		for (var i = 0; i < ship.enhancementOptions.length; i++) {
 			var row = ship.enhancementOptions[i];
-			if (row && row[0] === id && (parseInt(row[2], 10) || 0) > 0) return true;
+			var n = row ? (parseInt(row[2], 10) || 0) : 0;
+			if (row && row[0] === id && n > 0) return n;
 		}
-		return false;
+		return 0;
 	},
 
 	isPostDestroyed: function isPostDestroyed(ship, post) {
@@ -567,7 +614,19 @@ window.officers = {
 		this.arrivingAt(ship, systemId).forEach(function (arrival) {
 			lines.push(self.label(arrival.entry.id) + ' ' + self.arrivalText(ship, arrival.entry));
 		});
-		return lines.join('\n');
+		return this.countLines(lines).join('\n');
+	},
+
+	/* Identical lines once each, "Expert Pilot (3)" for three (Stage 18: a lobby flight's pilots share its one card), in the
+	   order they first appear - the fleet list's own "(n)" for placed officers. */
+	countLines: function countLines(lines) {
+		var order = [];
+		var counts = {};
+		lines.forEach(function (line) {
+			if (!counts[line]) { counts[line] = 0; order.push(line); }
+			counts[line]++;
+		});
+		return order.map(function (line) { return counts[line] > 1 ? line + ' (' + counts[line] + ')' : line; });
 	},
 
 	/* ------------------------------------------------------------------ the Expert Gunner's shot (Stage 10) */
@@ -948,6 +1007,23 @@ window.officers = {
 		return false;
 	},
 
+	/* How many of this officer serve now - an officer bought as a count (Stage 18) is one entry per craft, and isActive answers
+	   for the first only. ⚠️ MIRROR PAIR with Officers::servingCount (PHP). */
+	servingCount: function servingCount(ship, id) {
+		var turn = this.currentTurn();
+		var self = this;
+		return this.listFor(ship).filter(function (entry) { return entry.id === id && self.serves(entry, turn); }).length;
+	},
+
+	/* Expert Pilot: the jinking levels this flight may take at no thrust and beyond its jinking limit - one per serving pilot
+	   ("The bonus level does not count against jinking limits for that fighter class"). CLIENT ONLY: movement.php validates no
+	   jink, so shipManager.movement.canJink / doJink are the rule; never through ship.jinkinglimit, which the lobby and the
+	   hangars read as the fighter's weight class. Asked for the moving flight, always an own-team one with its list. */
+	PILOT_FREE_JINK: 1,
+	freeJinks: function freeJinks(ship) {
+		return (ship && ship.flight) ? this.servingCount(ship, 'OFF_PILOT') * this.PILOT_FREE_JINK : 0;
+	},
+
 	/* Expert Scanner: the EW points he adds to the late-EW allowance, on top of the EW Detector ladder
 	   (ew.getDetectorAllowance). In game the list is the server's, so an enemy ship answers 0.
 	   ⚠️ MIRROR PAIR with Officers::savedEwBonus (PHP). */
@@ -983,11 +1059,15 @@ window.officers = {
 	   2026-10-11: a count, like "System Enhancements (n)", the detail living on each post's tooltip). Own
 	   team only, through listFor; null with none aboard.
 	   A FLIGHT in the LOBBY names him instead ("Expert Dogfighter"; user request 2026-10-11): a flight
-	   carries one officer at most (D9), so a count says less than his name. In game it stays a count. */
+	   carries one officer at most (D9), so a count says less than his name - or "Expert Pilot (3)" for
+	   pilots bought as a count (Stage 18). In game it stays a count. */
 	summaryLine: function summaryLine(ship) {
 		var list = this.listFor(ship);
 		if (list.length === 0) return null;
-		if (ship.flight && window.gamedata && gamedata.gamephase === -2) return this.label(list[0].id);
+		if (ship.flight && window.gamedata && gamedata.gamephase === -2) {
+			var same = list.filter(function (entry) { return entry.id === list[0].id; }).length;
+			return this.label(list[0].id) + (same > 1 ? ' (' + same + ')' : '');
+		}
 		return 'Officers (' + list.length + ')';
 	},
 
@@ -1015,7 +1095,8 @@ window.officers = {
 	   enhancement is priced per craft and multiplied by the flight size (D8). A fighter officer's listed
 	   price is for a `standard` flight (standardFlight), so it is scaled by size / standard and rounded
 	   up, plus his perCraftExtra per craft (user ruling 2026-10-15). enhCost is the row's own sum (price x
-	   count); `extra` is perCraftExtra(ship, enhID), worked out once by the caller.
+	   count) - so officers bought as a count (Stage 18, Expert Pilots) are scaled and rounded up ONCE for
+	   the row, as Officers::flightPrice's $count; `extra` is perCraftExtra(ship, enhID), worked out once by the caller.
 	   ⚠️ MIRROR PAIR with Officers::flightPrice (PHP). */
 	flightCost: function flightCost(enhID, count, enhCost, size, extra, standard) {
 		var cost = Number(enhCost) || 0;
@@ -1027,10 +1108,15 @@ window.officers = {
 	},
 
 	/* The buy dialog's price note for a fighter officer's row: "29pts per 6 craft", "40pts per 6 craft + 6pts
-	   per craft"; a single superheavy's is just its price. null for anything else. */
+	   per craft"; a single superheavy's is just its price; "57pts each per 6 craft, one per craft" for an
+	   officer bought as a count (Stage 18). null for anything else. */
 	priceNote: function priceNote(ship, enhancement) {
 		if (!this.isFighterOfficer(enhancement[0])) return null;
 		var standard = this.standardFlight(ship);
+		var officer = this.get(enhancement[0]);
+		if (officer && officer.multi) {
+			return enhancement[4] + 'pts each' + (standard > 1 ? ' per ' + standard + ' craft' : '') + ', one per craft';
+		}
 		var note = enhancement[4] + 'pts' + (standard > 1 ? ' per ' + standard + ' craft' : '');
 		var extra = this.perCraftExtra(ship, enhancement[0]);
 		if (extra > 0) note += ' + ' + extra + 'pts per craft';

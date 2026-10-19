@@ -1069,7 +1069,7 @@ class Manager{
                         /* An officer row keeps what he cost (OFFICERS_PLAN.md §9.9): his price can change
                            under a saved fleet, and enhvalue, one lump, cannot say how much of it was his.
                            NULL for every other row. */
-                        $enhValue = Officers::isOfficerId($enhID) ? Officers::rowPrice($ship, $enhID) : null;
+                        $enhValue = Officers::isOfficerId($enhID) ? Officers::rowPrice($ship, $enhID, $enhNo) : null;
                         self::$dbManager->submitSavedEnhancement($listId, $shipId, $enhID, $enhNo, $enhName, $enhValue);
                     }
                 }
@@ -1262,7 +1262,7 @@ class Manager{
                                 . ' - removed, and its ' . $paid . ' points refunded.';
                             continue;
                         }
-                        $now = (float)Officers::rowPrice($ship, $enhID);
+                        $now = (float)Officers::rowPrice($ship, $enhID, $numberTaken); //the counts are written back below
                         if ($now != $paid) {
                             $ship->pointCostEnh = max(0, (float)$ship->pointCostEnh - $paid + $now);
                             $sysEnhNotices[] = $ship->name . ': ' . Officers::getLabel($enhID) . ' now costs ' . $now

@@ -3668,9 +3668,10 @@ class HangarOps {
 		if ($escapeeCount > 0 && $activeBefore > 0 && $escapeeCount < $activeBefore){
 			$totalEnh = (int)round((float)($flight->pointCostEnh ?? 0) + (float)($flight->pointCostEnh2 ?? 0));
 			if ($totalEnh > 0){
-				//the remnant keeps a fighter officer's own price only if he did not escape (Officers::shareWithCraft;
-				//exactly the old proportion on a flight without one)
-				$remnantEnh = Officers::shareWithCraft($flight, $totalEnh, $activeBefore - $escapeeCount, $activeBefore, !$officerEscapes);
+				//the remnant keeps a fighter officer's own price only if he did not escape - of several Expert Pilots, the
+				//ones who stayed (Officers::shareWithCraft; exactly the old proportion on a flight without one)
+				$remnantEnh = Officers::shareWithCraft($flight, $totalEnh, $activeBefore - $escapeeCount, $activeBefore,
+					Officers::officersAboard($flight) - $officerEscapes);
 				$flight->pointCostEnh  = $remnantEnh;
 				$flight->pointCostEnh2 = 0;
 				Manager::insertSingleEnhValue($flight->id, $remnantEnh);

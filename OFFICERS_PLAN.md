@@ -16,8 +16,9 @@ a second added officer (§9.19) - committed (`f17a680b8`). Stage 14, the Expert 
 (§9.20), and Stage 15, moving officers in Fleet Selection (free) with the Religious Leader's placed twin, and every officer on
 a post destroyed by pre-battle damage refunded (§9.21) - committed (`68f1c82b3`). Stage 16, the Expert Surge Officer (Ipsha),
 with FV's EM hardening rebuilt to the tabletop rules first (§9.22) - committed (`318058ac0`). Stage 17, the Expert Ion Technician
-(Cascor), whose thrust boost rides the generic boost the way the Hypergraviton Blaster's does (§9.23) - BUILT 2026-10-18,
-uncommitted.** Written
+(Cascor), whose thrust boost rides the generic boost the way the Hypergraviton Blaster's does (§9.23) - committed
+(`a83c3d6ae`). Stage 18, the Expert Pilot, the first officer bought as a COUNT - up to four on one flight, one per craft (§9.24) -
+BUILT 2026-10-19, uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -57,7 +58,11 @@ plus a flat -1 on every critical), so they supplied the tabletop hardening rules
 Ring Base hardened, and the officer on top - ruling five questions on the way (Stage 16, §9.22). Later that day they supplied the
 Expert Ion Technician's rules text, pointing at the Hypergraviton Blaster's thrust boost as the way to build his, and ruled the three
 questions it raised: the boost repeatable (then, once built, re-ruled to one level per gun), the discharge of a boosted gun that does
-not fire built, and a Sub Reactor counted as the reactor (Stage 17, §9.23). Each officer's own rules questions still only need ruling when that officer's stage starts. Next step: the
+not fire built, and a Sub Reactor counted as the reactor (Stage 17, §9.23). On 2026-10-19 they added the Expert Pilot with his rules
+text and notes (up to four, two for Raiders, each in his own craft; his free jinking level beyond the limit), and the Spark Field
+clauses of the Evader and the Pilot, and ruled four questions: pilots ARE the flight's one officer, priced by the §9.9 scaled rule,
+the Pilot's Spark Field relief automatic on a turn his flight neither jinks nor fires, and "Raiders" the Raiders faction (Stage 18,
+§9.24). Each officer's own rules questions still only need ruling when that officer's stage starts. Next step: the
 rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
@@ -157,7 +162,7 @@ here and can be built first, on their own (Stage 2a).
 | **D6** | **A new class, `Officers`** (`source/server/model/ships/Officers.php`), holds the registry and the resolver. `Enhancements.php` gains hook calls only. | `Enhancements.php` is 4,789 lines. WEAPON plan D12's argument applies: one literal per officer, so nothing gets added in three places out of four. |
 | **D7** | **ids are `OFF_*`, at most 10 characters** (table in §4.2). | `enhid` is `varchar(10)` in both tables. The prefix routes a row to the Officers section, and keeps it out of the public tooltip, with one test each. It also avoids the existing fighter `NAVIGATOR`. |
 | **D8** | **Price = ceil(pct × blueprint `pointCost`)**, the base `ELITE_CREW` uses ([Enhancements.php:244](source/server/model/ships/Enhancements.php#L244)). **Fighter officers are priced per FLIGHT**, not per craft (*re-ruled 2026-10-15, §9.9: every fighter officer is pct of one craft for a flight of six, scaled by the flight's size*). **Fleet-% officers** (Quartermaster, Evangelist) are priced off the **game's points limit**, not the live fleet total. | The lobby multiplies every fighter enhancement by flight size ([confirm.js:215](source/public/client/UI/confirm.js#L215), [gamelobby.js:4203](source/public/client/gamelobby.js#L4203) and five more sites). "1 per flight, 50 % of one fighter" is not that shape, so it needs a per-row exception (§4.10). Evader's "× number of fighters" is the one fighter officer that already fits. A price on the live fleet total is circular (the officer is part of the fleet) and changes with every purchase. The game's limit is fixed and known in the lobby. |
-| **D9** | **RULED.** **Ships: one officer of each type**, several different types per ship, "except as noted" (Gunner up to 3 / 2 / 1 by size; Breaching Expert up to 20 % of pods). **Flights: one officer in total.** **Never on Ancient hulls (factionAge ≥ 3), OSATs (mines extend OSAT) or terrain.** Bases, LCVs and everything else only where the post exists, so a base without a jump drive is never offered a Jump Officer. Faction gates use the faction string. | User ruling (QX3, QX4) and the rulebook: a unit "may not benefit from more than one expert officer of the same type (except as noted)". The flight cap makes a flight's officer rows mutually exclusive in the buy dialog (§4.10). ⚠️ FV_factions.txt:438 still promises Shadow ships "enhancements relating to special officers"; that line now contradicts the ruling. Corillani CPN and OSF exist only in `$notes` prose ([VostovaAMCPN.php:15](source/server/model/ships/corillani/VostovaAMCPN.php#L15)), so the Evangelist needs a per-hull opt-in (`enhancementOptionsEnabled[] = 'OFF_EVAN'`), which is a contributor-area edit. |
+| **D9** | **RULED.** **Ships: one officer of each type**, several different types per ship, "except as noted" (Gunner up to 3 / 2 / 1 by size; Breaching Expert up to 20 % of pods). **Flights: one officer in total** *(Stage 18, §9.24: up to four Expert Pilots, bought as a count, are that one officer)*. **Never on Ancient hulls (factionAge ≥ 3), OSATs (mines extend OSAT) or terrain.** Bases, LCVs and everything else only where the post exists, so a base without a jump drive is never offered a Jump Officer. Faction gates use the faction string. | User ruling (QX3, QX4) and the rulebook: a unit "may not benefit from more than one expert officer of the same type (except as noted)". The flight cap makes a flight's officer rows mutually exclusive in the buy dialog (§4.10). ⚠️ FV_factions.txt:438 still promises Shadow ships "enhancements relating to special officers"; that line now contradicts the ruling. Corillani CPN and OSF exist only in `$notes` prose ([VostovaAMCPN.php:15](source/server/model/ships/corillani/VostovaAMCPN.php#L15)), so the Evangelist needs a per-hull opt-in (`enhancementOptionsEnabled[] = 'OFF_EVAN'`), which is a contributor-area edit. |
 | **D10** | **Where they are bought:** track-1 officers in the buy dialog's Officers section; placed officers in the system's own *Add Enhancements & Damage* menu, under an **Officers** sub-heading of the gold section. **Plus filter chips in the buy dialogs (D13).** | One `buySectionOf` change lights the reserved section ([confirm.js:852](source/public/client/UI/confirm.js#L852)). A placed officer is bought where his post is. |
 | **D11** | **The insignia** is a small gold double chevron (inline SVG, `theme.colors.enhTitle`) in a top-left **badge row** shared with the ✦. One insignia per post, however many officers are posted there. **Disabled** = grey; **killed** = grey with a red slash. Both stay shown. | Top-right belongs to the meteor badge ([SystemIcon.js:69](source/public/client/UI/reactJs/system/SystemIcon.js#L69)). A shared row keeps ✦ and insignia from overlapping on a gun with both Gunsights and a Gunner. Showing a fallen officer is what tells the player why a bonus stopped. |
 | **D12** | **The tooltip** gets a gold **Officers** block in `SystemInfo`, after *Special* and before *Criticals*: one line per officer with his name and a one-line effect, plus "(disabled, turn N)" or "(killed, turn N)" once he is out of action. The text comes from a client mirror of the registry labels. | The lobby has no server round trip, so the text must exist client-side anyway. `system.data` is the wrong channel: it is rebuilt per turn, replaced wholesale by a server `data`, and shared by reference across same-class systems ([[arch_system_info_tooltip_data_flow]]). |
@@ -320,6 +325,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Missileer | `OFF_MSL` | lead craft | 1 (flight) |
 | Expert Evader | `OFF_EVAD` | lead craft | 1 (flight) |
 | Expert Coordinator | `OFF_COOR` | lead craft | 1 (flight) |
+| Expert Pilot *(added 2026-10-19, §9.24)* | `OFF_PILOT` | one per craft, from the first | 1 (flight), bought as a count |
 | Expert Electrician | `OFF_ELEC` | lead craft | 1 (flight) |
 
 Offers come from one call, `Officers::addOffers($ship)`, made at the end of
@@ -453,6 +459,7 @@ masking: individual notes never reach any client.
 | Plasma Scientist (Stage 12) | a Plasma Web's `range` / `rangeArray`; a Plasma Battery's capacity, charge and output | **Yes, to every viewer** (user ruling 2026-10-17: a displayed stat is public). The battery's line and output were sent to everyone already; the web's range is sent while he serves (`webForJson`). His damage bonus and range relief show only as damage dealt |
 | Surge Officer (Stage 16) | the Mag-Gravitic Reactor's `output` | **Yes**, as the Technician's: `output` is sent unconditionally. His +1 per EM hit, the hardening he eases and the Spark Field relief show only as their results (damage dealt, criticals rolled, a "shutdown resisted" line in the log - which a hardened ship's own d6 also writes) |
 | Ion Technician (Stage 17) | an ion gun's `boostable` / `boostEfficiency` / `thrustBoosted` / `thrustPerBoost`, its boost (type-2 power entries), and the thrust it takes off the engine | **Own team only**, as the Laser Technician's: "Weapons being charged in this manner will be detected (and their strength known) by anything that detects special weapon arming modes, such as the Expert Analyst" - by nothing else until the Analyst's stage. An opponent's payload carries the gun's power entries without its boosts while he is aboard; game over discloses all. His +1s, the boost and the Rad Cannon's improved effects show only as their results; a discharge shows as the gun's loading, which is public |
+| Expert Pilot (Stage 18) | a flight's `offensivebonus` (+1 a serving pilot); its jinking (free levels beyond the limit) | **Yes, to every viewer**: the OB through his `publish`, as the Evader's; the jinking shows as the flight's jinking, which is public. Who and how many stay own-team; the Spark Field relief shows only as the damage dealt |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
 | Scanner | the late-EW allowance | Own-team only: the client asks `officers.listFor`, which an enemy payload never carries |
@@ -526,6 +533,8 @@ masking: individual notes never reach any client.
   [confirm.js:215](source/public/client/UI/confirm.js#L215) or at
   [gamelobby.js:4203, 4209, 4414, 4420, 4634, 4640](source/public/client/gamelobby.js#L4203). Use
   one predicate, `officers.isPerFlight(row)`, at all seven sites, never seven copies of an id test.
+- *Stage 18 (§9.24): the Expert Pilot is bought as a COUNT (registry `multi`) - up to four, one in each of the flight's first
+  crafts, every one an entry of the runtime list - and together they are still the flight's one officer.*
 - Hangar split-launch can carry the lead craft onto a "- Split" row. §6 (Fighter officers) decides
   whether he goes with it. *Ruled 2026-10-11: he does not; he stays on the row he was bought on (§9.6).
   Re-ruled the same day: he **follows his fighter**, and his cost goes with him (§9.7).*
@@ -607,7 +616,8 @@ committed.
 | **15** | Moving officers in Fleet Selection, free; the Religious Leader's placed twin; any officer on a post destroyed by pre-battle damage refunded. **BUILT 2026-10-17** (§9.21) | Move from a system's menu (its Officers footer), the pick outlining every post he could be bought on; placed to placed, C&C to twin and back, points unchanged; occupied, destroyed and unoffered posts refused; the twin offered on every primary non-weapon system but the C&C, at his own price, and every effect his; a C&C destroyed in the pre-battle editor refunds its ship officers with a warning, an edit and a saved fleet too; the menu rows keep their one shape |
 | **16** | FV's EM hardening rebuilt to the tabletop rules, the Ring Base hardened; the Expert Surge Officer on top. **BUILT 2026-10-18** (§9.22) | Hardened units no longer immune: -2 once a turn on the critical (dropout) roll of a system an EM weapon affects, through the real `doDamage`; a forced dropout ignored on 1-2, a forced shutdown resisted on 1, power losses one less, at the Burst Beam family, Shock Cannon and others; other EM effects and armour-ignoring damage as against anyone; the flat -1 stand-in gone from every Ipsha hull. The officer: Ipsha only, 10%, the Mag-Gravitic Reactor; +2/+1 power by size, previewed in the lobby; +1 per EM hit, +N on an N-cannon Surge Cannon shot, his own Spark Field too; -3 and 1-2 on his ship; Spark Fields 1 weaker against him |
 | **17** | Expert Ion Technician (Cascor), his thrust boost on the Hypergraviton Blaster's path. **BUILT 2026-10-18** (§9.23) | +1 per die (capped at the face) on rolled ion weapons, +1 a hit on fixed ones (the Ion Torpedo, a Ballistic weapon in FV, included), nothing on a roll of 0; stacking with Elite Crew, replaced by a Gunner's; Rad Cannons 12 boxes, the C&C at +4, criticals forced on Scanner, Engine, Reactor and Sub Reactor; the boost - 3 thrust for 1d10+1, one level per gun (a second refused in the real power.js), once a turn, a loaded rolled gun only, hidden from opponents, the engine's thrust lowered in the real movement.js; a boosted gun that does not fire discharges at the turn change; Cascor only, 10%, in the Engine |
-| **18+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **18** | Expert Pilot, added by the user - the first officer bought as a COUNT. **BUILT 2026-10-19** (§9.24) | Up to 4 (Raiders 2), never more than the flight's craft, each in his own craft from the first; +1 OB each; one free jinking level each, beyond the jinking limit, in the real movement.js (`jinkinglimit` itself untouched); each lost with his own craft, and following it on a split, his share of the cost with him; Spark Fields 1 weaker per pilot on a turn the flight neither jinks nor fires (an interception not counting); the Evader's -1 already reaching Spark Fields; pilots the flight's one officer; 100% of a craft each for a flight of six, scaled; the buy dialog holding the count to the flight size |
+| **19+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -647,6 +657,7 @@ committed.
 | Software Engineer | "Lets the computer specialist use their ability twice" and "Incompatible with Computer Specialist" contradict each other. Which one stands? "Submarine" = the Hyach stealth hulls (Alichi Kav and Tal)? Whose detection range gets +5? |
 | Ion Technician | Rad Cannons always score 12, with no roll? Forced crits on Sensors, Engine and Reactor on every hit? When is the thrust boost declared? Is "+4 on C&C crits" a penalty? **Rules text 2026-10-18 (§9.23)** settles all four: 12 Structure boxes instead of 10 (the Rad Cannon rolls nothing anyway); a forced critical roll on a sensors, engine or reactor hit; the boost "is made at the same time systems are activated or deactivated for extra power" - Initial Orders; the C&C's roll "at +4 on the die instead of the listed +2" - his ship's Rad Cannons hitting an enemy C&C. Asked: may one gun take more than one boost? A boosted gun that does not fire - build the discharge? Does a Sub Reactor count as the reactor? **RULED 2026-10-18:** the boost was first ruled **repeatable** (every 3 thrust another 1d10+1), then, once built, **re-ruled to one level per gun** a turn (the recommendation); the **discharge is built**, with a tooltip line; a **Sub Reactor counts**. |
 | Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? **Rules text 2026-10-18 (§9.22)** settles the first: "Capital ships and larger receive +2 points of power, while medium ships and HCVs get +1" - the reactor. **RULED 2026-10-18:** the −3 is "−1 on EM-hit systems" (the tabletop −2 → −3 step, where the rule says); then, the user finding FV's hardening to be a simplification, **FV's EM hardening rebuilt to the tabletop rules** (supplied) and the Ring Base hardened, the officer on top; the −2 **once per system per turn**; EM effects the tabletop hardening does not list **apply normally** (the old immunity lines commented out with a note, to revisit); armour-ignoring EM weapons **ignore Ipsha armour fully**; the flat −1 stand-in **removed** from every Ipsha hull; **his own Spark Field gains the +1**. |
+| Expert Pilot | *Added 2026-10-19 with his rules text and notes (§9.24).* Several pilots beside another officer (D9 says one; the Spark Field text pictures "four pilots and an evader")? 100% of a fighter each, or the §9.9 scaled rule? The Spark Field relief "if he forgoes all his other benefits for the entire turn" is a per-turn choice: build a toggle? Which factions are "Raiders"? **RULED 2026-10-19:** pilots **ARE the flight's one officer** (1-4 of them, never beside another); **scaled** by §9.9 (100% of a craft each, for a flight of six); the relief **automatic** - "if flight doesn't jink or fire that turn they can get the damage reduction"; **the Raiders faction only**. |
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? |
 | Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). **RULED 2026-10-15: Grome Autocracy only** (§9.12); the Matter-weapon hull test is kept beside it. **Rules text and rulings 2026-10-16 (§9.14):** "moved into one specific weapon instead of his normal station" - **one or the other, never both**; that weapon gets the +1 / +1 "but no others do", and its rate of fire +1 (Stage 10); "disabled if the weapon takes any damage at all (after armor), and automatically killed if the weapon is destroyed" - **and the ordinary kill roll too**. |
@@ -2709,3 +2720,128 @@ weapon is recharging (and therefore cannot fire that turn) we should remove its 
   loading time). `fvbuild -Check` replay 156 / 0. Bundles rebuilt, served copy synced.
 - ⚠️ Game 4491 itself: its turn-2 boost rows (Norsca #3, systems 24 and 25) were saved before the fix, so that turn's Movement still
   shows the thrust taken; the server no longer discharges either gun for them.
+
+### 9.24 Stage 18: Expert Pilot (2026-10-19)
+
+**Rules text (user, 2026-10-19).** "Expert Pilot: Pilots all receive a certain amount of training, but some are so skilled, experienced
+or simply gifted that they rank among the elite. Pilots provide the following benefits to their flight: Offense: +1 (+5% hit chance in
+FV) to the flight's offensive bonus. Jinking: The flight can use one level of jinking without paying any thrust cost for it. Additional
+levels require the standard amount of thrust (calculated as though this "free" level were not being used). The bonus level does not
+count against jinking limits for that fighter class. Point Cost: Equal to 100% cost of a fighter. Limitations: Up to four expert pilots
+in the same flight are cumulative, except for Raider flights, which can use no more than two due to poor training methods." The user's
+notes: up to 4 (2 for Raiders), never more than the flight's size; the first officer a flight may carry several of, so each goes in his
+own craft from the first, and his bonuses go when his craft disengages or is destroyed; the jinking bonus is "effectively +1 to jinking
+level in game (be careful in gamelobby, I know jinking is used as a stat to identify heavy, medium and light fighters etc), and the first
+level of Jinking costs no thrust". With it, for the Expert Evader and the Pilot: "An Expert Evader can use his evasion ability to reduce
+sparkfield damage by 1 point on each fighter in his flight, and an Expert Pilot will also reduce damage by 1 point if he forgoes all his
+other benefits for the entire turn. These benefits are cumulative, so, an elite flight (with four pilots and an evader) could
+theoretically earn a maximum of -5 on spark field damage, but this would be an extremely expensive proposition."
+
+**Rulings (user, 2026-10-19, asked before building):**
+1. **Pilots ARE the flight's one officer** (D9 stands): 1-4 pilots, or one other officer, never both. The Spark Field text's "four
+   pilots and an evader" therefore cannot happen in FV.
+2. **Price: §9.9's scaled rule** - 100% of a craft per pilot, for a flight of six, scaled by the flight's size.
+3. **The Spark Field relief is automatic**: "if flight doesn't jink or fire that turn they can get the damage reduction" (offered: a
+   per-turn toggle in Initial Orders, a count of pilots who forgo, or deferring the clause).
+4. **"Raider" flights = the `Raiders` faction**, the one the Scavenger's price and the Jump Officer's ban already name - not the two
+   Escalation Wars raider factions.
+
+**Built with defaults, stated here (ask before changing):**
+- Every benefit is per SERVING pilot and cumulative: +1 OB, one free jinking level and +1 to the jinking limit each.
+- "Fire" = any of the flight's fire orders that turn except an interception (`intercept`, `selfIntercept`) or the `meteorDefence`
+  pseudo-order - an interception spends neither the OB nor a jink. A ballistic launch declared that turn counts; jinking or firing on an
+  earlier turn does not.
+- The relief is per pilot serving that turn, taken off each fighter's hit after its getDamageMod (shields), never below 0.
+- The free levels stay the player's choice (a jink still costs the flight's own fire its penalty): the first N levels taken cost 0;
+  taking a level off removes one that cost thrust first, so what is left costs what it would have.
+- The limit: 4 (or the faction's `max`), and never above a set maxFlightSize, in the offer; the buy dialog also holds the count to the
+  flight size it shows and takes extra pilots off when the size goes down; the server caps at the craft the flight has.
+- A lobby flight shows one craft card, so all its pilots' insignia sit there (title "Expert Pilot (3)"); the lobby's gold line reads
+  "Expert Pilot (3)", and the fleet list "Expert Pilot (3)" (describeTaken's own count). In game each pilot's card carries his own.
+- Shuttles and breaching pods are offered him; Hunter-Killers, Ancients, mines and MicroSATs are not (D9, as every fighter officer).
+- The Star Wars fighters' `ELITE_SW` "Elite Pilot" enhancement is something else and stacks with him.
+
+**The Evader's half of the clause was already built.** His "-1 damage on all incoming fire" is `FighterFlight::getDamageMod`, which
+`Weapon::getFinalDamage` subtracts, and `SparkField::beforeDamage` runs getFinalDamage once per fighter - so each fighter of his flight
+already takes 1 less from a Spark Field. A harness check now proves it; nothing changed.
+
+**Design.**
+- ⭐ **Registry key `multi`: an officer bought as a COUNT.** `pickPosts` makes one runtime entry per pilot, posted in the flight's k-th
+  craft (`nthCraft`), held to `maxCount` and to the craft the flight has; `apply` runs `applyPilot` per serving entry (+1 OB, published
+  as the Evader's -1 is). `Officers::maxCount` is the offer's limit: the registry's 4, `$factionRules`' new key **`max`** (Raiders 2),
+  a set maxFlightSize. ⚠️ `isActive` answers for an id's FIRST entry - count pilots with `servingCount` (⚠️ MIRROR PAIR with
+  `officers.servingCount`).
+- **Price**: `flightPrice($flight, $id, $crafts, $count)` - the listed price x count, scaled and rounded up ONCE for the row, which is
+  the lobby's own `flightCost` sum (its enhCost is price x count), so no client price code changed: 2 pilots on 3 craft are 57, not
+  2 x 29. `rowPrice($ship, $id, $count)`: `loadSavedFleet` re-prices BEFORE it writes the counts back, so it passes the count.
+- ⭐ **The jinking is CLIENT-ONLY and never touches `jinkinglimit`**, which the lobby reads as the weight class (>= 6 heavy, 8 medium,
+  10 light: two pilots would have made a heavy a medium), the hangars as box sizes and the flight-size cap as 9 or 12.
+  `officers.freeJinks` (the serving pilots) is added to the limit in `shipManager.movement.canJink`; a free level is a player jink row
+  assigned 0 thrust (`getFreeJinkRows`, `nextJinkIsFree`); `doJink` writes 0 while one is unused and, on a flight, removes a paid row
+  first (a ship's jink rows keep their old removal). movement.php neither prices nor limits a jink (the thrust validator covers ship
+  manoeuvres) and a flight's spent thrust is the sum of `assignedThrust`, so nothing server-side moved - the Coordinator's pattern.
+- **Spark Field relief**: `Officers::pilotSparkRelief($flight, $turn)` in `SparkField::beforeDamage`'s flight branch, behind
+  `$officersPresent`: serving pilots x 1 when `Movement::getJinking` is 0 and `getAllFireOrders($turn)` holds only interceptions.
+  Both are known when a field resolves (movement committed in phase 2, every order in the firing gamedata).
+- **Lost with his craft, follows it on a split** - the Stage 4 rules, per entry. ⭐ `OffMoved` notes are now matched by POST
+  (`$officerMoves` a list of array(id, turn, post), as kills have been since Stage 10; DBManager passes the note's system), so one pilot
+  leaving takes only himself. `followFighter` moves every travelling pilot (their crafts first, the new row bought at their count, one
+  note each); `officerAmong` returns a COUNT (truthy exactly as before); `shareWithCraft`'s `$withOfficer` takes a count (true / false
+  as before), each pilot's share of the row's price going with his fighter; the rail-escape remnant passes `officersAboard -
+  officerAmong` - the one HangarOps site that negated it (`!$officerEscapes`).
+- **Buy dialog**: `confirm.enhRowMax` (the + button, the typed box, the wheel) and `clampEnhRowsToSize` (from getTotalCost, before it
+  sums); `officers.rowMax`; the price note "57pts each per 6 craft, one per craft"; `OFFICER_LIMIT_NOTE` "A flight may carry only one
+  officer (or Expert Pilots, one per craft)." **Tooltips**: ShipInfo's flight OFFICERS block and the insignia title group identical
+  lines (`officers.countLines`: "Expert Pilot (2)"; a lost one keeps a line of his own).
+
+**Files.** Server: `Officers.php` (PILOT_* constants, `$notFiring`, `$factionRules` OFF_PILOT `max`, registry `OFF_PILOT` last with
+`multi`; `maxCount`, `nthCraft`, `craftCount`, `boughtCount`, pickPosts' multi branch, outState's moves by post, `applyPilot`,
+`servingCount`, `pilotSparkRelief`, `flightPrice` / `rowPrice` counts, `fighterOfficersAboard`, `officersAboard`, `officersCost`,
+`shareWithCraft`, `travellingOfficers`, `officerAmong`, `followFighter`), `ShipClasses.php` (`$officerMoves`, `recordOfficerMove`'s
+post), `DBManager.php` (the note's system), `Manager.php` (both saved-fleet `rowPrice` calls pass the count), `HangarOps.php` (the
+rail-escape remnant), `specialWeapons.php` (SparkField). Client: `officers.js` (registry row; listFor's multi branch, `derivedEntry`,
+`nthCraft`, `rowLimit`, `rowMax`, `boughtCount`, `servingCount`, `freeJinks`, `countLines`, `summaryLine`, `priceNote`), `movement.js`
+(`canJink`, `doJink`, `getFreeJinkRows`, `jinkThrust`, `nextJinkIsFree`), `UI/confirm.js` (`enhRowMax`, `clampEnhRowsToSize`, the
+note), React `ShipInfo.js`. Docs: an Expert Pilot card (Fighter Officers, alphabetical - last), the section's lede, the Evader card
+(Spark Fields), the visible-numbers list; README's faction-rules how-to (`max`). Statics, bundles and the served copy rebuilt; no new
+PHP class, no schema change.
+
+**Measured.** 360 OFF_PILOT offers - the flights the Coordinator is offered - +15.9 KB uncompressed: limit 4 on 265, 3 on 38 (flights of
+at most 3 craft), 2 on 57 (Raiders by the faction rule, and flights of at most 2 craft). Aurora: 57 a pilot.
+
+**Verified.**
+- `officersHarness.php` **1198 / 0 with the database**, 1124 / 0 with `--no-db` (65 new): offers and limits (Aurora 57 / 4, a
+  Raiders Delta-V 2, a FangedSerpentAM 3 at 145, a single superheavy 1; none on a ship or a Hunter-Killer, a shuttle yes); the price
+  table (1x1 10 ... 4x9 342) and rowPrice; posts on the first crafts, held to the craft (4 on 3), Raiders (2) and a doctored 9; beside
+  another officer row the other serves; no kill roll; OB +1 / +2 / +4, a pilot's craft destroyed (serves that turn, gone the next),
+  dropped out, docked, destroyed before battle, a craft without one; the payload per viewer; the REAL `calculateHitBase` +5% / +20%;
+  the REAL `SparkField::beforeDamage` on each fighter (4 / 2 / 0 with 2 / 4 pilots, jinked or fired this turn none, last turn relief,
+  an interception relief, a Gamma's ballistic launch none, a lost pilot's craft not hit and one less relief, gate off, the Evader's -1);
+  `followFighter` with two of four travelling, the old row's two serving the next turn, a move note on a pilot-less craft; the cost
+  split (the stayers' share after two left); the REAL partial dock (138 / 162) and the REAL rail escape (random_int: fresh fixtures
+  until 1-2 pilots escape, the remnant right in every run); a REAL DB round trip - two pilots load into the first two craft, and an
+  OffMoved note on the second one's craft moves him alone; and REAL saved fleets - two pilots stored as one row at 57, reloaded at 57,
+  an older 50 re-priced with its notice.
+- `officersClientHarness.js` **439 / 0** (29 new): the registry row; the lobby list (craft 1, 2, then the first again; the row's limit
+  and the flight size); the lobby OB; "Expert Pilot (3)" / "Officers (4)"; `servingCount` and `freeJinks`; the same price table through
+  `flightCost`; `priceNote`; `rowMax`; the REAL `confirm.enhRowMax`, `clampEnhRowsToSize`, `doOnPlusEnhancement` and `getTotalCost`
+  (a flight cut to 2 keeps and charges two pilots); the insignia title and the REAL ShipInfo's grouped lines; the REAL movement.js
+  (free rows 0-0-1, 8 levels on a limit of 6, none without them, 2 free levels with no thrust, a paid level removed first, a pilot
+  lost last turn, an enemy flight, a ship's old removal).
+- `enhancementsDifferential.js` **698 / 0** (12 new: `pilot`, `pilot4`, `pilot+dog` on the four flight hulls - a blueprint flight holds
+  one craft, so one serves on both ends); `enhancementsHarness` **280 / 0** (fingerprint unchanged: ships only).
+- `fvbuild -Check`: autoload current, validator clean, replay **156 / 0** (game 4488 SKIP, surrendered - as at Stage 17).
+- **Mutation-tested: 57 breaks (34 server, 23 client), 54 caught**, files byte-identical afterwards. Of the other three: dropping the
+  craft cap (server) CRASHES every load of a flight with more pilots than craft (nthCraft returns null) - caught, though not by a FAIL
+  line; `submitSavedFleet` without the count (server) and counting paid jink rows as free (client) are equivalent - the saved row
+  already carries its count, and a flight's free levels always come before its paid ones. Two client checks were added for the run:
+  the REAL `doOnPlusEnhancement` and `getTotalCost` under a fake jQuery (the + button's cap, the clamp before the sum).
+
+**Observations, not changed:**
+1. The Spark Field text's "-5 (four pilots and an evader)" cannot happen under ruling 1: at most -4 with pilots, or the Evader's -1.
+2. A flight's OB also funds mine detection (§9.7's Evader observation): a flight that neither fires nor jinks keeps its pilots' OB for
+   detecting mines while it takes the Spark Field relief.
+3. The free levels are client-side only, as the Coordinator's pivot cost is: movement.php validates no flight's jinking.
+4. Not play-tested: no local game holds a pilot flight. Worth a test: buy 2 pilots on a flight of 6 (57 each, "Expert Pilot (2)"),
+   drop the size to 1 (one left), back to 6; in game, OB +10, jink to the limit + 2 with the first two levels free; then a turn
+   without jinking or firing inside an Ipsha Spark Field (2 less on each fighter).

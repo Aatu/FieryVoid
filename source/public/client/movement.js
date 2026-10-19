@@ -331,13 +331,40 @@ shipManager.movement = {
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!
         if (!ship.flight && ship.jinkinglimit <= 0) return false;
         if (accel == 0) return true;
-        if (accel > 0 && shipManager.movement.getRemainingEngineThrust(ship) <= 0) return false; //only adding jink costs thrust; reducing refunds it
+        //only adding jink costs thrust (reducing refunds it) - and not an Expert Pilot's free level (OFFICERS_PLAN.md §9.24)
+        if (accel > 0 && !shipManager.movement.nextJinkIsFree(ship) && shipManager.movement.getRemainingEngineThrust(ship) <= 0) return false;
         var jinking = shipManager.movement.getJinking(ship);
         //Gravitic Augmenter grants forced jink levels (marked forced=true) that the player
         //may not remove: a reduction cannot take the total below that forced floor.
         var floor = shipManager.movement.getForcedJinking(ship);
-        if (jinking + accel > ship.jinkinglimit || jinking + accel < floor) return false;
+        //Expert Pilots' levels do not count against the jinking limit - a separate term, never ship.jinkinglimit (the fighter's weight class)
+        var limit = ship.jinkinglimit + (window.officers ? officers.freeJinks(ship) : 0);
+        if (jinking + accel > limit || jinking + accel < floor) return false;
         return true;
+    },
+
+    /* Expert Pilots (OFFICERS_PLAN.md §9.24): a flight's first jinking levels this turn, one per serving pilot, cost no thrust.
+       Such a level is a jink row of the player's own (not forced) that takes no thrust; the next one is free while there are
+       fewer of those than pilots. CLIENT ONLY - movement.php neither prices nor limits a jink. */
+    getFreeJinkRows: function getFreeJinkRows(ship) {
+        var n = 0;
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move.turn != gamedata.turn || move.type != "jink" || move.forced) continue;
+            if (shipManager.movement.jinkThrust(move) === 0) n++;
+        }
+        return n;
+    },
+
+    jinkThrust: function jinkThrust(move) {
+        var total = 0;
+        for (var a in move.assignedThrust) total += Number(move.assignedThrust[a]) || 0;
+        return total;
+    },
+
+    nextJinkIsFree: function nextJinkIsFree(ship) {
+        if (!ship.flight || !window.officers) return false;
+        return shipManager.movement.getFreeJinkRows(ship) < officers.freeJinks(ship);
     },
 
     getJinking: function getJinking(ship) {
@@ -371,23 +398,26 @@ shipManager.movement = {
         var assignedThrust = Array();
         if (ship.flight) {
             commit = true;
-            requiredThrust[0] = 1;
-            assignedThrust[0] = 1;
+            //an Expert Pilot's free level costs nothing (OFFICERS_PLAN.md §9.24)
+            var cost = shipManager.movement.nextJinkIsFree(ship) ? 0 : 1;
+            requiredThrust[0] = cost;
+            assignedThrust[0] = cost;
         } else {
             //this is a ship, not fighter flight!
             requiredThrust = Array(ship.pivotcost, 0, 0, 0, 0);
         }
         if (accel < 0) {
+            //Never remove a forced jink (Gravitic Augmenter minimum) - only the player's own: the first. On a flight, the first
+            //that cost thrust, so the free levels (Expert Pilots) are the ones kept and what is left costs what it would have.
+            var remove = -1;
             for (var i in ship.movement) {
                 var move = ship.movement[i];
-                if (move.turn != gamedata.turn) continue;
-
-                //Never remove a forced jink (Gravitic Augmenter minimum) - only the player's own.
-                if (move.type == "jink" && !move.forced) {
-                    ship.movement.splice(i, 1);
-                    break;
-                }
+                if (move.turn != gamedata.turn || move.type != "jink" || move.forced) continue;
+                if (remove === -1) remove = i;
+                if (!ship.flight) break;
+                if (shipManager.movement.jinkThrust(move) > 0) { remove = i; break; }
             }
+            if (remove !== -1) ship.movement.splice(remove, 1);
         } else {
             var lm = shipManager.movement.getLastCommitedMove(ship);
             ship.movement[ship.movement.length] = {

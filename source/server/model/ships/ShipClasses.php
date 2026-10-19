@@ -181,9 +181,10 @@ class BaseShip {
 	   'how') each. Rebuilt at every load by Officers::pickPosts / ::apply; only Officers writes it.
 	   $officerKills is a list of array('id', 'turn', 'post'), read off the OffKilled notes by DBManager's
 	   note loop - the post is the note's system, so with several Gunners aboard only the one posted there
-	   dies (Stage 10; post null = any post, the shape a test may write). $officerMoves is officer id =>
-	   turn off the OffMoved notes (a fighter officer who left this row with his fighter), and $officerSaves
-	   likewise off the OffSaved notes (the Expert Scavenger's once-per-game save, spent).
+	   dies (Stage 10; post null = any post, the shape a test may write). $officerMoves is a list of
+	   array('id', 'turn', 'post') off the OffMoved notes (a fighter officer who left this row with his
+	   fighter - the post is his craft, so of several Expert Pilots only his has gone, Stage 18), and
+	   $officerSaves is officer id => turn off the OffSaved notes (the Expert Scavenger's once-per-game save, spent).
 	   Stage 10: $officerTransfers lists the OffTransfer notes (array('id', 'from', 'to', 'turn', 'seq') - an
 	   officer moved to another post) and $officerUses the OffUsed notes (array('id', 'post', 'ability',
 	   'turn') - an Expert Gunner's once-per-battle ability spent); $officerTransferClaims is what a POST of
@@ -1896,13 +1897,10 @@ class BaseShip {
 		return $this->officerMoves;
 	}
 
-	//one OffMoved note (Officers::followFighter): the earliest turn wins, as for a kill
-	public function recordOfficerMove($officerId, $turn){
-		$officerId = (string)$officerId;
-		$turn = (int)$turn;
-		if (!isset($this->officerMoves[$officerId]) || $turn < $this->officerMoves[$officerId]){
-			$this->officerMoves[$officerId] = $turn;
-		}
+	/* one OffMoved note (Officers::followFighter), on the post he left (null: wherever he is - a test's shorthand). A note
+	   written twice simply lists twice: Officers::apply takes the earliest turn that matches him, as for a kill. */
+	public function recordOfficerMove($officerId, $turn, $post = null){
+		$this->officerMoves[] = array('id' => (string)$officerId, 'turn' => (int)$turn, 'post' => ($post === null) ? null : (int)$post);
 	}
 
 	public function getOfficerSaves(){

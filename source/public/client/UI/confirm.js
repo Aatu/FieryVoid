@@ -170,6 +170,7 @@ window.confirm = {
 
         var totalCostSpan = $(".confirm .totalUnitCostAmount").first();
         var flightSize = parseInt($(".fighterAmount").html()) || 1;
+        confirm.clampEnhRowsToSize(); //a smaller flight keeps no more Expert Pilots than craft
         //Per craft for a flight with a size selector; otherwise the whole unit's bare hull, which
         //confirm.setBuyBase parks on the dialog's own total. (This used to read an UNSCOPED
         //.totalUnitCostAmount and so, by document order, a hidden page template holding the base -
@@ -228,6 +229,35 @@ window.confirm = {
         if (!window.officers) return (target.data("enhCost") || 0) * flightSize;
         return officers.flightCost(target.data("enhID"), target.data("count"), target.data("enhCost"),
             flightSize, target.data("perCraftExtra"), target.data("standardFlight"));
+    },
+
+    /* The most one enhancement row's spinner may take: its limit - and for Expert Pilots, an officer bought as a count
+       (OFFICERS_PLAN.md Stage 18), never more than the flight size this dialog shows (officers.rowMax). The + button, the
+       typed box and the wheel all ask here; clampEnhRowsToSize takes the extra off when the size goes down. */
+    enhRowMax: function enhRowMax(target) {
+        var max = target.data("max");
+        var officer = window.officers ? officers.get(target.data("enhID")) : null;
+        if (!officer || !officer.multi) return max;
+        return officers.rowMax(target.data("enhID"), max, parseInt($(".fighterAmount").html(), 10) || 1);
+    },
+
+    clampEnhRowsToSize: function clampEnhRowsToSize() {
+        var enhNo = 0;
+        var target = $(".selectAmount.shpenh" + enhNo);
+        while (typeof target.data("enhPrice") != 'undefined') {
+            var officer = window.officers ? officers.get(target.data("enhID")) : null;
+            var count = target.data("count") || 0;
+            var max = confirm.enhRowMax(target);
+            if (officer && officer.multi && count > max) {
+                //an officer row: no price step and never an option, so its cost is price x count
+                target.data("count", max);
+                target.data("value", max);
+                target.data("enhCost", target.data("enhPrice") * max);
+                confirm.enhShowLevel(target, max);
+            }
+            enhNo++;
+            target = $(".selectAmount.shpenh" + enhNo);
+        }
     },
 
     getTotalCostBulk: function getTotalCostBulk() {
@@ -336,6 +366,7 @@ window.confirm = {
             }
         }
         if (noTaken < 1 && confirm.officerBlocked(target)) return; //D9: one officer per flight
+        enhLimit = confirm.enhRowMax(target); //Expert Pilots: never more than the flight's craft
 
         if (noTaken < enhLimit) { //increase possible
             var newCount = noTaken + 1;
@@ -539,7 +570,7 @@ window.confirm = {
 
         // Get the min and max limits
         var min = $(this).data('min');
-        var max = $(this).data('max');
+        var max = confirm.enhRowMax($(this)); //its limit - Expert Pilots also the flight's size
 
         // Enforce min/max
         if (value < min) value = min;
@@ -605,7 +636,7 @@ window.confirm = {
 
         // Get the min and max limits
         var min = $(this).data('min');
-        var max = $(this).data('max');
+        var max = confirm.enhRowMax($(this)); //its limit - Expert Pilots also the flight's size
 
         // Adjust value based on scroll direction
         value += increment;
@@ -698,7 +729,7 @@ window.confirm = {
 
         // Get the min and max limits
         var min = $(this).data('min');
-        var max = $(this).data('max');
+        var max = confirm.enhRowMax($(this)); //its limit - Expert Pilots also the flight's size
 
         // Enforce min/max
         if (value < min) value = min;
@@ -1242,7 +1273,7 @@ window.confirm = {
        is refused (officerBlocked) with that line flashing - a passive notice, never a dialog
        (feedback_passive_notices). A ship may carry one of each, so it gets no line. The server does not
        trust the dialog: Officers::pickPosts serves only the first officer row on a flight. */
-    OFFICER_LIMIT_NOTE: 'A flight may carry only one officer.',
+    OFFICER_LIMIT_NOTE: 'A flight may carry only one officer type.',
 
     addOfficerLimitNote: function addOfficerLimitNote(e, ship) {
         if (!ship) return;

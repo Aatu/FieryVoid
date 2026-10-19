@@ -1680,11 +1680,14 @@ class SparkField extends Weapon implements DefensiveSystem{
 			if (TacGamedata::$officersPresent) $damage = max(0, $damage - Officers::sparkFieldRelief($target));
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
 		}else{//fighter flight - separate hit on each fighter!
+			//Expert Pilots on a flight that has neither jinked nor fired this turn: 1 point less each, on every fighter (OFFICERS_PLAN.md §9.24)
+			$relief = TacGamedata::$officersPresent ? Officers::pilotSparkRelief($target, $gamedata->turn) : 0;
 			foreach ($target->systems as $fighter){
 				if ($fighter == null || $fighter->isDestroyed()){
 				    continue;
 				}
 				$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+				if ($relief > 0) $damage = max(0, $damage - $relief);
 				$this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
                     	}
 		}

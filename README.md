@@ -403,11 +403,13 @@ It runs as check 2 of 3 in `scripts\fvbuild.ps1 -Check`, before the replay harne
 
 Some Expert Officers belong to particular factions (the Expert Geneticist is Dilgar only), are not available to some (no Expert Jump Officer for Raiders), or cost a faction less (the Expert Scavenger is 15% for the Descari instead of 25%). All of that lives in **one table**, `$factionRules`, near the top of `source/server/model/ships/Officers.php`. Nothing else needs touching — not the client, not the ship files.
 
-Each entry is keyed by the officer's id (the ids are listed in `Officers::$registry` just below the table, e.g. `OFF_GENE` for the Expert Geneticist) and can use any of three keys:
+Each entry is keyed by the officer's id (the ids are listed in `Officers::$registry` just below the table, e.g. `OFF_GENE` for the Expert Geneticist) and can use any of four keys:
 
-    'OFF_GENE' => array('only'  => array('Dilgar Imperium')),            // offered ONLY to these factions
-    'OFF_JUMP' => array('never' => array('Raiders', 'Belt Alliance')),   // never offered to these factions
-    'OFF_SCAV' => array('pct'   => array('Descari Committees' => 15)),   // this faction's price, in % of the ship
+    'OFF_GENE'  => array('only'  => array('Dilgar Imperium')),            // offered ONLY to these factions
+    'OFF_JUMP'  => array('never' => array('Raiders', 'Belt Alliance')),   // never offered to these factions
+    'OFF_SCAV'  => array('pct'   => array('Descari Committees' => 15)),   // this faction's price, in % of the ship
+    'OFF_PILOT' => array('max'   => array('Raiders' => 2)),               // how many this faction may buy, for an officer
+                                                                          // bought as a count (the Expert Pilot, normally 4)
 
 **To add your custom faction**, add its name to the right list. For example, to let a custom faction buy the Expert Geneticist:
 

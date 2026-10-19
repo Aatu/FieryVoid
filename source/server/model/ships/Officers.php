@@ -55,6 +55,9 @@
    tabletop rules, rebuilt the same stage in WeaponEM) eased further, and Spark Fields 1 weaker against him.
    Stage 17: the Expert Ion Technician (Cascor) - +1 per die (or +1) on ion weapons, stronger Rad Cannons, and ion guns the player
    may BOOST with thrust for +1d10+1 a level (the generic boost, priced in thrust) - a boosted gun that does not fire discharges.
+   Stage 18: the Expert Pilot - the first officer bought as a COUNT (`multi`): up to four on one flight, one in each of its first
+   crafts, each +1 OB and a free jinking level beyond the limit (client, movement.js), and Spark Fields 1 weaker on his flight on a
+   turn it neither jinks nor fires (pilotSparkRelief). Several pilots are still the flight's ONE officer (D9).
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -109,6 +112,10 @@ class Officers{
 	const ION_BOOST_FLAT = 1;            //...and its +1
 	const RAD_STRUCTURE_BOXES = 12;      //...: "Rad cannons score 12 damage on structure instead of 10"
 	const RAD_CNC_CRIT_MOD = 4;          //...: "If they hit C&C, the critical roll is at +4 on the die instead of the listed +2"
+	const PILOT_OB = 1;                  //Expert Pilot: "+1 to the flight's offensive bonus" (+5% in FV)
+	const PILOT_SPARK_RELIEF = 1;        //...: "will also reduce [spark field] damage by 1 point if he forgoes all his other benefits"
+	//the fire orders that are NOT the flight firing, for his Spark Field relief: interception uses neither OB nor jinking
+	private static $notFiring = array('intercept', 'selfIntercept', 'meteorDefence');
 
 	/* ⭐ FACTION RULES (user request 2026-10-15) - which factions an officer is offered to, and what some
 	   of them pay. ONE table, so a faction's officers change here and nowhere else: README.md, "Officers:
@@ -119,6 +126,8 @@ class Officers{
 	     never  never offered to these factions
 	     pct    his price in percent for these factions, in place of the registry's pct (of the hull, or
 	            of one craft for a fighter officer); the registry's rounding still applies
+	     max    (an officer bought as a count - `multi`) how many one unit of these factions may carry, in place
+	            of the registry's `multi`
 	   A faction is named by its hulls' $faction string, exactly as the ship files write it - the name the
 	   faction has in Fleet Selection. A name that matches no faction simply never applies, so
 	   officersHarness checks every name here against the factions that exist.
@@ -145,6 +154,8 @@ class Officers{
 		'OFF_SURG' => array('only' => array('Ipsha Baronies')),
 		//"Availability: Cascor only" - not the Civilians' Cascor-built Calacca and Caracti
 		'OFF_ION'  => array('only' => array('Cascor Commonwealth')),
+		//"Up to four expert pilots in the same flight are cumulative, except for Raider flights, which can use no more than two"
+		'OFF_PILOT' => array('max' => array('Raiders' => 2)),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -164,6 +175,9 @@ class Officers{
 	                 craft count (flightPrice - user ruling 2026-10-15)
 	     perMissile  (optional) points added PER CRAFT for every missile one craft can carry, on top of
 	                 that (the Missileer)
+	     multi       (optional, Stage 18) bought as a COUNT, up to this many (or $factionRules' `max`), and never
+	                 more than the flight has craft: one officer in each of its first crafts, every one of them
+	                 applying his effects (the Expert Pilot). Together they are still the flight's one officer.
 	   Placed officers (Stage 8) carry, instead of a post key:
 	     placed      true: the player picks his post, a weapon, in that system's own menu - a per-system row
 	                 (Enhancements::$systemEnhancementRegistry), never an enhancementOptions offer
@@ -373,6 +387,18 @@ class Officers{
 		   bought before he existed. */
 		'OFF_COOR' => array('label' => 'Expert Coordinator', 'post' => 'craft', 'flight' => true, 'pct' => 50,
 			'apply' => null),
+		/* Expert Pilot (Stage 18; rules text, user 2026-10-19): "+1 to the flight's offensive bonus" (applyPilot); "one level of
+		   jinking without paying any thrust cost for it ... The bonus level does not count against jinking limits" - CLIENT ONLY
+		   (officers.freeJinks in movement.js canJink / doJink: movement.php validates no jink), and never through `jinkinglimit`,
+		   which the lobby and the hangars read as the fighter's weight class; and "an Expert Pilot will also reduce [spark field]
+		   damage by 1 point if he forgoes all his other benefits for the entire turn" - automatic on a turn his flight neither
+		   jinks nor fires (user ruling 2026-10-19; pilotSparkRelief). "Up to four expert pilots in the same flight are
+		   cumulative, except for Raider flights, which can use no more than two" (`multi`, $factionRules' `max`), never more than
+		   the flight has craft, each in his own craft from the first (user notes): one lost with his craft takes his share away.
+		   Rulings (user 2026-10-19): pilots ARE the flight's one officer (D9 - never beside another); "100% cost of a fighter" each,
+		   for a flight of six and scaled by its size (§9.9, the Evader's rule). Last in the list, as the newest. */
+		'OFF_PILOT' => array('label' => 'Expert Pilot', 'post' => 'craft', 'flight' => true, 'pct' => 100, 'multi' => 4,
+			'apply' => 'applyPilot', 'publish' => array('offensivebonus')),
 	);
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV) - so the
@@ -448,15 +474,29 @@ class Officers{
 
 	/* Called at the end of Enhancements::setEnhancementOptionsShip and ::setEnhancementOptionsFighter,
 	   so the offers land in the static blueprints (fvbuild -Statics follows any change here). Limit 1:
-	   "one of each type" (D9); a flight's "one officer in total" is the buy dialog's to enforce, and
-	   pickPosts' to defend. */
+	   "one of each type" (D9) - or an officer bought as a count, maxCount; a flight's "one officer in
+	   total" is the buy dialog's to enforce, and pickPosts' to defend. */
 	public static function addOffers($ship){
 		if (!self::mayCarryOfficers($ship)) return;
 		foreach (self::$registry as $id => $officer){
 			if (in_array($id, $ship->enhancementOptionsDisabled)) continue;
 			if (!self::isEligible($ship, $id)) continue;
-			$ship->enhancementOptions[] = array($id, $officer['label'], 0, 1, self::offerPrice($ship, $id), 0, false);
+			$ship->enhancementOptions[] = array($id, $officer['label'], 0, self::maxCount($ship, $id), self::offerPrice($ship, $id), 0, false);
 		}
+	}
+
+	/* How many of this officer one unit may carry: 1 ("one of each type", D9) - or, for an officer bought as a count (`multi`,
+	   Stage 18), his registry number, or the faction's `max` ($factionRules), and never more than the flight may fly craft (a
+	   positive maxFlightSize; the buy dialog also holds the count to the size bought - officers.rowMax). The offer's limit,
+	   and pickPosts caps a bought row at it and at the craft the flight has. */
+	public static function maxCount($ship, $id){
+		if (empty(self::$registry[$id]['multi'])) return 1;
+		$max = (int)self::$registry[$id]['multi'];
+		$rules = self::rulesId($id);
+		$faction = (string)$ship->faction;
+		if (isset(self::$factionRules[$rules]['max'][$faction])) $max = (int)self::$factionRules[$rules]['max'][$faction];
+		if (isset($ship->maxFlightSize) && (int)$ship->maxFlightSize > 0) $max = min($max, (int)$ship->maxFlightSize);
+		return max(1, $max);
 	}
 
 	/* The offer's price. A ship officer: pct% of the hull. A fighter officer: pct% of ONE craft - his
@@ -510,12 +550,15 @@ class Officers{
 	/* ⭐ What a fighter officer costs a flight of $crafts craft - THE rule (user ruling 2026-10-15): his
 	   listed price (craftPrice, for a standard flight) scaled by $crafts / standardFlight and rounded up,
 	   plus the Missileer's 1 point per missile per craft. So a 3-craft flight pays half the six-craft
-	   price and a 12-craft flight twice it. ⚠️ MIRROR PAIR with officers.flightCost. */
-	public static function flightPrice($flight, $id, $crafts){
+	   price and a 12-craft flight twice it. $count (Stage 18): an officer bought as a count is $count
+	   times the listed price, scaled and rounded up ONCE for the row - the lobby's own sum (enhCost is
+	   price x count): 2 Expert Pilots on a 3-craft Aurora are ceil(114 x 3/6) = 57.
+	   ⚠️ MIRROR PAIR with officers.flightCost. */
+	public static function flightPrice($flight, $id, $crafts, $count = 1){
 		$officer = self::$registry[$id];
 		$crafts = max(1, (int)$crafts);
 		$standard = self::standardFlight($flight);
-		$price = intdiv(self::craftPrice($flight, self::pctFor($flight, $id)) * $crafts + $standard - 1, $standard);
+		$price = intdiv(self::craftPrice($flight, self::pctFor($flight, $id)) * max(1, (int)$count) * $crafts + $standard - 1, $standard);
 		if (!empty($officer['perMissile'])) $price += (int)$officer['perMissile'] * self::missilesPerCraft($flight) * $crafts;
 		return $price;
 	}
@@ -554,7 +597,8 @@ class Officers{
 	              No officer-eligible hull carries two (measured 2026-10-15), so "his ship's drive" and "the
 	              drive he sits in" cannot disagree.
 	     craft    a flight's first craft (Stage 4): the lobby's one fighter card, and the sample fighter
-	              getSampleFighter() answers - id 1, whether or not it is still flying.
+	              getSampleFighter() answers - id 1, whether or not it is still flying. An officer bought as a
+	              count (Stage 18) takes the first craft, the next the second, and so on (nthCraft).
 	   ⚠️ Asked BEFORE any enhancement moves an output (D2): Poor Crew takes a point off the strongest
 	   scanner, so on a hull with two equal ones asking afterwards would pick the other. */
 	private static function findPost($ship, $post){
@@ -604,10 +648,22 @@ class Officers{
 
 	//the first craft by construction order: systems are keyed by id, and the first craft is id 1
 	private static function firstCraft($flight){
+		return self::nthCraft($flight, 1);
+	}
+
+	//the $n-th craft by construction order (1 = the first), or null when the flight has fewer
+	private static function nthCraft($flight, $n){
+		$i = 0;
 		foreach ($flight->systems as $craft){
-			if ($craft instanceof Fighter) return $craft;
+			if ($craft instanceof Fighter && ++$i === (int)$n) return $craft;
 		}
 		return null;
+	}
+
+	private static function craftCount($flight){
+		$n = 0;
+		foreach ($flight->systems as $craft) if ($craft instanceof Fighter) $n++;
+		return $n;
 	}
 
 	//a fighter officer for a flight and every other officer for a ship; the faction may have him
@@ -629,13 +685,22 @@ class Officers{
 	   output, from the bought rows. A count above 1 still means one officer (D9), and a row the hull
 	   would not have been offered (no post, the officer's own test fails, or his faction rules refuse
 	   it) buys nothing - the server trusts the client's rows, so a doctored payload is answered here. So
-	   is a flight's second officer row (D9: one officer in total): only the first in registry order serves. */
+	   is a flight's second officer row (D9: one officer in total): only the first in registry order serves.
+	   An officer bought as a count (`multi`, Stage 18) is that many entries, one in each of the flight's
+	   first crafts, held to maxCount and to the craft it has. */
 	public static function pickPosts($ship){
 		$list = array();
 		if (self::hasOfficerRow($ship) && self::mayCarryOfficers($ship)){
 			foreach (self::$registry as $id => $officer){
 				if (!self::isBought($ship, $id)) continue;
 				if (!self::isEligible($ship, $id)) continue;
+				if (!empty($officer['multi']) && $ship instanceof FighterFlight){
+					$n = min(self::boughtCount($ship, $id), self::maxCount($ship, $id), self::craftCount($ship));
+					for ($k = 1; $k <= $n; $k++){
+						$list[] = array('id' => $id, 'post' => (int)self::nthCraft($ship, $k)->id, 'out' => null, 'how' => null);
+					}
+					break;
+				}
 				$post = self::findPost($ship, $officer['post']);
 				$list[] = array('id' => $id, 'post' => (int)$post->id, 'out' => null, 'how' => null);
 				if ($ship instanceof FighterFlight) break;
@@ -755,10 +820,15 @@ class Officers{
 	}
 
 	private static function isBought($ship, $id){
+		return self::boughtCount($ship, $id) > 0;
+	}
+
+	//the count on his bought row (0 when none)
+	private static function boughtCount($ship, $id){
 		foreach ($ship->enhancementOptions as $entry){
-			if ($entry[0] === $id && (int)$entry[2] > 0) return true;
+			if ($entry[0] === $id && (int)$entry[2] > 0) return (int)$entry[2];
 		}
-		return false;
+		return 0;
 	}
 
 	/* ------------------------------------------------------------------ out of action */
@@ -818,9 +888,12 @@ class Officers{
 			if ($fell !== null && self::within($fell, $stay)) $take($fell, 'killed');
 		}
 		/* MOVED: a fighter officer who left this row with his fighter (followFighter) - a move beats the
-		   DisengagedFighter bookkeeping that retires the row he left on the same turn. */
-		$moves = $ship->getOfficerMoves();
-		if (isset($moves[$entry['id']])) $take((int)$moves[$entry['id']], 'moved');
+		   DisengagedFighter bookkeeping that retires the row he left on the same turn. Matched on the post the
+		   note sits on (Stage 18): of several Expert Pilots only the one whose craft left has gone. */
+		foreach ($ship->getOfficerMoves() as $move){
+			if ($move['id'] !== $entry['id']) continue;
+			if ($move['post'] === null || (int)$move['post'] === (int)$entry['post']) $take((int)$move['turn'], 'moved');
+		}
 		//DISABLED: a post destroyed while he held it, or by the end of the turn he was moving to it (he arrives to a wreck)
 		foreach ($stays as $stay){
 			$post = $ship->getSystemById($stay['post']);
@@ -2179,6 +2252,42 @@ class Officers{
 		return Movement::getCombatPivotRotation($flight, $turn) < self::COMBAT_PIVOT_FULL;
 	}
 
+	/* ------------------------------------------------------------------ Expert Pilot (Stage 18) */
+
+	/* Expert Pilot: +1 OB each - apply() runs once per serving pilot, so a craft lost takes his share away from the next turn.
+	   Published (the shooter's preview needs the real OB). His free jinking level is the client's (officers.freeJinks). */
+	private static function applyPilot($ship, $entry, $turn){
+		$ship->offensivebonus += self::PILOT_OB;
+	}
+
+	/* How many of this officer serve on $turn - an officer bought as a count (`multi`) is one entry per craft, and isActive
+	   answers for the first only. ⚠️ MIRROR PAIR with officers.servingCount (JS). */
+	public static function servingCount($ship, $id, $turn = null){
+		if ($turn === null) $turn = TacGamedata::$currentTurn;
+		$n = 0;
+		foreach ($ship->getOfficers() as $entry){
+			if ($entry['id'] === $id && self::serves($entry, $turn)) $n++;
+		}
+		return $n;
+	}
+
+	/* "An Expert Pilot will also reduce [spark field] damage by 1 point if he forgoes all his other benefits for the entire
+	   turn" - AUTOMATIC (user ruling 2026-10-19): on a turn his flight has not jinked (his free level unused) and has not fired
+	   (his OB unused), each serving pilot takes 1 point off every hit a Spark Field scores on each of its fighters
+	   (SparkField::beforeDamage, behind $officersPresent). Firing = any of the flight's fire orders this turn but an
+	   interception ($notFiring), which spends neither benefit. Both are known when a field resolves: the movement was
+	   committed in phase 2, and the orders - ballistic launches from Initial Orders included - are in the firing gamedata. */
+	public static function pilotSparkRelief($flight, $turn){
+		if (!($flight instanceof FighterFlight)) return 0;
+		$pilots = self::servingCount($flight, 'OFF_PILOT', $turn);
+		if ($pilots < 1) return 0;
+		if (Movement::getJinking($flight, $turn) > 0) return 0;
+		foreach ($flight->getAllFireOrders($turn) as $order){
+			if (!in_array($order->type, self::$notFiring, true)) return 0;
+		}
+		return $pilots * self::PILOT_SPARK_RELIEF;
+	}
+
 	/* ------------------------------------------------------------------ repairs (Stage 5) */
 
 	/* Criticals::setCriticals, after Pass 2 - so after every Self Repair has spent its points - behind
@@ -2321,11 +2430,15 @@ class Officers{
 	/* What one bought officer row costs the unit, by the lobby's rule: a ship officer pct% of the hull, a
 	   fighter officer flightPrice at the row's own flightSize (the size it was bought or spawned at).
 	   Stored with a saved fleet's row (Manager::submitSavedFleet), and used to keep an officer's cost
-	   with him when HangarOps splits a flight. */
-	public static function rowPrice($ship, $id){
+	   with him when HangarOps splits a flight. $count (Stage 18): an officer bought as a count costs the
+	   row's count - read off the unit's bought row when null, or the count about to be written back
+	   (Manager::loadSavedFleet re-prices before it restores the counts). */
+	public static function rowPrice($ship, $id, $count = null){
 		if (!isset(self::$registry[$id])) return 0;
 		if (empty(self::$registry[$id]['flight'])) return self::shipPrice($ship, $id);
-		return self::flightPrice($ship, $id, $ship->flightSize);
+		if (empty(self::$registry[$id]['multi'])) $count = 1;
+		else if ($count === null) $count = self::boughtCount($ship, $id);
+		return self::flightPrice($ship, $id, $ship->flightSize, max(1, (int)$count));
 	}
 
 	/* The fighter officers' Stage 4 prices, as live ran them until 2026-10-15 (ab0025aba): pct of one
@@ -2354,41 +2467,65 @@ class Officers{
 		return $price;
 	}
 
-	/* The fighter officer this flight row holds (not one who has already left it with his fighter), or null. */
-	private static function fighterOfficerAboard($flight){
-		if (!($flight instanceof FighterFlight)) return null;
+	/* The fighter officers this flight row holds (not one who has already left it with his fighter): one, or
+	   for an officer bought as a count (Stage 18) one entry per craft holding one. */
+	private static function fighterOfficersAboard($flight){
+		if (!($flight instanceof FighterFlight)) return array();
+		$aboard = array();
 		foreach ($flight->getOfficers() as $entry){
-			if (self::isFighterOfficer($entry['id']) && $entry['how'] !== 'moved') return $entry;
+			if (self::isFighterOfficer($entry['id']) && $entry['how'] !== 'moved') $aboard[] = $entry;
 		}
-		return null;
+		return $aboard;
+	}
+
+	//How many fighter officers this row holds - HangarOps gives the side that stays these, less the ones leaving (officerAmong)
+	public static function officersAboard($flight){
+		return count(self::fighterOfficersAboard($flight));
+	}
+
+	/* What the fighter officers this row holds cost it: his rowPrice - or, for officers bought as a count, the row's price
+	   shared out by the number bought, for those still aboard. */
+	private static function officersCost($flight, array $aboard){
+		if (empty($aboard)) return 0.0;
+		$id = $aboard[0]['id'];
+		$price = (float)self::rowPrice($flight, $id);
+		if (empty(self::$registry[$id]['multi'])) return $price;
+		$bought = max(1, self::boughtCount($flight, $id));
+		return $price * min(count($aboard), $bought) / $bought;
 	}
 
 	/* The share of a flight's enhancement value HangarOps gives $k of its $n craft when it splits the
 	   row in two - proportional to the craft, as it always was, EXCEPT a fighter officer's own price,
 	   which goes whole to the side that has him (user ruling 2026-10-11: his cost moves with him).
-	   $withOfficer: does this side have him? With no officer aboard this is exactly round($total * $k / $n),
-	   the split every caller made before. */
+	   $withOfficer: does this side have him? true / false, or (Stage 18) how many of the row's officers
+	   it has - each Expert Pilot's share of the row's price goes with his fighter. With no officer aboard
+	   this is exactly round($total * $k / $n), the split every caller made before. */
 	public static function shareWithCraft($flight, $total, $k, $n, $withOfficer){
 		if ($n <= 0) return 0;
-		$entry = self::fighterOfficerAboard($flight);
-		$cost = $entry ? max(0, min((float)$total, (float)self::rowPrice($flight, $entry['id']))) : 0;
+		$aboard = self::fighterOfficersAboard($flight);
+		$cost = max(0, min((float)$total, self::officersCost($flight, $aboard)));
 		$share = (int)round(((float)$total - $cost) * $k / $n);
-		return $withOfficer ? $share + (int)round($cost) : $share;
+		$count = count($aboard);
+		if ($count === 0) return $share;
+		$with = is_bool($withOfficer) ? ($withOfficer ? $count : 0) : max(0, min($count, (int)$withOfficer));
+		return $share + (int)round($cost * $with / $count);
 	}
 
-	/* The serving fighter officer whose post (craft) is among $crafts - the craft leaving the row - or null. */
-	private static function travellingOfficer($flight, array $crafts, $turn){
-		$entry = self::fighterOfficerAboard($flight);
-		if ($entry === null || !self::serves($entry, $turn)) return null;
-		foreach ($crafts as $craft){
-			if ($craft instanceof Fighter && (int)$craft->id === (int)$entry['post']) return $entry;
+	/* The serving fighter officers whose posts (crafts) are among $crafts - the craft leaving the row. */
+	private static function travellingOfficers($flight, array $crafts, $turn){
+		$leaving = array();
+		foreach ($crafts as $craft) if ($craft instanceof Fighter) $leaving[(int)$craft->id] = true;
+		$travelling = array();
+		foreach (self::fighterOfficersAboard($flight) as $entry){
+			if (self::serves($entry, $turn) && isset($leaving[(int)$entry['post']])) $travelling[] = $entry;
 		}
-		return null;
+		return $travelling;
 	}
 
-	//Is this flight's fighter officer among the craft leaving it? (HangarOps, for shareWithCraft)
+	/* How many of this flight's fighter officers are among the craft leaving it (HangarOps, for shareWithCraft): 0 or 1, or
+	   up to four Expert Pilots (Stage 18) - so it is truthy exactly when one is. */
 	public static function officerAmong($flight, array $crafts, $turn){
-		return self::travellingOfficer($flight, $crafts, $turn) !== null;
+		return count(self::travellingOfficers($flight, $crafts, $turn));
 	}
 
 	/* ⭐ A FIGHTER OFFICER FOLLOWS HIS FIGHTER (user ruling 2026-10-11). Called by HangarOps wherever craft
@@ -2401,26 +2538,34 @@ class Officers{
 	       does for ammunition;
 	     - the old row gets one OffMoved note on his old post, intercepted at load like OffKilled, so from
 	       the next turn he is gone from it ('moved') - he still serves this turn, the next-turn rule.
-	   Returns whether he moved. His cost follows him through shareWithCraft, which the callers apply. */
+	   Several Expert Pilots (Stage 18): every one whose craft leaves goes - their crafts first, so they land
+	   in the new row's first crafts, its row bought at their count, and one OffMoved note on each one's craft.
+	   Returns whether anyone moved. Their cost follows them through shareWithCraft, which the callers apply. */
 	public static function followFighter($source, $target, array &$crafts, $gamedata){
 		if (!($source instanceof FighterFlight) || !($target instanceof FighterFlight)) return false;
-		$entry = self::travellingOfficer($source, $crafts, $gamedata->turn);
-		if ($entry === null) return false;
+		$travelling = self::travellingOfficers($source, $crafts, $gamedata->turn);
+		if (empty($travelling)) return false;
 
+		$posts = array();
+		foreach ($travelling as $entry) $posts[(int)$entry['post']] = true;
 		$ordered = array();
-		foreach ($crafts as $craft) if ((int)$craft->id === (int)$entry['post']) $ordered[] = $craft;
-		foreach ($crafts as $craft) if ((int)$craft->id !== (int)$entry['post']) $ordered[] = $craft;
+		foreach ($crafts as $craft) if (isset($posts[(int)$craft->id])) $ordered[] = $craft;
+		foreach ($crafts as $craft) if (!isset($posts[(int)$craft->id])) $ordered[] = $craft;
 		$crafts = $ordered;
 
-		$label = self::getLabel($entry['id']);
-		Manager::insertSingleEnhancement($gamedata, $target->id, $entry['id'], 1, $label);
-		$target->enhancementOptions[] = array($entry['id'], $label, 1, 0, 0, 0);
+		$id = $travelling[0]['id']; //a flight's one officer, or several of one kind bought as a count (D9)
+		$label = self::getLabel($id);
+		$count = count($travelling);
+		Manager::insertSingleEnhancement($gamedata, $target->id, $id, $count, $label);
+		$target->enhancementOptions[] = array($id, $label, $count, 0, 0, 0);
 		self::pickPosts($target);
 
 		/* Read at the NEXT load. The old row's in-memory list is left alone: he serves it to the end of
 		   this turn, and shareWithCraft, called after this, still has to see him there to price the split. */
-		Manager::insertIndividualNote(new IndividualNote(-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
-			$source->id, (int)$entry['post'], self::MOVE_NOTE, substr($label . ' left with his fighter', 0, 40), $entry['id']));
+		foreach ($travelling as $entry){
+			Manager::insertIndividualNote(new IndividualNote(-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+				$source->id, (int)$entry['post'], self::MOVE_NOTE, substr($label . ' left with his fighter', 0, 40), $entry['id']));
+		}
 		return true;
 	}
 

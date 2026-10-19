@@ -924,12 +924,12 @@
       abilities he has used. While an officer is moving, both posts' tooltips say where he is going or coming from. A
       fighter officer is named in the flight's own tooltip, shown when you hover over a fighter.</li>
     <li>The ship window's gold Enhancements box counts the officers aboard, as <b>Officers (2)</b>. In the lobby, a
-      fighter flight's box names its one officer instead.</li>
+      fighter flight's box names its one officer instead (<b>Expert Pilot (3)</b> for three pilots).</li>
     <li>Your opponent sees none of these until the game is over. Some effects do show, though, because they change numbers
       everyone can read: a Helmsman's, a Security Officer's, a Religious Leader's or a Dogfighter's initiative (and the initiative,
       profiles and sensors of a ship whose Religious Leader has been lost), a Geneticist's profiles, a Technician's reactor power,
       a Matter Weapons Expert's or an Expert Gunner's fire control, a Plasma Scientist's battery capacity and Plasma Web range, a Navigator's turn, pivot, roll and accel/decel costs, a Jump Officer's jump
-      range, how long his jump point stays open and his arrival initiative penalty, an Evader's offensive bonus, the
+      range, how long his jump point stays open and his arrival initiative penalty, an Evader's or Expert Pilots' offensive bonus (and the jinking the pilots let a flight do), the
       criticals and damage an Engineer or Scavenger repairs, and a weapon's loading when an officer speeds up its reload.
       The opponent sees the number, not who is behind it. An Expert Gunner's added Piercing mode stays hidden from your
       opponent until he fires it: they see it only in the replay of that turn. Lasers boosted by an Expert Laser Technician,
@@ -1360,7 +1360,8 @@
 <section data-key="fighterofficers" data-title="Fighter Officers" data-group="Officers">
   <p class="fvd-lede">Officers for fighter flights. A flight may carry only one of them, and he flies in its first
     fighter: he is lost if that fighter is destroyed or drops out, and goes with it if it is split off from the flight
-    (see <a href="#losingofficers">Losing an officer</a>).</p>
+    (see <a href="#losingofficers">Losing an officer</a>). The one exception is the Expert Pilot: a flight may carry
+    up to four of them (in place of any other officer), one in each of its first fighters.</p>
   <p>Each officer's cost is for a standard flight of six fighters. A flight of another size pays it in proportion,
     rounded up: three fighters pay half, nine one and a half times, twelve double. A single superheavy fighter pays it
     in full.</p>
@@ -1404,7 +1405,7 @@
         <dt>Effect</dt>
         <dd><ul>
           <li>-5 Offensive Bonus (-5% to hit) on all of the flight's weapons.</li>
-          <li>-1 damage from every hit on the flight.</li>
+          <li>-1 damage from every hit on the flight - a Spark Field's hit on each fighter included.</li>
         </ul></dd>
         <dt>Cost</dt>
         <dd>100% of one fighter's cost, for a flight of six.</dd>
@@ -1441,6 +1442,30 @@
         <dt>Notes</dt>
         <dd>Formerly a fighter enhancement, with the same effect, at 10% of each fighter's cost. As an officer he now
           counts as the flight's one officer, is lost with the flight's first fighter, and is hidden from your opponent.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Pilot</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>One in each of the flight's first fighters: the first pilot in the first fighter, the second in the second, and so on.</dd>
+        <dt>Effect</dt>
+        <dd>For each pilot:<ul>
+          <li>+5 Offensive Bonus (+5% to hit) on all of the flight's weapons.</li>
+          <li>One level of jinking that costs no thrust and does not count against the flight's jinking limit. Further
+            levels cost the usual thrust: with two pilots, a flight with a jinking limit of 6 may jink up to 8, the first
+            two levels free.</li>
+          <li>On a turn the flight neither jinks nor fires, a Spark Field deals 1 less damage to each of its fighters.
+            This is automatic; intercepting does not count as firing.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>100% of one fighter's cost per pilot, for a flight of six.</dd>
+        <dt>Limit</dt>
+        <dd>Up to 4 pilots per flight (2 for Raiders), never more than the flight has fighters. Pilots count as the
+          flight's one officer: a flight with pilots carries no other officer.</dd>
+        <dt>Notes</dt>
+        <dd>Each pilot is lost with his own fighter, so the flight's bonuses shrink as its pilots' fighters are destroyed
+          or drop out. A pilot whose fighter is split off from the flight goes with it.</dd>
       </dl>
     </article>
   </div>
