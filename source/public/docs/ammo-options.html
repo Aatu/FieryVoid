@@ -144,6 +144,29 @@
 <section data-key="shipenhancements" data-title="Ship Enhancements" data-group="Unit Enhancements">
   <div class="fvd-cards">
     <article class="fvd-card fvd-card--wide">
+      <h4>Advanced Engine Module</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>The ship's strongest Engine gets 1 better Efficiency - the power each extra point of thrust costs
+          when you boost it - to a minimum of 1. An Efficiency 3 Engine boosts for 2 power per thrust.</dd>
+        <dt>Cost</dt><dd>10% of the ship's cost (rounded up)</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Lost for good the first time ANY of the ship's Engines suffers a critical of any kind. It stops
+          working from the following turn, and repairing the critical does not bring it back. Not offered if the strongest
+          Engine is already Efficiency 1, or on a ship with Unreliable Engines (Engine Flux). Hyach Thruster Specialists
+          cannot take an Engine below Efficiency 1 either.</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h4>Assault Shuttle / Fighter Hangar Conversions</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Converts a fighter slot into an assault shuttle slot, or vice versa.</dd>
+        <dt>Cost</dt><dd>5 pts per slot converted</dd>
+        <dt>Limit</dt><dd>The number of assault shuttle / fighter slots</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Elite Crew</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt>
@@ -170,6 +193,86 @@
     </article>
 
     <article class="fvd-card fvd-card--wide">
+      <h4>Extra Marines</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>A pool of extra marine units used to restock the Marines of Breaching Pods that dock back into
+          the carrier (1 marine per pod per turn while docked).</dd>
+        <dt>Cost</dt><dd>10 pts per contingent - each contingent is a single marine unit.</dd>
+        <dt>Limit</dt><dd>1% of the ship's base Combat Point value, rounded up (a 600-PV ship can buy up to 6
+          contingents).</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h4>Identify Friend or Foe (IFF)</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Stops ballistic mines attacking friendly units.</dd>
+        <dt>Cost</dt><dd>4 pts per Ballistic Mine Launcher</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Only for ships with Ballistic Mine Launchers.</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h4>Improved Engine</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 Thrust</dd>
+        <dt>Cost</dt><dd>12 + (4 / turn cost), rounded up</dd>
+        <dt>Limit</dt><dd>Engine thrust rating / 2</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h4>Improved Reactor</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 to +4 Power (depending on unit size, from MCV to Enormous)</dd>
+        <dt>Cost</dt><dd>10 &times; the power added (doubled if the ship has a power deficit)</dd>
+        <dt>Limit</dt><dd>1</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h4>Improved Sensors</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>+1 Scanner rating</dd>
+        <dt>Cost</dt><dd>New Scanner rating &times; 5 (doubled for ELINT Sensors / Advanced Sensors)</dd>
+        <dt>Limit</dt><dd>1</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h4>Jump Accelerator</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd><ul>
+          <li>Jump delay reduced by 33% (fractions of 0.5 or more round up).</li>
+          <li>Jump Drive range +2 hexes (4 becomes 6): it can open a jump point up to 6 hexes away, and the jump point
+            stays open while the ship ends its turns within 6 hexes of it.</li>
+          <li>The Jump Drive's power draw is doubled, and the reactor also loses power equal to the drive's normal draw.
+            A drive that normally draws 3 power leaves the ship 6 power short while it is switched on, and 3 short while
+            it is switched off.</li>
+          <li>At the end of the turn the ship <b>opens</b> a jump point, the chance of a damaged drive destroying the
+            ship is doubled (to a maximum of 100%). Turns spent maintaining it roll the normal chance.</li>
+        </ul></dd>
+        <dt>Cost</dt><dd>10% of the ship's cost (rounded up)</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Only for Jump Drives that open jump points - not the one-click drives (Star Wars Hyperdrive, BSG
+          FTL, Shadow Phasing Drive), and not Ancient drives. With Elite or Poor Crew, the crew change is applied first: a
+          20-turn delay with Elite Crew becomes 16, then 11.</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h4>Ordnance Reserve</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>A pool of points used to restock the missiles and torpedoes of docked fighters (see
+          <a href="faq.php#hangar">Hangar Operations</a>).</dd>
+        <dt>Cost</dt><dd>Up to 200 pts can be bought; the cost of the missiles restocked to docked fighters is drawn from
+          this reserve.</dd>
+        <dt>Limit</dt><dd>200 pts</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Poor Crew</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt>
@@ -188,6 +291,34 @@
         <dt>Limit</dt><dd>2</dd>
         <dt>Notes</dt><dd>Every effect above is per level: a ship bought Poor Crew twice gets +2 Turn Delay, a quartered
           hangar rate, and a jump delay lengthened by 20% twice (to 144% of the original).</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h4>Shuttle to Breaching Pod Conversion</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Converts one of the ship's default shuttle slots into a hangar slot that can hold a Breaching
+          Pod (replacing the shuttle).</dd>
+        <dt>Cost</dt><dd>10 pts per slot converted</dd>
+        <dt>Limit</dt><dd>The number of default shuttle slots</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h4>Shuttle to Minesweeping Shuttle Conversion</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Converts one of the ship's default shuttles into a minesweeping shuttle.</dd>
+        <dt>Cost</dt><dd>10 pts per shuttle converted</dd>
+        <dt>Limit</dt><dd>The number of default shuttles</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h4>Sluggish</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>-5 Initiative</dd>
+        <dt>Cost</dt><dd>-6 per step</dd>
+        <dt>Limit</dt><dd>7</dd>
       </dl>
     </article>
 
@@ -218,138 +349,7 @@
       </dl>
     </article>
 
-    <article class="fvd-card">
-      <h4>Ordnance Reserve</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>A pool of points used to restock the missiles and torpedoes of docked fighters (see
-          <a href="faq.php#hangar">Hangar Operations</a>).</dd>
-        <dt>Cost</dt><dd>Up to 200 pts can be bought; the cost of the missiles restocked to docked fighters is drawn from
-          this reserve.</dd>
-        <dt>Limit</dt><dd>200 pts</dd>
-      </dl>
-    </article>
-
-    <article class="fvd-card">
-      <h4>Extra Marines</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>A pool of extra marine units used to restock the Marines of Breaching Pods that dock back into
-          the carrier (1 marine per pod per turn while docked).</dd>
-        <dt>Cost</dt><dd>10 pts per contingent - each contingent is a single marine unit.</dd>
-        <dt>Limit</dt><dd>1% of the ship's base Combat Point value, rounded up (a 600-PV ship can buy up to 6
-          contingents).</dd>
-      </dl>
-    </article>
-
-    <article class="fvd-card">
-      <h4>Assault Shuttle / Fighter Hangar Conversions</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>Converts a fighter slot into an assault shuttle slot, or vice versa.</dd>
-        <dt>Cost</dt><dd>5 pts per slot converted</dd>
-        <dt>Limit</dt><dd>The number of assault shuttle / fighter slots</dd>
-      </dl>
-    </article>
-
-    <article class="fvd-card">
-      <h4>Shuttle to Breaching Pod Conversion</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>Converts one of the ship's default shuttle slots into a hangar slot that can hold a Breaching
-          Pod (replacing the shuttle).</dd>
-        <dt>Cost</dt><dd>10 pts per slot converted</dd>
-        <dt>Limit</dt><dd>The number of default shuttle slots</dd>
-      </dl>
-    </article>
-
-    <article class="fvd-card">
-      <h4>Shuttle to Minesweeping Shuttle Conversion</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>Converts one of the ship's default shuttles into a minesweeping shuttle.</dd>
-        <dt>Cost</dt><dd>10 pts per shuttle converted</dd>
-        <dt>Limit</dt><dd>The number of default shuttles</dd>
-      </dl>
-    </article>
-
-    <article class="fvd-card">
-      <h4>Identify Friend or Foe (IFF)</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>Stops ballistic mines attacking friendly units.</dd>
-        <dt>Cost</dt><dd>4 pts per Ballistic Mine Launcher</dd>
-        <dt>Limit</dt><dd>1</dd>
-        <dt>Notes</dt><dd>Only for ships with Ballistic Mine Launchers.</dd>
-      </dl>
-    </article>
-
-    <article class="fvd-card">
-      <h4>Improved Engine</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>+1 Thrust</dd>
-        <dt>Cost</dt><dd>12 + (4 / turn cost), rounded up</dd>
-        <dt>Limit</dt><dd>Engine thrust rating / 2</dd>
-      </dl>
-    </article>
-
-    <article class="fvd-card">
-      <h4>Advanced Engine Module</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>The ship's strongest Engine gets 1 better Efficiency - the power each extra point of thrust costs
-          when you boost it - to a minimum of 1. An Efficiency 3 Engine boosts for 2 power per thrust.</dd>
-        <dt>Cost</dt><dd>10% of the ship's cost (rounded up)</dd>
-        <dt>Limit</dt><dd>1</dd>
-        <dt>Notes</dt><dd>Lost for good the first time ANY of the ship's Engines suffers a critical of any kind. It stops
-          working from the following turn, and repairing the critical does not bring it back. Not offered if the strongest
-          Engine is already Efficiency 1, or on a ship with Unreliable Engines (Engine Flux). Hyach Thruster Specialists
-          cannot take an Engine below Efficiency 1 either.</dd>
-      </dl>
-    </article>
-
-    <article class="fvd-card">
-      <h4>Improved Reactor</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>+1 to +4 Power (depending on unit size, from MCV to Enormous)</dd>
-        <dt>Cost</dt><dd>10 &times; the power added (doubled if the ship has a power deficit)</dd>
-        <dt>Limit</dt><dd>1</dd>
-      </dl>
-    </article>
-
-    <article class="fvd-card">
-      <h4>Improved Sensors</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>+1 Scanner rating</dd>
-        <dt>Cost</dt><dd>New Scanner rating &times; 5 (doubled for ELINT Sensors / Advanced Sensors)</dd>
-        <dt>Limit</dt><dd>1</dd>
-      </dl>
-    </article>
-
-    <article class="fvd-card">
-      <h4>Jump Accelerator</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd><ul>
-          <li>Jump delay reduced by 33% (fractions of 0.5 or more round up).</li>
-          <li>Jump Drive range +2 hexes (4 becomes 6): it can open a jump point up to 6 hexes away, and the jump point
-            stays open while the ship ends its turns within 6 hexes of it.</li>
-          <li>The Jump Drive's power draw is doubled, and the reactor also loses power equal to the drive's normal draw.
-            A drive that normally draws 3 power leaves the ship 6 power short while it is switched on, and 3 short while
-            it is switched off.</li>
-          <li>At the end of the turn the ship <b>opens</b> a jump point, the chance of a damaged drive destroying the
-            ship is doubled (to a maximum of 100%). Turns spent maintaining it roll the normal chance.</li>
-        </ul></dd>
-        <dt>Cost</dt><dd>10% of the ship's cost (rounded up)</dd>
-        <dt>Limit</dt><dd>1</dd>
-        <dt>Notes</dt><dd>Only for Jump Drives that open jump points - not the one-click drives (Star Wars Hyperdrive, BSG
-          FTL, Shadow Phasing Drive), and not Ancient drives. With Elite or Poor Crew, the crew change is applied first: a
-          20-turn delay with Elite Crew becomes 16, then 11.</dd>
-      </dl>
-    </article>
-
-    <article class="fvd-card">
-      <h4>Sluggish</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>-5 Initiative</dd>
-        <dt>Cost</dt><dd>-6 per step</dd>
-        <dt>Limit</dt><dd>7</dd>
-      </dl>
-    </article>
-
-    <article class="fvd-card">
+    <article class="fvd-card fvd-card--wide">
       <h4>Vulnerable to Criticals</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 to critical rolls</dd>
@@ -366,7 +366,17 @@
     <p>The Expert Motivator is an officer now: see <a href="#fighterofficers">Fighter Officers</a>.</p>
   </div>
   <div class="fvd-cards">
-    <article class="fvd-card">
+    <article class="fvd-card fvd-card--wide">
+      <h4>Elite Pilot</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Pivot cost reduced by one thrust. Initiative +5. Offensive Bonus +1. Profile -1.</dd>
+        <dt>Cost</dt><dd>+40% of the craft's price (rounded up)</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Custom Star Wars faction only.</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Improved Targeting Computer</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 Offensive Bonus (OB)</dd>
@@ -374,7 +384,8 @@
         <dt>Limit</dt><dd>1</dd>
       </dl>
     </article>
-    <article class="fvd-card">
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Improved Thrust</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 thrust</dd>
@@ -382,7 +393,8 @@
         <dt>Limit</dt><dd>1</dd>
       </dl>
     </article>
-    <article class="fvd-card">
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Minesweeper Conversion</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>Sets the Offensive Bonus to 4 and gives shuttles the minesweeper property, letting them use
@@ -392,7 +404,8 @@
         <dt>Notes</dt><dd>Shuttles only.</dd>
       </dl>
     </article>
-    <article class="fvd-card">
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Navigator</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>360-degree missile guidance, +5 Initiative</dd>
@@ -400,21 +413,13 @@
         <dt>Limit</dt><dd>1</dd>
       </dl>
     </article>
-    <article class="fvd-card">
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Poor Training</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>-5 Initiative, -1 thrust, -1 OB, +1 Defence Rating, +2 to dropout rolls</dd>
         <dt>Cost</dt><dd>-10% of the craft's price (rounded up)</dd>
         <dt>Limit</dt><dd>1</dd>
-      </dl>
-    </article>
-    <article class="fvd-card">
-      <h4>Elite Pilot</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>Pivot cost reduced by one thrust. Initiative +5. Offensive Bonus +1. Profile -1.</dd>
-        <dt>Cost</dt><dd>+40% of the craft's price (rounded up)</dd>
-        <dt>Limit</dt><dd>1</dd>
-        <dt>Notes</dt><dd>Custom Star Wars faction only.</dd>
       </dl>
     </article>
   </div>
@@ -438,7 +443,8 @@
           targeting.</dd>
       </dl>
     </article>
-    <article class="fvd-card">
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Flexible Targeting</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>Lets you set different ranges for different weapons during Deployment.</dd>
@@ -447,7 +453,8 @@
         <dt>Notes</dt><dd>Only for DEW mines with more than one weapon.</dd>
       </dl>
     </article>
-    <article class="fvd-card">
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Identify Friend or Foe (IFF)</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>Stops mines attacking friendly units.</dd>
@@ -455,7 +462,8 @@
         <dt>Limit</dt><dd>1</dd>
       </dl>
     </article>
-    <article class="fvd-card">
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Improved Accuracy</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 Accuracy</dd>
@@ -464,7 +472,8 @@
         <dt>Notes</dt><dd>Captor &amp; DEW only.</dd>
       </dl>
     </article>
-    <article class="fvd-card">
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Improved Armour</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 Armour</dd>
@@ -473,7 +482,8 @@
         <dt>Notes</dt><dd>DEW only.</dd>
       </dl>
     </article>
-    <article class="fvd-card">
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Improved Range</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 Range</dd>
@@ -482,7 +492,8 @@
         <dt>Notes</dt><dd>Captor &amp; DEW only.</dd>
       </dl>
     </article>
-    <article class="fvd-card">
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Improved Signature</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 Signature</dd>
@@ -500,7 +511,7 @@
 
   <h3 data-anchor="ancients">Ancients</h3>
   <div class="fvd-cards">
-    <article class="fvd-card">
+    <article class="fvd-card fvd-card--wide">
       <h4>Improved Self Repair</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 rating for every Self Repair system on the ship</dd>
@@ -512,7 +523,7 @@
 
   <h3 data-anchor="drazi">Drazi Freehold</h3>
   <div class="fvd-cards">
-    <article class="fvd-card">
+    <article class="fvd-card fvd-card--wide">
       <h4>Repeater Gunsights</h4>
       <p>A System Enhancement, bought for each Particle Repeater separately - see
         <a href="#systemrefits">Available Refits</a>.</p>
@@ -521,26 +532,7 @@
 
   <h3 data-anchor="ipsha">Ipsha Baronies</h3>
   <div class="fvd-cards">
-    <article class="fvd-card">
-      <h4>Spark Curtain</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>Ballistic hit chance reduced by 2 + any boost level of the Spark Field</dd>
-        <dt>Cost</dt><dd>40 + 10 per Spark Field</dd>
-        <dt>Limit</dt><dd>1</dd>
-        <dt>Notes</dt><dd>Unofficial.</dd>
-      </dl>
-    </article>
-    <article class="fvd-card">
-      <h4>Essan Barony Refit</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>Engine +1 thrust and +2 structure boxes, but Scanner -1 output and -2 structure boxes;
-          Structure +1 armour on all sections (to a maximum of 5)</dd>
-        <dt>Cost</dt><dd>0</dd>
-        <dt>Limit</dt><dd>1</dd>
-        <dt>Notes</dt><dd>An Essan Barony variant rather than a true enhancement.</dd>
-      </dl>
-    </article>
-    <article class="fvd-card">
+    <article class="fvd-card fvd-card--wide">
       <h4>Eethan Barony Refit</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+2 thrust, +25% available power, +0.1 turn delay, -5 Initiative, +4 critical roll modifier for
@@ -551,11 +543,32 @@
           remade as a ship upgrade rather than an add-on system.</dd>
       </dl>
     </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h4>Essan Barony Refit</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Engine +1 thrust and +2 structure boxes, but Scanner -1 output and -2 structure boxes;
+          Structure +1 armour on all sections (to a maximum of 5)</dd>
+        <dt>Cost</dt><dd>0</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>An Essan Barony variant rather than a true enhancement.</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h4>Spark Curtain</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Ballistic hit chance reduced by 2 + any boost level of the Spark Field</dd>
+        <dt>Cost</dt><dd>40 + 10 per Spark Field</dd>
+        <dt>Limit</dt><dd>1</dd>
+        <dt>Notes</dt><dd>Unofficial.</dd>
+      </dl>
+    </article>
   </div>
 
   <h3 data-anchor="kirishiaclords">Kirishiac Lords</h3>
   <div class="fvd-cards">
-    <article class="fvd-card">
+    <article class="fvd-card fvd-card--wide">
       <h4>Improved Gravitic Converters</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>Boosting the damage of the ship's Hypergraviton Blaster costs only 4 thrust.</dd>
@@ -567,7 +580,7 @@
 
   <h3 data-anchor="markab">Markab Theocracy</h3>
   <div class="fvd-cards">
-    <article class="fvd-card">
+    <article class="fvd-card fvd-card--wide">
       <h4>Religious Fervor</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 to hit with all weapons (+5 OB for fighters), +10 initiative, and fighters get -3 to
@@ -581,7 +594,7 @@
 
   <h3 data-anchor="mindriders">The Mindriders</h3>
   <div class="fvd-cards">
-    <article class="fvd-card">
+    <article class="fvd-card fvd-card--wide">
       <h4>Improved Thought Shields</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 to every Thought Shield rating on the vessel</dd>
@@ -593,7 +606,7 @@
 
   <h3 data-anchor="shadows">Shadow Association</h3>
   <div class="fvd-cards">
-    <article class="fvd-card">
+    <article class="fvd-card fvd-card--wide">
       <h4>Increased Diffusers</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 rating for every Diffuser on the ship</dd>
@@ -601,7 +614,8 @@
         <dt>Limit</dt><dd>5</dd>
       </dl>
     </article>
-    <article class="fvd-card">
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Integrated Fighter</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>Buys an integrated Shadow Medium Fighter for this ship.</dd>
@@ -613,7 +627,7 @@
 
   <h3 data-anchor="thirdspace">Thirdspace</h3>
   <div class="fvd-cards">
-    <article class="fvd-card">
+    <article class="fvd-card fvd-card--wide">
       <h4>Improved Psychic Field</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 range on the Psychic Field</dd>
@@ -625,7 +639,7 @@
 
   <h3 data-anchor="vorlons">Vorlon Empire</h3>
   <div class="fvd-cards">
-    <article class="fvd-card">
+    <article class="fvd-card fvd-card--wide">
       <h4>Amethyst Skin</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 Adaptive Armor (AA) point; the AA allowance per weapon type and the AA pre-assigned amount go
@@ -635,7 +649,8 @@
         <dt>Notes</dt><dd>Ships only.</dd>
       </dl>
     </article>
-    <article class="fvd-card">
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Azure Skin</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>+1 rating on all EM Shields</dd>
@@ -644,7 +659,8 @@
         <dt>Notes</dt><dd>The size factor is 30 for Enormous units, 25 for Capitals and 20 for anything smaller.</dd>
       </dl>
     </article>
-    <article class="fvd-card">
+
+    <article class="fvd-card fvd-card--wide">
       <h4>Crimson Skin</h4>
       <dl class="fvd-spec">
         <dt>Effect</dt><dd>The Power Capacitor gains +2 storage and +1 recharge</dd>
