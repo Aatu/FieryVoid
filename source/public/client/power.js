@@ -1392,6 +1392,10 @@ shipManager.power = {
 
 			if (shipManager.power.isOffline(ship, array[i])) continue;
 
+			//Same rule as the single Off button (canOffline): a system with a fire order declared stays
+			//on - the player must cancel the order first.
+			if (weaponManager.hasFiringOrder(ship, array[i])) continue;
+
 			array[i].power.push({ id: null, shipid: ship.id, systemid: array[i].id, type: 1, turn: gamedata.turn, amount: 0 });
 
 			//Stage 20 - same rule as onOfflineClicked: a deactivated jump drive's abduction is cancelled.
