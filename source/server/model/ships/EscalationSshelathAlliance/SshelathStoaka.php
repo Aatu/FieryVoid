@@ -60,7 +60,7 @@ class SshelathStoaka extends MediumShip{
 
 		1=> array(
 			5 => "Thruster",
-			8 => "Light Class-O Missile Rack",
+			8 => "Light O-Missile Rack",
 			17 => "Structure",
 			20 => "Primary",
 		),

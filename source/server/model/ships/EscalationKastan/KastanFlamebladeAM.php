@@ -108,8 +108,8 @@ class KastanFlamebladeAM extends BaseShip{
 			),
 			4=> array(
 					5 => "Thruster",
-					7 => "Imperial Laser",
-					10 => "Royal Laser",
+					7 => "Heavy Plasma Cannon",
+					10 => "Medium Plasma Cannon",
 					18 => "Structure",
 					20 => "Primary",
 			),

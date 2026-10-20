@@ -75,7 +75,7 @@ class SalbezVasken extends HeavyCombatVessel{
             2=> array(
                     6 => "Thruster",
 					8 => "Light Laser",
-					11 => "Light Particle Beam",
+					11 => "Improved Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),

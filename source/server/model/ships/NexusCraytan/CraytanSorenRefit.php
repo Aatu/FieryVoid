@@ -38,6 +38,7 @@ class CraytanSorenRefit extends HeavyCombatVesselLeftRight{
 		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 240, 60));
 		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 120, 300));
 		$this->addLeftSystem(new HeavyPlasma(2, 8, 5, 300, 60));
+        $this->addLeftSystem(new ConnectionStrut(3));
                 
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 4));
@@ -45,6 +46,7 @@ class CraytanSorenRefit extends HeavyCombatVesselLeftRight{
 		$this->addRightSystem(new NexusCIDS(2, 4, 2, 300, 120));
 		$this->addRightSystem(new NexusCIDS(2, 4, 2, 60, 240));
 		$this->addRightSystem(new HeavyPlasma(2, 8, 5, 300, 60));
+        $this->addRightSystem(new ConnectionStrut(3));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(3, 40));

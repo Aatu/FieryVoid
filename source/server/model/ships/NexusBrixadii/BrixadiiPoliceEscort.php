@@ -47,7 +47,7 @@ class BrixadiiPoliceEscort extends LCV{
 		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 270, 90));
 		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 300, 120));
 	    
-        $this->addPrimarySystem(new Structure(3, 27));
+        $this->addPrimarySystem(new Structure(4, 27));
 	    
         $this->hitChart = array(
         		0=> array( 

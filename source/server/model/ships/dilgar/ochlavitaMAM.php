@@ -65,7 +65,7 @@ class OchlavitaMAM extends HeavyCombatVessel{
 	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 120, 300));
 	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 60, 240));
 		$this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 90, 270, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-		$this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 60, 240, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 90, 270, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
  
  
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

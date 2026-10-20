@@ -45,7 +45,7 @@ class VelraxSoressPDCRefit extends FighterFlight{
 			$armour = array(4, 2, 2, 2);
 			$fighter = new Fighter("VelraxSoressPDCRefit", $armour, 34, $this->id);
 			$fighter->displayName = "Soress";
-			$fighter->imagePath = "img/ships/Nexus/velraxHisskar.png.png";
+			$fighter->imagePath = "img/ships/Nexus/velraxHisskar.png";
 			$fighter->iconPath = "img/ships/Nexus/velraxHisskar_large.png";
 
 			//ammo magazine itself (AND its missile options)

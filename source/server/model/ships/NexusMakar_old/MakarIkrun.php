@@ -39,7 +39,7 @@ class MakarIkrun extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
 		$this->addFrontSystem(new NexusDefenseGun(2, 4, 1, 270, 90));
 		$this->addFrontSystem(new EWHeavyRocketLauncher(3, 6, 2, 300, 60));
-		$this->addFrontSystem(new Hangar(2, 4));
+		$this->addFrontSystem(new Hangar(2, 4, 4));
 		$this->addFrontSystem(new EWHeavyRocketLauncher(3, 6, 2, 300, 60));
                 
         $this->addAftSystem(new Thruster(3, 15, 0, 4, 2));

@@ -87,7 +87,7 @@ class KlingonD5 extends MediumShip{
 			3 => "2:Nacelle",
 			6 => "Structure",
            	8 => "Cloaking Device",
-			11 => "Micro Jump System",
+			11 => "Warp Drive",
 			12 => "Hangar",		
 			14 => "Scanner",
 			16 => "Engine",

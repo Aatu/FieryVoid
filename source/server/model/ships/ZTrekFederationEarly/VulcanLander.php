@@ -69,8 +69,8 @@ class VulcanLander extends LCV{
 		0=> array(
 			11 => "Structure",
 			13 => "0:Shield Projector",
-			15 => "Light Phase Cannon",
-			17 => "Nacelle",
+			15 => "1:Light Phase Cannon",
+			17 => "1:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
 			20 => "0:Scanner",
@@ -79,8 +79,8 @@ class VulcanLander extends LCV{
 		1=> array(
 			10 => "Structure",
 			12 => "0:Shield Projector",
-			14 => "Light Phase Cannon",
-			17 => "Nacelle",
+			14 => "1:Light Phase Cannon",
+			17 => "1:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
 			20 => "0:Scanner",
@@ -89,8 +89,8 @@ class VulcanLander extends LCV{
 		2=> array(
 			10 => "Structure",
 			12 => "0:Shield Projector",
-			15 => "Light Phase Cannon",
-			17 => "Nacelle",
+			15 => "2:Light Phase Cannon",
+			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
 			20 => "0:Scanner",

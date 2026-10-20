@@ -42,7 +42,7 @@ class breachingPodMakarB extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 3, 3, 3);
-            $fighter = new Fighter("breachingPodMakar", $armour, 16, $this->id);
+            $fighter = new Fighter("breachingPodMakar", $armour, 20, $this->id);
             $fighter->displayName = "Kurren";
             $fighter->imagePath = "img/ships/Nexus/makarBP.png";
             $fighter->iconPath = "img/ships/Nexus/makarBP_large.png";

@@ -92,7 +92,7 @@ class KlingonD7Early extends HeavyCombatVessel{
                 11 => "Scanner",
                 13 => "Engine",
                 15 => "Hangar",
-                16 => "Micro Jump Drive",
+                16 => "Warp Drive",
                 17 => "Cloaking Device",
                 19 => "Reactor",
                 20 => "C&C",
@@ -107,7 +107,7 @@ class KlingonD7Early extends HeavyCombatVessel{
             2=> array(
 				2 => "Shield Projector",
 				8 => "Nacelle",
-				11 => "Medium Disruptor",
+				11 => "Early Disruptor",
 				13 => "Light Disruptor",
 				18 => "Structure",
 				20 => "Primary",

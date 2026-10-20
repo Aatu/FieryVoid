@@ -6,7 +6,7 @@ class MakarNollon extends MediumShip{
         
         $this->pointCost = 340;
         $this->faction = "Nexus Makar Federation";
-        $this->phpclass = "MakarArtem";
+        $this->phpclass = "MakarNollon";
         $this->imagePath = "img/ships/Nexus/makar_brassert2.png";
         $this->shipClass = "Nollon Assault Frigate";
 			$this->variantOf = "Brassert Frigate";

@@ -19,6 +19,7 @@ class MakarHalicin extends BaseShip{
 	    $this->notes = '<br>Unreliable Ship:';
  	    $this->notes .= '<br> - Sensor Fluctuations';
  	    $this->notes .= '<br> - Sluggish';
+		$this->notes .= '<br> - Connecting Struts';
 // 	    $this->notes .= '<br> - Vulnerable to Criticals';
 		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
 		$this->enhancementOptionsDisabled[] = 'SLUGGISH';

@@ -4,7 +4,7 @@ class BrixadiiFreighter2110 extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 100;
+        $this->pointCost = 120;
         $this->faction = "Nexus Support Units";
         $this->phpclass = "BrixadiiFreighter2110";
         $this->imagePath = "img/ships/Nexus/brixadii_strategic_transport.png";

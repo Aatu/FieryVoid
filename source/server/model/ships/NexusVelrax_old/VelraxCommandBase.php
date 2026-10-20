@@ -53,7 +53,7 @@ class VelraxCommandBase extends SmallStarBaseFourSections{
 			$catapult = new Catapult(3, 6);
 			$catapult->startArc = 90;
 			$catapult->endArc = 270;
-			$this->addAftSystem($catapult);
+			$this->addFrontSystem($catapult);
 
 		$this->addAftSystem(new NexusHeavyLaserSpear(3, 6, 4, 90, 270));
 		$this->addAftSystem(new NexusRangedPlasmaWave(3, 7, 4, 90, 270));

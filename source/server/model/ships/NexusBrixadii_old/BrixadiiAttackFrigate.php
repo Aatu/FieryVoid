@@ -36,8 +36,8 @@ class BrixadiiAttackFrigate extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 7, 0, 3, 4));
         $this->addPrimarySystem(new Thruster(2, 7, 0, 3, 4));
       
-        $this->addFrontSystem(new Thruster(3, 8, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(3, 8, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 300, 360));
 		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 0, 60));
 		$this->addFrontSystem(new NexusParticleBolter(2, 6, 2, 300, 60));
