@@ -2,6 +2,8 @@ import * as React from "react";
 import styled from "styled-components"
 import SystemInfoButtons, { canDoAnything, hasStyledMenu } from "./SystemInfoButtons";
 import { Tooltip, TooltipHeader, TooltipEntry } from '../common'
+import besideWindow from '../helpers/besideWindow'
+import { setMenuTarget } from '../helpers/menuTarget'
 
 const InfoHeader = styled(TooltipHeader)`
     font-size: 12px;
@@ -46,16 +48,37 @@ const Header = styled.span`
 
 class SystemInfoMenu extends React.Component {
 
+    /* The lobby menu beside a ship window marks its system, whose icon is outlined while it is open
+       (helpers/menuTarget, user request 2026-10-16). */
+    componentDidMount() {
+        this.markTarget();
+    }
+
+    componentDidUpdate() {
+        this.markTarget();
+    }
+
+    componentWillUnmount() {
+        setMenuTarget(null, null);
+    }
+
+    markTarget() {
+        const { ship, system, avoidBox } = this.props;
+        const open = Boolean(avoidBox) && canDoAnything(ship, system);
+        setMenuTarget(open ? ship : null, open ? system : null);
+    }
+
     render() {
 
-        const { ship, system, boundingBox } = this.props;
+        const { ship, system, boundingBox, avoidBox } = this.props;
 
         if (!canDoAnything(ship, system)) {
             return null;
         }
 
         return (
-            <SystemInfoTooltip position={getPosition(boundingBox)} opacity={hasStyledMenu(ship, system) ? 0.95 : 0.8}
+            <SystemInfoTooltip position={besideWindow(boundingBox, avoidBox, viewWidth(), viewHeight()) || getPosition(boundingBox)}
+                opacity={hasStyledMenu(ship, system) ? 0.95 : 0.8}
                 $bare={gamedata.gamephase === -2}>
                 <SystemInfoButtons {...this.props} />
             </SystemInfoTooltip>
@@ -63,6 +86,15 @@ class SystemInfoMenu extends React.Component {
     }
 }
 
+/* The size of the box the menu's right/bottom offsets are measured from: the lobby mounts it in a fixed inset:0
+   overlay, whose edges are the viewport's WITHOUT its scrollbars. window.innerWidth includes a scrollbar, so with
+   the lobby page scrolling a menu set on the window's left fell a scrollbar's width (~17px) short of it
+   (user report 2026-10-16). */
+const viewWidth = () => document.documentElement.clientWidth || window.innerWidth;
+const viewHeight = () => document.documentElement.clientHeight || window.innerHeight;
+
+/* avoidBox: the ship window's rectangle, which the lobby passes so its menu opens beside the window rather
+   than over it (helpers/besideWindow); game.php passes none, and getPosition places it at the icon as before. */
 const getPosition = boundingBox => {
     const position = {};
 

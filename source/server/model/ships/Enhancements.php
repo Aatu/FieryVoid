@@ -1759,7 +1759,7 @@ class Enhancements{
 	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Targeting Computer';
 		  $enhLimit = 1;	
-		  $enhPrice = max(1,($flight->offensivebonus+1)*3);	  
+		  $enhPrice = max(1,($flight->offensivebonus)*2);	  
 		  $enhPriceStep = 0; //3; //limit is 1 but if anyone increases it - step is ready...or would be but the effect looks silly ;)
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
@@ -3782,7 +3782,50 @@ class Enhancements{
 			'ages'      => array(3),
 			'serialise' => array(),
 		),
+		/* ⭐ PLACED OFFICERS (OFFICERS_PLAN.md §4.11, Stage 8) - NOT refits. The player puts the officer in a
+		   weapon from that system's own menu, so he rides this track for its tables (tac_sys_enhancements,
+		   tac_saved_sysenh), D13's name check, saved-fleet re-validation and the D11 refund. Everything that
+		   makes him an officer - his label, price, faction rules, effects, out-of-action state and payload -
+		   lives in Officers.php, which resolves these rows into $ship->officers (pickPosts). One more slot:
+		     officer    true: no `apply` here (Officers::apply runs his effects, once it knows he serves), no ✦,
+		                not counted in "System Enhancements (n)" (the gold box's "Officers (n)" has him), and
+		                Officers::keepPlacedRows decides which rows a ship may keep (sanitisePlacedOfficers).
+		                The offer carries a 6th slot: how many one ship may carry (Officers::placedLimit).
+		   ⚠️ The label MUST equal Officers::getLabel's (officersHarness checks it): it is the stored enhname. */
+		'OFF_GUN' => array(
+			'label'     => 'Expert Gunner',
+			'eligible'  => 'sysEnhEligibleOfficerGUN',
+			'price'     => 'sysEnhPriceOfficerGUN',
+			'limit'     => 'sysEnhLimitOne',
+			'officer'   => true,
+			'ages'      => array(1, 2),
+			'serialise' => array(),
+		),
+		'OFF_MWEW' => array(
+			'label'     => 'Matter Weapons Expert',
+			'eligible'  => 'sysEnhEligibleOfficerMWEW',
+			'price'     => 'sysEnhPriceOfficerMWEW',
+			'limit'     => 'sysEnhLimitOne',
+			'officer'   => true,
+			'ages'      => array(1, 2),
+			'serialise' => array(),
+		),
+		//OFFICERS_PLAN.md Stage 15: the Expert Religious Leader in a primary non-weapon system other than his C&C
+		'OFF_RELIP' => array(
+			'label'     => 'Expert Religious Leader',
+			'eligible'  => 'sysEnhEligibleOfficerRELIP',
+			'price'     => 'sysEnhPriceOfficerRELIP',
+			'limit'     => 'sysEnhLimitOne',
+			'officer'   => true,
+			'ages'      => array(1, 2),
+			'serialise' => array(),
+		),
 	);
+
+	//a placed officer's row (Stage 8), not a refit: kept off the star and the summary count
+	public static function isSystemEnhancementOfficer($enhID){
+		return !empty(self::$systemEnhancementRegistry[$enhID]['officer']);
+	}
 
 	/* The registry, for anything that needs to read it (the JSON fixups, the client label map
 	   emitter, the tests). Returned by value - callers must not mutate it. */
@@ -3864,7 +3907,10 @@ class Enhancements{
 	}
 
 	/* The gate every one of the five sits behind (§4.3). Deliberately mirrors the client's
-	   isPseudoSystem in SystemInfoButtons.js - ⚠️ MIRROR PAIR, change both. */
+	   isPseudoSystem in SystemInfoButtons.js - ⚠️ MIRROR PAIR, change both.
+	   ONE intended divergence: the client exempts orbitalMounted systems so they can take
+	   pre-battle DAMAGE; this gate does not, so they get no enhancement offers (user ruling
+	   2026-10-18). Do not "re-sync" either side. */
 	public static function systemMayBeEnhanced($ship, $system){
 		if(!is_object($ship) || !is_object($system)) return false;
 		//D6 - hull age is still the primary gate, but it is now a PER-ENHANCEMENT question
@@ -3910,6 +3956,13 @@ class Enhancements{
 			$out[] = $enhID;
 		}
 		return $out;
+	}
+
+	/* Would this system be OFFERED this one enhancement? systemEnhancementsFor's question for a single id -
+	   Officers::pickPlacedPosts asks it of every bought officer row, so a doctored row buys nothing. */
+	public static function systemEnhancementOffered($ship, $system, $enhID){
+		if(!isset(self::$systemEnhancementRegistry[$enhID])) return false;
+		return in_array($enhID, self::systemEnhancementsFor($ship, $system), true);
 	}
 
 	/* THE pricing question (D4). $level is 0-BASED: the cost of buying the (level+1)th point.
@@ -3961,13 +4014,17 @@ class Enhancements{
 
 		foreach($ship->systems as $system){
 			foreach(self::systemEnhancementsFor($ship, $system) as $enhID){
-				$ship->systemEnhancementOffers[] = array(
+				$offer = array(
 					$enhID,
 					self::systemEnhancementLimit($ship, $system, $enhID),
 					self::systemEnhancementPrice($ship, $system, $enhID, 0),
 					self::systemEnhancementPriceStep($ship, $system, $enhID),
 					(int)$system->id,
 				);
+				/* A placed officer's offer adds how many ONE SHIP may carry (the Gunner's 1-4 by size) -
+				   systemEnhancements.set() refuses past it, so the lobby needs no copy of the rule. */
+				if(self::isSystemEnhancementOfficer($enhID)) $offer[] = Officers::placedLimit($ship, $enhID);
+				$ship->systemEnhancementOffers[] = $offer;
 				self::addSwapPreview($ship, $system, $enhID);
 			}
 		}
@@ -4480,6 +4537,37 @@ class Enhancements{
 		return 1;
 	}
 
+	/* ------------------------------------------------------------------ placed officers (Stage 8) */
+
+	/* "Any weapon Gunsights may be bought for" (user ruling 2026-10-16) - so a gun that rolls to hit, never a
+	   utility mount or a jump drive - and then Officers::mayHost: D9's unit test, his faction rules, and the
+	   Matter expert's Matter mode. */
+	private static function sysEnhEligibleOfficerGUN($ship, $system){
+		return self::sysEnhEligibleGSGT($ship, $system) && Officers::mayHost($ship, $system, 'OFF_GUN');
+	}
+
+	private static function sysEnhEligibleOfficerMWEW($ship, $system){
+		return self::sysEnhEligibleGSGT($ship, $system) && Officers::mayHost($ship, $system, 'OFF_MWEW');
+	}
+
+	//an officer's price is a share of the HULL (Officers::rowPrice), whichever weapon he sits in
+	private static function sysEnhPriceOfficerGUN($ship, $system, $level){
+		return Officers::rowPrice($ship, 'OFF_GUN');
+	}
+
+	private static function sysEnhPriceOfficerMWEW($ship, $system, $level){
+		return Officers::rowPrice($ship, 'OFF_MWEW');
+	}
+
+	//Stage 15: no Gunsights test in front - his posts are not weapons (Officers::mayHost, `nonWeapon`)
+	private static function sysEnhEligibleOfficerRELIP($ship, $system){
+		return Officers::mayHost($ship, $system, 'OFF_RELIP');
+	}
+
+	private static function sysEnhPriceOfficerRELIP($ship, $system, $level){
+		return Officers::rowPrice($ship, 'OFF_RELIP');
+	}
+
 	/* SYS_HSHLD and SYS_THR are both "output += level".
 	   ⚠️ ORDERING MATTERS for the shield and is already right: Shield::onConstructed derives
 	   tohitPenalty/damagePenalty from getOutput(), and setSystemEnhancements is called from
@@ -4522,6 +4610,7 @@ class Enhancements{
 		   see stripSystemEnhancementSummary(). */
 		$enhancedSystems = array();
 		foreach($ship->systemEnhancements as $row){
+			if(isset($row[0]) && self::isSystemEnhancementOfficer((string)$row[0])) continue; //a placed officer is no refit (Stage 8)
 			if(isset($row[2]) && (int)$row[2] > 0 && isset($row[6])) $enhancedSystems[(int)$row[6]] = true;
 		}
 		if(count($enhancedSystems) > 0){
@@ -4669,7 +4758,36 @@ class Enhancements{
 			);
 			$out['total'] += $total;
 		}
-		return self::sanitiseSystemEnhancementGroups($out);
+		return self::sanitisePlacedOfficers($ship, self::sanitiseSystemEnhancementGroups($out));
+	}
+
+	/* PLACED OFFICERS (Stage 8): a system hosts one, and no officer passes his ship cap - Officers::
+	   keepPlacedRows, THE rule the load defends with too. Run last, on rows that passed everything else, so a
+	   row that was going to be dropped anyway cannot crowd out a valid one. The lobby refuses the same
+	   purchases as they are made (systemEnhancements.set); this is the guarantee for a doctored or stale list.
+	   Refits pass straight through, in their original order. */
+	private static function sanitisePlacedOfficers($ship, $out){
+		$pairs = array();
+		foreach($out['rows'] as $i => $row){
+			if(self::isSystemEnhancementOfficer($row[0])) $pairs[$i] = array($row[0], (int)$row[6]);
+		}
+		if(empty($pairs)) return $out;
+		$kept = array_flip(Officers::keepPlacedRows($ship, $pairs));
+		$rows = array();
+		$out['total'] = 0;
+		foreach($out['rows'] as $i => $row){
+			if(isset($pairs[$i]) && !isset($kept[$i])){
+				$limit = Officers::placedLimit($ship, $row[0]);
+				$out['notices'][] = self::systemEnhancementLabel($row[0]) . " on {$row[7]} #{$row[6]} was removed: "
+					. "a system hosts one officer, and this ship may carry $limit " . self::systemEnhancementLabel($row[0])
+					. ($limit === 1 ? '' : 's') . '.';
+				continue;
+			}
+			$rows[] = $row;
+			$out['total'] += $row[4];
+		}
+		$out['rows'] = $rows;
+		return $out;
 	}
 
 	/* MUTUAL EXCLUSION (KIRISHIAC_ORBITAL_REFITS_PLAN.md §9.2): per (system, group) only the rows of

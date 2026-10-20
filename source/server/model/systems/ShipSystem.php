@@ -109,6 +109,22 @@ class ShipSystem {
         $this->survivesStructureDestruction = (bool)$survives;
     }
 
+    /* Carried by a Kirishiac Orbital (its weapon, Self Repair or refit module) - set by the orbital's
+       wiring. Such a system is isTargetable = false by RULE (no called shots on orbital systems) but is
+       still a real box, and the lobby's pre-battle damage pseudo-system test reads this to tell it from
+       an ability (RammingAttack and friends). PROTECTED for the reason given on
+       $survivesStructureDestruction above; reaches the static blueprint only, via
+       ShipCompactor::annotateSystems. */
+    protected $orbitalMounted = false;
+
+    public function getOrbitalMounted(){
+        return $this->orbitalMounted;
+    }
+
+    public function setOrbitalMounted($mounted = true){
+        $this->orbitalMounted = (bool)$mounted;
+    }
+
     /* The critical classes this system's hit chart can produce, flattened and deduped.
        $possibleCriticals stays PROTECTED - only the derived list is exposed, and only for
        the lobby's pre-battle crit picker (systemCriticals.php -> Manager::getSystemCriticals).
@@ -662,6 +678,7 @@ public function setParentFighter($fighter) {
 		        	if ($enhID == 'MARK_FERV') $rollMod += $enhCount; //Markab Fervor causes defenders to fight harder.
 				}
 		}
+		$rollMod += Officers::boardingShift($ship); //An Expert Security Officer moves every boarding roll 2 in the defender's favour.
 		
 		//Capture Ship missions chances of getting 'caught' doesn't increase every two turns, they are in open battle from the start!
 		if(!($critical->phpclass == "CaptureShip" || $critical->phpclass == "CaptureShipElite") && $critical->turn <= $gamedata->turn){
@@ -1008,6 +1025,7 @@ public function setParentFighter($fighter) {
 				if ($enhID == 'MARK_FERV') $defenderRollMod -= $enhCount;
 			}
 		}
+		$defenderRollMod -= Officers::boardingShift($ship); //An Expert Security Officer helps his own defenders too (lower is better for them).
 
 		$defenderHits = 0;
 		for ($i = 0; $i < $currentMarines; $i++) {
@@ -1809,6 +1827,8 @@ public function setParentFighter($fighter) {
 			$effectiveDamage = $effectOfProtection['dmg'];
 			$effectiveArmor = $effectOfProtection['armor'];
 		}
+		//OFFICERS_PLAN.md Stage 5: the Expert Scavenger's once-per-game save - the last resort, on what any protector left
+		if(TacGamedata::$officersPresent) $effectiveDamage = Officers::scavengerSave($target, $this, $gamedata, $effectiveDamage, $effectiveArmor);
 		
 		
 		//if damage is more than system has structure left - mark rest as overkilling

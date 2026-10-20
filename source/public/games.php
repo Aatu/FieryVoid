@@ -156,7 +156,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates</h3>
       <ul class="updates-list">
         <!--<li style="--update-colour: #e05b52;"><span class="update-title">Merry Christmas from Fiery Void!</span></li>-->
-        <li><span class="update-title">Officers</span>A selection of Officers can now be bought to enhance your units, see FAQ for more info.</li>   
+        <li><span class="update-title">Officers</span>A selection of Officers can now be bought to enhance your units, see 'Ship Options' for more info.</li>   
         <li><span class="update-title">Ancient Updates</span>Kirishiac and Triad factions have received additional options and abilities.</li>                
         <li><span class="update-title">Create Game/Fleet Selection Redesign</span>Improvements to UI and features in Create Game and Fleet Selections screens.</li>        
         <li><span class="update-title">Saved Orders</span>Halfway through a big phase and need to stop? The floppy-disk button beside the green Commit tick saves your orders so you can come back later.</li>         

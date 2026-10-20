@@ -39,6 +39,13 @@ window.gameOptions = (function () {
             title: "Replay sound effects. When off, every replay starts muted - the speaker button on the map still turns them on for that replay",
             def: true,
             onChange: applySoundEffects
+        },
+        {
+            key: "hideMapBackground",
+            label: "Never show map background",
+            title: "Every game opens with the background image switched off, as the Disable Background button on the map does - that button still turns it back on for the session",
+            def: false,
+            onChange: applyMapBackground
         }
     ];
 
@@ -105,6 +112,17 @@ window.gameOptions = (function () {
         if (!window.gamedata) return;
         gamedata.playAudio = value;
         window.dispatchEvent(new CustomEvent("soundToggled"));
+    }
+
+    /* The same switch the Disable Background button in the map's EW strip throws. That
+       button owns #background and the image it restores, so this asks IT to set the state
+       rather than touching the element - otherwise the button would not light up.
+
+       Like the sound option, the button stays a per-session override and does NOT write
+       back here. EwButtons applies the standing preference itself when it mounts, which is
+       later than anything in this file runs, so there is no load-time call to make here. */
+    function applyMapBackground(value) {
+        window.dispatchEvent(new CustomEvent("BackgroundPreferenceChanged", { detail: { off: value } }));
     }
 
     return {

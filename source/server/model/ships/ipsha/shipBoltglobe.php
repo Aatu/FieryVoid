@@ -3,7 +3,7 @@ class ShipBoltglobe extends HeavyCombatVesselLeftRight{ //technically a Capital 
 	/*Variants-5; by fluff this ship has serious problems due to being overburdened and overpowered and overall unstable*/
     /*Ipsha general:
      - remember about EM hardening!
-     - instead of -2 bonus to dropout/crit when caused by Ion weapon, just add -1 overall crit/dropout bonus
+     - EM hardening follows the tabletop rules (WeaponEM, specialWeapons.php) - the old -1 overall crit/dropout stand-in is gone (2026-10-18)
      - remind player of the above in comments in fleet selection phase!
      - Singularity Drive replaced by standard engine
      - add Sensor power demand to Reactor output (it's considered 'baseline' for tabletop!)
@@ -29,7 +29,7 @@ class ShipBoltglobe extends HeavyCombatVesselLeftRight{ //technically a Capital 
 	$this->notes .= '<br>EM hardened';	  
 	//$this->notes .= '<br>+3 critical roll penalty';
 	$this->EMHardened = true; //EM Hardening - some weapons would check for this value!
-	$this->critRollMod = -1+4; //generalbonus to critical rolls!
+	$this->critRollMod = 4; //critical roll penalty (was -1+4: the -1 was FV's old stand-in for EM hardening, replaced by the tabletop rules (WeaponEM, OFFICERS_PLAN.md §9.22, 2026-10-18))
 	    //this ship has some serious problems by fluff - I try to show this by ading serious shipwide vulnerability to criticals
 	    //so +4 to criticals (on top of usual Ipsha -1 , giving +3 total :) )
 		

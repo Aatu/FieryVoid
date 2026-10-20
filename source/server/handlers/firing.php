@@ -1477,6 +1477,8 @@ class Firing
         $target = $gd->getShipById($fire->targetid);
         $interceptingShip = $weapon->getUnit();
         $firingweapon = $shooter->getSystemById($fire->weaponid);	
+
+        if ($target instanceof Terrain) return false; //Prevents freeIntercept later against Terrain shots.     
         
         if($interceptingShip instanceof Mine){
             if(!$interceptingShip->getCommandControl()){

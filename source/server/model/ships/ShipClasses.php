@@ -179,13 +179,25 @@ class BaseShip {
 
 	/* OFFICERS_PLAN.md - the officers aboard, as Officers keeps them: array('id', 'post', 'out',
 	   'how') each. Rebuilt at every load by Officers::pickPosts / ::apply; only Officers writes it.
-	   $officerKills is officer id => turn, read off the OffKilled notes by DBManager's note loop, and
-	   $officerMoves likewise off the OffMoved notes (a fighter officer who left this row with his fighter).
+	   $officerKills is a list of array('id', 'turn', 'post'), read off the OffKilled notes by DBManager's
+	   note loop - the post is the note's system, so with several Gunners aboard only the one posted there
+	   dies (Stage 10; post null = any post, the shape a test may write). $officerMoves is a list of
+	   array('id', 'turn', 'post') off the OffMoved notes (a fighter officer who left this row with his
+	   fighter - the post is his craft, so of several Expert Pilots only his has gone, Stage 18), and
+	   $officerSaves is officer id => turn off the OffSaved notes (the Expert Scavenger's once-per-game save, spent).
+	   Stage 10: $officerTransfers lists the OffTransfer notes (array('id', 'from', 'to', 'turn', 'seq') - an
+	   officer moved to another post) and $officerUses the OffUsed notes (array('id', 'post', 'ability',
+	   'turn') - an Expert Gunner's once-per-battle ability spent); $officerTransferClaims is what a POST of
+	   Initial Orders asked for (InitialOrdersGamePhase::process checks it against the loaded ship).
 	   All PROTECTED for $crewQuality's reason: a public empty default would put a dead key on every
 	   static blueprint. */
 	protected $officers = array();
 	protected $officerKills = array();
 	protected $officerMoves = array();
+	protected $officerSaves = array();
+	protected $officerTransfers = array();
+	protected $officerUses = array();
+	protected $officerTransferClaims = array();
 
 	
 	public $halfPhaseThrust = 0; //needed for half phasing; equal to thrust from two BioThrusters on a given ship; 0 for ships that cannot half phase, eg. vast majority
@@ -512,7 +524,13 @@ class BaseShip {
         $scatter = JumpEngine::getArrivalScatter($this, $gamedata);
         if ($scatter === null) return 0;
 
-        return -5 * (int)$scatter['hexes'] - 10 * abs((int)$scatter['facingSteps']);
+        $penalty = -5 * (int)$scatter['hexes'] - 10 * abs((int)$scatter['facingSteps']);
+        /* OFFICERS_PLAN.md Stage 7 - "any initiative penalty produced by scatter is reduced by 20 for his unit
+           only. Note that this is not an initiative bonus": this unit's OWN Expert Jump Officer, capped at 0. */
+        if ($penalty < 0 && TacGamedata::$officersPresent){
+            $penalty = min(0, $penalty + Officers::arrivalPenaltyRelief($this, $gamedata->turn));
+        }
+        return $penalty;
     }
     
 
@@ -1869,26 +1887,63 @@ class BaseShip {
 		return $this->officerKills;
 	}
 
-	//one OffKilled note: the earliest turn wins if one were ever written twice
-	public function recordOfficerKill($officerId, $turn){
-		$officerId = (string)$officerId;
-		$turn = (int)$turn;
-		if (!isset($this->officerKills[$officerId]) || $turn < $this->officerKills[$officerId]){
-			$this->officerKills[$officerId] = $turn;
-		}
+	/* one OffKilled note, on the post he died at (null: wherever he is - a test's shorthand). A note written
+	   twice simply lists twice: Officers::apply takes the earliest turn that matches him. */
+	public function recordOfficerKill($officerId, $turn, $post = null){
+		$this->officerKills[] = array('id' => (string)$officerId, 'turn' => (int)$turn, 'post' => ($post === null) ? null : (int)$post);
 	}
 
 	public function getOfficerMoves(){
 		return $this->officerMoves;
 	}
 
-	//one OffMoved note (Officers::followFighter): the earliest turn wins, as for a kill
-	public function recordOfficerMove($officerId, $turn){
+	/* one OffMoved note (Officers::followFighter), on the post he left (null: wherever he is - a test's shorthand). A note
+	   written twice simply lists twice: Officers::apply takes the earliest turn that matches him, as for a kill. */
+	public function recordOfficerMove($officerId, $turn, $post = null){
+		$this->officerMoves[] = array('id' => (string)$officerId, 'turn' => (int)$turn, 'post' => ($post === null) ? null : (int)$post);
+	}
+
+	public function getOfficerSaves(){
+		return $this->officerSaves;
+	}
+
+	//one OffSaved note (Officers::scavengerSave), or the save just spent in this request: the earliest turn wins
+	public function recordOfficerSave($officerId, $turn){
 		$officerId = (string)$officerId;
 		$turn = (int)$turn;
-		if (!isset($this->officerMoves[$officerId]) || $turn < $this->officerMoves[$officerId]){
-			$this->officerMoves[$officerId] = $turn;
+		if (!isset($this->officerSaves[$officerId]) || $turn < $this->officerSaves[$officerId]){
+			$this->officerSaves[$officerId] = $turn;
 		}
+	}
+
+	public function getOfficerTransfers(){
+		return $this->officerTransfers;
+	}
+
+	/* one OffTransfer note (Stage 10): the officer serving as $officerId at $from on $turn was ordered to $to.
+	   Officers::resolveTransfers replays them in turn order and drops any the rules refuse. $seq orders two
+	   notes of one turn (the note id). */
+	public function recordOfficerTransfer($officerId, $from, $to, $turn, $seq = 0){
+		$this->officerTransfers[] = array('id' => (string)$officerId, 'from' => (int)$from, 'to' => (int)$to,
+			'turn' => (int)$turn, 'seq' => (int)$seq);
+	}
+
+	public function getOfficerUses(){
+		return $this->officerUses;
+	}
+
+	//one OffUsed note (Stage 10), or an ability spent in this request: the officer at $post on $turn spent $ability
+	public function recordOfficerUse($officerId, $post, $ability, $turn){
+		$this->officerUses[] = array('id' => (string)$officerId, 'post' => (int)$post, 'ability' => (string)$ability, 'turn' => (int)$turn);
+	}
+
+	public function getOfficerTransferClaims(){
+		return $this->officerTransferClaims;
+	}
+
+	//what a POST of Initial Orders asks for (Manager::getShipsFromJSON) - RAW, a claim; nothing trusts it unchecked
+	public function setOfficerTransferClaims($claims){
+		$this->officerTransferClaims = is_array($claims) ? $claims : array();
 	}
 
     public function getSpecialAbilitySystem($ability)

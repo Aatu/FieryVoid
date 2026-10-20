@@ -646,6 +646,7 @@ class GromeFlakCannon extends Weapon{
 			$distance = mathlib::getDistanceHex($interceptingShip, $target);
 			if ($distance > 5) return false;//target must be within 5 hexes			
 			if ($firingWeapon->uninterceptable) return false; //Cannot free intercept lasers etc.  Only matters for first shot.
+            if ($target instanceof Terrain) return false;
 								
 			//both source and target of fire must be in arc
 			//first check target

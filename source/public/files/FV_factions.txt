@@ -245,8 +245,7 @@ Gravitic Drive - see Brakiri.
 Mag-Gravitic Reactor - Ipsha power source has fixed power output, rather than default relative (eg. "Power rating of 40" rather than "enough to enable all systems on ship"). This implies that destruction of systems does NOT cut into power produced (Reactor outpus stays the same) - so even though Power is usually negative for a fresh ship (eg. can't power everything), number of possible enabled systems does NOT go down with damage.
 Singularity Engine - Ipsha drive system is closely tied to Mag-Gravitic Reactor, which produces some quirks (notably Engine destructions destroyes the ship outright). This is not implemented in FV.
 EM Hardened - Ipsha units are especially resistant to Electromagnetic damage. This is cumulative with dropout bonus their fighters possess. 
-	Tabletop: Critical/drouputrolls caused by EM weapons are made with -2 bonus. In addition, this trait reduces effects of many EM weapons.
-	Fiery Void: ALL critical/dropout rolls are made with -1 bonus. In addition, EM weapons treat EM Hardened units as they would ones with Advanced Armor.
+	Tabletop and Fiery Void (the tabletop rules since 2026-10): a system hit by an EM weapon makes its critical/dropout roll at -2 that turn (once, however many EM hits). A fighter forced to drop out by an EM weapon ignores it on a d6 of 1-2. A system forced offline by an EM weapon resists on a d6 of 1. An EM weapon reducing power takes 1 point less. Damage is always suffered normally, and other EM effects apply normally.
 Easy pivot - Ipsha ships have generally low pivot cost (even 0). Pivot-related penalties they suffer just like everyone else.
 Cooldown - all Ipsha weapons have recharge rate of 1 (eg. can fire immediately after being powered up). However, they usually do require a cooldown period (eg. forced shutdown) after firing.
 	Coupled with limited power available, this means Ipsha usually power up and fire some of their weapons, and while they are cooling down - rotate to bring freesh ones to bear.
@@ -479,7 +478,7 @@ STREIB COLLECTORS
 A faction that has only one officially released ship (Collector), it was expanded a bit in BabCom by Paul Brown to create a playable faction.
 Streib are notable for their extremely tough armor (without any special properties though) and extensive use of energy draining/dropout causing weapons. 
 Layout of their ships is atypical as well - highly asymmetrical, with many core systems placed on outer sections.
-Their design makes them a bit Ancient-like when it comes to balancing - they are very vulnerable in some situations and unbeatable in others. In particular they are essentially shut down if their opponent is resistant to Electromagnetic weapons (eg. Advanced Armor or EM Hardening).
+Their design makes them a bit Ancient-like when it comes to balancing - they are very vulnerable in some situations and unbeatable in others. In particular they are essentially shut down if their opponent is resistant to Electromagnetic weapons (eg. Advanced Armor), and blunted by EM Hardening.
 
 
 THIRDSPACE (Unofficial Faction)

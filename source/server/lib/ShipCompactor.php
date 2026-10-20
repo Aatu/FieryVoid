@@ -396,10 +396,13 @@ class ShipCompactor
      * $alwaysHideFireOrders / $hideFireOrdersFromEnemies in weapon.php. Reading it through an
      * accessor HERE keeps it to the static blueprint, which is the only consumer.
      *
-     * Only survivesStructureDestruction so far, and only written when TRUE: the gamelobby's
-     * pre-battle damage preview mirrors ShipSystem::isDestroyed's structure cascade itself
-     * (battleDamage.cascadeStructure), and a shield projection must not go dark there when
-     * its section's structure is destroyed.
+     * Both written only when TRUE:
+     *   - survivesStructureDestruction: the gamelobby's pre-battle damage preview mirrors
+     *     ShipSystem::isDestroyed's structure cascade itself (battleDamage.cascadeStructure),
+     *     and a shield projection must not go dark there when its section's structure is
+     *     destroyed.
+     *   - orbitalMounted: a Kirishiac Orbital's systems are isTargetable = false by rule, and
+     *     SystemInfoButtons.js isPseudoSystem needs this to keep them pre-damageable.
      *
      * Walks $decoded by the keys of $systems: json_encode preserves an array's keys, so the
      * two are the same shape all the way down, nested flight subsystems included.
@@ -414,6 +417,9 @@ class ShipCompactor
             if (method_exists($system, 'getSurvivesStructureDestruction')
                 && $system->getSurvivesStructureDestruction()) {
                 $decoded[$key]['survivesStructureDestruction'] = true;
+            }
+            if (method_exists($system, 'getOrbitalMounted') && $system->getOrbitalMounted()) {
+                $decoded[$key]['orbitalMounted'] = true;
             }
 
             if (!empty($system->systems) && !empty($decoded[$key]['systems'])) {

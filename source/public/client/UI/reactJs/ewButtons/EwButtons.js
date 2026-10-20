@@ -33,6 +33,8 @@ class EwButtons extends React.Component {
         this.externalToggleSound = this.externalToggleSound.bind(this);
         this.toggleBackground = this.toggleBackground.bind(this);
         this.externalToggleBackground = this.externalToggleBackground.bind(this);
+        this.setBackground = this.setBackground.bind(this);
+        this.externalSetBackground = this.externalSetBackground.bind(this);
     }
 
     getReplayMode() {
@@ -43,7 +45,15 @@ class EwButtons extends React.Component {
         window.addEventListener("LoSToggled", this.externalToggleLoS);
         window.addEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
         window.addEventListener("BackgroundToggled", this.externalToggleBackground);
+        window.addEventListener("BackgroundPreferenceChanged", this.externalSetBackground);
         window.addEventListener("soundToggled", this.externalToggleSound);
+
+        // OPTIONS tab -> "Never show map background": the standing preference, applied once
+        // here. Clicking the button afterwards is a per-session override and is not saved.
+        if (window.gameOptions && gameOptions.get("hideMapBackground")) {
+            this.setBackground(true);
+        }
+
         // 👇 periodically check for replay mode change
         this.replayCheck = setInterval(() => {
             const replayValue = this.getReplayMode();
@@ -57,6 +67,7 @@ class EwButtons extends React.Component {
         window.removeEventListener("LoSToggled", this.externalToggleLoS);
         window.removeEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
         window.removeEventListener("BackgroundToggled", this.externalToggleBackground);
+        window.removeEventListener("BackgroundPreferenceChanged", this.externalSetBackground);
         window.removeEventListener("soundToggled", this.externalToggleSound);
         clearInterval(this.replayCheck);
     }
@@ -77,6 +88,10 @@ class EwButtons extends React.Component {
 
     externalToggleBackground() {
         this.toggleBackground();
+    }
+
+    externalSetBackground(event) {
+        this.setBackground(!!(event.detail && event.detail.off));
     }
 
     showFriendlyEW(up) {
@@ -127,13 +142,18 @@ class EwButtons extends React.Component {
     }
 
     toggleBackground() {
-        const bodyBg = document.getElementById("background");
-        if (!bodyBg) return;
+        this.setBackground(!this.state.bgToggled);
+    }
 
-        const newValue = !this.state.bgToggled;
+    // `off` true = background disabled (button lit). Setting the state it is already in is
+    // a no-op, so the OPTIONS checkbox can ask for either state without knowing the current one.
+    setBackground(off) {
+        const bodyBg = document.getElementById("background");
+        if (!bodyBg || off === this.state.bgToggled) return;
+
         let originalImage = this.state.originalBgImage;
 
-        if (newValue) {
+        if (off) {
             // Turning ON the feature (background off - plain black)
             if (!originalImage) {
                 originalImage = bodyBg.style.backgroundImage;
@@ -146,7 +166,7 @@ class EwButtons extends React.Component {
             bodyBg.style.backgroundColor = '';
         }
 
-        this.setState({ bgToggled: newValue, originalBgImage: originalImage });
+        this.setState({ bgToggled: off, originalBgImage: originalImage });
     }
 
     render() {

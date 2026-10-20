@@ -7,6 +7,24 @@ import SystemIcon, { OfficerInsignia } from "../system/SystemIcon"
 //hover tooltip in the lobby only (still wanted in game.php).
 const isLobby = () => Boolean(window.gamedata) && window.gamedata.gamephase === -2;
 
+//A craft that LEFT through hyperspace (Mapmaker probes' own drive, or a jump point) is taken off the
+//board by a HyperspaceJump damage entry, so it reads destroyed like a lost one. The per-craft half of
+//shipManager.hasJumpedNotDestroyed: it carries a jump entry, and the damage that is NOT jump damage
+//had not already killed it.
+const hasJumpedOut = (fighter) => {
+    let jumped = false;
+    let nonJump = 0;
+    for (const i in fighter.damage) {
+        const entry = fighter.damage[i];
+        if (entry.damageclass === 'HyperspaceJump') {
+            jumped = true;
+            continue;
+        }
+        nonJump += Math.max(0, entry.damage - entry.armour);
+    }
+    return jumped && nonJump < fighter.maxhealth;
+};
+
 
 /* Outer card frame: holds the border + dimensions but does NOT apply the
  * destroyed fade. The fade is applied on the inner FadedContent so the
@@ -295,7 +313,7 @@ class FighterIcon extends React.Component {
         //structure-box destroyed) — STILL ALIVE and fighting, but can never land.
         const cutOff = shipManager.criticals.isCutOffFighter(fighter);
 
-        //State-label precedence: DOCKED > LAUNCHED > DROPOUT > DESTROYED for a fighter
+        //State-label precedence: DOCKED > LAUNCHED > DROPOUT > JUMPED > DESTROYED for a fighter
         //that has LEFT the flight (all flagged destroyed server-side). CUT OFF is
         //different — the fighter is alive — so it renders on a LIVING fighter (and is
         //superseded by the destroyed labels if it later dies and leaves).
@@ -306,6 +324,8 @@ class FighterIcon extends React.Component {
             if (docked)          overlay = <OverlayLabel $color="#00b8e6">DOCKED</OverlayLabel>;
             else if (launched)   overlay = <OverlayLabel $color="#00b8e6">SPLIT</OverlayLabel>;
             else if (droppedOut) overlay = <OverlayLabel $color="#ff8c00">DROPOUT</OverlayLabel>;
+            //the fleet list's "Jumped" orange (logPanel.css .fleetlistentry .jumped)
+            else if (hasJumpedOut(fighter)) overlay = <OverlayLabel $color="#cc8500">JUMPED</OverlayLabel>;
             else                 overlay = <OverlayLabel $color="#ff5252">DESTROYED</OverlayLabel>;
         } else if (cutOff) {
             //Living integrated fighter severed from its carrier — can fight, can't land.
