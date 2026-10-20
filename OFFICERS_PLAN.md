@@ -2845,3 +2845,64 @@ at most 3 craft), 2 on 57 (Raiders by the faction rule, and flights of at most 2
 4. Not play-tested: no local game holds a pilot flight. Worth a test: buy 2 pilots on a flight of 6 (57 each, "Expert Pilot (2)"),
    drop the size to 1 (one left), back to 6; in game, OB +10, jink to the limit + 2 with the first two levels free; then a turn
    without jinking or firing inside an Ipsha Spark Field (2 less on each fighter).
+
+### 9.25 Expert Evader made an Evade order; Expert Dogfighter wins ties (2026-10-20)
+
+**User request, 2026-10-20** (replacing §9.6's "Evader: always on"): "Expert Evader should be a movement ability used in Firing Phase,
+like a Combat Pivot. Use the Jink icon for Movement UI (but without the + and - buttons), movement tooltip reads 'Evade' for the icon
+and it's hidden after being clicked (cancelled in the usual way for cancelling movement orders, the red cancel button). OB reduced in
+client after Evade icon clicked. Effects of Evader applied on the server the same as they are now when an 'Evade' movement order is
+present. Otherwise Evader does not apply any effects." And: "Expert Dogfighter should also break Initiative ties in the same way as
+Expert Helmsman does for ships (in addition to the Initiative bonus it already has)."
+
+**Built with defaults, stated here (ask before changing):**
+- Evade sits behind the combat pivot's gate, `weaponManager.canCombatTurn`: only before the flight declares direct fire. That also
+  keeps the shown hit chances current - no declared shot was priced at the old OB.
+- No thrust, once a turn; Cancel takes it back (the red button, as for a combat pivot), after which it can be given again.
+- "That turn" = the turn the row is dated: the -1 OB and -1 damage apply to everything resolved on it, so fire resolved in the
+  Firing phase. Shots resolved BEFORE the order exists (Pre-Firing, movement-phase hazards) see no Evade.
+- Hidden from the opponent until the Firing phase resolves, as combat pivots are: the row AND its -1 OB.
+- A Dogfighter's flight tied with a Helmsman's ship: both "win", so the ordinary tie-break (bonus, then id) settles it.
+
+**Design.**
+- The order is a movement row, type `evade` (value 0, no thrust), made by `shipManager.movement.doEvade`, offered by `canEvade`
+  (Firing phase, a serving Evader - `officers.canEvade` ↔ `Officers::mayEvade` - not yet given this turn, on the board, not attached,
+  `canCombatTurn`). `isFiringPhaseMove` (a combat pivot or an Evade) replaced the combat-pivot-only tests in
+  `hasDeletableMovements`, `deleteMove` and both Saved Orders phase-3 sites. FireGamePhase::process already submits a flight's
+  phase-3 movement; `Movement::validateMovement` now keeps one `evade` row a turn for a flight whose Evader serves, asked of the
+  authoritative load (the POST-side ship carries no officers: it is rebuilt from the client's JSON).
+- Server effects: `Movement::hasEvaded($ship, $turn)`; `applyEvader` takes the OB only on such a turn (movement rows are loaded
+  before `Officers::apply`); `evaderDamageReduction($flight, $turn)` gets getDamageMod's turn. The registry's `publish` of
+  `offensivebonus` stays (the owner's preview reads the published figure).
+- Client OB: `officers.pendingEvadeOb` = 1 while an Evade row is still the client's own (id -1); a sent row has its real id and the
+  server's OB already carries it. Read by `displayStat` (ShipInfo, SystemInfo, the ship window rail) and `computeOEW`'s
+  `effectiveOB` (the live hit chance). DERIVED, never written into `ship.offensivebonus`, so Cancel, Saved Orders and a reload
+  cannot double-count it. The registry entry lost its `stats: { offensivebonus: -1 }`: the lobby shows the full OB now.
+- Masking: `TacGamedata::hideEnemyCombatPivots` strips an enemy flight's `evade` row with its pivots and gives its OB back
+  (`Officers::hideEvadeOb`).
+- UI: `#evade` in game.php (`data-movement-type="Evade"`), drawn astern with the jink art (no value, no +/-) in the slot after the
+  jink stack, Cancel behind it; `ShipMovementCallbacks.evadeCallback` (also removes the hover label, since the icon hides under the
+  pointer). `FirePhaseStrategy.setSelectedShip` draws the movement UI for a flight that can Evade or has.
+- Dogfighter: `Officers::winsInitiativeTies` = Helmsman OR Dogfighter. No client twin needed (§9.2: the client never sees a tie).
+- Docs: the Evader card (how to Evade, effects that turn) and the Dogfighter card (+ the tie line); the Helmsman card's tie line
+  now names both. officers.js summaries updated ("+5 initiative, wins ties"; "Evade in the Firing phase: ...").
+
+**Verified.**
+- `officersHarness.php` **1212 / 0**: no Evade = no effect; Evade this turn = -1 OB and +1 getDamageMod, another turn's = nothing;
+  gate off; an Evade row with no Evader; a lost Evader with a row; Spark Field 5 with an Evade, 6 without; the payload's -1 with an
+  Evade; the REAL `hideEnemyCombatPivots` hiding row and -1 from the enemy, keeping both for the owner; the REAL `sortShips`: a
+  Dogfighter beats a higher bonus in either order, Helmsman vs Dogfighter settled by the bonus, a lost Dogfighter wins nothing.
+- `officersClientHarness.js` **451 / 0**: the REAL movement.js `canEvade` / `doEvade` / `deleteMove` / `isFiringPhaseMove` (the row's
+  shape, OB 7 -> 6 -> 7 through Cancel, a sent row not taken twice, last turn's row, the fire gate, no / lost / enemy Evader,
+  Movement phase); lobby Evader OB unchanged (35 shown). **456** after the play-test fix below.
+- **Play test, game 4494 (user, same day): the Evade icon showed but a click did nothing.** `UI.shipMovement.evadeCallback` had
+  never been written (one edit of the build was lost) and the binding was in twice, so jQuery bound `undefined`. Fixed. The client
+  harness now drives the CLICK through the REAL `UI/shipMovement.js` and `ShipMovementCallbacks.js` (fake jQuery): one click handler,
+  the row made, the icon gone and Cancel shown on the redraw, every `.on()` handler in shipMovement.js defined. Mutation-checked: with
+  the handler removed, 4 FAILs.
+- `enhancementsDifferential.js` **698 / 0**; `enhancementsHarness` **280 / 0** (fingerprint unchanged). Bundles rebuilt (`fvbuild -Client`).
+- Replay: **153 / 2** - games **4467** and **4475** FAIL as intended: each holds an Evader flight that (necessarily) never Evaded, so
+  its OB is 1 higher (4475's recomputed to-hit 100 -> 105). NOT re-recorded, pending the user's OK. 4488 SKIP as before.
+  `fvbuild -Check` stops earlier on a NEW ship-data validator error not from this work: KobolRanger's hit chart names a "Jump
+  Drive" on location 0 that it does not have.
+- Not play-tested in a browser.

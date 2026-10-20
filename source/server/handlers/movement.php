@@ -37,15 +37,26 @@
                 if (!($ship instanceof FighterFlight))
                     $ship->movement = array();
 
+                /* An Expert Evader's Evade (OFFICERS_PLAN.md, user request 2026-10-20): one row a turn, and only
+                   for a flight whose Evader serves - asked of the authoritative load, since this POST-side ship
+                   carries no officers. */
+                $loaded = $gamedata->getShipById($ship->id);
+                $mayEvade = ($ship instanceof FighterFlight) && TacGamedata::$officersPresent
+                    && Officers::mayEvade($loaded) && !self::hasEvaded($loaded, $gamedata->turn);
+                $evadeKept = false;
+
                 for ($i=count($ship->movement)-1;$i>=0;$i--){
                     $move = $ship->movement[$i];
 
-                    if (($move->type != "pivotright" && $move->type != "pivotleft" )
+                    $isEvade = ($move->type == "evade");
+                    if (($move->type != "pivotright" && $move->type != "pivotleft" && !$isEvade)
 						||( $move->turn != $gamedata->turn )
-						||(!self::checkIsNewMove($gamedata, $ship, $move))){
+						||(!self::checkIsNewMove($gamedata, $ship, $move))
+						||($isEvade && (!$mayEvade || $evadeKept))){
                         unset($ship->movement[$i]);
-
+                        continue;
                     }
+                    if ($isEvade) $evadeKept = true;
 
                 }
 
@@ -1228,7 +1239,17 @@
             }
            
             return $pivots;
-		}        
+		}
+
+		/* Did the flight order an Expert Evader's Evade this turn - the Firing phase's 'evade' row (client movement.js
+		   doEvade). Officers::applyEvader and evaderDamageReduction ask it. */
+		public static function hasEvaded($ship, $turn){
+			if (!$ship || !is_array($ship->movement)) return false;
+			foreach ($ship->movement as $move){
+				if ($move->type == "evade" && $move->turn == $turn) return true;
+			}
+			return false;
+		}
 
 		/* How far this turn's combat pivots turned the flight, in hex sides, rights against lefts: right-left-right
 		   is 1, three to one side 3 (180 degrees), four to one side 4. Every flight is agile, so each combat pivot

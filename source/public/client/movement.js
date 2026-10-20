@@ -242,7 +242,7 @@ shipManager.movement = {
             if (movement.turn != gamedata.turn) continue;
 
             if (gamedata.gamephase == 3) {
-                if (movement.value == "combatpivot" && (movement.type == "pivotleft" || movement.type == "pivotright")) {
+                if (shipManager.movement.isFiringPhaseMove(movement)) {
                     return true;
                 }
             } else {
@@ -277,7 +277,7 @@ shipManager.movement = {
         if (shipManager.movement.isLastMoveFinal(ship)) return; // Swept for mines - final (MINE_DETECTION_PLAN.md D11)
 
         if (!movement.preturn && !movement.forced && movement.turn == gamedata.turn) {
-            if (gamedata.gamephase == 3 && (movement.value != "combatpivot" || movement.type != "pivotleft" && movement.type != "pivotright")) return;
+            if (gamedata.gamephase == 3 && !shipManager.movement.isFiringPhaseMove(movement)) return;
 
             if (movement.type == "detach") {
                 ship.detached = false;
@@ -1462,6 +1462,65 @@ shipManager.movement = {
             }
         }
         return c;
+    },
+
+    /* The movement orders a flight may give in the Firing phase - a combat pivot, or an Expert Evader's Evade - and so the
+       only rows Cancel can take back there (hasDeletableMovements, deleteMove) and Saved Orders keeps (savedOrders.js). */
+    isFiringPhaseMove: function isFiringPhaseMove(move) {
+        if (!move) return false;
+        if (move.type == "evade") return true;
+        return move.value == "combatpivot" && (move.type == "pivotleft" || move.type == "pivotright");
+    },
+
+    /* EXPERT EVADER (OFFICERS_PLAN.md, user request 2026-10-20): Evade is a Firing-phase movement order, like a combat pivot
+       and under the same gate (weaponManager.canCombatTurn: before the flight declares direct fire). Once a turn, no thrust;
+       the icon hides once it is given, and Cancel takes it back. While it stands the flight's OB is 1 lower
+       (officers.pendingEvadeOb, then the server's Officers::applyEvader) and every hit on it does 1 less damage (server only).
+       ⚠️ The server keeps the row only for a flight whose Evader serves (Movement::validateMovement). */
+    hasEvaded: function hasEvaded(ship) {
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move && move.type == "evade" && move.turn == gamedata.turn) return true;
+        }
+        return false;
+    },
+
+    canEvade: function canEvade(ship) {
+        if (gamedata.gamephase != 3 || !ship.flight) return false;
+        if (!(window.officers && officers.canEvade(ship))) return false;
+        if (shipManager.movement.hasEvaded(ship)) return false;
+        if (shipManager.movement.hasJumpedOut(ship)) return false;
+        if (shipManager.isDestroyed(ship)) return false;
+        if (shipManager.getTurnDeployed(ship) > gamedata.turn) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!
+        return weaponManager.canCombatTurn(ship);
+    },
+
+    doEvade: function doEvade(ship) {
+        if (!shipManager.movement.canEvade(ship)) return false;
+        var lm = ship.movement[ship.movement.length - 1];
+        ship.movement[ship.movement.length] = {
+            id: -1,
+            type: "evade",
+            position: lm.position,
+            xOffset: lm.xOffset,
+            yOffset: lm.yOffset,
+            facing: lm.facing,
+            heading: lm.heading,
+            speed: lm.speed,
+            animating: false,
+            animated: true,
+            animationtics: 0,
+            requiredThrust: [0],
+            assignedThrust: [0],
+            commit: true,
+            preturn: false,
+            at_initiative: shipManager.getIniativeOrder(ship),
+            turn: gamedata.turn,
+            forced: false,
+            value: 0
+        };
+        return true;
     },
 
     /* What a flight's combat pivot (Firing phase) costs: 1.5 x its pivot cost, rounded up - halved, rounded up, by

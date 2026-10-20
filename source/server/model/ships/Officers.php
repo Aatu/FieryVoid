@@ -354,7 +354,8 @@ class Officers{
 		   carries him. No kill roll: a craft has no d20 critical roll, only the d10 dropout test (user
 		   rulings 2026-10-11). Priced off one craft, scaled by the flight's size (flightPrice). ⚠️ Saved
 		   fleets bought under the Stage 4 prices are re-priced on reload (legacyPrice). */
-		/* Expert Dogfighter: +5 initiative (FV units, QX1). 50% of a craft. */
+		/* Expert Dogfighter: +5 initiative (FV units, QX1), and wins initiative ties as the Helmsman does (user request
+		   2026-10-20, winsInitiativeTies). 50% of a craft. */
 		'OFF_DOG'  => array('label' => 'Expert Dogfighter', 'post' => 'craft', 'flight' => true, 'pct' => 50,
 			'apply' => 'applyDogfighter', 'publish' => array('iniativebonus')),
 		/* Expert Missileer: "+5 OB for missiles" = +1 OB (the +5 is FV's displayed %) on every ballistic
@@ -365,7 +366,9 @@ class Officers{
 		'OFF_MSL'  => array('label' => 'Expert Missileer', 'post' => 'craft', 'flight' => true, 'pct' => 50,
 			'perMissile' => 1, 'apply' => null, 'needs' => 'hasMissiles'),
 		/* Expert Evader: "-1 to hit with the flight's own weapons, -1 damage on all incoming fire",
-		   always on (user ruling 2026-10-11). -1 OB, which is what every fighter to-hit path reads on
+		   only on a turn the flight EVADES (user request 2026-10-20, replacing "always on"): an 'evade'
+		   movement row ordered in the Firing phase like a combat pivot (Movement::hasEvaded; client
+		   movement.js doEvade). -1 OB, which is what every fighter to-hit path reads on
 		   both ends (the client never reads a flight's toHitBonus), and +1 in FighterFlight::getDamageMod.
 		   100% of a craft - NOT per craft (user ruling 2026-10-15). */
 		'OFF_EVAD' => array('label' => 'Expert Evader', 'post' => 'craft', 'flight' => true, 'pct' => 100,
@@ -1295,9 +1298,11 @@ class Officers{
 		$ship->iniativebonus += 5;
 	}
 
-	//Expert Helmsman: "wins ties" - TacGamedata::sortShips, behind $officersPresent
+	/* Expert Helmsman and Expert Dogfighter (user request 2026-10-20): "wins ties" - TacGamedata::sortShips, behind
+	   $officersPresent. A Helmsman's ship and a Dogfighter's flight tied with each other both win, so the usual
+	   tie-break settles it. */
 	public static function winsInitiativeTies($ship){
-		return self::isActive($ship, 'OFF_HELM');
+		return self::isActive($ship, 'OFF_HELM') || self::isActive($ship, 'OFF_DOG');
 	}
 
 	//Expert Helmsman: -1 on the meteor impact chart's die - RammingAttack::resolveMeteors
@@ -2224,17 +2229,32 @@ class Officers{
 		return self::missilesPerCraft($ship) > 0;
 	}
 
-	/* Expert Evader, to hit: -1 OB, which every fighter to-hit path on both ends reads (and the
-	   published stat the shooter's own preview needs). */
+	/* Expert Evader, to hit: -1 OB on a turn the flight evades, which every fighter to-hit path on both
+	   ends reads (and the published stat the shooter's own preview needs). The movement rows are loaded
+	   before apply runs; the client takes the -1 off itself while its Evade row is still unsent
+	   (officers.pendingEvadeOb), and an enemy does not see it before the Firing phase resolves
+	   (hideEvadeOb). */
+	const EVADE_OB = 1;
 	private static function applyEvader($ship, $entry, $turn){
-		$ship->offensivebonus -= 1;
+		if (Movement::hasEvaded($ship, $turn)) $ship->offensivebonus -= self::EVADE_OB;
 	}
 
-	/* Expert Evader, damage: 1 point off every hit on the flight - FighterFlight::getDamageMod, the
-	   flight's defensive choke point (Weapon::getFinalDamage subtracts it), behind $officersPresent.
-	   No client mirror: no client damage preview exists. */
-	public static function evaderDamageReduction($flight){
-		return self::isActive($flight, 'OFF_EVAD') ? 1 : 0;
+	/* TacGamedata::hideEnemyCombatPivots has just taken an enemy flight's Evade row out of the payload: its OB
+	   goes back to what it was without one, so the published figure does not give the order away. */
+	public static function hideEvadeOb($flight){
+		if (self::isActive($flight, 'OFF_EVAD')) $flight->offensivebonus += self::EVADE_OB;
+	}
+
+	/* Expert Evader, damage: 1 point off every hit on the flight on a turn it evades -
+	   FighterFlight::getDamageMod, the flight's defensive choke point (Weapon::getFinalDamage subtracts
+	   it), behind $officersPresent. No client mirror: no client damage preview exists. */
+	public static function evaderDamageReduction($flight, $turn){
+		return (self::isActive($flight, 'OFF_EVAD', $turn) && Movement::hasEvaded($flight, $turn)) ? 1 : 0;
+	}
+
+	//Who may order an Evade - Movement::validateMovement, on the authoritative load (a POST-side ship has no officers)
+	public static function mayEvade($flight){
+		return ($flight instanceof FighterFlight) && self::isActive($flight, 'OFF_EVAD');
 	}
 
 	//Expert Motivator: -2 on dropout rolls, Fighter::testCritical's flight critRollMod (as EXP_MOTIV always was)

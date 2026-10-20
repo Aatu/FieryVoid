@@ -2083,7 +2083,8 @@ window.weaponManager = {
             var flightOew = Math.max(0, oew);
             //max(0) here, not only on the sum below: the server clamps $effectiveOB before it is
             //used, so a crit-suppressed bonus must not eat into the flight's own OEW.
-            var effectiveOB = Math.max(0, shooter.offensivebonus - OBcrit - (mdew * 2));
+            //minus an Expert Evader's Evade not yet sent (officers.pendingEvadeOb; the server applies a sent one)
+            var effectiveOB = Math.max(0, shooter.offensivebonus - (window.officers ? officers.pendingEvadeOb(shooter) : 0) - OBcrit - (mdew * 2));
 
             if (weapon.ballistic) {
                 //A ballistic's bonus is a CONDITIONAL GRANT, not a lock, and flight OEW plays no

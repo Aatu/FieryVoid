@@ -203,7 +203,9 @@ window.FirePhaseStrategy = function () {
     FirePhaseStrategy.prototype.setSelectedShip = function (ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
         //added extra check for combat pivots to allow cancelling these when flight has 0 thrust - DK 10.24
-        if (shipManager.movement.canPivot(ship) || (shipManager.movement.countCombatPivot(ship) > 0)) {
+        //...and an Expert Evader's Evade, to give or to cancel (OFFICERS_PLAN.md)
+        if (shipManager.movement.canPivot(ship) || (shipManager.movement.countCombatPivot(ship) > 0)
+            || shipManager.movement.canEvade(ship) || shipManager.movement.hasEvaded(ship)) {
             this.drawMovementUI(this.selectedShip);
         }
     };

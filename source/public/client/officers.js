@@ -91,11 +91,13 @@ window.officers = {
 		{ id: 'OFF_RELIP', label: 'Expert Religious Leader', placed: true, sameAs: 'OFF_RELI', movable: true, stats: { iniativebonus: 10 },
 			summary: '+10 initiative, +1 damage on every hit; once he is lost: +20 initiative, +1 sensors, +5% to be hit' },
 		{ id: 'OFF_DOG', label: 'Expert Dogfighter', post: 'craft', flight: true, stats: { iniativebonus: 5 },
-			summary: '+5 initiative' },
+			summary: '+5 initiative, wins ties' },
 		{ id: 'OFF_MSL', label: 'Expert Missileer', post: 'craft', flight: true, perMissile: 1, needs: 'missiles',
 			summary: '+5 offensive bonus for missiles' },
-		{ id: 'OFF_EVAD', label: 'Expert Evader', post: 'craft', flight: true, stats: { offensivebonus: -1 },
-			summary: '-5 offensive bonus, -1 damage to hits on this flight' },
+		/* No `stats`: his -1 OB is only on a turn the flight Evades (user request 2026-10-20) - the server's once the row is
+		   sent, pendingEvadeOb's until then. */
+		{ id: 'OFF_EVAD', label: 'Expert Evader', post: 'craft', flight: true,
+			summary: 'Evade in the Firing phase: that turn -5 offensive bonus, -1 damage to hits on this flight' },
 		{ id: 'EXP_MOTIV', label: 'Expert Motivator', post: 'craft', flight: true, stats: { critRollMod: -2 },
 			summary: '-2 on dropout rolls' },
 		{ id: 'OFF_COOR', label: 'Expert Coordinator', post: 'craft', flight: true,
@@ -1055,6 +1057,25 @@ window.officers = {
 		return shipManager.movement.getCombatPivotRotation(ship) < this.COMBAT_PIVOT_FULL;
 	},
 
+	/* Expert Evader (user request 2026-10-20): may this flight order an Evade - the Firing-phase movement order
+	   (movement.js canEvade / doEvade) without which he does nothing. Own team only, through his list.
+	   ⚠️ MIRROR PAIR with Officers::mayEvade (PHP). */
+	canEvade: function canEvade(ship) {
+		return !!(ship && ship.flight && this.isActive(ship, 'OFF_EVAD'));
+	},
+
+	/* ...and his -1 OB while the Evade row is still the client's own (id -1): once it has been sent, the server's
+	   load applies it (Officers::applyEvader) and the row comes back with its real id. Read by displayStat and the
+	   hit chance (weaponManager.computeOEW). A row that Cancel takes away takes the -1 with it. */
+	pendingEvadeOb: function pendingEvadeOb(ship) {
+		if (!this.canEvade(ship) || !window.gamedata) return 0;
+		for (var i in ship.movement) {
+			var move = ship.movement[i];
+			if (move && move.type === 'evade' && move.turn == gamedata.turn && move.id == -1) return 1;
+		}
+		return 0;
+	},
+
 	/* "Officers (2)" - the one line the ship window's gold Enhancements block shows for them (user request
 	   2026-10-11: a count, like "System Enhancements (n)", the detail living on each post's tooltip). Own
 	   team only, through listFor; null with none aboard.
@@ -1150,6 +1171,8 @@ window.officers = {
 			if (officer.stats && officer.stats[field]) value += officer.stats[field];
 			if (officer.adjust) value = this[officer.adjust](field, value);
 		}
+		//in game: an Expert Evader's Evade not yet sent (the server applied a sent one)
+		if (field === 'offensivebonus') value -= this.pendingEvadeOb(ship);
 		return value;
 	},
 

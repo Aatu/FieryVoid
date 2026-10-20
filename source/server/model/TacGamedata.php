@@ -2026,12 +2026,16 @@ class TacGamedata {
                 continue; //owner and teammates see their own pending pivots
             }
 
+            //...and an Expert Evader's Evade, the other Firing-phase movement order, with the -1 OB it brought (OFFICERS_PLAN.md)
+            $evaded = false;
             for ($i = sizeof($ship->movement) - 1; $i >= 0; $i--) {
                 $move = $ship->movement[$i];
-                if ($move->turn == $this->turn && $move->value == 'combatpivot') {
+                if ($move->turn == $this->turn && ($move->value == 'combatpivot' || $move->type == 'evade')) {
+                    if ($move->type == 'evade') $evaded = true;
                     unset($ship->movement[$i]);
                 }
             }
+            if ($evaded && self::$officersPresent) Officers::hideEvadeOb($ship);
 
             //Re-index so json_encode still emits an ARRAY - a transient move appended after
             //the pivot (e.g. the Augmenter's forced jink) would otherwise leave a key gap.

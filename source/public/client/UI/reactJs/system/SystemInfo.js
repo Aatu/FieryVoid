@@ -117,7 +117,7 @@ class SystemInfo extends React.Component {
         }
         var reactKey = 0; //needed for react so each line has unique key!
 
-        //an Expert Evader's -1 in the lobby, added as it is shown (officers.displayStat; in game the server applied it)
+        //an officer's OB as it is shown (officers.displayStat): an Expert Pilot's in the lobby, an Evade not yet sent in game
         let displayOffensiveBonus = window.officers ? officers.displayStat(ship, 'offensivebonus') : ship.offensivebonus;
         if (ship.flight && gamedata.areMinesPresent) {
 			if(ship.minesweeper){
