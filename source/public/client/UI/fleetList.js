@@ -213,6 +213,14 @@ function activeFlightValue(ship) {
     //path handle it rather than divide by zero.
     if (roster <= 0) return null;
 
+    //A flight that LEFT through hyperspace under its own power (Mapmaker probes) keeps the
+    //value it had when it went - FighterFlight::calculateCombatValue's first branch. The jump
+    //takes it off the board by destroying EVERY craft, so the count above reads 0; the server
+    //snapshotted the value before that ('jumped' note) and sends it as combatValue.
+    if (shipManager.hasJumpedNotDestroyed(ship) && ship.combatValue !== undefined) {
+        return { activeCraft: roster, combatValue: Number(ship.combatValue) };
+    }
+
     //Unrounded fraction; caller rounds once after multiplying by base.
     var effectiveCV = 100 * (cvAccum / roster);
     return { activeCraft: roster, combatValue: effectiveCV };

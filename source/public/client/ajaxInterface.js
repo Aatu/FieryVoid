@@ -1140,6 +1140,13 @@ window.ajaxInterface = {
                 //unit enhancements
                 newShip.enhancementOptions = ship.enhancementOptions;
 
+                //officers ordered to another post this turn (OFFICERS_PLAN.md Stage 10) - a claim the server checks;
+                //read only in Initial Orders, and sent only by a ship that has one
+                if (window.officers) {
+                    var officerTransfers = officers.transferClaims(ship);
+                    if (officerTransfers.length > 0) newShip.officerTransfers = officerTransfers;
+                }
+
                 //Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §6). Read ONLY by
                 //BuyingGamePhase::process, so this is inert in every other phase.
                 //preBattleAvailable is deliberately NOT sent: it records what a saved fleet

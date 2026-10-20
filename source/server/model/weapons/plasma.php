@@ -621,7 +621,7 @@ class HeavyPlasmaBolter extends Plasma{
 					else {
 					$sourcePos = $shooter->getHexPos();
 					}
-			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			$dis = $this->getRangeDamageDistance($shooter, $sourcePos, $target);				
 			if ($dis <= 15) {
 				$damage -= 0;
 				}
@@ -677,7 +677,7 @@ class MediumPlasmaBolter extends Plasma{
 					else {
 					$sourcePos = $shooter->getHexPos();
 					}
-			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			$dis = $this->getRangeDamageDistance($shooter, $sourcePos, $target);				
 			if ($dis <= 10) {
 				$damage -= 0;
 				}
@@ -731,7 +731,7 @@ class LightPlasmaBolter extends Plasma{
 					else {
 					$sourcePos = $shooter->getHexPos();
 					}
-			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			$dis = $this->getRangeDamageDistance($shooter, $sourcePos, $target);				
 			if ($dis <= 5) {
 				$damage -= 0;
 				}
@@ -795,7 +795,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
 					else {
 					$sourcePos = $shooter->getHexPos();
 					}
-			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			$dis = $this->getRangeDamageDistance($shooter, $sourcePos, $target);				
 			if ($dis <= 3) {
 				$damage -= 0;
 				}

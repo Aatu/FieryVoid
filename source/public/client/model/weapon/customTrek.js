@@ -720,3 +720,64 @@ TrekShieldProjectionKelly.prototype.getDefensiveHitChangeMod = function (target,
     //this is made to be a shield just to display arc visually, no actual protection
     return 0;
 };
+
+var TrekPhotonTorpMultiKelly = function TrekPhotonTorpMultiKelly(json, ship) {
+    Torpedo.call(this, json, ship);
+};
+TrekPhotonTorpMultiKelly.prototype = Object.create(Torpedo.prototype);
+TrekPhotonTorpMultiKelly.prototype.constructor = TrekPhotonTorpMultiKelly;
+
+TrekPhotonTorpMultiKelly.prototype.initializationUpdate = function() {
+	if(this.fireOrders.length == 0){
+		this.data["Number of shots"] = this.turnsloaded;
+		this.maxVariableShots = this.turnsloaded; 
+	}else{
+		this.data["Number of shots"] = this.maxVariableShots;
+	}
+	return this;
+};
+
+TrekPhotonTorpMultiKelly.prototype.doMultipleFireOrders = function (shooter, target, system) {
+	
+	//Don't add Firing Order and give player error message if they are out of ammo.
+	if(this.data["Number of shots"] <= 0){
+		confirm.error("A Photon Launcher does not have enough ammo to target another shot.");		
+		return; //No more shots to allocated!
+	}
+	
+	for (var s = 0; s < this.guns; s++) {
+		var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+                        
+		var calledid = -1; //Ballistic Topredo CANNOT make called shots.
+
+	    var damageClass = this.data["Weapon type"].toLowerCase();
+	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
+
+	    var fire = {
+	        id: fireid,
+	        type: 'ballistic',
+	        shooterid: shooter.id,
+	        targetid: target.id,
+	        weaponid: this.id,
+	        calledid: calledid,
+	        turn: gamedata.turn,
+	        firingMode: this.firingMode,
+	        shots: this.defaultShots,
+	        x: "null",
+	        y: "null",
+	        damageclass: damageClass,
+	        chance: chance,
+			hitmod: 0,	        
+	        notes: "Split"	        
+	        };
+		
+		this.maxVariableShots -= fire.shots; 
+			        
+    	return fire;
+	}
+};
+
+TrekPhotonTorpMultiKelly.prototype.checkFinished = function () {
+	if(this.fireOrders.length == this.turnsloaded) return true; 
+    return false;
+};

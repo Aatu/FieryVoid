@@ -3,7 +3,7 @@ class ShipJumpsphere extends BaseShip{
   /*custom ship, providing Ipsha with jumpship other than the scout*/
     /*Ipsha general:
      - remember about EM hardening!
-     - instead of -2 bonus to dropout/crit when caused by Ion weapon, just add -1 overall crit/dropout bonus
+     - EM hardening follows the tabletop rules (WeaponEM, specialWeapons.php) - the old -1 overall crit/dropout stand-in is gone (2026-10-18)
      - remind player of the above in comments in fleet selection phase!
      - Singularity Drive replaced by standard engine
      - add Sensor power demand to Reactor output (it's considered 'baseline' for tabletop!)
@@ -29,7 +29,7 @@ class ShipJumpsphere extends BaseShip{
 	    $this->isd = 2265;
 	    $this->notes = 'EM hardened';	  
 	    $this->EMHardened = true; //EM Hardening - some weapons would check for this value!
-	    $this->critRollMod = -1; //generalbonus to critical rolls!
+	    //$this->critRollMod = -1; //generalbonus to critical rolls! - FV's old stand-in for EM hardening, replaced by the tabletop rules (WeaponEM, OFFICERS_PLAN.md §9.22, 2026-10-18)
 		
         $this->forwardDefense = 17;
         $this->sideDefense = 17;

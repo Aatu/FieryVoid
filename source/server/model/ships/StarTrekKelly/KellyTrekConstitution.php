@@ -44,8 +44,8 @@ class KellyTrekConstitution extends HeavyCombatVessel{
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);
 	$this->addFrontSystem($projection);
-	$this->addFrontSystem(new TrekPhotonTorpKelly(3, 0, 0, 270, 90));
-    $this->addFrontSystem(new TrekPhotonTorpKelly(3, 0, 0, 270, 90));
+	$this->addFrontSystem(new TrekPhotonTorpMultiKelly(3, 0, 0, 315, 45));
+    $this->addFrontSystem(new TrekPhotonTorpMultiKelly(3, 0, 0, 315, 45));
 	$this->addFrontSystem(new TrekPhaserKelly(3, 0, 0, 240, 360));
 	$this->addFrontSystem(new TrekPhaserKelly(3, 0, 0, 300, 60));
 	$this->addFrontSystem(new TrekPhaserKellyType7(3, 0, 0, 300, 60));	
@@ -68,7 +68,7 @@ class KellyTrekConstitution extends HeavyCombatVessel{
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
 	$this->addAftSystem($projection);
-	$this->addAftSystem(new TrekPhaserKelly(3, 0, 0, 120, 240));
+	$this->addAftSystem(new TrekPhaserKelly(3, 0, 0, 120, 240, 1));
 	//$this->addAftSystem(new SWTractorBeam(2,120,240,1));
 
 		

@@ -170,6 +170,7 @@ window.confirm = {
 
         var totalCostSpan = $(".confirm .totalUnitCostAmount").first();
         var flightSize = parseInt($(".fighterAmount").html()) || 1;
+        confirm.clampEnhRowsToSize(); //a smaller flight keeps no more Expert Pilots than craft
         //Per craft for a flight with a size selector; otherwise the whole unit's bare hull, which
         //confirm.setBuyBase parks on the dialog's own total. (This used to read an UNSCOPED
         //.totalUnitCostAmount and so, by document order, a hidden page template holding the base -
@@ -202,7 +203,7 @@ window.confirm = {
 
         var totalCost = (flightSize * fighterCost) + totalMissileCost;
 
-        // Add enhancement cost - per craft for a flight, except an officer charged per flight (enhRowCost)
+        // Add enhancement cost - per craft for a flight, except a fighter officer scaled by its size (enhRowCost)
         var enhNo = 0;
         var target = $(".selectAmount.shpenh" + enhNo);
         while (typeof target.data("enhPrice") != 'undefined') { //as long as there are enhancements defined...
@@ -220,14 +221,43 @@ window.confirm = {
     },
 
     /* What one enhancement row's spinner costs the unit: its enhCost, times the flight size for a flight
-       (1 for anything else) - unless it is a fighter officer priced per FLIGHT, whose price is charged
-       once plus his per-craft part (officers.flightCost, the one rule; perCraftExtra was worked out when
-       the row was built). gamelobby.js's doBuyShip / doCopyShip / doEditShip read rows back through this
-       too, so the dialog and the fleet can never charge differently. */
+       (1 for anything else) - unless it is a fighter officer, whose price is scaled by the flight's size
+       plus his per-craft part (officers.flightCost, the one rule; perCraftExtra and standardFlight were
+       worked out when the row was built). gamelobby.js's doBuyShip / doCopyShip / doEditShip read rows
+       back through this too, so the dialog and the fleet can never charge differently. */
     enhRowCost: function enhRowCost(target, flightSize) {
         if (!window.officers) return (target.data("enhCost") || 0) * flightSize;
         return officers.flightCost(target.data("enhID"), target.data("count"), target.data("enhCost"),
-            flightSize, target.data("perCraftExtra"));
+            flightSize, target.data("perCraftExtra"), target.data("standardFlight"));
+    },
+
+    /* The most one enhancement row's spinner may take: its limit - and for Expert Pilots, an officer bought as a count
+       (OFFICERS_PLAN.md Stage 18), never more than the flight size this dialog shows (officers.rowMax). The + button, the
+       typed box and the wheel all ask here; clampEnhRowsToSize takes the extra off when the size goes down. */
+    enhRowMax: function enhRowMax(target) {
+        var max = target.data("max");
+        var officer = window.officers ? officers.get(target.data("enhID")) : null;
+        if (!officer || !officer.multi) return max;
+        return officers.rowMax(target.data("enhID"), max, parseInt($(".fighterAmount").html(), 10) || 1);
+    },
+
+    clampEnhRowsToSize: function clampEnhRowsToSize() {
+        var enhNo = 0;
+        var target = $(".selectAmount.shpenh" + enhNo);
+        while (typeof target.data("enhPrice") != 'undefined') {
+            var officer = window.officers ? officers.get(target.data("enhID")) : null;
+            var count = target.data("count") || 0;
+            var max = confirm.enhRowMax(target);
+            if (officer && officer.multi && count > max) {
+                //an officer row: no price step and never an option, so its cost is price x count
+                target.data("count", max);
+                target.data("value", max);
+                target.data("enhCost", target.data("enhPrice") * max);
+                confirm.enhShowLevel(target, max);
+            }
+            enhNo++;
+            target = $(".selectAmount.shpenh" + enhNo);
+        }
     },
 
     getTotalCostBulk: function getTotalCostBulk() {
@@ -336,6 +366,7 @@ window.confirm = {
             }
         }
         if (noTaken < 1 && confirm.officerBlocked(target)) return; //D9: one officer per flight
+        enhLimit = confirm.enhRowMax(target); //Expert Pilots: never more than the flight's craft
 
         if (noTaken < enhLimit) { //increase possible
             var newCount = noTaken + 1;
@@ -539,7 +570,7 @@ window.confirm = {
 
         // Get the min and max limits
         var min = $(this).data('min');
-        var max = $(this).data('max');
+        var max = confirm.enhRowMax($(this)); //its limit - Expert Pilots also the flight's size
 
         // Enforce min/max
         if (value < min) value = min;
@@ -605,7 +636,7 @@ window.confirm = {
 
         // Get the min and max limits
         var min = $(this).data('min');
-        var max = $(this).data('max');
+        var max = confirm.enhRowMax($(this)); //its limit - Expert Pilots also the flight's size
 
         // Adjust value based on scroll direction
         value += increment;
@@ -698,7 +729,7 @@ window.confirm = {
 
         // Get the min and max limits
         var min = $(this).data('min');
-        var max = $(this).data('max');
+        var max = confirm.enhRowMax($(this)); //its limit - Expert Pilots also the flight's size
 
         // Enforce min/max
         if (value < min) value = min;
@@ -1204,8 +1235,13 @@ window.confirm = {
             selectAmountItem.data('max', enhLimit);
             selectAmountItem.data('enhPrice', enhPrice);
             selectAmountItem.data('enhPriceStep', enhPriceStep);
-            //a per-flight officer's per-craft part (the Missileer's missiles), for enhRowCost - 0 otherwise
+            //a fighter officer's per-craft part (the Missileer's missiles) and the flight size his price is
+            //for, for enhRowCost - 0 and 6 otherwise
             selectAmountItem.data('perCraftExtra', window.officers ? officers.perCraftExtra(ship, enhID) : 0);
+            selectAmountItem.data('standardFlight', window.officers ? officers.standardFlight(ship) : 6);
+            //a ship officer already placed in a weapon (the Matter Weapons Expert, OFFICERS_PLAN.md Stage 8): why he
+            //may not be bought here too, or null - read by officerBlocked, shown by addOfficerLimitNote
+            selectAmountItem.data('officerBlock', (window.officers && !enhCount) ? officers.shipLevelBlock(ship, enhID) : null);
             //Marked before the box is first written: a stepped enhancement shows the quantity its
             //level buys (and cannot be typed into); step 1 - every one but Extra Tendrils - leaves
             //the row as it was.
@@ -1237,25 +1273,37 @@ window.confirm = {
        is refused (officerBlocked) with that line flashing - a passive notice, never a dialog
        (feedback_passive_notices). A ship may carry one of each, so it gets no line. The server does not
        trust the dialog: Officers::pickPosts serves only the first officer row on a flight. */
-    OFFICER_LIMIT_NOTE: 'A flight may carry only one officer.',
+    OFFICER_LIMIT_NOTE: 'A flight may carry only one officer type.',
 
     addOfficerLimitNote: function addOfficerLimitNote(e, ship) {
-        if (!ship || !ship.flight) return;
+        if (!ship) return;
         var body = confirm.buySectionBody(e, 'officers');
         if (!$(".buyRow", body).length) return;
-        $('<p class="buySectionNote buyOfficerNote"></p>').text(confirm.OFFICER_LIMIT_NOTE).prependTo(body);
+        if (ship.flight) {
+            $('<p class="buySectionNote buyOfficerNote"></p>').text(confirm.OFFICER_LIMIT_NOTE).prependTo(body);
+            return;
+        }
+        //a ship: one line per officer row refused because he is placed in a weapon already (officerBlock)
+        $(".selectAmount", body).each(function () {
+            var reason = $(this).data("officerBlock");
+            if (reason) $('<p class="buySectionNote buyOfficerNote"></p>').text(reason).prependTo(body);
+        });
     },
 
     /* Would raising this row's count put a SECOND officer on a flight? True for a fighter officer's row
-       while another officer row of the same dialog is already bought. */
+       while another officer row of the same dialog is already bought. And on a ship, for an officer row
+       carrying an officerBlock: he is placed in a weapon already (Stage 8, the Matter Weapons Expert). */
     officerBlocked: function officerBlocked(target) {
-        if (!window.officers || !officers.isFighterOfficer(target.data("enhID"))) return false;
+        if (!window.officers) return false;
         var dialog = target.closest(".confirm");
-        var taken = $(".selectAmount", dialog).filter(function () {
-            var other = $(this);
-            return this !== target[0] && officers.isOfficerId(other.data("enhID")) && (other.data("count") || 0) > 0;
-        });
-        if (!taken.length) return false;
+        if (!target.data("officerBlock")) {
+            if (!officers.isFighterOfficer(target.data("enhID"))) return false;
+            var taken = $(".selectAmount", dialog).filter(function () {
+                var other = $(this);
+                return this !== target[0] && officers.isOfficerId(other.data("enhID")) && (other.data("count") || 0) > 0;
+            });
+            if (!taken.length) return false;
+        }
         var note = $(".buyOfficerNote", dialog);
         //restart the flash: drop the class, force a reflow, add it back
         note.removeClass("is-flash");
@@ -1454,7 +1502,7 @@ window.confirm = {
     /* Paint what getTotalCost / getTotalCostBulk worked out: the Base Hull line, each row's cost and
        each section's count + subtotal. `base` is the hull figure they priced from, and `each` what an
        enhancement's per-craft cost is multiplied by (the flight size; 1 otherwise - enhRowCost, so a
-       per-flight officer is charged once), so Base Hull plus every subtotal is the total. The bulk
+       fighter officer is scaled by it instead), so Base Hull plus every subtotal is the total. The bulk
        dialog works per unit: there that sum is the Per Unit figure, and the total is it times the
        quantity. */
     paintBuySummary: function paintBuySummary(base, each) {

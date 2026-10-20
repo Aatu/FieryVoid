@@ -768,8 +768,8 @@ window.gamedata = {
 	   then ONE line for the per-system refits.
 	   ⚠️ A ship-level line is priced from its option the way the buy dialog seeds data('enhCost')
 	   (confirm.js): level i costs price + i x step, a choice costs its listed price, and a flight
-	   pays per craft (doBuyShip) - except an officer charged per flight (officers.flightCost, the
-	   rule the dialog prices by). The refit line is the refit bucket itself. */
+	   pays per craft (doBuyShip) - except a fighter officer, scaled by the flight's size
+	   (officers.flightCost, the rule the dialog prices by). The refit line is the refit bucket itself. */
 	enhancementLines: function enhancementLines(ship) {
 		var lines = [];
 		var units = gamedata.bulkCount(ship);
@@ -781,15 +781,26 @@ window.gamedata = {
 			if (name === null) continue;
 			name = name.replace(/^(\(AMMO\)|\(LIGHT AMMO\)|\(MEDIUM AMMO\)|\(HEAVY AMMO\)|\(Option\))\s*/, '');
 			var cost = window.officers
-				? officers.flightCost(entry[0], entry[2], gamedata.enhancementOptionCost(entry), crafts, officers.perCraftExtra(ship, entry[0]))
+				? officers.flightCost(entry[0], entry[2], gamedata.enhancementOptionCost(entry), crafts, officers.perCraftExtra(ship, entry[0]), officers.standardFlight(ship))
 				: gamedata.enhancementOptionCost(entry) * crafts;
 			lines.unshift({ text: name, cost: cost * units }); //reverse order
 		}
 
 		if (window.systemEnhancements) {
 			var sysEnhLine = systemEnhancements.summaryLine(ship);
-			//LAST, after the reversed ship-level lines above
-			if (sysEnhLine) lines.push({ text: sysEnhLine, cost: (parseFloat(ship.pointCostSysEnh) || 0) * units });
+			//LAST, after the reversed ship-level lines above. The bucket also holds the placed officers'
+			//rows (OFFICERS_PLAN.md Stage 8), which get a line each below, so the refit line is the refits alone.
+			if (sysEnhLine) lines.push({ text: sysEnhLine, cost: systemEnhancements.refitCost(ship) * units });
+			var placed = {};
+			systemEnhancements.officerRows(ship).forEach(function (row) {
+				if (!placed[row[0]]) placed[row[0]] = { count: 0, cost: 0 };
+				placed[row[0]].count++;
+				placed[row[0]].cost += parseFloat(row[4]) || 0;
+			});
+			Object.keys(placed).forEach(function (enhID) {
+				var name = systemEnhancements.label(enhID) + (placed[enhID].count > 1 ? ' (' + placed[enhID].count + ')' : '');
+				lines.push({ text: name, cost: placed[enhID].cost * units });
+			});
 		}
 		return lines;
 	},
@@ -2753,18 +2764,18 @@ window.gamedata = {
 		holder.empty().append(made).css("--picker-cols", String(best.length));
 	},
 
-	/* The picker's filters: a row shows when its tier is ticked, it passes Show Custom (and its
-	   Show Only Customs mode), and its name contains the search text. A group shows while any row in
-	   it does, and its count is how many. While a search is typed every group is shown open
-	   (.is-searching), so a match is never hidden inside a closed one. */
+	/* The picker's filters: a row shows when its tier is the chosen tier chip's (any chip's, under
+	   All), it passes Show Custom (and its Show Only Customs mode), and its name contains the search
+	   text. A group shows while any row in it does, and its count is how many. While a search is typed
+	   every group is shown open (.is-searching), so a match is never hidden inside a closed one. */
 	filterFactionList: function filterFactionList() {
 		var list = $("#factionList");
 		if (!list.length) return;
 
-		var tiers = $(".tier-filter:checked").map(function () { return $(this).attr("data-tier"); }).get();
-		//All / None read pressed while every tier chip - or none - is on.
-		$("#lbTierAll").attr("aria-pressed", tiers.length === $(".tier-filter").length ? "true" : "false");
-		$("#lbTierNone").attr("aria-pressed", tiers.length === 0 ? "true" : "false");
+		//All is every tier a chip names - as every tier chip ticked was, so a faction with no power
+		//rating yet still shows under none.
+		var tier = $(".tier-filter:checked").attr("data-tier") || "";
+		var tiers = tier !== "" ? [tier] : $(".tier-filter").map(function () { return this.getAttribute("data-tier"); }).get().filter(Boolean);
 		var showCustom = $("#toggleCustom").is(":checked");
 		var onlyCustom = showCustom && $("#customSelect").val() === "showOnlyCustom";
 		var search = String($("#factionSearch").val() || "").trim().toLowerCase();
@@ -2792,13 +2803,6 @@ window.gamedata = {
 		$("#lbRollFaction").prop("disabled", !anyShown);
 		var rolled = gamedata.rolledFactionRow();
 		if (gamedata.rolledFaction !== null && (!rolled || rolled.hidden)) gamedata.showRolledFaction(null);
-	},
-
-	//The picker's All / None chips: every tier chip on, or every one off. Custom is left as it is - it
-	//is a different question (which customs may be picked, with its own mode and warning).
-	setAllTierFilters: function setAllTierFilters(on) {
-		$(".tier-filter").prop("checked", !!on);
-		gamedata.filterFactionList();
 	},
 
 	/* The randomiser (plan §4.5, Stage 7), in place of the three off-site Wheel of Names links. It
@@ -3098,10 +3102,6 @@ window.gamedata = {
 				else if (mq.addListener) mq.addListener(relayout);
 			});
 		}
-
-		//The tier chips' All / None.
-		$("#lbTierAll").on("click", gamedata.setAllTierFilters.bind(gamedata, true));
-		$("#lbTierNone").on("click", gamedata.setAllTierFilters.bind(gamedata, false));
 
 		//The randomiser, and its Choose - the rolled row's own click.
 		$("#lbRollFaction").on("click", gamedata.rollFaction);
@@ -4204,13 +4204,13 @@ window.gamedata = {
 				ship.enhancementOptions[enhNo][2] = noTaken;
 				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight) {
-						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
+						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a fighter officer scaled by the flight's size (D8)
 					} else {
 						ship.pointCostEnh += target.data("enhCost");
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
-						ship.pointCostEnh2 += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
+						ship.pointCostEnh2 += confirm.enhRowCost(target, flightSize); //per craft, but a fighter officer scaled by the flight's size (D8)
 					} else {
 						ship.pointCostEnh2 += target.data("enhCost");
 					}
@@ -4415,13 +4415,13 @@ window.gamedata = {
 				ship.enhancementOptions[enhNo][2] = noTaken;
 				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight) {
-						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
+						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a fighter officer scaled by the flight's size (D8)
 					} else {
 						ship.pointCostEnh += target.data("enhCost");
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
-						ship.pointCostEnh2 += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
+						ship.pointCostEnh2 += confirm.enhRowCost(target, flightSize); //per craft, but a fighter officer scaled by the flight's size (D8)
 					} else {
 						ship.pointCostEnh2 += target.data("enhCost");
 					}
@@ -4635,13 +4635,13 @@ window.gamedata = {
 				ship.enhancementOptions[enhNo][2] = nowTaken;
 				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight) {
-						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
+						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a fighter officer scaled by the flight's size (D8)
 					} else {
 						ship.pointCostEnh += target.data("enhCost");
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
-						ship.pointCostEnh2 += confirm.enhRowCost(target, flightSize); //per craft, but a per-flight officer once (D8)
+						ship.pointCostEnh2 += confirm.enhRowCost(target, flightSize); //per craft, but a fighter officer scaled by the flight's size (D8)
 					} else {
 						ship.pointCostEnh2 += target.data("enhCost");
 					}
@@ -4730,6 +4730,11 @@ window.gamedata = {
 			refitsDropped = systemEnhancements.dropDestroyed(ship);
 			//pointCost had the OLD refit total folded in; take the refunded difference back off.
 			if (refitsDropped.length) ship.pointCost -= (sysEnhBefore - (ship.pointCostSysEnh || 0));
+		}
+		//OFFICERS_PLAN.md Stage 15 (user ruling 2026-10-17): a ship officer bought in this edit for a post the pre-battle
+		//damage destroys is refunded at once, as the placed ones above are (it moves pointCostEnh and pointCost itself)
+		if (window.officers && typeof officers.dropDestroyedPosts === 'function') {
+			refitsDropped = refitsDropped.concat(officers.dropDestroyedPosts(ship));
 		}
 
 		//The React window renders from this same mutated ship object, so no
@@ -5192,6 +5197,7 @@ window.gamedata = {
 		//Reported once, after the load, so a mis-click is obvious rather than silent.
 		var declinedDamage = false;
 		var declinedCriticals = false;
+		var destroyedPostsDropped = []; //OFFICERS_PLAN.md Stage 15 - see the sweep after applyToShip below
 
 		for (var i = 0; i < fleet.length; i++) {
 			var listShip = fleet[i];
@@ -5276,6 +5282,20 @@ window.gamedata = {
 				if (available.criticals && !loaded.criticals) declinedCriticals = true;
 
 				battleDamage.applyToShip(ship);
+
+				/* OFFICERS_PLAN.md Stage 15 (user ruling 2026-10-17): an officer on a system this fleet's damage destroys is
+				   refunded - as the system menu does the moment the damage is dealt - and so is a refit (D11, which the buy
+				   would drop anyway). A fleet saved before the ruling can hold such an officer. After applyToShip, which
+				   writes the structure cascade. */
+				if (window.systemEnhancements) {
+					var sysEnhLoaded = parseFloat(ship.pointCostSysEnh) || 0;
+					var refitsGone = systemEnhancements.dropDestroyed(ship);
+					if (refitsGone.length) ship.pointCost -= (sysEnhLoaded - (parseFloat(ship.pointCostSysEnh) || 0));
+					destroyedPostsDropped = destroyedPostsDropped.concat(refitsGone);
+				}
+				if (window.officers && typeof officers.dropDestroyedPosts === 'function') {
+					destroyedPostsDropped = destroyedPostsDropped.concat(officers.dropDestroyedPosts(ship));
+				}
 			}
 
 			gamedata.updateFleet(ship);
@@ -5292,6 +5312,10 @@ window.gamedata = {
 		if (Array.isArray(sysEnhNotice) && sysEnhNotice.length > 0) {
 			confirm.fleetNotice("Enhancements changed since this fleet was saved: "
 				+ sysEnhNotice.join(" "));
+		}
+		if (destroyedPostsDropped.length && window.systemEnhancements) {
+			gamedata.calculateFleet();
+			confirm.fleetNotice(systemEnhancements.describeRemoved(destroyedPostsDropped));
 		}
 
 		//gamedata.populateFleetDropdown();
@@ -6702,12 +6726,22 @@ jQuery(function () {
 	  ACTIONABLE system menu, so a click now opens SystemInfoMenu when the system has
 	  something to offer (canDoAnything, via canShowSystemInfoMenu) and falls back to the
 	  read-only popup otherwise. Mirrors PhaseStrategy.showSystemInfo's menu branch.*/
+	/*The ship window holding the clicked icon (ShipWindow tags its container data-ship-window), so the
+	  menu can be set BESIDE it rather than over the systems and stats around the icon (user request
+	  2026-10-16). Its on-screen rectangle, scaled windows included; null if it cannot be found.*/
+	var shipWindowBox = function (element) {
+		var el = element && (element.getBoundingClientRect ? element : $(element)[0]);
+		var win = el && el.closest ? el.closest('[data-ship-window]') : null;
+		return win ? win.getBoundingClientRect() : null;
+	};
+
 	var showMenu = function (payload) {
 		uiManager.showSystemInfoMenu({
 			ship: payload.ship,
 			selectedShip: null,
 			system: payload.system,
-			boundingBox: getBoundingBox(payload.element)
+			boundingBox: getBoundingBox(payload.element),
+			avoidBox: shipWindowBox(payload.element)
 		});
 		systemInfoState = { menu: true };
 	};
@@ -6776,5 +6810,14 @@ jQuery(function () {
 		if (!systemInfoState || !systemInfoState.menu) return;
 		if (e.target && e.target.closest && e.target.closest('#systemInfoReact')) return;
 		hideInfo(true);
+	});
+
+	/*OFFICERS_PLAN.md Stage 15: an officer waiting to be MOVED (the menu's Move) takes the next click on one of his outlined
+	  systems - SystemIcon hands it to officers.pickTarget, and stops it there. A click on the page behind the windows
+	  calls the move off instead of leaving the outline behind.*/
+	$(document).on('click.officerLobbyMove', function (e) {
+		if (!window.officers || !officers.picking) return;
+		if (e.target && e.target.closest && e.target.closest('#systemInfoReact')) return;
+		officers.cancelPick();
 	});
 });

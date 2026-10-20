@@ -28,6 +28,24 @@ shipManager.movement = {
         return Math.round(baseTurnDelayCost * 100) / 100;
     },
 
+    // What the NEXT speed change this turn costs. An accel/decel cost may carry a fraction (an Expert
+    // Navigator's x0.75, OFFICERS_PLAN.md §9.11): "retain all fractions until the full acceleration/
+    // deceleration cost has been determined, then round any remainder up" - so a turn's n changes cost
+    // ceil(n x cost) together, and the k-th costs ceil(k x cost) - ceil((k-1) x cost): 2, 1, 2, 1... for
+    // 1.5. A whole cost comes out as itself. Speed changes are always undone from the LAST row
+    // (deleteSpeedChange), so the rows already plotted keep what they cost. Deployment speed is not a row.
+    getSpeedChangeCost: function getSpeedChangeCost(ship) {
+        var cost = Number(ship.accelcost) || 0;
+        if (cost === Math.floor(cost)) return cost;
+        var done = 0;
+        for (var i in ship.movement) {
+            var movement = ship.movement[i];
+            if (movement.turn == gamedata.turn && movement.type == "speedchange") done++;
+        }
+        //a whole cost x0.75 is always a quarter, exact in floats; the epsilon only guards other fractions
+        return Math.ceil((done + 1) * cost - 1e-9) - Math.ceil(done * cost - 1e-9);
+    },
+
     // LCV Rails (B5W §10.1): each LCV docked on a rail makes a turn/turn-delay cost
     // +1 THRUST this turn (a FLAT surcharge on the final turn-cost/turn-delay value,
     // NOT a change to the ship's turncost/turndelaycost rate). E.g. a turn-cost-1
@@ -313,13 +331,40 @@ shipManager.movement = {
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!
         if (!ship.flight && ship.jinkinglimit <= 0) return false;
         if (accel == 0) return true;
-        if (accel > 0 && shipManager.movement.getRemainingEngineThrust(ship) <= 0) return false; //only adding jink costs thrust; reducing refunds it
+        //only adding jink costs thrust (reducing refunds it) - and not an Expert Pilot's free level (OFFICERS_PLAN.md §9.24)
+        if (accel > 0 && !shipManager.movement.nextJinkIsFree(ship) && shipManager.movement.getRemainingEngineThrust(ship) <= 0) return false;
         var jinking = shipManager.movement.getJinking(ship);
         //Gravitic Augmenter grants forced jink levels (marked forced=true) that the player
         //may not remove: a reduction cannot take the total below that forced floor.
         var floor = shipManager.movement.getForcedJinking(ship);
-        if (jinking + accel > ship.jinkinglimit || jinking + accel < floor) return false;
+        //Expert Pilots' levels do not count against the jinking limit - a separate term, never ship.jinkinglimit (the fighter's weight class)
+        var limit = ship.jinkinglimit + (window.officers ? officers.freeJinks(ship) : 0);
+        if (jinking + accel > limit || jinking + accel < floor) return false;
         return true;
+    },
+
+    /* Expert Pilots (OFFICERS_PLAN.md §9.24): a flight's first jinking levels this turn, one per serving pilot, cost no thrust.
+       Such a level is a jink row of the player's own (not forced) that takes no thrust; the next one is free while there are
+       fewer of those than pilots. CLIENT ONLY - movement.php neither prices nor limits a jink. */
+    getFreeJinkRows: function getFreeJinkRows(ship) {
+        var n = 0;
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move.turn != gamedata.turn || move.type != "jink" || move.forced) continue;
+            if (shipManager.movement.jinkThrust(move) === 0) n++;
+        }
+        return n;
+    },
+
+    jinkThrust: function jinkThrust(move) {
+        var total = 0;
+        for (var a in move.assignedThrust) total += Number(move.assignedThrust[a]) || 0;
+        return total;
+    },
+
+    nextJinkIsFree: function nextJinkIsFree(ship) {
+        if (!ship.flight || !window.officers) return false;
+        return shipManager.movement.getFreeJinkRows(ship) < officers.freeJinks(ship);
     },
 
     getJinking: function getJinking(ship) {
@@ -353,23 +398,26 @@ shipManager.movement = {
         var assignedThrust = Array();
         if (ship.flight) {
             commit = true;
-            requiredThrust[0] = 1;
-            assignedThrust[0] = 1;
+            //an Expert Pilot's free level costs nothing (OFFICERS_PLAN.md §9.24)
+            var cost = shipManager.movement.nextJinkIsFree(ship) ? 0 : 1;
+            requiredThrust[0] = cost;
+            assignedThrust[0] = cost;
         } else {
             //this is a ship, not fighter flight!
             requiredThrust = Array(ship.pivotcost, 0, 0, 0, 0);
         }
         if (accel < 0) {
+            //Never remove a forced jink (Gravitic Augmenter minimum) - only the player's own: the first. On a flight, the first
+            //that cost thrust, so the free levels (Expert Pilots) are the ones kept and what is left costs what it would have.
+            var remove = -1;
             for (var i in ship.movement) {
                 var move = ship.movement[i];
-                if (move.turn != gamedata.turn) continue;
-
-                //Never remove a forced jink (Gravitic Augmenter minimum) - only the player's own.
-                if (move.type == "jink" && !move.forced) {
-                    ship.movement.splice(i, 1);
-                    break;
-                }
+                if (move.turn != gamedata.turn || move.type != "jink" || move.forced) continue;
+                if (remove === -1) remove = i;
+                if (!ship.flight) break;
+                if (shipManager.movement.jinkThrust(move) > 0) { remove = i; break; }
             }
+            if (remove !== -1) ship.movement.splice(remove, 1);
         } else {
             var lm = shipManager.movement.getLastCommitedMove(ship);
             ship.movement[ship.movement.length] = {
@@ -1373,7 +1421,7 @@ shipManager.movement = {
         //		}
         if (ship.flight && gamedata.gamephase == 3) {
             if (!weaponManager.canCombatTurn(ship)) return false;
-            if (Math.ceil(ship.pivotcost * 1.5) > shipManager.movement.getRemainingEngineThrust(ship)) return false;
+            if (shipManager.movement.getCombatPivotCost(ship) > shipManager.movement.getRemainingEngineThrust(ship)) return false;
         } else if (gamedata.gamephase != 2) return false;
 
         return true;
@@ -1416,6 +1464,28 @@ shipManager.movement = {
         return c;
     },
 
+    /* What a flight's combat pivot (Firing phase) costs: 1.5 x its pivot cost, rounded up - halved, rounded up, by
+       an Expert Coordinator (officers.combatPivotCost). The cost canPivot checks, doPivot puts on the row and the
+       map tooltip quotes. */
+    getCombatPivotCost: function getCombatPivotCost(ship) {
+        var cost = Math.ceil(ship.pivotcost * 1.5);
+        return window.officers ? officers.combatPivotCost(ship, cost) : cost;
+    },
+
+    /* How far this turn's combat pivots have turned the flight, in hex sides, rights against lefts (every flight
+       is agile, so each row is one 60-degree step the way it names). ⚠️ MIRROR PAIR with
+       Movement::getCombatPivotRotation (PHP). */
+    getCombatPivotRotation: function getCombatPivotRotation(ship) {
+        var net = 0;
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move.turn != gamedata.turn || move.value != "combatpivot") continue;
+            if (move.type == "pivotright") net++;
+            else if (move.type == "pivotleft") net--;
+        }
+        return Math.abs(net);
+    },
+
 
     doPivot: function doPivot(ship, right) {
         if (!shipManager.movement.canPivot(ship, right)) return false;
@@ -1433,7 +1503,7 @@ shipManager.movement = {
 
         var value = 0;
         if (gamedata.gamephase == 3) {
-            pivotcost = Math.ceil(pivotcost * 1.5); //2 for fighters, 3 for shuttles
+            pivotcost = shipManager.movement.getCombatPivotCost(ship); //2 for fighters, 3 for shuttles
             value = "combatpivot";
         }
         if (pivoting != "no") {
@@ -1979,6 +2049,14 @@ shipManager.movement = {
         return false;
     },
 
+    /* Does this flight's fire take the combat pivot's -1 this turn? Not when it ignores manoeuvre modifiers, nor
+       under an Expert Coordinator short of a full 180 (officers.waivesCombatPivotPenalty). The test the hit chance
+       (weaponManager.computeShotModifiers) and the map tooltip share - weapon.php's fighter branch is its server twin. */
+    hasCombatPivotPenalty: function hasCombatPivotPenalty(ship) {
+        if (!shipManager.movement.hasCombatPivoted(ship) || ship.ignoreManoeuvreMods) return false;
+        return !(window.officers && officers.waivesCombatPivotPenalty(ship));
+    },
+
     hasPivotedForShooting: function hasPivotedForShooting(ship) {
         for (var i in ship.movement) {
             var movement = ship.movement[i];
@@ -2031,7 +2109,7 @@ shipManager.movement = {
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.movement.checkHasUncommitted(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
-        if (ship.accelcost > shipManager.movement.getRemainingEngineThrust(ship)) {
+        if (shipManager.movement.getSpeedChangeCost(ship) > shipManager.movement.getRemainingEngineThrust(ship)) {
             return false;
         }
 
@@ -2133,17 +2211,18 @@ shipManager.movement = {
 
         var commit = false;
         var assignedThrust = Array();
+        var speedChangeCost = shipManager.movement.getSpeedChangeCost(ship); //counted BEFORE this row is added
         if (ship.flight) {
             commit = true;
-            requiredThrust[0] = ship.accelcost;
-            assignedThrust[0] = ship.accelcost;
+            requiredThrust[0] = speedChangeCost;
+            assignedThrust[0] = speedChangeCost;
         } else {
             var reqThrusterName = "main";
             if (!accel) { //!accel means it's deceleration instead
                 reqThrusterName = "retro";
             }
             var requiredThruster = shipManager.movement.thrusterDirectionRequired(ship, reqThrusterName, true);
-            requiredThrust[requiredThruster] = ship.accelcost;
+            requiredThrust[requiredThruster] = speedChangeCost;
         }
 
         var lm = shipManager.movement.getLastCommitedMove(ship);

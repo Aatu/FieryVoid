@@ -1229,6 +1229,20 @@
            
             return $pivots;
 		}        
+
+		/* How far this turn's combat pivots turned the flight, in hex sides, rights against lefts: right-left-right
+		   is 1, three to one side 3 (180 degrees), four to one side 4. Every flight is agile, so each combat pivot
+		   row is one 60-degree step in the direction it names (client doPivot). The Expert Coordinator's "full 180"
+		   (Officers::waivesCombatPivotPenalty). ⚠️ MIRROR PAIR with shipManager.movement.getCombatPivotRotation. */
+		public static function getCombatPivotRotation($ship, $turn){
+			$net = 0;
+			foreach ($ship->movement as $move){
+				if ($move->value != "combatpivot" || $move->turn != $turn) continue;
+				if ($move->type == "pivotright") $net++;
+				else if ($move->type == "pivotleft") $net--;
+			}
+			return abs($net);
+		}
        
         public static function getTurnDelay($ship){
             $turndelay = 0;

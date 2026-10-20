@@ -108,12 +108,13 @@ class SystemInfo extends React.Component {
                 </SystemInfoTooltip>
             );
         }
-        //special treatment for 'Special' entry (due to probable multiline)    
+        //special treatment for 'Special' entry (due to probable multiline)
+        var specialName = 'Special';
         var specialEntry = new Array;
         if (system.data.Special && system.data.Special != "") {
-            specialEntry = system.data.Special.split('<br>');
+            //through the same hook as the other rows: an Expert Jump Officer's "within N hexes" in the lobby
+            specialEntry = String(adjustDataDisplay(ship, system, specialName)).split('<br>');
         }
-        var specialName = 'Special';
         var reactKey = 0; //needed for react so each line has unique key!
 
         //an Expert Evader's -1 in the lobby, added as it is shown (officers.displayStat; in game the server applied it)
@@ -171,6 +172,13 @@ class SystemInfo extends React.Component {
             }
         }
 
+        /* OFFICERS_PLAN.md Stage 11: the power put into a laser this turn under an Expert Laser Technician. Read off the
+           power entries like the boost highlight, so it moves the instant the player clicks; only the owner's team has
+           an officer list, so it is null for anyone else (and in the lobby, where nothing is boosted). */
+        var laserBoost = window.officers ? officers.laserBoostText(ship, system) : null;
+        //Stage 17: the thrust put into an ion gun this turn under an Expert Ion Technician, and that it must fire - the same reading
+        var ionBoost = window.officers ? officers.ionBoostText(ship, system) : null;
+
         let isUnrevealedMine = false;
         if (ship.mine) {
             var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
@@ -202,6 +210,10 @@ class SystemInfo extends React.Component {
                     + dockedPower.donors + (dockedPower.donors === 1 ? ' ship' : ' ships'))}
 
                 {abductionTarget !== null && getEntry('Abduction target', abductionTarget)}
+
+                {laserBoost !== null && !isUnrevealedMine && getEntry('Laser boost', laserBoost)}
+
+                {ionBoost !== null && !isUnrevealedMine && getEntry('Thrust boost', ionBoost)}
 
                 {Object.keys(specialEntry).length > 0 && <Entry key={`special-${reactKey++}`}><Header>Special: </Header>&nbsp;</Entry>}
                 {Object.keys(specialEntry).length > 0 &&
@@ -283,21 +295,28 @@ const getCalledShotDisplay = (ship, system) => {
 const getOfficers = (ship, system) => {
     if (!window.officers || !ship || !system) return null;
     const posted = officers.onPost(ship, system.id);
-    if (posted.length === 0) return null;
+    //Stage 10: an officer moving onto this post this turn (ordered now or committed) has a line here too
+    const arriving = officers.arrivingAt(ship, system.id);
+    if (posted.length === 0 && arriving.length === 0) return null;
     const turn = officers.currentTurn();
     return [
         <Divider key="officerDivider" />,
         <OfficerHeader key="officerHeader">Officers</OfficerHeader>
-    ].concat(posted.map(entry => {
+    ].concat(posted.map((entry, i) => {
         const officer = officers.get(entry.id);
-        const state = officers.stateText(entry);
+        const state = officers.moveText(ship, entry) || officers.stateText(entry);
         return (
-            <OfficerEntry key={`officer-${entry.id}`} $out={!officers.serves(entry, turn)}>
+            <OfficerEntry key={`officer-${entry.id}-${i}`} $out={!officers.serves(entry, turn) || officers.movingTo(ship, entry) !== null}>
                 <OfficerName>{officers.label(entry.id)}: </OfficerName>
                 {officer ? officer.summary : ''}{state ? ' ' + state : ''}
             </OfficerEntry>
         );
-    }));
+    }), arriving.map((arrival, i) => (
+        <OfficerEntry key={`arriving-${arrival.entry.id}-${i}`} $out>
+            <OfficerName>{officers.label(arrival.entry.id)} </OfficerName>
+            {officers.arrivalText(ship, arrival.entry)}
+        </OfficerEntry>
+    )));
 };
 
 const getCriticals = (system) => {
