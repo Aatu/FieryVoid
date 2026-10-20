@@ -3820,6 +3820,25 @@ class Enhancements{
 			'ages'      => array(1, 2),
 			'serialise' => array(),
 		),
+		//OFFICERS_PLAN.md Stage 19: the Expert Targeter in a Structure block - and on a Medium ship's one block, its second side
+		'OFF_TARG' => array(
+			'label'     => 'Expert Targeter',
+			'eligible'  => 'sysEnhEligibleOfficerTARG',
+			'price'     => 'sysEnhPriceOfficerTARG',
+			'limit'     => 'sysEnhLimitOne',
+			'officer'   => true,
+			'ages'      => array(1, 2),
+			'serialise' => array(),
+		),
+		'OFF_TARG2' => array(
+			'label'     => 'Expert Targeter',
+			'eligible'  => 'sysEnhEligibleOfficerTARG2',
+			'price'     => 'sysEnhPriceOfficerTARG2',
+			'limit'     => 'sysEnhLimitOne',
+			'officer'   => true,
+			'ages'      => array(1, 2),
+			'serialise' => array(),
+		),
 	);
 
 	//a placed officer's row (Stage 8), not a refit: kept off the star and the summary count
@@ -4566,6 +4585,23 @@ class Enhancements{
 
 	private static function sysEnhPriceOfficerRELIP($ship, $system, $level){
 		return Officers::rowPrice($ship, 'OFF_RELIP');
+	}
+
+	//Stage 19: a Structure block (Officers::mayHost, `nonWeapon`; his `hosts` says which blocks)
+	private static function sysEnhEligibleOfficerTARG($ship, $system){
+		return Officers::mayHost($ship, $system, 'OFF_TARG');
+	}
+
+	private static function sysEnhPriceOfficerTARG($ship, $system, $level){
+		return Officers::rowPrice($ship, 'OFF_TARG');
+	}
+
+	private static function sysEnhEligibleOfficerTARG2($ship, $system){
+		return Officers::mayHost($ship, $system, 'OFF_TARG2');
+	}
+
+	private static function sysEnhPriceOfficerTARG2($ship, $system, $level){
+		return Officers::rowPrice($ship, 'OFF_TARG2');
 	}
 
 	/* SYS_HSHLD and SYS_THR are both "output += level".

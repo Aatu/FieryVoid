@@ -133,7 +133,8 @@ window.PhaseStrategy = function () {
         });
     };
 
-    PhaseStrategy.prototype.showSystemInfo = function (ship, system, element, menu) {
+    //officersOnly (OFFICERS_PLAN.md Stage 19): a Structure bar's tooltip, which names the block's officers and nothing else
+    PhaseStrategy.prototype.showSystemInfo = function (ship, system, element, menu, officersOnly) {
         if (this.systemInfoState && this.systemInfoState.menu && !menu) {
             return;
         }
@@ -147,9 +148,9 @@ window.PhaseStrategy = function () {
             }
             this.uiManager.showSystemInfoMenu({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox });
         } else {
-            this.uiManager.showSystemInfo({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox });
+            this.uiManager.showSystemInfo({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox, officersOnly: Boolean(officersOnly) });
         }
-        this.systemInfoState = { menu: menu, element: element, system: system }
+        this.systemInfoState = { menu: menu, element: element, system: system, officersOnly: Boolean(officersOnly) && !menu }
     }
 
     PhaseStrategy.prototype.consumeGamedata = function () {
@@ -1370,6 +1371,13 @@ window.PhaseStrategy = function () {
             icon.hideStructureArcs();
         });
 
+        /* OFFICERS_PLAN.md Stage 19: a block holding an officer the viewer may see (the Expert Targeter - own team only, through
+           officers.listFor) names him in an officers-only tooltip (SystemInfo `officersOnly`), "and nothing else" (user request
+           2026-10-20). Any other bar still raises no tooltip. */
+        if (payload.element && payload.structure && window.officers && officers.hasPostTooltip(payload.ship, payload.structure)) {
+            this.showSystemInfo(payload.ship, payload.structure, payload.element, false, true);
+        }
+
         var icon = this.shipIconContainer.getByShip(payload.ship);
         if (!icon) return;
 
@@ -1380,6 +1388,8 @@ window.PhaseStrategy = function () {
         this.shipIconContainer.getArray().forEach(function (icon) {
             icon.hideStructureArcs();
         });
+        //only the bar's own tooltip: a menu (or another system's hover) is left alone
+        if (this.systemInfoState && this.systemInfoState.officersOnly) this.hideSystemInfo();
     };
 
     /* Ship-window EW panel hover (2026-07-30): hovering the BDEW or Detect Mines row raises that

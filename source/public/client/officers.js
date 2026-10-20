@@ -90,6 +90,14 @@ window.officers = {
 		   offers say which). The same officer as OFF_RELI (sameAs), with the same effects. */
 		{ id: 'OFF_RELIP', label: 'Expert Religious Leader', placed: true, sameAs: 'OFF_RELI', movable: true, stats: { iniativebonus: 10 },
 			summary: '+10 initiative, +1 damage on every hit; once he is lost: +20 initiative, +1 sensors, +5% to be hit' },
+		/* Stage 19: the Expert Targeter, in a STRUCTURE block (ShipSection's bar carries his insignia, his tooltip and, in Initial
+		   Orders, his menu). His +4 is the hit-chance preview's (targeterShotBonus), over the weapons the server says he covers
+		   (`covers`). On a hull with one block (a Medium ship) he covers one side of its hit chart: OFF_TARG the first (Front, or
+		   Left), OFF_TARG2 the second (sameAs) - `side` - and `switchTo` is the side selector's other id (a move to his own post). */
+		{ id: 'OFF_TARG', label: 'Expert Targeter', placed: true, movable: true, side: 1, switchTo: 'OFF_TARG2',
+			summary: '+20% on called shots (the called shot penalty still applies)' },
+		{ id: 'OFF_TARG2', label: 'Expert Targeter', placed: true, sameAs: 'OFF_TARG', movable: true, side: 2, switchTo: 'OFF_TARG',
+			summary: '+20% on called shots (the called shot penalty still applies)' },
 		{ id: 'OFF_DOG', label: 'Expert Dogfighter', post: 'craft', flight: true, stats: { iniativebonus: 5 },
 			summary: '+5 initiative, wins ties' },
 		{ id: 'OFF_MSL', label: 'Expert Missileer', post: 'craft', flight: true, perMissile: 1, needs: 'missiles',
@@ -657,7 +665,8 @@ window.officers = {
 			if (!open('pierce')) return 0;
 			return (entry.mode !== undefined && parseInt(weapon.firingMode, 10) === parseInt(entry.mode, 10)) ? 0 : this.PIERCE_PENALTY;
 		}
-		return (called && open('called')) ? this.GUNNER_CALLED_BONUS : 0;
+		//Stage 19: on a gun a serving Expert Targeter covers, his +4 is the called shot's - the Gunner's +3 neither used nor spent
+		return (called && open('called') && !this.targeterCovering(ship, weapon)) ? this.GUNNER_CALLED_BONUS : 0;
 	},
 
 	/* ------------------------------------------------------------------ moving officers (Stage 10) */
@@ -729,7 +738,17 @@ window.officers = {
 
 	systemName: function systemName(ship, systemId) {
 		var s = this.systemById(ship, systemId);
-		return (s ? (s.displayName || s.name) : 'system') + ' #' + systemId;
+		return (s ? this.postName(s) : 'system') + ' #' + systemId;
+	},
+
+	/* A system's name for an officer line: its display name - or, for a Structure block (Stage 19, the Expert Targeter's post),
+	   its section's, "Aft Structure", the ship window's own section names (ShipSection SECTION_NAMES). */
+	SECTION_NAMES: { 0: 'Primary', 1: 'Forward', 2: 'Aft', 3: 'Port', 4: 'Starboard', 31: 'Port Fwd', 32: 'Port Aft', 41: 'Stbd Fwd', 42: 'Stbd Aft' },
+	postName: function postName(system) {
+		if (system && system.name === 'structure' && this.SECTION_NAMES[system.location] !== undefined) {
+			return this.SECTION_NAMES[system.location] + ' Structure';
+		}
+		return system ? (system.displayName || system.name) : 'system';
 	},
 
 	//"(moving to Heavy Laser #12 - serves there from turn 5)", or '' while he is not moving
@@ -737,7 +756,100 @@ window.officers = {
 		var to = this.movingTo(ship, entry);
 		if (to === null) return '';
 		var pending = (entry.moving === undefined || entry.moving === null);
-		return '(' + (pending ? 'ordered to ' : 'moving to ') + this.systemName(ship, to) + ' - serves there from turn ' + (this.currentTurn() + 1) + ')';
+		var from = ' from turn ' + (this.currentTurn() + 1) + ')';
+		if (String(to) === String(entry.post)) { //Stage 19: a side switch is a move to his own post
+			return '(' + (pending ? 'ordered to switch to ' : 'switching to ') + this.sideName(ship, this.get(entry.id).switchTo) + ' - covers it' + from;
+		}
+		return '(' + (pending ? 'ordered to ' : 'moving to ') + this.systemName(ship, to) + ' - serves there' + from;
+	},
+
+	/* ------------------------------------------------------------------ the Expert Targeter (Stage 19) */
+
+	/* His effect line, with the weapons he covers: "... - Aft weapons" (his block's section), or a Medium ship's side - "Front
+	   weapons". What those weapons are is the server's (`covers`). Every other officer: his registry summary. */
+	summaryOf: function summaryOf(ship, entry) {
+		var officer = this.get(entry.id);
+		if (!officer) return '';
+		if ((officer.sameAs || officer.id) !== 'OFF_TARG') return officer.summary;
+		return officer.summary + ' - ' + this.coverName(ship, entry) + ' weapons';
+	},
+
+	coverName: function coverName(ship, entry) {
+		if (!this.hasOuterBlock(ship)) return this.sideName(ship, entry.id);
+		var post = this.systemById(ship, entry.post);
+		return (post && this.SECTION_NAMES[post.location] !== undefined) ? this.SECTION_NAMES[post.location] : 'his block\'s';
+	},
+
+	//a Structure block outside the Primary section - a hull with none (a Medium ship) posts him in its Primary Structure, by side
+	hasOuterBlock: function hasOuterBlock(ship) {
+		return this.systemsOf(ship).some(function (s) { return s && s.name === 'structure' && (parseInt(s.location, 10) || 0) !== 0; });
+	},
+
+	/* "Front" / "Aft", or "Left" / "Right" on a LeftRight hull: the side `id` covers - the hull's hit chart's non-Primary locations in
+	   order, his `side` picking the first or the second (Officers::hullSides, PHP). */
+	SIDE_NAMES: { 1: 'Front', 2: 'Aft', 3: 'Left', 4: 'Right' },
+	sideName: function sideName(ship, id) {
+		var officer = this.get(id);
+		var sides = Object.keys((ship && ship.hitChart) || {}).map(function (k) { return parseInt(k, 10); })
+			.filter(function (k) { return k !== 0 && !isNaN(k); }).sort(function (a, b) { return a - b; });
+		var side = sides[((officer && officer.side) || 1) - 1];
+		return this.SIDE_NAMES[side] || 'his side\'s';
+	},
+
+	/* The serving Targeter covering this weapon - not one ordered to move or switch this turn (he serves nowhere then, as the server
+	   will rule once the order is sent) - or null. In game only: `covers` comes with the server's list. */
+	targeterCovering: function targeterCovering(ship, weapon) {
+		var turn = this.currentTurn();
+		var self = this;
+		return this.listFor(ship).filter(function (e) {
+			var officer = self.get(e.id);
+			return officer && (officer.sameAs || officer.id) === 'OFF_TARG' && self.serves(e, turn) && self.transferOf(ship, e) === null
+				&& Array.isArray(e.covers) && e.covers.map(String).indexOf(String(weapon.id)) !== -1;
+		})[0] || null;
+	},
+
+	/* What he adds to THIS shot's hit chance, in d20 units: +4 on a standard called shot (one that pays the -8) by a weapon he covers;
+	   nothing on any other shot. Asked for the SHOOTER, so always an own-team ship with its list.
+	   ⚠️ MIRROR PAIR with Officers::targeterShotBonus (PHP). */
+	TARGETER_CALLED_BONUS: 4,
+	targeterShotBonus: function targeterShotBonus(ship, weapon, called) {
+		if (!called || !ship || !weapon || ship.flight) return 0;
+		return this.targeterCovering(ship, weapon) ? this.TARGETER_CALLED_BONUS : 0;
+	},
+
+	/* The side selector, in place of Move, for a Targeter who may switch sides - in game, one whose `targets` hold his own post
+	   (Officers::mayMoveTo); in Fleet Selection, one whose other side this block offers. [{id, name, current}], or null. */
+	sideChoices: function sideChoices(ship, entry) {
+		var officer = entry ? this.get(entry.id) : null;
+		if (!ship || !officer || !officer.switchTo) return null;
+		var may = this.isDerived(ship)
+			? Boolean(window.systemEnhancements) && Boolean(systemEnhancements.offerFor(ship, entry.post, officer.switchTo))
+			: Array.isArray(entry.targets) && entry.targets.map(String).indexOf(String(entry.post)) !== -1;
+		if (!may) return null;
+		var mine = { id: entry.id, name: this.sideName(ship, entry.id), current: true };
+		var other = { id: officer.switchTo, name: this.sideName(ship, officer.switchTo), current: false };
+		return (officer.side || 1) === 1 ? [mine, other] : [other, mine];
+	},
+
+	/* Fleet Selection: switch him to his other side now, free - his row traded for the other side's on the same block, both at his
+	   price (Officers::rowPrice), and put back if that is refused. true when he switched. */
+	lobbySwitchSide: function lobbySwitchSide(ship, entry) {
+		var officer = entry ? this.get(entry.id) : null;
+		if (!officer || !officer.switchTo || !window.systemEnhancements || !this.sideChoices(ship, entry)) return false;
+		var sysBefore = parseFloat(ship.pointCostSysEnh) || 0;
+		systemEnhancements.set(ship, entry.post, entry.id, 0);
+		var landed = systemEnhancements.set(ship, entry.post, officer.switchTo, 1) === 1;
+		if (!landed) systemEnhancements.set(ship, entry.post, entry.id, 1);
+		ship.pointCost = (parseFloat(ship.pointCost) || 0) + ((parseFloat(ship.pointCostSysEnh) || 0) - sysBefore);
+		systemEnhancements.apply(ship);
+		this.afterLobbyChange(ship);
+		return landed;
+	},
+
+	/* Has the viewer an officer to read about on this system (posted, or arriving this turn)? The Structure bar's officers-only
+	   tooltip (ShipSection) shows only then - a block has nothing else to say. */
+	hasPostTooltip: function hasPostTooltip(ship, system) {
+		return Boolean(ship && system) && (this.onPost(ship, system.id).length > 0 || this.arrivingAt(ship, system.id).length > 0);
 	},
 
 	//"(arriving from Medium Laser #8 - serves here from turn 5)"
@@ -984,10 +1096,21 @@ window.officers = {
 		if (!ship || !system || ship.flight || !this.isDerived(ship)) return rows;
 		var self = this;
 		var entries = this.onPost(ship, system.id);
+		/* Stage 19: a Medium ship's block is offered the Expert Targeter twice, once per side (OFF_TARG, OFF_TARG2) - one officer,
+		   so one row: the side bought, or his first side while neither is. The footer's side selector trades one for the other. */
+		rows = rows.filter(function (row) {
+			var officer = row.officer ? self.get(row.enhID) : null;
+			if (!officer || !officer.side || row.count > 0) return true;
+			var twinBought = rows.some(function (other) { return other.enhID === officer.switchTo && other.count > 0; });
+			return !twinBought && officer.side === 1;
+		});
 		rows.forEach(function (row) {
 			var officer = row.officer && row.count > 0 ? self.get(row.enhID) : null;
 			var entry = officer && officer.movable ? entries.filter(function (e) { return e.id === row.enhID; })[0] : null;
-			if (entry) row.moveTo = self.lobbyDestinations(ship, entry);
+			if (!entry) return;
+			//a Targeter on a single-block hull has no other post: his side, if this block offers him the other one, is the choice
+			if (officer.side && !self.hasOuterBlock(ship)) row.sides = self.sideChoices(ship, entry);
+			else row.moveTo = self.lobbyDestinations(ship, entry);
 		});
 		entries.forEach(function (entry) {
 			var officer = self.get(entry.id);

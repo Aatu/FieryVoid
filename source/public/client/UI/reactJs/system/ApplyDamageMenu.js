@@ -343,6 +343,15 @@ class ApplyDamageMenu extends Component {
         if (window.uiEvents) window.uiEvents.relay('CloseSystemInfo');
     }
 
+    /* OFFICERS_PLAN.md Stage 19 - the Officers footer's SIDE selector: the Expert Targeter on a Medium ship's one block covers the
+       other side now, free (officers.lobbySwitchSide trades his row for the other side's). The menu stays open, showing it. */
+    switchSide(enhID) {
+        const { ship, system } = this.props;
+        if (!window.officers) return;
+        const entry = officers.lobbyEntryAt(ship, system.id, enhID);
+        if (entry && officers.lobbySwitchSide(ship, entry)) this.forceUpdate();
+    }
+
     step(direction) {
         this.setRemaining(this.remaining() + direction);
     }
@@ -377,6 +386,7 @@ class ApplyDamageMenu extends Component {
                     rows={enhRows}
                     onChange={(enhID, count) => this.setEnhancement(enhID, count)}
                     onMove={enhID => this.startMove(enhID)}
+                    onSide={enhID => this.switchSide(enhID)}
                 />
                 {enhRows.length > 0 && <SectionDivider />}
 

@@ -18,7 +18,9 @@ a post destroyed by pre-battle damage refunded (§9.21) - committed (`68f1c82b3`
 with FV's EM hardening rebuilt to the tabletop rules first (§9.22) - committed (`318058ac0`). Stage 17, the Expert Ion Technician
 (Cascor), whose thrust boost rides the generic boost the way the Hypergraviton Blaster's does (§9.23) - committed
 (`a83c3d6ae`). Stage 18, the Expert Pilot, the first officer bought as a COUNT - up to four on one flight, one per craft (§9.24) -
-BUILT 2026-10-19, uncommitted.** Written
+BUILT 2026-10-19, uncommitted. Stage 19, the Expert Targeter (Raiders; Llort at double), the first officer posted in a STRUCTURE
+block - +4 on called shots by the weapons of his block, or on a Medium ship by one side's weapons on its hit chart (§9.26) - BUILT
+2026-10-20, uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -62,8 +64,12 @@ not fire built, and a Sub Reactor counted as the reactor (Stage 17, §9.23). On 
 text and notes (up to four, two for Raiders, each in his own craft; his free jinking level beyond the limit), and the Spark Field
 clauses of the Evader and the Pilot, and ruled four questions: pilots ARE the flight's one officer, priced by the §9.9 scaled rule,
 the Pilot's Spark Field relief automatic on a turn his flight neither jinks nor fires, and "Raiders" the Raiders faction (Stage 18,
-§9.24). Each officer's own rules questions still only need ruling when that officer's stage starts. Next step: the
-rest of the Hard tier, one officer at a time.
+§9.24). On 2026-10-20 they added the Expert Targeter with his rules text and notes (a system enhancement on the outer Structure
+blocks, movable between them in battle; a Front / Aft choice on a Medium ship's one block; the insignia and a tooltip on the block's
+health bar), and ruled four questions: his kill roll counts only the damage his block took that turn, a Medium ship's side is its
+hit chart's reach (Primary included), an Expert Gunner's called-shot bonus gives way to his, and the insignia sits after the
+section name (Stage 19, §9.26). Each officer's own rules questions still only need ruling when that officer's stage starts. Next
+step: the rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -313,6 +319,8 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Security Officer *(added 2026-10-17, §9.19)* | `OFF_SECU` | C&C | 1 |
 | Expert Religious Leader *(added 2026-10-17, §9.20)* | `OFF_RELI` | C&C, movable to any primary non-weapon system | 1 |
 | Expert Religious Leader, elsewhere *(Stage 15, §9.21)* | `OFF_RELIP` | a chosen primary non-weapon system | 2 |
+| Expert Targeter *(added 2026-10-20, §9.26)* | `OFF_TARG` | a chosen outer Structure block; on a hull with none, its Primary Structure, covering the first side | 2 |
+| Expert Targeter, the other side *(§9.26)* | `OFF_TARG2` | a Medium ship's Primary Structure, covering its second side | 2 |
 | Expert Software Engineer | `OFF_SOFT` | Computer | 1 |
 | Expert Ion Technician | `OFF_ION` | Engine | 1 |
 | Expert Surge Officer | `OFF_SURG` | Mag-Grav Reactor | 1 |
@@ -460,6 +468,7 @@ masking: individual notes never reach any client.
 | Surge Officer (Stage 16) | the Mag-Gravitic Reactor's `output` | **Yes**, as the Technician's: `output` is sent unconditionally. His +1 per EM hit, the hardening he eases and the Spark Field relief show only as their results (damage dealt, criticals rolled, a "shutdown resisted" line in the log - which a hardened ship's own d6 also writes) |
 | Ion Technician (Stage 17) | an ion gun's `boostable` / `boostEfficiency` / `thrustBoosted` / `thrustPerBoost`, its boost (type-2 power entries), and the thrust it takes off the engine | **Own team only**, as the Laser Technician's: "Weapons being charged in this manner will be detected (and their strength known) by anything that detects special weapon arming modes, such as the Expert Analyst" - by nothing else until the Analyst's stage. An opponent's payload carries the gun's power entries without its boosts while he is aboard; game over discloses all. His +1s, the boost and the Rad Cannon's improved effects show only as their results; a discharge shows as the gun's loading, which is public |
 | Expert Pilot (Stage 18) | a flight's `offensivebonus` (+1 a serving pilot); its jinking (free levels beyond the limit) | **Yes, to every viewer**: the OB through his `publish`, as the Evader's; the jinking shows as the flight's jinking, which is public. Who and how many stay own-team; the Spark Field relief shows only as the damage dealt |
+| Expert Targeter (Stage 19) | the hit chance of a called shot by a weapon he covers; which weapons those are (`covers`) | **Own team only**: the +4 is in the owner's own hit-chance preview ("Expert Targeter") and nowhere else; an opponent sees only the needed % the combat log prints for the shot, as for a Gunner's +3. The covered weapon ids ride the officer payload, which an opponent never receives |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
 | Scanner | the late-EW allowance | Own-team only: the client asks `officers.listFor`, which an enemy payload never carries |
@@ -617,7 +626,8 @@ committed.
 | **16** | FV's EM hardening rebuilt to the tabletop rules, the Ring Base hardened; the Expert Surge Officer on top. **BUILT 2026-10-18** (§9.22) | Hardened units no longer immune: -2 once a turn on the critical (dropout) roll of a system an EM weapon affects, through the real `doDamage`; a forced dropout ignored on 1-2, a forced shutdown resisted on 1, power losses one less, at the Burst Beam family, Shock Cannon and others; other EM effects and armour-ignoring damage as against anyone; the flat -1 stand-in gone from every Ipsha hull. The officer: Ipsha only, 10%, the Mag-Gravitic Reactor; +2/+1 power by size, previewed in the lobby; +1 per EM hit, +N on an N-cannon Surge Cannon shot, his own Spark Field too; -3 and 1-2 on his ship; Spark Fields 1 weaker against him |
 | **17** | Expert Ion Technician (Cascor), his thrust boost on the Hypergraviton Blaster's path. **BUILT 2026-10-18** (§9.23) | +1 per die (capped at the face) on rolled ion weapons, +1 a hit on fixed ones (the Ion Torpedo, a Ballistic weapon in FV, included), nothing on a roll of 0; stacking with Elite Crew, replaced by a Gunner's; Rad Cannons 12 boxes, the C&C at +4, criticals forced on Scanner, Engine, Reactor and Sub Reactor; the boost - 3 thrust for 1d10+1, one level per gun (a second refused in the real power.js), once a turn, a loaded rolled gun only, hidden from opponents, the engine's thrust lowered in the real movement.js; a boosted gun that does not fire discharges at the turn change; Cascor only, 10%, in the Engine |
 | **18** | Expert Pilot, added by the user - the first officer bought as a COUNT. **BUILT 2026-10-19** (§9.24) | Up to 4 (Raiders 2), never more than the flight's craft, each in his own craft from the first; +1 OB each; one free jinking level each, beyond the jinking limit, in the real movement.js (`jinkinglimit` itself untouched); each lost with his own craft, and following it on a split, his share of the cost with him; Spark Fields 1 weaker per pilot on a turn the flight neither jinks nor fires (an interception not counting); the Evader's -1 already reaching Spark Fields; pilots the flight's one officer; 100% of a craft each for a flight of six, scaled; the buy dialog holding the count to the flight size |
-| **19+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **19** | Expert Targeter, added by the user - the first officer posted in a Structure block. **BUILT 2026-10-20** (§9.26) | Offered on every outer block of a Raiders or Llort hull (Llort 20%), one per block (never moved onto a held one), on a Medium ship's one block with a second-side twin only where the two sides differ, never elsewhere; +4 on a called shot by a covered weapon, nothing on an ordinary shot or a flat-profile call, the -8 kept; a block covers its location's weapons, a Medium ship's side its hit chart's reach through Primary; a covered Gunner's +3 neither used nor spent; the kill roll on this turn's damage only; a move between blocks and a side switch on the Stage 10 rules (serving nowhere that turn), free in Fleet Selection; the insignia in the bar, an officers-only tooltip on it, its click opening the Officers menu in Initial Orders |
+| **20+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -658,6 +668,7 @@ committed.
 | Ion Technician | Rad Cannons always score 12, with no roll? Forced crits on Sensors, Engine and Reactor on every hit? When is the thrust boost declared? Is "+4 on C&C crits" a penalty? **Rules text 2026-10-18 (§9.23)** settles all four: 12 Structure boxes instead of 10 (the Rad Cannon rolls nothing anyway); a forced critical roll on a sensors, engine or reactor hit; the boost "is made at the same time systems are activated or deactivated for extra power" - Initial Orders; the C&C's roll "at +4 on the die instead of the listed +2" - his ship's Rad Cannons hitting an enemy C&C. Asked: may one gun take more than one boost? A boosted gun that does not fire - build the discharge? Does a Sub Reactor count as the reactor? **RULED 2026-10-18:** the boost was first ruled **repeatable** (every 3 thrust another 1d10+1), then, once built, **re-ruled to one level per gun** a turn (the recommendation); the **discharge is built**, with a tooltip line; a **Sub Reactor counts**. |
 | Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? **Rules text 2026-10-18 (§9.22)** settles the first: "Capital ships and larger receive +2 points of power, while medium ships and HCVs get +1" - the reactor. **RULED 2026-10-18:** the −3 is "−1 on EM-hit systems" (the tabletop −2 → −3 step, where the rule says); then, the user finding FV's hardening to be a simplification, **FV's EM hardening rebuilt to the tabletop rules** (supplied) and the Ring Base hardened, the officer on top; the −2 **once per system per turn**; EM effects the tabletop hardening does not list **apply normally** (the old immunity lines commented out with a note, to revisit); armour-ignoring EM weapons **ignore Ipsha armour fully**; the flat −1 stand-in **removed** from every Ipsha hull; **his own Spark Field gains the +1**. |
 | Expert Pilot | *Added 2026-10-19 with his rules text and notes (§9.24).* Several pilots beside another officer (D9 says one; the Spark Field text pictures "four pilots and an evader")? 100% of a fighter each, or the §9.9 scaled rule? The Spark Field relief "if he forgoes all his other benefits for the entire turn" is a per-turn choice: build a toggle? Which factions are "Raiders"? **RULED 2026-10-19:** pilots **ARE the flight's one officer** (1-4 of them, never beside another); **scaled** by §9.9 (100% of a craft each, for a flight of six); the relief **automatic** - "if flight doesn't jink or fire that turn they can get the damage reduction"; **the Raiders faction only**. |
+| Expert Targeter | *Added 2026-10-20 with his rules text and notes (§9.26).* His post is a Structure block, and FV rolls d20 + ALL the block's damage for one: under D3 that kills him almost at once - keep D3, roll on this turn's damage, or no kill roll? Which weapons does a Medium ship's side aid: those its hit chart reaches directly, through its Primary result too, or those in that section? A Gunner's gun he covers: both bonuses, his alone, or the Gunner's ("does not combine")? Where does the insignia go on a block's bar? **RULED 2026-10-20:** d20 + **this turn's damage** to the block, 20+ kills, the new code "heavily gated"; the side's **hit chart reach, Primary included**; **his +4 only** - the Gunner keeps his +1 fire control, his once-per-battle +3 neither used nor spent while covered; **in the bar, after the section name**. **Re-ruled after the play test (game 4495):** one **per Structure block**, not per ship, and never moved onto a block another Targeter holds. |
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? |
 | Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). **RULED 2026-10-15: Grome Autocracy only** (§9.12); the Matter-weapon hull test is kept beside it. **Rules text and rulings 2026-10-16 (§9.14):** "moved into one specific weapon instead of his normal station" - **one or the other, never both**; that weapon gets the +1 / +1 "but no others do", and its rate of fire +1 (Stage 10); "disabled if the weapon takes any damage at all (after armor), and automatically killed if the weapon is destroyed" - **and the ordinary kill roll too**. |
@@ -2906,3 +2917,151 @@ Expert Helmsman does for ships (in addition to the Initiative bonus it already h
   `fvbuild -Check` stops earlier on a NEW ship-data validator error not from this work: KobolRanger's hit chart names a "Jump
   Drive" on location 0 that it does not have.
 - Not play-tested in a browser.
+
+### 9.26 Stage 19: Expert Targeter (2026-10-20)
+
+**Rules text (user, 2026-10-20) - a 30th officer, not in the original brief.** "Expert Targeter: One area in which Raiders excel is
+that of knocking critical systems (weapons, thrusters, etc.) off enemy units. In many cases, this is the only way they can complete
+their goal of capturing freighters with their cargo intact. The expert target is a true boon to a Raider band. With him on the ship,
+called shots have a +4 bonus to hit. This does not provide any benefit to normal attacks, only called shots. It does not cancel the
+usual -8 called shot penalty, either. Location: One structure block. All weapons attached to this block receive the benefit. On a
+medium ship, he must choose either forward or aft weapons, and will aid only those weapons which can be hit from the chosen
+direction (on the Hit Location Chart). Cost: 10% of the ship's base cost for Raiders. Availability: Raiders. Llort can also take at
+double the cost." The user's notes: a System Enhancement on the non-Primary Structure blocks, movable to the other outer blocks
+during battle; a Medium ship has one block, so instead of Move its menu has a Front / Aft selection (Left / Right on a LeftRight
+hull; default Front / Left), and switching sides in Initial Orders costs him that turn, as any officer move does; care with the
+insignia on a block's bar ("less room, especially on the Starboard side"); and a hover tooltip on the bar giving the officer's
+details "and nothing else", which the bar does not have today.
+
+**Measured before asking.**
+- FV's Structure makes the ordinary critical roll - d20 + ALL its damage - and simply has no criticals to apply, so under D3 the
+  roll kills him: a block that has taken 10 kills him on 55% of later hit-turns, from 19 on certainly - and on a Medium ship most
+  hits land on the one block.
+- Raiders + Llort have 41 hulls with ONE Structure block (33 Medium ships, 7 LCVs, the Hawk - MediumShipLeftRight - and the Llort
+  Graemlar OSAT, D9's). Every other hull of theirs has outer blocks, the bases' through `Structure::createAsOuter`; the Vree-built
+  Jia and Vastar keep their weapons in the ring's locations.
+- On those 41 the hit chart and the weapons' locations disagree: the Hactrus's four PRIMARY beams are hit only from the FRONT chart
+  ("0:Light Particle Beam"), and the Hawk's FRONT cannon only through PRIMARY. Read off the charts: the 7 LCVs reach every weapon
+  from both sides; 12 hulls reach nothing from the aft chart but what Primary gives; 22 split, 13 of them with Primary-chart weapons
+  reachable from either side; no weapon is out of every side's reach.
+
+**Rulings (user, 2026-10-20, asked before building):**
+1. His kill roll is **d20 + the damage his block took THIS turn** (through armour), 20+ killed - not D3's roll on all the block's
+   damage. "Make any new code heavily gated since this will be a rare occurrence."
+2. A Medium ship's side aids the weapons **its hit chart reaches, directly or through its Primary result** - so a Primary-chart
+   weapon is aided from either side, and an LCV's every weapon from both.
+3. A called shot from an **Expert Gunner's** gun that he covers gets **his +4 only**: the Gunner keeps his +1 fire control; his
+   once-per-battle +3 called shot is neither used nor spent while the gun is covered, so it is still his if he moves or the
+   Targeter falls.
+4. The insignia sits **in the bar, after the section name**.
+5. *(After the user's play test, game 4495, the same day.)* **One per eligible Structure block**, "like other System Enhancements",
+   not one per ship - and a Targeter is never moved onto a block where another one is. Built as a `shipLimit` (`targeterLimit`, the
+   blocks he could serve in: 4 on a four-block capital, 2 on an HCV, 6 on a six-block base, 1 on a Medium ship) - the offer's cap
+   slot, which the lobby's `set()` already obeys. `keepPlacedRows`' one officer to a system, and the move rule's occupancy test
+   (mayMoveTo; the lobby's lobbyPostAs; the game's `destinations`), already kept two off one block: proved, not changed. With one
+   per block no weapon is ever covered twice.
+
+**Built with defaults, stated here (ask before changing):**
+- **Posts.** Any outer Structure block (location not 0) of a Raiders or Llort hull; a hull with none - a Medium ship, an LCV - is
+  offered its Primary Structure. ~~One per ship~~ - **re-ruled the same day (ruling 5): one per block** he could serve in.
+- **A block covers the weapons in its own location** ("attached to this block"), so Primary weapons never, and a weapon a hit chart
+  happens to reach from that side ("0:..." entries) only if it sits in the block's location. The jump drive (a `Weapon` in FV) never.
+- **A Medium ship's sides** are its hit chart's non-Primary locations in order - 1 / 2 (Front / Aft), or 3 / 4 (Left / Right) on a
+  LeftRight hull - each reaching, from its own bearing, every weapon its chart names ("N:" redirects and "TAG:" entries included;
+  Structure ignored) and, through its "Primary" result, every weapon the Primary chart names. He covers the FIRST side when bought.
+  The second side is offered (OFF_TARG2) only where the two sides reach different weapons, so an LCV has no selector.
+- **+4 (+20%)** on a standard called shot - a call on a system with no flat profile of its own, i.e. every call that pays the -8;
+  the -8 itself unchanged (-16 against a base); nothing on an ordinary shot or a Kirishiac flat-profile call. Ballistic called shots
+  too (declared in Initial Orders, resolved when he serves or not).
+- A **called Piercing shot** from a covered Gunner's gun: the Gunner's Piercing branch is unchanged (his Piercing ability is not a
+  called-shot bonus), and the +4 applies.
+- **Out of action.** Disabled when his block is destroyed (an outer block also falls with the Primary - the ship is lost then
+  anyway); killed on ruling 1's roll, made on every turn the block takes damage through armour, while he serves or on the turn he is
+  put out. Pre-battle damage destroying his block refunds him (Stage 15's rule).
+- **Moves.** Between outer blocks in Initial Orders by Stage 10's rules (one a turn, serving nowhere that turn, never onto a
+  destroyed block); free in Fleet Selection (Stage 15). A **side switch is a move to his own post** - the transfer note names his
+  own block, and he becomes the other side's id there - so it costs the turn exactly as a move does, and is free in Fleet Selection.
+- **Price** 10% of the hull, Llort 20% ($factionRules); "Raiders" is the `Raiders` faction (the Stage 18 reading - not the
+  Escalation Wars raider factions).
+
+**Design.**
+- ⭐ **Two placed ids, the twin pattern** (OFF_MWE / OFF_MWEW, OFF_RELI / OFF_RELIP): `OFF_TARG` - a block, or a single-block hull's
+  first side - and `OFF_TARG2` (`sameAs` OFF_TARG: his faction rules and price, one or the other) - its second side. A per-system
+  row on the Structure, so the lobby buys him in the block's own menu (the health bar already opens it; Hardened Armour is sold
+  there), and saved fleets, the D13 name check, the D11 refund and the sanitiser come free; `keepPlacedRows`' one officer per system
+  keeps the two side rows exclusive. New registry keys: `switchTo` (the id he becomes on his own post - the side switch) and `side`
+  (which of a single-block hull's sides he covers). `shipLimit` `targeterLimit` (ruling 5): one per block he could serve in.
+- **The +4**: `Officers::targeterShotBonus` beside `gunnerShotBonus` in `Weapon::calculateHitBase`, behind `$officersPresent`, and
+  only for a standard called shot: a list walk on a called shot by a ship with officers. `gunnerShotBonus` asks `targeterFor` before
+  spending the called +3. ⚠️ MIRROR PAIR `officers.targeterShotBonus` in `weaponManager.computeShotModifiers` ("Expert Targeter").
+- **Coverage is the server's alone**: `Officers::targeterCovers` (location, or `sideReach` over the hit chart through
+  `getSystemsByNameLoc`), sent to the owner as the payload's `covers` (weapon ids) - so the client mirror reads a list and copies no
+  hit-chart logic. The lobby needs no coverage (it shows no hit chance).
+- **The kill roll** (ruling 1): one branch in `rollKills` for a Structure post, `blockKillRoll` = d20 + floor(`damageReceivedOnTurn`)
+  + the critRollMods - reached only for a post holding an officer that took damage this turn, behind `$officersPresent`.
+- **The side switch**: `mayMoveTo` answers a move to his own post with his `switchTo` id, where that is offered; `moveTargets` then
+  lists his own block among the `targets`, which the client reads as "may switch". Everything after - the note, `transit`, `moving`,
+  the blue insignia - is Stage 10's.
+- **UI.** `ShipSection`'s bar: the insignia after the name; the pick outline on a destination bar; a click hands a pick its answer,
+  and in Initial Orders opens the Officers menu (SystemClicked, menu); a hover (or long press) raises the officers-only tooltip
+  (`SystemInfo` `officersOnly`) through the bar's own StructureMouseOver / Out events, in game and in the lobby, only when the viewer
+  has an officer listed there. The Officers menu and the lobby menu's footer show a side selector for a side-switching Targeter in
+  place of Move. `officers.systemName` names a block by its section ("Aft Structure #20").
+
+**Files.** Server: `Officers.php` (constants, `$factionRules` OFF_TARG, registry `OFF_TARG` / `OFF_TARG2` after OFF_RELIP; `mayMoveTo`'s
+switch; `isTargeterPost`, `isTargeterSecondSide`, `hasOuterBlock`, `hullSides`, `sideReach`, `targeterCovers`, `coveredWeapons`,
+`targeterFor`, `targeterShotBonus`; `gunnerShotBonus`; `rollKills` / `blockKillRoll`; `addForJson` `covers`), `Enhancements.php`
+(per-system registry entries and wrappers), `weapon.php` (`calculateHitBase`). Client: `officers.js`, `weaponManager.js`, React
+`ShipSection.js`, `SystemInfo.js`, `OfficersMenu.js`, `SystemEnhancementsSection.js`, `ApplyDamageMenu.js`, `PhaseStrategy.js`,
+`gamelobby.js`, `systemEnhancements.js` (the two labels). Docs: an Expert Targeter card (Ship Officers, alphabetical), About Officers
+(buying in a block, moving, the insignia and the bar's tooltip). Statics, bundles and the served copy rebuilt; no new PHP class.
+
+**Measured.** 254 OFF_TARG offers (Raiders 203, Llort 51) and 34 OFF_TARG2 (Raiders 33 - 32 Medium ships and the Hawk - Llort 1, the
+Terillon), statics +7.3 KB uncompressed. Caps (the offer's 6th slot, ruling 5): 1 on a Medium ship, 2 on an HCV, 4 on a four-block
+capital, 6 on a six-block base.
+
+**Verified.**
+- `officersHarness.php` **1316 / 0 with the database** (96 new): the registry pair; offers on every outer block (Battlewagon 4, a base's
+  6 createAsOuter blocks), Llort 20%, a Medium ship's two sides, an LCV's one, none for the Omega, an OSAT or a Dilgar hull, none with
+  OFF_TARG opted out, the Gunner still weapons-only; posts from rows (a Primary block or a weapon buys nothing; one per block, two on
+  one block one); the sanitiser; coverage through the payload's `covers` - a block's own weapons (not the Primary ones, the jump drive
+  or the RammingAttack), the Wolf's two sides with its Primary beam in both, the Hactrus's Primary beams on its front chart, the
+  Hawk's Front cannon from both sides, the Lshon's every weapon; the REAL `calculateHitBase` (+20% on a covered call, nothing ordinary,
+  uncovered, gate off, disabled, killed, moving; the Aft weapons once he arrives; the Medium ship's sides; a covered Gunner's +5 and
+  +20 with nothing spent, his +15 back once the Targeter is killed); the kill roll (17 + 3 kills, 16 + 3 does not, 30 earlier damage
+  ignored, the ship's critRollMod, no roll without damage through armour, a block destroyed this turn rolled, last turn's
+  disabled); moves (to Port, refused to the Primary block, a weapon, his own block on a big ship, a wreck; targets; two Targeters -
+  never onto the other's block, onto a free one, onto a killed one's; each one's targets the free blocks); the side switch (moving
+  to his own block that turn, OFF_TARG2 the next, back again; refused on an LCV; targets; saveTransfers' note), a Gunner's own-gun
+  order still refused; a REAL saved fleet (a Battlewagon's Aft block at 54, a Wolf's Aft side at 45), rolled back.
+- `officersClientHarness.js` **500 / 0** (44 new): the registry mirror and order; block names; summaries; sides; the +4 and its
+  states; the Gunner's +3 giving way; the REAL `computeShotModifiers`; the side selector in the REAL OfficersMenu (order, claim,
+  "ordered to switch", the blue insignia, cancel); the REAL ShipSection bar (insignia after the name, gold / killed, nothing without
+  an officer, the pick outline, a click ordering the move, the Initial Orders menu click, nothing in the Firing phase, the hover's
+  element); the officers-only SystemInfo; the REAL PhaseStrategy.js hover handlers (shown, hidden, another block, a menu left open);
+  the lobby (one row a block, the selector, a free switch and back, an LCV, Move on a big ship, a second Targeter bought, never moved
+  onto it); the REAL footer.
+- `enhancementsDifferential.js` **707 / 0** (9 new: `targ`, `targ+gun` on Areko; `targ`, `targ2`, `targ+targ2` on the Wolf, added for
+  the placed cases only); `enhancementsHarness` **282 / 0** (fingerprint unchanged - ship-level offers only).
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0**.
+- **Mutation-tested: 34 breaks (16 server, 18 client), all caught**, files byte-identical afterwards. One first exited on an unguarded
+  read (`payload.element.tag`) rather than a FAIL line; the check was made null-safe and then reported it.
+- **Play test, game 4495 (user, 2026-10-20)** - read off its rows and a real load: three Targeters (a Pillager and an IML Attack
+  Cruiser moved between blocks on turn 2, the Terillon switched to Aft - an OffTransfer to its own block, OFF_TARG2 from turn 3). On
+  turn 1 the cruiser's covered Port beam needed 115 against 95 for its uncovered Starboard beam on the same target, and the Terillon's
+  covered Front Scattergun 70 against 50 for its Aft one - +20 exactly. The user then re-ruled the limit (ruling 5).
+
+**Follow-up (user request, 2026-10-20): the bar's ✦ and the menu outline** - both observations of the first build, fixed:
+- A block carrying a system enhancement (Hardened Armour) shows SystemIcon's ✦ on its bar (`EnhancementStar`, now exported), after
+  the name and before an officer's insignia - SystemIcon's badge order. Own team only, as the icon's (`systemEnhancements.hasAny`,
+  which skips officer rows: a Targeter alone lights no ✦).
+- The lobby menu's outline (helpers/menuTarget) draws on the block's bar while its menu is open, in the menu's focus blue, on the
+  bar's edge as the pick outline is.
+- **Room on the bar, measured** (`officersE2E/lobby19.mjs`, standalone, real bundles): every one of the 78 hulls with a 3-digit
+  Port / Starboard / quarter block, plus Battlewagon, Brigand, Wolf, Hawk, Sanctuary, Erlorra, Kaedashkada and Omega, Hardened Armour
+  on every block and a Targeter on every block offered one - **463 / 0**: no badge ever overlaps the readout, no readout is ever
+  clipped. "Starboard" was the one name a 128px side column had no room for (49 bars, the Battlewagon's 52/52 among them), so with a
+  badge it reads **"Stbd"** - the window's own quarter spelling. The name, never the readout, shortens with an ellipsis if still
+  short of room (the readout does not shrink): 4 bars, the Kaedashkada (New)'s quarter blocks with both badges and 3-digit boxes.
+- officersClientHarness **507 / 0** (7 new: the ✦ and its order, the ✦ alone, none elsewhere, the ellipsis and the fixed readout,
+  "Stbd" only with a badge, the outline on the menu's block only, gone on close). Bundles rebuilt, served copy synced.

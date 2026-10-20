@@ -1900,9 +1900,12 @@ public function getFullStartLoading()
 
         /* OFFICERS_PLAN.md Stage 10 - an Expert Gunner's once-per-battle shot: +4 on his gun's first native Piercing
            shot, +3 on its first called shot (Officers::gunnerShotBonus spends it). One static read for every other
-           shot in the game. ⚠️ MIRROR PAIR with officers.gunnerShotBonus, in weaponManager.computeShotModifiers. */
+           shot in the game. ⚠️ MIRROR PAIR with officers.gunnerShotBonus, in weaponManager.computeShotModifiers.
+           Stage 19: and an Expert Targeter's +4 on a standard called shot by a weapon he covers (officers.targeterShotBonus). */
         if (TacGamedata::$officersPresent) {
-            $mod += Officers::gunnerShotBonus($shooter, $this, $calledSystem !== null && $calledProfileOverride === null, $gamedata);
+            $standardCalledShot = ($calledSystem !== null && $calledProfileOverride === null);
+            $mod += Officers::gunnerShotBonus($shooter, $this, $standardCalledShot, $gamedata);
+            $mod += Officers::targeterShotBonus($shooter, $this, $standardCalledShot, $gamedata);
         }
 
         if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)) { //leaving instanceof OSAT here - assuming MicroSATs will not suffer this penalty (Dovarum seems to be able to turn/pivot like a superheavy fighter it's based on)

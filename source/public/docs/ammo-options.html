@@ -719,7 +719,8 @@
   <ul>
     <li>A system with no gold section at all simply has nothing to offer - the normal case for most systems on most
       ships.</li>
-    <li>A refitted system gets a gold <b>&#10022;</b> star on its icon, and the ship's Enhancements box gains a
+    <li>A refitted system gets a gold <b>&#10022;</b> star on its icon (a Structure block, which has no icon, on its health
+      bar after the section name), and the ship's Enhancements box gains a
       <b>"System Enhancements (n)"</b> line, where n is the number of systems refitted (a gun carrying two different
       refits still counts once). Both markers are shown to your own side only.</li>
     <li>What a system is actually carrying is shown in its own information tooltip, alongside its normal stats.</li>
@@ -872,9 +873,10 @@
     <li>Officers are bought with the unit in Fleet Selection, in the <b>Officers</b> section at the bottom of its buy
       window.</li>
     <li>A few officers serve in a <b>system you choose</b> - the Expert Gunner in a weapon, the Matter Weapons Expert in a
-      Matter weapon instead of the C&amp;C, and the Expert Religious Leader in any Primary system that is not a weapon instead
-      of the C&amp;C. Buy one there once the ship is in your fleet: click the system in the ship window and add him under
-      <b>Officers</b> in its Enhancements menu. A system holds one such officer.</li>
+      Matter weapon instead of the C&amp;C, the Expert Religious Leader in any Primary system that is not a weapon instead
+      of the C&amp;C, and the Expert Targeter in a Structure block. Buy one there once the ship is in your fleet: click the
+      system in the ship window (for a Structure block, its health bar) and add him under <b>Officers</b> in its Enhancements
+      menu. A system holds one such officer.</li>
     <li>Changed your mind? In Fleet Selection any officer who can move can be moved, <b>for free</b> - see Moving an
       officer.</li>
     <li>A ship may carry several officers, but only one of each type - except where a card gives a higher limit. A fighter
@@ -909,8 +911,10 @@
   <h3 data-anchor="movingofficers">Moving an officer</h3>
   <ul>
     <li>Some officers can change posts: the Expert Gunner, between weapons; the Matter Weapons Expert, between the C&amp;C and
-      the ship's Matter weapons; and the Expert Religious Leader, between the systems of the ship's Primary section that are
-      not weapons.</li>
+      the ship's Matter weapons; the Expert Religious Leader, between the systems of the ship's Primary section that are
+      not weapons; and the Expert Targeter, between the ship's outer Structure blocks - or, on a medium ship, from one side to
+      the other with the <b>Front</b> / <b>Aft</b> buttons that take Move's place. Click a block's health bar to reach his
+      menu, and a highlighted health bar to move him there.</li>
     <li><b>In Fleet Selection</b> a move is free and takes effect at once. Click the system the officer is posted in: its menu's
       <b>Officers</b> section has a <b>Move</b> button beside his points. Press it, then click one of the highlighted systems
       in the ship window; a click anywhere else calls it off. An officer bought at the C&amp;C in the buy window is shown in
@@ -933,12 +937,13 @@
   <h3 data-anchor="seeingofficers">Seeing your officers</h3>
   <ul>
     <li>A gold double-chevron insignia marks the post's icon in the ship window - for a fighter officer, the flight's first
-      fighter. It turns grey once the officer is out of action, with a red slash through it if they were killed. On the turn
+      fighter, and for an Expert Targeter his block's health bar, after its name. It turns grey once the officer is out of action, with a red slash through it if they were killed. On the turn
       an officer moves, the insignia on both his old and his new post turns <b>blue</b>.</li>
     <li>The post's information tooltip names the officer and what they do, and says how and when they were lost - or, for
       an Expert Scavenger, when he spent his once-per-battle save, and for an Expert Gunner, which of his once-per-battle
       abilities he has used. While an officer is moving, both posts' tooltips say where he is going or coming from. A
-      fighter officer is named in the flight's own tooltip, shown when you hover over a fighter.</li>
+      fighter officer is named in the flight's own tooltip, shown when you hover over a fighter, and an Expert Targeter in a
+      tooltip of his own when you hover over his block's health bar.</li>
     <li>The ship window's gold Enhancements box counts the officers aboard, as <b>Officers (2)</b>. In the lobby, a
       fighter flight's box names its one officer instead (<b>Expert Pilot (3)</b> for three pilots).</li>
     <li>Your opponent sees none of these until the game is over. Some effects do show, though, because they change numbers
@@ -1315,6 +1320,37 @@
           only shots in an EM mode benefit. Your EM weapons' tooltips show their damage with his bonus. The extra power shows
           to your opponent as the reactor's output; the officer himself stays hidden. His -3 also protects him: an
           officer's survival depends on his post's critical roll.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Targeter</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>One Structure block of your choice, other than the Primary one. Bought from the block's own Enhancements menu: click
+          its health bar in the ship window and add him under Officers. A medium ship has only its Primary block, so he serves
+          there instead, covering one side of the ship.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>+20% to hit on <b>called shots</b> by the weapons he covers. The usual called shot penalty still applies, and
+            ordinary shots gain nothing.</li>
+          <li>He covers every weapon in his block's section - the Forward weapons from the Forward block, and so on.</li>
+          <li>On a medium ship he covers either the <b>Front</b> or the <b>Aft</b> (<b>Left</b> or <b>Right</b> on a ship laid
+            out by sides): the weapons that ship's hit chart can hit from that side, including any it reaches through a
+            Primary result. He starts on the Front (Left). Where both sides would cover the same weapons, as on an LCV, there
+            is no choice to make.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>10% of the ship's base cost (20% for the Llort).</dd>
+        <dt>Limit</dt>
+        <dd>1 per Structure block - a ship may carry one in each block he could serve in. Raiders and Llort only.</dd>
+        <dt>Notes</dt>
+        <dd>He can move to another outer Structure block, but not to one another Targeter holds (see Moving an officer). On a medium ship the block's menu has a
+          <b>Front</b> / <b>Aft</b> choice in place of Move: free in Fleet Selection, but in Initial Orders switching sides is a
+          move, so he covers nothing for the rest of that turn. He is disabled if his block is destroyed. Structure is hit far
+          more often than other systems, so his kill roll counts only the damage his block took that turn, not all the damage
+          it has taken. On a weapon an Expert Gunner serves in, his +20% replaces the Gunner's once-per-battle +15% called shot,
+          which the Gunner keeps for later. The bonus shows in your called shots' hit chances; hovering over his block's health
+          bar names him.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">

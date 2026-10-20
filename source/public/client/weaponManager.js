@@ -2377,6 +2377,9 @@ window.weaponManager = {
            shot, +3 on its first called shot. ⚠️ MIRROR PAIR with the gunnerShotBonus line in Weapon::calculateHitBase. */
         var gunnerShot = window.officers ? officers.gunnerShotBonus(shooter, weapon, standardCalledShot) : 0;
         if (gunnerShot !== 0) otherDetail.push({ label: 'Expert Gunner', value: gunnerShot });
+        //Stage 19: an Expert Targeter's +4 on a called shot by a weapon he covers. ⚠️ MIRROR PAIR with Officers::targeterShotBonus.
+        var targeterShot = window.officers ? officers.targeterShotBonus(shooter, weapon, standardCalledShot) : 0;
+        if (targeterShot !== 0) otherDetail.push({ label: 'Expert Targeter', value: targeterShot });
 
         var ammo = weapon.getAmmo(null);
         if (ammo && ammo.hitChanceMod !== 0) {

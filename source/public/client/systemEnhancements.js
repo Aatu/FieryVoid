@@ -58,7 +58,9 @@ window.systemEnhancements = {
 		//placed officers (OFFICERS_PLAN.md Stage 8) - officers.js holds the rest of what they are
 		OFF_GUN: 'Expert Gunner',
 		OFF_MWEW: 'Matter Weapons Expert',
-		OFF_RELIP: 'Expert Religious Leader'
+		OFF_RELIP: 'Expert Religious Leader',
+		OFF_TARG: 'Expert Targeter',  //Stage 19: in a Structure block - and, on a Medium ship's one block, its second side:
+		OFF_TARG2: 'Expert Targeter'
 	},
 
 	/* A placed officer's row (OFFICERS_PLAN.md Stage 8), not a refit: the OFF_ prefix every officer id carries

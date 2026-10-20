@@ -58,6 +58,9 @@
    Stage 18: the Expert Pilot - the first officer bought as a COUNT (`multi`): up to four on one flight, one in each of its first
    crafts, each +1 OB and a free jinking level beyond the limit (client, movement.js), and Spark Fields 1 weaker on his flight on a
    turn it neither jinks nor fires (pilotSparkRelief). Several pilots are still the flight's ONE officer (D9).
+   Stage 19: the Expert Targeter (Raiders, Llort) - the first officer posted in a STRUCTURE block: +4 on called shots by the weapons
+   he covers (targeterShotBonus) - his block's, or on a Medium ship one side's of its hit chart (sideReach) - and a side switch that is
+   a move to his own post (`switchTo`). His kill roll counts only that turn's damage to the block (blockKillRoll).
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -114,6 +117,9 @@ class Officers{
 	const RAD_CNC_CRIT_MOD = 4;          //...: "If they hit C&C, the critical roll is at +4 on the die instead of the listed +2"
 	const PILOT_OB = 1;                  //Expert Pilot: "+1 to the flight's offensive bonus" (+5% in FV)
 	const PILOT_SPARK_RELIEF = 1;        //...: "will also reduce [spark field] damage by 1 point if he forgoes all his other benefits"
+	const TARGETER_CALLED_BONUS = 4;     //Expert Targeter: "called shots have a +4 bonus to hit" - the -8 stays ("It does not cancel ...")
+	//...a Medium ship's side, looked at from its own bearing (a "TAG:" hit chart entry is arc-filtered): Front, Aft, Left, Right
+	private static $sideBearing = array(1 => 0, 2 => 180, 3 => 270, 4 => 90);
 	//the fire orders that are NOT the flight firing, for his Spark Field relief: interception uses neither OB nor jinking
 	private static $notFiring = array('intercept', 'selfIntercept', 'meteorDefence');
 
@@ -156,6 +162,8 @@ class Officers{
 		'OFF_ION'  => array('only' => array('Cascor Commonwealth')),
 		//"Up to four expert pilots in the same flight are cumulative, except for Raider flights, which can use no more than two"
 		'OFF_PILOT' => array('max' => array('Raiders' => 2)),
+		//"Cost: 10% of the ship's base cost for Raiders. Availability: Raiders. Llort can also take at double the cost."
+		'OFF_TARG' => array('only' => array('Raiders', 'Llort'), 'pct' => array('Llort' => 20)),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -197,7 +205,10 @@ class Officers{
 	   Stage 14:
 	     lost        (optional) the static method applying what his LOSS does, on every turn after he was disabled
 	                 or killed in battle (isLost) - in place of `apply`, which only runs while he serves
-	     lostPublish (optional) `publish`'s list for the turns `lost` runs */
+	     lostPublish (optional) `publish`'s list for the turns `lost` runs
+	   Stage 19:
+	     side        (optional) which of a single-block hull's two sides he covers (1 = its first, 2 = its second - hullSides)
+	     switchTo    (optional) the officer he becomes when ordered to his OWN post (mayMoveTo): the Expert Targeter's side switch */
 	private static $registry = array(
 		/* Expert Helmsman: +5 initiative (FV units, QX1), wins initiative ties, and -1 on the die he
 		   rolls on a meteor swarm's impact chart (user, 2026-10-10). The tie-break is
@@ -347,6 +358,21 @@ class Officers{
 		'OFF_RELIP' => array('label' => 'Expert Religious Leader', 'placed' => true, 'pct' => 15, 'sameAs' => 'OFF_RELI',
 			'hosts' => 'isReligiousPost', 'nonWeapon' => true, 'apply' => 'applyReligiousLeader', 'publish' => array('iniativebonus'),
 			'lost' => 'applyReligiousFrenzy', 'lostPublish' => array('iniativebonus', 'forwardDefense', 'sideDefense'), 'movable' => true),
+		/* Expert Targeter (Stage 19; rules text, user 2026-10-20), in a STRUCTURE block: "called shots have a +4 bonus to hit ... only
+		   called shots. It does not cancel the usual -8" (targeterShotBonus). "All weapons attached to this block receive the
+		   benefit" - the weapons in its location; "on a medium ship, he must choose either forward or aft weapons, and will aid only
+		   those weapons which can be hit from the chosen direction (on the Hit Location Chart)" - a hull with no outer block posts him
+		   in its Primary Structure, covering one side's reach on its hit chart (sideReach). OFF_TARG is a block, or such a hull's
+		   first side (Front, or Left); OFF_TARG2 its second (Aft, or Right) - the same officer (sameAs), offered only where the two
+		   sides differ. Rulings (user 2026-10-20): the side's reach includes its Primary result; his kill roll counts only that
+		   turn's damage to the block (blockKillRoll); on a Gunner's gun his +4 replaces the Gunner's called-shot +3. One per block
+		   he could serve in, like a system enhancement (user ruling 2026-10-20 - targeterLimit; a block hosts one officer). Moves to
+		   another outer block no other officer holds (movable); on a single-block hull switches side as a move to his own post
+		   (switchTo). 10%, Llort 20%, Raiders and Llort only ($factionRules). No stat moves at load. */
+		'OFF_TARG' => array('label' => 'Expert Targeter', 'placed' => true, 'pct' => 10, 'hosts' => 'isTargeterPost', 'nonWeapon' => true,
+			'apply' => null, 'movable' => true, 'side' => 1, 'switchTo' => 'OFF_TARG2', 'shipLimit' => 'targeterLimit'),
+		'OFF_TARG2' => array('label' => 'Expert Targeter', 'placed' => true, 'pct' => 10, 'sameAs' => 'OFF_TARG', 'hosts' => 'isTargeterSecondSide',
+			'nonWeapon' => true, 'apply' => null, 'movable' => true, 'side' => 2, 'switchTo' => 'OFF_TARG'),
 
 		/* FIGHTER OFFICERS (Stage 4). A flight carries ONE officer in total (D9), posted on its first
 		   craft. He is lost with that craft - destroyed, or dropped out - and never by a dock, a partial
@@ -985,7 +1011,8 @@ class Officers{
 	   (the client offers only those) all ask it:
 	     - a movable officer, serving (not disabled or killed before $m), moving at most once a turn;
 	     - a post he could hold (postAs: a weapon he could be bought for; the Matter Weapons Expert's C&C), not
-	       his own, and not destroyed;
+	       his own, and not destroyed - his own only for an officer who becomes another there (`switchTo`, Stage 19: the
+	       Expert Targeter's switch to a Medium ship's other side), costing the turn as any move does;
 	     - not the post of another placed officer still in action that turn or the next - one officer to a
 	       weapon (Stage 8), and no swaps: the post must be free when he sets out. A disabled or killed
 	       officer holds nobody's post. */
@@ -994,10 +1021,11 @@ class Officers{
 		$stay = self::stayOn($entry, $m);
 		if ($stay === null || empty(self::$registry[$stay['id']]['movable'])) return null;
 		if (!empty($entry['transit']) && in_array((int)$m, $entry['transit'], true)) return null;
-		if ((int)$target->id === (int)$stay['post']) return null;
+		$own = ((int)$target->id === (int)$stay['post']);
+		if ($own && empty(self::$registry[$stay['id']]['switchTo'])) return null;
 		list($out) = self::outState($ship, $entry);
 		if ($out !== null && $out < $m) return null; //"Disabled or Killed Officers cannot be moved"
-		$as = self::postAs($ship, $stay['id'], $target);
+		$as = $own ? self::switchAs($ship, $stay['id'], $target) : self::postAs($ship, $stay['id'], $target);
 		if ($as === null) return null;
 		$fell = self::disabledTurn($ship, $target);
 		if ($fell !== null && $fell < $m) return null;
@@ -1030,6 +1058,12 @@ class Officers{
 		return null;
 	}
 
+	//Stage 19: the officer he becomes on his own post ($registry `switchTo`), where the hull offers him there - or null
+	private static function switchAs($ship, $id, $system){
+		$to = isset(self::$registry[$id]['switchTo']) ? self::$registry[$id]['switchTo'] : null;
+		return ($to !== null && Enhancements::systemEnhancementOffered($ship, $system, $to)) ? $to : null;
+	}
+
 	/* "Any primary non-weapon system" (the Religious Leader) - a system of the PRIMARY section that is not a weapon and not
 	   Structure. Not one that can never be targeted either (a technical system - the Hyach Specialists, an ammo magazine, a
 	   Mag-Grav "technical" reactor): an officer there could never be disabled or killed. ⚠️ A jump drive IS a Weapon in FV
@@ -1044,6 +1078,113 @@ class Officers{
 	   there he is OFF_RELI, bought in the Officers section, so one post never has two ways to buy him. */
 	private static function isReligiousPost($system, $ship){
 		return self::isPrimaryNonWeapon($ship, $system) && $system !== self::findPost($ship, 'cnc');
+	}
+
+	/* ------------------------------------------------------------------ the Expert Targeter (Stage 19) */
+
+	/* How many Expert Targeters one ship may carry (`shipLimit`): one per block he could serve in - "1 per eligible (structure)
+	   system, like other System Enhancements" (user ruling 2026-10-20). keepPlacedRows' one officer to a system does the rest, and
+	   mayMoveTo's occupancy test keeps a moving Targeter off a block another one holds. A single-block hull: 1. */
+	private static function targeterLimit($ship){
+		$n = 0;
+		foreach ($ship->systems as $system) if (self::isTargeterPost($system, $ship)) $n++;
+		return max(1, $n);
+	}
+
+	/* OFF_TARG's posts (`hosts`): "One structure block" - any outer block (the user's note: the non-Primary blocks); a hull with
+	   none, a Medium ship or an LCV, has one block, its Primary Structure, and he covers one side of its hit chart there. */
+	private static function isTargeterPost($system, $ship){
+		if (!($system instanceof Structure)) return false;
+		if (self::hasOuterBlock($ship)) return (int)$system->location !== 0;
+		return $system === $ship->getStructureSystem(0) && count(self::hullSides($ship)) > 0;
+	}
+
+	/* OFF_TARG2's (`hosts`): that one block again, covering its SECOND side - offered only where the two sides reach different
+	   weapons, so an LCV (whose three charts are one) has no choice to make. */
+	private static function isTargeterSecondSide($system, $ship){
+		if (!($system instanceof Structure) || self::hasOuterBlock($ship) || $system !== $ship->getStructureSystem(0)) return false;
+		$sides = self::hullSides($ship);
+		if (count($sides) !== 2) return false;
+		$first = array_keys(self::sideReach($ship, $sides[0]));
+		$second = array_keys(self::sideReach($ship, $sides[1]));
+		sort($first); sort($second);
+		return $first !== $second;
+	}
+
+	//a Structure block outside the Primary section (Structure::createAsOuter's included)
+	private static function hasOuterBlock($ship){
+		foreach ($ship->systems as $system){
+			if ($system instanceof Structure && (int)$system->location !== 0) return true;
+		}
+		return false;
+	}
+
+	//a single-block hull's sides: its hit chart's non-Primary locations, in order - 1 and 2 (Front, Aft), or 3 and 4 (Left, Right)
+	private static function hullSides($ship){
+		$sides = array();
+		foreach (array_keys((array)$ship->hitChart) as $loc) if ((int)$loc !== 0) $sides[] = (int)$loc;
+		sort($sides);
+		return $sides;
+	}
+
+	/* ⭐ "Those weapons which can be hit from the chosen direction (on the Hit Location Chart)": every weapon (by id) the side's hit
+	   chart names - "N:" redirects and "TAG:" entries resolved as a hit would resolve them (getSystemsByNameLoc), from the side's own
+	   bearing - and, through its "Primary" result, every weapon the Primary chart names (user ruling 2026-10-20). Structure and the
+	   jump drive (a Weapon in FV) are never his. */
+	private static function sideReach($ship, $side, $viaPrimary = true){
+		$out = array();
+		if (!isset($ship->hitChart[$side])) return $out;
+		$bearing = isset(self::$sideBearing[$side]) ? self::$sideBearing[$side] : 0;
+		foreach ($ship->hitChart[$side] as $name){
+			if (strcasecmp($name, 'Structure') === 0) continue;
+			if (strcasecmp($name, 'Primary') === 0){
+				if ($viaPrimary && (int)$side !== 0) $out += self::sideReach($ship, 0, false);
+				continue;
+			}
+			foreach ($ship->getSystemsByNameLoc($name, $side, $bearing, true) as $system){
+				if ($system instanceof Weapon && !($system instanceof JumpEngine)) $out[(int)$system->id] = $system;
+			}
+		}
+		return $out;
+	}
+
+	/* Does this Targeter's entry cover $weapon? "All weapons attached to this block": the weapons in his block's location; on a
+	   single-block hull, his side's hit chart reach (sideReach) - his `side`, the first or the second. */
+	private static function targeterCovers($ship, array $entry, $weapon){
+		if (!($weapon instanceof Weapon) || $weapon instanceof JumpEngine) return false;
+		$post = $ship->getSystemById($entry['post']);
+		if ($post === null) return false;
+		if (self::hasOuterBlock($ship)) return (int)$weapon->location === (int)$post->location;
+		$sides = self::hullSides($ship);
+		$k = (isset(self::$registry[$entry['id']]['side']) ? (int)self::$registry[$entry['id']]['side'] : 1) - 1;
+		return isset($sides[$k]) && isset(self::sideReach($ship, $sides[$k])[(int)$weapon->id]);
+	}
+
+	//...every weapon he covers, by id: the payload's `covers` (own team only), so the client's preview copies no hit-chart rule
+	private static function coveredWeapons($ship, array $entry){
+		$ids = array();
+		foreach ($ship->systems as $system){
+			if (self::targeterCovers($ship, $entry, $system)) $ids[] = (int)$system->id;
+		}
+		return $ids;
+	}
+
+	//the Expert Targeter serving on $turn who covers $weapon, or null
+	private static function targeterFor($ship, $weapon, $turn){
+		foreach ($ship->getOfficers() as $entry){
+			if (self::rulesId($entry['id']) !== 'OFF_TARG' || !self::serves($entry, $turn)) continue;
+			if (self::targeterCovers($ship, $entry, $weapon)) return $entry;
+		}
+		return null;
+	}
+
+	/* ⭐ HIS +4 - Weapon::calculateHitBase, in d20 units, behind $officersPresent, beside the Gunner's. A STANDARD called shot only
+	   ($called: a call that pays the -8 - not a Kirishiac flat-profile one): "This does not provide any benefit to normal attacks,
+	   only called shots. It does not cancel the usual -8 called shot penalty, either." Nothing to look up on any other shot.
+	   ⚠️ MIRROR PAIR with officers.targeterShotBonus (JS), in weaponManager.computeShotModifiers. */
+	public static function targeterShotBonus($ship, $weapon, $called, $gamedata){
+		if (!$called) return 0;
+		return (self::targeterFor($ship, $weapon, (int)$gamedata->turn) !== null) ? self::TARGETER_CALLED_BONUS : 0;
 	}
 
 	//an officer who occupies his post as far as another's move is concerned: a placed or movable one
@@ -1222,7 +1363,7 @@ class Officers{
 	   and 20 or more kills every officer posted there.
 	   The roll is the post's own from Pass 1 when it made one this turn; otherwise (Pass 1 skips a
 	   destroyed system, and a missile launcher whose magazine exploded never reached the parent) the
-	   same formula is rolled here.
+	   same formula is rolled here. A Structure post (Stage 19, the Expert Targeter) rolls on this turn's damage alone (blockKillRoll).
 	   ⚠️ Writes straight through Manager::insertIndividualNote - a sweep inside advance()
 	   ([[arch_individual_notes_and_phase_hooks]]) - and updates the in-memory list, so anything later
 	   in this request reads him as killed.
@@ -1244,8 +1385,12 @@ class Officers{
 			foreach ($byPost as $postId => $indexes){
 				$post = $ship->getSystemById($postId);
 				if ($post === null || !$post->isDamagedOnTurn($turn)) continue;
-				$roll = $post->getCritRollOnTurn($turn);
-				if ($roll === null) $roll = self::rollFor($ship, $post);
+				if ($post instanceof Structure){
+					$roll = self::blockKillRoll($ship, $post, $turn); //Stage 19: only an Expert Targeter lives in a block
+				} else {
+					$roll = $post->getCritRollOnTurn($turn);
+					if ($roll === null) $roll = self::rollFor($ship, $post);
+				}
 				if ($roll < self::KILL_ROLL) continue;
 				foreach ($indexes as $i){
 					$id = $list[$i]['id'];
@@ -1276,6 +1421,14 @@ class Officers{
 			if ($ship->hasSpecialAbility("HyachSensors")) $mod -= $half;
 		}
 		return Dice::d(20) + floor($post->getTotalDamage()) + $mod + $ship->critRollMod;
+	}
+
+	/* An officer in a STRUCTURE block (the Expert Targeter, Stage 19): d20 + the damage the block took THIS turn through its armour
+	   + the block's and the ship's critRollMod (user ruling 2026-10-20). The block's own Pass 1 roll counts all its damage, as every
+	   system's does, which on a block that has been fought over kills him at once. Reached only from rollKills, for a block holding
+	   an officer that was damaged this turn - "heavily gated since this will be a rare occurrence". */
+	private static function blockKillRoll($ship, $block, $turn){
+		return Dice::d(20) + floor($block->damageReceivedOnTurn($turn)) + $block->critRollMod + $ship->critRollMod;
 	}
 
 	//DBManager's bulk note loop hands every OffKilled note here instead of to its system (§4.4)
@@ -1478,7 +1631,8 @@ class Officers{
 	     a Piercing shot      his Piercing ability, if he still has it: on a gun that may already pierce, +4 - the
 	                          usual -4 waived ("no penalty where it is"); in the mode added for him, nothing more
 	                          (that mode carries the penalty) - either way it is spent;
-	     a called shot        otherwise, +3 ("a called shot at +3"), spent - never on a Piercing shot;
+	     a called shot        otherwise, +3 ("a called shot at +3"), spent - never on a Piercing shot, nor (Stage 19) on a gun
+	                          a serving Expert Targeter covers, whose +4 is that shot's instead (targeterShotBonus);
 	   The faster reload is the turn change's (fasterReload). ⚠️ MIRROR PAIR with officers.gunnerShotBonus (JS). */
 	public static function gunnerShotBonus($ship, $weapon, $called, $gamedata){
 		$turn = (int)$gamedata->turn;
@@ -1491,6 +1645,9 @@ class Officers{
 			return (isset($entry['mode']) && (int)$weapon->firingMode === (int)$entry['mode']) ? 0 : self::PIERCE_PENALTY;
 		}
 		if (!$called || !self::abilityOpen($entry, 'called', $turn)) return 0;
+		//Stage 19 (user ruling 2026-10-20): on a gun a serving Expert Targeter covers, his +4 is the called shot's bonus - the
+		//Gunner's +3 is neither used nor spent, so it is still his if he moves or the Targeter falls
+		if (self::targeterFor($ship, $weapon, $turn) !== null) return 0;
 		self::spend($ship, $i, 'called', $turn, $gamedata);
 		return self::GUNNER_CALLED_BONUS;
 	}
@@ -2627,6 +2784,8 @@ class Officers{
 			if (isset($entry['moving'])) $row['moving'] = $entry['moving'];
 			if (!empty($entry['abilities'])) $row['abilities'] = $entry['abilities'];
 			if (isset($entry['mode'])) $row['mode'] = $entry['mode'];
+			//Stage 19: the weapons an Expert Targeter covers, by id - the client's hit-chance preview reads them (officers.targeterShotBonus)
+			if (self::rulesId($entry['id']) === 'OFF_TARG') $row['covers'] = self::coveredWeapons($ship, $entry);
 			if (!empty(self::$registry[$entry['id']]['movable']) && (int)TacGamedata::$currentPhase === 1 && !TacGamedata::$currentGameFinished){
 				$targets = self::moveTargets($ship, $list, $i, $turn);
 				if (!empty($targets)) $row['targets'] = $targets;

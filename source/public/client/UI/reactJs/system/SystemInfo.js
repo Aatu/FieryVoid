@@ -81,7 +81,19 @@ export const OfficerHeading = styled(Header)`
 class SystemInfo extends React.Component {
 
     render() {
-        const { ship, selectedShip, system, boundingBox } = this.props;
+        const { ship, selectedShip, system, boundingBox, officersOnly } = this.props;
+
+        /* OFFICERS_PLAN.md Stage 19 (user request 2026-10-20): a section's Structure health bar has no tooltip of its own - the
+           bar shows its boxes and armour already - but the Expert Targeter lives in one, so hovering a bar that holds an officer
+           names him "and nothing else" (ShipSection raises it only then, through StructureMouseOver). */
+        if (officersOnly) {
+            return (
+                <SystemInfoTooltip position={getPosition(boundingBox)}>
+                    <InfoHeader>{window.officers ? officers.postName(system) : system.displayName}</InfoHeader>
+                    {getOfficers(ship, system, true)}
+                </SystemInfoTooltip>
+            );
+        }
 
         //`system === ship` matters in the lobby: bought fleet ships are jQuery.extend
         //clones without the Ship prototype, so instanceof alone missed their
@@ -292,23 +304,22 @@ const getCalledShotDisplay = (ship, system) => {
    and how he left action once he has. Own team only, through officers.listFor (D4). Not system.data:
    that is rebuilt per turn, replaced wholesale by a server `data`, and shared by reference across
    same-class systems ([[arch_system_info_tooltip_data_flow]]). */
-const getOfficers = (ship, system) => {
+const getOfficers = (ship, system, alone = false) => {
     if (!window.officers || !ship || !system) return null;
     const posted = officers.onPost(ship, system.id);
     //Stage 10: an officer moving onto this post this turn (ordered now or committed) has a line here too
     const arriving = officers.arrivingAt(ship, system.id);
     if (posted.length === 0 && arriving.length === 0) return null;
     const turn = officers.currentTurn();
-    return [
-        <Divider key="officerDivider" />,
+    //`alone` (Stage 19, the Structure bar's tooltip): the block's officers are all there is, so no divider above them
+    return (alone ? [] : [<Divider key="officerDivider" />]).concat([
         <OfficerHeader key="officerHeader">Officers</OfficerHeader>
-    ].concat(posted.map((entry, i) => {
-        const officer = officers.get(entry.id);
+    ]).concat(posted.map((entry, i) => {
         const state = officers.moveText(ship, entry) || officers.stateText(entry);
         return (
             <OfficerEntry key={`officer-${entry.id}-${i}`} $out={!officers.serves(entry, turn) || officers.movingTo(ship, entry) !== null}>
                 <OfficerName>{officers.label(entry.id)}: </OfficerName>
-                {officer ? officer.summary : ''}{state ? ' ' + state : ''}
+                {officers.summaryOf(ship, entry)}{state ? ' ' + state : ''}
             </OfficerEntry>
         );
     }), arriving.map((arrival, i) => (
