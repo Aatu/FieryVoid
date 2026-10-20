@@ -68,7 +68,7 @@ class KellyTrekConstitution extends HeavyCombatVessel{
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
 	$this->addAftSystem($projection);
-	$this->addAftSystem(new TrekPhaserKelly(3, 0, 0, 120, 240));
+	$this->addAftSystem(new TrekPhaserKelly(3, 0, 0, 120, 240, 1));
 	//$this->addAftSystem(new SWTractorBeam(2,120,240,1));
 
 		
