@@ -8,7 +8,7 @@ class MakarWarthoneRefit extends MediumShip{
         $this->faction = "Nexus Makar Federation";
         $this->phpclass = "MakarWarthoneRefit";
         $this->imagePath = "img/ships/Nexus/makar_brassert2.png";
-        $this->shipClass = "Warthone Strike Frigate (2109)";
+        $this->shipClass = "Warthone Strike Frigate";
 			$this->variantOf = "Brassert Frigate";
 			$this->occurence = "rare";
 		$this->unofficial = true;

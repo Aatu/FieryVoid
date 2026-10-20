@@ -63,7 +63,7 @@ class SshelathTrovalta extends MediumShip{
 
 		1=> array(
 			4 => "Thruster",
-			6 => "Light Class-O Missile Rack",
+			6 => "Light O-Missile Rack",
 			8 => "Light Laser Cutter",
 			10 => "Defense Laser",
 			17 => "Structure",

@@ -68,7 +68,7 @@ class CraytanUlten extends HeavyCombatVessel{
             1=> array(
                     4 => "Thruster",
                     6 => "Medium Enhanced Plasma",
-                    8 => "ELINT Scatter",
+                    8 => "ELINT Scanner",
 					10 => "Light Enhanced Plasma",
 					18 => "Structure",
                     20 => "Primary",

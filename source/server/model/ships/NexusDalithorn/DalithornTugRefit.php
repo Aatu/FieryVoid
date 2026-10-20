@@ -4,7 +4,7 @@ class DalithornTugRefit extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 85;
+        $this->pointCost = 125;
         $this->faction = "Nexus Support Units";
         $this->phpclass = "DalithornTugRefit";
         $this->imagePath = "img/ships/Nexus/dalithorn_tug.png";
@@ -18,6 +18,7 @@ class DalithornTugRefit extends MediumShip{
  		$this->fighters = array("superheavy"=>1);
 
 		$this->notes = "Usually uses transport super-heavy unit.";	
+		$this->notes .= '<br>Ramming damage is higher due to the attached barge.';
        
         $this->forwardDefense = 10;
         $this->sideDefense = 12;
@@ -46,8 +47,13 @@ class DalithornTugRefit extends MediumShip{
 		$cF->displayName = "Cargo Bay F";
 		$cG->displayName = "Cargo Bay G";
 		$cH->displayName = "Cargo Bay H";
+
+		//Need this to boost the ramming factor to account for the barge
+	    $hitBonus = 0; //there is no bonus to hit
+	    $rammingAttack = new RammingAttack(0, 0, 360, 80, $hitBonus, true, 0); //actual damage - NOT calculated, but designed (130)
+		$this->addPrimarySystem($rammingAttack);
 		
-        $this->addPrimarySystem(new Reactor(2, 6, 0, 0));
+        $this->addPrimarySystem(new Reactor(2, 9, 0, 0));
         $this->addPrimarySystem(new CnC(3, 4, 0, 0));
         $this->addPrimarySystem(new Scanner(2, 6, 2, 2));
         $this->addPrimarySystem(new Engine(2, 16, 0, 8, 4));
@@ -78,11 +84,11 @@ class DalithornTugRefit extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			6 => "Thruster",
-			8 => "Autocannon",
-			9 => "Catapult",
-			12 => "Scanner",
-			15 => "Engine",
+			9 => "Thruster",
+			10 => "Autocannon",
+			11 => "Catapult",
+			13 => "Scanner",
+			16 => "Engine",
 			17 => "Hangar",
 			19 => "Reactor",
 			20 => "C&C",
@@ -100,10 +106,10 @@ class DalithornTugRefit extends MediumShip{
 
 		2=> array(
 			3 => "Thruster",
-			5 => "Cargo Bay A",
-			7 => "Cargo Bay B",
-			9 => "Cargo Bay C",
-			11 => "Cargo Bay D",
+			5 => "Cargo Bay E",
+			7 => "Cargo Bay F",
+			9 => "Cargo Bay G",
+			11 => "Cargo Bay H",
 			17 => "Structure",
 			20 => "Primary",
 		),

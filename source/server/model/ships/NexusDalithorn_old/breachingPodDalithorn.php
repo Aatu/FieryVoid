@@ -8,7 +8,7 @@ class breachingPodDalithorn extends FighterFlight{
         $this->faction = "Nexus Dalithorn Commonwealth (early)";
         $this->phpclass = "breachingPodDalithorn";
         $this->shipClass = "Havedrin Breaching Pods";
-        $this->imagePath = "img/Nexus/DalithornBP.png";
+        $this->imagePath = "img/ships/Nexus/DalithornBP.png";
         $this->isd = 1912;
         
 	    $this->notes = 'Atmospheric.';
@@ -42,7 +42,7 @@ class breachingPodDalithorn extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 2, 2, 2);
-            $fighter = new Fighter("breachingPodDalithorn", $armour, 16, $this->id);
+            $fighter = new Fighter("breachingPodDalithorn", $armour, 19, $this->id);
             $fighter->displayName = "Havedrin";
             $fighter->imagePath = "img/ships/Nexus/DalithornBP.png";
             $fighter->iconPath = "img/ships/Nexus/DalithornBP_large.png";

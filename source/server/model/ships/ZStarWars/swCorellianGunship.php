@@ -68,7 +68,6 @@ class swCorellianGunship extends MediumShip{
         				11 => "Hyperdrive",
 						13 => "Scanner",
         				16 => "Engine",
-        				17 => "Hangar",
        					19 => "Reactor",
         				20 => "C&C",
         		),

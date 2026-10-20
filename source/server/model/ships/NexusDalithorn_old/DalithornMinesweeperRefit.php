@@ -10,7 +10,7 @@ class DalithornMinesweeperRefit extends MediumShip{
         $this->imagePath = "img/ships/Nexus/Dalithorn_Frigate2.png";
         $this->shipClass = "Velivorn Minesweeper (2047)";
 			$this->variantOf = "Grendithorn Frigate";
-			$this->occurence = "common";
+			$this->occurence = "rare";
 		$this->unofficial = true;
         $this->canvasSize = 100;
 	    $this->isd = 2047;

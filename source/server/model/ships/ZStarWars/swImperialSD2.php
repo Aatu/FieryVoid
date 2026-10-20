@@ -121,7 +121,6 @@ class swImperialSD2 extends BaseShip{
             1=> array(
                     2 => "Thruster",
 		    3 => "Ray Shield",
-                    4 => "Medium Laser",
                     5 => "Tractor Beam",
                     8 => "Heavy Turbolaser",
                     10 => "Medium Ion Cannon",

@@ -296,7 +296,7 @@ class NexusAntifighterLauncher extends Weapon{
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $maxhealth == 0 ) $maxhealth = 4;
             if ( $powerReq == 0 ) $powerReq = 0;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }

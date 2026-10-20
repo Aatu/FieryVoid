@@ -24,7 +24,7 @@ class BrixadiiLauncherPlatform2107 extends OSAT{
         $this->iniativebonus = 60;
 
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
-        $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 6, 3, 5));   
 
         $this->addFrontSystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 270, 90));

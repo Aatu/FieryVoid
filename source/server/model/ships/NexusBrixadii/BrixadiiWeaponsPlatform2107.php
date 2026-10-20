@@ -10,7 +10,6 @@ class BrixadiiWeaponsPlatform2107 extends OSAT{
         $this->imagePath = "img/ships/Nexus/brixadii_osat_single_mount.png";
 			$this->canvasSize = 90; //img has 100px per side
         $this->shipClass = "Tor'xii Weapons Platform (2107)";
-		$this->limited = 33;
 		$this->unofficial = true;
 		$this->isd = 2107;
 
@@ -29,7 +28,7 @@ class BrixadiiWeaponsPlatform2107 extends OSAT{
         $this->addFrontSystem(new ParticleHammer(1, 12, 6, 300, 60));
         $this->addFrontSystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
         $this->addFrontSystem(new ScatterPulsar(2, 4, 2, 0, 360));
-        $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 6, 3, 5));   
         $this->addAftSystem(new Thruster(3, 6, 0, 0, 2));
                 

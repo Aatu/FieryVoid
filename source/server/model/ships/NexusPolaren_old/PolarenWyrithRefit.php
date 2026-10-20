@@ -56,7 +56,7 @@ class PolarenWyrithRefit extends HeavyCombatVesselLeftRight{
         				8 => "Structure",
 						9 => "Polaren LCV Controller",
         				11 => "2:Thruster",
-						12 => "1: Sand Caster",
+						12 => "1:Sand Caster",
         				14 => "Scanner",
         				16 => "Engine",
         				17 => "Hangar",
@@ -65,7 +65,7 @@ class PolarenWyrithRefit extends HeavyCombatVesselLeftRight{
         		),
         		3=> array(
         				5 => "Thruster",
-        				8 => "Docking Collar",
+        				8 => "LCV Rail",
 						10 => "Maser",
 						11 => "Light Blast Cannon",
         				18 => "Structure",
@@ -73,7 +73,7 @@ class PolarenWyrithRefit extends HeavyCombatVesselLeftRight{
         		),
         		4=> array(
         				5 => "Thruster",
-        				8 => "Docking Collar",
+        				8 => "LCV Rail",
 						10 => "Maser",
 						11 => "Light Blast Cannon",
         				18 => "Structure",

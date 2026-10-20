@@ -43,7 +43,7 @@ class DalithornCutter extends FighterFlight{
 			$armour = array(2, 1, 2, 2);
 			$fighter = new Fighter("DalithornCutter", $armour, 24, $this->id);
 			$fighter->displayName = "Cutter";
-			$fighter->imagePath = "img/ships/Nexus/Dalithorn_Cutter2.png.png";
+			$fighter->imagePath = "img/ships/Nexus/Dalithorn_Cutter2.png";
 			$fighter->iconPath = "img/ships/Nexus/Dalithorn_Cutter_Large2.png";
 
 	        $lightGasGun = new NexusLightGasGunFtr(300, 60, 1); //$startArc, $endArc, $nrOfShots
