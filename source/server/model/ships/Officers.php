@@ -118,6 +118,10 @@ class Officers{
 	const PILOT_OB = 1;                  //Expert Pilot: "+1 to the flight's offensive bonus" (+5% in FV)
 	const PILOT_SPARK_RELIEF = 1;        //...: "will also reduce [spark field] damage by 1 point if he forgoes all his other benefits"
 	const TARGETER_CALLED_BONUS = 4;     //Expert Targeter: "called shots have a +4 bonus to hit" - the -8 stays ("It does not cancel ...")
+	const ELINT_SENSORS = 1;             //Expert ELINT Officer: "The sensor rating of his ship is increased by + 1"
+	const ELINT_CRIT_MOD = -2;           //...: "All critical hit rolls against the sensors are reduced by 2"
+	const ELINT_RANGE_PCT = 25;          //...: "The range of all ELINT functions is increased by 25% (round fractions of 0.5 or more up)"
+	const ELINT_BLANKET_BALLISTIC = 3;   //...: blanket protection's total "divided by 3 (not 4) for purposes of ballistic weapons only"
 	//...a Medium ship's side, looked at from its own bearing (a "TAG:" hit chart entry is arc-filtered): Front, Aft, Left, Right
 	private static $sideBearing = array(1 => 0, 2 => 180, 3 => 270, 4 => 90);
 	//the fire orders that are NOT the flight firing, for his Spark Field relief: interception uses neither OB nor jinking
@@ -164,6 +168,14 @@ class Officers{
 		'OFF_PILOT' => array('max' => array('Raiders' => 2)),
 		//"Cost: 10% of the ship's base cost for Raiders. Availability: Raiders. Llort can also take at double the cost."
 		'OFF_TARG' => array('only' => array('Raiders', 'Llort'), 'pct' => array('Llort' => 20)),
+		/* "15% of the ship's base value for Abbai factions ... Double the cost for non-Abbai vessels. Not available for races whose
+		   current mainline ships do not have at least an 8 sensor rating" - the races are the user's list (2026-10-20): not the
+		   Centauri WotCR, the Early Earth Alliance or the Drazi WotCR, and no custom faction for now; the Abbai WotCR are Abbai. */
+		'OFF_ELINT' => array('only' => array('Abbai Matriarchate', 'Abbai Matriarchate (WotCR)', 'Centauri Republic', 'Earth Alliance',
+			'Narn Regime', 'Minbari Federation', 'Yolu Confederation', 'Torata Regency', 'Gaim Intelligence', 'Drazi Freehold',
+			'Vree Conglomerate', 'Dilgar Imperium', 'Brakiri Syndicracy', 'Hyach Gerontocracy', 'Markab Theocracy', 'Corillani Theocracy',
+			'Llort', 'Deneth Tribes', 'Minbari Protectorate'),
+			'pct' => array('Abbai Matriarchate' => 15, 'Abbai Matriarchate (WotCR)' => 15)),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -321,6 +333,14 @@ class Officers{
 		   only for a hull carrying an ion weapon. No stat moves at load: every rule is asked at damage time. */
 		'OFF_ION'  => array('label' => 'Expert Ion Technician', 'post' => 'engine', 'pct' => 10, 'apply' => null,
 			'needs' => 'hasIonWeapon'),
+		/* Expert ELINT Officer (Stage 20; rules text, user 2026-10-20), in his ship's ELINT array - "ELINT vessel only", so a hull
+		   without one is never offered him. His array +1 output, and -2 on the critical rolls of every sensor array on his ship
+		   (applyElintOfficer); every ELINT function's range 25% longer, rounded half up (elintRange: 30 -> 38, 50 -> 63, 20 -> 25); and his
+		   blanket protection counts a third, not a quarter, against ballistic weapons (ballisticBlanket). Rulings (user 2026-10-20):
+		   the ranged functions only - SOEW, SDEW, Blanket, Disruption, Jamming (Detect Stealth and the stealth detection range
+		   unchanged); the -2 on every array; the blanket's fractions kept, as FV's quarter keeps them. Both range and blanket reach
+		   every viewer (addForJson). 30%, the Abbai 15%, for the races of the user's list only ($factionRules). */
+		'OFF_ELINT' => array('label' => 'Expert ELINT Officer', 'post' => 'elint', 'pct' => 30, 'apply' => 'applyElintOfficer'),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -615,6 +635,8 @@ class Officers{
 	              SecondaryCnC is not a CnC subclass, so it is never picked.
 	     scanner  the strongest Scanner by output (ELINT scanners included) - the one Elite Crew,
 	              Poor Crew and Improved Sensors move, so they agree on a hull with two.
+	     elint    the strongest ELINT array by output (Stage 20): an ElintScanner, the Chameleon suite included - never a
+	              Kirishiac ELINT module, which is no Scanner. No officer-eligible hull mixes a plain Scanner with an array.
 	     reactor  the biggest Reactor by maxhealth - Elite Crew's rule (a malus would sit on the main
 	              reactor too); Mag-Grav reactors included.
 	     engine   the strongest Engine by output - the one Poor Crew and ADV_ENG move (Stage 5)
@@ -644,6 +666,8 @@ class Officers{
 				return $any;
 			case 'scanner':
 				return self::strongest($ship, 'Scanner', 'output', -1);
+			case 'elint':
+				return self::strongest($ship, 'ElintScanner', 'output', -1);
 			case 'reactor':
 				return self::strongest($ship, 'Reactor', 'maxhealth', -1000);
 			case 'maggrav':
@@ -2368,6 +2392,40 @@ class Officers{
 		return false;
 	}
 
+	/* ------------------------------------------------------------------ Expert ELINT Officer (Stage 20) */
+
+	/* +1 output on the array he sits in - `output` reaches every client and ew.js sums it into the EW pool, so the game needs
+	   nothing more (the lobby previews it - officers.sensorBonus) - and -2 on the critical rolls of EVERY sensor array on his ship
+	   (user ruling 2026-10-20), each array's own critRollMod, which ShipSystem::testCritical reads: so it also eases his kill roll
+	   on his array, as the Technician's -2 does on his reactor. Nothing displays a critical modifier. */
+	private static function applyElintOfficer($ship, $entry, $turn){
+		$array = $ship->getSystemById($entry['post']);
+		if ($array !== null) $array->output += self::ELINT_SENSORS;
+		foreach ($ship->systems as $system){
+			if ($system instanceof Scanner) $system->critRollMod += self::ELINT_CRIT_MOD;
+		}
+	}
+
+	/* ⭐ THE range of an ELINT function from $elint (a unit): $base hexes, 25% longer while his officer serves, fractions of 0.5 or more
+	   rounded up - 30 -> 38, 20 -> 25, 50 -> 63. Every ELINT range test asks it: EW::getSupportedOEW (both legs), getSupportedDEW,
+	   getBlanketDEW and getDistruptionEW, and HkJamming's. The ranged functions only (user ruling 2026-10-20): Detect Stealth has no
+	   range of its own, and an ELINT's stealth detection range is not one of its functions. One static read in a game without officers.
+	   ⚠️ MIRROR PAIR with officers.elintRange (JS), which reads the `elintRangeBonus` addForJson publishes. */
+	public static function elintRange($elint, $base){
+		if (!TacGamedata::$officersPresent || !self::isActive($elint, 'OFF_ELINT')) return $base;
+		return intdiv((int)$base * (100 + self::ELINT_RANGE_PCT) + 50, 100);
+	}
+
+	/* His blanket against a BALLISTIC weapon: "the total EW value is divided by 3 (not 4) for purposes of ballistic weapons only" - the
+	   ELINT's blanket points, scaled for the quarter EW::getBlanketDEW takes of each ELINT's: x4/3, so 12 points give 4 against a
+	   ballistic weapon and 3 against anything else, and against each the best ELINT covering the unit wins. Fractions are kept, as the
+	   quarter keeps them (user ruling 2026-10-20: 10 points give 3.33). Asked for a ballistic shot only, behind $officersPresent.
+	   ⚠️ MIRROR PAIR with officers.ballisticBlanket (JS), which reads the `blanketBallistic` addForJson publishes. */
+	public static function ballisticBlanket($elint, $blanket){
+		if (!self::isActive($elint, 'OFF_ELINT')) return $blanket;
+		return $blanket * 4 / self::ELINT_BLANKET_BALLISTIC;
+	}
+
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */
 
 	//Expert Dogfighter: +5 initiative, ELITE_SW's line
@@ -2768,6 +2826,14 @@ class Officers{
 			else continue;
 			if (empty($officer[$key])) continue;
 			foreach ($officer[$key] as $field) $strippedShip->$field = $ship->$field;
+		}
+		/* Stage 20: an Expert ELINT Officer's longer ranges and his blanket's ballistic divisor, to every viewer - an opponent's own OEW
+		   under his Disruption, and its hit chance against a unit under his blanket, are previewed with them (elintRange,
+		   ballisticBlanket). Numbers, not a name: the officer list below stays own-team. A disguised Chameleon ship's payload is its
+		   simulacrum's, which carries neither. */
+		if (self::isActive($ship, 'OFF_ELINT')){
+			$strippedShip->elintRangeBonus = self::ELINT_RANGE_PCT;
+			$strippedShip->blanketBallistic = self::ELINT_BLANKET_BALLISTIC;
 		}
 		if (!TacGamedata::$currentGameFinished && !$ship->isRevealedToCurrentViewer()) return;
 		$out = array();

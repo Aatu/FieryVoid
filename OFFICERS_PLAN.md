@@ -20,7 +20,9 @@ with FV's EM hardening rebuilt to the tabletop rules first (§9.22) - committed 
 (`a83c3d6ae`). Stage 18, the Expert Pilot, the first officer bought as a COUNT - up to four on one flight, one per craft (§9.24) -
 BUILT 2026-10-19, uncommitted. Stage 19, the Expert Targeter (Raiders; Llort at double), the first officer posted in a STRUCTURE
 block - +4 on called shots by the weapons of his block, or on a Medium ship by one side's weapons on its hit chart (§9.26) - BUILT
-2026-10-20, uncommitted.** Written
+2026-10-20, uncommitted. Stage 20, the Expert ELINT Officer (Abbai 15%; 17 more races at 30%), in the ELINT array - sensors +1,
+sensor criticals -2, every ELINT range 25% longer, his blanket a third against ballistic weapons (§9.27) - BUILT 2026-10-20,
+uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -68,8 +70,10 @@ the Pilot's Spark Field relief automatic on a turn his flight neither jinks nor 
 blocks, movable between them in battle; a Front / Aft choice on a Medium ship's one block; the insignia and a tooltip on the block's
 health bar), and ruled four questions: his kill roll counts only the damage his block took that turn, a Medium ship's side is its
 hit chart's reach (Primary included), an Expert Gunner's called-shot bonus gives way to his, and the insignia sits after the
-section name (Stage 19, §9.26). Each officer's own rules questions still only need ruling when that officer's stage starts. Next
-step: the rest of the Hard tier, one officer at a time.
+section name (Stage 19, §9.26). Later that day they added the Expert ELINT Officer with his rules text and a list of the races that
+may take him (no custom faction for now), and ruled four questions: the Abbai WotCR are Abbai and the Drazi WotCR left out, his +25%
+on the ranged functions only, the -2 on every sensor array, and the blanket's fractions kept (Stage 20, §9.27). Each officer's own
+rules questions still only need ruling when that officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -321,6 +325,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Religious Leader, elsewhere *(Stage 15, §9.21)* | `OFF_RELIP` | a chosen primary non-weapon system | 2 |
 | Expert Targeter *(added 2026-10-20, §9.26)* | `OFF_TARG` | a chosen outer Structure block; on a hull with none, its Primary Structure, covering the first side | 2 |
 | Expert Targeter, the other side *(§9.26)* | `OFF_TARG2` | a Medium ship's Primary Structure, covering its second side | 2 |
+| Expert ELINT Officer *(added 2026-10-20, §9.27)* | `OFF_ELINT` | the ELINT array | 1 |
 | Expert Software Engineer | `OFF_SOFT` | Computer | 1 |
 | Expert Ion Technician | `OFF_ION` | Engine | 1 |
 | Expert Surge Officer | `OFF_SURG` | Mag-Grav Reactor | 1 |
@@ -349,6 +354,7 @@ budget, drop the label from the wire, since the client holds the labels anyway.
 | C&C | the first `instanceof CnC` that is not a `FlagBridge`; failing that, the first `CnC` of any kind | `SecondaryCnC` is not a `CnC` subclass ([baseSystems.php:3837](source/server/model/systems/baseSystems.php#L3837)), so it is never picked. `ShadowPilot` is one (:15079), but it only sits on Ancient hulls, which D9 excludes. |
 | Engine | the strongest `Engine` by `output` | `strongestSystem()` semantics: the first in construction order wins a tie |
 | Sensor Array, Sensors | the strongest `Scanner` by `output` | includes `ElintScanner` |
+| ELINT array | the strongest `ElintScanner` by `output` | Expert ELINT Officer (Stage 20); the Chameleon suite is one, a Kirishiac ELINT module is not (no Scanner). No officer-eligible hull mixes a plain Scanner with an array (measured) |
 | Reactor | the biggest `Reactor` by `maxhealth` | `ELITE_CREW`'s rule ([Enhancements.php:2485](source/server/model/ships/Enhancements.php#L2485)); `MagGravReactor` extends `Reactor` |
 | Mag-Grav Reactor | the first `MagGravReactor` that can be hit (never a `MagGravReactorTechnical`) | Surge Officer (Stage 16: every Ipsha hull has exactly one) |
 | Jump Drive | the first engine `JumpEngine::getUnitJumpEngines($ship)` returns that is neither legacy nor a gate | never a bare sweep of `$ship->systems` ([[project_jump_points]]) |
@@ -469,6 +475,7 @@ masking: individual notes never reach any client.
 | Ion Technician (Stage 17) | an ion gun's `boostable` / `boostEfficiency` / `thrustBoosted` / `thrustPerBoost`, its boost (type-2 power entries), and the thrust it takes off the engine | **Own team only**, as the Laser Technician's: "Weapons being charged in this manner will be detected (and their strength known) by anything that detects special weapon arming modes, such as the Expert Analyst" - by nothing else until the Analyst's stage. An opponent's payload carries the gun's power entries without its boosts while he is aboard; game over discloses all. His +1s, the boost and the Rad Cannon's improved effects show only as their results; a discharge shows as the gun's loading, which is public |
 | Expert Pilot (Stage 18) | a flight's `offensivebonus` (+1 a serving pilot); its jinking (free levels beyond the limit) | **Yes, to every viewer**: the OB through his `publish`, as the Evader's; the jinking shows as the flight's jinking, which is public. Who and how many stay own-team; the Spark Field relief shows only as the damage dealt |
 | Expert Targeter (Stage 19) | the hit chance of a called shot by a weapon he covers; which weapons those are (`covers`) | **Own team only**: the +4 is in the owner's own hit-chance preview ("Expert Targeter") and nowhere else; an opponent sees only the needed % the combat log prints for the shot, as for a Gunner's +3. The covered weapon ids ride the officer payload, which an opponent never receives |
+| Expert ELINT Officer (Stage 20) | his array's `output`; every ELINT range from his ship; his blanket against ballistic weapons | **Yes, to every viewer**: `output` always is, and the ship payload carries `elintRangeBonus` (25) and `blanketBallistic` (3) while he serves - an opponent's own OEW under his Disruption and its hit chance against a unit under his blanket are previewed with them; his array's tooltip shows the ranges. The officer list stays own-team; a disguised Chameleon ship's payload is its simulacrum's and carries neither. The -2 on sensor criticals is never sent |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
 | Scanner | the late-EW allowance | Own-team only: the client asks `officers.listFor`, which an enemy payload never carries |
@@ -627,7 +634,8 @@ committed.
 | **17** | Expert Ion Technician (Cascor), his thrust boost on the Hypergraviton Blaster's path. **BUILT 2026-10-18** (§9.23) | +1 per die (capped at the face) on rolled ion weapons, +1 a hit on fixed ones (the Ion Torpedo, a Ballistic weapon in FV, included), nothing on a roll of 0; stacking with Elite Crew, replaced by a Gunner's; Rad Cannons 12 boxes, the C&C at +4, criticals forced on Scanner, Engine, Reactor and Sub Reactor; the boost - 3 thrust for 1d10+1, one level per gun (a second refused in the real power.js), once a turn, a loaded rolled gun only, hidden from opponents, the engine's thrust lowered in the real movement.js; a boosted gun that does not fire discharges at the turn change; Cascor only, 10%, in the Engine |
 | **18** | Expert Pilot, added by the user - the first officer bought as a COUNT. **BUILT 2026-10-19** (§9.24) | Up to 4 (Raiders 2), never more than the flight's craft, each in his own craft from the first; +1 OB each; one free jinking level each, beyond the jinking limit, in the real movement.js (`jinkinglimit` itself untouched); each lost with his own craft, and following it on a split, his share of the cost with him; Spark Fields 1 weaker per pilot on a turn the flight neither jinks nor fires (an interception not counting); the Evader's -1 already reaching Spark Fields; pilots the flight's one officer; 100% of a craft each for a flight of six, scaled; the buy dialog holding the count to the flight size |
 | **19** | Expert Targeter, added by the user - the first officer posted in a Structure block. **BUILT 2026-10-20** (§9.26) | Offered on every outer block of a Raiders or Llort hull (Llort 20%), one per block (never moved onto a held one), on a Medium ship's one block with a second-side twin only where the two sides differ, never elsewhere; +4 on a called shot by a covered weapon, nothing on an ordinary shot or a flat-profile call, the -8 kept; a block covers its location's weapons, a Medium ship's side its hit chart's reach through Primary; a covered Gunner's +3 neither used nor spent; the kill roll on this turn's damage only; a move between blocks and a side switch on the Stage 10 rules (serving nowhere that turn), free in Fleet Selection; the insignia in the bar, an officers-only tooltip on it, its click opening the Officers menu in Initial Orders |
-| **20+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **20** | Expert ELINT Officer, added by the user. **BUILT 2026-10-20** (§9.27) | Offered on the ELINT hulls of the user's 19 factions only (Abbai and Abbai WotCR 15%, the rest 30%; never the Centauri or Drazi WotCR, the Early EA, a custom faction or an OSAT), posted in the strongest array; that array +1, every array -2 on criticals, his kill roll included; SOEW, Disruption and Jamming 38 hexes, SDEW 63 (its base corrected to 50), Blanket 25, at declaration (the real Initial Orders menu) and at use (the real EW sweeps, both ends); his blanket a third against ballistic weapons only, fractions kept, the best ELINT per weapon kind, in the real `calculateHitBase` and the live client breakdown; the numbers to every viewer, the officer to his own team |
+| **21+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -669,6 +677,7 @@ committed.
 | Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? **Rules text 2026-10-18 (§9.22)** settles the first: "Capital ships and larger receive +2 points of power, while medium ships and HCVs get +1" - the reactor. **RULED 2026-10-18:** the −3 is "−1 on EM-hit systems" (the tabletop −2 → −3 step, where the rule says); then, the user finding FV's hardening to be a simplification, **FV's EM hardening rebuilt to the tabletop rules** (supplied) and the Ring Base hardened, the officer on top; the −2 **once per system per turn**; EM effects the tabletop hardening does not list **apply normally** (the old immunity lines commented out with a note, to revisit); armour-ignoring EM weapons **ignore Ipsha armour fully**; the flat −1 stand-in **removed** from every Ipsha hull; **his own Spark Field gains the +1**. |
 | Expert Pilot | *Added 2026-10-19 with his rules text and notes (§9.24).* Several pilots beside another officer (D9 says one; the Spark Field text pictures "four pilots and an evader")? 100% of a fighter each, or the §9.9 scaled rule? The Spark Field relief "if he forgoes all his other benefits for the entire turn" is a per-turn choice: build a toggle? Which factions are "Raiders"? **RULED 2026-10-19:** pilots **ARE the flight's one officer** (1-4 of them, never beside another); **scaled** by §9.9 (100% of a craft each, for a flight of six); the relief **automatic** - "if flight doesn't jink or fire that turn they can get the damage reduction"; **the Raiders faction only**. |
 | Expert Targeter | *Added 2026-10-20 with his rules text and notes (§9.26).* His post is a Structure block, and FV rolls d20 + ALL the block's damage for one: under D3 that kills him almost at once - keep D3, roll on this turn's damage, or no kill roll? Which weapons does a Medium ship's side aid: those its hit chart reaches directly, through its Primary result too, or those in that section? A Gunner's gun he covers: both bonuses, his alone, or the Gunner's ("does not combine")? Where does the insignia go on a block's bar? **RULED 2026-10-20:** d20 + **this turn's damage** to the block, 20+ kills, the new code "heavily gated"; the side's **hit chart reach, Primary included**; **his +4 only** - the Gunner keeps his +1 fire control, his once-per-battle +3 neither used nor spent while covered; **in the bar, after the section name**. **Re-ruled after the play test (game 4495):** one **per Structure block**, not per ship, and never moved onto a block another Targeter holds. |
+| Expert ELINT Officer | *Added 2026-10-20 with his rules text and the user's list of races (§9.27).* Two WotCR factions carry ELINT hulls the list does not name (Abbai Matriarchate (WotCR), Drazi Freehold (WotCR)): which get him? "The range of all ELINT functions" - which ranges? On a hull with several ELINT arrays, the -2 on every array or his own? His blanket's third: keep FV's fractions or round down? **RULED 2026-10-20 (all as recommended):** the **Abbai WotCR at the Abbai 15%**, the Drazi WotCR left out (as the Centauri WotCR); the **ranged functions** - SOEW, SDEW, Blanket, Disruption, Jamming - not Detect Stealth or the stealth detection range; the -2 on **every** array; **fractions kept** (BDEW 10 gives 3.33 against a ballistic). |
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? |
 | Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). **RULED 2026-10-15: Grome Autocracy only** (§9.12); the Matter-weapon hull test is kept beside it. **Rules text and rulings 2026-10-16 (§9.14):** "moved into one specific weapon instead of his normal station" - **one or the other, never both**; that weapon gets the +1 / +1 "but no others do", and its rate of fire +1 (Stage 10); "disabled if the weapon takes any damage at all (after armor), and automatically killed if the weapon is destroyed" - **and the ordinary kill roll too**. |
@@ -3065,3 +3074,121 @@ capital, 6 on a six-block base.
   short of room (the readout does not shrink): 4 bars, the Kaedashkada (New)'s quarter blocks with both badges and 3-digit boxes.
 - officersClientHarness **507 / 0** (7 new: the ✦ and its order, the ✦ alone, none elsewhere, the ellipsis and the fixed readout,
   "Stbd" only with a badge, the outline on the menu's block only, gone on close). Bundles rebuilt, served copy synced.
+
+### 9.27 Stage 20: Expert ELINT Officer (2026-10-20)
+
+**Rules text (user, 2026-10-20) - a 31st officer, not in the original brief.** "Expert ELINT Officer: With Abbai advances in electronics
+and communications, it is only natural they have experts in this field. The expert ELINT officer is one such individual. He provides the
+following advantages: The sensor rating of his ship is increased by + 1. All critical hit rolls against the sensors are reduced by 2. The
+range of all ELINT functions is increased by 25% (round fractions of 0.5 or more up). If the ship puts up blanket protection, the total EW
+value is divided by 3 (not 4) for purposes of ballistic weapons only. Thus, if 12 EW is applied to blanket protection, all friendly units in
+range receive - 3 to their defense ratings for normal weapons and - 4 versus ballistic types. Location: Sensors. Cost: 15% of the ship's
+base value for Abbai factions. Availability: ELINT vessel only. Double the cost for non-Abbai vessels. Not available for races whose current
+mainline ships do not have at least an 8 sensor rating." The user's notes: the non-Abbai factions that may take him are the Centauri
+Republic (not the WotCR Centauri), the Earth Alliance (not EA Early), Narn, Minbari Federation, Yolu, Torata, Gaim, Drazi, Vree, Dilgar,
+Brakiri, Hyach, Markab, Corillani, Llort, Deneth and the Minbari Protectorate; no custom faction for now.
+
+**Measured before asking.**
+- FV's ELINT ranges: SOEW 30 (ELINT to target and to the supported ship), SDEW 30 at declaration but **50 in the server's firing check**
+  (`EW::getSupportedDEW`; the tooltip says 30), Blanket 20, Disruption 30, Jamming 30 (`HkJamming::JAM_RANGE`). Detect
+  Stealth has no range: +2 detection per point, on top of an ELINT's x3 stealth detection range. Declaration is checked only in the client
+  (the Initial Orders menu's `isInElintDistance`); use, on both ends (the EW sweeps, ew.js twins).
+- FV's blanket keeps fractions: the best ELINT's points x0.25 (BDEW 10 = 2.5), taken once in `EW::getBlanketDEW` - which every hit
+  calculation asks, ballistic or not.
+- From the statics: 44 ELINT hulls in the 19 named factions, 52 with the Abbai WotCR (3 of whose 8 are OSATs, D9's); none mixes a plain
+  Scanner with an ELINT array; four carry several arrays - Oracle Scout AM (6 + 4), Oracle Scout Epsilon (7 + 4), Eyehawk (8 + 4),
+  Fwellgon AM (6 + 2 + 2). Two WotCR factions the list does not name carry ELINT hulls: Abbai Matriarchate (WotCR) and Drazi Freehold (WotCR).
+
+**Rulings (user, 2026-10-20, asked before building - all as recommended):**
+1. The **Abbai WotCR are Abbai** (15%); the Drazi WotCR are left out, as the Centauri WotCR are.
+2. His +25% covers the **ranged functions only**: SOEW, SDEW, Blanket, Disruption, Jamming - 30 -> 38, 50 -> 63 (SDEW), 20 -> 25. Detect
+   Stealth and the stealth detection range are unchanged.
+3. The -2 is on the critical rolls of **every** sensor array on his ship; the +1 on his own.
+4. His blanket's third **keeps FV's fractions**: BDEW 10 gives 2.5 against an ordinary weapon and 3.33 against a ballistic one.
+
+**Built with defaults, stated here (ask before changing):**
+- **Post**: his ship's strongest ELINT array by output (the first on a tie - none exists among his hulls); the Chameleon suite is one.
+  Out of action as any officer: disabled when the array is destroyed, killed on its own critical roll of 20+ - which his -2 eases ("including
+  any modifications", the Technician's and the Security Officer's precedent). Pre-battle damage destroying it refunds him (Stage 15).
+- **Against each weapon kind the best ELINT wins**: his 9 points beside a plain ELINT's 12 give 3 against either (2.25 / 3 for his); his 12
+  beside a plain 12 give 3, and 4 against a ballistic. Fighter missiles count as ballistic (a fighter's direct fire ignores the blanket as
+  before).
+- **Public numbers** (the 2026-10-10 rule): the ranges and the ballistic third reach every viewer (`elintRangeBonus`, `blanketBallistic` on
+  the ship payload) - an opponent's own OEW under his Disruption, and its hit chance against a unit under his blanket, need them - and the
+  array's tooltip shows them to everyone; the officer himself stays own-team.
+- 30% / Abbai 15%, rounded up as every officer's; one per ship.
+
+**Design.**
+- Registry `OFF_ELINT` after OFF_ION (the last fixed-post ship officer), post `elint` (findPost: the strongest `ElintScanner`), `$factionRules`
+  `only` (the 19 factions) + `pct` (the two Abbai factions at 15). `applyElintOfficer`: `output` +1 on his array, `critRollMod` -2 on every
+  `Scanner` of his ship.
+- ⭐ **`Officers::elintRange($elint, $base)` is THE range of an ELINT function**: 25% longer while he serves, rounded half up in whole numbers
+  (`intdiv(base x 125 + 50, 100)`), behind `$officersPresent`. Asked at every range test: `EW::getBlanketDEW` (20), `getSupportedOEW`
+  (30, both legs), `getSupportedDEW` (50), `getDistruptionEW` (30), `HkJamming` (`JAM_RANGE`). ⚠️ MIRROR PAIR `officers.elintRange`, which reads
+  the published percent (`ew.elintRange` delegates; ew.js getSupportedOEW / getSupportedBDEW / getDistruptionEW and the Initial Orders menu's
+  `isInElintDistance` ask it).
+- **The ballistic third**: `EW::getBlanketDEW($gamedata, $target, $ballistic = false)`; for a ballistic shot (behind `$officersPresent`) each
+  ELINT's points pass through `Officers::ballisticBlanket` - x4/3 for his, counted in the quarters the existing x0.25 takes, so the best
+  ELINT still wins and every other shot runs the unchanged path. `Weapon::calculateHitBase` passes `$this->ballistic`; every other caller
+  (EdjdAbduction) the default. ⚠️ MIRROR PAIR `ew.getSupportedBDEW(ship, ballistic)` / `officers.ballisticBlanket`, at weaponManager's two
+  call sites (the live `computeBaseDefenceBreakdown`; `calculateBaseHitChange`, whose ShipTooltip caller has no weapon - ordinary).
+- **Lobby**: his +1 is added at read time in `shipManager.systems.getOutput` / `getOutputNoBoost` for an EW system (`officers.sensorBonus`,
+  0 in game - the server raised `output`), so the icon and the EW pool show it; the differential compares it (an EW system's output +
+  sensorBonus, as the reactor's + reactorBonus). The array's Special text is rewritten as it is shown (`officers.elintSpecial`, from
+  `adjustDataDisplay`): "30 hexes" -> 38, "20 hexes" -> 25, and the blanket's quarter gains "(per 3 against ballistic weapons)" - in game
+  for every viewer off the published numbers, in the lobby off his bought row.
+
+**Files.** Server: `Officers.php` (constants, `$factionRules`, registry, findPost `elint`, `applyElintOfficer`, `elintRange`, `ballisticBlanket`,
+`addForJson`), `EW.php` (the four sweeps), `HkJamming.php`, `weapon.php` (calculateHitBase). Client: `officers.js` (registry row, findPost,
+`sensorBonus`, `elintRangeBonus`, `elintRange`, `ballisticBlanket`, `elintSpecial`, adjustDataDisplay), `ew.js` (`elintRange` and the three
+sweeps), `systems.js` (getOutput / getOutputNoBoost), `weaponManager.js` (two call sites), `UI/shipTooltipInitialOrdersMenu.js`
+(isInElintDistance). Docs: an Expert ELINT Officer card (Ship Officers, alphabetical - first, before the Engineer) and his numbers in About
+Officers' list of what an opponent sees. Statics rebuilt; no new PHP class, no React change.
+
+**Measured.** 49 OFF_ELINT offers (the 44 + the Abbai WotCR's 5 non-OSAT hulls), statics +2.6 KB uncompressed: Abbai 2, Abbai WotCR 5,
+Brakiri 7, Centauri Republic 5 (the Dargan Chameleon included), Corillani 2, Deneth 1, Dilgar 2, Drazi Freehold 1, Earth Alliance 3, Gaim 2,
+Hyach 2, Llort 1, Markab 2 (the Shadrak base included), Minbari Federation 2, Minbari Protectorate 2, Narn 5 (three of them unofficial
+zzunoff hulls), Torata 2, Vree 2, Yolu 1.
+
+**Verified.**
+- `officersHarness.php` **1374 / 0 with the database** (55 new): the registry; offers and prices on 13 hulls across the factions (Skiatha 690
+  -> 104, Delphi 825 -> 248, the Nota at the Abbai 15%), none for the Garut, the Oracle Alpha, the Egret, the Explorer Prototype, the Kirva
+  OSAT, the Omega or the G'Quan; posts (the 6-array of the Oracle, the Fwellgon's 6, the Chameleon suite), unmoved by Improved Sensors and
+  Poor Crew; a doctored row buys nothing; +1 on his array only, -2 on both of the Oracle's, the EW pool +1, a Hyach array too; the REAL
+  testCritical roll 21 -> 19 (survives), 22 -> 20 (killed, one note); killed or disabled last turn - nothing, ranges 30, nothing published;
+  the payload per viewer; `elintRange` (38 / 25 / 63 / 0, gate off 30); the REAL `getBlanketDEW` (3 / 4 at 22, nothing at 26, a plain ELINT
+  nothing at 22 and 3 / 3 at 18, 2.5 / 3.33 for 10 points, gate off, two ELINTs both ways), `getSupportedOEW` (35: 3 / 0, 39: 0),
+  `getSupportedDEW` (55: 2 / 0, 64: 0), `getDistruptionEW` (35: 2 / 0, 39: 0), `HkJamming::resolveJamming` (rolled at 35 from his only); the
+  REAL `calculateHitBase` - a Norsca's Ion Torpedo needs 5% less under his blanket 12, its Rad Cannon the same.
+- `officersClientHarness.js` **530 / 0** (23 new): the registry mirror and order; findPost on the Oracle's and the Chameleon's REAL static
+  systems; `sensorBonus` (lobby, other array, none, in game, pre-battle destroyed); the REAL systems.js getOutput / getOutputNoBoost;
+  `elintRange` / `ballisticBlanket`; the REAL ew.js getSupportedBDEW, getSupportedOEW and getDistruptionEW; the REAL
+  computeBaseDefenceBreakdown (BDEW 4 against a ballistic, 3 against a beam); the tooltip text (published, lobby, none, the Chameleon
+  suite's own text unchanged); the REAL SystemInfo (an opponent's array: the ranges, no officer; his own: his line too); the REAL Initial
+  Orders menu's SOEW / SDEW / DIST buttons at 35 and 39 hexes.
+- `enhancementsDifferential.js` **709 / 0** (2 new: `elint`, `elint+sens+poor1` on the Nota); `enhancementsHarness` **283 / 0** - the
+  fingerprint re-recorded twice and proved additions only: one offer line (the Nota's, old copy `fingerprint.before-officers-stage20.txt`),
+  then 32 new case blocks (16 hulls x 2), the rest byte-identical.
+- `initialOrdersTooltipHarness.js` reads its known 4 / 10, identical to the output recorded on a clean tree (its stale stub lacks
+  `shipManager.isTargetable` - [[arch_stale_stage_harnesses]]) - so the menu's range is tested in officersClientHarness instead.
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0**. Legacy bundles carry the change (the watcher's); served copy synced.
+- **Mutation-tested: 31 breaks (17 server, 14 client), all caught**, files byte-identical afterwards. One first exited on an unguarded read
+  (`findPost(...).name` on null, when the Chameleon suite was dropped from the post) rather than a FAIL line; the check was made null-safe and
+  then reported it.
+
+**Follow-up (user, 2026-10-20, the same day): two FV ELINT corrections, for every ELINT, not only his.**
+- **SDEW's base range is 50**, as the server's firing check already had it: the Initial Orders menu's Add / Remove SDEW now offer it up to 50
+  hexes (was 30), the ELINT array's tooltip and the FAQ say 50. With him 63 (the tooltip rewrites 50 -> 63 as well). The client's
+  `ew.getSupportedDEW` - the hit-chance preview - checked no range at all; it now drops SDEW beyond `ew.elintRange(elint, 50)`, as the server
+  does at firing (user request, the same day; client 532 / 0, mutation 2 / 2).
+- **The blanket drawn on the map** (`ShipIcon.showBDEW`, user report the same day: it drew 20 hexes around his ship) - the radius is now
+  `ew.elintRange(ship, 20)`, 25 with him, off the published number, so an opponent's map shows his reach too. client 533 / 0 (the REAL
+  showBDEW, its HexRegion stubbed: 25 / 20), mutation 1 / 1. The Kirishiac module arc (`ELINT_ARC_HEXES` 30) is left: no Kirishiac unit
+  can take him.
+- **Blanket Protection's ConstrainedEW is the ELINT's**: `EW::getBlanketDEW` gave a fifth instead of a quarter when the TARGET was a Mindrider,
+  once after the loop; now each ELINT's own ability decides, per ELINT, as `ew.getSupportedBDEW` always did. Unchanged wherever no Mindrider
+  ELINT is on the board (a quarter of the best, or the best of the quarters, is one number); a Mindrider ELINT's blanket on an ally is now a
+  fifth (BDEW 10: 2.5 -> 2), an ordinary ELINT's on a Mindrider a quarter (12: 2.4 -> 3).
+- officersHarness **1375 / 0** (+1), client **531 / 0** (+1, SDEW 50 / 63 in the real menu; the tooltip checks now name SDEW 63 and
+  Disruption 38 apart); statics rebuilt (the array's text); kirishiacRefits 168 / 88, enhancements 283, differential 709, replay 162 / 0 - no
+  corpus game moved. Mutation 3 / 3 (the target read back, the menu's 30 back, the tooltip's 50 left long).

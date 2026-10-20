@@ -1263,7 +1263,7 @@ window.weaponManager = {
         var sdew = 0;
 
         sdew = ew.getSupportedDEW(target);
-        bdew = ew.getSupportedBDEW(target);
+        bdew = ew.getSupportedBDEW(target, Boolean(weapon && weapon.ballistic)); //a ballistic: an Expert ELINT Officer's blanket counts a third (OFFICERS_PLAN.md Stage 20)
 
         if (shooter && shooter.flight && !weapon.ballistic) {
             dew = 0;
@@ -1975,7 +1975,7 @@ window.weaponManager = {
         }
 
         sdew = ew.getSupportedDEW(target);
-        bdew = ew.getSupportedBDEW(target);
+        bdew = ew.getSupportedBDEW(target, Boolean(weapon && weapon.ballistic)); //a ballistic: an Expert ELINT Officer's blanket counts a third (OFFICERS_PLAN.md Stage 20)
 
         /* WALKERS_OF_SIGMA_PLAN.md 3.13c: the total BEFORE the fighter waiver below, which is
            what cancels an ordinary fighter weapon's flight OEW (never its offensive bonus - the

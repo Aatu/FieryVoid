@@ -1845,7 +1845,7 @@ public function getFullStartLoading()
           calculation and has to be zeroed wherever $dew is (two sites below).*/
         $disguisedDEW = $target->getDisguisedDEWFor($shooter, $gamedata->turn);
         $dewFake = ($disguisedDEW !== null) ? $disguisedDEW : $dew;
-        $bdew = EW::getBlanketDEW($gamedata, $target);
+        $bdew = EW::getBlanketDEW($gamedata, $target, $this->ballistic); //a ballistic: an Expert ELINT Officer's blanket counts a third (OFFICERS_PLAN.md Stage 20)
         $sdew = EW::getSupportedDEW($gamedata, $target);
         /* STEALTH COATING - THE LOCK (SHIP_ENHANCEMENTS_PLAN.md D9, §2.2.4): a weapon that uses OEW,
            fired by a unit holding OEW >= 1 on the target after disruption EW. Captured HERE, straight

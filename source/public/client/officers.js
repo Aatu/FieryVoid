@@ -76,6 +76,11 @@ window.officers = {
 		   Gunner's, is in the summary only. The boost buttons come with the payload (boostable, priced in thrust). */
 		{ id: 'OFF_ION', label: 'Expert Ion Technician', post: 'engine', needs: 'ionWeapon',
 			summary: 'Ion weapons have increased damage; Rad Cannons stronger; Boost ion weapons with thrust' },
+		/* Stage 20: in the ELINT array. Its +1 output is previewed in the lobby (sensorBonus - in game the server raised `output`); the
+		   -2 on sensor criticals is the server's alone. His longer ranges and his blanket against ballistics are read in game off the
+		   numbers the server publishes to every viewer (elintRange, ballisticBlanket); the array's tooltip shows both (elintSpecial). */
+		{ id: 'OFF_ELINT', label: 'Expert ELINT Officer', post: 'elint',
+			summary: '+1 sensors, -2 on sensor criticals; ELINT ranges +25%; Blanket Protection gives +1 DEW per 3 points against ballistic weapons' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -147,6 +152,7 @@ window.officers = {
 	   "cnC" carrying the FlagBridge special ability - the class property every FlagBridge declares.
 	     cnc      the first C&C that is not a Flag Bridge; failing that, the first one of any kind
 	     scanner  the strongest scanner by output - the list and the pick Elite Crew's lobby mirror uses
+	     elint    the strongest ELINT array by output (Stage 20): a scanner named elintScanner, or the Chameleon suite
 	     reactor  the biggest reactor by maxhealth - likewise
 	     engine   the strongest engine by output - the pick Poor Crew's and ADV_ENG's lobby mirrors use
 	     maggrav  the first Mag-Gravitic Reactor that can be hit: a reactor with fixedPower (the Thirdspace drive has it
@@ -179,6 +185,11 @@ window.officers = {
 			var scanners = (window.shipManager && shipManager.systems && typeof shipManager.systems.getScannerList === 'function')
 				? shipManager.systems.getScannerList(ship) : [];
 			return this.strongest(ship, scanners, 'output', -1);
+		}
+		if (post === 'elint') {
+			var arrays = (window.shipManager && shipManager.systems && typeof shipManager.systems.getScannerList === 'function')
+				? shipManager.systems.getScannerList(ship).filter(function (s) { return s && (s.name === 'elintScanner' || s.name === 'chameleonSensors'); }) : [];
+			return this.strongest(ship, arrays, 'output', -1);
 		}
 		if (post === 'reactor') {
 			return this.strongest(ship, systems.filter(function (s) { return s && s.name === 'reactor'; }), 'maxhealth', -1000);
@@ -1717,6 +1728,61 @@ window.officers = {
 			.replace('Engine: output reduced by 2.', 'Engine: output reduced by 2, and critical roll forced.<br> - Reactor or Sub Reactor: critical roll forced.');
 	},
 
+	/* ------------------------------------------------------------------ Expert ELINT Officer (Stage 20) */
+
+	ELINT_SENSORS: 1,           //⚠️ MIRROR of Officers::ELINT_SENSORS (PHP)
+	ELINT_RANGE_PCT: 25,        //...ELINT_RANGE_PCT - the lobby's own figure; in game the server publishes it (elintRangeBonus)
+	ELINT_BLANKET_BALLISTIC: 3, //...ELINT_BLANKET_BALLISTIC - likewise (blanketBallistic)
+
+	/* In the lobby: what he adds to THIS array's output - +1 on his own post, 0 anywhere else. shipManager.systems.getOutput adds it,
+	   so the icon and the EW pool show it. In game the server raised `output` (servingDerived is empty there).
+	   ⚠️ MIRROR PAIR with Officers::applyElintOfficer (PHP). */
+	sensorBonus: function sensorBonus(ship, system) {
+		if (!system) return 0;
+		var serving = this.servingDerived(ship);
+		for (var i = 0; i < serving.length; i++) {
+			if (serving[i].id === 'OFF_ELINT' && String(serving[i].post) === String(system.id)) return this.ELINT_SENSORS;
+		}
+		return 0;
+	},
+
+	/* How much longer his ship's ELINT ranges are, in percent: in game the number the server published to every viewer while he serves
+	   (Officers::addForJson - an opponent's previews need it too), in the lobby his own while he would serve. 0 without him. */
+	elintRangeBonus: function elintRangeBonus(ship) {
+		if (!ship) return 0;
+		if (ship.elintRangeBonus !== undefined) return parseInt(ship.elintRangeBonus, 10) || 0;
+		return this.servingDerived(ship).some(function (entry) { return entry.id === 'OFF_ELINT'; }) ? this.ELINT_RANGE_PCT : 0;
+	},
+
+	/* THE range of an ELINT function from `elint`: `base` hexes, his percent longer, fractions of 0.5 or more up - 50 -> 63, 30 -> 38,
+	   20 -> 25.
+	   ⚠️ MIRROR PAIR with Officers::elintRange (PHP). */
+	elintRange: function elintRange(elint, base) {
+		var pct = this.elintRangeBonus(elint);
+		if (!pct) return base;
+		return Math.floor((base * (100 + pct) + 50) / 100);
+	},
+
+	/* His ELINT's blanket points against a ballistic weapon, scaled for the quarter ew.getSupportedBDEW takes: x4/3 while the server
+	   says his blanket counts a third (blanketBallistic). ⚠️ MIRROR PAIR with Officers::ballisticBlanket (PHP). */
+	ballisticBlanket: function ballisticBlanket(elint, blanket) {
+		var divisor = elint ? parseInt(elint.blanketBallistic, 10) || 0 : 0;
+		if (!divisor) return blanket;
+		return blanket * 4 / divisor;
+	},
+
+	/* The ELINT array's Special text as the tooltip shows it while he serves - to every viewer in game, as the numbers are public: the
+	   ranges 25% longer and the blanket's third against ballistics. A sentence worded otherwise is left as it is. */
+	elintSpecial: function elintSpecial(ship, value) {
+		if (!ship || ship.flight || !this.elintRangeBonus(ship)) return value;
+		var self = this;
+		var hexes = function (text, base) { return text.replace(new RegExp('\\b' + base + ' hexes', 'g'), self.elintRange(ship, base) + ' hexes'); };
+		var divisor = ship.blanketBallistic !== undefined ? parseInt(ship.blanketBallistic, 10) || 0 : this.ELINT_BLANKET_BALLISTIC;
+		var text = hexes(hexes(hexes(String(value), 50), 30), 20); //SDEW 50, SOEW and Disruption 30, Blanket 20
+		if (divisor) text = text.replace('per 4 points allocated.', 'per 4 points allocated (per ' + divisor + ' against ballistic weapons).');
+		return text;
+	},
+
 	/* SystemInfo's one hook into a system's data rows (and its Special text). The weapon tooltip quotes fire
 	   control only through data["Fire control (fighter/med/cap)"] - in game too, less an officer just ordered to
 	   move (pendingMoveFireControl, user request 2026-10-16) - and a jump drive its range through
@@ -1728,7 +1794,8 @@ window.officers = {
 	   where the server applies both only at damage time. Stage 12: a plasma weapon's, with an Expert Plasma Scientist's
 	   +1 or +2 (plasmaDamageLine), the same way. Stage 14: every weapon's, with an Expert Religious Leader's +1 on top
 	   (religiousDamageLine). Stage 16: an EM weapon's, with an Expert Surge Officer's +1 (surgeDamageLine). Stage 17: an ion
-	   weapon's, with an Expert Ion Technician's +1 and thrust boost (ionDamageLine), and the Rad Cannon's Special text. */
+	   weapon's, with an Expert Ion Technician's +1 and thrust boost (ionDamageLine), and the Rad Cannon's Special text. Stage 20: an
+	   ELINT array's Special text, with an Expert ELINT Officer's ranges and blanket (elintSpecial) - to every viewer, in game too. */
 	DATA_KEY_FIRECONTROL: 'Fire control (fighter/med/cap)',
 	adjustDataDisplay: function adjustDataDisplay(ship, system, key, value) {
 		if (!system) return value;
@@ -1740,6 +1807,7 @@ window.officers = {
 			return this.surgeDamageLine(ship, system, this.religiousDamageLine(ship, system, line));
 		}
 		if (system.name === 'RadCannon' && key === 'Special') return this.radCannonSpecial(ship, value);
+		if ((system.name === 'elintScanner' || system.name === 'chameleonSensors') && key === 'Special') return this.elintSpecial(ship, value);
 		if (system.name === 'jumpEngine' && (key === 'Range' || key === 'Special')) {
 			var bonus = this.jumpRangeBonus(ship, system);
 			if (!bonus) return value;
