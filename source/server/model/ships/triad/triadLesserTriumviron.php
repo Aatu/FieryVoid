@@ -48,12 +48,15 @@ class triadLesserTriumviron extends BaseShip{
 		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
 		
 		$this->addPrimarySystem(new Reactor(8, 30, 0, 0));//armor, structure, power req, output
-        $this->addPrimarySystem(new CnC(8, 16, 0, 0));
+        $cnc = new CnC(8, 16, 0, 0);
+			$cnc->addTriad(); //Triad Command Node
+			$this->addPrimarySystem($cnc);
 //		$scanner = new Scanner(8, 24, 0, 15);
 //			$scanner->markAdvanced();
 //			$this->addPrimarySystem($scanner);			
         $scanner = new ElintScanner(8, 20, 0, 14);
-			$scanner->markMindrider();
+			$scanner->markAdvanced();
+			$scanner->markJealous(); //Jealous ELINT
 			$this->addPrimarySystem($scanner);	        
 		$this->addPrimarySystem(new Engine(8, 20, 0, 12, 3));
 //        $this->addPrimarySystem(new StructureSelfRepair(8, 24, 24)); //armor, structure, output

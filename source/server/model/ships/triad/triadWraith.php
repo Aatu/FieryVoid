@@ -25,7 +25,7 @@ class triadWraith extends BaseShip{
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 4;
-		$this->iniativebonus = 3 *5;
+		$this->iniativebonus = 2 *5;
 
 		$this->notes .= 'Triad Capital Ship'; 
 
@@ -54,12 +54,15 @@ class triadWraith extends BaseShip{
 		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
 
 		$this->addPrimarySystem(new Reactor(8, 30, 0, 0));//armor, structure, power req, output
-        $this->addPrimarySystem(new CnC(8, 16, 0, 0));
+        $cnc = new CnC(8, 16, 0, 0);
+			$cnc->addTriad(); //Triad Command Node
+			$this->addPrimarySystem($cnc);
 //		$scanner = new Scanner(8, 24, 0, 15);
 //			$scanner->markAdvanced();
 //			$this->addPrimarySystem($scanner);			
-        $scanner = new ElintScanner(8, 24, 0, 14);  // Using this for now as Jealous ELINT not implemented
-			$scanner->markMindrider();
+        $scanner = new ElintScanner(8, 24, 0, 14);
+			$scanner->markAdvanced();
+			$scanner->markJealous(); //Jealous ELINT
 			$this->addPrimarySystem($scanner);	        
 		$this->addPrimarySystem(new Engine(8, 30, 0, 18, 3));
         $this->addPrimarySystem(new CoopStructureSelfRepair(8, 18, 18)); //armor, structure, output

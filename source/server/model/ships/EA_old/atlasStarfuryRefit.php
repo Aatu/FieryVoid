@@ -8,7 +8,7 @@ class AtlasStarfuryRefit extends FighterFlight{
         $this->faction = "Earth Alliance (Early)";
         $this->phpclass = "AtlasStarfuryRefit";
         $this->shipClass = "Starfury: Atlas Heavy flight (2234)";
-			$this->variantOf = "Starfury: Flying Fox Heavy flight";
+		$this->variantOf = "NONE"; 
 			$this->occurence = "uncommon";
         $this->imagePath = "img/ships/aries.png";
 	    $this->isd = 2234;

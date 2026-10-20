@@ -43,6 +43,8 @@ PlainSprite.prototype.addTextSprite = function(avail) {
         texture.colorSpace = THREE.SRGBColorSpace;
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
+    // LinearFilter never samples mipmaps; three r169+ would still build them.
+    texture.generateMipmaps = false;
     texture.needsUpdate = true;
 
     var material = new THREE.SpriteMaterial({

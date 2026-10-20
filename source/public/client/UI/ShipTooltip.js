@@ -509,6 +509,13 @@ window.ShipTooltip = function () {
         if (arrivalIni !== 0) {
             toDisplay += '<span style="color:cyan;">Arrival Scatter (' + arrivalIni + ' Ini)</span>; ';
         }
+        /* Triad Command Node (TRIAD_ADVANCED_FEATURES_PLAN.md §4, §9) - the +10 and the swap, for the node and
+           its partner. A notice like the others here rather than a row of its own (user request 2026-10-09); the
+           total it produces is on the Ini line. Yellow, the tooltip's --fv-warn. */
+        if (!ship.flight && typeof CnC !== 'undefined' && typeof CnC.getTooltipLine === 'function') {
+            var commandNodeLine = CnC.getTooltipLine(ship);
+            if (commandNodeLine !== '') toDisplay += '<span style="color:#e1b000;">' + commandNodeLine + '</span>; ';
+        }
         if (ship.flight === true) {
             if (shipManager.movement.hasCombatPivoted(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 5;
         } else if (ship.osat) {
@@ -548,7 +555,13 @@ window.ShipTooltip = function () {
 
         } else {
             //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
-            this.addEntryElement("Ini Order: " + shipManager.getIniativeOrder(ship) + " (total " + ship.iniative + "): base " + ship.iniativebonus + "; mod " + ship.iniativeadded);
+            //Triad Command Node (TRIAD_ADVANCED_FEATURES_PLAN.md §4): during Initial Orders a nominated node is
+            //shown AS IT WILL BE once applied - the order and total on this line, for every ship it re-ranks.
+            var iniProjection = (typeof CnC !== 'undefined' && typeof CnC.getIniativeProjection === 'function') ? CnC.getIniativeProjection() : null;
+            if (iniProjection && !iniProjection[ship.id]) iniProjection = null;
+            var iniOrder = iniProjection ? CnC.getProjectedIniativeOrder(ship, iniProjection) : shipManager.getIniativeOrder(ship);
+            var iniTotal = iniProjection ? iniProjection[ship.id].iniative : ship.iniative;
+            this.addEntryElement("Ini Order: " + iniOrder + " (total " + iniTotal + "): base " + ship.iniativebonus + "; mod " + ship.iniativeadded);
 
             /*miscellanous info - once inserted, now disappeared; if it's needed, look for source code in Abbai branch!
             toDisplay = shipManager.systems.getMisc(ship);

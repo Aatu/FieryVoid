@@ -7,7 +7,7 @@ import ShipSection from "./ShipSection";
 import ShipWindowEw from "./ShipWindowEw";
 import FighterList from "./FighterList";
 import HitChartPanel from "./HitChartPanel";
-import ShipNotesPanel, { ManoeuvreStats, EnhancementsPanel, StatsIcon } from "./ShipNotesPanel";
+import ShipNotesPanel, { ManoeuvreStats, EnhancementsPanel, StatsIcon, officerSummaryLine } from "./ShipNotesPanel";
 import ShipInfo from "../system/ShipInfo";
 
 /*"Digital SCS" ship window (SHIPWINDOW_REDESIGN_PLAN.md Stage 1): sections arranged
@@ -1908,7 +1908,9 @@ class ShipWindow extends React.Component {
         //that used to live in the Notes popup (2026-07-19). Ammo enhancements are already
         //excluded server-side (Enhancements::isAmmoEnhancement) so ship.enhancementTooltip
         //carries only the enhancements worth surfacing here.
-        const withEnhPanel = Boolean(ship.enhancementTooltip);
+        //Officers share the gold box ("Officers (n)", OFFICERS_PLAN.md §4.7) but never enter
+        //enhancementTooltip (D4), so a hull carrying only an officer needs the panel on their account
+        const withEnhPanel = Boolean(ship.enhancementTooltip) || officerSummaryLine(ship) !== null;
         const areas = buildTemplateAreas(systemsByLocation, withEnhPanel);
         const isBigBase = ship.base && !ship.smallBase;
 

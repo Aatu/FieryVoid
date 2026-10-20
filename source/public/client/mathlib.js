@@ -373,34 +373,25 @@ window.mathlib = {
 	   loop does (i = 0 .. steps). The 50-step cap is the server's too - keep them equal.
 	   ------------------------------------------------------------------------------------ */
 	hexLine: function hexLine(start, end) {
-		/* ⚠️⚠️ THIS IS NOT Math.round, AND IT IS NOT JUST A SIGN FIX EITHER. PHP's round() differs
-		   from JS's in TWO ways, and both of them bite here:
+		/* ⚠️⚠️ THIS IS NOT Math.round. PHP's round() is HALF AWAY FROM ZERO: round(-2.5) === -3,
+		   while JS's Math.round(-2.5) === -2. Cube coordinates go negative all over a Fiery Void
+		   map, and a line through a hex corner lands on a .5. Without the sign handling, 843 of
+		   4,000 corpus lines disagreed with the server.
 
-		     1. HALF AWAY FROM ZERO. PHP round(-2.5) === -3; JS Math.round(-2.5) === -2. Cube
-		        coordinates go negative all over a Fiery Void map.
-		     2. PRE-ROUNDING. PHP first rounds the value to (14 - floor(log10|v|)) decimal places,
-		        so a value that floating-point error has left at -20.49999999999999644 is treated
-		        as -20.5 and lands on -21. Plain rounding gives -20.
+		   ⚠️ PHP 8.4 removed round()'s old PRE-ROUNDING step (rounding to 14 - floor(log10|v|)
+		   decimal places first, which turned -20.49999999999999644 into -20.5 and then -21), so
+		   round() now rounds the exact double. Live runs 8.4 (and local Docker matches since
+		   2026-10-08). This mirror was written against 8.2 and copied the pre-round, which made it
+		   disagree with the 8.4 server on 106 of 100,000 seeded lines, all through an exact hex
+		   corner; without it, it agrees on all 100,000. Math.round is exact (spec'd on the real
+		   value, ties toward +Infinity), so the mirror of 8.4's round(v, 0) is just the
+		   sign-symmetric form.
 
-		   Measured against the real HexZone::line over a 4,000-line corpus: fixing only (1) still
-		   left 13 lines disagreeing with the server, all of them from (2). Fixing only (2) leaves
-		   843. Both are load-bearing; the throwaway test asserts each of them separately.
-
-		   Mirrors _php_math_round(value, 0) in PHP's ext/standard/math.c. ⚠️ If FV's PHP ever
-		   moves to a version that changes round()'s edge-case behaviour (the "saner round()" work
-		   lands after 8.3 - this was written against 8.2), re-run the differential test before
-		   assuming this still matches. */
-		function halfAwayFromZero(x) { return x < 0 ? -Math.round(-x) : Math.round(x); }
-		function phpRound(v) {
-			if (!isFinite(v) || v === 0) return v;
-			var precisionPlaces = 14 - Math.floor(Math.log10(Math.abs(v)));
-			//PHP's guard, with places = 0: pre-round only when it is both useful and safe
-			if (precisionPlaces > 0 && precisionPlaces < 15) {
-				var f = Math.pow(10, precisionPlaces);
-				v = halfAwayFromZero(v * f) / f;
-			}
-			return halfAwayFromZero(v);
-		}
+		   ⚠️ PAIRED WITH HexZone::roundHalfAwayFromZero() on the server, which since 2026-10-08 no
+		   longer calls PHP's round() at all, so a future PHP version cannot split client and server
+		   again. The two must stay the same function; change one, change both, and re-run the
+		   differential (LIBRARY_UPGRADES_PLAN.md section 8). */
+		function phpRound(v) { return v < 0 ? -Math.round(-v) : Math.round(v); }
 
 		function offsetToCube(hex) {
 			var x = hex.q - (hex.r + (hex.r & 1)) / 2;

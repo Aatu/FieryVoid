@@ -199,8 +199,16 @@ PakmaraPlasmaWeb.prototype.clearBoost = function () {
  *                      may temporarily read as 0.
  *                      Subordinate cutters are stowed so UI shows them grayed out.
  *
- * DEFENSIVE    — right-click on the cutter opens intercept dialog via
- *                doMultipleSelfIntercept. Blocked when sustained is active.
+ * DEFENSIVE    — each die is -5% against one incoming shot
+ *                (TRIAD_ADVANCED_FEATURES_PLAN.md §2). Two ways to spend dice:
+ *                - Commit to interception (doMultipleSelfIntercept): one row
+ *                  per intercept shot, each its own dice from the cutters'
+ *                  shared pool, each shot a BLOCK the automation puts on one
+ *                  incoming shot (9 dice = one -45% or three -15%);
+ *                - manual interception: select the cutter in the Firing phase
+ *                  and click an incoming shot's hit chance - one die per click,
+ *                  however many cutters are selected.
+ *                Blocked entirely when sustained is active.
  * =========================================================================== */
 
 var hpcSelfInterceptQueue  = [];
@@ -270,13 +278,15 @@ HyperplasmaCutter.prototype.getEligibleCutters = function (shooter, target) {
     return cutters;
 };
 
+//A manual 'intercept' order carries its own die in ->shots (one per click), so it is spent from
+//the pool exactly like an offensive shot or a defensive block.
 HyperplasmaCutter.prototype.getRemainingDice = function () {
     var max  = (this.maxDice !== undefined) ? this.maxDice : 10;
     var used = 0;
     var currentTurn = (typeof gamedata !== 'undefined') ? gamedata.turn : -1;
     for (var i = 0; i < this.fireOrders.length; i++) {
         var fo = this.fireOrders[i];
-        if ((fo.type === 'normal' || fo.type === 'selfIntercept') &&
+        if ((fo.type === 'normal' || fo.type === 'selfIntercept' || fo.type === 'intercept') &&
             (currentTurn === -1 || fo.turn == currentTurn)) {
             used += fo.shots || 0;
         }
@@ -284,11 +294,58 @@ HyperplasmaCutter.prototype.getRemainingDice = function () {
     return Math.max(0, max - used);
 };
 
+//The cutters sharing this one's pool: every intact cutter on the ship (itself at least).
+HyperplasmaCutter.prototype.getPoolCutters = function () {
+    var cutters = this.ship ? this.getEligibleCutters(this.ship, null) : [];
+    return cutters.length > 0 ? cutters : [this];
+};
+
+/* ⭐ THE SHIP'S ONE POOL (user, 2026-10-09: "the shots from the 3 Cutters ... should share their pool of
+   dice, even for intercept"). Every cutter's dice, less what has actually been spent this turn by ANY of
+   them - offence, defensive blocks and manual intercepts alike.
+   Counted EXACTLY, never by summing getRemainingDice: an offensive primary order carries the WHOLE shot's
+   dice while each contributing sibling also carries an 'HPC-subordinate' copy of its share (skipped here),
+   and a defensive block may hold more dice than its own cutter has - which the per-cutter clamp in
+   getRemainingDice cannot see. Mirrored server-side by hyperplasmaCutter::getDefensiveDiceSequence. */
+HyperplasmaCutter.prototype.getShipPoolRemaining = function () {
+    var cutters = this.getPoolCutters();
+    var max = 0;
+    var used = 0;
+    for (var c = 0; c < cutters.length; c++) {
+        var cutter = cutters[c];
+        max += (cutter.maxDice !== undefined && cutter.maxDice !== null) ? cutter.maxDice : 10;
+        for (var i = 0; i < cutter.fireOrders.length; i++) {
+            var fo = cutter.fireOrders[i];
+            if (fo.turn != gamedata.turn) continue;
+            if (fo.type !== 'normal' && fo.type !== 'selfIntercept' && fo.type !== 'intercept') continue;
+            if (fo.type === 'normal' && fo.notes && fo.notes.indexOf('HPC-subordinate') >= 0) continue;
+            used += fo.shots || 0;
+        }
+    }
+    return Math.max(0, max - used);
+};
+
+//Dice the SHIP has put on defence this turn - every cutter's blocks and manual orders together.
+HyperplasmaCutter.prototype.getDefensiveDice = function () {
+    var cutters = this.getPoolCutters();
+    var dice = 0;
+    for (var c = 0; c < cutters.length; c++) {
+        for (var i = 0; i < cutters[c].fireOrders.length; i++) {
+            var fo = cutters[c].fireOrders[i];
+            if (fo.turn != gamedata.turn) continue;
+            if (fo.type === 'selfIntercept' || fo.type === 'intercept') dice += fo.shots || 0;
+        }
+    }
+    return dice;
+};
+
+//Dice the cutters that can reach `target` may still fire - never more than the ship's pool has left (a
+//defensive block bigger than its own cutter leaves the per-cutter counts overstating it).
 HyperplasmaCutter.prototype.getShipRemainingDice = function (shooter, target) {
     var eligible = this.getEligibleCutters(shooter, target);
     var total = 0;
     for (var i = 0; i < eligible.length; i++) total += eligible[i].getRemainingDice();
-    return total;
+    return Math.min(total, this.getShipPoolRemaining());
 };
 
 /* --------------------------------------------------------------------------
@@ -322,10 +379,20 @@ HyperplasmaCutter.prototype.initializationUpdate = function () {
         delete this.data["Current Target"];
     }
 
-    if (!sustained && gamedata.gamephase == 3 && this.getRemainingDice() > 0 || this.fireOrders.length > 0) {
-        this.data["Dice Remaining"] = this.getRemainingDice();
+    //Both figures are the SHIP's - its cutters share one pool (see getShipPoolRemaining).
+    delete this.data["Dice Remaining"];
+    var poolLeft = this.getShipPoolRemaining();
+    if (!sustained && gamedata.gamephase == 3 && poolLeft > 0 || this.fireOrders.length > 0) {
+        this.data["Ship Dice Remaining"] = poolLeft;
     } else {
-        delete this.data["Dice Remaining"];
+        delete this.data["Ship Dice Remaining"];
+    }
+
+    var defensiveDice = (gamedata.gamephase == 3) ? this.getDefensiveDice() : 0;
+    if (defensiveDice > 0) {
+        this.data["Ship Defensive Dice"] = defensiveDice;
+    } else {
+        delete this.data["Ship Defensive Dice"];
     }
 
     if (this.overloadshots > 0) {
@@ -450,7 +517,8 @@ HyperplasmaCutter.prototype.doMultipleFireOrders = function (shooter, target, sy
                     weapons: [firedWeapons[0]]
                 });
             }
-        }
+        },
+        { cssClass: 'hpcConfirm' } //the cutter's green - the default purple is the Molecular Slicer's
     );
 
     return [];
@@ -572,12 +640,22 @@ HyperplasmaCutter.prototype.continueSustainedShot = function (shooter, target) {
 };
 
 /* --------------------------------------------------------------------------
- * Defensive — right-click opens intercept dialog
+ * Defensive — Commit to interception (TRIAD_ADVANCED_FEATURES_PLAN.md §2, §9, rulings H1/H3/H4)
+ * confirm.hyperplasmaIntercept: ONE ROW PER INTERCEPT SHOT, each its own number of
+ * dice - one 9-dice shot, a 5-dice shot and a 3-dice shot, or any mix the pool allows.
+ * Each shot is a BLOCK worth -5% per die against ONE incoming shot, which the
+ * automation picks at resolution ("9 dice could be a single 45% intercept, or three
+ * 15% intercepts").
+ * The rows draw on the whole ship's pool (H3: the cutters share their dice, even for
+ * intercept - a Triumviron can put all 30 on defence from any one cutter). The blocks
+ * go on the cutter defence was opened from, because a block is spent with ITS
+ * cutter's arc. Every Triumviron cutter shares one arc; on a hull whose cutters look
+ * different ways (the Fiend), open defence from the one facing the threat.
  * Blocked entirely when sustained mode is active.
  * ------------------------------------------------------------------------ */
 HyperplasmaCutter.prototype.checkSelfInterceptSystem = function () {
     if (this.isSustainedThisTurn()) return false;
-    return this.getRemainingDice() > 0;
+    return this.getShipPoolRemaining() > 0;
 };
 
 HyperplasmaCutter.prototype.doMultipleSelfIntercept = function (ship) {
@@ -601,86 +679,163 @@ function openHpcSelfInterceptDialog() {
     hpcSelfInterceptQueue = [];
     if (queued.length === 0) return;
 
+    //A single click queues only the cutter clicked; a right-click queues every cutter of the ship, and then the
+    //lowest id leads. Either way it is ONE ship - the selected one - and its one pool is what the dialog offers;
+    //the shots go on that ship's first queued cutter.
     queued.sort(function (a, b) { return parseInt(a.weapon.id, 10) - parseInt(b.weapon.id, 10); });
+    var entry = queued[0];
+    var poolDice = entry.weapon.getShipPoolRemaining();
 
-    var totalDice = 0;
-    for (var i = 0; i < queued.length; i++) totalDice += queued[i].weapon.getRemainingDice();
-
-    if (totalDice <= 0) {
+    if (poolDice <= 0) {
         confirm.error("No dice remaining for defensive fire.");
         return;
     }
 
-    confirm.askForMultipleValues(
-        "Add defensive intercept shot (" + totalDice + " dice remaining — each die = -5% hit chance on one incoming shot)",
-        [{
-            id:    'dice',
-            label: 'Dice for this intercept shot',
-            max:   totalDice,
-            min:   1,
-            value: 1
-        }],
-        function (results) {
-            var dice = parseInt(results['dice'], 10);
-            if (isNaN(dice) || dice < 1) return;
-            dice = Math.min(dice, totalDice);
-
-            var targetEntry  = null;
-            var targetCutter = null;
-
-            for (var i = 0; i < queued.length; i++) {
-                if (queued[i].weapon.getRemainingDice() >= dice) {
-                    targetEntry  = queued[i];
-                    targetCutter = queued[i].weapon;
-                    break;
-                }
-            }
-
-            if (!targetCutter) {
-                var maxDice = 0;
-                for (var i = 0; i < queued.length; i++) {
-                    var rem = queued[i].weapon.getRemainingDice();
-                    if (rem > maxDice) {
-                        maxDice      = rem;
-                        targetEntry  = queued[i];
-                        targetCutter = queued[i].weapon;
-                    }
-                }
-                dice = Math.min(dice, targetCutter.getRemainingDice());
-            }
-
-            if (!targetCutter || dice <= 0) return;
-
-            var fireid = targetEntry.ship.id + '_' + targetCutter.id + '_intercept_' + (targetCutter.fireOrders.length + 1);
-            targetCutter.fireOrders.unshift({
-                id:         fireid,
-                type:       'selfIntercept',
-                shooterid:  targetEntry.ship.id,
-                targetid:   targetEntry.ship.id,
-                weaponid:   targetCutter.id,
-                calledid:   -1,
-                turn:       gamedata.turn,
-                firingMode: targetCutter.firingMode,
-                shots:      dice,
-                x:          'null',
-                y:          'null',
-                addToDB:    true,
-                damageclass:'plasma',
-                notes:      'HPC-intercept'
-            });
-
-            webglScene.customEvent('SystemDataChanged', { ship: targetEntry.ship, system: targetCutter });
-            if (targetCutter.checkFinished()) weaponManager.unSelectWeapon(targetEntry.ship, targetCutter);
-        }
-    );
+    confirm.hyperplasmaIntercept(entry.ship.name, poolDice, function (blocks) {
+        entry.weapon.addSelfInterceptOrders(entry.ship, blocks);
+    });
 }
+
+/* One BLOCK per intercept shot, `blocks` holding each one's dice - [9, 5, 3]: a selfIntercept order marked
+   'HPC-intercept' carrying its dice in ->shots, which hyperplasmaCutter::getInterceptionMod prices at dice x 5%
+   against one shot. A block may hold more dice than its own cutter has - the dice come out of the SHIP's pool (H3).
+   Re-checked against the pool in row order, so a stale dialog can never overspend it: a block the pool can no
+   longer pay for is skipped.
+   Unshifted, as defensive orders always have been on this weapon - last-first, so the ship window lists them in
+   the dialog's order. That order does not decide anything: the server spends a cutter's blocks LARGEST FIRST
+   (hyperplasmaCutter::getOwnDefensiveDice), each on the shot it is worth most against. */
+HyperplasmaCutter.prototype.addSelfInterceptOrders = function (ship, blocks) {
+    var left = this.getShipPoolRemaining();
+    var accepted = [];
+    for (var s = 0; s < blocks.length; s++) {
+        var dice = parseInt(blocks[s], 10);
+        if (isNaN(dice) || dice < 1 || dice > left) continue;
+        accepted.push(dice);
+        left -= dice;
+    }
+
+    for (var b = accepted.length - 1; b >= 0; b--) {
+        var dicePerShot = accepted[b];
+        this.fireOrders.unshift({
+            id:         ship.id + '_' + this.id + '_intercept_' + (this.fireOrders.length + 1),
+            type:       'selfIntercept',
+            shooterid:  ship.id,
+            targetid:   ship.id,
+            weaponid:   this.id,
+            calledid:   -1,
+            turn:       gamedata.turn,
+            firingMode: this.firingMode,
+            shots:      dicePerShot,
+            x:          'null',
+            y:          'null',
+            addToDB:    true,
+            damageclass:'plasma',
+            notes:      'HPC-intercept'
+        });
+    }
+
+    webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+    if (this.checkFinished()) weaponManager.unSelectWeapon(ship, this);
+};
+
+/* --------------------------------------------------------------------------
+ * Manual interception (TRIAD_ADVANCED_FEATURES_PLAN.md §2, ruling H2)
+ * "Just 5% per die added with a click": with the cutter selected in the Firing
+ * phase, each click on an incoming shot's hit chance puts ONE more die on that
+ * shot, as its own 'intercept' order carrying the die in ->shots.
+ *
+ * No selfIntercept marker stands behind it, unlike the Molecular Slicer (whose
+ * engagements are paid for by markers): hyperplasmaCutter::getInterceptionMod
+ * credits these orders directly, before the automation spends any block, so
+ * there is nothing to pair and no getSpareInterceptCapacity. A click draws on
+ * the SHIP's UNCOMMITTED dice (H3 - one pool for every cutter); blocks already
+ * committed through the dialog are left alone - withdraw one in the ship window
+ * to free its dice.
+ *
+ * ONE DIE PER CLICK, however many cutters are selected: getInterceptPoolKey tells
+ * weaponManager.getSelectedInterceptorsFor that they are one pool, so a click is
+ * answered by a single cutter of the ship (the strongest-ranked eligible one).
+ *
+ * The flag keeps the cutter off weaponManager's generic one-order-per-gun path,
+ * which would neither charge the pool nor price the order by its dice.
+ * ------------------------------------------------------------------------ */
+HyperplasmaCutter.prototype.usesCustomInterceptAllocation = true;
+
+HyperplasmaCutter.prototype.getInterceptPoolKey = function (ship) {
+    return 'HyperplasmaCutter_' + ship.id;
+};
+
+HyperplasmaCutter.prototype.canDeclareManualIntercept = function (ship) {
+    if (this.intercept < 1) return false;
+    if (this.isSustainedThisTurn()) return false; //sustained fire blocks defensive fire
+    return this.getShipPoolRemaining() > 0;
+};
+
+HyperplasmaCutter.prototype.declareManualIntercept = function (ship, ball, mode) {
+    if (!this.canDeclareManualIntercept(ship)) return 0;
+
+    this.fireOrders.push({
+        id: ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1),
+        type: 'intercept',
+        shooterid: ship.id,
+        //An intercept order's targetid is the id of the FIRE ORDER it is stopping.
+        targetid: ball.fireOrder.id,
+        weaponid: this.id,
+        calledid: -1,
+        turn: gamedata.turn,
+        firingMode: mode,
+        shots: 1, //ONE die per click - the row's hit chance drops 5% each time
+        x: "null",
+        y: "null",
+        damageclass: 'plasma',
+        notes: 'HPC-intercept' //how the server tells a manual cutter order from an automated one
+    });
+
+    //That was the pool's last die: the caller unselects this cutter, so take its selected siblings with it -
+    //they have nothing left to give either.
+    if (this.getShipPoolRemaining() <= 0) {
+        var self = this;
+        gamedata.selectedSystems.slice().forEach(function (sys) {
+            if (sys !== self && sys instanceof HyperplasmaCutter && sys.ship === ship) weaponManager.unSelectWeapon(ship, sys);
+        });
+    }
+
+    webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+    return 1;
+};
+
+/* --------------------------------------------------------------------------
+ * The INCOMING list (ShipTooltipBallisticsMenu - user request 2026-10-09)
+ * A ship's cutters are ONE weapon, so their shots are listed as one: every
+ * cutter's shot reads "Hyperplasma Cutter", the hull's A/B/C dropped
+ * (stripPairingSuffix), and shots alike in everything else group into one row -
+ * "2x Hyperplasma Cutter (Normal)". The row also says the dice its shots carry,
+ * as the Molecular Slicer's does: "(15d10)". Only while they are unresolved - a
+ * primary order carries its whole shot's dice in ->shots until
+ * hyperplasmaCutter::beforeFiringOrderResolution moves them to ->damageDice and
+ * leaves 1 (subordinate orders never reach the list: getAllBallisticsAgainst
+ * takes 'Sweeping' orders only).
+ * ------------------------------------------------------------------------ */
+HyperplasmaCutter.prototype.getIncomingDisplayName = function () {
+    return weaponManager.stripPairingSuffix(this.displayName);
+};
+
+HyperplasmaCutter.prototype.getIncomingDiceText = function (fireOrders) {
+    var dice = 0;
+    for (var i = 0; i < fireOrders.length; i++) {
+        if (weaponManager.isResolvedFireOrder(fireOrders[i])) return '';
+        dice += parseInt(fireOrders[i].shots, 10) || 0;
+    }
+    return dice > 0 ? dice + 'd10' : '';
+};
 
 /* --------------------------------------------------------------------------
  * Misc
  * ------------------------------------------------------------------------ */
+//Finished when the SHIP's pool is spent: any cutter can still fire or defend with a sibling's dice.
 HyperplasmaCutter.prototype.checkFinished = function () {
     if (this.isSustainedThisTurn()) return true;
-    return this.getRemainingDice() <= 0;
+    return this.getShipPoolRemaining() <= 0;
 };
 
 /* =============================================================================

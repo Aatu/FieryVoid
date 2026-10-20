@@ -1248,7 +1248,10 @@ window.shipManager = {
             if (shipManager.power.isOffline(ship, system)) continue;
 
             for (var a in system.specialAbilities) {
-                if (system.specialAbilities[a] == ability) return system;
+                if (system.specialAbilities[a] != ability) continue;
+                //e.g. an undesignated Jealous ELINT array lists "ELINT" but is not one this turn
+                if (typeof system.isSpecialAbilityActive === 'function' && !system.isSpecialAbilityActive(ability)) continue;
+                return system;
             }
         }
 

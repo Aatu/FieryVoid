@@ -38,20 +38,26 @@ class SimultaneousMovementRule implements JsonSerializable {
 
             $iniative = Dice::d(100) + $iniBonus + $mod;
 
-            //$newInitiative = 0;
-            $newInitiative = $this->iniRangeMin;
-
-            forEach ($this->categories as $category) {
-               // if (($iniative+10) > $category) { //Ini+10 instead of just Ini - to move more units to brackets 5/6 and make Ini penalties for Cap ships more important
-                if (($iniative) > $category) { //modified Ini ranges - retur to base Ini!
-                    $newInitiative = $category;
-                    break;
-                } 
-            }
-
             $ship->unmodifiedIniative = $iniative;
-            $ship->iniative = $newInitiative;
+            $ship->iniative = $this->getIniativeCategory($iniative);
         }
+    }
+
+    /* The category a raw initiative total falls into. Shared with anything that moves a total AFTER the
+       roll - the Triad Command Node (CnC::applyTriadCommandNodes) - so it lands where a roll would. */
+    public function getIniativeCategory($iniative) {
+        //$newInitiative = 0;
+        $newInitiative = $this->iniRangeMin;
+
+        forEach ($this->categories as $category) {
+           // if (($iniative+10) > $category) { //Ini+10 instead of just Ini - to move more units to brackets 5/6 and make Ini penalties for Cap ships more important
+            if (($iniative) > $category) { //modified Ini ranges - retur to base Ini!
+                $newInitiative = $category;
+                break;
+            }
+        }
+
+        return $newInitiative;
     }
 
     public function getNewActiveShip(TacGamedata $gameData, $lastShips = null) {

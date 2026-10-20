@@ -1,5 +1,5 @@
 <!--
-  FIERY VOID DATA ARCHIVE - AMMO, OPTIONS & ENHANCEMENTS
+  FIERY VOID DATA ARCHIVE - SHIP OPTIONS (ordnance, enhancements, refits and officers)
   Shown by client/UI/docViewer.js (the in-page window) and by ammo-options-enhancements.php (the
   same viewer, filling the page). Edit the words here; nothing else needs to change.
 
@@ -136,6 +136,8 @@
     <li><a href="#factionenhancements">Faction Enhancements</a> - options for one faction only.</li>
     <li><a href="#systemenhancements">System Enhancements</a> - refits bought for a single system rather than the whole
       unit.</li>
+    <li><a href="#officers">Officers</a> - specialists posted in one of a ship's systems, or in a fighter flight's first
+      fighter.</li>
   </ul>
 </section>
 
@@ -361,16 +363,9 @@
 <section data-key="fighterenhancements" data-title="Fighter Enhancements" data-group="Unit Enhancements">
   <div class="fvd-note">
     <p>All costs are per fighter: you pay for each fighter in the flight.</p>
+    <p>The Expert Motivator is an officer now: see <a href="#fighterofficers">Fighter Officers</a>.</p>
   </div>
   <div class="fvd-cards">
-    <article class="fvd-card">
-      <h4>Expert Motivator</h4>
-      <dl class="fvd-spec">
-        <dt>Effect</dt><dd>-2 to the flight's dropout rolls</dd>
-        <dt>Cost</dt><dd>10% of the craft's price (rounded up)</dd>
-        <dt>Limit</dt><dd>1</dd>
-      </dl>
-    </article>
     <article class="fvd-card">
       <h4>Improved Targeting Computer</h4>
       <dl class="fvd-spec">
@@ -789,6 +784,42 @@
           change what a thruster refit costs.</dd>
       </dl>
     </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Advanced Gravitic Shield (Kirishiac orbitals)</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Replaces the orbital's weapon with an Advanced Gravitic Shield generator covering the same arc.
+          It works like a Gravitic Shield of the rating you buy (each point: -5% to hit and -1 damage), needs no Shield
+          Generator, and keeps working while the orbital is docked. A standard orbital may also take a <b>2nd</b>
+          generator, rated separately: the two do not add up - the higher rating counts - but either one keeps the shield
+          up if the other is destroyed (the orbital's 1-6 weapon band becomes 1-3 / 4-6).</dd>
+        <dt>Cost</dt><dd>150 per rating level, for each generator.</dd>
+        <dt>Limit</dt><dd>Rating 5 on Ancient hulls, 3 on Primordial ones. Standard orbitals may take one or two generators,
+          Light orbitals exactly one, Heavy orbitals none.</dd>
+        <dt>Notes</dt><dd>Generators have armour 2 and 3 structure boxes. Only the strongest shield covering a shot counts,
+          however many generators or orbitals cover it. They are lost with their orbital and regenerate with it. Only 25%
+          of a fleet's ships may carry them (Ancient hulls; the Fleet Check counts them). An orbital cannot carry both
+          shield generators and an ELINT Sensor Module - buying one removes the other.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>ELINT Sensor Module (Kirishiac Masterships)</h4>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>Replaces a Gravitic Augmenter orbital's augmenter with a 4-point ELINT module in the same
+          180&deg; arc. The ship becomes an ELINT ship, but only toward units inside a live module's arc. Module points
+          are a pool of their own: they pay for OEW and every ELINT function (SOEW, SDEW, BDEW, Disruption, Detect Stealth,
+          Jamming) toward units in arc, and never become DEW. The ship's own scanner points cannot pay for ELINT
+          functions at all. OEW is paid from the scanner first; module points only carry in-arc OEW the scanner has
+          no room left for.</dd>
+        <dt>Cost</dt><dd>700 per module.</dd>
+        <dt>Limit</dt><dd>One per augmenter orbital - at most four per Mastership. Two are needed for all-round cover.</dd>
+        <dt>Notes</dt><dd>Each module permanently costs the scanner 2 EW. Modules add together only where their arcs
+          overlap - Blanket DEW and Detect Stealth too: a unit gets only the points of the modules whose arc holds it
+          (BDEW 8 from a port and a starboard module is 1 BDEW to a friendly on either side, 2 to the Mastership
+          itself). You may allocate toward a unit outside every arc (you are warned), but after Movement any module
+          points spent on a unit that is not then in a live module's arc are lost - your DEW is never changed to make up
+          for them. Works docked or deployed; may be powered down only while docked. Module 6 armour, 12 structure.</dd>
+      </dl>
+    </article>
   </div>
 </section>
 
@@ -811,4 +842,227 @@
       player for their own damage and movement displays to be correct. A careful opponent comparing a ship against its
       published control sheet can still work out that something has been refitted.</li>
   </ul>
+</section>
+
+<!-- ═════════════════════════════════ OFFICERS ══════════════════════════════ -->
+
+<section data-key="officers" data-title="About Officers" data-group="Officers">
+  <p class="fvd-lede">Expert officers are specialists a ship or a fighter flight can carry. Each one works from a
+    particular system - their <b>post</b> - and gives their bonus for as long as they are able to serve.</p>
+  <p>Like enhancements, officers are optional: worth agreeing with your opponent before using them in a pickup battle.</p>
+
+  <h3 data-anchor="buyingofficers">Buying officers</h3>
+  <ul>
+    <li>Officers are bought with the unit in Fleet Selection, in the <b>Officers</b> section at the bottom of its buy
+      window.</li>
+    <li>A ship may carry several officers, but only one of each type. A fighter flight may carry only <b>one officer in
+      total</b>: once one is bought, the buy window refuses a second.</li>
+    <li>A ship officer's price is a percentage of the ship's base cost, rounded up. A fighter officer's is a percentage of
+      one fighter's cost - paid once for the whole flight, or for every fighter in it, as each card says.</li>
+    <li>A unit is only offered an officer whose post it has - no C&amp;C, no Helmsman. Ancient units, OSATs, MicroSATs,
+      mines, terrain and remotely controlled craft such as Orieni Hunter-Killers (they have no pilots) cannot carry officers
+      at all.</li>
+  </ul>
+
+  <h3 data-anchor="losingofficers">Losing an officer</h3>
+  <ul>
+    <li><b>Disabled.</b> If the officer's post is destroyed - by damage to the system itself, or because the Structure
+      block holding it is destroyed - the officer is out for the rest of the battle. Repairing the system afterwards
+      does not bring them back.</li>
+    <li><b>Killed.</b> Whenever the post takes damage, its normal critical roll also decides the officer's fate: a roll of
+      20 or more, modifiers included, kills them. The roll is made even when the damage destroys the system.</li>
+    <li>Either way, the officer still serves for the rest of the turn it happens, and is gone from the next turn.</li>
+    <li>An officer whose post is destroyed by pre-battle damage never serves at all. Fleet Selection warns you, and you can
+      remove the officer by editing the ship.</li>
+    <li><b>Fighter officers</b> fly in the flight's first fighter and are lost only with it: when it is destroyed or drops
+      out. There is no kill roll, and docking never loses them.</li>
+    <li>If the flight splits in two - part of it launched or docked on its own, or escaping a lost hangar as a separate
+      "Split" flight - the officer <b>goes with his fighter</b>: the part that has it gets his bonus, and carries his cost in
+      the fleet list, from the next turn; the rest of the flight does not.</li>
+  </ul>
+
+  <h3 data-anchor="seeingofficers">Seeing your officers</h3>
+  <ul>
+    <li>A gold double-chevron insignia marks the post's icon in the ship window - for a fighter officer, the flight's first
+      fighter. It turns grey once the officer is out of action, with a red slash through it if they were killed.</li>
+    <li>The post's information tooltip names the officer and what they do, and says how and when they were lost. A fighter
+      officer is named in the flight's own tooltip, shown when you hover over a fighter.</li>
+    <li>The ship window's gold Enhancements box counts the officers aboard, as <b>Officers (2)</b>. In the lobby, a
+      fighter flight's box names its one officer instead.</li>
+    <li>Your opponent sees none of these until the game is over. Some effects do show, though, because they change numbers
+      everyone can read: a Helmsman's or a Dogfighter's initiative, a Geneticist's profiles, a Technician's reactor power,
+      a Matter Weapons Expert's fire control and an Evader's offensive bonus. The opponent sees the number, not who is
+      behind it.</li>
+  </ul>
+</section>
+
+<section data-key="shipofficers" data-title="Ship Officers" data-group="Officers">
+  <p class="fvd-lede">The officers available so far. More will be added over time.</p>
+  <div class="fvd-cards">
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Helmsman</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>C&amp;C</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>+5 Initiative.</li>
+          <li>Wins initiative ties against ships without an Expert Helmsman.</li>
+          <li>-1 to the die the ship rolls on a meteor swarm's impact chart, so fewer meteors strike it.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>5% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship.</dd>
+        <dt>Notes</dt>
+        <dd>With simultaneous movement, ships move in initiative brackets rather than one at a time, so the tie-break has
+          nothing to decide there. The +5 still counts.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Scanner</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The ship's strongest Scanner.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>The ship may save 1 point of EW and spend it after movement, in the Pre-Firing or Firing phase - the same
+            way an EW Detector allows.</li>
+          <li>Works anywhere on the map: no EW Detector needs to be present.</li>
+          <li>Adds to an EW Detector's allowance: a ship covered by one Detector and carrying an Expert Scanner may save
+            2 points.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>7% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship.</dd>
+        <dt>Notes</dt>
+        <dd>As with a Detector, the saved point comes out of the ship's unspent EW (its DEW), so a ship that spends all its
+          EW in Initial Orders has nothing to save.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Technician</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The ship's Reactor (the largest, if it has more than one).</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>+2 Reactor power.</li>
+          <li>Or, if it is more, a third (rounded down) of the power used by the largest system the ship has lost - for
+            example +3 once a system using 9 power has been destroyed.</li>
+          <li>Worked out again every turn, so the bonus grows as the ship loses bigger systems.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>9% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Geneticist</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>C&amp;C</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>-1 to hit (-5%) with all of the ship's own weapons.</li>
+          <li>+2 to both of the ship's defence profiles (+10% to be hit).</li>
+          <li>Enemy ships may ram this ship.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>5% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship.</dd>
+        <dt>Notes</dt>
+        <dd>Intended for scenarios - agree with your opponent before using one. Fiery Void leaves ramming to the players, so
+          the ramming rule is not enforced by the game.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Matter Weapons Expert</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>C&amp;C</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>+1 fire control (+5%) for every Matter weapon on the ship, against every target size it can engage.</li>
+          <li>+1 damage on every Matter weapon shot.</li>
+          <li>On a weapon with several firing modes, only its Matter modes benefit.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>10% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship. Only offered to ships carrying at least one Matter weapon.</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<section data-key="fighterofficers" data-title="Fighter Officers" data-group="Officers">
+  <p class="fvd-lede">Officers for fighter flights. A flight may carry only one of them, and he flies in its first
+    fighter: he is lost if that fighter is destroyed or drops out, and goes with it if it is split off from the flight
+    (see <a href="#losingofficers">Losing an officer</a>).</p>
+  <div class="fvd-cards">
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Dogfighter</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The flight's first fighter.</dd>
+        <dt>Effect</dt>
+        <dd>+5 Initiative for the flight.</dd>
+        <dt>Cost</dt>
+        <dd>50% of one fighter's cost, once for the whole flight.</dd>
+        <dt>Limit</dt>
+        <dd>1 officer per flight.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Missileer</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The flight's first fighter.</dd>
+        <dt>Effect</dt>
+        <dd>+5 Offensive Bonus (+5%) on the flight's missile and torpedo launches - whenever a launch gets the flight's
+          Offensive Bonus at all (a Navigator aboard, or the target in the launcher's arc).</dd>
+        <dt>Cost</dt>
+        <dd>50% of one fighter's cost, once for the whole flight, plus 1 point for every missile the flight can carry -
+          so a flight of six fighters carrying four missiles each pays 24 more.</dd>
+        <dt>Limit</dt>
+        <dd>1 officer per flight. Only offered to flights that carry missiles.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Evader</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The flight's first fighter.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>-5 Offensive Bonus (-5% to hit) on all of the flight's weapons.</li>
+          <li>-1 damage from every hit on the flight.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>100% of one fighter's cost, for every fighter in the flight.</dd>
+        <dt>Limit</dt>
+        <dd>1 officer per flight.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h4>Expert Motivator</h4>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The flight's first fighter.</dd>
+        <dt>Effect</dt>
+        <dd>-2 to the flight's dropout rolls.</dd>
+        <dt>Cost</dt>
+        <dd>10% of one fighter's cost (rounded up), for every fighter in the flight.</dd>
+        <dt>Limit</dt>
+        <dd>1 officer per flight.</dd>
+        <dt>Notes</dt>
+        <dd>Formerly a fighter enhancement, with the same effect and price. As an officer he now counts as the flight's one
+          officer, is lost with the flight's first fighter, and is hidden from your opponent.</dd>
+      </dl>
+    </article>
+  </div>
 </section>

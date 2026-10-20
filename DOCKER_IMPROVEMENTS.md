@@ -37,6 +37,13 @@ This document summarizes the changes made to improve the Docker development envi
     - Added `mariadb_data` volume in `docker-compose.yml`.
     - Mounted it to `/var/lib/mysql` in the `mariadb` service.
 
+### MariaDB 11.4 (matches live)
+- **Issue**: The local database was MariaDB 10.3 (end of life May 2023), while live runs 11.4.5, so SQL was only ever tested on a different server.
+- **Fix**: `docker/mariadb/Dockerfile` is pinned to live's exact version, `mariadb:11.4.5`, with live's settings: character set and collation `utf8mb4` / `utf8mb4_unicode_ci`, time zone Central European (`TZ=Europe/Warsaw`; it was UTC before), and the B5CGM database default `utf8mb3_general_ci` (set in `db/emptyDatabase.sql`). Changed 2026-10-08.
+- **Implementation**:
+    - `MARIADB_AUTO_UPGRADE=1` upgrades an existing 10.3 volume in place on its first start. Tested on a copy of one: the data was identical afterwards.
+    - The container has no `mysql` command any more. Use `mariadb`, `mariadb-dump` and `mariadb-admin` (README, "Backing up the local database").
+
 ## 3. Performance
 - **Observation**: Startup times are faster.
 - **Reason**:

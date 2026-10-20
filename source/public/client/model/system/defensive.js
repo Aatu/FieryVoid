@@ -138,6 +138,20 @@ GraviticShield.prototype.getDefensiveHitChangeMod = function (target, shooter, w
 	return defenceMod;
 };
 
+/* Kirishiac orbital refit (KIRISHIAC_ORBITAL_REFITS_PLAN.md) - mirrors KirishiacAdvGravShield in
+   baseSystems.php. A Gravitic Shield in every client-side rule: getOutput is the defence mod and the
+   ship's shield bucket keeps only the strongest. Its name differs from graviticShield on purpose -
+   the Shield Generator coupling in ship.js / power.js is keyed on that name, and this shield needs
+   no generator (A1). The class exists because SystemFactory builds `new window[Name]`. */
+var KirishiacAdvGravShield = function KirishiacAdvGravShield(json, ship) {
+	GraviticShield.call(this, json, ship);
+};
+KirishiacAdvGravShield.prototype = Object.create(GraviticShield.prototype);
+KirishiacAdvGravShield.prototype.constructor = KirishiacAdvGravShield;
+//what ShipIcon.showWeaponArc draws a shield's wedge on hover for. An ordinary shield gets it from its static
+//blueprint; this one is built from its own game payload (plan D6), which does not carry it.
+KirishiacAdvGravShield.prototype.defensiveSystem = true;
+
 var ShieldGenerator = function ShieldGenerator(json, ship) {
 	ShipSystem.call(this, json, ship);
 };

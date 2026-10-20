@@ -33,18 +33,21 @@ const PANEL_GAP = 6;
    hung below it - stayed 120px across, and the whole control looked detached from its ship.
    The ring now hugs the unit's allegiance circle instead: ShipIcon draws that circle
    min(canvasSize * 0.75, 250) game units across, which is that / zoom pixels on screen.
-   It is pulled IN only, never pushed out: once the circle is bigger than the fixed layout (zoomed in,
-   or a big hull) the ring is exactly where it always was. */
+   It is pulled IN only: once the circle is bigger than the fixed layout (zoomed in, or a big hull)
+   the ring is where it always was. The one exception is a fore/aft column of five or more tiles,
+   which the side rows now stand clear of (see getRingOffsets). */
 const TILE = 40;
 const RING_X_MAX = 60;  //fore/aft columns: distance from the ship's centre to the inner edge
-const RING_Y_MAX = 80;  //port/starboard rows: the same
+const RING_Y_MAX = 80;  //port/starboard rows: the same, unless a taller fore/aft column needs more
 const RING_GAP = 4;     //clearance between the unit's circle and the nearest tile
 
-/* {x, y, clear}, in px. x and y: how far out the columns and rows stand. Each hugs the circle, held
-   off just far enough that the tiles cannot collide at the four corners: a column and a row are
-   clear of each other when the column stands outside the row's half-width OR the row stands outside
-   the column's half-height, so whichever is the smaller push is the one taken. Only the directions
-   this manoeuvre actually draws are counted.
+/* {x, y, clear}, in px. x and y: how far out the columns and rows stand. Each hugs the circle, except
+   that the port/starboard rows always stand clear of the END of the taller fore/aft column (user
+   request 2026-10-09). Two or more retro or main thrusters stack into a column across the ship's
+   axis, and the side rows used to be allowed to tuck in between the two columns, nearer the hull
+   than the outermost retro/main tile. Standing the rows outside the columns also means the tiles can
+   never collide at the four corners, which the columns were once pushed outward to avoid. Only the
+   directions this manoeuvre actually draws are counted.
    clear: the radius round the ship's centre the PANEL keeps out of as well as the tiles - a turn
    draws tiles on only two sides, and without it the panel would sit on the hull. Capped at the old
    fixed ring's reach, so zoomed in on a big hull it goes no further out than it always did. */
@@ -54,18 +57,13 @@ const getRingOffsets = (ship, totalRequired, movement) => {
     const clear = Math.min(circle, RING_Y_MAX + TILE);
     const drawn = direction => movement.type === 'roll' || !Array.isArray(totalRequired) || totalRequired[direction] !== null;
     const tiles = direction => drawn(direction) ? shipManager.systems.getThrusters(ship, direction).length : 0;
-    const rowHalf = Math.max(tiles(3), tiles(4)) * TILE / 2;    //half the width of the wider side row
     const columnHalf = Math.max(tiles(1), tiles(2)) * TILE / 2; //half the height of the taller fore/aft column
 
-    let x = Math.min(circle, RING_X_MAX);
-    let y = Math.min(circle, RING_Y_MAX);
-    if (x < rowHalf && y < columnHalf) {
-        const pushX = rowHalf <= RING_X_MAX ? rowHalf - x : Infinity;
-        const pushY = columnHalf <= RING_Y_MAX ? columnHalf - y : Infinity;
-        if (pushX === Infinity && pushY === Infinity) return { x: RING_X_MAX, y: RING_Y_MAX, clear };
-        if (pushX <= pushY) x = rowHalf; else y = columnHalf;
-    }
-    return { x, y, clear };
+    return {
+        x: Math.min(circle, RING_X_MAX),
+        y: Math.max(Math.min(circle, RING_Y_MAX), columnHalf),
+        clear
+    };
 };
 
 /* ── Thruster ring ─────────────────────────────────────────────────────────────────────── */
@@ -88,9 +86,11 @@ const Text = styled.span`
                        delay (the panel's green "Extra thrust" row)
      unset    no box - the click would be refused (thruster at double its rating, no engine thrust
                        left, nothing more a non-turn manoeuvre will take, ...)
-   $destroyed: dimmed and crossed out. getThrusters returns destroyed thrusters too, and the
+   $destroyed: dimmed and boxed in red. getThrusters returns destroyed thrusters too, and the
    panel used to draw them exactly like live ones, so a ship that had lost its thrusters could
-   only find out why from the ship window. */
+   only find out why from the ship window. The red box replaced a ✕ over the tile (user request
+   2026-10-09): it hid the 0/0 readout and left the tile looking like a stray mark rather than a
+   member of its row. */
 const Thruster = styled.div`
     width: 40px;
     height: 40px;
@@ -100,6 +100,7 @@ const Thruster = styled.div`
     position: relative; // Needed for absolute positioning of ::before
     box-sizing: border-box;
     ${props => {
+        if (props.$destroyed) return `box-shadow: inset 0 0 0 1px ${theme.colors.statusBad};`;
         if (props.$box === 'need') return `box-shadow: inset 0 0 0 1px ${theme.colors.warning};`;
         if (props.$box === 'extra') return `box-shadow: inset 0 0 0 1px ${theme.colors.greenBtnLineHover};`;
         return '';
@@ -142,20 +143,7 @@ const Thruster = styled.div`
         ${props => props.$destroyed ? 'opacity: 0.3;' : ''}
     }
 
-    ${props => props.$destroyed ? `
-    cursor: default;
-    &::after {
-        content: "✕";
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 26px;
-        line-height: 1;
-        color: ${theme.colors.statusBad};
-        pointer-events: none;
-    }` : Clickable}
+    ${props => props.$destroyed ? 'cursor: default;' : Clickable}
 `;
 
 const ThrusterContainer = styled.div`

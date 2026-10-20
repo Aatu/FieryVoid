@@ -107,6 +107,13 @@ class MovementGamePhase implements Phase
             MineStealth::checkMovementDetection($latestgameData, $dbManager);
         }
 
+        /* KIRISHIAC_ORBITAL_REFITS_PLAN.md §8.4 - every unit has moved: ELINT module points spent on a
+           unit that is now outside every live module's arc are lost (R9). Once per turn, before
+           anything reads this turn's EW for firing. One static boolean in every game without modules. */
+        if (TacGamedata::$elintModulesPresent) {
+            ElintModules::validateAfterMovement($latestgameData, $dbManager);
+        }
+
         // Update game phase to Pre-Firing
         $gameData->setPhase(5);
         $gameData->setActiveship(-1);

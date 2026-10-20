@@ -84,6 +84,128 @@ var ElintScanner = function ElintScanner(json, ship) {
 ElintScanner.prototype = Object.create(Scanner.prototype);
 ElintScanner.prototype.constructor = ElintScanner;
 
+/* ===== JEALOUS ELINT (Triad - TRIAD_ADVANCED_FEATURES_PLAN.md §3) ======================================
+   Mirrors ElintScanner in baseSystems.php. A Jealous array lists "ELINT" but only works as one on a turn
+   it was DESIGNATED in Initial Orders, and a fleet (= slot) may designate ceil(N/4) of its N Jealous
+   ships per turn. jealousElintTurn is that designation: set locally by the tooltip button, posted at
+   the commit, and sent back by the server for the current turn (masked from enemies during Initial
+   Orders). Everything that asks "is this an ELINT?" goes through shipManager.getSpecialAbilitySystem,
+   which asks isSpecialAbilityActive below - so SOEW/SDEW/BDEW/DIST/JAM/Detect Stealth buttons and every
+   ELINT read follow the designation with no call-site changes. */
+ElintScanner.prototype.isJealousElint = function () {
+	return Array.isArray(this.specialAbilities) && this.specialAbilities.indexOf("JealousELINT") !== -1;
+};
+
+ElintScanner.prototype.isJealousElintActive = function () {
+	return this.jealousElintTurn !== undefined && this.jealousElintTurn !== null && this.jealousElintTurn == gamedata.turn;
+};
+
+ElintScanner.prototype.isSpecialAbilityActive = function (ability) {
+	if (ability === "ELINT" && this.isJealousElint()) return this.isJealousElintActive();
+	return true;
+};
+
+ElintScanner.prototype.doIndividualNotesTransfer = function () {
+	this.individualNotesTransfer = "";
+	if (gamedata.gamephase != 1 || !this.isJealousElint() || !gamedata.isMyShip(this.ship)) return false;
+	this.individualNotesTransfer = [this.isJealousElintActive() ? 1 : 0];
+	return true;
+};
+
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the designation, in the one phase it is made. Undefined on every
+//other ELINT array, which getDraftState skips.
+ElintScanner.prototype.draftStateKeys = ['jealousElintTurn'];
+ElintScanner.prototype.draftStatePhases = [1];
+
+//The ship's Jealous ELINT array (in any state), or null.
+ElintScanner.getJealousArray = function (ship) {
+	if (!ship || ship.flight || !ship.systems) return null;
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+		if (system instanceof ElintScanner && system.isJealousElint()) return system;
+	}
+	return null;
+};
+
+//The other units of this ship's fleet - same player, same slot (one player may hold several slots).
+ElintScanner.getFleetShips = function (ship) {
+	return gamedata.ships.filter(function (other) {
+		return other.userid == ship.userid && other.slot == ship.slot;
+	});
+};
+
+//ceil(N/4), N = the fleet's live, deployed ships with an intact Jealous array. Mirrors
+//ElintScanner::getJealousElintQuota, which is what the server enforces.
+ElintScanner.getJealousQuota = function (ship) {
+	var count = 0;
+	ElintScanner.getFleetShips(ship).forEach(function (other) {
+		if (shipManager.isDestroyed(other)) return;
+		if (shipManager.getTurnDeployed(other) > gamedata.turn) return;
+		var array = ElintScanner.getJealousArray(other);
+		if (array && !shipManager.systems.isDestroyed(other, array)) count++;
+	});
+	return Math.ceil(count / 4);
+};
+
+ElintScanner.countJealousDesignated = function (ship) {
+	var count = 0;
+	ElintScanner.getFleetShips(ship).forEach(function (other) {
+		var array = ElintScanner.getJealousArray(other);
+		if (array && array.isJealousElintActive()) count++;
+	});
+	return count;
+};
+
+/* May this ship be designated now? Own ship, Initial Orders, not yet committed, on the board, with a
+   working Jealous array, not already designated - and a place left in the fleet's quota. */
+ElintScanner.canDesignateJealous = function (ship) {
+	if (gamedata.gamephase != 1 || gamedata.waiting) return false;
+	if (!ship || !gamedata.isMyShip(ship) || shipManager.isDestroyed(ship)) return false;
+	if (shipManager.getTurnDeployed(ship) > gamedata.turn) return false;
+	var array = ElintScanner.getJealousArray(ship);
+	if (!array || array.isJealousElintActive()) return false;
+	if (shipManager.systems.isDestroyed(ship, array) || shipManager.power.isOffline(ship, array)) return false;
+	return ElintScanner.countJealousDesignated(ship) < ElintScanner.getJealousQuota(ship);
+};
+
+ElintScanner.isDesignatedJealous = function (ship) {
+	if (!ship || !gamedata.isMyShip(ship)) return false;
+	var array = ElintScanner.getJealousArray(ship);
+	return !!(array && array.isJealousElintActive());
+};
+
+ElintScanner.designateJealous = function (ship) {
+	if (!ElintScanner.canDesignateJealous(ship)) return;
+	ElintScanner.getJealousArray(ship).jealousElintTurn = gamedata.turn;
+	gamedata.elintShips = Array(); //lazy cache of ELINT ships - rebuilt on next read
+	webglScene.customEvent("ShipEwChanged", { ship: ship });
+};
+
+/* Stand the ship down - and take back what only an ELINT could have allocated this turn, or it would
+   sit in the EW panel spending points the ship can no longer use. */
+ElintScanner.ELINT_EW_TYPES = ["SOEW", "SDEW", "BDEW", "DIST", "JAM", "Detect Stealth"];
+ElintScanner.standDownJealous = function (ship) {
+	if (gamedata.gamephase != 1 || gamedata.waiting) return;
+	var array = ElintScanner.getJealousArray(ship);
+	if (!array || !array.isJealousElintActive()) return;
+	array.jealousElintTurn = null;
+	ship.EW = ship.EW.filter(function (entry) {
+		return !(entry.turn == gamedata.turn && ElintScanner.ELINT_EW_TYPES.indexOf(entry.type) !== -1);
+	});
+	gamedata.elintShips = Array();
+	webglScene.customEvent("ShipEwChanged", { ship: ship });
+};
+
+/* Kirishiac orbital refit (KIRISHIAC_ORBITAL_REFITS_PLAN.md) - mirrors KirishiacElintModule in
+   baseSystems.php. Deliberately NOT a Scanner (no isScanner): its points are a pool of their own,
+   never part of the ship's normal EW (plan D10, §8.1). It carries the "ELINT" special ability, which
+   is what makes shipManager.isElint answer true for its ship. */
+var KirishiacElintModule = function KirishiacElintModule(json, ship) {
+	ShipSystem.call(this, json, ship);
+};
+KirishiacElintModule.prototype = Object.create(ShipSystem.prototype);
+KirishiacElintModule.prototype.constructor = KirishiacElintModule;
+
 //Chameleon Sensor Suite - mirrors ChameleonSensors in baseSystems.php. Extends ElintScanner so
 //isScanner() stays true; the distinct class exists because createSystemFromJson does new window[Name].
 var ChameleonSensors = function ChameleonSensors(json, ship) {
@@ -279,6 +401,249 @@ CnC.prototype.initializationUpdate = function () {
 		this.data["Marine Units"] = this.marines || 0;
 	}
 	return this;
+};
+
+/* ===== TRIAD COMMAND NODE (TRIAD_ADVANCED_FEATURES_PLAN.md §4) =========================================
+   Mirrors CnC in baseSystems.php. "Once a turn, nominate one Triad capital ship to be the Command Node:
+   +2 initiative, and it may swap initiative totals with any other friendly Triad capital ship." The
+   nomination is made in Initial Orders from the ship tooltip and applied by the server when the phase
+   closes (CnC::applyTriadCommandNodes). It lives on the nominated ship's C&C: commandNodeTurn (the turn)
+   and commandNodeSwap (the partner's ship id, or null) - set locally by the buttons, posted at the
+   commit, and sent back by the server for the current turn (masked from enemies during Initial Orders).
+   Hulls opt in through CnC::addTriad, which lists "CommandNode" among the C&C's special abilities. */
+CnC.prototype.isTriadNode = function () {
+	return Array.isArray(this.specialAbilities) && this.specialAbilities.indexOf("CommandNode") !== -1;
+};
+
+CnC.prototype.isCommandNodeThisTurn = function () {
+	return this.commandNodeTurn !== undefined && this.commandNodeTurn !== null && this.commandNodeTurn == gamedata.turn;
+};
+
+CnC.prototype.doIndividualNotesTransfer = function () {
+	this.individualNotesTransfer = "";
+	if (gamedata.gamephase != 1 || !this.isTriadNode() || !gamedata.isMyShip(this.ship)) return false;
+	if (!this.isCommandNodeThisTurn()) return false;
+	var swap = (this.commandNodeSwap !== undefined && this.commandNodeSwap !== null) ? this.commandNodeSwap : -1;
+	this.individualNotesTransfer = [1, swap];
+	return true;
+};
+
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the nomination and the swap, in the one phase they are made.
+CnC.prototype.draftStateKeys = ['commandNodeTurn', 'commandNodeSwap'];
+CnC.prototype.draftStatePhases = [1];
+
+//The ship's Triad C&C (in any state), or null.
+CnC.getTriadNode = function (ship) {
+	if (!ship || ship.flight || !ship.systems) return null;
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+		if (system instanceof CnC && system.isTriadNode()) return system;
+	}
+	return null;
+};
+
+//Initial Orders, not yet committed - the only time the choice can be made or changed.
+CnC.canEditCommandNode = function () {
+	return gamedata.gamephase == 1 && !gamedata.waiting;
+};
+
+//Same player AND same slot: one player may hold several fleets in a game, and each has its own node.
+CnC.isSameFleet = function (ship, other) {
+	return !!(ship && other && ship.userid == other.userid && ship.slot == other.slot);
+};
+
+//May this ship be nominated? An own Triad capital ship, alive, on the board, with an intact C&C.
+CnC.canNominate = function (ship) {
+	if (!CnC.canEditCommandNode()) return false;
+	if (!ship || !gamedata.isMyShip(ship) || shipManager.isDestroyed(ship)) return false;
+	if (shipManager.getTurnDeployed(ship) > gamedata.turn) return false;
+	var node = CnC.getTriadNode(ship);
+	return !!(node && !shipManager.systems.isDestroyed(ship, node));
+};
+
+CnC.isCommandNode = function (ship) {
+	var node = CnC.getTriadNode(ship);
+	return !!(node && node.isCommandNodeThisTurn());
+};
+
+//The Command Node of this ship's fleet this turn, or null.
+CnC.getFleetCommandNode = function (ship) {
+	for (var i in gamedata.ships) {
+		var other = gamedata.ships[i];
+		if (CnC.isSameFleet(ship, other) && CnC.isCommandNode(other)) return other;
+	}
+	return null;
+};
+
+//One node per fleet: nominating a ship withdraws whichever ship held it.
+CnC.nominate = function (ship) {
+	if (!CnC.canNominate(ship)) return;
+	var current = CnC.getFleetCommandNode(ship);
+	if (current) CnC.withdraw(current);
+	var node = CnC.getTriadNode(ship);
+	node.commandNodeTurn = gamedata.turn;
+	node.commandNodeSwap = null;
+};
+
+CnC.withdraw = function (ship) {
+	if (!CnC.canEditCommandNode()) return;
+	var node = CnC.getTriadNode(ship);
+	if (!node) return;
+	node.commandNodeTurn = null;
+	node.commandNodeSwap = null;
+};
+
+/* May the Command Node `ship` swap initiative totals with `other`? Another Triad capital ship of the same
+   fleet, alive and on the board. The partner's own C&C state does not matter - it is not the one doing
+   the commanding. Also what keeps the selection when the node clicks it (InitialPhaseStrategy.selectShip). */
+CnC.canSwapWith = function (ship, other) {
+	if (!CnC.canEditCommandNode()) return false;
+	if (!ship || !other || ship === other) return false;
+	if (!CnC.isCommandNode(ship) || !CnC.isSameFleet(ship, other)) return false;
+	if (shipManager.isDestroyed(other) || shipManager.getTurnDeployed(other) > gamedata.turn) return false;
+	return !!CnC.getTriadNode(other);
+};
+
+CnC.isSwappingWith = function (ship, other) {
+	var node = CnC.getTriadNode(ship);
+	return !!(node && other && node.isCommandNodeThisTurn() && node.commandNodeSwap == other.id);
+};
+
+CnC.setSwap = function (ship, other) {
+	if (!CnC.canSwapWith(ship, other)) return;
+	CnC.getTriadNode(ship).commandNodeSwap = other.id;
+};
+
+CnC.clearSwap = function (ship) {
+	if (!CnC.canEditCommandNode()) return;
+	var node = CnC.getTriadNode(ship);
+	if (node) node.commandNodeSwap = null;
+};
+
+/* The ship tooltip's Command Node notice for a node or its swap partner, or '' - a yellow entry among the
+   tooltip's status notices (ShipTooltip), while the Ini line carries the total it produces. During Initial
+   Orders it is the owner's plan, nothing applied yet; once the phase closes it is the server's record of what
+   was applied, for every viewer. In FV's d100 initiative, +2 is +10. */
+CnC.getTooltipLine = function (ship) {
+	if (!ship || ship.flight) return '';
+	//During Initial Orders the Ini line already shows the totals AS THEY WILL BE (getIniativeProjection), so
+	//this notice says what the roll was; once the phase has closed the server has applied it.
+	var projecting = !!CnC.getIniativeProjection();
+	var rolled = function (s) { return CnC.isSimultaneousMovement() ? s.unmodifiedIniative : s.iniative; };
+	var node = CnC.getTriadNode(ship);
+	if (node && node.isCommandNodeThisTurn()) {
+		var line = 'Command Node: +10 Ini' + (projecting ? ' (rolled ' + rolled(ship) + ')' : '');
+		var partner = (node.commandNodeSwap !== undefined && node.commandNodeSwap !== null) ? gamedata.getShip(node.commandNodeSwap) : null;
+		if (partner) line += ', swapped with ' + partner.name;
+		return line;
+	}
+	var commandNode = CnC.getFleetCommandNode(ship);
+	if (commandNode && commandNode !== ship && CnC.isSwappingWith(commandNode, ship)) {
+		return 'Swapped Ini with ' + commandNode.name;
+	}
+	return '';
+};
+
+CnC.isSimultaneousMovement = function () {
+	return !!(gamedata.rules && gamedata.rules.initiativeCategories);
+};
+
+/* The category a raw initiative total falls into under simultaneous movement - the client copy of
+   SimultaneousMovementRule::getIniativeCategory (keep the two in step): -20..220 cut into N equal steps,
+   and a total sits in the highest step it EXCEEDS. (SimultaneousMovementRule.js carries an older 0..200
+   version of the cut for its own purposes; this one has to match what the server will write.) */
+CnC.getIniativeCategory = function (raw) {
+	var number = parseInt(gamedata.rules.initiativeCategories, 10);
+	var min = -20, max = 220;
+	var step = Math.floor((max - min) / number);
+	for (var n = number - 1; n >= 0; n--) {
+		var category = min + step * n;
+		if (raw > category) return category;
+	}
+	return min;
+};
+
+/* ⭐ THE COMMAND NODE, AS IT WILL BE APPLIED (user request 2026-10-09: "show the effects immediately").
+   During Initial Orders only - the server rewrites tac_iniative when the phase closes
+   (CnC::applyTriadCommandNodes), and after that the loaded totals already carry it. Returns null when there
+   is nothing to project, else { shipId: { iniative, raw } } for EVERY ship, so an Ini Order computed from it
+   shows the whole field re-ranked. The same steps the server takes: per fleet one node, its ROLLED total
+   swapped with a valid partner's, then +10 on the node (on the raw total, re-categorised, under simultaneous
+   movement) - the bonus is the node's own and never travels with the swap (ruling C4) - then, classic movement
+   only, the +1 nudge off an exact tie, node first. Only nominations this client can see are projected: its
+   own and its team's, while the phase is open. */
+CnC.getIniativeProjection = function () {
+	if (gamedata.gamephase != 1) return null;
+	var simultaneous = CnC.isSimultaneousMovement();
+	var onBoard = function (s) { return !shipManager.isDestroyed(s) && shipManager.getTurnDeployed(s) <= gamedata.turn; };
+	var projection = null;
+	var changed = [];
+	var fleetsDone = {};
+
+	gamedata.ships.forEach(function (ship) {
+		var node = CnC.getTriadNode(ship);
+		if (!node || !node.isCommandNodeThisTurn()) return;
+		if (shipManager.systems.isDestroyed(ship, node) || !onBoard(ship)) return;
+		var fleet = ship.userid + '_' + ship.slot;
+		if (fleetsDone[fleet]) return;
+		fleetsDone[fleet] = true;
+
+		if (!projection) {
+			projection = {};
+			gamedata.ships.forEach(function (s) { projection[s.id] = { iniative: s.iniative, raw: s.unmodifiedIniative }; });
+		}
+		var mine = projection[ship.id];
+		changed.push(ship.id);
+
+		var partner = (node.commandNodeSwap !== undefined && node.commandNodeSwap !== null) ? gamedata.getShip(node.commandNodeSwap) : null;
+		if (partner && partner !== ship && CnC.isSameFleet(ship, partner) && CnC.getTriadNode(partner) && onBoard(partner)) {
+			var theirs = projection[partner.id];
+			var ini = mine.iniative; mine.iniative = theirs.iniative; theirs.iniative = ini;
+			if (simultaneous) { var raw = mine.raw; mine.raw = theirs.raw; theirs.raw = raw; }
+			changed.push(partner.id);
+		}
+
+		//the node keeps its +10, swapped or not
+		if (simultaneous) {
+			mine.raw = Number(mine.raw) + 10;
+			mine.iniative = CnC.getIniativeCategory(mine.raw);
+		} else {
+			mine.iniative = Number(mine.iniative) + 10;
+		}
+	});
+
+	if (projection && !simultaneous) {
+		changed.forEach(function (id) {
+			var tied;
+			do {
+				tied = gamedata.ships.some(function (other) {
+					return other.id != id && Number(projection[other.id].iniative) === Number(projection[id].iniative);
+				});
+				if (tied) projection[id].iniative = Number(projection[id].iniative) + 1;
+			} while (tied);
+		});
+	}
+	return projection;
+};
+
+//shipManager.getIniativeOrder, ranked on a projection instead of the loaded totals.
+CnC.getProjectedIniativeOrder = function (ship, projection) {
+	var valid = gamedata.ships.filter(function (s) {
+		return !shipManager.isDestroyed(s) && !gamedata.isTerrain(s.shipSizeClass, s.userid) && !s.mine && !(shipManager.getTurnDeployed(s) > gamedata.turn);
+	}).sort(function (a, b) {
+		var d = projection[a.id].iniative - projection[b.id].iniative;
+		return d !== 0 ? d : a.id - b.id;
+	});
+	var previous = -100000;
+	var order = 0;
+	for (var i = 0; i < valid.length; i++) {
+		if (projection[valid[i].id].iniative > previous) {
+			order++;
+			previous = projection[valid[i].id].iniative;
+		}
+		if (valid[i].id === ship.id) return order;
+	}
+	return 0;
 };
 
 var ProtectedCnC = function ProtectedCnC(json, ship) {

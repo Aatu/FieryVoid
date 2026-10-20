@@ -3625,6 +3625,8 @@ class HangarOps {
 		if (empty($shed)) return;
 
 		$escapees = ($maxEscape > 0) ? array_slice($shed, 0, $maxEscape) : array();
+		//a fighter officer among the escapees takes his cost with him (OFFICERS_PLAN.md Stage 4)
+		$officerEscapes = Officers::officerAmong($flight, $escapees, $gamedata->turn);
 		if (!empty($escapees)){
 			self::spawnRailEscapeFlight($carrier, $rail, $entry, $flight, $escapees, $gamedata);
 		}
@@ -3666,7 +3668,9 @@ class HangarOps {
 		if ($escapeeCount > 0 && $activeBefore > 0 && $escapeeCount < $activeBefore){
 			$totalEnh = (int)round((float)($flight->pointCostEnh ?? 0) + (float)($flight->pointCostEnh2 ?? 0));
 			if ($totalEnh > 0){
-				$remnantEnh = (int)round($totalEnh * ($activeBefore - $escapeeCount) / $activeBefore);
+				//the remnant keeps a fighter officer's own price only if he did not escape (Officers::shareWithCraft;
+				//exactly the old proportion on a flight without one)
+				$remnantEnh = Officers::shareWithCraft($flight, $totalEnh, $activeBefore - $escapeeCount, $activeBefore, !$officerEscapes);
 				$flight->pointCostEnh  = $remnantEnh;
 				$flight->pointCostEnh2 = 0;
 				Manager::insertSingleEnhValue($flight->id, $remnantEnh);
@@ -3765,11 +3769,14 @@ class HangarOps {
 
 		$flightName = self::dockedSplitName($entry);
 		if ($flightName === null) $flightName = self::flightNameFor($phpclass, $carrier);
-		$escapeFlight = self::spawnLaunchedKFlight($phpclass, $count, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, $sourceFlight, $gamedata);
+		$escapeFlight = self::spawnLaunchedKFlight($phpclass, $count, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, $sourceFlight, $gamedata,
+			Officers::officerAmong($sourceFlight, $escapees, $gamedata->turn));
 		if (!$escapeFlight) return null;
 
-		//Copy the chosen escapees' ammo/damage/crit state onto the new flight.
+		//Copy the chosen escapees' ammo/damage/crit state onto the new flight - a fighter officer among
+		//them goes too, his fighter first (OFFICERS_PLAN.md Stage 4, Officers::followFighter).
 		self::copyFlightAmmoEnhancements($sourceFlight, $escapeFlight, $gamedata);
+		Officers::followFighter($sourceFlight, $escapeFlight, $escapees, $gamedata);
 		$targetFighters = array();
 		foreach ($escapeFlight->systems as $f){ if ($f instanceof Fighter) $targetFighters[] = $f; }
 		for ($i = 0; $i < count($escapees); $i++){
@@ -5028,14 +5035,18 @@ class HangarOps {
 
 		//PARTIAL LAUNCH — spawn a fresh K-flight; shrink the original docked ship.
 		$flightName = self::dockedSplitName($entry);
-		$launched = self::spawnLaunchedKFlight($phpclass, $size, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, $docked, $gamedata);
+		//Choose the K fighters that leave (most-ammo / least-damaged first) BEFORE the spawn: a
+		//fighter officer among them takes his cost with him (OFFICERS_PLAN.md Stage 4).
+		$chosen = self::selectFightersForExtraction($docked, $size, $gamedata);
+		$launched = self::spawnLaunchedKFlight($phpclass, $size, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, $docked, $gamedata,
+			Officers::officerAmong($docked, $chosen, $gamedata->turn));
 		if (!$launched) return null;
 
-		//Choose the K fighters that leave (most-ammo / least-damaged first), copy
-		//their state onto the launched flight, and disengage them on the docked
+		//Copy their state onto the launched flight, and disengage them on the docked
 		//ship so it shrinks to N-K active craft (the remnant stays the same ship).
+		//A fighter officer among them goes too, his fighter first (Officers::followFighter).
 		self::copyFlightAmmoEnhancements($docked, $launched, $gamedata);
-		$chosen = self::selectFightersForExtraction($docked, $size, $gamedata);
+		Officers::followFighter($docked, $launched, $chosen, $gamedata);
 		$launchedFighters = array();
 		foreach ($launched->systems as $f){ if ($f instanceof Fighter) $launchedFighters[] = $f; }
 		for ($i = 0; $i < count($chosen); $i++){
@@ -5171,7 +5182,7 @@ class HangarOps {
 	 * new-spawn block of performLaunch: insert ship + flightsize + deploy move +
 	 * per-system data (weapons fully charged). Carries pointCostEnh proportionally
 	 * from the docked source so fleet-list value is right. */
-	private static function spawnLaunchedKFlight($phpclass, $k, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, $sourceDocked, $gamedata){
+	private static function spawnLaunchedKFlight($phpclass, $k, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, $sourceDocked, $gamedata, $withOfficer = false){
 		if (!is_string($phpclass) || $phpclass === '' || !class_exists($phpclass)) return null;
 		$k = max(1, (int)$k);
 		if ($flightName === null || $flightName === '') $flightName = self::flightNameFor($phpclass, $carrier);
@@ -5181,11 +5192,13 @@ class HangarOps {
 		//Proportional enhancement cost from the source docked flight, when there
 		//is one (partial launch). Anonymous shuttle launches pass no real source
 		//(no enhancements to carry) — guarded by the FighterFlight check.
+		//A fighter officer's own price goes whole to the side that has him ($withOfficer: his fighter is
+		//among these K) - Officers::shareWithCraft, which is round(total*K/N) on a flight without one.
 		if ($sourceDocked instanceof FighterFlight){
 			$srcSize = (int)$sourceDocked->flightSize;
 			$srcEnh  = (float)($sourceDocked->pointCostEnh ?? 0) + (float)($sourceDocked->pointCostEnh2 ?? 0);
 			if ($srcSize > 0 && $srcEnh > 0){
-				$flight->pointCostEnh = (int)round($srcEnh * $k / $srcSize);
+				$flight->pointCostEnh = Officers::shareWithCraft($sourceDocked, $srcEnh, $k, $srcSize, $withOfficer);
 				$flight->pointCostEnh2 = 0;
 			}
 		}
@@ -6009,6 +6022,8 @@ class HangarOps {
 			//dockedCraftStashValue skip the entry so the carrier isn't double-
 			//credited for craft that now have their own row.
 			$chosenFighters = self::dockFighters($flight, $count, $gamedata);
+			//asked before the spawn: a fighter officer among the docking craft goes with them, cost and all
+			$officerDocks = Officers::officerAmong($flight, $chosenFighters, $gamedata->turn);
 			$fragment = self::spawnFragmentFlight($flight, $chosenFighters, $carrier, $primaryHangar, $gamedata);
 			$dockedUnit = $fragment;   //Stage S: the docked portion is the fragment (remnant $flight stays in space)
 			if ($fragment){
@@ -6031,9 +6046,11 @@ class HangarOps {
 				//$activeCount is the pre-dock size (captured before dockFighters);
 				//$count is K. spawnFragmentFlight doesn't set pointCostEnh, so the
 				//fragment starts at 0 and we set its share explicitly here.
+				//A fighter officer's own price goes whole to the side that has him (Officers::shareWithCraft,
+				//exactly round(total*K/N) on a flight without one).
 				$totalEnh = (int)round((float)($flight->pointCostEnh ?? 0) + (float)($flight->pointCostEnh2 ?? 0));
 				if ($totalEnh > 0 && $activeCount > 0){
-					$fragmentEnh = (int)round($totalEnh * $count / $activeCount);
+					$fragmentEnh = Officers::shareWithCraft($flight, $totalEnh, $count, $activeCount, $officerDocks);
 					$remnantEnh  = max(0, $totalEnh - $fragmentEnh);
 
 					$fragment->pointCostEnh  = $fragmentEnh;
@@ -7158,6 +7175,9 @@ class HangarOps {
 		//on next-turn relaunch. copyFighterStateToTarget below writes
 		//per-magazine balancing notes for the actual current state.
 		self::copyFlightAmmoEnhancements($sourceFlight, $fragment, $gamedata);
+		//A fighter officer among the chosen goes with his fighter, which is put first so it becomes
+		//the fragment's first craft - his post there (OFFICERS_PLAN.md Stage 4, Officers::followFighter).
+		Officers::followFighter($sourceFlight, $fragment, $chosenFighters, $gamedata);
 
 		//Copy damage and crits from each chosen source fighter onto the
 		//corresponding fragment fighter. Pairing is BY ORDER: chosenFighters[i]
@@ -7426,6 +7446,11 @@ class HangarOps {
 					//Priority-select $take fighters from fragment (Stage 15:
 					//missile-count DESC, then damage DESC, back-of-array tiebreak).
 					$chosen = self::selectFightersForExtraction($fragment, $take, $gamedata);
+
+					//A fighter officer among them goes with his fighter (OFFICERS_PLAN.md Stage 4) when it
+					//can head the launched flight - its first craft is his post there. (This per-bay path
+					//serves catapults, single craft, so a second fragment in one launch is not met.)
+					if ($cursor === 0) Officers::followFighter($fragment, $launchedFlight, $chosen, $gamedata);
 
 					//Transfer damage/crits onto the next slice of launched
 					//flight fighters. Pairing is by ORDER — chosen[i] maps to
@@ -8181,12 +8206,15 @@ class HangarOps {
 
 				$flightName = self::dockedSplitName($entry);
 				if ($flightName === null) $flightName = self::flightNameFor($phpclass, $carrier);
-				$escapeFlight = self::spawnLaunchedKFlight($phpclass, $count, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, $sourceFlight, $gamedata);
+				$escapeFlight = self::spawnLaunchedKFlight($phpclass, $count, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, $sourceFlight, $gamedata,
+					Officers::officerAmong($sourceFlight, $chosenFighters, $gamedata->turn));
 				if (!$escapeFlight) return null;
 
 				//Copy the chosen escapees' ammo/damage/crit state onto the new
 				//K-flight (same state-copy the rail-escape + partial-launch use).
+				//A fighter officer among them goes too, his fighter first (OFFICERS_PLAN.md Stage 4).
 				self::copyFlightAmmoEnhancements($sourceFlight, $escapeFlight, $gamedata);
+				Officers::followFighter($sourceFlight, $escapeFlight, $chosenFighters, $gamedata);
 				$targetFighters = array();
 				foreach ($escapeFlight->systems as $f){ if ($f instanceof Fighter) $targetFighters[] = $f; }
 				for ($i = 0; $i < count($chosenFighters); $i++){

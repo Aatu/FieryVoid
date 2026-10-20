@@ -50,11 +50,6 @@ const SystemText = styled.div`
    (shield output, armour, thruster output), so the badge hides the LABEL, not the fact.
    It is not an information-hiding mechanism - see §12 if real masking is ever wanted. */
 const EnhancementStar = styled.div`
-    position: absolute;
-    top: 0px;
-    left: 1px;
-    z-index: 1;
-    pointer-events: none;
     /*11px on a 32px icon: the 7px it launched at was legible only if you already knew to
       look for it (user report 2026-08-15). Still small enough to clear the icon art and the
       [n/n] load counter, which sits along the BOTTOM edge.*/
@@ -63,6 +58,48 @@ const EnhancementStar = styled.div`
     color: ${theme.colors.enhTitle};
     text-shadow: black 0 0 3px, black 0 0 3px, black 0 0 3px;
 `;
+
+/* The top-left marker row: the ✦ and the officer insignia side by side (OFFICERS_PLAN.md D11), so a
+   system carrying both never stacks one on the other. Top-RIGHT stays the meteor badge's. */
+const BadgeRow = styled.div`
+    position: absolute;
+    top: 0px;
+    left: 1px;
+    z-index: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 1px;
+    pointer-events: none;
+`;
+
+/* ⭐ The officer insignia (D11): a double chevron, one per post however many officers live there.
+   GOLD while one of them serves; GREY once all are out of action; grey with a RED SLASH when killed.
+   A fallen officer stays shown - it is what tells the player why a bonus stopped. The drop-shadow
+   keeps it legible over light hull art, as the star's text-shadow does.
+   ⚠️ Cosmetic secrecy, like the star: it is drawn only from officers.listFor, which an enemy's
+   payload never feeds (plan §4.6 lists the numbers that still reach the enemy). */
+const Insignia = styled.svg`
+    display: block;
+    width: 11px;
+    height: 11px;
+    overflow: visible;
+    filter: drop-shadow(0 0 1px black) drop-shadow(0 0 1px black);
+`;
+
+/* The out-of-action grey is LIGHT on purpose: a disabled officer's post is usually a DESTROYED system,
+   whose whole icon is blurred (System's filter) - a filter no child can escape - so a mid grey vanished
+   into the darkened art. Light grey still reads as "not gold". */
+const INSIGNIA_COLOUR = { serving: theme.colors.enhTitle, disabled: '#c4c4c4', killed: '#c4c4c4' };
+
+//exported for the fighter card (FighterIcon), a fighter officer's post being the craft itself (Stage 4)
+export const OfficerInsignia = ({ state, title }) => (
+    <Insignia viewBox="0 0 12 12" role="img" aria-label={title}>
+        <title>{title}</title>
+        <path d="M1.5 5.5 L6 2 L10.5 5.5 M1.5 10 L6 6.5 L10.5 10" fill="none"
+            stroke={INSIGNIA_COLOUR[state]} strokeWidth="2" strokeLinecap="square" />
+        {state === 'killed' && <path d="M1 11.5 L11 0.5" stroke="#ff4d4f" strokeWidth="1.8" strokeLinecap="round" />}
+    </Insignia>
+);
 
 /* ☄ - "committed to meteor defence this turn", top RIGHT so it never sits on the enhancement star.
    The amber state colour alone would leave it to colour vision. */
@@ -608,11 +645,20 @@ class SystemIcon extends React.Component {
    OWN-TEAM ONLY, decided server-side (D8): the star is driven by ship.systemEnhancements,
    which only ever reaches the owner - in the LOBBY the array is local to that player's
    browser, and in GAME the enemy's stripped payload carries none. There is deliberately no
-   client-side userid comparison here, matching the isRevealedToCurrentViewer pattern. */
+   client-side userid comparison here, matching the isRevealedToCurrentViewer pattern.
+   The officer insignia follows the same rule through officers.listFor (OFFICERS_PLAN.md D4), and
+   rides this helper for the same reason the star does: a destroyed post keeps its insignia. */
 const renderBadges = (ship, system) => {
-    if (!window.systemEnhancements || !ship || !system) return null;
-    if (!systemEnhancements.hasAny(ship, system.id)) return null;
-    return <EnhancementStar title="Carries a system enhancement">✦</EnhancementStar>;
+    if (!ship || !system) return null;
+    const star = Boolean(window.systemEnhancements) && systemEnhancements.hasAny(ship, system.id);
+    const officerState = window.officers ? officers.postState(ship, system.id) : null;
+    if (!star && !officerState) return null;
+    return (
+        <BadgeRow>
+            {star && <EnhancementStar title="Carries a system enhancement">✦</EnhancementStar>}
+            {officerState && <OfficerInsignia state={officerState} title={officers.describePost(ship, system.id)} />}
+        </BadgeRow>
+    );
 };
 
 //A "spent & locked" Gravitic Augmenter shows the spent (dimmed) look, not the active-firing orange

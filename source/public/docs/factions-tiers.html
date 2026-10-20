@@ -745,7 +745,7 @@
 
   <h3>Special Shells</h3>
   <p>Grome railguns can each load a number of different shells; their effects are listed in
-    <a href="ammo-options-enhancements.php#shells">Ammo, Options &amp; Enhancements</a>.</p>
+    <a href="ammo-options-enhancements.php#shells">Ship Options</a>.</p>
 </section>
 
 <section data-key="hurr" data-title="Hurr Republic" data-group="League of Non-Aligned Worlds">
@@ -1405,6 +1405,10 @@
       while deployed to remove criticals, fix the attached weapon or restore their structure. While docked, its repair
       rate doubles and can be used on the ship - or the heavy orbital can benefit from the ship's self-repair, or that of
       other docked orbitals. Its weapon can still fire while docked, but with a much reduced arc.</dd>
+    <dt>Orbital refits</dt>
+    <dd>In the fleet lobby an orbital's weapon may be swapped for an Advanced Gravitic Shield (one or two generators,
+      each rated separately; not on heavy orbitals), and a Mastership's Gravitic Augmenter orbitals may carry ELINT Sensor Modules instead. Both
+      keep working while docked. See <a href="ammo-options-enhancements.php#systemrefits">Available Refits</a>.</dd>
   </dl>
 </section>
 
@@ -1816,9 +1820,19 @@
   <p>Triad capital ships were often given enhanced abilities to support the other creations:</p>
   <dl class="fvd-defs">
     <dt>Command Node</dt>
-    <dd>Capital ships gain an extra +1 initiative - simpler than the tabletop ability.</dd>
+    <dd>Once a turn, in Initial Orders, one Triad capital ship of each fleet may be nominated the <b>Command Node</b>:
+      select it and use the star button on its tooltip. It may swap initiative rolls with another Triad capital ship of
+      the same fleet: with the Command Node still selected, click that ship and use the swap button. It also gains +2
+      initiative (+10 on Fiery Void's d100 scale), which it keeps whether it swaps or not - only the rolls change
+      hands. Your tooltips show the resulting initiative straight away;
+      your opponent sees it when Initial Orders close, which is when it takes effect - so the movement order can change
+      after Initial Orders.</dd>
     <dt>Jealous ELINT</dt>
-    <dd>Could not be fully implemented; the Triad use the Mindrider Constrained ELINT instead.</dd>
+    <dd>The Demon, Fiend, Lesser Triumviron and Wraith carry a Jealous ELINT array: a full ELINT array, but only on a
+      turn the ship is <b>designated</b>. In Initial Orders, select the ship and use the ELINT button on its tooltip; its
+      ELINT functions then appear. Only one Jealous ELINT ship per four in the fleet (rounded up) may be designated each
+      turn - so a fleet with one to four of them has one. Standing a ship down again clears its ELINT EW for the turn.
+      The Triumviron and the Archangel are regular ELINT ships and do not count towards the limit.</dd>
     <dt>Cooperative Structure Self Repair</dt>
     <dd>Triad capital ships can use their structure self-repair on friendly units (ships and fighters), handled
       automatically: it repairs itself first, then friendly units without structure self-repair, then other units with
@@ -1884,9 +1898,17 @@
       shot.</li>
     <li>Fighters can be targeted individually: select the flight and assign dice, then target the flight again to assign
       dice to another fighter.</li>
-    <li>To fire defensively, select the shield icon and assign a number of d10s to defensive fire; each gives -1 (-5%) to
-      hit, cumulatively. For now the cutter can only generate one defensive shot; this will be looked at in a later
-      update.</li>
+    <li>To fire defensively, select the shield icon on any cutter. Defence draws on the same shared pool, so the menu
+      offers all of the ship's remaining dice: each row is one defensive shot with its own d10s, and "Add another
+      intercept shot" adds a row - so you might make one 9-dice shot, a 5-dice shot and a 3-dice shot. Every die gives
+      -1 (-5%) to hit against the one incoming shot that defensive shot is used on, so 9 dice can be a single -45%
+      intercept or three -15% ones. The game assigns these defensive shots to incoming fire itself, within the arc of the
+      cutter you opened the menu from: the largest first, each to the shot where it stops the most damage, whatever
+      order you entered them in.</li>
+    <li>To choose the shot yourself, select a cutter in the Firing phase and click the hit chance of an incoming shot
+      in your ship's tooltip (the INCOMING list): each click puts one more die (-5%) from the shared pool on that shot -
+      one die per click, however many cutters are selected. This uses dice not already committed to defensive
+      shots.</li>
     <li><b>Sustained mode:</b> ALL available cutters must be set to it, and every available die is used on the same
       target. The hyperplasma cutter is a sustained (3) weapon.</li>
     <li><b>Criticals:</b> the cutter suffers only one type - losing d10s. Each lost d10 takes a single self-repair point
@@ -2179,7 +2201,7 @@
   <h3>Skin Enhancements</h3>
   <p>Vorlon units may take only one Skin Colouring enhancement (Fiery Void does not enforce this - it is up to the player
     to comply). In summary - the full details are under Faction Enhancements in
-    <a href="ammo-options-enhancements.php#vorlons">Ammo, Options &amp; Enhancements</a>:</p>
+    <a href="ammo-options-enhancements.php#vorlons">Ship Options</a>:</p>
   <dl class="fvd-defs">
     <dt>Amethyst Skin Colouring</dt><dd>Improves Adaptive Armor, for players wanting more flexibility.</dd>
     <dt>Azure Skin Colouring</dt><dd>EM Shield improvements, for greater overall protection.</dd>

@@ -261,6 +261,18 @@
     background-color: white;
 }
 
+/* The hover line under the buttons must never WIDEN the tooltip (user report 2026-10-09, game 4453).
+   The box is placed once, centred on the ship, and then keeps its left edge while its width is
+   shrink-to-fit - so a long hover text grew it to the right, the centred buttons slid right by half
+   the growth, the pointer on a button's left edge fell off it, the text cleared, the box shrank and
+   the button slid back under the pointer: a mouseover/mouseout loop that looked like the tooltip
+   re-rendering. width:0 + min-width:100% takes the line out of the width calculation and lets it fill
+   whatever width the rest of the tooltip already has, so a long text wraps instead. */
+.shipNameContainer .buttons .menu .info {
+    width: 0;
+    min-width: 100%;
+}
+
 .selectShip{
     background-image: url("../img/selectShip.png");
 }
@@ -437,6 +449,34 @@
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+}
+
+/* Initial Orders, Triad (TRIAD_ADVANCED_FEATURES_PLAN.md §3, §4): designate a Jealous ELINT ship for the
+   turn, nominate the fleet's Command Node, and have the node swap initiative with another capital ship.
+   All 40x40 like the rest of this menu. Each withdrawal is its own icon recoloured red with a red minus
+   badge (user requests 2026-10-09: a red star reading -2, a red mast, red swap arrows). */
+.designateJealousElint {
+    background-image: url("../img/designateJealousElint.png");
+}
+
+.standDownJealousElint {
+    background-image: url("../img/standDownJealousElint.png");
+}
+
+.setCommandNode {
+    background-image: url("../img/setCommandNode.png");
+}
+
+.cancelCommandNode {
+    background-image: url("../img/cancelCommandNode.png");
+}
+
+.swapInitiative {
+    background-image: url("../img/swapInitiative.png");
+}
+
+.cancelSwapInitiative {
+    background-image: url("../img/cancelSwapInitiative.png");
 }
 
 /* == The INCOMING list (MANUAL_INTERCEPTION_PLAN.md §6) ======================================

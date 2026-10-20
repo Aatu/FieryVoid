@@ -57,6 +57,16 @@ window.ShipTooltipInitialOrdersMenu = function () {
 
     ShipTooltipInitialOrdersMenu.buttons = ShipTooltipInitialOrdersMenu.ewButtons.concat([
         { className: "removeAllEW", condition: [isSelf, notFlight, notMine, sourceEwNotSuspended], action: removeAllEW, info: "Remove All EW" },
+        /* ⭐ TRIAD (TRIAD_ADVANCED_FEATURES_PLAN.md §3, §4) - two per-turn choices made from the ship's own
+           tooltip. Deliberately NOT in ewButtons: that subset is reused verbatim in the late-EW window,
+           and both of these belong to Initial Orders alone. Every predicate below fails closed on a null
+           selection, so a tooltip opened with nothing selected never offers them. */
+        { className: "designateJealousElint", condition: [isSelf, canDesignateJealousElint], action: designateJealousElint, info: jealousElintInfo },
+        { className: "standDownJealousElint", condition: [isSelf, isDesignatedJealousElint], action: standDownJealousElint, info: "Remove ELINT (clears ELINT EW)" },
+        { className: "setCommandNode", condition: [isSelf, canNominateCommandNode], action: setCommandNode, info: "Select Command Node" },
+        { className: "cancelCommandNode", condition: [isSelf, isCommandNode], action: cancelCommandNode, info: "Remove Command Node" },
+        { className: "swapInitiative", condition: [notSelf, canSwapInitiativeWithTarget], action: swapInitiative, info: "Swap Initiative" },
+        { className: "cancelSwapInitiative", condition: [notSelf, isSwappingInitiativeWithTarget], action: cancelSwapInitiative, info: "Cancel Initiative swap" },
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" },
         { className: "targetWeaponsHex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
         { className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
@@ -200,17 +210,18 @@ window.ShipTooltipInitialOrdersMenu = function () {
             type = "OEW";
         }
 
+        //the target rides along for a Kirishiac ELINT module ship, whose module points pay for OEW only in arc
         do {
             var entry = ew.getEntryByTargetAndType(this.selectedShip, this.targetedShip, type, this.turn);
-            var before = ew.getEwLeftFor(this.selectedShip, type);
+            var before = ew.getEwLeftFor(this.selectedShip, type, this.targetedShip);
             if (!entry) {
                 ew.AssignOEW(this.selectedShip, this.targetedShip, type);
             } else {
                 ew.assignEW(this.selectedShip, entry);
             }
             if (!isMaxClick) return;
-            if (ew.getEwLeftFor(this.selectedShip, type) >= before) return;
-        } while (ew.getEwLeftFor(this.selectedShip, type) > 0);
+            if (ew.getEwLeftFor(this.selectedShip, type, this.targetedShip) >= before) return;
+        } while (ew.getEwLeftFor(this.selectedShip, type, this.targetedShip) > 0);
     }
 
     function getRemoveOEW(type) {
@@ -295,6 +306,85 @@ window.ShipTooltipInitialOrdersMenu = function () {
             this.currentInfo = canSignalGate.call(this) ? "Signal Jump Gate" : "";
             this.shipTooltip.update();
         }
+    }
+
+    /* ---- TRIAD (TRIAD_ADVANCED_FEATURES_PLAN.md §3, §4). The rules live on ElintScanner and CnC
+       (baseSystems.js); these only ask and act. Every action redraws the tooltip, for the reason
+       cancelJumpGateSignal gives: a button that has just done its job must turn into its opposite (and
+       designating ELINT brings the ELINT EW buttons in), and nothing re-runs a menu's conditions on its
+       own. currentInfo is cleared because the pointer does not move across the swap. */
+    function redrawAfterTriadChoice() {
+        if (this.shipTooltip) {
+            this.currentInfo = "";
+            this.shipTooltip.update();
+        }
+    }
+
+    function canDesignateJealousElint() {
+        return typeof ElintScanner !== 'undefined' && ElintScanner.canDesignateJealous(this.selectedShip);
+    }
+
+    function isDesignatedJealousElint() {
+        return gamedata.gamephase == 1 && !gamedata.waiting
+            && typeof ElintScanner !== 'undefined' && ElintScanner.isDesignatedJealous(this.selectedShip);
+    }
+
+    //The hover line says how much of the fleet's quota is already spoken for.
+    function jealousElintInfo() {
+        var used = ElintScanner.countJealousDesignated(this.selectedShip);
+        var quota = ElintScanner.getJealousQuota(this.selectedShip);
+        return "Act as ELINT this turn (" + used + "/" + quota + " designated)";
+    }
+
+    function designateJealousElint() {
+        ElintScanner.designateJealous(this.selectedShip);
+        redrawAfterTriadChoice.call(this);
+    }
+
+    function standDownJealousElint() {
+        ElintScanner.standDownJealous(this.selectedShip);
+        redrawAfterTriadChoice.call(this);
+    }
+
+    function canNominateCommandNode() {
+        return typeof CnC !== 'undefined' && CnC.canNominate(this.selectedShip) && !CnC.isCommandNode(this.selectedShip);
+    }
+
+    //⚠️ the null test first: gamedata.isMyShip(null) throws, and one throwing condition takes the whole
+    //tooltip down with it (see isEnemyEW).
+    function isCommandNode() {
+        return !!this.selectedShip && typeof CnC !== 'undefined' && CnC.canEditCommandNode()
+            && gamedata.isMyShip(this.selectedShip) && CnC.isCommandNode(this.selectedShip);
+    }
+
+    function canSwapInitiativeWithTarget() {
+        return typeof CnC !== 'undefined' && CnC.canSwapWith(this.selectedShip, this.targetedShip)
+            && !CnC.isSwappingWith(this.selectedShip, this.targetedShip);
+    }
+
+    function isSwappingInitiativeWithTarget() {
+        return !!this.selectedShip && typeof CnC !== 'undefined' && CnC.canEditCommandNode()
+            && gamedata.isMyShip(this.selectedShip) && CnC.isSwappingWith(this.selectedShip, this.targetedShip);
+    }
+
+    function setCommandNode() {
+        CnC.nominate(this.selectedShip);
+        redrawAfterTriadChoice.call(this);
+    }
+
+    function cancelCommandNode() {
+        CnC.withdraw(this.selectedShip);
+        redrawAfterTriadChoice.call(this);
+    }
+
+    function swapInitiative() {
+        CnC.setSwap(this.selectedShip, this.targetedShip);
+        redrawAfterTriadChoice.call(this);
+    }
+
+    function cancelSwapInitiative() {
+        CnC.clearSwap(this.selectedShip);
+        redrawAfterTriadChoice.call(this);
     }
 
     function isSelf() {

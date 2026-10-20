@@ -27,7 +27,7 @@ class triadDemon extends BaseShip{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 4;
-		$this->iniativebonus = 3 *5;
+		$this->iniativebonus = 2 *5;
 
 		$this->notes = 'Triad Capital Ship'; 
 		$this->notes .= '<br>Atmospheric Capable'; 
@@ -35,12 +35,15 @@ class triadDemon extends BaseShip{
 		$this->fighters = array("Triad Fighter"=>12);
 
 		$this->addPrimarySystem(new Reactor(8, 30, 0, 0));//armor, structure, power req, output
-        $this->addPrimarySystem(new CnC(8, 24, 0, 0));
+        $cnc = new CnC(8, 24, 0, 0);
+			$cnc->addTriad(); //Triad Command Node
+			$this->addPrimarySystem($cnc);
 //		$scanner = new Scanner(8, 24, 0, 15);
 //			$scanner->markAdvanced();
 //			$this->addPrimarySystem($scanner);			
         $scanner = new ElintScanner(8, 24, 0, 14);
-			$scanner->markMindrider();
+			$scanner->markAdvanced();
+			$scanner->markJealous(); //Jealous ELINT
 			$this->addPrimarySystem($scanner);	        
 		$this->addPrimarySystem(new Engine(8, 25, 0, 15, 3));
 //        $this->addPrimarySystem(new StructureSelfRepair(8, 24, 24)); //armor, structure, output

@@ -64,6 +64,10 @@ const Block = styled.div`
       2026-07-18) so the whole panel reads as the gold-accented one*/
     border: 1px dotted ${props => props.$gold ? theme.colors.enhLine : theme.colors.line};
     padding: 0 8px 3px;
+    /*$gold: the enhancement lines in the gold body text on every window (user request 2026-10-11).
+      The grid's EnhancementsPanel got it from its EnhArea wrapper, but a flight's block sits in
+      the blue Rail and read blue; set here, both read the same.*/
+    ${props => props.$gold ? `color: ${theme.colors.enhText};` : ''}
 `;
 
 const BlockTitle = styled.div`
@@ -250,6 +254,9 @@ const EnhArea = styled.div`
 //legacy parity: TC/TD to two decimals, Profile as defense * 5, Ini raw
 const fix2 = (value) => (typeof value === 'number' ? value.toFixed(2) : value);
 
+//a stat as the window shows it: a lobby officer's change is added at read time (officers.displayStat)
+const statOf = (ship, field) => (window.officers ? officers.displayStat(ship, field) : ship[field]);
+
 const profileText = (front, side) => (front * 5) + '/' + (side * 5);
 
 //"<thrust> (<rate>)" - the ship tooltip's turn-cost format
@@ -360,8 +367,8 @@ export const ManoeuvreStats = ({ ship, live, bare }) => {
             {mobile && <StatRow><StatLabel>Accel/decel</StatLabel><StatValue>{ship.accelcost}</StatValue></StatRow>}
             {mobile && <StatRow><StatLabel>Pivot</StatLabel><StatValue>{ship.pivotcost}</StatValue></StatRow>}
             {mobile && <StatRow><StatLabel>Roll</StatLabel><StatValue>{ship.rollcost}</StatValue></StatRow>}
-            <StatRow><StatLabel>Profile - Front / Side</StatLabel><StatValue $changed={Boolean(now && now.profileChanged)}>{now ? now.profile : profileText(ship.forwardDefense, ship.sideDefense)}</StatValue></StatRow>
-            {mobile && <StatRow><StatLabel>Initiative</StatLabel><StatValue $changed={Boolean(now && now.initiativeChanged)}>{now ? now.initiative : ship.iniativebonus}</StatValue></StatRow>}
+            <StatRow><StatLabel>Profile - Front / Side</StatLabel><StatValue $changed={Boolean(now && now.profileChanged)}>{now ? now.profile : (window.officers ? profileText(officers.displayStat(ship, 'forwardDefense'), officers.displayStat(ship, 'sideDefense')) : profileText(ship.forwardDefense, ship.sideDefense))}</StatValue></StatRow>
+            {mobile && <StatRow><StatLabel>Initiative</StatLabel><StatValue $changed={Boolean(now && now.initiativeChanged)}>{now ? now.initiative : (window.officers ? officers.displayIniativeBonus(ship) : ship.iniativebonus)}</StatValue></StatRow>}
 
         </StatsPanel>
     );
@@ -372,16 +379,25 @@ export const ManoeuvreStats = ({ ship, live, bare }) => {
 //grid there)
 export const EnhancementsPanel = ({ ship }) => {
     const enhLines = splitHtmlLines(ship.enhancementTooltip);
-    if (enhLines.length === 0) return null;
+    const officerLine = officerSummaryLine(ship);
+    if (enhLines.length === 0 && !officerLine) return null;
     return (
         <EnhArea>
             <Block $gold>
                 <EnhTitle>Enhancements</EnhTitle>
                 {enhLines.map((line, i) => <Row key={`enh-${i}`}>{line}</Row>)}
+                {officerLine && <Row key="officers">{officerLine}</Row>}
             </Block>
         </EnhArea>
     );
 };
+
+/* OFFICERS_PLAN.md §4.7 - the officers' ONE line in the gold Enhancements box, "Officers (2)", the way the
+   per-system refits get "System Enhancements (n)" (user request 2026-10-11, replacing a list of names
+   under a sub-title of their own): who they are and how they fare is on each post's own tooltip and
+   insignia. Last, after the enhancement lines. Own team only, through officers.listFor (D4) - so, unlike
+   the refit line, it never needs taking back out of anything the server sends an enemy. */
+export const officerSummaryLine = (ship) => ((window.officers && ship) ? officers.summaryLine(ship) : null);
 
 const splitHtmlLines = (text) =>
     (text || '')
@@ -399,6 +415,7 @@ class ShipNotesPanel extends React.Component {
         const complement = buildComplement(ship);
         const noteLines = splitHtmlLines(ship.notes);
         const enhLines = hideEnhancements ? [] : splitHtmlLines(ship.enhancementTooltip);
+        const officerLine = hideEnhancements ? null : officerSummaryLine(ship);
 
         const meta = [];
         if (ship.limited && ship.limited != 0) meta.push("Limited: " + ship.limited + "%");
@@ -422,7 +439,7 @@ class ShipNotesPanel extends React.Component {
                     <Block>
                         <BlockTitle>Flight Stats</BlockTitle>
                         <StatRow><StatLabel>Armor F/S/A</StatLabel><StatValue>{shipManager.systems.getFlightArmour(ship)}</StatValue></StatRow>
-                        <StatRow><StatLabel>Offensive bonus</StatLabel><StatValue>{ship.offensivebonus * 5}</StatValue></StatRow>
+                        <StatRow><StatLabel>Offensive bonus</StatLabel><StatValue>{statOf(ship, 'offensivebonus') * 5}</StatValue></StatRow>
                         {/*flights carry forwardDefense/sideDefense exactly like ships (the
                            lobby resets them from the blueprint on edit, and FtrPetals-style
                            systems mutate them live), so the profile reads the same way as
@@ -431,7 +448,7 @@ class ShipNotesPanel extends React.Component {
                         <StatRow><StatLabel>Thrust</StatLabel><StatValue>{ship.freethrust}</StatValue></StatRow>
                         <StatRow><StatLabel>Turn Cost / Delay</StatLabel><StatValue>{ship.turncost} / {ship.turndelaycost == 0 ? 0 : ship.turndelaycost}</StatValue></StatRow>
                         {<StatRow><StatLabel>Accel. / Pivot / Roll</StatLabel><StatValue>{ship.accelcost} / {ship.pivotcost} / {ship.rollcost}</StatValue></StatRow>}                                            
-                        <StatRow><StatLabel>Initiative</StatLabel><StatValue>{ship.iniativebonus}</StatValue></StatRow>
+                        <StatRow><StatLabel>Initiative</StatLabel><StatValue>{statOf(ship, 'iniativebonus')}</StatValue></StatRow>
                     </Block>
                 )}
 
@@ -451,10 +468,11 @@ class ShipNotesPanel extends React.Component {
                     </Block>
                 )}
 
-                {enhLines.length > 0 && (
+                {(enhLines.length > 0 || officerLine) && (
                     <Block $gold>
                         <EnhTitle>Enhancements</EnhTitle>
                         {enhLines.map((line, i) => <Row key={`enh-${i}`}>{line}</Row>)}
+                        {officerLine && <Row key="officers">{officerLine}</Row>}
                     </Block>
                 )}
             </Rail>
