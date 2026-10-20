@@ -15,8 +15,6 @@ class DalithornMissileFrigate extends MediumShip{
         $this->canvasSize = 100;
 	    $this->isd = 2110;
 
-        $this->fighters = array("superheavy"=>1);
-        
         $this->forwardDefense = 10;
         $this->sideDefense = 12;
         

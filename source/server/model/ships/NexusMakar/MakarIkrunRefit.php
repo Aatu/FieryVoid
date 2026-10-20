@@ -39,7 +39,7 @@ class MakarIkrunRefit extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
 		$this->addFrontSystem(new NexusLightXRayLaser(2, 3, 1, 270, 90));
 		$this->addFrontSystem(new NexusRAMLauncher(3, 8, 4, 300, 60));
-		$this->addFrontSystem(new Hangar(2, 4));
+		$this->addFrontSystem(new Hangar(2, 4, 4));
 		$this->addFrontSystem(new NexusRAMLauncher(3, 8, 4, 300, 60));
                 
         $this->addAftSystem(new Thruster(3, 15, 0, 4, 2));

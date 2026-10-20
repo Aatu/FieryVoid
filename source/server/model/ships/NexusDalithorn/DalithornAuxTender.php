@@ -17,7 +17,7 @@ class DalithornAuxTender extends MediumShip{
 
  		$this->fighters = array("superheavy"=>1);
 
-		$this->notes = "Usually uses transport super-heavy unit.";	
+		$this->notes = 'Ramming damage is higher due to the attached barge.';
        
         $this->forwardDefense = 10;
         $this->sideDefense = 12;
@@ -28,6 +28,11 @@ class DalithornAuxTender extends MediumShip{
         $this->rollcost = 999;
         $this->pivotcost = 999;
         $this->iniativebonus = -4*5;
+
+		//Need this to boost the ramming factor to account for the barge
+	    $hitBonus = 0; //there is no bonus to hit
+	    $rammingAttack = new RammingAttack(0, 0, 360, 65, $hitBonus, true, 0); //actual damage - NOT calculated, but designed (130)
+		$this->addPrimarySystem($rammingAttack);
 
         $this->addPrimarySystem(new Reactor(2, 6, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
@@ -60,11 +65,11 @@ class DalithornAuxTender extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			6 => "Thruster",
-			8 => "Autocannon",
-			9 => "Catapult",
-			12 => "Scanner",
-			15 => "Engine",
+			9 => "Thruster",
+			10 => "Autocannon",
+			11 => "Catapult",
+			13 => "Scanner",
+			16 => "Engine",
 			17 => "Hangar",
 			19 => "Reactor",
 			20 => "C&C",
@@ -74,7 +79,7 @@ class DalithornAuxTender extends MediumShip{
 			3 => "Thruster",
 			5 => "Cargo Bay",
 			7 => "Quarters",
-			11 => "Docking Collar",
+			11 => "LCV Rail",
 			17 => "Structure",
 			20 => "Primary",
 		),
@@ -83,7 +88,7 @@ class DalithornAuxTender extends MediumShip{
 			3 => "Thruster",
 			5 => "Cargo Bay",
 			7 => "Quarters",
-			11 => "Docking Collar",
+			11 => "LCV Rail",
 			17 => "Structure",
 			20 => "Primary",
 		),

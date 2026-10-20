@@ -118,7 +118,7 @@ class CraytanOlipanCombat extends SmallStarBaseFourSections{
 				9 => "TAG:Heavy Enhanced Plasma",
 				11 => "TAG:Hangar",
 				18 => "Structure",
-				20 => "Primary",
+				20 => "C&C",
 			),
 			1=> array(
 				3 => "TAG:Cargo Bay",

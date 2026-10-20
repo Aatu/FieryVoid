@@ -2108,14 +2108,17 @@ class TractingRodHandler {
 	}
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-		$crit = null;
-		if (WeaponEM::isTargetEMResistant($ship,$system)) return;
-		if ($ship instanceof FighterFlight) 2;
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);	        
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
+		if ($ship instanceof FighterFlight) {
+			$system->critRollMod+=2;
+			return;
+		}
 		if ($system->powerReq > 0 || $system->canOffLine){
 			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+			return;
 		}
 		$system->critRollMod += 4;
-		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);	        
 	}
 		
         public function getDamage($fireOrder){        return Dice::d(10, 2);   }

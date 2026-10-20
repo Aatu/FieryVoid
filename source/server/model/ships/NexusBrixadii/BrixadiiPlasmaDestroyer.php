@@ -37,7 +37,7 @@ class BrixadiiPlasmaDestroyer extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-    	$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 240, 0));
+    	$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 240, 360));
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 0, 120));
         $this->addFrontSystem(new EnergyPulsar(2, 6, 3, 240, 60));
         $this->addFrontSystem(new EnergyPulsar(2, 6, 3, 300, 120));

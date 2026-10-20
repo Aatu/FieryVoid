@@ -4,7 +4,7 @@ class MakarRogetan extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 540;
+        $this->pointCost = 600;
         $this->faction = "Nexus Makar Federation";
         $this->phpclass = "MakarRogetan";
         $this->imagePath = "img/ships/Nexus/makar_niskan2.png";

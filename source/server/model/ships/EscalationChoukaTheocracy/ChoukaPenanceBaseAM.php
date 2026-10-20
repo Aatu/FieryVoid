@@ -51,7 +51,10 @@ class ChoukaPenanceBaseAM extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 270;
 			$cargoBay->endArc = 90;
 			$this->addFrontSystem($cargoBay);
-			$this->addFrontSystem($cargoBay);
+			$cargoBay2 = new CargoBay(3, 15);
+			$cargoBay2->startArc = 270;
+			$cargoBay2->endArc = 90;
+			$this->addFrontSystem($cargoBay2);
 						
 		$this->addAftSystem(new EWHeavyPointPlasmaGun(3, 7, 3, 90, 270));
         $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 90, 270, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
@@ -65,7 +68,10 @@ class ChoukaPenanceBaseAM extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 90;
 			$cargoBay->endArc = 270;
 			$this->addAftSystem($cargoBay);
-			$this->addAftSystem($cargoBay);
+			$cargoBay2 = new CargoBay(3, 15);
+			$cargoBay2->startArc = 90;
+			$cargoBay2->endArc = 270;
+			$this->addAftSystem($cargoBay2);
 						
 		$this->addLeftSystem(new EWHeavyPointPlasmaGun(3, 7, 3, 180, 360));
         $this->addLeftSystem(new AmmoMissileRackS(3, 0, 0, 180, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
@@ -79,7 +85,10 @@ class ChoukaPenanceBaseAM extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 180;
 			$cargoBay->endArc = 360;
 			$this->addLeftSystem($cargoBay);
-			$this->addLeftSystem($cargoBay);
+			$cargoBay2 = new CargoBay(3, 15);
+			$cargoBay2->startArc = 180;
+			$cargoBay2->endArc = 360;
+			$this->addLeftSystem($cargoBay2);
 						
 		$this->addRightSystem(new EWHeavyPointPlasmaGun(3, 7, 3, 0, 180));
         $this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 180, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
@@ -93,7 +102,10 @@ class ChoukaPenanceBaseAM extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 0;
 			$cargoBay->endArc = 180;
 			$this->addRightSystem($cargoBay);
-			$this->addRightSystem($cargoBay);
+			$cargoBay2 = new CargoBay(3, 15);
+			$cargoBay2->startArc = 0;
+			$cargoBay2->endArc = 180;
+			$this->addRightSystem($cargoBay2);
 						
 		/*replaced by TAGed versions!
 		$this->addFrontSystem(new Structure( 3, 50));

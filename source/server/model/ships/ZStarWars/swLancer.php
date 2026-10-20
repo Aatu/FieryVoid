@@ -71,7 +71,6 @@ class swLancer extends MediumShip{
         				12 => "Hyperdrive",
 						14 => "Scanner",
         				16 => "Engine",
-        				17 => "Hangar",
        					19 => "Reactor",
         				20 => "C&C",
         		),

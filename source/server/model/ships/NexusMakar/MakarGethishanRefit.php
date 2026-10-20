@@ -13,7 +13,7 @@ class MakarGethishanRefit extends HeavyCombatVessel{
 			$this->variantOf = "Niskan Half Cruiser (2109)";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
-        $this->isd = 2050;
+        $this->isd = 2110;
 
 		$this->fighters = array("LCVs" => 2);        
 
@@ -77,7 +77,7 @@ class MakarGethishanRefit extends HeavyCombatVessel{
             ),
             2=> array(
                     5 => "Thruster",
-					7 => "Docking Collar",
+					7 => "LCV Rail",
                     9 => "Light X-Ray Laser",
 					11 => "X-Ray Laser",
                     18 => "Structure",

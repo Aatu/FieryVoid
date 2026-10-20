@@ -76,7 +76,7 @@ class KobolRanger extends HeavyCombatVessel{
 					13 => "Scanner",
 					15 => "Engine",
 					16 => "Hangar",
-					18 => "FTL Drive",
+					18 => "Jump Drive",
 					19 => "Reactor",
 					20 => "C&C",
 			),

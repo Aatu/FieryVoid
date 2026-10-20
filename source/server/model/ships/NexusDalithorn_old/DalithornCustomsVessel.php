@@ -43,7 +43,7 @@ class DalithornCustomsVessel extends FighterFlight{
 			$armour = array(1, 0, 1, 1);
 			$fighter = new Fighter("DalithornCustomsVessel", $armour, 24, $this->id);
 			$fighter->displayName = "Krethim";
-			$fighter->imagePath = "img/ships/Nexus/Dalithorn_Cutter2.png.png";
+			$fighter->imagePath = "img/ships/Nexus/Dalithorn_Cutter2.png";
 			$fighter->iconPath = "img/ships/Nexus/Dalithorn_Cutter_Large2.png";
 
 			$shattergun = new NexusShatterGunFtr(0, 360, 1);

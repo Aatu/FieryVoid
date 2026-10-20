@@ -77,7 +77,7 @@ class MakarGethishan extends HeavyCombatVessel{
             ),
             2=> array(
                     5 => "Thruster",
-					7 => "Docking Collar",
+					7 => "LCV Rail",
                     9 => "Defense Gun",
 					11 => "X-Ray Laser",
                     18 => "Structure",

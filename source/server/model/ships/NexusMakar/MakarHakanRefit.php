@@ -37,7 +37,7 @@ class MakarHakanRefit extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(1, 1, 1, 1);
-            $fighter = new Fighter("MakarKalmet", $armour, 15, $this->id);
+            $fighter = new Fighter("MakarKalmet", $armour, 8, $this->id);
             $fighter->displayName = "Hakan";
             $fighter->imagePath = "img/ships/Nexus/makar_kalmet2.png";
             $fighter->iconPath = "img/ships/Nexus/makar_kalmet_large2.png";

@@ -82,7 +82,7 @@ class SshelathNaslik extends BaseShip{
 			2=> array(
 					5 => "Thruster",
 					8 => "Light Gauss Cannon",
-					10 => "Light Laser",
+					10 => "Light Particle Beam",
 					18 => "Structure",
 					20 => "Primary",
 			),
