@@ -85,6 +85,11 @@ window.officers = {
 		   movement.js's (canAnticipate - the turn arrows in the Firing phase). */
 		{ id: 'OFF_ANTI', label: 'Expert Anticipator', post: 'cnc',
 			summary: 'Initiative rolled twice, best kept; one turn in the Firing Phase; damage rolls of 2+ dice roll one extra die and drop the lowest' },
+		/* Stage 25: Centauri capital ships and larger (`needs`; the faction is the offers'). No stat moves in the lobby: his free expert and
+		   free Hardened Armour are PRICES (freeExpertId - the buy dialog and the fleet list; freeArmourRows - systemEnhancements.totalCost),
+		   his armed shuttle is the server's hangars', and his speech is his C&C's Activate box in the Firing phase (canSpeak). */
+		{ id: 'OFF_POL', label: 'Expert Political Officer', post: 'cnc', needs: 'capital',
+			summary: 'An armed shuttle, one free Expert Navigator, Helmsman, Engineer or Scanner, and 5 free Hardened Armour (not on Structure); once per battle a speech in the Firing Phase: +30 initiative next turn' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -305,10 +310,12 @@ window.officers = {
 	     ionWeapon     the hull carries a weapon with an Ion mode, or an Ion Torpedo (the Expert Ion Technician)
 	     missiles      the flight carries missiles (the Expert Missileer)
 	     tailGun       the flight's craft has a tail gun - a weapon the blueprint flags `tailGun` (the Expert Tailgunner)
-	     breachingPod  the flight is a breaching pod (isBreachingPod - the Breaching Expert) */
+	     breachingPod  the flight is a breaching pod (isBreachingPod - the Breaching Expert)
+	     capital       a capital ship or larger, size class 3 (the Expert Political Officer) */
 	passesNeeds: function passesNeeds(ship, officer) {
 		if (!officer.needs) return true;
 		var self = this;
+		if (officer.needs === 'capital') return (parseInt(ship.shipSizeClass, 10) || 0) >= 3;
 		if (officer.needs === 'matterWeapon') {
 			return this.systemsOf(ship).some(function (s) { return self.isMatterWeapon(s); });
 		}
@@ -662,7 +669,8 @@ window.officers = {
 	},
 
 	//"(used: called shot, turn 3; Piercing shot, turn 4)" - the Gunner's spent once-per-battle abilities, or ''
-	ABILITY_NAMES: { reload: 'faster reload', pierce: 'Piercing shot', called: 'called shot', capture: 'capture assault' }, //capture: the Breaching Expert's (Stage 24)
+	//capture: the Breaching Expert's (Stage 24); speech: the Expert Political Officer's (Stage 25)
+	ABILITY_NAMES: { reload: 'faster reload', pierce: 'Piercing shot', called: 'called shot', capture: 'capture assault', speech: 'speech' },
 	abilitiesText: function abilitiesText(entry) {
 		var spent = entry && entry.abilities ? entry.abilities : null;
 		if (!spent) return '';
@@ -833,10 +841,12 @@ window.officers = {
 	/* ------------------------------------------------------------------ the Expert Targeter (Stage 19) */
 
 	/* His effect line, with the weapons he covers: "... - Aft weapons" (his block's section), or a Medium ship's side - "Front
-	   weapons". What those weapons are is the server's (`covers`). Every other officer: his registry summary. */
+	   weapons". What those weapons are is the server's (`covers`). Stage 25: an Expert Political Officer's in the lobby says what he has
+	   brought so far (politicalStatus). Every other officer: his registry summary. */
 	summaryOf: function summaryOf(ship, entry) {
 		var officer = this.get(entry.id);
 		if (!officer) return '';
+		if (officer.id === 'OFF_POL' && this.isDerived(ship)) return officer.summary + '. ' + this.politicalStatus(ship);
 		if ((officer.sameAs || officer.id) !== 'OFF_TARG') return officer.summary;
 		return officer.summary + ' - ' + this.coverName(ship, entry) + ' weapons';
 	},
@@ -1087,14 +1097,23 @@ window.officers = {
 	/* Buy (n 1) or un-buy (n 0) a ship-level officer's row from outside the buy dialog, moving pointCostEnh and pointCost by
 	   the same amount - the lobby's invariant pointCost = hull + pointCostEnh + pointCostEnh2 + pointCostSysEnh. An Edit
 	   later rebuilds pointCostEnh from the rows' counts (gamelobby doEditShip), so it agrees with what is written here.
+	   Stage 25: the expert an Expert Political Officer brings costs nothing (politicalDiscount, before and after), and buying or
+	   un-buying the Political Officer himself re-prices his free Hardened Armour - the refit bucket, pointCost with it.
 	   false when the hull does not offer him. */
 	setShipLevelRow: function setShipLevelRow(ship, id, n) {
 		var row = this.shipLevelRow(ship, id);
 		if (!row) return false;
+		var discount = this.politicalDiscount(ship);
 		var delta = (n - (parseInt(row[2], 10) || 0)) * (parseFloat(row[4]) || 0);
 		row[2] = n;
+		delta -= this.politicalDiscount(ship) - discount;
 		ship.pointCostEnh = (parseFloat(ship.pointCostEnh) || 0) + delta;
 		ship.pointCost = (parseFloat(ship.pointCost) || 0) + delta;
+		if (id === 'OFF_POL' && window.systemEnhancements) {
+			var refitsBefore = parseFloat(ship.pointCostSysEnh) || 0;
+			systemEnhancements.totalCost(ship);
+			ship.pointCost += (parseFloat(ship.pointCostSysEnh) || 0) - refitsBefore;
+		}
 		return true;
 	},
 
@@ -1136,7 +1155,8 @@ window.officers = {
 	   ship-level half: each bought ship officer whose post (findPost) is destroyed loses his row, and pointCostEnh and
 	   pointCost give back what he cost. One-way, as D11: repairing the post does not bring him back. Flights are not swept:
 	   pre-battle damage never destroys a fighter (a lost fighter is a smaller flight). Returns dropDestroyed's shape, for
-	   systemEnhancements.describeRemoved. */
+	   systemEnhancements.describeRemoved. Stage 25: what each one gave back is what the unit's points moved by - an Expert Political
+	   Officer's free expert and free armour priced again (setShipLevelRow). */
 	dropDestroyedPosts: function dropDestroyedPosts(ship) {
 		if (!ship || ship.flight || !ship.systems || !Array.isArray(ship.enhancementOptions)) return [];
 		var self = this;
@@ -1148,8 +1168,9 @@ window.officers = {
 			if (count < 1) return;
 			var post = self.findPost(ship, officer.post);
 			if (!post || !self.isPostDestroyed(ship, post)) return;
-			var points = count * (parseFloat(row[4]) || 0);
+			var pointsBefore = parseFloat(ship.pointCost) || 0;
 			self.setShipLevelRow(ship, officer.id, 0);
+			var points = pointsBefore - (parseFloat(ship.pointCost) || 0);
 			removed.push({ enhID: officer.id, label: officer.label, points: points, systemid: parseInt(post.id, 10),
 				systemName: post.displayName || post.name });
 		});
@@ -1165,6 +1186,7 @@ window.officers = {
 		if (!ship || !system || ship.flight || !this.isDerived(ship)) return rows;
 		var self = this;
 		var entries = this.onPost(ship, system.id);
+		rows.forEach(function (row) { self.decorateArmourRow(ship, system, row); }); //Stage 25: an Expert Political Officer's free armour
 		/* Stage 19: a Medium ship's block is offered the Expert Targeter twice, once per side (OFF_TARG, OFF_TARG2) - one officer,
 		   so one row: the side bought, or his first side while neither is. The footer's side selector trades one for the other. */
 		rows = rows.filter(function (row) {
@@ -1334,6 +1356,149 @@ window.officers = {
 		if (!ship || ship.flight) return false;
 		if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) return false;
 		return this.isActive(ship, 'OFF_ANTI');
+	},
+
+	/* ------------------------------------------------------------------ Expert Political Officer (Stage 25) */
+
+	/* The four experts one of whom he brings at no cost, in registry order - which a tie for the dearest goes by.
+	   ⚠️ MIRROR PAIR with Officers::$politicalExperts (PHP). */
+	POLITICAL_EXPERTS: ['OFF_HELM', 'OFF_SCAN', 'OFF_ENG', 'OFF_NAV'],
+	POLITICAL_ARMOUR_SYSTEMS: 5, //⚠️ MIRROR of Officers::POLITICAL_ARMOUR_SYSTEMS (PHP)
+
+	/* Which of the four costs nothing: with a Political Officer bought, the DEAREST of them bought - the first on a tie; null with no
+	   Political Officer or none of them. `rows`: [{id, count, price}] - a ship's own rows (shipRows), or a buy dialog's spinners
+	   (confirm.isFreeExpert). ⚠️ MIRROR PAIR with Officers::freeExpertId (PHP). */
+	freeExpertId: function freeExpertId(rows) {
+		var bought = function (id) {
+			return rows.filter(function (row) { return row.id === id && row.count > 0; })[0] || null;
+		};
+		if (!bought('OFF_POL')) return null;
+		var best = null;
+		var bestPrice = -1;
+		this.POLITICAL_EXPERTS.forEach(function (id) {
+			var row = bought(id);
+			if (row && row.price > bestPrice) {
+				best = id;
+				bestPrice = row.price;
+			}
+		});
+		return best;
+	},
+
+	//a ship's officer rows as freeExpertId reads them
+	shipRows: function shipRows(ship) {
+		var rows = (ship && Array.isArray(ship.enhancementOptions)) ? ship.enhancementOptions : [];
+		return rows.filter(function (row) { return row && typeof row[0] === 'string'; }).map(function (row) {
+			return { id: row[0], count: parseInt(row[2], 10) || 0, price: parseFloat(row[4]) || 0 };
+		});
+	},
+
+	//what the free expert would have cost this ship - the points it is spared (0 without one)
+	politicalDiscount: function politicalDiscount(ship) {
+		var rows = this.shipRows(ship);
+		var free = this.freeExpertId(rows);
+		return free ? rows.filter(function (row) { return row.id === free; })[0].price : 0;
+	},
+
+	/* One bought ship-level row's points for the fleet list (gamelobby enhancementLines): 0 for the free expert, else `cost`. */
+	shipRowCost: function shipRowCost(ship, entry, cost) {
+		return (entry && entry[0] === this.freeExpertId(this.shipRows(ship))) ? 0 : cost;
+	},
+
+	/* ⭐ Which Hardened Armour is free, as the indexes of ship.systemEnhancements: with a Political Officer bought and his C&C standing,
+	   the POLITICAL_ARMOUR_SYSTEMS dearest SYS_HARM rows that are not on Structure, a tie to the lower system id. Priced by the offer
+	   (the blueprint, D10). ⚠️ MIRROR PAIR with Officers::freeArmourRows (PHP). */
+	freeArmourRows: function freeArmourRows(ship) {
+		var free = {};
+		if (!this.armourFreeOpen(ship)) return free;
+		this.armourCandidates(ship).slice(0, this.POLITICAL_ARMOUR_SYSTEMS).forEach(function (c) { free[c.index] = true; });
+		return free;
+	},
+
+	//his armour's candidates - every bought Hardened Armour not on Structure, dearest first ({index, price, id})
+	armourCandidates: function armourCandidates(ship) {
+		var list = [];
+		systemEnhancements.rows(ship).forEach(function (row, i) {
+			if (!row || row[0] !== 'SYS_HARM' || (parseInt(row[2], 10) || 0) < 1) return;
+			var system = systemEnhancements.systemById(ship, row[6]);
+			if (!system || system.name === 'structure') return;
+			var offer = systemEnhancements.offerFor(ship, row[6], 'SYS_HARM');
+			list.push({ index: i, price: systemEnhancements.priceFor(offer, row[2]), id: parseInt(row[6], 10) });
+		});
+		return list.sort(function (a, b) { return (b.price - a.price) || (a.id - b.id); });
+	},
+
+	/* Every Hardened Armour priced again - the free ones 0, the rest their offer's price. systemEnhancements.totalCost runs it before it
+	   sums the bucket, so every write prices them as the server's sanitiser will (Officers::pricePoliticalArmour). A row no longer
+	   offered keeps what it was priced at. */
+	pricePoliticalArmour: function pricePoliticalArmour(ship) {
+		if (!ship || !window.systemEnhancements || !Array.isArray(ship.systemEnhancements)) return;
+		var free = this.freeArmourRows(ship);
+		ship.systemEnhancements.forEach(function (row, i) {
+			if (!row || row[0] !== 'SYS_HARM') return;
+			var offer = systemEnhancements.offerFor(ship, row[6], 'SYS_HARM');
+			if (offer) row[4] = free[i] ? 0 : systemEnhancements.priceFor(offer, row[2]);
+		});
+	},
+
+	/* What buying a Hardened Armour on `system` would add to the ship (the system menu's price): its offer's price, less what his five
+	   free ones absorb - free while fewer than five are placed, and past that the cheapest of them goes back to full price. */
+	armourNextCost: function armourNextCost(ship, system, price) {
+		if (!this.armourFreeOpen(ship) || !system || system.name === 'structure') return price;
+		var max = this.POLITICAL_ARMOUR_SYSTEMS;
+		var top = function (prices) {
+			return prices.slice().sort(function (a, b) { return b - a; }).slice(0, max)
+				.reduce(function (sum, p) { return sum + p; }, 0);
+		};
+		var prices = this.armourCandidates(ship).map(function (c) { return c.price; });
+		return price - (top(prices.concat([price])) - top(prices));
+	},
+
+	//does this ship have a Political Officer whose free armour applies (bought, his C&C standing)?
+	armourFreeOpen: function armourFreeOpen(ship) {
+		if (!ship || ship.flight || !window.systemEnhancements || !Array.isArray(ship.enhancementOptions) || !this.isBought(ship, 'OFF_POL')) return false;
+		var cnc = this.findPost(ship, 'cnc');
+		return Boolean(cnc) && !this.isPostDestroyed(ship, cnc);
+	},
+
+	/* The lobby's line on what he has brought so far - his SystemInfo summary (summaryOf): "Free expert: Expert Navigator. Free
+	   Hardened Armour: 3 of 5 placed - the rest go on random systems when the fleet is committed." */
+	politicalStatus: function politicalStatus(ship) {
+		var free = this.freeExpertId(this.shipRows(ship));
+		var placed = this.armourFreeOpen(ship) ? Object.keys(this.freeArmourRows(ship)).length : 0;
+		var text = 'Free expert: ' + (free ? this.label(free) : 'none bought - one is picked at random when the fleet is committed') + '. ';
+		text += 'Free Hardened Armour: ' + placed + ' of ' + this.POLITICAL_ARMOUR_SYSTEMS + ' placed';
+		return text + (placed < this.POLITICAL_ARMOUR_SYSTEMS ? ' - the rest go on random systems when the fleet is committed.' : '.');
+	},
+
+	/* The system menu's Hardened Armour row on his ship (decorateMenuRows): what it costs now (the price it is charged - 0 when free),
+	   what buying it would add (armourNextCost), and a note saying so. */
+	decorateArmourRow: function decorateArmourRow(ship, system, row) {
+		if (row.enhID !== 'SYS_HARM' || !this.armourFreeOpen(ship)) return;
+		if (system.name === 'structure') {
+			row.note = 'The Expert Political Officer\'s free Hardened Armour cannot go on Structure.';
+			return;
+		}
+		var bought = systemEnhancements.rowFor(ship, system.id, 'SYS_HARM');
+		if (bought) row.price = parseFloat(bought[4]) || 0;
+		else row.nextPrice = this.armourNextCost(ship, system, row.nextPrice);
+		var placed = Object.keys(this.freeArmourRows(ship)).length;
+		row.note = 'Expert Political Officer: ' + this.POLITICAL_ARMOUR_SYSTEMS + ' Hardened Armour free (the dearest, not on Structure) - '
+			+ placed + ' placed; any left are placed at random when the fleet is committed.';
+	},
+
+	/* May this ship's Expert Political Officer give his speech now, from `system` - the Speech! button of the C&C he is posted in
+	   (CnC.canActivate; a hull with two C&Cs shows it on his alone): the Firing phase, his own team's ship, he serves and has not spoken
+	   yet (`abilities`, the server's). Through his list, so never an enemy's. ⚠️ MIRROR PAIR with Officers::speakerIndex (PHP). */
+	canSpeak: function canSpeak(ship, system) {
+		if (!ship || ship.flight || !system || !window.gamedata || gamedata.gamephase != 3) return false;
+		if (typeof gamedata.isMyShip === 'function' && !gamedata.isMyShip(ship)) return false;
+		var turn = this.currentTurn();
+		var self = this;
+		return this.listFor(ship).some(function (entry) {
+			return entry.id === 'OFF_POL' && String(entry.post) === String(system.id) && self.serves(entry, turn)
+				&& !(entry.abilities && entry.abilities.speech);
+		});
 	},
 
 	/* "Officers (2)" - the one line the ship window's gold Enhancements block shows for them (user request

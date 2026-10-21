@@ -30,7 +30,10 @@ all but called shots (§9.29) - committed (`260780e57`, `20cc13c40`). Stage 23, 
 C&C - initiative rolled twice and the higher kept, one turn in the Firing phase as a fighter's combat pivot, and every damage roll of two or
 more dice one die larger with its lowest dropped (§9.30) - committed (`b03679743`). Stage 24, the Breaching Expert (Balosians, Yolu, Narn and
 Gaim 25% of one pod, everyone else 50%), in a breaching pod - the flight +1 thrust, his pod's Marines Elite, his pod's first capture party
-three attack rolls on its first turn aboard, and at most 20% of a fleet's pods in the Fleet Correctness Report (§9.31) - BUILT 2026-10-21,
+three attack rolls on its first turn aboard, and at most 20% of a fleet's pods in the Fleet Correctness Report (§9.31) - committed
+(`30cb21e5d`). Stage 25, the Expert Political Officer (Centauri capital ships and larger, 40%), in the C&C - an armed shuttle, one free Expert
+Navigator, Helmsman, Engineer or Scanner, five free Hardened Armour (what the player leaves unchosen picked at random as the fleet is committed),
+and once per battle a stirring speech in the Firing phase, told in the combat log, for +30 initiative next turn (§9.32) - BUILT 2026-10-21,
 uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
@@ -97,7 +100,11 @@ before fire resolves, so this turn's fire meets the new facing; and on an Expert
 both apply (Stage 23, §9.30). Later that day they supplied the Breaching Expert's rules text - one of the original 25 - and ruled four
 questions: in a pair of pods his Elite benefit and his triple capture roll are his own pod's only ("single pod"), the +1 thrust the flight's;
 his price is 25% (50%) of ONE pod, not scaled by the flight's size; the fleet's 20% is a Fleet Correctness Report line, as every
-fleet-composition rule is; and on a pod already Elite only the Elite clause adds nothing (Stage 24, §9.31). Each officer's own rules
+fleet-composition rule is; and on a pod already Elite only the Elite clause adds nothing (Stage 24, §9.31). Later that day they added the
+Expert Political Officer with his rules text and notes - the free expert as the dearest of those bought (one at random with none), the armour
+as five free Hardened Armour (random ones for any left unplaced), the speech as an Activate menu on the C&C in the Firing phase ("Speech!" /
+"Cancel speech"), told in the combat log - and ruled four questions: both Centauri factions; the random picks the server's, at battle start;
+his armed shuttle on top of Elite Crew's; and no +30 unless he still serves on the turn it lands (Stage 25, §9.32). Each officer's own rules
 questions still only need ruling when that officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
@@ -352,6 +359,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Targeter, the other side *(§9.26)* | `OFF_TARG2` | a Medium ship's Primary Structure, covering its second side | 2 |
 | Expert ELINT Officer *(added 2026-10-20, §9.27)* | `OFF_ELINT` | the ELINT array | 1 |
 | Expert Turret Officer *(added 2026-10-21, §9.29)* | `OFF_TURR` | a chosen turret-mounted weapon, aiding every weapon on its turret | 2, one to a turret |
+| Expert Political Officer *(added 2026-10-21, §9.32)* | `OFF_POL` | C&C | 1, Centauri capital ships and larger |
 | Expert Software Engineer | `OFF_SOFT` | Computer | 1 |
 | Expert Ion Technician | `OFF_ION` | Engine | 1 |
 | Expert Surge Officer | `OFF_SURG` | Mag-Grav Reactor | 1 |
@@ -505,6 +513,7 @@ masking: individual notes never reach any client.
 | Expert Tailgunner (Stage 21) | the hit chance of his flight's tail guns | **Own team only**: the owner's hit-chance preview ("Expert Tailgunner" +5, or no "Tail Gun" -10) and the tail gun's tooltip line; an opponent sees only the needed % the combat log prints. The tail gun's own penalty is public: every viewer's tooltip has the "Tail Gun" line |
 | Expert Turret Officer (Stage 22) | his turret's weapons' fire control; their critical and jam rolls; where hits land on a sheltered turret | Fire control: **yes, to every viewer**, as the Gunner's (isModified). The -1 on criticals is never sent (nothing displays one); the jam's 19+ is in the owner's "Turret Mount" line only. The shelter is server-only: an opponent sees where the hits land (another system, or Structure), never why |
 | Breaching Expert (Stage 24) | a pod flight's `freethrust`; his pod's Marines Elite at delivery; his capture party's three attack rolls | Thrust: **yes, to every viewer** (his `publish` - the boarding hit chance reads it on both ends). The Elite is asked at delivery and never written into the weapon, whose "Elite" tooltip line every viewer is sent - so it stays the hull's, and his own team's client adds him to it. Which capture party is his is a key in its critical's `param`, stripped from every payload (`ShipSystem::stripForJson`). An opponent sees results only: an Elite mission class on one pod's party, the delivery and combat rolls the log prints |
+| Expert Political Officer (Stage 25) | `iniativebonus` (+30 the turn after his speech); his speech itself; the armour of his five free Hardened Armour; an armed shuttle in a hangar | **Yes**: the speech is a combat log line every player reads once firing resolves ("The Political Officer on-board <ship> begins a stirring speech about ...", user request) - so his speech names him; the +30 through his `publish`. The armour and the armed shuttle show exactly as any bought refit and any hangar's contents do. Which expert he brought and which armour is free stay as hidden as any officer and refit |
 | Expert ELINT Officer (Stage 20) | his array's `output`; every ELINT range from his ship; his blanket against ballistic weapons | **Yes, to every viewer**: `output` always is, and the ship payload carries `elintRangeBonus` (25) and `blanketBallistic` (3) while he serves - an opponent's own OEW under his Disruption and its hit chance against a unit under his blanket are previewed with them; his array's tooltip shows the ranges. The officer list stays own-team; a disguised Chameleon ship's payload is its simulacrum's and carries neither. The -2 on sensor criticals is never sent |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
@@ -669,7 +678,8 @@ committed.
 | **22** | Expert Turret Officer (Vree), added by the user - placed in a turret-mounted weapon, aiding his whole turret. **BUILT 2026-10-21** (§9.29) | Offered on every turret-mounted weapon of the 12 Vree hulls with turrets, 5%, one to a turret (a ship as many as it has turrets), never the Custom Ships' Shadow Xonn; +1 fire control on every weapon of his turret (not +2 on a Gunner's), -1 on their criticals (his kill roll included), -2 on their jam roll; a turret none of whose weapons fires a shot sheltered - an interception not counting - so a hit-chart roll on its weapons takes the destroyed-system fallback, a called shot still hitting, inside the real `Firing::fireWeapons` only; disabled with his own weapon; movable, never onto a turret another holds; the lobby's fire control and Turret Mount line, the client's one-per-turret rules |
 | **23** | Expert Anticipator, one of the original 25 (Hard). **BUILT 2026-10-21** (§9.30) | 15%, the Torata 10%, in the C&C; the d100 of both initiative rolls thrown twice for his ship, the higher kept; one turn in the Firing phase - a real turnleft / turnright, its thrust through the thrusters on the Movement phase's panel - only with the turn delay complete (no snap turn) and the thrust unspent, before the ship declares direct fire, once a turn, never with a unit attached, kept by the server for his ship only and hidden from enemies until firing resolves, its facing the one this turn's fire meets; a commit refused while its thrust is unassigned; every damage roll of two or more dice one die larger, the lowest dropped (the real `lib/dice.php` and both harness stubs alike), the Pentagon Array's five rakes included, never a one-die or fixed roll or a ram, on a Gunner's weapon with his +1 per die as well |
 | **24** | Breaching Expert, one of the original 25 (Hard). **BUILT 2026-10-21** (§9.31) | Offered on all 42 breaching pods and nothing else carrying Marines; 25% of one pod for the Balosians, Yolu, Narn and Gaim, 50% for everyone else, the same at any flight size (lobby and server); in the first pod, the flight's one officer, no kill roll, lost with his pod; the flight +1 thrust, published, previewed in the lobby, reaching the boarding speed match; his pod's Marines Elite at delivery (-1, the Elite mission classes), never the other pod's, nothing more on a pod Elite already, the "Elite" tooltip line his team's only; his pod's first delivered capture party - never a failed delivery, a Sabotage or a Rescue - three attack rolls on its first turn aboard in the real capture combat, still one attacker to the defenders, once per scenario through a reload; the mark never sent; the Fleet Correctness Report's "Breaching Experts" line, 20% of the fleet's pods rounded half up |
-| **25+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **25** | Expert Political Officer, added by the user. **BUILT 2026-10-21** (§9.32) | Offered on the 60 capital ships and larger of the Centauri Republic and its WotCR, 40%, in the C&C; a free Expert Navigator, Helmsman, Engineer or Scanner - the dearest bought, a tie to the first in the registry - in the buy dialog, the fleet list, Fleet Selection's own writes and a saved fleet; five free Hardened Armour, the dearest, never Structure, priced 0 by the sanitiser and the lobby alike, none with his C&C destroyed; whatever is left unchosen picked at random as the fleet is committed, never Structure, a destroyed or already-armoured system; one more armed shuttle than Elite Crew gives, none with Poor Crew; "Speech!" / "Cancel speech" on his C&C in the Firing phase, once per battle, judged on the loaded ship; a "SPEECH:" combat log line as firing resolves; +30 initiative on the next turn while he still serves, shown to every viewer |
+| **26+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -716,6 +726,7 @@ committed.
 | Expert Turret Officer | *Added 2026-10-21 with his rules text and the user's notes (§9.29):* FV has no turret system, so he is a system enhancement on a turret weapon - FV already marks turret weapons (the jammable mounts) and their turret mates (the linked firing group) - aiding every weapon on that turret, one officer to a turret; "sheltered" is automatic when no weapon on the turret fires, instead of a declaration UI. Does an interception count as the turret firing? Does a Gunner's +1 on that turret combine with his? Is a turret weapon linked to no other a turret of its own? May he move? **RULED 2026-10-21:** **offensive fire only** breaks the shelter (a turret may intercept and stay sheltered); **no combining** - the Gunner's +1 replaces his on the Gunner's gun, the -1, the -2 and the shelter still apply; **each unlinked turret weapon is its own turret** (Xorr 2, Xonn 3, Tyllz 6); **movable**, as the other placed officers. |
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? **Rules text and note 2026-10-21 (§9.30)** settle both: a single turn "if desired", with "Turn Delay complete and enough thrust ... left unused to complete a turn maneuver", "not a roll, pivot, snap turn, or other maneuver" - the user's note: "similar to a fighter's combat pivot except that there are no associated firing penalties and thrust must still be spent on ship thrusters as normal"; 10% for the Torata, 50% more for everyone else (15%). Asked: does the turn take effect before fire resolves, as a combat pivot does, or after all fire? On an Expert Gunner's weapon, the extra die too, or only the Gunner's +1 per die ("does not combine")? **RULED 2026-10-21:** **like a combat pivot** - this turn's fire, his and at him, meets the new facing; on a Gunner's weapon **both apply**. |
+| Political Officer | *Added 2026-10-21 with his rules text and the user's notes (§9.32):* the armed shuttle is Elite Crew's own method; the free expert is the dearest of the four bought, one at random with none; the armour is five free Hardened Armour on different systems, random for any left unplaced; the speech an Activate menu on the C&C in the Firing phase ("Speech!" / "Cancel speech"), a fire order in the combat log, +30 the following turn. Asked: "Centauri Only" - which Centauri factions? When are the unmade picks made: by the server at battle start, or in the lobby at purchase? With Elite Crew too, one armed shuttle or two? The +30 if he is killed or disabled in the turn he speaks? **RULED 2026-10-21:** **both Centauri factions** (the Republic and its WotCR); **the server, at battle start** (built as the fleet's commit: rolled once and stored); **they add up**; **no +30 unless he still serves** on the turn it lands. |
 | Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). **RULED 2026-10-15: Grome Autocracy only** (§9.12); the Matter-weapon hull test is kept beside it. **Rules text and rulings 2026-10-16 (§9.14):** "moved into one specific weapon instead of his normal station" - **one or the other, never both**; that weapon gets the +1 / +1 "but no others do", and its rate of fire +1 (Stage 10); "disabled if the weapon takes any damage at all (after armor), and automatically killed if the weapon is destroyed" - **and the ordinary kill roll too**. |
 | Gunner | Size caps for LCVs and bases? Which weapons are eligible: any with fire control, ballistics too? Does he stack with Gunsights? **Rules text and rulings 2026-10-16 (§9.14):** +1 to hit (not EW) and +1 per die capped at the face, always; 5% of the base cost, doubled on non-Yolu ships; at most 1 on a medium ship or smaller, 2 heavy, 3 capital, 4 enormous; **any weapon Gunsights may be bought for** (ballistics included), stacking with Gunsights and with Elite Crew; "does not combine any to-hit or damage bonuses with those of other elite officers" - **on his weapon his own replace the Matter Weapons Expert's**. Once-per-scenario rate of fire, piercing mode and +3 called shot: not combinable, Hard (§3.3), not built; moving between weapons: §8. **Stage 10 (user, 2026-10-16, §9.16) - all three automatic:** the faster reload after the first firing that used neither other ability (**RULED: saved for a later firing** when the first used one); +15% on his weapon's first called shot that is not Piercing; Piercing as an ADDED firing mode on a gun without one, removed once fired - **RULED: single-mode Standard/Raking direct-fire guns only, at the usual -4 with no fighters** - and +4 on a native Piercing gun's first Piercing shot. All three tied to HIM, not the weapon. Moving officers between posts in Initial Orders (blue `#90b1ee` Officers menu); **RULED: the Matter Weapons Expert moves between the C&C and his Matter weapons too**. |
 | Fighter officers | Post = the first craft? A craft has no d20 critical roll (its test is a d10 dropout), so: no kill roll at all, or a d20 + damage roll on any damage to his craft, 20+ kills? (Default: none; he is lost with his craft.) Does he go with that craft on a split-launch? Missileer's "+5 OB": is that +1 OB (5 %)? Evader: always on, or toggled like jinking? Coordinator's "180°+" = three combat pivots in one turn? **RULED 2026-10-11:** the post is the first craft; he is lost **with his craft** (destroyed or dropped out), with **no kill roll**; a dock, a partial dock or a split launch never loses him, and he **stays on the flight row he was bought on** (a "- Split" row never carries him). Missileer: **+1 OB** on a launch that gets the flight's OB, priced **half a craft once, plus 1 per missile the whole flight can carry**. Evader: **always on**. Expert Motivator: **a full officer** (one per flight, lost with his craft, hidden), under his old id, effect and price. Coordinator: Stage 9. **RE-RULED 2026-10-11 (round 2, §9.7):** a **remotely controlled** unit (`$remoteControl`, the Orieni Hunter-Killers) carries no officer of any kind - "they have no pilots". An officer's abilities apply only to the part of the flight that holds his fighter, so when the flight splits **he follows his fighter**: the new row gets him, posted in its first craft, and his cost; the old row loses him from the next turn. The Evader's −1 OB also lowering mine detection is accepted. |
@@ -3656,8 +3667,9 @@ varchar(200), and a party's JSON grows by 11 characters (`,"expert":1`).
 - **Mutation-tested: 42 breaks (22 server, 2 differential, 18 client), 42 caught**, files byte-identical afterwards; every catch by a Stage 24
   check. Runner `mutate24.js` in the session scratchpad only. One more mutant was equivalent: the half-up offset +50 -> +40 (20% of whole
   pods is a multiple of 0.2, so any offset from 40 to 59 rounds alike); +30 and +60 are caught.
-- ⚠️ NOT yet run: `officersHarness.php` with the database, and `fvbuild -Check` (the replay corpus). The FieryVoid database container was
-  stopped and the DouglasChanges stack held its ports.
+- ~~NOT yet run: `officersHarness.php` with the database, and `fvbuild -Check` (the replay corpus). The FieryVoid database container was
+  stopped and the DouglasChanges stack held its ports.~~ Both run in Stage 25 (§9.32), with this stage's checks inside them: officersHarness
+  with the database and `-Check`'s replay 162 / 0 both green.
 
 **Observations, not changed:**
 1. Not play-tested. Worth a test: two pairs of pods with one Expert - the Fleet Correctness Report's line; his pair's thrust in the lobby and
@@ -3667,3 +3679,154 @@ varchar(200), and a party's JSON grows by 11 characters (`,"expert":1`).
    keyed under the old name in its own faction file.
 3. The orphan static `ZTrek Playtest Other Factions.json` (2026-09-26, a faction name the generator no longer writes) still holds a Nausicaan
    pod without the offer; the client harness's sweep reads only the files of the last statics run.
+
+### 9.32 Stage 25: Expert Political Officer (2026-10-21)
+
+**Rules text (user, 2026-10-21) - an officer added beyond the original 25.** "Expert Political Officer. Most Centauri ships are sponsored by
+Imperial Houses, who like to keep an eye on their charges. One common means for this is the political officer, who is actually little more than
+a glorified spy for the nobility ... Though they have no shipboard duties, expert political officers have Influence with a capital 'I.' This
+enables them to acquire better equipment and service for their ship. This has the following benefits: The ship possesses one armed shuttle. If
+this shuttle can use missiles, it comes loaded with one set of standard missiles at no cost. The political officer's reputation attracts other
+important or skilled figures to the ship's crew. Select either an expert navigator, expert helmsman, expert engineer, expert scanner and add him
+to the crew at no cost. These are not lost if the political officer is killed, but remain on the ship. Due to improved armor ... ship systems
+(selected by the owner) receive +1 to their armor values. The owner must select 5 different systems (i.e., these cannot be combined) and cannot
+select structure blocks. This armor is not lost during the scenario if the officer is killed. Once during each scenario, the political officer
+can give a stirring speech to his ship's crew ... This provides the ship with +30 to its initiative on that turn. The speech must be announced
+before initiative rolls are made on that turn (by any player). Location: C&C. Cost: 40% of the ship's basic value. Availability: Capital ships
+or larger units only. Centauri Only." The user's notes: the armed shuttle - "Elite Crew enhancements already provides a method for this"; the
+armour - "5 free Hardened Armour System Enhancements (on different systems) by player (or randomly allocated to eligible systems in case player
+forgets)"; the free expert - "zero the cost of an expert navigator, expert helmsman, expert engineer, expert scanner as picked by player (most
+expensive one is zero'd if several are picked, and one is randomly picked if none are chosen)"; the speech - "a new 'Activate' React menu for CnC
+(using existing doActivate/doDeactivate methods in client) available in the Firing Phase that provides an Initiative bonus the following Turn
+... a fireOrder so that it appears in Combat Log as 'The Political Officer on-board [Ship Name] begins a stirring speech about [insert random
+noun here]'. The React buttons should just read 'Speech!' and 'Cancel speech'."
+
+**What FV had.**
+- **60 hulls** qualify: the capital ships and larger (size class 3) of the Centauri Republic (23) and the Centauri Republic (WotCR) (37), 5 of
+  them bases. All but the Lias have a default shuttle; every one has 18 or more non-Structure systems that may take Hardened Armour.
+- **Elite Crew's armed shuttle** is not a purchase: as the hangars fill (HangarOps::populateInitialHangarUsage, from onIndividualNotesLoaded -
+  before onConstructed, so read off the rows), one default shuttle per Elite level is retyped into the faction's armed shuttle
+  (`crewArmedShuttleUpgrades`; the Centauri one is ArmedShuttleCent); Poor Crew blocks armed shuttles (`crewBlocksArmedShuttles`). The lobby
+  never sees it.
+- **Hardened Armour** (`SYS_HARM`) is a per-system refit: +1 armour, any system with armour (Structure included), one to a system, priced
+  ceil(maxhealth x max(2, armour) / 2). The server re-prices every refit row (`sanitiseSystemEnhancements` - at buy, saved-fleet save and
+  reload); the lobby prices them in `systemEnhancements.js`, every write through `totalCost`.
+- **Ship-level officer prices** are trusted from the client at buy; a saved fleet stores each officer row's price and re-prices it on reload
+  (`Officers::rowPrice`) - one row at a time, each re-priced BEFORE its own count was written back.
+- **A Firing-phase declaration** on a non-weapon system: the Wide-Beam Lightning Array's toggle - `individualNotesTransfer` posted at the
+  commit, saved through `ShipSystem::saveFirePhaseDeclaration` in `FireGamePhase::process`. The generic `SystemActivation` box takes a
+  system's own labels (`getActivateLabel` / `getDeactivateLabel`) and reads `active`.
+- **A combat log line** with no shot: a log-only fire order on the ship's own Ramming Attack ([[howto_create_fire_orders]]); every entry was
+  headed "FIRE: <shooter>" but the hyperspace kinds ("HYPERSPACE:").
+- Next turn's initiative is rolled at the turn change on a fresh load AT the new turn (`Manager::changeTurn` -> `generateIniative`), so
+  `Officers::apply` on that load can add a bonus earned the turn before.
+
+**Rulings (user, 2026-10-21, asked before building):**
+1. **Both Centauri factions** - the Republic and the Wars of the Centauri Republic.
+2. **The server makes the random picks, at battle start** - not the lobby at purchase.
+3. **His armed shuttle adds to Elite Crew's** (Elite Crew + him = two).
+4. **No +30 unless he still serves** on the turn it lands - killed or disabled in the turn he speaks, the speech is wasted.
+
+**Built with defaults, stated here (ask before changing):**
+- "Capital ships or larger" = size class 3 (bases and enormous units included). 40% rounded up, as every ship officer. One per ship.
+- The free expert is the dearest of the four bought, by his price on that hull (the Scanner's 7% rounds up, the Navigator's down, so the Scanner
+  wins between the two unless 7% is whole); a tie goes to the first in the registry (Helmsman, Scanner, Engineer, Navigator). He is an
+  ordinary officer in every other way - posted, disabled and killed by his own post.
+- The five free Hardened Armour are the dearest five non-Structure rows bought (a tie to the lower system id); a sixth or more, and any on
+  Structure, are paid as usual. None is free while his C&C is destroyed by pre-battle damage (he is refunded then - Stage 15). Each is an
+  ordinary refit: its ✦, its +1, its tooltip.
+- **The random picks are made as the fleet is COMMITTED** (`BuyingGamePhase`, right after the unit's refits are sanitised) and stored as
+  ordinary rows - rolled once with `Dice`, not derived from a hash at each load: FV is open source and the repo's `$secret_phrase` is committed,
+  so a hash an opponent can recompute would tell him which systems got the armour and which expert came aboard. From the player's side this is
+  "at battle start": the lobby shows what is still unchosen, and nothing is random before the commit. A random expert is one of the four the hull
+  is offered; random armour goes only where a Hardened Armour could be bought - never Structure, a system destroyed before battle, or one
+  already armoured.
+- The speech: "Speech!" / "Cancel speech" in the C&C's Activate box (the generic SystemActivation - in the Hyach Computer's purple, user request
+  the same day: `CnC.prototype.activationMenuPurple`, SystemActivation's existing opt-in), in the Firing phase only,
+  on the C&C he is posted in (a hull with two C&Cs shows it on his alone), while he serves and has not spoken. It may be given at any moment of
+  the phase and withdrawn until the commit. The server spends it at the commit on the loaded ship. The C&C's icon does not glow as a power
+  boost while one is ordered (`suppressActiveBoost`). Save Orders keeps an ordered speech.
+- The log line is written as firing resolves, after every shot, and reads "SPEECH: The Political Officer on-board <ship> begins a stirring
+  speech about <topic>." - the topic one of twenty at random (`$speechTopics`: the rules' "past glories of the Republic", "honor of serving the
+  Emperor", and other mumbo-jumbo). Every player reads it, so the speech reveals him - as the user asked.
+
+**Design.**
+- `Officers`: registry `OFF_POL` (post `cnc`, pct 40, `apply` applyPoliticalOfficer, `publish` iniativebonus, `needs` isCapitalOrLarger) right after
+  the Anticipator, before the placed officers; `$factionRules` `only` both Centauri factions; constants `SPEECH_INITIATIVE` 30,
+  `POLITICAL_ARMOUR_SYSTEMS` 5, `SPEECH_DAMAGE_CLASS` 'PoliticalSpeech'; `$politicalExperts`, `$speechTopics`; `$abilityNames['speech']`.
+  `politicalAboard` (the ROWS say he is bought and the hull is offered him - for everything that runs without the officer list);
+  `politicalArmedShuttles`; ⭐ `freeExpertId` (⚠️ MIRROR PAIR with `officers.freeExpertId`), read by `rowPrice`; ⭐ `freeArmourRows` (⚠️ MIRROR
+  PAIR with `officers.freeArmourRows`) and `pricePoliticalArmour`; `placePoliticalPicks` (+ `buyShipLevelRow`); `applyPoliticalOfficer`;
+  `speakerIndex` (⚠️ MIRROR PAIR with `officers.canSpeak`), `saveSpeech` (Stage 10's `spend`: one OffUsed note `OFF_POL:speech`,
+  "Expert Political Officer: speech used"), `speechLog`.
+- `Enhancements::sanitiseSystemEnhancements` ends with `Officers::pricePoliticalArmour`; `sysEnhDestroyedSystemIds` made public.
+  `HangarOps::crewArmedShuttleUpgrades` adds `politicalArmedShuttles` unless Poor Crew blocks it. `CnC::saveFirePhaseDeclaration` hands a
+  posted `['speech']` to `saveSpeech`. `FireGamePhase::advance` calls `speechLog` before the new fire orders are written.
+  `BuyingGamePhase` calls `placePoliticalPicks` after each unit's refits are sanitised. ⚠️ `Manager::loadSavedFleet` now writes every saved
+  officer count onto the unit BEFORE re-pricing any officer row: one row's price can depend on the others now (the Navigator's was re-priced
+  while the Political Officer's count, later in enhid order, still read 0).
+- Client: `officers.js` - the registry row (`needs: 'capital'`), `POLITICAL_EXPERTS`, `freeExpertId` / `shipRows` / `politicalDiscount` /
+  `shipRowCost`, `freeArmourRows` / `armourCandidates` / `pricePoliticalArmour` / `armourNextCost` / `armourFreeOpen` / `decorateArmourRow`
+  (the system menu's Hardened Armour row: the price charged, what one more would add, a note), `politicalStatus` (his lobby summary: the free
+  expert, "n of 5 placed"), `canSpeak`; `setShipLevelRow` takes the free expert into account and re-prices the armour when he comes or goes,
+  `dropDestroyedPosts` reports what the points actually moved by. `systemEnhancements.totalCost` prices the armour first. `confirm.js`
+  `isFreeExpert`, asked by `enhRowCost` - the buy dialog's totals and its "free" row. `gamelobby.js`: the ship read-backs of doBuyShip /
+  doCopyShip / doEditShip through `enhRowCost`, `enhancementLines` through `shipRowCost`, and doEditShip re-prices the refits on every edit.
+  `model/system/baseSystems.js`: CnC `canActivate` / `canDeactivate` / labels / `doActivate` / `doDeactivate`, `suppressActiveBoost`, a
+  phase-3 branch in `doIndividualNotesTransfer`, `draftStateKeys` + `active` in phases 1 and 3. `combatLog.js`: the "SPEECH:" header, the ship
+  not printed ahead of the sentence; `weaponManager.doShortLogText`: 'PoliticalSpeech'.
+- Docs: an Expert Political Officer card (Ship Officers, alphabetically after the Plasma Scientist).
+
+**Files.** Server: `Officers.php`, `Enhancements.php`, `systems/HangarOps.php`, `systems/baseSystems.php` (CnC), `controller/Manager.php`
+(loadSavedFleet), `Phase/BuyingGamePhase.php`, `Phase/FireGamePhase.php`. Client: `officers.js`, `systemEnhancements.js`, `UI/confirm.js`,
+`gamelobby.js`, `model/system/baseSystems.js`, `combatLog.js`, `weaponManager.js`. Docs `ammo-options.html`. Harnesses: `officersHarness.php`,
+`officersClientHarness.js` (SystemActivation added to its bundle), the enhancements fingerprint. Statics (`fvbuild -Statics`) and legacy
+bundles (`scripts/bundle-legacy.js` - the watcher was not running) rebuilt; no React source changed, no new class, no schema change.
+
+**Measured.** Statics +3,301 B: 60 offers, all Centauri. Fingerprint: exactly one new line (the Primus's offer, the one Centauri hull it holds);
+old copy `fingerprint.before-officers-stage25.txt`.
+
+**Verified.**
+- `officersHarness.php` **1718 / 0 with the database** (the Stage 23 registry-order check relaxed - he now sits between the Anticipator and
+  the placed officers): the registry place; offers and prices on five hulls (two factions, a base, an enormous ship), none on a Centauri HCV,
+  another faction's capital ship or a flight, and a sweep of every Centauri hull - offered on exactly the 60; the C&C post (the first of two);
+  the free expert's table (dearest, the Scanner over the Navigator by rounding, ties to the registry, none without him or the four, none on a
+  hull not offered him, a doctored Engineer row on a base - which has no Engine - not free), rowPrice; the commit's random expert for each d4
+  face, none when one is bought, a base's from its three; his C&C lost, his Engineer serving on; the free armour through the REAL sanitiser
+  (five of seven, the sixth and seventh and a Structure row paid, none without him or with his C&C destroyed before battle, a tie for the fifth
+  to the lower system id); the commit's random armour (five different systems, none Structure, destroyed or already armoured, all free;
+  nothing past five; Structure not counted; with only Structure left, nothing; with his C&C destroyed, no armour and no expert); +1 armour at
+  load; the armed shuttle (none, one, two with Elite Crew, none with Poor Crew or on a
+  hull not offered him) and the REAL hangar population (a Centauri Armed Shuttle, none on the shuttle-less Lias); the speech's +30 (the turn
+  after only; not this turn's, not two turns on; none when his C&C fell or he was killed in that turn), published to an enemy without him, his
+  team told it was used; the REAL `CnC::saveFirePhaseDeclaration` (one OffUsed note on his C&C, once; nothing from the other C&C, another
+  player, a Command Node transfer, a ship without him, the gate off, after a reload that says he spoke, or with his C&C destroyed); the log line
+  (his Ramming Attack, at itself, rolled 1, no shot, the sentence and a forced topic, none for last turn's speech); a saved fleet through the
+  REAL `submitSavedFleet` / `loadSavedFleet` (the Navigator stored at 0, nothing re-priced on reload, five of six armour free).
+- `officersClientHarness.js` **663 / 0** (34 new; the Stage 23 order check relaxed): the registry row; every Centauri static - the client's test
+  and the server's offers agree (60); the free-expert table; the fleet list's costs; the buy dialog through `confirm.enhRowCost` / `isFreeExpert`;
+  `setShipLevelRow` (a Navigator joining, him leaving); `dropDestroyedPosts` with his C&C destroyed; the armour through the REAL
+  systemEnhancements (five free, then seven and a Structure one, the tie for the fifth, the menu's prices and notes, him un-bought, his C&C
+  destroyed); his lobby
+  summary; the C&C's buttons in every case (his, the other C&C, spoken, killed, another officer, an enemy, not mine, Initial Orders), the
+  commit's transfer, Save Orders; the REAL SystemActivation box; the REAL combatLog's "SPEECH:" line (the ship named once) and a jump point's
+  "HYPERSPACE:" line unchanged.
+- `enhancementsHarness` **288 / 0** (fingerprint re-recorded, one line added); `enhancementsDifferential.js` **742 / 0** (no case added: he moves
+  no lobby stat).
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0** (no corpus game has him).
+- **Mutation-tested: 60 breaks (35 server, 25 client), 59 caught**, files byte-identical afterwards. Runner `mutate25.js` in the session
+  scratchpad only (~30s a server mutant, ~3s a client one). The first pass missed five, each a missing check, now added: the free expert's
+  eligibility test (only the five bases, with no Engine, can tell - a doctored Engineer row there), the armour's tie-break (the Primus fixture
+  had no tie at the fifth place - Thrusters #20 and #25 now give one, both ends), a random armour landing on Structure (Structure blocks come
+  last in system order, so the all-1 dice never reached them - a fixture with nothing but Structure left), and the commit ignoring a destroyed
+  C&C. The one left is equivalent: `speakerIndex` letting a spent speech through, which `spend()` refuses itself.
+
+**Observations, not changed:**
+1. Not play-tested. Worth a test: a Centauri Primus with him and an Expert Navigator - the buy dialog's Navigator row reading "free"; five
+   Hardened Armour placed (each 0p in the system menu), a sixth paid; then a second Primus with him and nothing else - after the commit, a random
+   expert aboard (insignia) and five ✦; in the Firing phase, "Speech!" on the C&C, the log's SPEECH line once firing resolves, and +30 on the
+   next turn's initiative.
+2. Not covered by a harness: the two one-line phase hooks - `BuyingGamePhase`'s call to `placePoliticalPicks` and `FireGamePhase::advance`'s
+   to `speechLog` (the methods themselves are; the phases need a whole game in the database).
+3. Elite Crew's own armed shuttle comes "loaded with one set of standard missiles" only as far as FV's armed shuttle classes already carry
+   them - nothing new for his.

@@ -783,6 +783,7 @@ window.gamedata = {
 			var cost = window.officers
 				? officers.flightCost(entry[0], entry[2], gamedata.enhancementOptionCost(entry), crafts, officers.perCraftExtra(ship, entry[0]), officers.standardFlight(ship))
 				: gamedata.enhancementOptionCost(entry) * crafts;
+			if (window.officers) cost = officers.shipRowCost(ship, entry, cost); //an Expert Political Officer's free expert (Stage 25)
 			lines.unshift({ text: name, cost: cost * units }); //reverse order
 		}
 
@@ -4228,7 +4229,7 @@ window.gamedata = {
 					if (ship.flight) {
 						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a fighter officer scaled by the flight's size (D8)
 					} else {
-						ship.pointCostEnh += target.data("enhCost");
+						ship.pointCostEnh += confirm.enhRowCost(target, 1); //its enhCost - but nothing for an Expert Political Officer's free expert (OFFICERS_PLAN.md Stage 25)
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
@@ -4439,7 +4440,7 @@ window.gamedata = {
 					if (ship.flight) {
 						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a fighter officer scaled by the flight's size (D8)
 					} else {
-						ship.pointCostEnh += target.data("enhCost");
+						ship.pointCostEnh += confirm.enhRowCost(target, 1); //its enhCost - but nothing for an Expert Political Officer's free expert (OFFICERS_PLAN.md Stage 25)
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
@@ -4659,7 +4660,7 @@ window.gamedata = {
 					if (ship.flight) {
 						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a fighter officer scaled by the flight's size (D8)
 					} else {
-						ship.pointCostEnh += target.data("enhCost");
+						ship.pointCostEnh += confirm.enhRowCost(target, 1); //its enhCost - but nothing for an Expert Political Officer's free expert (OFFICERS_PLAN.md Stage 25)
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
@@ -4749,9 +4750,11 @@ window.gamedata = {
 		if (window.systemEnhancements) {
 			systemEnhancements.apply(ship);
 			var sysEnhBefore = ship.pointCostSysEnh || 0;
+			//OFFICERS_PLAN.md Stage 25: an Expert Political Officer bought or dropped in this edit re-prices his free Hardened Armour
+			systemEnhancements.totalCost(ship);
 			refitsDropped = systemEnhancements.dropDestroyed(ship);
-			//pointCost had the OLD refit total folded in; take the refunded difference back off.
-			if (refitsDropped.length) ship.pointCost -= (sysEnhBefore - (ship.pointCostSysEnh || 0));
+			//pointCost had the OLD refit total folded in; take the difference back off.
+			ship.pointCost -= (sysEnhBefore - (ship.pointCostSysEnh || 0));
 		}
 		//OFFICERS_PLAN.md Stage 15 (user ruling 2026-10-17): a ship officer bought in this edit for a post the pre-battle
 		//damage destroys is refunded at once, as the placed ones above are (it moves pointCostEnh and pointCost itself)

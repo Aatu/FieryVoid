@@ -736,9 +736,14 @@ class HangarOps {
 	}
 
 	/* How many default shuttles this carrier upgrades to armed shuttles for free: one per ELITE
-	 * Crew level, none otherwise. Poor Crew answers 0 through the same expression. */
+	 * Crew level, none otherwise. Poor Crew answers 0 through the same expression.
+	 * OFFICERS_PLAN.md Stage 25: one more for an Expert Political Officer ("The ship possesses one
+	 * armed shuttle"), on top of Elite Crew's (user ruling 2026-10-21) - but never on a Poor Crew
+	 * hull, which cannot accommodate one (crewBlocksArmedShuttles). Read off the rows, like the crew
+	 * level: the officer list does not exist yet at hangar population. */
 	public static function crewArmedShuttleUpgrades($ship){
-		return max(0, self::crewQualityAtLoad($ship));
+		$political = self::crewBlocksArmedShuttles($ship) ? 0 : Officers::politicalArmedShuttles($ship);
+		return max(0, self::crewQualityAtLoad($ship)) + $political;
 	}
 
 	/* ⭐ POOR CREW - "CANNOT PURCHASE ARMED SHUTTLES, OR ACCOMMODATE THEM IN FLEET CHECKER."

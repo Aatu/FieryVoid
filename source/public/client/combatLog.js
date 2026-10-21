@@ -311,7 +311,11 @@ window.combatLog = {
            same source and is untouched, so the owner of the event is still readable at a glance.
            If the rail is ever restyled, this decision has to be revisited with it. */
         var hyperspaceKind = combatLog.HYPERSPACE_LOG_KINDS[fire.damageclass] || null;
-        var headerLabel = hyperspaceKind ? 'HYPERSPACE: ' : 'FIRE: ';
+        /* OFFICERS_PLAN.md Stage 25 - an Expert Political Officer's speech is not fire either: "SPEECH:", in the shooter's colour, and
+           then its sentence as the server wrote it ("The Political Officer on-board <ship> begins ...") - it names the ship itself, so
+           the shooter's name is not printed ahead of it. */
+        var isSpeech = fire.damageclass === 'PoliticalSpeech';
+        var headerLabel = hyperspaceKind ? 'HYPERSPACE: ' : (isSpeech ? 'SPEECH!: ' : 'FIRE: ');
         var headerClass = hyperspaceKind ? 'logheader hyperspace ' + hyperspaceKind : 'logheader fire';
         //The hyperspace colours live in logPanel.css, keyed off the class - an inline literal here
         //would be a fourth copy of two values the stylesheets already own.
@@ -322,7 +326,7 @@ window.combatLog = {
            below, and the rail colour is easier to read next to the header colour it comes
            from. `html` is the entry's INNER markup from this point on. */
         var html = '<span class="' + headerClass + '" style="' + headerStyle + '">' + headerLabel + '</span><span>';
-        html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span>';
+        if (!isSpeech) html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span>';
 
         var counttext = count > 1 ? count + "x " : "";
 

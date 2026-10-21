@@ -3387,6 +3387,16 @@ class CnC extends ShipSystem implements SpecialAbility {
 		return $this->commandNodeTurn !== null && (int)$this->commandNodeTurn === (int)$turn;
 	}
 
+	/* OFFICERS_PLAN.md Stage 25 - an Expert Political Officer's stirring speech, ordered with this C&C's Speech! button in the Firing
+	   phase: the client posts ['speech']. This is the POST-side rebuild, which has no officers, so Officers::saveSpeech judges it on
+	   the real load and writes it there. */
+	public function saveFirePhaseDeclaration($gamedata, $dbManager){
+		$transfer = $this->individualNotesTransfer;
+		if (!is_array($transfer) || !in_array('speech', $transfer, true)) return;
+		$this->individualNotesTransfer = array();
+		Officers::saveSpeech($this, $gamedata);
+	}
+
 	/* Initial Orders: persist the nomination the client made - it posts [1, partner id or -1] from the
 	   nominated ship's C&C. This is the POST-side rebuild, so it only writes what was asked; whether the
 	   partner is legal is judged when the note is applied, on the real load. Own ships only, and the

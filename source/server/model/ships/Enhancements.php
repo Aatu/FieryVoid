@@ -4819,7 +4819,9 @@ class Enhancements{
 			);
 			$out['total'] += $total;
 		}
-		return self::sanitisePlacedOfficers($ship, self::sanitiseSystemEnhancementGroups($out));
+		/* OFFICERS_PLAN.md Stage 25: an Expert Political Officer makes up to five Hardened Armour free - priced last, on the rows that
+		   stand, so a dropped row never takes a free slot. */
+		return Officers::pricePoliticalArmour($ship, self::sanitisePlacedOfficers($ship, self::sanitiseSystemEnhancementGroups($out)), $destroyed);
 	}
 
 	/* PLACED OFFICERS (Stage 8): a system hosts one, and no officer passes his ship cap - Officers::
@@ -4903,8 +4905,9 @@ class Enhancements{
 	   from ShipSystem::isDestroyed(): isDestroyed() reads ->structureSystem, which is populated in
 	   onConstructed, and a POST-side reconstructed ship is exactly the kind of thing that may not
 	   have been through it ([[arch_post_side_ship_reconstruction]]). ->location and
-	   getStructureLocation() are set in the constructor and are always there. */
-	private static function sysEnhDestroyedSystemIds($ship, $cleanPreBattle){
+	   getStructureLocation() are set in the constructor and are always there.
+	   Public for Officers::placePoliticalPicks (OFFICERS_PLAN.md Stage 25), which places armour only where a refit could go. */
+	public static function sysEnhDestroyedSystemIds($ship, $cleanPreBattle){
 		$destroyed = array();
 		if(empty($cleanPreBattle['sys']) || !is_array($cleanPreBattle['sys'])) return $destroyed;
 

@@ -227,8 +227,24 @@ window.confirm = {
        back through this too, so the dialog and the fleet can never charge differently. */
     enhRowCost: function enhRowCost(target, flightSize) {
         if (!window.officers) return (target.data("enhCost") || 0) * flightSize;
+        if (confirm.isFreeExpert(target)) return 0; //OFFICERS_PLAN.md Stage 25: the expert an Expert Political Officer brings
         return officers.flightCost(target.data("enhID"), target.data("count"), target.data("enhCost"),
             flightSize, target.data("perCraftExtra"), target.data("standardFlight"));
+    },
+
+    /* OFFICERS_PLAN.md Stage 25: is this spinner the expert an Expert Political Officer brings at no cost - with him bought in the same
+       dialog, the dearest of the Navigator, Helmsman, Engineer and Scanner bought there (officers.freeExpertId)? */
+    isFreeExpert: function isFreeExpert(target) {
+        if (!window.officers || officers.POLITICAL_EXPERTS.indexOf(target.data("enhID")) === -1) return false;
+        var dialog = target.closest(".confirm");
+        if (!dialog.length) dialog = $(".confirm");
+        var rows = [];
+        $(".selectAmount", dialog).each(function () {
+            var amount = $(this);
+            if (typeof amount.data("enhPrice") === 'undefined') return;
+            rows.push({ id: amount.data("enhID"), count: amount.data("count") || 0, price: amount.data("enhPrice") || 0 });
+        });
+        return officers.freeExpertId(rows) === target.data("enhID");
     },
 
     /* The most one enhancement row's spinner may take: its limit - and for Expert Pilots, an officer bought as a count
@@ -1541,8 +1557,10 @@ window.confirm = {
                     subtotal += cost;
                 }
                 $(this).toggleClass("is-taken", isTaken);
+                //the expert an Expert Political Officer brings reads "free" (OFFICERS_PLAN.md Stage 25)
+                var free = isTaken && cost === 0 && typeof amount.data("enhPrice") !== 'undefined' && confirm.isFreeExpert(amount);
                 $(".buyRowCost", this)
-                    .text(isTaken ? confirm.formatBuyPts(cost) : '')
+                    .text(isTaken ? (free ? 'free' : confirm.formatBuyPts(cost)) : '')
                     .toggleClass("is-saving", isTaken && cost < 0);
             });
 

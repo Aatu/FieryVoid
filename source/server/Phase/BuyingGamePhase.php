@@ -581,6 +581,10 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                        Every price here is the SERVER's (D4) - the client's claim is discarded. */
                     $cleanSysEnh = Enhancements::sanitiseSystemEnhancements(
                         $ship, $ship->systemEnhancements ?? array(), $cleanPreBattle);
+                    /* OFFICERS_PLAN.md Stage 25: an Expert Political Officer's free expert and free Hardened Armour that the
+                       player left unchosen are picked at random HERE, once, as the fleet is committed - stored below as the rows
+                       they become (the ship-level row with the rest, the armour with $cleanSysEnh), free of charge. */
+                    $cleanSysEnh = Officers::placePoliticalPicks($ship, $cleanSysEnh, $cleanPreBattle);
                     //Fold the authoritative total in BEFORE submitShip, which writes it into
                     //tac_ship.enhvalue alongside the other two buckets.
                     $ship->pointCostSysEnh = $cleanSysEnh['total'];

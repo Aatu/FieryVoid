@@ -230,6 +230,8 @@ window.systemEnhancements = {
 	   REFUNDS every refit while leaving it applied. */
 	totalCost: function totalCost(ship) {
 		var total = 0;
+		//OFFICERS_PLAN.md Stage 25: up to five Hardened Armour are free with an Expert Political Officer - priced again before the sum
+		if (window.officers) officers.pricePoliticalArmour(ship);
 		this.rows(ship).forEach(function (row) {
 			if ((parseInt(row[2], 10) || 0) > 0) total += parseFloat(row[4]) || 0;
 		});

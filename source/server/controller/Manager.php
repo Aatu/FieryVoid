@@ -1243,6 +1243,16 @@ class Manager{
                 // Add enhancements
                 Enhancements::setEnhancementOptions($ship);
                 $shipEnh = $enhancementsByShip[$ship->id] ?? [];
+                /* OFFICERS_PLAN.md Stage 25: what one officer row costs can depend on the OTHERS - the expert an Expert Political
+                   Officer brings is free (Officers::freeExpertId) - so every saved officer count goes onto the unit before any row
+                   is re-priced below, which writes the same counts again. */
+                foreach ($shipEnh as $enhEntry) {
+                    if ((int)$enhEntry[1] < 1 || !Officers::isOfficerId($enhEntry[0])) continue;
+                    foreach ($ship->enhancementOptions as &$option) {
+                        if ($option[0] === $enhEntry[0]) $option[2] = $enhEntry[1];
+                    }
+                    unset($option);
+                }
                 foreach ($shipEnh as $enhEntry) {
                     $enhID       = $enhEntry[0];
                     $numberTaken = $enhEntry[1];

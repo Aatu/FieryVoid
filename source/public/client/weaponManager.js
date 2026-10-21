@@ -5868,7 +5868,10 @@ window.weaponManager = {
             "SensorCharge",
             //Abduction (WALKERS_OF_SIGMA_PLAN.md 3.18): the Extra-Dimensional Jump Drive's per-turn report
             //- power-turns delivered, or why it took no hold. EdfExposure's shape exactly.
-            "Abduction"
+            "Abduction",
+            //PoliticalSpeech (OFFICERS_PLAN.md Stage 25): an Expert Political Officer's stirring speech - its sentence alone, under a
+            //"SPEECH:" header (combatLog.logFireOrders), 0 shots on the ship's own Ramming Attack.
+            "PoliticalSpeech"
         ];
 
         //A crash into Huge terrain (multi-hex asteroid, moon) reads like the small-asteroid

@@ -74,6 +74,10 @@
    flight's size (`unscaled`): the flight +1 thrust, his pod's Marines Elite (eliteMarines), and his pod's first capture party
    three attack rolls on its first turn aboard (spendCaptureAssault, captureRolls). Fleet-wide, at most 20% of a fleet's pods - the
    lobby's Fleet Correctness Report (gamelobby.js).
+   Stage 25: the Expert Political Officer (Centauri capital ships and larger) - his Influence buys the ship an armed shuttle, one of
+   four experts at no cost (freeExpertId) and five free Hardened Armour (pricePoliticalArmour), whatever the player leaves unchosen
+   picked at random as the fleet is committed (placePoliticalPicks); and once per battle a stirring speech in the Firing phase, told in
+   the combat log (speechLog), +30 initiative on the next turn.
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -141,6 +145,22 @@ class Officers{
 	const BREACH_THRUST = 1;             //Breaching Expert: "The pod receives +1 thrust" - the flight's, as a flight moves as one
 	const BREACH_CAPTURE_ROLLS = 3;      //...: "the pod's contingent gets three attack rolls on the first turn of combat"
 	const BREACH_PARTY_KEY = 'expert';   //...the capture party he sent: a key in its CaptureShip critical's param (never sent - ShipSystem::stripForJson)
+	const SPEECH_INITIATIVE = 30;        //Expert Political Officer: "This provides the ship with +30 to its initiative on that turn" - FV units, as the Quartermaster's -30 (QX1)
+	const POLITICAL_ARMOUR_SYSTEMS = 5;  //...: "+1 to their armor values. The owner must select 5 different systems ... and cannot select structure blocks"
+	const SPEECH_DAMAGE_CLASS = 'PoliticalSpeech'; //...his speech's combat log line (speechLog) - combatLog.js heads it "SPEECH:"
+	/* ...: "Select either an expert navigator, expert helmsman, expert engineer, expert scanner and add him to the crew at no cost" - in
+	   REGISTRY order, which is the order a tie for the dearest goes by (freeExpertId). ⚠️ MIRROR PAIR with officers.POLITICAL_EXPERTS (JS). */
+	private static $politicalExperts = array('OFF_HELM', 'OFF_SCAN', 'OFF_ENG', 'OFF_NAV');
+	/* ...: "a stirring speech to his ship's crew, quoting the past glories of the Republic, the honor of serving the Emperor, and other
+	   political mumbo-jumbo" - the combat log names one of these at random (speechLog). */
+	private static $speechTopics = array(
+		'the past glories of the Republic', 'the honour of serving the Emperor', 'the ancient splendour of Centauri Prime',
+		'the duty owed to the Great Houses', 'the boundless destiny of the Centauri people', 'the wisdom of the Imperial Court',
+		'the conquest of the Xon', 'the ingratitude of the Narn', 'the glory of the Imperial Fleet', 'the favour of the Great Maker',
+		'the treachery of rival Houses', 'the burden of Empire', 'the Emperor\'s latest decree', 'the sacrifices of the Orieni War',
+		'the necessity of unquestioning loyalty', 'the proper height of a hair crest', 'the virtues of a well-aged brivari',
+		'the price of a good seat at Court', 'the splendour of the Imperial Palace gardens', 'his own distinguished family',
+	);
 	//...a Medium ship's side, looked at from its own bearing (a "TAG:" hit chart entry is arc-filtered): Front, Aft, Left, Right
 	private static $sideBearing = array(1 => 0, 2 => 180, 3 => 270, 4 => 90);
 	//the fire orders that are NOT the flight firing, for his Spark Field relief: interception uses neither OB nor jinking
@@ -202,6 +222,8 @@ class Officers{
 		//"25% of the cost of the breaching pod ... Any race may purchase one, but races other than Balosian, Yolu, Narn or Gaim double the
 		//cost" - the registry's 50, and 25 here
 		'OFF_BRCH' => array('pct' => array('Balosian Underdwellers' => 25, 'Yolu Confederation' => 25, 'Narn Regime' => 25, 'Gaim Intelligence' => 25)),
+		//"Availability: ... Centauri Only" - the Wars of the Centauri Republic too (user ruling 2026-10-21)
+		'OFF_POL'  => array('only' => array('Centauri Republic', 'Centauri Republic (WotCR)')),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -383,6 +405,19 @@ class Officers{
 		   this turn's fire, his and at him, meets the new facing; on a Gunner's weapon the extra die AND the Gunner's +1 per die.
 		   15%, the Torata 10% ($factionRules). No stat moves at load. */
 		'OFF_ANTI' => array('label' => 'Expert Anticipator', 'post' => 'cnc', 'pct' => 15, 'apply' => null),
+		/* Expert Political Officer (Stage 25; rules text, user 2026-10-21), in the C&C - "Capital ships or larger units only. Centauri
+		   Only" (`needs`, $factionRules). "Expert political officers have Influence with a capital 'I'": the ship possesses one armed
+		   shuttle - Elite Crew's own retype of a default shuttle as the hangars fill (politicalArmedShuttles, asked by HangarOps); one
+		   Expert Navigator, Helmsman, Engineer or Scanner comes at no cost - the dearest of those bought (freeExpertId, the user's note);
+		   and +1 armour on 5 different systems, never Structure - five free Hardened Armour (pricePoliticalArmour). What the player
+		   leaves unchosen, the server picks at random once, as the fleet is committed (placePoliticalPicks). None of it is lost with
+		   him. "Once during each scenario ... a stirring speech ... +30 to its initiative on that turn ... announced before initiative
+		   rolls are made": ordered in the Firing phase from his C&C's menu (saveSpeech), told in that turn's combat log (speechLog), and
+		   +30 on the next turn's initiative (applyPoliticalOfficer). Rulings (user 2026-10-21): both Centauri factions; the random picks
+		   the server's, at the commit; his armed shuttle on top of Elite Crew's; no +30 unless he still serves on the turn it lands.
+		   40%. */
+		'OFF_POL'  => array('label' => 'Expert Political Officer', 'post' => 'cnc', 'pct' => 40, 'apply' => 'applyPoliticalOfficer',
+			'publish' => array('iniativebonus'), 'needs' => 'isCapitalOrLarger'),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -1703,7 +1738,8 @@ class Officers{
 
 	//what a spent ability is called in its note and the tooltip
 	private static $abilityNames = array('reload' => 'faster reload', 'pierce' => 'Piercing shot', 'called' => 'called shot',
-		'capture' => 'capture assault'); //Stage 24: the Breaching Expert's (spendCaptureAssault)
+		'capture' => 'capture assault', //Stage 24: the Breaching Expert's (spendCaptureAssault)
+		'speech' => 'speech');          //Stage 25: the Expert Political Officer's (saveSpeech)
 
 	/* Is this ability still his on $turn? Spent ON $turn still counts: that turn's shot is the one that spent it
 	   (so every order his gun fires that turn, and a replay of it, reads the same). */
@@ -2653,6 +2689,196 @@ class Officers{
 		return !($ship instanceof FighterFlight) && empty($ship->hasAttached) && self::isActive($ship, 'OFF_ANTI');
 	}
 
+	/* ------------------------------------------------------------------ Expert Political Officer (Stage 25) */
+
+	//"Availability: Capital ships or larger units only" - size class 3, bases and enormous units included
+	private static function isCapitalOrLarger($ship){
+		return (int)$ship->shipSizeClass >= 3;
+	}
+
+	/* Is a Political Officer BOUGHT on this unit, as its rows say? For the rules that run before the officer list exists, or with
+	   none: the free expert's and the free armour's prices (at buy on a POST-side ship, and on a saved fleet), the picks made at the
+	   commit, and the hangar's armed shuttle (HangarOps runs from onIndividualNotesLoaded, before onConstructed). A row the hull
+	   would not be offered buys nothing, as in pickPosts. */
+	public static function politicalAboard($ship){
+		if (!is_object($ship) || empty($ship->enhancementOptions) || !is_array($ship->enhancementOptions)) return false;
+		if (!self::isBought($ship, 'OFF_POL') || !self::mayCarryOfficers($ship)) return false;
+		return self::isEligible($ship, 'OFF_POL');
+	}
+
+	/* "The ship possesses one armed shuttle. If this shuttle can use missiles, it comes loaded with one set of standard missiles at no
+	   cost": one more default shuttle retyped into the faction's armed shuttle, as Elite Crew's are (user note) and on top of them
+	   (user ruling 2026-10-21) - HangarOps::crewArmedShuttleUpgrades. None on a Poor Crew hull, which "cannot accommodate" armed
+	   shuttles (HangarOps::crewBlocksArmedShuttles - the caller's rule). Not lost with him: it is the ship's. */
+	public static function politicalArmedShuttles($ship){
+		return self::politicalAboard($ship) ? 1 : 0;
+	}
+
+	/* "Select either an expert navigator, expert helmsman, expert engineer, expert scanner and add him to the crew at no cost": of
+	   those four bought on a ship with a Political Officer, the DEAREST costs nothing (the user's note) - the first in registry order
+	   on a tie. null with no Political Officer, or none of the four. rowPrice prices a saved fleet's row by it; the lobby prices the
+	   buy dialog and the fleet list the same way. ⚠️ MIRROR PAIR with officers.freeExpertId (JS). */
+	public static function freeExpertId($ship){
+		if (!self::politicalAboard($ship)) return null;
+		$best = null;
+		$bestPrice = -1;
+		foreach (self::$politicalExperts as $id){
+			if (!self::isBought($ship, $id) || !self::isEligible($ship, $id)) continue;
+			$price = self::shipPrice($ship, $id);
+			if ($price > $bestPrice){
+				$best = $id;
+				$bestPrice = $price;
+			}
+		}
+		return $best;
+	}
+
+	/* ⭐ WHICH HARDENED ARMOUR IS FREE - "ship systems (selected by the owner) receive +1 to their armor values. The owner must select 5
+	   different systems ... and cannot select structure blocks": with a Political Officer aboard, the POLITICAL_ARMOUR_SYSTEMS dearest
+	   SYS_HARM rows (a refit of +1 armour, one to a system) that are not on Structure, a tie to the lower system id. Any beyond them is
+	   paid as ever. Nothing while his C&C is in $destroyed (pre-battle damage refunds him - Stage 15). Returns $rows' keys.
+	   ⚠️ MIRROR PAIR with officers.freeArmourRows (JS). */
+	private static function freeArmourRows($ship, array $rows, array $destroyed = array()){
+		if (!self::politicalAboard($ship)) return array();
+		$cnc = self::findPost($ship, 'cnc');
+		if ($cnc === null || isset($destroyed[(int)$cnc->id])) return array();
+		$candidates = array();
+		foreach ($rows as $i => $row){
+			if (!is_array($row) || !isset($row[0], $row[2], $row[6]) || (string)$row[0] !== 'SYS_HARM' || (int)$row[2] < 1) continue;
+			$system = $ship->getSystemById((int)$row[6]);
+			if (!$system || $system instanceof Structure) continue;
+			$candidates[] = array($i, Enhancements::systemEnhancementTotalPrice($ship, $system, 'SYS_HARM', (int)$row[2]), (int)$row[6]);
+		}
+		usort($candidates, function ($a, $b){
+			if ($a[1] !== $b[1]) return $b[1] - $a[1];
+			return $a[2] - $b[2];
+		});
+		$free = array();
+		foreach (array_slice($candidates, 0, self::POLITICAL_ARMOUR_SYSTEMS) as $candidate) $free[$candidate[0]] = true;
+		return $free;
+	}
+
+	/* The last step of Enhancements::sanitiseSystemEnhancements - at buy, save and reload alike: the free Hardened Armour priced 0,
+	   every other SYS_HARM row at its full price, and the total summed again. $out is that method's result. */
+	public static function pricePoliticalArmour($ship, array $out, array $destroyed = array()){
+		$free = self::freeArmourRows($ship, $out['rows'], $destroyed);
+		$out['total'] = 0;
+		foreach ($out['rows'] as $i => $row){
+			if ((string)$row[0] === 'SYS_HARM'){
+				$system = $ship->getSystemById((int)$row[6]);
+				$out['rows'][$i][4] = (isset($free[$i]) || !$system) ? 0 : Enhancements::systemEnhancementTotalPrice($ship, $system, 'SYS_HARM', (int)$row[2]);
+			}
+			$out['total'] += $out['rows'][$i][4];
+		}
+		return $out;
+	}
+
+	/* As the fleet is COMMITTED (BuyingGamePhase, once per unit, right after its system enhancements are sanitised), whatever the player
+	   left unchosen is chosen at random, ONCE, and stored as ordinary rows (user ruling 2026-10-21: the server's pick) - so it is fixed
+	   for the whole game, no opponent can work it out, and every load reads it as it reads a purchase:
+	     - none of the four experts bought: one of those this hull is offered, his row bought (free - freeExpertId);
+	     - fewer than POLITICAL_ARMOUR_SYSTEMS free Hardened Armour: one on each of as many random systems as are missing - a system
+	       offered it, not Structure, not destroyed by pre-battle damage and not refitted with it already.
+	   Never on a saved fleet: only a game's commit rolls. Dice::d, which a harness can force. $out: sanitiseSystemEnhancements'
+	   result, returned with the rows added and every Hardened Armour priced again. */
+	public static function placePoliticalPicks($ship, array $out, $cleanPreBattle = null){
+		if (!self::politicalAboard($ship)) return $out;
+		$destroyed = Enhancements::sysEnhDestroyedSystemIds($ship, $cleanPreBattle);
+		$cnc = self::findPost($ship, 'cnc');
+		if ($cnc === null || isset($destroyed[(int)$cnc->id])) return $out;
+
+		if (self::freeExpertId($ship) === null){
+			$choices = array();
+			foreach (self::$politicalExperts as $id) if (self::isEligible($ship, $id)) $choices[] = $id;
+			if ($choices) self::buyShipLevelRow($ship, $choices[Dice::d(count($choices)) - 1]);
+		}
+
+		$missing = self::POLITICAL_ARMOUR_SYSTEMS - count(self::freeArmourRows($ship, $out['rows'], $destroyed));
+		if ($missing > 0){
+			$refitted = array();
+			foreach ($out['rows'] as $row) if ((string)$row[0] === 'SYS_HARM') $refitted[(int)$row[6]] = true;
+			$candidates = array();
+			foreach ($ship->systems as $system){
+				$id = (int)$system->id;
+				if ($system instanceof Structure || isset($destroyed[$id]) || isset($refitted[$id])) continue;
+				if (Enhancements::systemEnhancementOffered($ship, $system, 'SYS_HARM')) $candidates[] = $system;
+			}
+			for (; $missing > 0 && $candidates; $missing--){
+				$k = Dice::d(count($candidates)) - 1;
+				$system = $candidates[$k];
+				array_splice($candidates, $k, 1);
+				$out['rows'][] = array('SYS_HARM', Enhancements::systemEnhancementLabel('SYS_HARM'), 1,
+					Enhancements::systemEnhancementLimit($ship, $system, 'SYS_HARM'), 0,
+					Enhancements::systemEnhancementPriceStep($ship, $system, 'SYS_HARM'), (int)$system->id, (string)$system->name);
+			}
+		}
+		return self::pricePoliticalArmour($ship, $out, $destroyed);
+	}
+
+	//buy a ship-level officer row the hull offers: its count 1, as the buy dialog writes it (or the offer appended, on a list without it)
+	private static function buyShipLevelRow($ship, $id){
+		foreach ($ship->enhancementOptions as $i => $entry){
+			if (isset($entry[0]) && $entry[0] === $id){
+				$ship->enhancementOptions[$i][2] = 1;
+				return;
+			}
+		}
+		$ship->enhancementOptions[] = array($id, self::getLabel($id), 1, 1, self::shipPrice($ship, $id), 0, false);
+	}
+
+	/* "Once during each scenario, the political officer can give a stirring speech ... This provides the ship with +30 to its
+	   initiative on that turn. The speech must be announced before initiative rolls are made on that turn": ordered in the Firing
+	   phase (the C&C's Speech! button), so it is announced before the NEXT turn's roll, which is where the +30 lands. That turn he must
+	   still serve (user ruling 2026-10-21) - this runs only while he does. Published: iniativebonus is public. */
+	private static function applyPoliticalOfficer($ship, $entry, $turn){
+		if (isset($entry['abilities']['speech']) && (int)$entry['abilities']['speech'] === (int)$turn - 1) $ship->iniativebonus += self::SPEECH_INITIATIVE;
+	}
+
+	/* The index of this ship's Political Officer if he may give his speech on $turn from the C&C $systemid - posted there, serving, and
+	   with it still his - or null. ⚠️ MIRROR PAIR with officers.canSpeak (JS). */
+	private static function speakerIndex($ship, $systemid, $turn){
+		foreach ($ship->getOfficers() as $i => $entry){
+			if ($entry['id'] !== 'OFF_POL' || (int)$entry['post'] !== (int)$systemid || !self::serves($entry, $turn)) continue;
+			return isset($entry['abilities']['speech']) ? null : $i;
+		}
+		return null;
+	}
+
+	/* FireGamePhase::process, through CnC::saveFirePhaseDeclaration: the speech a POST asked for on the C&C $cnc of a POST-side ship,
+	   checked on the LOADED ship (the POST-side copy has no officers) and spent - one OffUsed note on his post, read back at every
+	   later load (takeNote, resolveUses). A second order, from a re-commit or a doctored POST, finds it spent and writes nothing. */
+	public static function saveSpeech($cnc, $gamedata){
+		if (!TacGamedata::$officersPresent || !is_object($cnc)) return;
+		$postShip = $cnc->getUnit();
+		if (!$postShip) return;
+		$ship = $gamedata->getShipById((int)$postShip->id);
+		if (!$ship || $ship instanceof FighterFlight || (int)$ship->userid !== (int)$gamedata->forPlayer) return;
+		$turn = (int)$gamedata->turn;
+		$i = self::speakerIndex($ship, (int)$cnc->id, $turn);
+		if ($i !== null) self::spend($ship, $i, 'speech', $turn, $gamedata);
+	}
+
+	/* FireGamePhase::advance, after firing: every speech given this turn told in the combat log, to every player - "The Political
+	   Officer on-board <ship> begins a stirring speech about <a topic of the rules' mumbo-jumbo>". A log line wearing a fire order's
+	   clothes ([[howto_create_fire_orders]]): on the ship's own RammingAttack, at itself, rolled 1 so the printed log keeps it, no shot.
+	   The ship's name is a bare shiplink, coloured for each reader by the client. Behind $officersPresent. */
+	public static function speechLog($gamedata){
+		if (!TacGamedata::$officersPresent) return;
+		$turn = (int)$gamedata->turn;
+		foreach ($gamedata->ships as $ship){
+			foreach ($ship->getOfficers() as $entry){
+				if ($entry['id'] !== 'OFF_POL' || !isset($entry['abilities']['speech']) || (int)$entry['abilities']['speech'] !== $turn) continue;
+				$ram = $ship->getSystemByName('RammingAttack');
+				if (!$ram) continue;
+				$order = new FireOrder(-1, 'normal', $ship->id, $ship->id, $ram->id, -1, $turn, 1, 0, 1, 0, 0, 0, 0, 0, self::SPEECH_DAMAGE_CLASS, 10000);
+				$order->pubnotes = 'The Political Officer on-board <span class="shiplink" data-id="' . (int)$ship->id . '">' . $ship->name
+					. '</span> begins a stirring speech about ' . self::$speechTopics[Dice::d(count(self::$speechTopics)) - 1] . '.';
+				$order->addToDB = true;
+				$ram->fireOrders[] = $order;
+			}
+		}
+	}
+
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */
 
 	//Expert Dogfighter: +5 initiative, ELITE_SW's line
@@ -2978,10 +3204,11 @@ class Officers{
 	   Stored with a saved fleet's row (Manager::submitSavedFleet), and used to keep an officer's cost
 	   with him when HangarOps splits a flight. $count (Stage 18): an officer bought as a count costs the
 	   row's count - read off the unit's bought row when null, or the count about to be written back
-	   (Manager::loadSavedFleet re-prices before it restores the counts). */
+	   (Manager::loadSavedFleet re-prices before it restores the counts). Stage 25: the expert a Political Officer brings costs
+	   nothing (freeExpertId - so the unit's other officer rows must already be bought on it: loadSavedFleet writes their counts first). */
 	public static function rowPrice($ship, $id, $count = null){
 		if (!isset(self::$registry[$id])) return 0;
-		if (empty(self::$registry[$id]['flight'])) return self::shipPrice($ship, $id);
+		if (empty(self::$registry[$id]['flight'])) return ($id === self::freeExpertId($ship)) ? 0 : self::shipPrice($ship, $id);
 		if (empty(self::$registry[$id]['multi'])) $count = 1;
 		else if ($count === null) $count = self::boughtCount($ship, $id);
 		return self::flightPrice($ship, $id, $ship->flightSize, max(1, (int)$count));

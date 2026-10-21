@@ -421,6 +421,11 @@ CnC.prototype.isCommandNodeThisTurn = function () {
 
 CnC.prototype.doIndividualNotesTransfer = function () {
 	this.individualNotesTransfer = "";
+	//OFFICERS_PLAN.md Stage 25: an Expert Political Officer's speech, ordered this Firing phase (CnC::saveFirePhaseDeclaration reads it)
+	if (gamedata.gamephase == 3 && this.active && gamedata.isMyShip(this.ship)) {
+		this.individualNotesTransfer = ['speech'];
+		return true;
+	}
 	if (gamedata.gamephase != 1 || !this.isTriadNode() || !gamedata.isMyShip(this.ship)) return false;
 	if (!this.isCommandNodeThisTurn()) return false;
 	var swap = (this.commandNodeSwap !== undefined && this.commandNodeSwap !== null) ? this.commandNodeSwap : -1;
@@ -428,9 +433,43 @@ CnC.prototype.doIndividualNotesTransfer = function () {
 	return true;
 };
 
-//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the nomination and the swap, in the one phase they are made.
-CnC.prototype.draftStateKeys = ['commandNodeTurn', 'commandNodeSwap'];
-CnC.prototype.draftStatePhases = [1];
+/* ===== EXPERT POLITICAL OFFICER'S SPEECH (OFFICERS_PLAN.md Stage 25) ===================================
+   "Once during each scenario, the political officer can give a stirring speech to his ship's crew ... +30 to its initiative": the
+   generic Activate box (SystemActivation, which reads `active` and these labels) on his C&C, in the Firing phase only, while he serves
+   and has not spoken (officers.canSpeak). `active` is this turn's order alone - posted at the commit (doIndividualNotesTransfer), judged
+   and spent by the server (Officers::saveSpeech), told in the combat log as firing resolves; the +30 is the next turn's. It is no
+   power boost, so the icon does not glow as one (suppressActiveBoost). The box wears the Hyach Computer's purple (user request
+   2026-10-21) - the speech is the only thing a C&C's Activate box ever holds. */
+CnC.prototype.suppressActiveBoost = true;
+CnC.prototype.activationMenuPurple = true;
+
+CnC.prototype.canActivate = function () {
+	return !this.active && Boolean(window.officers) && officers.canSpeak(this.ship, this);
+};
+
+CnC.prototype.canDeactivate = function () {
+	return Boolean(this.active) && Boolean(window.officers) && officers.canSpeak(this.ship, this);
+};
+
+CnC.prototype.getActivateLabel = function () {
+	return '"Speech!"';
+};
+
+CnC.prototype.getDeactivateLabel = function () {
+	return 'No speech';
+};
+
+CnC.prototype.doActivate = function () {
+	if (this.canActivate()) this.active = true;
+};
+
+CnC.prototype.doDeactivate = function () {
+	if (this.canDeactivate()) this.active = false;
+};
+
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the Command Node's nomination and swap in Initial Orders, the speech in the Firing phase.
+CnC.prototype.draftStateKeys = ['commandNodeTurn', 'commandNodeSwap', 'active'];
+CnC.prototype.draftStatePhases = [1, 3];
 
 //The ship's Triad C&C (in any state), or null.
 CnC.getTriadNode = function (ship) {
