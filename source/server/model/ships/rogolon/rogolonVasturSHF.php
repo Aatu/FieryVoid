@@ -52,6 +52,7 @@ class RogolonVasturSHF extends SuperHeavyFighter{
 			$fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
         
 			$gun = new RogolonLtPlasmaGun(150, 210, 6, 1);
+			$gun->setTailGun(); //tail gun (Weapon::getTailGunMod)
 			$gun->displayName = 'Imp. Lt. Plasma Gun';
 			$fighter->addAftSystem($gun);
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

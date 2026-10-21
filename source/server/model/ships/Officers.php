@@ -61,6 +61,9 @@
    Stage 19: the Expert Targeter (Raiders, Llort) - the first officer posted in a STRUCTURE block: +4 on called shots by the weapons
    he covers (targeterShotBonus) - his block's, or on a Medium ship one side's of its hit chart (sideReach) - and a side switch that is
    a move to his own post (`switchTo`). His kill roll counts only that turn's damage to the block (blockKillRoll).
+   Stage 20: the Expert ELINT Officer - his array +1, -2 on sensor criticals, every ELINT range 25% longer (elintRange).
+   Stage 21: the Expert Tailgunner - a fighter officer for flights with a TAIL GUN (Weapon::$tailGun): no penalty for firing it
+   with the forward guns, or +5% with it where it has none (Weapon::getTailGunMod).
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -122,6 +125,7 @@ class Officers{
 	const ELINT_CRIT_MOD = -2;           //...: "All critical hit rolls against the sensors are reduced by 2"
 	const ELINT_RANGE_PCT = 25;          //...: "The range of all ELINT functions is increased by 25% (round fractions of 0.5 or more up)"
 	const ELINT_BLANKET_BALLISTIC = 3;   //...: blanket protection's total "divided by 3 (not 4) for purposes of ballistic weapons only"
+	const TAILGUNNER_BONUS = 1;          //Expert Tailgunner: on a tail gun with no penalty, "+5% to hit with that gun only"
 	//...a Medium ship's side, looked at from its own bearing (a "TAG:" hit chart entry is arc-filtered): Front, Aft, Left, Right
 	private static $sideBearing = array(1 => 0, 2 => 180, 3 => 270, 4 => 90);
 	//the fire orders that are NOT the flight firing, for his Spark Field relief: interception uses neither OB nor jinking
@@ -448,6 +452,14 @@ class Officers{
 		   for a flight of six and scaled by its size (§9.9, the Evader's rule). Last in the list, as the newest. */
 		'OFF_PILOT' => array('label' => 'Expert Pilot', 'post' => 'craft', 'flight' => true, 'pct' => 100, 'multi' => 4,
 			'apply' => 'applyPilot', 'publish' => array('offensivebonus')),
+		/* Expert Tailgunner (Stage 21; rules text, user 2026-10-21): "adept at operating his fighter's tailgun in concert with the
+		   forward-mounted weapons, and can train the rest of his flight in this special skill. The flight receives no penalties when
+		   using the tailgun in the same turn as the other guns ... If the tailgun has no penalty associated with it, as in the Badger,
+		   the officer provides a +5% to hit with that gun only" - Weapon::getTailGunMod asks hasTailgunner. "Half the cost of a
+		   fighter": 50% of a craft. "Races can use this officer if they have fighters that meet the requirements e.g. an aft mounted
+		   weapon": a flight whose craft carries a weapon flagged as its tail gun (hasTailGun) - every faction (user ruling: all 15). */
+		'OFF_TAIL' => array('label' => 'Expert Tailgunner', 'post' => 'craft', 'flight' => true, 'pct' => 50,
+			'apply' => null, 'needs' => 'hasTailGun'),
 	);
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV) - so the
@@ -2521,6 +2533,23 @@ class Officers{
 			if (!in_array($order->type, self::$notFiring, true)) return 0;
 		}
 		return $pilots * self::PILOT_SPARK_RELIEF;
+	}
+
+	/* ------------------------------------------------------------------ Expert Tailgunner (Stage 21) */
+
+	//"if they have fighters that meet the requirements e.g. an aft mounted weapon" - a weapon its fighter's file flags as the tail gun
+	private static function hasTailGun($ship){
+		$craft = self::firstCraft($ship);
+		if ($craft === null) return false;
+		foreach ($craft->systems as $system){
+			if ($system instanceof Weapon && $system->isTailGun()) return true;
+		}
+		return false;
+	}
+
+	//Does an Expert Tailgunner serve this flight on $turn - Weapon::getTailGunMod, behind $officersPresent. ⚠️ MIRROR PAIR with officers.hasTailgunner (JS).
+	public static function hasTailgunner($flight, $turn){
+		return self::isActive($flight, 'OFF_TAIL', $turn);
 	}
 
 	/* ------------------------------------------------------------------ repairs (Stage 5) */

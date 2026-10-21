@@ -62,7 +62,7 @@ Ionizer - Laser-based primary fighter weapon. Unlike more typical fighter weapon
 Ion Field Generator - area-of effect weapon, targeted on a hex rather than ship. Units caught in area of effect have capabilities reduced next turn (reduced Initiative, Power, EW, OB, and has a chance to force shutdown a system).
 Poor acceleration - for ships it's just that, very high acceleration cost. For fighters, it's double acceleration cost - but medium and lighter fighters have unusually high thrust ratings, too. In effect they can't accelerate very well, but are exceptionally manoeuvrable even at high speed.
 Ultralight fighters - smallest Cascor fighters are of Ultralight type, which allows them to efficiently fit into hangar space intended for larger fighters.
-Tiqincc - medium Cascor fighters have tail gun. In tabletop, this gun has -2 penalty when fired together with main gun. In FV it does not.
+Tiqincc - medium Cascor fighters have tail gun. It has -2 (-10%) penalty when fired together with main gun, as in tabletop (no penalty with an Expert Tailgunner).
 
 
 CASCOR COMMONWEALTH (custom)

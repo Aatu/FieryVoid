@@ -2298,6 +2298,38 @@ window.weaponManager = {
         }
         return hexes;
     },
+    /* A fighter's TAIL GUN (OFFICERS_PLAN.md Stage 21; `tailGun` from the static blueprint): -2 (-10%) on a turn its craft also
+       fires another DIRECT-FIRE weapon - not a ballistic launch, an interception, a Meteor Defence declaration or the ramming attack
+       (user ruling 2026-10-21) - unless the flight has a
+       navigator; under an Expert Tailgunner no penalty, or +1 on a tail gun that has none. The shown chance follows the orders
+       declared so far: a tail gun declared BEFORE its craft's other guns shows no penalty, though the server's resolution has it.
+       ⚠️ MIRROR PAIR with Weapon::getTailGunMod (PHP). */
+    TAIL_GUN_PENALTY: 2,
+    getTailGunMod: function getTailGunMod(shooter, weapon) {
+        if (!weapon || !weapon.tailGun || !shooter || !shooter.flight) return 0;
+        var penalised = !shooter.hasNavigator;
+        if (window.officers && officers.hasTailgunner(shooter)) return penalised ? 0 : officers.TAILGUNNER_BONUS;
+        if (!penalised || !weaponManager.craftFiresOtherWeapon(shooter, weapon)) return 0;
+        return -weaponManager.TAIL_GUN_PENALTY;
+    },
+
+    //Weapon::firedOffensivelyOnTurn over the weapon's craft's OTHER direct-fire weapons, this turn
+    craftFiresOtherWeapon: function craftFiresOtherWeapon(shooter, weapon) {
+        var craft = shipManager.systems.getFighterBySystem(shooter, weapon.id);
+        if (!craft) return false;
+        for (var i in craft.systems) {
+            var sys = craft.systems[i];
+            if (!sys || sys.id == weapon.id || !sys.weapon || sys.isRammingAttack || sys.ballistic) continue;
+            for (var j in sys.fireOrders) {
+                var fire = sys.fireOrders[j];
+                if (fire.weaponid != sys.id || fire.turn != gamedata.turn) continue;
+                if (fire.type === 'meteorDefence' || String(fire.type).indexOf('ntercept') !== -1) continue;
+                return true;
+            }
+        }
+        return false;
+    },
+
     computeShotModifiers: function computeShotModifiers(shooter, target, weapon, calledid, distance, launchPos, fireOrder) {
         /* Chromatic Pulse Driver shield adaptation (WALKERS_OF_SIGMA_PLAN.md 3.4). getHitChangeMod
            returns the ADAPTED total - that is what the server rolls and it must not change. But a
@@ -2333,6 +2365,8 @@ window.weaponManager = {
             if (shipManager.movement.hasCombatPivotPenalty(shooter)) {
                 otherDetail.push({ label: 'Combat Pivot', value: -1 });
             }
+            var tailGun = weaponManager.getTailGunMod(shooter, weapon);
+            if (tailGun !== 0) otherDetail.push({ label: tailGun > 0 ? 'Expert Tailgunner' : 'Tail Gun', value: tailGun });
         } else {
             var rolling = (shooter.agile === true)
                 ? shipManager.movement.hasRolled(shooter)

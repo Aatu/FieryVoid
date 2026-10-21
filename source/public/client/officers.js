@@ -120,7 +120,11 @@ window.officers = {
 		   server's alone. The count's limit arrives in the offer (Officers::maxCount: 4, Raiders 2), and rowMax holds it to the
 		   flight size in the buy dialog. */
 		{ id: 'OFF_PILOT', label: 'Expert Pilot', post: 'craft', flight: true, multi: true, stats: { offensivebonus: 1 },
-			summary: 'Each: +5 offensive bonus and one free jinking level beyond the limit' }
+			summary: 'Each: +5 offensive bonus and one free jinking level beyond the limit' },
+		/* Stage 21: only for a flight with a tail gun (`needs`). No stat moves - his effect is the hit-chance preview's
+		   (weaponManager.getTailGunMod) and the tail gun's tooltip line (tailGunLine). */
+		{ id: 'OFF_TAIL', label: 'Expert Tailgunner', post: 'craft', flight: true, needs: 'tailGun',
+			summary: 'No penalty for firing the tail gun with the other guns; +5% with a tail gun that has no penalty' }
 	],
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV, the Expert
@@ -283,7 +287,8 @@ window.officers = {
 	     laserWeapon   the hull carries a weapon with a Laser mode (the Expert Laser Technician)
 	     plasmaWeapon  the hull carries a weapon with a Plasma mode (the Expert Plasma Scientist)
 	     ionWeapon     the hull carries a weapon with an Ion mode, or an Ion Torpedo (the Expert Ion Technician)
-	     missiles      the flight carries missiles (the Expert Missileer) */
+	     missiles      the flight carries missiles (the Expert Missileer)
+	     tailGun       the flight's craft has a tail gun - a weapon the blueprint flags `tailGun` (the Expert Tailgunner) */
 	passesNeeds: function passesNeeds(ship, officer) {
 		if (!officer.needs) return true;
 		var self = this;
@@ -300,6 +305,10 @@ window.officers = {
 			return this.systemsOf(ship).some(function (s) { return self.isIonWeapon(s); });
 		}
 		if (officer.needs === 'missiles') return this.missilesPerCraft(ship) > 0;
+		if (officer.needs === 'tailGun') {
+			var craft = ship.flight ? this.firstCraft(ship) : null;
+			return !!craft && this.systemsOf(craft).some(function (s) { return s && s.tailGun === true; });
+		}
 		return false;
 	},
 
@@ -1191,6 +1200,23 @@ window.officers = {
 		return shipManager.movement.getCombatPivotRotation(ship) < this.COMBAT_PIVOT_FULL;
 	},
 
+	/* Expert Tailgunner: does he serve this flight - read by weaponManager.getTailGunMod (the hit chance) and tailGunLine. Asked for
+	   the SHOOTER, always an own-team flight with its list. ⚠️ MIRROR PAIR with Officers::hasTailgunner (PHP). */
+	TAILGUNNER_BONUS: 1,
+	hasTailgunner: function hasTailgunner(ship) {
+		return !!(ship && ship.flight && this.isActive(ship, 'OFF_TAIL'));
+	},
+
+	/* A tail gun's "Tail Gun" tooltip line, as getTailGunMod would price it: the server writes the blueprint's (penalty, or a
+	   navigator's "No penalty"), and this keeps it right for a Navigator bought on the flight and for an Expert Tailgunner -
+	   whose part only his own team sees, as his list is theirs alone. */
+	tailGunLine: function tailGunLine(ship, value) {
+		if (!ship || !ship.flight) return value;
+		var penalised = !ship.hasNavigator;
+		if (this.hasTailgunner(ship)) return penalised ? 'No penalty (Expert Tailgunner)' : '+' + (this.TAILGUNNER_BONUS * 5) + '% (Expert Tailgunner)';
+		return penalised ? value : 'No penalty (navigator)';
+	},
+
 	/* Expert Evader (user request 2026-10-20): may this flight order an Evade - the Firing-phase movement order
 	   (movement.js canEvade / doEvade) without which he does nothing. Own team only, through his list.
 	   ⚠️ MIRROR PAIR with Officers::mayEvade (PHP). */
@@ -1795,7 +1821,8 @@ window.officers = {
 	   +1 or +2 (plasmaDamageLine), the same way. Stage 14: every weapon's, with an Expert Religious Leader's +1 on top
 	   (religiousDamageLine). Stage 16: an EM weapon's, with an Expert Surge Officer's +1 (surgeDamageLine). Stage 17: an ion
 	   weapon's, with an Expert Ion Technician's +1 and thrust boost (ionDamageLine), and the Rad Cannon's Special text. Stage 20: an
-	   ELINT array's Special text, with an Expert ELINT Officer's ranges and blanket (elintSpecial) - to every viewer, in game too. */
+	   ELINT array's Special text, with an Expert ELINT Officer's ranges and blanket (elintSpecial) - to every viewer, in game too.
+	   Stage 21: a fighter's tail gun's "Tail Gun" line (tailGunLine). */
 	DATA_KEY_FIRECONTROL: 'Fire control (fighter/med/cap)',
 	adjustDataDisplay: function adjustDataDisplay(ship, system, key, value) {
 		if (!system) return value;
@@ -1808,6 +1835,7 @@ window.officers = {
 		}
 		if (system.name === 'RadCannon' && key === 'Special') return this.radCannonSpecial(ship, value);
 		if ((system.name === 'elintScanner' || system.name === 'chameleonSensors') && key === 'Special') return this.elintSpecial(ship, value);
+		if (system.tailGun && key === 'Tail Gun') return this.tailGunLine(ship, value);
 		if (system.name === 'jumpEngine' && (key === 'Range' || key === 'Special')) {
 			var bonus = this.jumpRangeBonus(ship, system);
 			if (!bonus) return value;

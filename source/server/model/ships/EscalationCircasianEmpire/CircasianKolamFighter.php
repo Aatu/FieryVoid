@@ -49,6 +49,7 @@ class CircasianKolamFighter extends FighterFlight{
 			$fighter->addFrontSystem($frontGun);
 			
 			$rearGun = new PairedParticleGun(150, 210, 2, 1);
+			$rearGun->setTailGun(); //tail gun (Weapon::getTailGunMod)
 			$rearGun->displayName = "Particle Beam";
 			$fighter->addAftSystem($rearGun);
 			

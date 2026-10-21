@@ -18,11 +18,13 @@ a post destroyed by pre-battle damage refunded (§9.21) - committed (`68f1c82b3`
 with FV's EM hardening rebuilt to the tabletop rules first (§9.22) - committed (`318058ac0`). Stage 17, the Expert Ion Technician
 (Cascor), whose thrust boost rides the generic boost the way the Hypergraviton Blaster's does (§9.23) - committed
 (`a83c3d6ae`). Stage 18, the Expert Pilot, the first officer bought as a COUNT - up to four on one flight, one per craft (§9.24) -
-BUILT 2026-10-19, uncommitted. Stage 19, the Expert Targeter (Raiders; Llort at double), the first officer posted in a STRUCTURE
-block - +4 on called shots by the weapons of his block, or on a Medium ship by one side's weapons on its hit chart (§9.26) - BUILT
-2026-10-20, uncommitted. Stage 20, the Expert ELINT Officer (Abbai 15%; 17 more races at 30%), in the ELINT array - sensors +1,
-sensor criticals -2, every ELINT range 25% longer, his blanket a third against ballistic weapons (§9.27) - BUILT 2026-10-20,
-uncommitted.** Written
+committed (`76d449587`); the Expert Evader made an Evade order (§9.25) - committed (`e833a9adf`). Stage 19, the Expert Targeter
+(Raiders; Llort at double), the first officer posted in a STRUCTURE block - +4 on called shots by the weapons of his block, or on a
+Medium ship by one side's weapons on its hit chart (§9.26) - committed (`1f0900707`). Stage 20, the Expert ELINT Officer (Abbai 15%;
+17 more races at 30%), in the ELINT array - sensors +1, sensor criticals -2, every ELINT range 25% longer, his blanket a third against
+ballistic weapons (§9.27) - committed (`cff6a6094`). Stage 21, the Expert Tailgunner, with FV's missing TAIL GUN rule built first -
+a fighter's tail gun fired with its craft's other weapons at -10% unless the flight has a navigator; under him no penalty, or +5% with
+a tail gun that has none (§9.28) - BUILT 2026-10-21, uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -72,8 +74,13 @@ health bar), and ruled four questions: his kill roll counts only the damage his 
 hit chart's reach (Primary included), an Expert Gunner's called-shot bonus gives way to his, and the insignia sits after the
 section name (Stage 19, §9.26). Later that day they added the Expert ELINT Officer with his rules text and a list of the races that
 may take him (no custom faction for now), and ruled four questions: the Abbai WotCR are Abbai and the Drazi WotCR left out, his +25%
-on the ranged functions only, the -2 on every sensor array, and the blanket's fractions kept (Stage 20, §9.27). Each officer's own
-rules questions still only need ruling when that officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
+on the ranged functions only, the -2 on every sensor array, and the blanket's fractions kept (Stage 20, §9.27). On 2026-10-21 they
+added the Expert Tailgunner with his rules text and a note: FV may not apply the tail gun's penalty at all (it did not - FV_factions.txt
+said so), so it was to be built first, flagging the few fighters that have a tail gun. They ruled three questions: the -10% on the
+Tiqincc, the Tiqus and the custom tail-gun fighters "unless $this->hasNavigator = true"; the officer offered to all 15 tail-gun flights;
+no +5% for a penalised tail gun fired alone; and, after the first build, only the craft's other DIRECT-FIRE weapons trigger the penalty,
+never a torpedo or missile launched in Initial Orders (Stage 21, §9.28). Each officer's own rules questions still only need ruling when that
+officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -339,6 +346,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Evader | `OFF_EVAD` | lead craft | 1 (flight) |
 | Expert Coordinator | `OFF_COOR` | lead craft | 1 (flight) |
 | Expert Pilot *(added 2026-10-19, §9.24)* | `OFF_PILOT` | one per craft, from the first | 1 (flight), bought as a count |
+| Expert Tailgunner *(added 2026-10-21, §9.28)* | `OFF_TAIL` | lead craft | 1 (flight), a flight with a tail gun only |
 | Expert Electrician | `OFF_ELEC` | lead craft | 1 (flight) |
 
 Offers come from one call, `Officers::addOffers($ship)`, made at the end of
@@ -475,6 +483,7 @@ masking: individual notes never reach any client.
 | Ion Technician (Stage 17) | an ion gun's `boostable` / `boostEfficiency` / `thrustBoosted` / `thrustPerBoost`, its boost (type-2 power entries), and the thrust it takes off the engine | **Own team only**, as the Laser Technician's: "Weapons being charged in this manner will be detected (and their strength known) by anything that detects special weapon arming modes, such as the Expert Analyst" - by nothing else until the Analyst's stage. An opponent's payload carries the gun's power entries without its boosts while he is aboard; game over discloses all. His +1s, the boost and the Rad Cannon's improved effects show only as their results; a discharge shows as the gun's loading, which is public |
 | Expert Pilot (Stage 18) | a flight's `offensivebonus` (+1 a serving pilot); its jinking (free levels beyond the limit) | **Yes, to every viewer**: the OB through his `publish`, as the Evader's; the jinking shows as the flight's jinking, which is public. Who and how many stay own-team; the Spark Field relief shows only as the damage dealt |
 | Expert Targeter (Stage 19) | the hit chance of a called shot by a weapon he covers; which weapons those are (`covers`) | **Own team only**: the +4 is in the owner's own hit-chance preview ("Expert Targeter") and nowhere else; an opponent sees only the needed % the combat log prints for the shot, as for a Gunner's +3. The covered weapon ids ride the officer payload, which an opponent never receives |
+| Expert Tailgunner (Stage 21) | the hit chance of his flight's tail guns | **Own team only**: the owner's hit-chance preview ("Expert Tailgunner" +5, or no "Tail Gun" -10) and the tail gun's tooltip line; an opponent sees only the needed % the combat log prints. The tail gun's own penalty is public: every viewer's tooltip has the "Tail Gun" line |
 | Expert ELINT Officer (Stage 20) | his array's `output`; every ELINT range from his ship; his blanket against ballistic weapons | **Yes, to every viewer**: `output` always is, and the ship payload carries `elintRangeBonus` (25) and `blanketBallistic` (3) while he serves - an opponent's own OEW under his Disruption and its hit chance against a unit under his blanket are previewed with them; his array's tooltip shows the ranges. The officer list stays own-team; a disguised Chameleon ship's payload is its simulacrum's and carries neither. The -2 on sensor criticals is never sent |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
@@ -635,7 +644,8 @@ committed.
 | **18** | Expert Pilot, added by the user - the first officer bought as a COUNT. **BUILT 2026-10-19** (§9.24) | Up to 4 (Raiders 2), never more than the flight's craft, each in his own craft from the first; +1 OB each; one free jinking level each, beyond the jinking limit, in the real movement.js (`jinkinglimit` itself untouched); each lost with his own craft, and following it on a split, his share of the cost with him; Spark Fields 1 weaker per pilot on a turn the flight neither jinks nor fires (an interception not counting); the Evader's -1 already reaching Spark Fields; pilots the flight's one officer; 100% of a craft each for a flight of six, scaled; the buy dialog holding the count to the flight size |
 | **19** | Expert Targeter, added by the user - the first officer posted in a Structure block. **BUILT 2026-10-20** (§9.26) | Offered on every outer block of a Raiders or Llort hull (Llort 20%), one per block (never moved onto a held one), on a Medium ship's one block with a second-side twin only where the two sides differ, never elsewhere; +4 on a called shot by a covered weapon, nothing on an ordinary shot or a flat-profile call, the -8 kept; a block covers its location's weapons, a Medium ship's side its hit chart's reach through Primary; a covered Gunner's +3 neither used nor spent; the kill roll on this turn's damage only; a move between blocks and a side switch on the Stage 10 rules (serving nowhere that turn), free in Fleet Selection; the insignia in the bar, an officers-only tooltip on it, its click opening the Officers menu in Initial Orders |
 | **20** | Expert ELINT Officer, added by the user. **BUILT 2026-10-20** (§9.27) | Offered on the ELINT hulls of the user's 19 factions only (Abbai and Abbai WotCR 15%, the rest 30%; never the Centauri or Drazi WotCR, the Early EA, a custom faction or an OSAT), posted in the strongest array; that array +1, every array -2 on criticals, his kill roll included; SOEW, Disruption and Jamming 38 hexes, SDEW 63 (its base corrected to 50), Blanket 25, at declaration (the real Initial Orders menu) and at use (the real EW sweeps, both ends); his blanket a third against ballistic weapons only, fractions kept, the best ELINT per weapon kind, in the real `calculateHitBase` and the live client breakdown; the numbers to every viewer, the officer to his own team |
-| **21+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **21** | Expert Tailgunner, added by the user, with the tail gun rule FV lacked. **BUILT 2026-10-21** (§9.28) | A tail gun flagged on the 15 flights that have one (one a craft, firing aft beside a forward weapon), in the static blueprint; -10% on a turn its craft fires another direct-fire weapon - not another craft's, not a missile or torpedo launch, an interception, Meteor Defence, last turn's order or the ram - unless the flight has a navigator (7 of the 15, or one bought); the forward guns never penalised; the Tailgunner offered on those 15 only, 50% of a craft scaled; under him no penalty, or +5% on a tail gun without one and no other weapon; lost with his craft; the hit-chance breakdown and the tooltip line on the client, as on the server |
+| **22+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -678,6 +688,7 @@ committed.
 | Expert Pilot | *Added 2026-10-19 with his rules text and notes (§9.24).* Several pilots beside another officer (D9 says one; the Spark Field text pictures "four pilots and an evader")? 100% of a fighter each, or the §9.9 scaled rule? The Spark Field relief "if he forgoes all his other benefits for the entire turn" is a per-turn choice: build a toggle? Which factions are "Raiders"? **RULED 2026-10-19:** pilots **ARE the flight's one officer** (1-4 of them, never beside another); **scaled** by §9.9 (100% of a craft each, for a flight of six); the relief **automatic** - "if flight doesn't jink or fire that turn they can get the damage reduction"; **the Raiders faction only**. |
 | Expert Targeter | *Added 2026-10-20 with his rules text and notes (§9.26).* His post is a Structure block, and FV rolls d20 + ALL the block's damage for one: under D3 that kills him almost at once - keep D3, roll on this turn's damage, or no kill roll? Which weapons does a Medium ship's side aid: those its hit chart reaches directly, through its Primary result too, or those in that section? A Gunner's gun he covers: both bonuses, his alone, or the Gunner's ("does not combine")? Where does the insignia go on a block's bar? **RULED 2026-10-20:** d20 + **this turn's damage** to the block, 20+ kills, the new code "heavily gated"; the side's **hit chart reach, Primary included**; **his +4 only** - the Gunner keeps his +1 fire control, his once-per-battle +3 neither used nor spent while covered; **in the bar, after the section name**. **Re-ruled after the play test (game 4495):** one **per Structure block**, not per ship, and never moved onto a block another Targeter holds. |
 | Expert ELINT Officer | *Added 2026-10-20 with his rules text and the user's list of races (§9.27).* Two WotCR factions carry ELINT hulls the list does not name (Abbai Matriarchate (WotCR), Drazi Freehold (WotCR)): which get him? "The range of all ELINT functions" - which ranges? On a hull with several ELINT arrays, the -2 on every array or his own? His blanket's third: keep FV's fractions or round down? **RULED 2026-10-20 (all as recommended):** the **Abbai WotCR at the Abbai 15%**, the Drazi WotCR left out (as the Centauri WotCR); the **ranged functions** - SOEW, SDEW, Blanket, Disruption, Jamming - not Detect Stealth or the stealth detection range; the -2 on **every** array; **fractions kept** (BDEW 10 gives 3.33 against a ballistic). |
+| Expert Tailgunner | *Added 2026-10-21 with his rules text and the user's note (§9.28):* FV applies no tail gun penalty (FV_factions.txt: "In tabletop, this gun has -2 penalty when fired together with main gun. In FV it does not"), so build it first - a tail gun firing alone is free, fired in the same turn as the forward guns -10% - flagging the few fighters with a tail gun rather than testing every fighter. Which tail guns take the penalty? Which tail-gun flights may buy him? A penalised tail gun fired alone under him: +5%, or nothing? **RULED 2026-10-21:** the penalty on the Tiqincc, the Tiqus and the custom tail-gun fighters **"unless $this->hasNavigator = true"** (so never the Badger or the Rogolon Vostor); **all 15** tail-gun flights may buy him; **no bonus** for a penalised tail gun fired alone. **Re-ruled after the first build:** only the craft's other **direct-fire** weapons fired in the Firing Phase count - never a ballistic launch from Initial Orders. |
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? |
 | Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). **RULED 2026-10-15: Grome Autocracy only** (§9.12); the Matter-weapon hull test is kept beside it. **Rules text and rulings 2026-10-16 (§9.14):** "moved into one specific weapon instead of his normal station" - **one or the other, never both**; that weapon gets the +1 / +1 "but no others do", and its rate of fire +1 (Stage 10); "disabled if the weapon takes any damage at all (after armor), and automatically killed if the weapon is destroyed" - **and the ordinary kill roll too**. |
@@ -3192,3 +3203,101 @@ zzunoff hulls), Torata 2, Vree 2, Yolu 1.
 - officersHarness **1375 / 0** (+1), client **531 / 0** (+1, SDEW 50 / 63 in the real menu; the tooltip checks now name SDEW 63 and
   Disruption 38 apart); statics rebuilt (the array's text); kirishiacRefits 168 / 88, enhancements 283, differential 709, replay 162 / 0 - no
   corpus game moved. Mutation 3 / 3 (the target read back, the menu's 30 back, the tooltip's 50 left long).
+
+### 9.28 Stage 21: tail guns, and the Expert Tailgunner (2026-10-21)
+
+**Rules text (user, 2026-10-21) - a 31st officer, not in the original brief.** "Expert Tailgunner: This fighter-only officer is adept at
+operating his fighter's tailgun in concert with the forward-mounted weapons, and can train the rest of his fight in this special skill. The
+flight receives no penalties when using the tailgun in the same turn as the other guns. Cost: Half the cost of a fighter. Availability: Races
+can use this officer if they have fighters that meet the requirements e.g. an aft mounted weapon. If the tailgun has no penalty associated
+with it, as in the Badger, the officer provides a +5% to hit with that gun only." The user's notes: FV may not apply any tail gun penalty
+(the Cascor Tiqincc's -10%; the Earth Alliance Badger has none) - if not, build it first: a tail gun fired alone is free, fired in the same
+turn as the forward guns -10%; and rather than testing every fighter, flag the few that have a tail gun.
+
+**FV had no penalty.** FV_factions.txt said it outright ("Tiqincc ... In tabletop, this gun has -2 penalty when fired together with main
+gun. In FV it does not."), and nothing in the to-hit code knew a tail gun. Measured over the statics: **15 flights** carry one - a weapon
+whose arc covers dead astern and not dead ahead, beside a forward weapon (side guns, 0-180 / 180-360, excluded): Tiqincc, Tiqus, Badger,
+Kobol Raptor Support, Circasian Kolam, Sal-bez Crevnen / Drazchk / Okchn, Velrax Resterax / Resterax Refit / Soress PDC, Rogolon Vastur /
+Vostor / Vostor AM and the Star Wars ARC. Only the Tiqincc's notes named a penalty. The one local game holding any (4241, two Tiqincc,
+surrendered on turn 1) fired nothing, so the replay corpus could not move.
+
+**Rulings (user, 2026-10-21, asked before building):**
+1. **The penalty: the Tiqincc, the Tiqus and the custom fighters found "unless $this->hasNavigator = true".** That is a rule, not a list: a
+   flight with a navigator never takes it, so 8 of the 15 are penalised (Tiqincc, Tiqus, the three Sal-bez, the two Resterax, the ARC) and
+   7 are not (the Badger, the three Rogolons, the Kobol, the Kolam, the Soress) - the two official Rogolon Vostors included, both navigated.
+2. **All 15 tail-gun flights may buy him** (offered: the four official flights only).
+3. **No +5% for a penalised tail gun fired alone** under him: the +5% is for a gun with no penalty in its rules; a penalised one only has it
+   waived.
+4. **Only DIRECT-FIRE weapons count** (re-ruled after the first build, which counted every weapon): "it should not count ballistic weapons
+   fired in Initial Orders phase like Torpedoes, only other direct fire weapons fired during Firing Phase."
+
+**Built with defaults, stated here (ask before changing):**
+- "The other guns" = any other DIRECT-FIRE weapon of the SAME craft fired offensively that turn (ruling 4): a weapon flagged `ballistic`
+  (FV's flag is per weapon, never per mode) never counts, nor do an interception, a self-intercept, a Meteor Defence declaration or the
+  ramming attack - exactly the filter `isFtrFiringNonBallisticWeapons` already applies (`!ballistic && firedOffensivelyOnTurn`). Each craft
+  is its own: another craft's forward gun does not touch this one's tail gun.
+- Only the tail gun is penalised; the forward guns never are.
+- A Navigator BOUGHT on a penalised flight (the ARC may buy one, 10 points) lifts the penalty too - it is the same `hasNavigator`, which the
+  server already publishes once bought.
+- Lost with his craft (destroyed, dropped out), as every fighter officer; no kill roll. "Half the cost of a fighter": 50% of a craft for a
+  flight of six, scaled by §9.9 (Tiqincc 12 / 23 / 46 at 3 / 6 / 12 craft; Badger 35 a six).
+
+**Design.**
+- ⭐ **`Weapon::$tailGun` is PROTECTED** (false), set by `setTailGun()` in the fighter's own file (one line each in the 15), and read by
+  `isTailGun()`. `ShipCompactor::annotateSystems` writes `tailGun: true` into the static blueprint - the `$seedsBelowFullCharge` /
+  `survivesStructureDestruction` route - so it is on no payload: a PUBLIC property on Weapon lands on every missile of every MissileRack's
+  payload (MissileRack::stripForJson reflects public properties). game.php reads it off the blueprint, as the lobby does.
+- ⭐ **`Weapon::getTailGunMod($flight, $turn)` is THE rule**, one line in calculateHitBase's fighter branch (every tail-gun class reaches the
+  base method - none overrides it): -`TAIL_GUN_PENALTY` (2, -10%) when `craftFiresOtherWeapon` (the craft's other non-ballistic weapons),
+  unless `$flight->hasNavigator`; under a
+  serving Tailgunner (`Officers::hasTailgunner`, behind `$officersPresent`) 0 on a penalised gun, +`Officers::TAILGUNNER_BONUS` (1) on the
+  others. ⚠️ MIRROR PAIR with `weaponManager.getTailGunMod` / `craftFiresOtherWeapon` (the real `getFighterBySystem`), which
+  `computeShotModifiers` shows as "Tail Gun -2" or "Expert Tailgunner +1". The preview follows the orders declared so far: a tail gun
+  declared before its craft's other guns shows no penalty, though the server's resolution has it.
+- The registry entry `OFF_TAIL` (last - a doctored second row never displaces an officer bought before him) `needs` `hasTailGun` (the first
+  craft carries a flagged weapon) ↔ `officers.passesNeeds` 'tailGun'. No `apply`, no published stat.
+- **Tooltip**: the server writes a "Tail Gun" line on the gun ("-10% on a turn its fighter fires another direct-fire weapon", or "No penalty
+  (navigator)"); `officers.tailGunLine` (through `adjustDataDisplay`) keeps it right for a Navigator bought in the lobby and, for his own team,
+  under the officer ("No penalty (Expert Tailgunner)" / "+5% (Expert Tailgunner)").
+- Docs: an Expert Tailgunner card (Fighter Officers, alphabetical - last), explaining the tail gun rule too. FV_factions.txt's Tiqincc line
+  corrected.
+
+**Files.** Server: `weapon.php` (`$tailGun`, `setTailGun`, `isTailGun`, `TAIL_GUN_PENALTY`, `getTailGunMod`, `craftFiresOtherWeapon`, the
+calculateHitBase line, the data line), `Officers.php` (`TAILGUNNER_BONUS`, `OFF_TAIL`, `hasTailGun`, `hasTailgunner`, header), `ShipCompactor.php`
+(annotateSystems), the 15 fighter files. Client: `weaponManager.js` (`getTailGunMod`, `craftFiresOtherWeapon`, the breakdown line),
+`officers.js` (registry row, `passesNeeds`, `hasTailgunner`, `tailGunLine`, the adjustDataDisplay hook). Docs `ammo-options.html`;
+`FV_factions.txt`. Statics, legacy bundles (`scripts/bundle-legacy.js` - the watcher was not running) and the served copy rebuilt; no new
+class, no schema change.
+
+**Measured.** Statics +1,780 B in all: 15 `tailGun` flags (one a craft), 15 offers, 15 "Tail Gun" lines. Offers: Tiqincc 23, Tiqus 23,
+Badger 35, Kobol 48, Kolam 19, Crevnen 9, Drazchk 26, Okchn 50, Resterax 22, Soress 43, Resterax Refit 25, Vastur 63, Vostor 43, Vostor AM
+43, ARC 38.
+
+**Verified.**
+- `officersHarness.php` **1413 / 0 with the database** (38 new): the 15 flags (one a craft, aft, beside a forward gun;
+  navigators on the 7); the blueprint flag on the tail gun alone, none on an Aurora; the tooltip lines; offers on exactly the 15 at their
+  prices, none on an Aurora, a shuttle, a ship or a Hunter-Killer; flightPrice 12 / 23 / 46; doctored rows; the REAL `calculateHitBase` -
+  -10% with the craft's forward gun, none with another craft's, an interception / self-intercept / Meteor Defence, last turn's order or the
+  ram, none with a navigator (one bought too), the Tiqus's -10%, the forward gun never penalised, the Badger none, the ARC's torpedo launch
+  NOT counting (ruling 4) and its Medium Lasers counting; under him none on the Tiqincc (alone no bonus), the -10% back with the gate off, beside a Dogfighter, or with his craft lost
+  last turn (not this turn), the Badger's tail gun +5% alone or with the forward gun, its forward gun nothing, +5% on a Tiqincc with a
+  Navigator bought.
+- `officersClientHarness.js` **553 / 0** (20 new): the registry row; EVERY static blueprint - the 15 flagged flights are exactly those with a
+  rear-only gun beside a forward one, and exactly those offered him; the lobby derivation (a Tiqincc yes, a doctored Aurora row no); the real
+  `getTailGunMod` and `computeShotModifiers` on two-craft flights built from the real static blueprints (each case the server's, the ARC's
+  torpedo and lasers included, and a tail gun's own declared order not counting against it); the tooltip
+  line through `adjustDataDisplay`. The Stage 18 "OFF_PILOT last in the registry" check now reads one from last.
+- `enhancementsDifferential.js` **709 / 0** (no case added: he moves no lobby stat, and no differential hull has a tail gun);
+  `enhancementsHarness` **284 / 0** (fingerprint unchanged: ships only).
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0**.
+- **Mutation-tested: 37 breaks (20 server, 17 client), 36 caught**, files byte-identical afterwards (both harnesses green again). The one
+  miss is equivalent: `hasTailgunner` dropping its `$turn` - its only caller passes the current turn, the default. A first pass on the
+  pre-ruling-4 code (35 breaks) had missed one more, a tail gun's own order counting against it on the client - the check was added.
+
+**Observations, not changed:**
+1. officersHarness's Stage 18 rail-escape check ("...and a run let some pilots go and kept others") failed once in four runs during this
+   stage - it needs a random_int escape of 1-3 pilots within 40 tries, and its comment's P(miss) ~ 1e-18 is clearly too optimistic. Not
+   touched by this stage; worth making deterministic.
+2. Not play-tested: no local game holds a tail-gun flight. Worth a test: a Tiqincc flight firing both guns at one target (the tail gun's hit
+   chance 10% lower in the breakdown and the log), then one with an Expert Tailgunner (23 points) doing the same (no penalty), and a Badger
+   with one (+5% on its Uni-Pulse tail gun only).

@@ -190,6 +190,11 @@ class Weapon extends ShipSystem
     //            their turrets are 360 deg so weapon arcs can't express this on their own).
     //Only meaningful alongside a non-null $linkedFiringGroup. Pruned from the static blueprint when null.
     public $linkedFiringSpread = null;
+    /* A FIGHTER's TAIL GUN (OFFICERS_PLAN.md Stage 21): a rear-arc gun beside its craft's forward weapons, flagged by the
+       fighter's own file with setTailGun(). It fires at -TAIL_GUN_PENALTY on a turn its craft fires another direct-fire weapon, unless
+       the flight has a navigator, and an Expert Tailgunner trains it (getTailGunMod). PROTECTED, like $seedsBelowFullCharge:
+       the client reads it off the static blueprint, where ShipCompactor::annotateSystems writes it (isTailGun). */
+    protected $tailGun = false;
     public $noOverkill = false; //this will let simplify entire Matter line enormously!
     protected $noOverkillArray = array();
     public $doOverkill = false; //opposite of $noOverkill - allows Piercing shots to overkill (eg. Shadow Heavy Molecular Slicer Beam has such ability)
@@ -1020,6 +1025,13 @@ class Weapon extends ShipSystem
 		if ($this->linkedFiringGroup !== null && $this->linkedFiringSpread !== null) {
 			$this->data["Firing Link"] = "Mounted on " . $this->linkedFiringGroup;
 		}
+		//A fighter's tail gun (OFFICERS_PLAN.md Stage 21) - the client rewrites the line for a Navigator bought in the lobby and
+		//for an Expert Tailgunner (officers.tailGunLine)
+		if ($this->tailGun) {
+			$unit = $this->getUnit();
+			$this->data["Tail Gun"] = ($unit && !empty($unit->hasNavigator)) ? 'No penalty (navigator)'
+				: '-' . (self::TAIL_GUN_PENALTY * 5) . '% on a turn its fighter fires another direct-fire weapon';
+		}
 		//Turret jam - tell the player the mount can lock up before it happens, and confirm it after.
 		//The "Arc" line (set by the parent call below) always shows the arc currently in effect.
 		if ($this->reducedArcStart !== null) {
@@ -1533,6 +1545,41 @@ public function getFullStartLoading()
         return false;
     } //endof function isFtrFiringNonBallisticWeapons
 
+    const TAIL_GUN_PENALTY = 2; //-10%: the tabletop -2 for firing a tail gun "together with main gun" (FV_factions.txt, the Tiqincc)
+
+    public function setTailGun(){
+        $this->tailGun = true;
+    }
+
+    public function isTailGun(){
+        return $this->tailGun;
+    }
+
+    /* ⭐ A tail gun's to-hit modifier (OFFICERS_PLAN.md Stage 21), in calculateHitBase's fighter branch: -TAIL_GUN_PENALTY on a
+       turn its craft also fires another DIRECT-FIRE weapon - "not ballistic weapons fired in Initial Orders phase like Torpedoes, only
+       other direct fire weapons fired during Firing Phase" (user ruling 2026-10-21); an interception, a Meteor Defence declaration and
+       the ramming attack are not firing it either - isFtrFiringNonBallisticWeapons' own filter - unless the flight has a navigator to work it
+       (user ruling 2026-10-21: the Badger, the Rogolon Vostor, a Navigator bought on an ARC). An Expert Tailgunner serving that
+       turn waives the penalty; a tail gun without one gains Officers::TAILGUNNER_BONUS instead, "with that gun only", and a
+       penalised one fired alone gains nothing (user ruling). ⚠️ MIRROR PAIR with weaponManager.getTailGunMod (JS). */
+    public function getTailGunMod($flight, $turn){
+        if (!$this->tailGun || !($flight instanceof FighterFlight)) return 0;
+        $penalised = !$flight->hasNavigator;
+        if (TacGamedata::$officersPresent && Officers::hasTailgunner($flight, $turn)) return $penalised ? 0 : Officers::TAILGUNNER_BONUS;
+        if (!$penalised || !$this->craftFiresOtherWeapon($flight, $turn)) return 0;
+        return -self::TAIL_GUN_PENALTY;
+    }
+
+    protected function craftFiresOtherWeapon($flight, $turn){
+        $craft = $flight->getFighterBySystem($this->id);
+        if ($craft === null) return false;
+        foreach ($craft->systems as $system){
+            if ($system === $this || !($system instanceof Weapon) || $system->isRammingAttack || $system->ballistic) continue;
+            if ($system->firedOffensivelyOnTurn($turn)) return true;
+        }
+        return false;
+    }
+
     public function getFiringHex($gamedata, $fireOrder){
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
 		$pos = $shooter->getHexPos();
@@ -1934,6 +1981,7 @@ public function getFullStartLoading()
                 $coordinated = TacGamedata::$officersPresent && Officers::waivesCombatPivotPenalty($shooter, $gamedata->turn);
             	 if(!$shooter->ignoreManoeuvreMods && !$coordinated) $mod -= 1;
             }
+            $mod += $this->getTailGunMod($shooter, $gamedata->turn); //a tail gun fired with its craft's other direct-fire weapons (Stage 21)
 
             $effectiveOB = $shooter->offensivebonus;
             $firstFighter = $shooter->getSampleFighter();
