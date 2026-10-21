@@ -24,7 +24,9 @@ Medium ship by one side's weapons on its hit chart (§9.26) - committed (`1f0900
 17 more races at 30%), in the ELINT array - sensors +1, sensor criticals -2, every ELINT range 25% longer, his blanket a third against
 ballistic weapons (§9.27) - committed (`cff6a6094`). Stage 21, the Expert Tailgunner, with FV's missing TAIL GUN rule built first -
 a fighter's tail gun fired with its craft's other weapons at -10% unless the flight has a navigator; under him no penalty, or +5% with
-a tail gun that has none (§9.28) - BUILT 2026-10-21, uncommitted.** Written
+a tail gun that has none (§9.28) - committed (`3f8de3e6b`). Stage 22, the Expert Turret Officer (Vree), placed in a turret-mounted weapon
+and aiding his whole turret - +1 fire control, -1 on criticals, -2 on the turret jam roll, and a turret that fires no shot SHELTERED from
+all but called shots (§9.29) - BUILT 2026-10-21, uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -79,7 +81,11 @@ added the Expert Tailgunner with his rules text and a note: FV may not apply the
 said so), so it was to be built first, flagging the few fighters that have a tail gun. They ruled three questions: the -10% on the
 Tiqincc, the Tiqus and the custom tail-gun fighters "unless $this->hasNavigator = true"; the officer offered to all 15 tail-gun flights;
 no +5% for a penalised tail gun fired alone; and, after the first build, only the craft's other DIRECT-FIRE weapons trigger the penalty,
-never a torpedo or missile launched in Initial Orders (Stage 21, §9.28). Each officer's own rules questions still only need ruling when that
+never a torpedo or missile launched in Initial Orders (Stage 21, §9.28). Later that day they added the Expert Turret Officer with his rules
+text and notes - a system enhancement on a turret weapon (FV has no turret system), aiding every weapon on that turret, one to a turret, and
+"sheltered" automatic when no weapon on the turret fires, with no new declaration UI - and ruled four questions: only a shot breaks the
+shelter, never an interception; a Gunner's +1 on that turret does not combine with his; a turret weapon linked to no other is a turret of its
+own; and he moves as the other placed officers do (Stage 22, §9.29). Each officer's own rules questions still only need ruling when that
 officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
@@ -333,6 +339,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Targeter *(added 2026-10-20, §9.26)* | `OFF_TARG` | a chosen outer Structure block; on a hull with none, its Primary Structure, covering the first side | 2 |
 | Expert Targeter, the other side *(§9.26)* | `OFF_TARG2` | a Medium ship's Primary Structure, covering its second side | 2 |
 | Expert ELINT Officer *(added 2026-10-20, §9.27)* | `OFF_ELINT` | the ELINT array | 1 |
+| Expert Turret Officer *(added 2026-10-21, §9.29)* | `OFF_TURR` | a chosen turret-mounted weapon, aiding every weapon on its turret | 2, one to a turret |
 | Expert Software Engineer | `OFF_SOFT` | Computer | 1 |
 | Expert Ion Technician | `OFF_ION` | Engine | 1 |
 | Expert Surge Officer | `OFF_SURG` | Mag-Grav Reactor | 1 |
@@ -484,6 +491,7 @@ masking: individual notes never reach any client.
 | Expert Pilot (Stage 18) | a flight's `offensivebonus` (+1 a serving pilot); its jinking (free levels beyond the limit) | **Yes, to every viewer**: the OB through his `publish`, as the Evader's; the jinking shows as the flight's jinking, which is public. Who and how many stay own-team; the Spark Field relief shows only as the damage dealt |
 | Expert Targeter (Stage 19) | the hit chance of a called shot by a weapon he covers; which weapons those are (`covers`) | **Own team only**: the +4 is in the owner's own hit-chance preview ("Expert Targeter") and nowhere else; an opponent sees only the needed % the combat log prints for the shot, as for a Gunner's +3. The covered weapon ids ride the officer payload, which an opponent never receives |
 | Expert Tailgunner (Stage 21) | the hit chance of his flight's tail guns | **Own team only**: the owner's hit-chance preview ("Expert Tailgunner" +5, or no "Tail Gun" -10) and the tail gun's tooltip line; an opponent sees only the needed % the combat log prints. The tail gun's own penalty is public: every viewer's tooltip has the "Tail Gun" line |
+| Expert Turret Officer (Stage 22) | his turret's weapons' fire control; their critical and jam rolls; where hits land on a sheltered turret | Fire control: **yes, to every viewer**, as the Gunner's (isModified). The -1 on criticals is never sent (nothing displays one); the jam's 19+ is in the owner's "Turret Mount" line only. The shelter is server-only: an opponent sees where the hits land (another system, or Structure), never why |
 | Expert ELINT Officer (Stage 20) | his array's `output`; every ELINT range from his ship; his blanket against ballistic weapons | **Yes, to every viewer**: `output` always is, and the ship payload carries `elintRangeBonus` (25) and `blanketBallistic` (3) while he serves - an opponent's own OEW under his Disruption and its hit chance against a unit under his blanket are previewed with them; his array's tooltip shows the ranges. The officer list stays own-team; a disguised Chameleon ship's payload is its simulacrum's and carries neither. The -2 on sensor criticals is never sent |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
@@ -645,7 +653,8 @@ committed.
 | **19** | Expert Targeter, added by the user - the first officer posted in a Structure block. **BUILT 2026-10-20** (§9.26) | Offered on every outer block of a Raiders or Llort hull (Llort 20%), one per block (never moved onto a held one), on a Medium ship's one block with a second-side twin only where the two sides differ, never elsewhere; +4 on a called shot by a covered weapon, nothing on an ordinary shot or a flat-profile call, the -8 kept; a block covers its location's weapons, a Medium ship's side its hit chart's reach through Primary; a covered Gunner's +3 neither used nor spent; the kill roll on this turn's damage only; a move between blocks and a side switch on the Stage 10 rules (serving nowhere that turn), free in Fleet Selection; the insignia in the bar, an officers-only tooltip on it, its click opening the Officers menu in Initial Orders |
 | **20** | Expert ELINT Officer, added by the user. **BUILT 2026-10-20** (§9.27) | Offered on the ELINT hulls of the user's 19 factions only (Abbai and Abbai WotCR 15%, the rest 30%; never the Centauri or Drazi WotCR, the Early EA, a custom faction or an OSAT), posted in the strongest array; that array +1, every array -2 on criticals, his kill roll included; SOEW, Disruption and Jamming 38 hexes, SDEW 63 (its base corrected to 50), Blanket 25, at declaration (the real Initial Orders menu) and at use (the real EW sweeps, both ends); his blanket a third against ballistic weapons only, fractions kept, the best ELINT per weapon kind, in the real `calculateHitBase` and the live client breakdown; the numbers to every viewer, the officer to his own team |
 | **21** | Expert Tailgunner, added by the user, with the tail gun rule FV lacked. **BUILT 2026-10-21** (§9.28) | A tail gun flagged on the 15 flights that have one (one a craft, firing aft beside a forward weapon), in the static blueprint; -10% on a turn its craft fires another direct-fire weapon - not another craft's, not a missile or torpedo launch, an interception, Meteor Defence, last turn's order or the ram - unless the flight has a navigator (7 of the 15, or one bought); the forward guns never penalised; the Tailgunner offered on those 15 only, 50% of a craft scaled; under him no penalty, or +5% on a tail gun without one and no other weapon; lost with his craft; the hit-chance breakdown and the tooltip line on the client, as on the server |
-| **22+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **22** | Expert Turret Officer (Vree), added by the user - placed in a turret-mounted weapon, aiding his whole turret. **BUILT 2026-10-21** (§9.29) | Offered on every turret-mounted weapon of the 12 Vree hulls with turrets, 5%, one to a turret (a ship as many as it has turrets), never the Custom Ships' Shadow Xonn; +1 fire control on every weapon of his turret (not +2 on a Gunner's), -1 on their criticals (his kill roll included), -2 on their jam roll; a turret none of whose weapons fires a shot sheltered - an interception not counting - so a hit-chart roll on its weapons takes the destroyed-system fallback, a called shot still hitting, inside the real `Firing::fireWeapons` only; disabled with his own weapon; movable, never onto a turret another holds; the lobby's fire control and Turret Mount line, the client's one-per-turret rules |
+| **23+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -689,6 +698,7 @@ committed.
 | Expert Targeter | *Added 2026-10-20 with his rules text and notes (§9.26).* His post is a Structure block, and FV rolls d20 + ALL the block's damage for one: under D3 that kills him almost at once - keep D3, roll on this turn's damage, or no kill roll? Which weapons does a Medium ship's side aid: those its hit chart reaches directly, through its Primary result too, or those in that section? A Gunner's gun he covers: both bonuses, his alone, or the Gunner's ("does not combine")? Where does the insignia go on a block's bar? **RULED 2026-10-20:** d20 + **this turn's damage** to the block, 20+ kills, the new code "heavily gated"; the side's **hit chart reach, Primary included**; **his +4 only** - the Gunner keeps his +1 fire control, his once-per-battle +3 neither used nor spent while covered; **in the bar, after the section name**. **Re-ruled after the play test (game 4495):** one **per Structure block**, not per ship, and never moved onto a block another Targeter holds. |
 | Expert ELINT Officer | *Added 2026-10-20 with his rules text and the user's list of races (§9.27).* Two WotCR factions carry ELINT hulls the list does not name (Abbai Matriarchate (WotCR), Drazi Freehold (WotCR)): which get him? "The range of all ELINT functions" - which ranges? On a hull with several ELINT arrays, the -2 on every array or his own? His blanket's third: keep FV's fractions or round down? **RULED 2026-10-20 (all as recommended):** the **Abbai WotCR at the Abbai 15%**, the Drazi WotCR left out (as the Centauri WotCR); the **ranged functions** - SOEW, SDEW, Blanket, Disruption, Jamming - not Detect Stealth or the stealth detection range; the -2 on **every** array; **fractions kept** (BDEW 10 gives 3.33 against a ballistic). |
 | Expert Tailgunner | *Added 2026-10-21 with his rules text and the user's note (§9.28):* FV applies no tail gun penalty (FV_factions.txt: "In tabletop, this gun has -2 penalty when fired together with main gun. In FV it does not"), so build it first - a tail gun firing alone is free, fired in the same turn as the forward guns -10% - flagging the few fighters with a tail gun rather than testing every fighter. Which tail guns take the penalty? Which tail-gun flights may buy him? A penalised tail gun fired alone under him: +5%, or nothing? **RULED 2026-10-21:** the penalty on the Tiqincc, the Tiqus and the custom tail-gun fighters **"unless $this->hasNavigator = true"** (so never the Badger or the Rogolon Vostor); **all 15** tail-gun flights may buy him; **no bonus** for a penalised tail gun fired alone. **Re-ruled after the first build:** only the craft's other **direct-fire** weapons fired in the Firing Phase count - never a ballistic launch from Initial Orders. |
+| Expert Turret Officer | *Added 2026-10-21 with his rules text and the user's notes (§9.29):* FV has no turret system, so he is a system enhancement on a turret weapon - FV already marks turret weapons (the jammable mounts) and their turret mates (the linked firing group) - aiding every weapon on that turret, one officer to a turret; "sheltered" is automatic when no weapon on the turret fires, instead of a declaration UI. Does an interception count as the turret firing? Does a Gunner's +1 on that turret combine with his? Is a turret weapon linked to no other a turret of its own? May he move? **RULED 2026-10-21:** **offensive fire only** breaks the shelter (a turret may intercept and stay sheltered); **no combining** - the Gunner's +1 replaces his on the Gunner's gun, the -1, the -2 and the shelter still apply; **each unlinked turret weapon is its own turret** (Xorr 2, Xonn 3, Tyllz 6); **movable**, as the other placed officers. |
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? |
 | Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). **RULED 2026-10-15: Grome Autocracy only** (§9.12); the Matter-weapon hull test is kept beside it. **Rules text and rulings 2026-10-16 (§9.14):** "moved into one specific weapon instead of his normal station" - **one or the other, never both**; that weapon gets the +1 / +1 "but no others do", and its rate of fire +1 (Stage 10); "disabled if the weapon takes any damage at all (after armor), and automatically killed if the weapon is destroyed" - **and the ordinary kill roll too**. |
@@ -3301,3 +3311,116 @@ Badger 35, Kobol 48, Kolam 19, Crevnen 9, Drazchk 26, Okchn 50, Resterax 22, Sor
 2. Not play-tested: no local game holds a tail-gun flight. Worth a test: a Tiqincc flight firing both guns at one target (the tail gun's hit
    chance 10% lower in the breakdown and the log), then one with an Expert Tailgunner (23 points) doing the same (no penalty), and a Badger
    with one (+5% on its Uni-Pulse tail gun only).
+
+### 9.29 Stage 22: Expert Turret Officer (2026-10-21)
+
+**Rules text (user, 2026-10-21) - a 32nd officer, not in the original brief.** "Expert Turret Officer: The expert turret officer is adept at
+using his turret efficiently and getting its weapons out of harm's way when necessary. This has the following effects: Weapons on the turret
+gain +1 to hit. When rolling for critical hits against turret-mounted weapons, subtract 1 from the die roll. When rolling for the special
+turret jam critical, subtract 2 from the die roll. If no weapon on the turret fires in a given turn, the owning player can declare it to be
+'sheltered.' If this is done, no incoming fire can hit its weapons unless they use called shots. Location: One turret-mounted weapon. The
+turret operator can only aid that turret, not any other turrets on the same ship (if any). Cost: 5% of the ship's [base cost]. Availability:
+Vree only." The user's notes: FV has no turret system, but it already marks turret weapons and the other weapons on the same turret - so he is
+a system enhancement on a turret weapon, every weapon on that turret benefits, one officer per turret; and a turret with an officer whose
+weapons did not fire is simply sheltered, with no new UI for the declaration.
+
+**What FV calls a turret.** A turret-mounted weapon is one with the turret JAM (`setArcRestriction`, the "Turret Mount" tooltip line - the Vree
+saucers' primary mounts, [[arch_vree_turret_jam]]); its turret is `Weapon::getTurretMates` - its linked firing group ("Turret 1"), or the gun
+alone. Measured: 12 Vree hulls, 35 turret weapons - Xorr Turret 1 (2 cannons) + a lone cannon; Ximm a lone cannon + Turret 1 (2 defenders);
+Xixx two mixed turrets; Xavan two; Xonn two mixed turrets + a lone cannon; Vymish one; Vaarl, Vaarka one gun; Vyreel, Xill, Xurr two lone
+guns; the Tyllz starbase six lone Shredders. The Custom Ships' Shadow Xonn carries jammable mounts too, but is not Vree.
+
+**Rulings (user, 2026-10-21, asked before building):**
+1. **Only OFFENSIVE fire breaks the shelter**: a turret may intercept (or hold a weapon for Meteor Defence) and stay sheltered.
+2. **No combining with an Expert Gunner** on the same turret: on the Gunner's gun his +1 replaces the Turret Officer's (the Gunner's own text,
+   the Matter expert's Stage 8 precedent); the -1, the -2 and the shelter still apply to it.
+3. **A turret weapon linked to no other is a turret of its own** (FV's "turret of one"): the Xorr may carry 2, the Xonn 3, the Tyllz 6.
+4. **Movable**, as the other placed officers (free in Fleet Selection, Stage 10's rules in battle).
+
+**Built with defaults, stated here (ask before changing):**
+- "+1 to hit" = +1 fire control on every mode of every weapon on his turret, the Gunner's way (`isModified` - public, as Gunsights).
+- "Cost: 5% of the ship's" (the text stops there) = 5% of the hull's base cost, per officer (Xorr 28, Tyllz 175).
+- His post is the weapon he is bought on: he is disabled when THAT weapon is destroyed, even while a turret mate fights on, and his kill roll
+  is that weapon's critical roll - his own -1 included, as the Technician's -2 is in his.
+- The jam is its own d20, not a critical roll, so only the -2 applies to it (17+ becomes 19+), not the -1 as well.
+- Shelter is decided once, at the start of the ship and fighter fire in `Firing::fireWeapons`, when every order of the turn exists. The rams
+  that resolve before it (collisions, not fire) and Pre-Firing (which resolves before the turn's own orders are declared - meteors, the
+  Pre-Firing weapons) are not sheltered against. Any fire order type but intercept / selfIntercept / meteorDefence is a shot
+  (`Weapon::firedOffensivelyOnTurn`, the Tailgunner's filter) - a ballistic launch from Initial Orders included (no Vree turret weapon is one).
+- A hit rolled onto a sheltered weapon takes the DESTROYED-system fallback of the pool that rolled it: another system of that name or tag
+  (the tag pool's next repair priority), else the section's Structure. A called shot at one hits it (it is resolved before any pool).
+
+**Design.**
+- ⭐ **One per TURRET is a new registry key, `perTurret`** (`Officers::isPerTurret`): `keepPlacedRows` refuses a second of him on one turret
+  (the sanitiser and the load), `mayMoveTo` refuses a move onto a turret another holds - on the same "in action that turn or the next" terms
+  as a post - and `turretLimit` (`shipLimit`) caps a ship at its turret count. `Officers::turretKey` names a turret (`group:` + linked
+  firing group, else `mount:` + id); ⚠️ MIRROR PAIR with `officers.turretKey`, which reads the static blueprint's `linkedFiringGroup`.
+- `isTurretPost` (`hosts`) = `Weapon::isTurretMount()` (new, a method so it never reaches the blueprint); `getTurretMates` made public.
+- Effects (`applyTurretOfficer`): `raiseEveryMode` - the Gunner's +1, now shared by `applyGunner` - on every mate a serving Gunner does not
+  hold, and `critRollMod` -1 on every mate. Jam: `Officers::turretJamRelief` in `Weapon::testArcRestriction`, behind `$officersPresent`.
+- ⭐ **Shelter**: `Officers::openShelter($gamedata)` / `closeShelter()` around the ship and fighter fire loops of `Firing::fireWeapons`,
+  holding a per-request set; `Officers::isSheltered($ship, $system)` (one `empty()` in every other game) is read by
+  `BaseShip::getSystemsByNameLoc` (not-destroyed branch) and `getSystemsByTag` (as `isDestroyed`) - every hit-chart roll of
+  `getHitSystemByTable` / `ByDice`, Flash and Piercing charts included. Server only: nothing is sent.
+- Client (`officers.js`): the registry row (`perTurret`); `placedEntries`, `placedBlock` ("This turret already has the Expert Turret Officer
+  (on ...)") and `lobbyPostAs` mirror the one-per-turret rule; `fireControlRaise` now takes the ship and SUMS (Gunner 1 alone; else Turret
+  Officer + Matter expert), so the lobby preview and `pendingMoveFireControl` cover him; `turretOfficerOn` + `turretMountLine` rewrite
+  the owner's "Turret Mount" line to 19+ "(Expert Turret Officer)" through `adjustDataDisplay` (a jammed line is left alone).
+  `systemEnhancements.LABELS` gains OFF_TURR.
+- Docs: an Expert Turret Officer card (Ship Officers, after the Technician), and the About Officers bullets (placing, moving, what shows).
+
+**Files.** Server: `Officers.php` (constants, `$factionRules`, registry entry + `perTurret` doc, `keepPlacedRows`, `isPerTurret`, `mayMoveTo`,
+the Turret Officer block, `raiseEveryMode`, header), `Enhancements.php` (per-system entry, eligible / price wrappers, the sanitiser's notice),
+`weapon.php` (`isTurretMount`, public `getTurretMates`, the jam relief), `ShipClasses.php` (the two pools), `firing.php` (open / close).
+Client: `officers.js`, `systemEnhancements.js`. Docs `ammo-options.html`. Statics, legacy bundles (`scripts/bundle-legacy.js` - the watcher
+was not running) rebuilt; no new class, no schema change.
+
+**Measured.** Statics +853 B: 35 offers on 12 hulls (Xorr 3 at 28 cap 2, Tyllz 6 at 175 cap 6, Xonn 5 at 60 cap 3, Vymish 2 at 15 cap 1, ...).
+
+**Verified.**
+- `officersHarness.php` **1502 / 0 with the database** (89 new): the registry; every Vree hull's offers against its own turret mounts, price
+  and turret count; none for the Shadow Xonn, a Raiders-flown Xorr, an opt-out, an Omega, a turretless Vree hull, a Vree OSAT or an exterior
+  gun; posts (one to a turret by lowest id, two turrets two officers, a Gunner winning a shared gun, doctored rows); the sanitiser's kept
+  rows, prices and notice; fire control (live, every mode, a mode switch) and critRollMod on the mates only, the lone cannon on its own; a
+  Gunner's gun +1 not +2, the Turret Officer's back once that Gunner is killed; disabled with his own gun, not a mate's; the kill roll 19
+  lives / 20 dies (a Gunner on his turret eased, on another turret not); the payload per viewer; the REAL `testArcRestriction` (17 jams
+  without him, 18 not and 19 does with him, another turret's officer, the gate off, his kill last turn or his move changing nothing - his
+  kill this turn still relieving); shelter (no shot, an interception /
+  self-intercept / Meteor Defence, a shot this turn and last, two turrets, the gate, killed this turn / last turn, moving); the pools; the
+  REAL `getHitSystemByTable` (baseline a cannon, Turret 1 sheltered -> the lone cannon, every turret -> the front Structure, a called shot
+  -> its cannon); the REAL `Firing::fireWeapons` (a probe weapon sees the shelter open while its shot resolves, closed after); moves on the
+  Xonn (to a mate, the lone cannon, a free turret; refused onto a held turret, allowed once its officer is dead; the payload's targets).
+- `officersClientHarness.js` **577 / 0** (24 new): the registry; EVERY static blueprint (12 hulls, exactly the Turret Mount weapons, 5%, the
+  turret count; no other faction); a lobby Xorr from its real static blueprint - the derived post, fire control on the mates only, the
+  tooltip rows, the Turret Mount line (19+, the lone cannon unchanged, a jammed line untouched), one to a turret in `set()` / `placedBlock` /
+  the menu row, the cap, a Gunner's gun +1 not +2, pre-battle destruction, `lobbyDestinations` / `lobbyMove`; in game nothing added, a
+  pending move dropping the +1 and the 19+, an enemy's ship unchanged, the real `SystemInfo`.
+- `enhancementsDifferential.js` **725 / 0** (16 new: the Xorr and the Xonn added for placed cases only - a Gunner, Gunner + Gunsights,
+  a Gunner on every gun; the Turret Officer alone, on every turret weapon, with a Gunner or Gunsights on his mate, with a Gunner on his gun);
+  `enhancementsHarness` **285 / 0** (fingerprint unchanged: ship-level offers only).
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0** (no corpus game has a Vree turret officer).
+- **Mutation-tested: 46 breaks (28 server, 14 client, 4 through the differential), all caught**, files byte-identical afterwards. The
+  first pass missed one - the jam relief not asking whether he serves - so the jam checks gained his kill last turn / this turn and a move.
+
+**Follow-up (user, the same day): the Antimatter Shredder's Shredder mode keeps its 0/0/0.** "Fire control for the Antimatter Shredder
+should remain 0/0/0 (e.g. no bonuses from Gunner or Turret Officers, or any others actually) since it uses its own special hit
+calculation." Built for its Shredder mode (mode 1) only - the one with fire control 0/0/0 and its own per-target attacks (they resolve through
+the ordinary calculateHitBase, so a raised mode 1 would have raised every Shredder attack); its Raking and Piercing modes are plain Antimatter
+Cannon modes and keep every bonus. ⭐ One rule, `Weapon::$fixedFireControlModes` (PROTECTED, `array(1)` on AntimatterShredder) asked
+through `hasFixedFireControl($mode)` by EVERY fire control raiser: `Officers::raiseEveryMode` (Gunner, Turret Officer), `raiseMatterModes`,
+`Enhancements::sysEnhApplyGSGT` (Gunsights - a stored refit row is applied unchecked, so `sysEnhFixedFireControl` guards a non-weapon).
+`ShipCompactor::annotateSystems` writes `fixedFireControlModes` into the static blueprint (13 Shredders), which the lobby's raisers read:
+`systemEnhancements.hasFixedFireControl` (its Gunsights preview) and `officers.hasFixedFireControl` (`fireControlRaise` - so the lobby preview
+and `pendingMoveFireControl` give mode 1 nothing). Docs: the Gunsights, Gunner and Turret Officer cards. Gates after it: officersHarness
+**1512 / 0** (10 new - every raiser alone and together, a mode switch, Gunsights' bare applier, the Xonn's mixed turret), client **582 / 0**
+(5 new - the statics, the lobby previews, lobby Gunsights, a pending move), differential **725 / 0** (its Xonn cases put the officer on a
+Shredder), enhancements 285 / 0; **10 more breaks, all caught** (the Gunsights live-value guard needed the bare-applier check: on a real load
+changeFiringMode re-reads the array over it). Not covered by this, noted: an Expert Gunner's once-per-battle +15% called shot and an Expert
+Targeter's +20% still apply to (and the Gunner's is spent on) a Shredder-mode attack at a fighter - those attacks are standard called shots in
+calculateHitBase; not fire control, so left as they were.
+
+**Observations, not changed:**
+1. Not play-tested. Worth a test: a Xorr with a Turret Officer on Turret 1 that holds its fire for a turn while an enemy fires at it (hits
+   that roll Turret 1 go to the lone cannon or Structure; a called shot at a Turret 1 cannon still lands), then fires (no shelter); the
+   Turret 1 cannons' fire control +5% to both players; the owner's Turret Mount line at 19+.
+2. A Vree turret's Antiproton Defenders keep intercepting while sheltered (ruling 1) - worth a look in play whether that feels right.

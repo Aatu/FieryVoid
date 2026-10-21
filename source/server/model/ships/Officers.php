@@ -64,6 +64,9 @@
    Stage 20: the Expert ELINT Officer - his array +1, -2 on sensor criticals, every ELINT range 25% longer (elintRange).
    Stage 21: the Expert Tailgunner - a fighter officer for flights with a TAIL GUN (Weapon::$tailGun): no penalty for firing it
    with the forward guns, or +5% with it where it has none (Weapon::getTailGunMod).
+   Stage 22: the Expert Turret Officer (Vree) - placed in a turret-mounted weapon, aiding every weapon on that TURRET (Weapon::getTurretMates):
+   +1 fire control, -1 on criticals, -2 on the turret jam roll, and a turret that fires no shot SHELTERED from all but called shots
+   (openShelter). One to a turret (`perTurret`).
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -126,6 +129,8 @@ class Officers{
 	const ELINT_RANGE_PCT = 25;          //...: "The range of all ELINT functions is increased by 25% (round fractions of 0.5 or more up)"
 	const ELINT_BLANKET_BALLISTIC = 3;   //...: blanket protection's total "divided by 3 (not 4) for purposes of ballistic weapons only"
 	const TAILGUNNER_BONUS = 1;          //Expert Tailgunner: on a tail gun with no penalty, "+5% to hit with that gun only"
+	const TURRET_CRIT_MOD = -1;          //Expert Turret Officer: "When rolling for critical hits against turret-mounted weapons, subtract 1"
+	const TURRET_JAM_RELIEF = 2;         //...: "When rolling for the special turret jam critical, subtract 2 from the die roll"
 	//...a Medium ship's side, looked at from its own bearing (a "TAG:" hit chart entry is arc-filtered): Front, Aft, Left, Right
 	private static $sideBearing = array(1 => 0, 2 => 180, 3 => 270, 4 => 90);
 	//the fire orders that are NOT the flight firing, for his Spark Field relief: interception uses neither OB nor jinking
@@ -180,6 +185,8 @@ class Officers{
 			'Vree Conglomerate', 'Dilgar Imperium', 'Brakiri Syndicracy', 'Hyach Gerontocracy', 'Markab Theocracy', 'Corillani Theocracy',
 			'Llort', 'Deneth Tribes', 'Minbari Protectorate'),
 			'pct' => array('Abbai Matriarchate' => 15, 'Abbai Matriarchate (WotCR)' => 15)),
+		//"Availability: Vree only" - not the Custom Ships' Shadow-built Xonn, whose turrets are Vree-style too
+		'OFF_TURR' => array('only' => array('Vree Conglomerate')),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -224,7 +231,10 @@ class Officers{
 	     lostPublish (optional) `publish`'s list for the turns `lost` runs
 	   Stage 19:
 	     side        (optional) which of a single-block hull's two sides he covers (1 = its first, 2 = its second - hullSides)
-	     switchTo    (optional) the officer he becomes when ordered to his OWN post (mayMoveTo): the Expert Targeter's side switch */
+	     switchTo    (optional) the officer he becomes when ordered to his OWN post (mayMoveTo): the Expert Targeter's side switch
+	   Stage 22:
+	     perTurret   (optional) true: one of him to a TURRET (turretKey - a weapon's linked firing group, or the weapon alone), not only
+	                 one to a system - at purchase and load (keepPlacedRows) and when he moves (mayMoveTo) */
 	private static $registry = array(
 		/* Expert Helmsman: +5 initiative (FV units, QX1), wins initiative ties, and -1 on the die he
 		   rolls on a meteor swarm's impact chart (user, 2026-10-10). The tie-break is
@@ -397,6 +407,17 @@ class Officers{
 			'apply' => null, 'movable' => true, 'side' => 1, 'switchTo' => 'OFF_TARG2', 'shipLimit' => 'targeterLimit'),
 		'OFF_TARG2' => array('label' => 'Expert Targeter', 'placed' => true, 'pct' => 10, 'sameAs' => 'OFF_TARG', 'hosts' => 'isTargeterSecondSide',
 			'nonWeapon' => true, 'apply' => null, 'movable' => true, 'side' => 2, 'switchTo' => 'OFF_TARG'),
+		/* Expert Turret Officer (Stage 22; rules text, user 2026-10-21), in a TURRET-MOUNTED weapon (Weapon::isTurretMount - the Vree saucers'
+		   jammable mounts), aiding every weapon on that turret (Weapon::getTurretMates: his gun's linked firing group, or his gun alone) and
+		   "not any other turrets on the same ship": +1 to hit - fire control, the Gunner's way - and -1 on their critical rolls
+		   (applyTurretOfficer); -2 on the turret jam roll (turretJamRelief, asked by Weapon::testArcRestriction); and on a turn none of
+		   them fires, the turret is SHELTERED - "no incoming fire can hit its weapons unless they use called shots" (openShelter,
+		   isSheltered) - automatically, in place of the player's declaration (the user's note). Rulings (user 2026-10-21): only a SHOT
+		   breaks the shelter (an interception does not); on a gun a serving Expert Gunner holds, the Gunner's +1 replaces his ("does not
+		   combine"), his other effects still apply; a turret-mounted weapon linked to no other is a turret of its own; movable. One to a
+		   turret (perTurret), so a ship may carry one per turret (turretLimit). 5% of the ship's base cost, Vree only ($factionRules). */
+		'OFF_TURR' => array('label' => 'Expert Turret Officer', 'placed' => true, 'pct' => 5, 'hosts' => 'isTurretPost',
+			'apply' => 'applyTurretOfficer', 'movable' => true, 'perTurret' => true, 'shipLimit' => 'turretLimit'),
 
 		/* FIGHTER OFFICERS (Stage 4). A flight carries ONE officer in total (D9), posted on its first
 		   craft. He is lost with that craft - destroyed, or dropped out - and never by a dock, a partial
@@ -815,7 +836,8 @@ class Officers{
 	   sanitiseSystemEnhancements, at buy, save and reload, which names what it drops) and for the load
 	   (pickPlacedPosts). $pairs: array(array(id, systemid), ...). Walked in registry order, then system id:
 	     - a system hosts ONE placed officer (so a doctored Gunner + Matter expert on one gun keeps the Gunner);
-	     - no officer passes his ship cap (placedLimit).
+	     - no officer passes his ship cap (placedLimit);
+	     - a `perTurret` officer (Stage 22, the Expert Turret Officer): one to a turret (turretKey).
 	   Returns the keys of $pairs that stand, in that order. ⚠️ MIRROR PAIR with officers.placedEntries (JS). */
 	public static function keepPlacedRows($ship, array $pairs){
 		$order = array_flip(array_keys(self::$registry));
@@ -827,17 +849,25 @@ class Officers{
 			if ((int)$pairs[$a][1] !== (int)$pairs[$b][1]) return (int)$pairs[$a][1] - (int)$pairs[$b][1];
 			return $a - $b;
 		});
-		$hosted = array(); $count = array(); $kept = array();
+		$hosted = array(); $count = array(); $turrets = array(); $kept = array();
 		foreach ($keys as $key){
 			list($id, $systemid) = $pairs[$key];
 			if (!self::isPlacedOfficer($id) || isset($hosted[(int)$systemid])) continue;
 			$n = isset($count[$id]) ? $count[$id] : 0;
 			if ($n >= self::placedLimit($ship, $id)) continue;
+			$turret = self::isPerTurret($id) ? self::turretKey($ship->getSystemById((int)$systemid)) : null;
+			if ($turret !== null && isset($turrets[$id][$turret])) continue;
 			$hosted[(int)$systemid] = true;
 			$count[$id] = $n + 1;
+			if ($turret !== null) $turrets[$id][$turret] = true;
 			$kept[] = $key;
 		}
 		return $kept;
+	}
+
+	//a placed officer who is one to a TURRET, not only one to a system (Stage 22) - keepPlacedRows, mayMoveTo, the sanitiser's notice
+	public static function isPerTurret($id){
+		return !empty(self::$registry[$id]['perTurret']);
 	}
 
 	/* How many of this placed officer one ship may carry: his `shipLimit` method, or 1 ("one of each type").
@@ -1051,7 +1081,9 @@ class Officers{
 	       Expert Targeter's switch to a Medium ship's other side), costing the turn as any move does;
 	     - not the post of another placed officer still in action that turn or the next - one officer to a
 	       weapon (Stage 8), and no swaps: the post must be free when he sets out. A disabled or killed
-	       officer holds nobody's post. */
+	       officer holds nobody's post;
+	     - a `perTurret` officer (Stage 22): nor a turret another of him holds, on the same terms - between the guns of
+	       his own turret he may move. */
 	private static function mayMoveTo($ship, array $list, $i, $target, $m){
 		$entry = $list[$i];
 		$stay = self::stayOn($entry, $m);
@@ -1065,11 +1097,15 @@ class Officers{
 		if ($as === null) return null;
 		$fell = self::disabledTurn($ship, $target);
 		if ($fell !== null && $fell < $m) return null;
+		$turret = self::isPerTurret($as) ? self::turretKey($target) : null;
 		foreach ($list as $j => $other){
 			if ($j === $i) continue;
 			foreach (array($m, $m + 1) as $t){
 				$held = self::stayOn($other, $t);
-				if ($held === null || (int)$held['post'] !== (int)$target->id || !self::holdsAPost($held['id'])) continue;
+				if ($held === null || !self::holdsAPost($held['id'])) continue;
+				if ((int)$held['post'] !== (int)$target->id){
+					if ($turret === null || $held['id'] !== $as || self::turretKey($ship->getSystemById($held['post'])) !== $turret) continue;
+				}
 				list($otherOut) = self::outState($ship, $other);
 				if ($otherOut === null || $otherOut >= $m) return null;
 			}
@@ -1556,14 +1592,14 @@ class Officers{
 		}
 	}
 
-	//+1 on every non-null fire control of a weapon's Matter modes, live and per mode (applyMatterExpert's rule)
+	//+1 on every non-null fire control of a weapon's Matter modes, live and per mode (applyMatterExpert's rule) - never a fixed one
 	private static function raiseMatterModes($system){
 		if (!empty($system->fireControlArray) && is_array($system->fireControlArray)){
 			foreach ($system->fireControlArray as $mode => $fc){
-				if (is_array($fc) && self::isMatterMode($system, $mode)) $system->fireControlArray[$mode] = self::bumpFireControl($fc);
+				if (is_array($fc) && self::isMatterMode($system, $mode) && !$system->hasFixedFireControl($mode)) $system->fireControlArray[$mode] = self::bumpFireControl($fc);
 			}
 		}
-		if (self::isMatterMode($system, $system->firingMode)) $system->fireControl = self::bumpFireControl($system->fireControl);
+		if (self::isMatterMode($system, $system->firingMode) && !$system->hasFixedFireControl($system->firingMode)) $system->fireControl = self::bumpFireControl($system->fireControl);
 		$system->isModified = true;
 	}
 
@@ -1597,12 +1633,18 @@ class Officers{
 		//his Piercing shot, while he still has it, on a gun with no Piercing mode of its own: a mode to fire it in
 		//(BEFORE the +1 below, so the added mode carries it too)
 		if (self::abilityOpen($entry, 'pierce', $turn) && self::mayAddPiercing($weapon)) $entry['mode'] = self::addPiercingMode($weapon, self::spentOn($entry, 'pierce', $turn));
+		self::raiseEveryMode($weapon);
+	}
+
+	/* +1 on every non-null fire control of every mode, live and per mode (applyGunner's rule; the Expert Turret Officer's too, Stage 22) -
+	   never on a mode whose fire control is fixed (Weapon::hasFixedFireControl: the Antimatter Shredder's Shredder mode) */
+	private static function raiseEveryMode($weapon){
 		if (!empty($weapon->fireControlArray) && is_array($weapon->fireControlArray)){
 			foreach ($weapon->fireControlArray as $mode => $fc){
-				if (is_array($fc)) $weapon->fireControlArray[$mode] = self::bumpFireControl($fc);
+				if (is_array($fc) && !$weapon->hasFixedFireControl($mode)) $weapon->fireControlArray[$mode] = self::bumpFireControl($fc);
 			}
 		}
-		$weapon->fireControl = self::bumpFireControl($weapon->fireControl);
+		if (!$weapon->hasFixedFireControl($weapon->firingMode)) $weapon->fireControl = self::bumpFireControl($weapon->fireControl);
 		$weapon->isModified = true;
 	}
 
@@ -2436,6 +2478,100 @@ class Officers{
 	public static function ballisticBlanket($elint, $blanket){
 		if (!self::isActive($elint, 'OFF_ELINT')) return $blanket;
 		return $blanket * 4 / self::ELINT_BLANKET_BALLISTIC;
+	}
+
+	/* ------------------------------------------------------------------ the Expert Turret Officer (Stage 22) */
+
+	//OFF_TURR's posts (`hosts`): "One turret-mounted weapon" - a mount that can jam (Weapon::isTurretMount), any of its turret's guns
+	private static function isTurretPost($system, $ship){
+		return $system instanceof Weapon && $system->isTurretMount();
+	}
+
+	/* Which turret a weapon is on, as a key on its ship: its linked firing group - Weapon::getTurretMates' own test - or, for a mount linked
+	   to no other, the weapon alone ("a turret of one", user ruling 2026-10-21). null for anything that is not a weapon.
+	   ⚠️ MIRROR PAIR with officers.turretKey (JS). */
+	private static function turretKey($system){
+		if (!($system instanceof Weapon)) return null;
+		return ($system->linkedFiringGroup !== null) ? 'group:' . $system->linkedFiringGroup : 'mount:' . (int)$system->id;
+	}
+
+	//How many Expert Turret Officers one ship may carry (`shipLimit`): one per turret ("1 Officer per turret", the user's note)
+	private static function turretLimit($ship){
+		$turrets = array();
+		foreach ($ship->systems as $system){
+			if (self::isTurretPost($system, $ship)) $turrets[self::turretKey($system)] = true;
+		}
+		return max(1, count($turrets));
+	}
+
+	/* Every weapon on his turret: +1 to hit - +1 on every non-null fire control of every mode, the Gunner's rule (raiseEveryMode), which
+	   isModified sends to every viewer as Gunsights' is - except on a gun a serving Expert Gunner holds: the Gunner "does not combine any
+	   to-hit or damage bonuses with those of other elite officers" (user ruling 2026-10-21, the Matter expert's precedent). And -1 on
+	   every one's critical rolls (their critRollMod, which ShipSystem::testCritical reads) - so his own kill roll, and a Gunner's on that
+	   turret, are eased too, as the Technician's -2 eases his. */
+	private static function applyTurretOfficer($ship, $entry, $turn){
+		$post = $ship->getSystemById($entry['post']);
+		if (!($post instanceof Weapon)) return;
+		foreach ($post->getTurretMates($ship) as $weapon){
+			$weapon->critRollMod += self::TURRET_CRIT_MOD;
+			if (!self::servesOn($ship, 'OFF_GUN', $weapon, $turn)) self::raiseEveryMode($weapon);
+		}
+	}
+
+	//the Expert Turret Officer serving on $turn on $weapon's turret, or null
+	private static function turretOfficerFor($ship, $weapon, $turn){
+		$turret = self::turretKey($weapon);
+		if ($turret === null) return null;
+		foreach ($ship->getOfficers() as $entry){
+			if ($entry['id'] !== 'OFF_TURR' || !self::serves($entry, $turn)) continue;
+			if (self::turretKey($ship->getSystemById($entry['post'])) === $turret) return $entry;
+		}
+		return null;
+	}
+
+	/* -2 on the turret jam roll of a weapon on his turret - Weapon::testArcRestriction, behind $officersPresent. The jam is its own d20,
+	   not a critical roll, so his -1 on criticals is not added to it: "When rolling for the special turret jam critical, subtract 2". */
+	public static function turretJamRelief($ship, $weapon, $turn){
+		return (self::turretOfficerFor($ship, $weapon, (int)$turn) !== null) ? self::TURRET_JAM_RELIEF : 0;
+	}
+
+	/* ⭐ SHELTERED TURRETS: "If no weapon on the turret fires in a given turn, the owning player can declare it to be 'sheltered.' If this
+	   is done, no incoming fire can hit its weapons unless they use called shots." Built AUTOMATIC - no declaration (the user's note): a
+	   turret a serving Expert Turret Officer holds, none of whose weapons fires a SHOT this turn - an interception, a self-intercept or a
+	   Meteor Defence declaration is not one (user ruling 2026-10-21: Weapon::firedOffensivelyOnTurn). Decided ONCE, when every order of
+	   the turn is known: Firing::fireWeapons opens it before the ship and fighter fire and closes it after (the rams before it are
+	   collisions, and Pre-Firing resolves before the turn's own orders exist). Read by the hit-chart pools (BaseShip::getSystemsByNameLoc
+	   and ::getSystemsByTag), where a sheltered weapon reads as DESTROYED: a hit that rolls it takes the chart's usual fallback - another
+	   system of that name or tag, else the section's Structure. A called shot at one is resolved before any pool is asked
+	   (getHitSystemByTable), so it hits as ever. Server only: an opponent sees where the hits land, nothing more. */
+	private static $sheltered = array(); //ship id => array(system id => true), while Firing::fireWeapons resolves the turn's fire
+
+	public static function openShelter($gamedata){
+		self::$sheltered = array();
+		if (!TacGamedata::$officersPresent) return;
+		$turn = (int)$gamedata->turn;
+		foreach ($gamedata->ships as $ship){
+			foreach ($ship->getOfficers() as $entry){
+				if ($entry['id'] !== 'OFF_TURR' || !self::serves($entry, $turn)) continue;
+				$post = $ship->getSystemById($entry['post']);
+				if (!($post instanceof Weapon)) continue;
+				$mates = $post->getTurretMates($ship);
+				foreach ($mates as $weapon){
+					if ($weapon->firedOffensivelyOnTurn($turn)) continue 2;
+				}
+				foreach ($mates as $weapon) self::$sheltered[(int)$ship->id][(int)$weapon->id] = true;
+			}
+		}
+	}
+
+	public static function closeShelter(){
+		self::$sheltered = array();
+	}
+
+	//Is $system a sheltered turret's weapon in the fire being resolved now (openShelter)? One empty() in every other game.
+	public static function isSheltered($ship, $system){
+		if (empty(self::$sheltered)) return false;
+		return isset(self::$sheltered[(int)$ship->id][(int)$system->id]);
 	}
 
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */

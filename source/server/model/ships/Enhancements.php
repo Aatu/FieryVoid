@@ -3839,6 +3839,16 @@ class Enhancements{
 			'ages'      => array(1, 2),
 			'serialise' => array(),
 		),
+		//OFFICERS_PLAN.md Stage 22: the Expert Turret Officer in a turret-mounted weapon, aiding its whole turret
+		'OFF_TURR' => array(
+			'label'     => 'Expert Turret Officer',
+			'eligible'  => 'sysEnhEligibleOfficerTURR',
+			'price'     => 'sysEnhPriceOfficerTURR',
+			'limit'     => 'sysEnhLimitOne',
+			'officer'   => true,
+			'ages'      => array(1, 2),
+			'serialise' => array(),
+		),
 	);
 
 	//a placed officer's row (Stage 8), not a refit: kept off the star and the summary count
@@ -4243,13 +4253,14 @@ class Enhancements{
 	}
 
 	private static function sysEnhApplyGSGT($ship, $system, $count){
-		self::sysEnhBumpFireControl($system->fireControl, $count);
+		//never a mode whose fire control is fixed (Weapon::hasFixedFireControl: the Antimatter Shredder's Shredder mode keeps its 0/0/0)
+		if(!self::sysEnhFixedFireControl($system, $system->firingMode)) self::sysEnhBumpFireControl($system->fireControl, $count);
 		/* ⚠️ THE single most important trap in this feature (§2.2). Weapon::changeFiringMode
 		   re-reads fireControlArray[$mode] STRAIGHT OVER fireControl, so a refit that bumps only
 		   fireControl evaporates on the player's first mode switch - silently, mid-game. */
 		if(!empty($system->fireControlArray) && is_array($system->fireControlArray)){
 			foreach($system->fireControlArray as $mode => $fcSet){
-				if(!is_array($fcSet)) continue;
+				if(!is_array($fcSet) || self::sysEnhFixedFireControl($system, $mode)) continue;
 				self::sysEnhBumpFireControl($fcSet, $count);
 				$system->fireControlArray[$mode] = $fcSet;
 			}
@@ -4258,6 +4269,11 @@ class Enhancements{
 		   than inventing a second one - the Gravitic Augmenter established it, and
 		   weapon::stripForJson already re-sends fireControl AND fireControlArray off it. */
 		$system->isModified = true;
+	}
+
+	//a stored row is applied without re-checking eligibility (setSystemEnhancements), so a non-weapon is possible here
+	private static function sysEnhFixedFireControl($system, $mode){
+		return ($system instanceof Weapon) && $system->hasFixedFireControl($mode);
 	}
 
 	/* +1 per level to every NON-NULL entry, in place.
@@ -4604,6 +4620,15 @@ class Enhancements{
 		return Officers::rowPrice($ship, 'OFF_TARG2');
 	}
 
+	//Stage 22: any turret-mounted weapon (Officers::mayHost; his `hosts` says which) - no Gunsights test, "one turret-mounted weapon"
+	private static function sysEnhEligibleOfficerTURR($ship, $system){
+		return Officers::mayHost($ship, $system, 'OFF_TURR');
+	}
+
+	private static function sysEnhPriceOfficerTURR($ship, $system, $level){
+		return Officers::rowPrice($ship, 'OFF_TURR');
+	}
+
 	/* SYS_HSHLD and SYS_THR are both "output += level".
 	   ⚠️ ORDERING MATTERS for the shield and is already right: Shield::onConstructed derives
 	   tohitPenalty/damagePenalty from getOutput(), and setSystemEnhancements is called from
@@ -4815,7 +4840,8 @@ class Enhancements{
 			if(isset($pairs[$i]) && !isset($kept[$i])){
 				$limit = Officers::placedLimit($ship, $row[0]);
 				$out['notices'][] = self::systemEnhancementLabel($row[0]) . " on {$row[7]} #{$row[6]} was removed: "
-					. "a system hosts one officer, and this ship may carry $limit " . self::systemEnhancementLabel($row[0])
+					. "a system hosts one officer, " . (Officers::isPerTurret($row[0]) ? 'a turret one ' . self::systemEnhancementLabel($row[0]) . ', ' : '')
+					. "and this ship may carry $limit " . self::systemEnhancementLabel($row[0])
 					. ($limit === 1 ? '' : 's') . '.';
 				continue;
 			}

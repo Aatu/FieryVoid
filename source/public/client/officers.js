@@ -103,6 +103,12 @@ window.officers = {
 			summary: '+20% on called shots (the called shot penalty still applies)' },
 		{ id: 'OFF_TARG2', label: 'Expert Targeter', placed: true, sameAs: 'OFF_TARG', movable: true, side: 2, switchTo: 'OFF_TARG',
 			summary: '+20% on called shots (the called shot penalty still applies)' },
+		/* Stage 22: the Expert Turret Officer, in a turret-mounted weapon, aiding every weapon on that turret (turretKey: its linked firing
+		   group, or the gun alone). One to a turret (`perTurret`). His +1 fire control is previewed in the lobby (displayFireControl - in game
+		   the server raised it); his -1 on criticals, the -2 on the jam roll (the Turret Mount line says it - turretMountLine) and the shelter
+		   are the server's. */
+		{ id: 'OFF_TURR', label: 'Expert Turret Officer', placed: true, movable: true, perTurret: true,
+			summary: 'Turret weapons: +1 fire control, -1 on criticals, -2 on the jam roll; if turret does not fire, can only be hit by called shots' },
 		{ id: 'OFF_DOG', label: 'Expert Dogfighter', post: 'craft', flight: true, stats: { iniativebonus: 5 },
 			summary: '+5 initiative, wins ties' },
 		{ id: 'OFF_MSL', label: 'Expert Missileer', post: 'craft', flight: true, perMissile: 1, needs: 'missiles',
@@ -444,8 +450,9 @@ window.officers = {
 
 	/* The lobby's derived track 2: one officer per bought row, posted in its system - after D13's name check,
 	   with his ship-level self winning (sameAs), a system hosting ONE, and no officer past his ship cap
-	   (registry order, then system id). Pre-battle damage that destroys his weapon refunds him (D11, the row
-	   is gone); damage that does not still disables the Matter expert from the start (anyDamage).
+	   (registry order, then system id), a `perTurret` officer one to a turret (Stage 22). Pre-battle damage that
+	   destroys his weapon refunds him (D11, the row is gone); damage that does not still disables the Matter
+	   expert from the start (anyDamage).
 	   ⚠️ MIRROR PAIR with Officers::pickPlacedPosts / ::keepPlacedRows (PHP). */
 	placedEntries: function placedEntries(ship, shipLevel) {
 		var rows = this.placedRows(ship);
@@ -453,7 +460,7 @@ window.officers = {
 		var self = this;
 		var aboard = {};
 		(shipLevel || []).forEach(function (entry) { aboard[entry.id] = true; });
-		var hosted = {}, count = {}, out = [];
+		var hosted = {}, count = {}, turrets = {}, out = [];
 		this.REGISTRY.forEach(function (officer) {
 			if (!officer.placed || (officer.sameAs && aboard[officer.sameAs])) return;
 			rows.filter(function (row) { return row[0] === officer.id; })
@@ -463,8 +470,11 @@ window.officers = {
 				.forEach(function (c) {
 					var id = parseInt(c.system.id, 10);
 					if (hosted[id] || (count[officer.id] || 0) >= self.placedLimit(ship, officer.id)) return;
+					var turret = officer.perTurret ? officer.id + '|' + self.turretKey(c.system) : null;
+					if (turret !== null && turrets[turret]) return;
 					hosted[id] = true;
 					count[officer.id] = (count[officer.id] || 0) + 1;
+					if (turret !== null) turrets[turret] = true;
 					var entry = { id: officer.id, post: c.system.id };
 					if (officer.anyDamage ? self.isPostDamaged(ship, c.system) : self.isPostDestroyed(ship, c.system)) {
 						entry.out = 0;
@@ -507,6 +517,14 @@ window.officers = {
 			if (rowSystem !== id && row[0] === enhID) elsewhere.push(row);
 		});
 		if (reason) return reason;
+		//Stage 22: one Expert Turret Officer to a turret - a turret mate of this weapon may already hold him
+		var system = officer.perTurret ? this.systemById(ship, id) : null;
+		var mate = system ? elsewhere.filter(function (row) { return self.turretKey(self.systemById(ship, row[6])) === self.turretKey(system); })[0] : null;
+		if (mate) {
+			var held = this.systemById(ship, mate[6]);
+			return 'This turret already has the ' + this.label(enhID) + ' (on ' + (held ? (held.displayName || held.name) : mate[7]) + ' #' + mate[6]
+				+ '): he aids every weapon on his turret, one to a turret.';
+		}
 		var cap = this.placedLimit(ship, enhID);
 		if (elsewhere.length >= cap) {
 			var where = elsewhere.map(function (row) {
@@ -1011,8 +1029,10 @@ window.officers = {
 				if (!window.systemEnhancements || !systemEnhancements.offerFor(ship, system.id, candidate.id)) continue;
 				var others = this.placedRows(ship).filter(function (row) {
 					return row[0] === candidate.id && !(row[0] === entry.id && String(row[6]) === String(entry.post));
-				}).length;
-				if (others >= this.placedLimit(ship, candidate.id)) continue;
+				});
+				if (others.length >= this.placedLimit(ship, candidate.id)) continue;
+				//Stage 22: nor onto a turret another Expert Turret Officer holds (between the guns of his own turret he may move)
+				if (candidate.perTurret && others.some(function (row) { return self.turretKey(self.systemById(ship, row[6])) === self.turretKey(system); })) continue;
 				return candidate.id;
 			}
 			var post = this.findPost(ship, candidate.post);
@@ -1442,24 +1462,71 @@ window.officers = {
 	   cannot target that size, and stays so) when:
 	     - an Expert Gunner serves IN it - every mode;
 	     - otherwise, in a Matter mode, the C&C Matter Weapons Expert serves, or the weapon-mounted one serves in
-	       it. A Gunner's +1 replaces the Matter expert's on his own weapon (user ruling 2026-10-16), never adds.
+	       it; and, every mode, an Expert Turret Officer serves on its turret (Stage 22). A Gunner's +1 replaces the
+	       Matter expert's and the Turret Officer's on his own weapon (user rulings 2026-10-16, 2026-10-21), never adds.
 	   Gunsights is already in system.fireControl (systemEnhancements.apply), so the two show stacked.
-	   ⚠️ MIRROR PAIR with Officers::applyGunner / applyMatterExpert / applyWeaponMatterExpert (PHP). */
+	   ⚠️ MIRROR PAIR with Officers::applyGunner / applyMatterExpert / applyWeaponMatterExpert / applyTurretOfficer (PHP). */
 	displayFireControl: function displayFireControl(ship, system) {
 		var fc = system ? system.fireControl : null;
 		if (!Array.isArray(fc)) return fc;
-		if (!this.fireControlRaise(this.servingDerived(ship), system)) return fc;
-		return fc.map(function (v) { return (v === null || v === undefined) ? v : (parseInt(v, 10) || 0) + 1; });
+		var raise = this.fireControlRaise(ship, this.servingDerived(ship), system);
+		if (!raise) return fc;
+		return fc.map(function (v) { return (v === null || v === undefined) ? v : (parseInt(v, 10) || 0) + raise; });
 	},
 
-	//1 when the officers in `serving` raise this weapon's fire control in its current mode (displayFireControl's rule), else 0
-	fireControlRaise: function fireControlRaise(serving, system) {
+	/* how much the officers in `serving` raise this weapon's fire control in its current mode (displayFireControl's rule): 0, 1 or more -
+	   0 in a mode whose fire control is fixed (the Antimatter Shredder's Shredder mode), as the server never raises one */
+	fireControlRaise: function fireControlRaise(ship, serving, system) {
+		if (this.hasFixedFireControl(system, system.firingMode)) return 0;
+		var self = this;
 		var on = function (id) {
 			return serving.some(function (entry) { return entry.id === id && String(entry.post) === String(system.id); });
 		};
 		if (on('OFF_GUN')) return 1;
-		return (this.isMatterWeapon(system) && this.isMatterMode(system, system.firingMode)
-			&& (on('OFF_MWEW') || serving.some(function (entry) { return entry.id === 'OFF_MWE'; }))) ? 1 : 0;
+		var turret = serving.some(function (entry) {
+			return entry.id === 'OFF_TURR' && self.turretKey(self.systemById(ship, entry.post)) === self.turretKey(system);
+		}) ? 1 : 0;
+		return turret + ((this.isMatterWeapon(system) && this.isMatterMode(system, system.firingMode)
+			&& (on('OFF_MWEW') || serving.some(function (entry) { return entry.id === 'OFF_MWE'; }))) ? 1 : 0);
+	},
+
+	/* May nothing raise this firing mode's fire control? The static blueprint's `fixedFireControlModes` (the Antimatter Shredder's
+	   Shredder mode). ⚠️ MIRROR PAIR with Weapon::hasFixedFireControl (PHP); systemEnhancements.hasFixedFireControl reads the same key. */
+	hasFixedFireControl: function hasFixedFireControl(system, mode) {
+		var fixed = system ? system.fixedFireControlModes : null;
+		return Array.isArray(fixed) && fixed.map(Number).indexOf(parseInt(mode, 10)) !== -1;
+	},
+
+	/* Which turret a weapon is on (Stage 22): its linked firing group, or the weapon alone - "a turret of one". The static blueprint carries
+	   linkedFiringGroup wherever it is set. null for no system. ⚠️ MIRROR PAIR with Officers::turretKey (PHP). */
+	turretKey: function turretKey(system) {
+		if (!system) return null;
+		var group = system.linkedFiringGroup;
+		return (group !== undefined && group !== null) ? 'group:' + group : 'mount:' + parseInt(system.id, 10);
+	},
+
+	/* The Expert Turret Officer serving on this weapon's turret - not one ordered to move this turn (he serves nowhere then, as the server
+	   reads a committed order) - or null. The lobby's derived list and the owner's server list both answer; an enemy's is empty. */
+	turretOfficerOn: function turretOfficerOn(ship, system) {
+		if (!ship || !system || ship.flight) return null;
+		var self = this;
+		var turn = this.currentTurn();
+		var turret = this.turretKey(system);
+		return this.listFor(ship).filter(function (entry) {
+			return entry.id === 'OFF_TURR' && self.serves(entry, turn) && self.transferOf(ship, entry) === null
+				&& self.turretKey(self.systemById(ship, entry.post)) === turret;
+		})[0] || null;
+	},
+
+	/* A turret-mounted weapon's "Turret Mount" tooltip line under an Expert Turret Officer: the jam roll's threshold 2 higher ("subtract 2
+	   from the die roll" - 17+ reads 19+), and his name. The server writes the blueprint's line; only his own team sees this one. A turret
+	   already jammed ("JAMMED - locked to ...") has no roll left to show. */
+	TURRET_JAM_RELIEF: 2,
+	turretMountLine: function turretMountLine(ship, system, value) {
+		var text = String(value);
+		var roll = /on a (\d+)\+ \(d20\)/.exec(text);
+		if (!roll || !this.turretOfficerOn(ship, system)) return value;
+		return text.replace(roll[0], 'on a ' + ((parseInt(roll[1], 10) || 0) + this.TURRET_JAM_RELIEF) + '+ (d20)') + ' (Expert Turret Officer)';
 	},
 
 	/* Stage 10 (user request 2026-10-16): the fire control an officer ordered to move THIS turn - not yet committed - still
@@ -1474,7 +1541,7 @@ window.officers = {
 		var turn = this.currentTurn();
 		var serving = this.listFor(ship).filter(function (entry) { return self.serves(entry, turn); });
 		var staying = serving.filter(function (entry) { return self.transferOf(ship, entry) === null; });
-		return this.fireControlRaise(serving, weapon) - this.fireControlRaise(staying, weapon);
+		return this.fireControlRaise(ship, serving, weapon) - this.fireControlRaise(ship, staying, weapon);
 	},
 
 	/* Expert Jump Officer, in the lobby: the hexes he adds to THIS drive's range - 0 unless it is his post.
@@ -1822,7 +1889,8 @@ window.officers = {
 	   (religiousDamageLine). Stage 16: an EM weapon's, with an Expert Surge Officer's +1 (surgeDamageLine). Stage 17: an ion
 	   weapon's, with an Expert Ion Technician's +1 and thrust boost (ionDamageLine), and the Rad Cannon's Special text. Stage 20: an
 	   ELINT array's Special text, with an Expert ELINT Officer's ranges and blanket (elintSpecial) - to every viewer, in game too.
-	   Stage 21: a fighter's tail gun's "Tail Gun" line (tailGunLine). */
+	   Stage 21: a fighter's tail gun's "Tail Gun" line (tailGunLine). Stage 22: a turret-mounted weapon's "Turret Mount" line, under an
+	   Expert Turret Officer (turretMountLine), and his +1 in its fire control (displayFireControl). */
 	DATA_KEY_FIRECONTROL: 'Fire control (fighter/med/cap)',
 	adjustDataDisplay: function adjustDataDisplay(ship, system, key, value) {
 		if (!system) return value;
@@ -1836,6 +1904,7 @@ window.officers = {
 		if (system.name === 'RadCannon' && key === 'Special') return this.radCannonSpecial(ship, value);
 		if ((system.name === 'elintScanner' || system.name === 'chameleonSensors') && key === 'Special') return this.elintSpecial(ship, value);
 		if (system.tailGun && key === 'Tail Gun') return this.tailGunLine(ship, value);
+		if (key === 'Turret Mount') return this.turretMountLine(ship, system, value);
 		if (system.name === 'jumpEngine' && (key === 'Range' || key === 'Special')) {
 			var bonus = this.jumpRangeBonus(ship, system);
 			if (!bonus) return value;

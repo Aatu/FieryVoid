@@ -426,6 +426,10 @@ class ShipCompactor
             if (method_exists($system, 'isTailGun') && $system->isTailGun()) {
                 $decoded[$key]['tailGun'] = true;
             }
+            //the firing modes no fire control bonus may raise (the Antimatter Shredder's Shredder mode) - the lobby's previews skip them
+            if (method_exists($system, 'getFixedFireControlModes') && $system->getFixedFireControlModes()) {
+                $decoded[$key]['fixedFireControlModes'] = array_values($system->getFixedFireControlModes());
+            }
 
             if (!empty($system->systems) && !empty($decoded[$key]['systems'])) {
                 self::annotateSystems($system->systems, $decoded[$key]['systems']);

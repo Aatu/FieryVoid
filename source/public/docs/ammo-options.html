@@ -757,7 +757,8 @@
         <dt>Limit</dt><dd>1</dd>
         <dt>Notes</dt><dd>Weapons only. A handful of utility mounts that roll no meaningful attack - the Abbai Shield
           Projector, Aegis Sensor Pod, Combat Transporter, Grappling Claw, Gravitic Shifter and Grome Targeting Array - are
-          excluded, as the refit would do nothing for them.</dd>
+          excluded, as the refit would do nothing for them. The Antimatter Shredder's Shredder mode keeps its 0/0/0 fire
+          control, as it has a hit calculation of its own; its two Antimatter Cannon modes gain the +1 as usual.</dd>
       </dl>
     </article>
 
@@ -883,7 +884,8 @@
       window.</li>
     <li>A few officers serve in a <b>system you choose</b> - the Expert Gunner in a weapon, the Matter Weapons Expert in a
       Matter weapon instead of the C&amp;C, the Expert Religious Leader in any Primary system that is not a weapon instead
-      of the C&amp;C, and the Expert Targeter in a Structure block. Buy one there once the ship is in your fleet: click the
+      of the C&amp;C, the Expert Targeter in a Structure block, and the Expert Turret Officer in a turret-mounted weapon. Buy one
+      there once the ship is in your fleet: click the
       system in the ship window (for a Structure block, its health bar) and add him under <b>Officers</b> in its Enhancements
       menu. A system holds one such officer.</li>
     <li>Changed your mind? In Fleet Selection any officer who can move can be moved, <b>for free</b> - see Moving an
@@ -921,7 +923,8 @@
   <ul>
     <li>Some officers can change posts: the Expert Gunner, between weapons; the Matter Weapons Expert, between the C&amp;C and
       the ship's Matter weapons; the Expert Religious Leader, between the systems of the ship's Primary section that are
-      not weapons; and the Expert Targeter, between the ship's outer Structure blocks - or, on a medium ship, from one side to
+      not weapons; the Expert Turret Officer, between turret-mounted weapons; and the Expert Targeter, between the ship's outer
+      Structure blocks - or, on a medium ship, from one side to
       the other with the <b>Front</b> / <b>Aft</b> buttons that take Move's place. Click a block's health bar to reach his
       menu, and a highlighted health bar to move him there.</li>
     <li><b>In Fleet Selection</b> a move is free and takes effect at once. Click the system the officer is posted in: its menu's
@@ -959,7 +962,7 @@
       everyone can read: a Helmsman's, a Security Officer's, a Religious Leader's or a Dogfighter's initiative (and the initiative,
       profiles and sensors of a ship whose Religious Leader has been lost), a Geneticist's profiles, a Technician's reactor power,
       an ELINT Officer's sensor rating, ELINT ranges and Blanket Protection,
-      a Matter Weapons Expert's or an Expert Gunner's fire control, a Plasma Scientist's battery capacity and Plasma Web range, a Navigator's turn, pivot, roll and accel/decel costs, a Jump Officer's jump
+      a Matter Weapons Expert's, an Expert Gunner's or an Expert Turret Officer's fire control, a Plasma Scientist's battery capacity and Plasma Web range, a Navigator's turn, pivot, roll and accel/decel costs, a Jump Officer's jump
       range, how long his jump point stays open and his arrival initiative penalty, an Evader's or Expert Pilots' offensive bonus (and the jinking the pilots let a flight do), the
       criticals and damage an Engineer or Scavenger repairs, and a weapon's loading when an officer speeds up its reload.
       The opponent sees the number, not who is behind it. An Expert Gunner's added Piercing mode stays hidden from your
@@ -1078,7 +1081,8 @@
           rolled on dice gains no extra damage. Pulse, Flash, ballistic, magazine-fed and other multi-mode weapons get no
           added Piercing mode - he can still use it from another weapon. His once-per-battle abilities are his own: they go
           with him when he moves to another weapon (see Moving an officer). An interception counts as a firing for the
-          faster reload.</dd>
+          faster reload. On an Antimatter Shredder his +1 fire control applies to its Antimatter Cannon modes only: the Shredder
+          mode keeps its 0/0/0.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
@@ -1415,6 +1419,36 @@
           does not earn the Efficient Transfers point. A destroyed system counts from the turn after it is lost, and stops
           counting if it is repaired. The -2 also makes the Technician harder to kill, since his fate is decided by the
           Reactor's critical roll.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h3>Expert Turret Officer</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>One turret-mounted weapon of your choice - a weapon whose tooltip has a <b>Turret Mount</b> line. Bought from the
+          weapon's own Enhancements menu, under Officers. He aids every weapon on that weapon's turret - the weapons whose
+          <b>Firing Link</b> line names the same turret ("Mounted on Turret 1"), or the weapon alone if it has no such line - and no
+          other turret.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>+1 fire control (+5%) for every weapon on his turret, in every firing mode - except an Antimatter Shredder's
+            Shredder mode, which keeps its 0/0/0 (its Antimatter Cannon modes gain the +1).</li>
+          <li>-1 on every critical roll against those weapons, and -2 on their turret jam roll (a jam on 19+ instead of 17+).</li>
+          <li><b>Sheltered:</b> on a turn none of the turret's weapons fires a shot, the turret is sheltered automatically - no
+            incoming fire can hit its weapons except a called shot at one of them. A hit that would have struck one goes where it
+            would if that weapon were destroyed: usually another weapon, or the section's Structure. Intercepting does not count
+            as firing, so a sheltered turret can still intercept.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>5% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per turret - a ship may carry one on each of its turrets. Vree Conglomerate only.</dd>
+        <dt>Notes</dt>
+        <dd>He is disabled if his own weapon is destroyed, even while the rest of his turret fights on, and his kill roll is that
+          weapon's critical roll (his -1 included). He can move to another turret-mounted weapon, on his turret or another one no
+          other Turret Officer holds (see Moving an officer). On a weapon an Expert Gunner serves in, the Gunner's +1 fire control
+          applies instead of his; the -1, the -2 and the shelter still do. Shelter is decided as the turn's fire is resolved;
+          ramming is not fire, and damage before the Firing phase (such as meteors) is not affected.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">

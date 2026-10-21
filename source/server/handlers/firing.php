@@ -2296,13 +2296,18 @@ public static function firePreFiringWeapons($gamedata){
         foreach ($rammingOrders as $ramming){
             $ship = $gamedata->getShipById($ramming->shooterid);
             self::fire($ship, $ramming, $gamedata);
-        }        
+        }
 
-        $fireOrders  = array();  //Array for non-ramming ship fire.      
+        /* OFFICERS_PLAN.md Stage 22: a turret an Expert Turret Officer serves on whose weapons fire no shot this turn is SHELTERED -
+           only a called shot can hit its weapons. Every order of the turn is known by now, so it is decided once, here, for the ship and
+           fighter fire below (the rams above are collisions, not fire), and closed again after it. */
+        Officers::openShelter($gamedata);
+
+        $fireOrders  = array();  //Array for non-ramming ship fire.
         //Now fire ship weapons.
-        foreach ($gamedata->ships as $ship){	
+        foreach ($gamedata->ships as $ship){
 
-            if ($ship instanceof FighterFlight) continue; //No fighter attacks handled here now that Ramming Attacks are handled above - DK 03.25      
+            if ($ship instanceof FighterFlight) continue; //No fighter attacks handled here now that Ramming Attacks are handled above - DK 03.25
             if($ship->isDestroyed()) continue; //Ship could be destroyed by ramming now.
 
             foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
@@ -2424,6 +2429,7 @@ public static function firePreFiringWeapons($gamedata){
                 self::fire($shooter, $fire, $gamedata);
             }
         }
+        Officers::closeShelter();
 
         //Attachment outcomes are only known now, so units that failed to attach to an
         //Enormous unit ram it here - see createFailedAttachRamOrders.

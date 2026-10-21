@@ -60,7 +60,8 @@ window.systemEnhancements = {
 		OFF_MWEW: 'Matter Weapons Expert',
 		OFF_RELIP: 'Expert Religious Leader',
 		OFF_TARG: 'Expert Targeter',  //Stage 19: in a Structure block - and, on a Medium ship's one block, its second side:
-		OFF_TARG2: 'Expert Targeter'
+		OFF_TARG2: 'Expert Targeter',
+		OFF_TURR: 'Expert Turret Officer'  //Stage 22: in a turret-mounted weapon
 	},
 
 	/* A placed officer's row (OFFICERS_PLAN.md Stage 8), not a refit: the OFF_ prefix every officer id carries
@@ -622,7 +623,9 @@ window.systemEnhancements = {
 
 				case 'SYS_GSGT':
 					self.rememberBase(system, 'fireControl');
-					system.fireControl = self.bumpFireControl(system[self.BASE_KEY].fireControl, count);
+					//never a mode whose fire control is fixed (the Antimatter Shredder's Shredder mode keeps its 0/0/0)
+					system.fireControl = self.hasFixedFireControl(system, system.firingMode) ? system[self.BASE_KEY].fireControl
+						: self.bumpFireControl(system[self.BASE_KEY].fireControl, count);
 					/* ⚠️ THE single most important trap in this feature. changeFiringMode re-reads
 					   fireControlArray[mode] STRAIGHT OVER fireControl, so a refit that bumps only
 					   fireControl evaporates on the player's first mode switch - silently. */
@@ -632,7 +635,7 @@ window.systemEnhancements = {
 						var out = Array.isArray(base) ? [] : {};
 						for (var mode in base) {
 							if (!Object.prototype.hasOwnProperty.call(base, mode)) continue;
-							out[mode] = Array.isArray(base[mode])
+							out[mode] = (Array.isArray(base[mode]) && !self.hasFixedFireControl(system, mode))
 								? self.bumpFireControl(base[mode], count)
 								: base[mode];
 						}
@@ -709,6 +712,14 @@ window.systemEnhancements = {
 	   JS as in PHP, which would silently give a Piercing missile a fighter-targeting
 	   capability it does not have. Guard on null, never on truthiness - 0 is a legal fire
 	   control, and so is a negative one. */
+	/* May nothing raise this firing mode's fire control? The static blueprint's `fixedFireControlModes` (ShipCompactor writes it -
+	   the Antimatter Shredder's Shredder mode, which has a hit calculation of its own). ⚠️ MIRROR PAIR with Weapon::hasFixedFireControl
+	   (PHP); officers.hasFixedFireControl reads the same key. */
+	hasFixedFireControl: function hasFixedFireControl(system, mode) {
+		var fixed = system ? system.fixedFireControlModes : null;
+		return Array.isArray(fixed) && fixed.map(Number).indexOf(parseInt(mode, 10)) !== -1;
+	},
+
 	bumpFireControl: function bumpFireControl(fireControl, count) {
 		if (!Array.isArray(fireControl)) return fireControl;
 		return fireControl.map(function (fc) {

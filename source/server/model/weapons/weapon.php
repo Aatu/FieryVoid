@@ -195,6 +195,11 @@ class Weapon extends ShipSystem
        the flight has a navigator, and an Expert Tailgunner trains it (getTailGunMod). PROTECTED, like $seedsBelowFullCharge:
        the client reads it off the static blueprint, where ShipCompactor::annotateSystems writes it (isTailGun). */
     protected $tailGun = false;
+    /* Firing modes whose fire control NOTHING may raise - no Gunsights, no Expert Gunner, Turret Officer or Matter Weapons Expert: a mode
+       with a hit calculation of its own (the Antimatter Shredder's Shredder mode keeps its 0/0/0, user 2026-10-21). Asked through
+       hasFixedFireControl by every fire control raiser; PROTECTED, like $tailGun - the lobby reads it off the static blueprint, where
+       ShipCompactor::annotateSystems writes it (getFixedFireControlModes). */
+    protected $fixedFireControlModes = array();
     public $noOverkill = false; //this will let simplify entire Matter line enormously!
     protected $noOverkillArray = array();
     public $doOverkill = false; //opposite of $noOverkill - allows Piercing shots to overkill (eg. Shadow Heavy Molecular Slicer Beam has such ability)
@@ -311,6 +316,21 @@ class Weapon extends ShipSystem
     public property on purpose: methods aren't serialised into the static ship blueprint.*/
     public function isArcRestricted(){
         return $this->arcRestricted;
+    }
+
+    /*is this weapon TURRET-MOUNTED - a mount that can jam (setArcRestriction)? Its turret is getTurretMates. The Expert Turret
+    Officer's posts (OFFICERS_PLAN.md Stage 22). A method, like isArcRestricted, so it never reaches the static blueprint.*/
+    public function isTurretMount(){
+        return $this->reducedArcStart !== null;
+    }
+
+    //may nothing raise this firing mode's fire control ($fixedFireControlModes)? ⚠️ MIRROR PAIR with the client's fixedFireControlModes readers
+    public function hasFixedFireControl($mode){
+        return in_array((int)$mode, $this->fixedFireControlModes, true);
+    }
+
+    public function getFixedFireControlModes(){
+        return $this->fixedFireControlModes;
     }
 
     public $useOEW = true;
@@ -800,7 +820,9 @@ class Weapon extends ShipSystem
         if (!$this->isDamagedOnTurn($gamedata->turn)) return; //only a hit this turn triggers the roll
         if ($this->hasCritical("ReducedArcs", false)) return; //already jammed
 
-        if (Dice::d(20) < $this->arcRestrictionThreshold) return;
+        //an Expert Turret Officer on this turret: "subtract 2 from the die roll" (OFFICERS_PLAN.md Stage 22)
+        $relief = TacGamedata::$officersPresent ? Officers::turretJamRelief($ship, $this, $gamedata->turn) : 0;
+        if (Dice::d(20) - $relief < $this->arcRestrictionThreshold) return;
 
         foreach ($this->getTurretMates($ship) as $mate){
             if ($mate->hasCritical("ReducedArcs", false)) continue; //don't double up on a mate already jammed
@@ -811,8 +833,9 @@ class Weapon extends ShipSystem
     }
 
     /* This weapon plus every other weapon sharing its turret - same non-null linkedFiringGroup on the
-       same unit. An unlinked mount is a turret of one. */
-    protected function getTurretMates($ship)
+       same unit. An unlinked mount is a turret of one. Public for the Expert Turret Officer, who aids
+       every weapon on his turret (Officers, Stage 22). */
+    public function getTurretMates($ship)
     {
         $mates = array($this);
         if ($this->linkedFiringGroup === null) return $mates;
@@ -1037,7 +1060,7 @@ class Weapon extends ShipSystem
 		if ($this->reducedArcStart !== null) {
 			$this->data["Turret Mount"] = $this->arcRestricted
 				? "JAMMED - locked to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
-				: "Whole turret May jam to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
+				: "Whole turret may jam to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
 					. " on a " . $this->arcRestrictionThreshold . "+ (d20) whenever damaged";
 		}
         $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' . $this->priorityAF;
