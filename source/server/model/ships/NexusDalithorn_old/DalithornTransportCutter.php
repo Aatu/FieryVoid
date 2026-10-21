@@ -42,7 +42,7 @@ class DalithornTransportCutter extends FighterFlight{
 			$armour = array(2, 1, 2, 2);
 			$fighter = new Fighter("DalithornCutter", $armour, 24, $this->id);
 			$fighter->displayName = "Orvast";
-			$fighter->imagePath = "img/ships/Nexus/Dalithorn_Cutter2.png.png";
+			$fighter->imagePath = "img/ships/Nexus/Dalithorn_Cutter2.png";
 			$fighter->iconPath = "img/ships/Nexus/Dalithorn_Cutter_Large2.png";
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

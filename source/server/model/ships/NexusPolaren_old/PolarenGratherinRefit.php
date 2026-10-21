@@ -69,7 +69,7 @@ class PolarenGratherinRefit extends HeavyCombatVesselLeftRight{
         		),
         		3=> array(
         				3 => "Thruster",
-        				5 => "Rad Cannon",
+        				5 => "Heavy Maser",
         				7 => "Maser",
 						9 => "Light Blast Cannon",
 						11 => "Impactor",
@@ -78,7 +78,7 @@ class PolarenGratherinRefit extends HeavyCombatVesselLeftRight{
         		),
         		4=> array(
         				3 => "Thruster",
-        				5 => "Rad Cannon",
+        				5 => "Heavy Maser",
         				7 => "Maser",
 						9 => "Light Blast Cannon",
 						11 => "Impactor",

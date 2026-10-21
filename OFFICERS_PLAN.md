@@ -18,7 +18,17 @@ a post destroyed by pre-battle damage refunded (§9.21) - committed (`68f1c82b3`
 with FV's EM hardening rebuilt to the tabletop rules first (§9.22) - committed (`318058ac0`). Stage 17, the Expert Ion Technician
 (Cascor), whose thrust boost rides the generic boost the way the Hypergraviton Blaster's does (§9.23) - committed
 (`a83c3d6ae`). Stage 18, the Expert Pilot, the first officer bought as a COUNT - up to four on one flight, one per craft (§9.24) -
-BUILT 2026-10-19, uncommitted.** Written
+committed (`76d449587`); the Expert Evader made an Evade order (§9.25) - committed (`e833a9adf`). Stage 19, the Expert Targeter
+(Raiders; Llort at double), the first officer posted in a STRUCTURE block - +4 on called shots by the weapons of his block, or on a
+Medium ship by one side's weapons on its hit chart (§9.26) - committed (`1f0900707`). Stage 20, the Expert ELINT Officer (Abbai 15%;
+17 more races at 30%), in the ELINT array - sensors +1, sensor criticals -2, every ELINT range 25% longer, his blanket a third against
+ballistic weapons (§9.27) - committed (`cff6a6094`). Stage 21, the Expert Tailgunner, with FV's missing TAIL GUN rule built first -
+a fighter's tail gun fired with its craft's other weapons at -10% unless the flight has a navigator; under him no penalty, or +5% with
+a tail gun that has none (§9.28) - committed (`3f8de3e6b`). Stage 22, the Expert Turret Officer (Vree), placed in a turret-mounted weapon
+and aiding his whole turret - +1 fire control, -1 on criticals, -2 on the turret jam roll, and a turret that fires no shot SHELTERED from
+all but called shots (§9.29) - committed (`260780e57`, `20cc13c40`). Stage 23, the Expert Anticipator (Torata 10%, everyone else 15%), in the
+C&C - initiative rolled twice and the higher kept, one turn in the Firing phase as a fighter's combat pivot, and every damage roll of two or
+more dice one die larger with its lowest dropped (§9.30) - BUILT 2026-10-21, uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -62,7 +72,26 @@ not fire built, and a Sub Reactor counted as the reactor (Stage 17, §9.23). On 
 text and notes (up to four, two for Raiders, each in his own craft; his free jinking level beyond the limit), and the Spark Field
 clauses of the Evader and the Pilot, and ruled four questions: pilots ARE the flight's one officer, priced by the §9.9 scaled rule,
 the Pilot's Spark Field relief automatic on a turn his flight neither jinks nor fires, and "Raiders" the Raiders faction (Stage 18,
-§9.24). Each officer's own rules questions still only need ruling when that officer's stage starts. Next step: the
+§9.24). On 2026-10-20 they added the Expert Targeter with his rules text and notes (a system enhancement on the outer Structure
+blocks, movable between them in battle; a Front / Aft choice on a Medium ship's one block; the insignia and a tooltip on the block's
+health bar), and ruled four questions: his kill roll counts only the damage his block took that turn, a Medium ship's side is its
+hit chart's reach (Primary included), an Expert Gunner's called-shot bonus gives way to his, and the insignia sits after the
+section name (Stage 19, §9.26). Later that day they added the Expert ELINT Officer with his rules text and a list of the races that
+may take him (no custom faction for now), and ruled four questions: the Abbai WotCR are Abbai and the Drazi WotCR left out, his +25%
+on the ranged functions only, the -2 on every sensor array, and the blanket's fractions kept (Stage 20, §9.27). On 2026-10-21 they
+added the Expert Tailgunner with his rules text and a note: FV may not apply the tail gun's penalty at all (it did not - FV_factions.txt
+said so), so it was to be built first, flagging the few fighters that have a tail gun. They ruled three questions: the -10% on the
+Tiqincc, the Tiqus and the custom tail-gun fighters "unless $this->hasNavigator = true"; the officer offered to all 15 tail-gun flights;
+no +5% for a penalised tail gun fired alone; and, after the first build, only the craft's other DIRECT-FIRE weapons trigger the penalty,
+never a torpedo or missile launched in Initial Orders (Stage 21, §9.28). Later that day they added the Expert Turret Officer with his rules
+text and notes - a system enhancement on a turret weapon (FV has no turret system), aiding every weapon on that turret, one to a turret, and
+"sheltered" automatic when no weapon on the turret fires, with no new declaration UI - and ruled four questions: only a shot breaks the
+shelter, never an interception; a Gunner's +1 on that turret does not combine with his; a turret weapon linked to no other is a turret of its
+own; and he moves as the other placed officers do (Stage 22, §9.29). Later that day they supplied the Expert Anticipator's rules text - one
+of the original 25 - with a note (his Firing-phase turn "is similar to a fighter's combat pivot except that there are no associated firing
+penalties and thrust must still be spent on ship thrusters as normal"), and ruled two questions: the turn takes effect as a combat pivot does,
+before fire resolves, so this turn's fire meets the new facing; and on an Expert Gunner's weapon the extra die and the Gunner's +1 per die
+both apply (Stage 23, §9.30). Each officer's own rules questions still only need ruling when that officer's stage starts. Next step: the
 rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
@@ -255,7 +284,7 @@ Medium-sized job (§3.4).
 | **Expert Ion Technician** | "3 thrust → 1d10+1 on one ion weapon" is a per-turn spend with UI. *Built in Stage 17 (§9.23) with no new UI or storage: the user's note pointed at the Hypergraviton Blaster, whose boost is the generic one priced in thrust - so the Laser Technician's payload pattern with `thrustBoosted` gave the buttons, the thrust balance and the commit check for free; what was new is the discharge of a boosted gun that does not fire, at the turn change.* | +1 per die and +1 flat on Ion-class weapons; +4 on C&C crits; the Rad Cannon's flat 12 and forced crits are Medium |
 | **Expert Surge Officer** | Six unrelated hooks: EM damage, combined Surge Cannon shots, capacitor power by ship size, EM-hardening −3, a d6 to resist deactivation, Spark Field −1. *Built in Stage 16 (§9.22): the rules text made it reactor power by ship size; his two hardening clauses needed FV's EM hardening rebuilt to the tabletop rules first (WeaponEM), the bigger half of the stage.* | +1 damage on Electromagnetic-class weapons |
 | **Expert Ballistic Officer** | "+1 magazine round per launcher" moves the lobby's ammo limits, which are derived from magazine capacity at offer time. Free missile swaps are lobby ammo pricing | +5 launch range (`range` **and** `rangeArray` — the same mode-switch trap — and sent to the client) |
-| **Expert Anticipator** | A free **turn** for a ship in the Firing phase is a new phase-3 movement for ships (today only flights move there, as combat pivots), with masking, validation and animation | Rolling initiative twice is Easy. Re-rolling the lowest die is Medium: a `Dice`-level flag, which the replay harness's own `Dice` stub must mirror ([[project_replay_harness]]) |
+| **Expert Anticipator** | A free **turn** for a ship in the Firing phase is a new phase-3 movement for ships (today only flights move there, as combat pivots), with masking, validation and animation. *Built in Stage 23 (§9.30): the turn is an ordinary turn row marked `anticipate`, kept by the server's Firing-phase filter for his ship only and masked with the combat pivots; its thrust is paid on the Movement phase's own panel, wired into the Firing phase. The extra die is a `Dice` flag after all, and the one weapon that rolls its damage dice one call at a time - the Pentagon Array, his rules' own example - hands them to `Dice::keepBest`.* | Rolling initiative twice is Easy. Re-rolling the lowest die is Medium: a `Dice`-level flag, which the replay harness's own `Dice` stub must mirror ([[project_replay_harness]]) |
 | **Expert Gunner, once-per-battle abilities** | A Piercing mode injected into a weapon that lacks one, and +15 % on one called shot, each once per battle and not combinable: firing-mode injection, a persisted "used", and UI. *Built in Stage 10 (§9.16), all three automatic (user simplifications), with moving officers.* | — |
 | **Expert Electrician** | Per turn: deactivate the flight's weapons, convert their max damage ÷ flight size into thrust or OB, then a d6 to see whether they stay offline | — |
 | **Expert Analyst** | *Moved from Medium, 2026-10-16:* the user found his full rules "more complex than I first described". The Medium reading was a per-load "the viewer's team has a live Analyst" static widening `isDisclosedToCurrentViewer()` (ammo types, hangar contents) and the officer payload, per viewer; two clauses moot in FV (weapon arming already public, [weapon.php:453](source/server/model/weapons/weapon.php#L453); cargo not modelled). Needs his full rules text and its own ruling round | — |
@@ -313,11 +342,15 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Security Officer *(added 2026-10-17, §9.19)* | `OFF_SECU` | C&C | 1 |
 | Expert Religious Leader *(added 2026-10-17, §9.20)* | `OFF_RELI` | C&C, movable to any primary non-weapon system | 1 |
 | Expert Religious Leader, elsewhere *(Stage 15, §9.21)* | `OFF_RELIP` | a chosen primary non-weapon system | 2 |
+| Expert Targeter *(added 2026-10-20, §9.26)* | `OFF_TARG` | a chosen outer Structure block; on a hull with none, its Primary Structure, covering the first side | 2 |
+| Expert Targeter, the other side *(§9.26)* | `OFF_TARG2` | a Medium ship's Primary Structure, covering its second side | 2 |
+| Expert ELINT Officer *(added 2026-10-20, §9.27)* | `OFF_ELINT` | the ELINT array | 1 |
+| Expert Turret Officer *(added 2026-10-21, §9.29)* | `OFF_TURR` | a chosen turret-mounted weapon, aiding every weapon on its turret | 2, one to a turret |
 | Expert Software Engineer | `OFF_SOFT` | Computer | 1 |
 | Expert Ion Technician | `OFF_ION` | Engine | 1 |
 | Expert Surge Officer | `OFF_SURG` | Mag-Grav Reactor | 1 |
 | Expert Ballistic Officer | `OFF_BALL` | C&C | 1 |
-| Expert Anticipator | `OFF_ANTI` | C&C | 1 |
+| Expert Anticipator *(Stage 23, §9.30)* | `OFF_ANTI` | C&C | 1 |
 | Matter Weapons Expert, C&C | `OFF_MWE` | C&C | 1 |
 | Matter Weapons Expert, weapon | `OFF_MWEW` | chosen weapon | 2 |
 | Expert Gunner | `OFF_GUN` | chosen weapon | 2 |
@@ -326,6 +359,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Evader | `OFF_EVAD` | lead craft | 1 (flight) |
 | Expert Coordinator | `OFF_COOR` | lead craft | 1 (flight) |
 | Expert Pilot *(added 2026-10-19, §9.24)* | `OFF_PILOT` | one per craft, from the first | 1 (flight), bought as a count |
+| Expert Tailgunner *(added 2026-10-21, §9.28)* | `OFF_TAIL` | lead craft | 1 (flight), a flight with a tail gun only |
 | Expert Electrician | `OFF_ELEC` | lead craft | 1 (flight) |
 
 Offers come from one call, `Officers::addOffers($ship)`, made at the end of
@@ -341,6 +375,7 @@ budget, drop the label from the wire, since the client holds the labels anyway.
 | C&C | the first `instanceof CnC` that is not a `FlagBridge`; failing that, the first `CnC` of any kind | `SecondaryCnC` is not a `CnC` subclass ([baseSystems.php:3837](source/server/model/systems/baseSystems.php#L3837)), so it is never picked. `ShadowPilot` is one (:15079), but it only sits on Ancient hulls, which D9 excludes. |
 | Engine | the strongest `Engine` by `output` | `strongestSystem()` semantics: the first in construction order wins a tie |
 | Sensor Array, Sensors | the strongest `Scanner` by `output` | includes `ElintScanner` |
+| ELINT array | the strongest `ElintScanner` by `output` | Expert ELINT Officer (Stage 20); the Chameleon suite is one, a Kirishiac ELINT module is not (no Scanner). No officer-eligible hull mixes a plain Scanner with an array (measured) |
 | Reactor | the biggest `Reactor` by `maxhealth` | `ELITE_CREW`'s rule ([Enhancements.php:2485](source/server/model/ships/Enhancements.php#L2485)); `MagGravReactor` extends `Reactor` |
 | Mag-Grav Reactor | the first `MagGravReactor` that can be hit (never a `MagGravReactorTechnical`) | Surge Officer (Stage 16: every Ipsha hull has exactly one) |
 | Jump Drive | the first engine `JumpEngine::getUnitJumpEngines($ship)` returns that is neither legacy nor a gate | never a bare sweep of `$ship->systems` ([[project_jump_points]]) |
@@ -460,6 +495,10 @@ masking: individual notes never reach any client.
 | Surge Officer (Stage 16) | the Mag-Gravitic Reactor's `output` | **Yes**, as the Technician's: `output` is sent unconditionally. His +1 per EM hit, the hardening he eases and the Spark Field relief show only as their results (damage dealt, criticals rolled, a "shutdown resisted" line in the log - which a hardened ship's own d6 also writes) |
 | Ion Technician (Stage 17) | an ion gun's `boostable` / `boostEfficiency` / `thrustBoosted` / `thrustPerBoost`, its boost (type-2 power entries), and the thrust it takes off the engine | **Own team only**, as the Laser Technician's: "Weapons being charged in this manner will be detected (and their strength known) by anything that detects special weapon arming modes, such as the Expert Analyst" - by nothing else until the Analyst's stage. An opponent's payload carries the gun's power entries without its boosts while he is aboard; game over discloses all. His +1s, the boost and the Rad Cannon's improved effects show only as their results; a discharge shows as the gun's loading, which is public |
 | Expert Pilot (Stage 18) | a flight's `offensivebonus` (+1 a serving pilot); its jinking (free levels beyond the limit) | **Yes, to every viewer**: the OB through his `publish`, as the Evader's; the jinking shows as the flight's jinking, which is public. Who and how many stay own-team; the Spark Field relief shows only as the damage dealt |
+| Expert Targeter (Stage 19) | the hit chance of a called shot by a weapon he covers; which weapons those are (`covers`) | **Own team only**: the +4 is in the owner's own hit-chance preview ("Expert Targeter") and nowhere else; an opponent sees only the needed % the combat log prints for the shot, as for a Gunner's +3. The covered weapon ids ride the officer payload, which an opponent never receives |
+| Expert Tailgunner (Stage 21) | the hit chance of his flight's tail guns | **Own team only**: the owner's hit-chance preview ("Expert Tailgunner" +5, or no "Tail Gun" -10) and the tail gun's tooltip line; an opponent sees only the needed % the combat log prints. The tail gun's own penalty is public: every viewer's tooltip has the "Tail Gun" line |
+| Expert Turret Officer (Stage 22) | his turret's weapons' fire control; their critical and jam rolls; where hits land on a sheltered turret | Fire control: **yes, to every viewer**, as the Gunner's (isModified). The -1 on criticals is never sent (nothing displays one); the jam's 19+ is in the owner's "Turret Mount" line only. The shelter is server-only: an opponent sees where the hits land (another system, or Structure), never why |
+| Expert ELINT Officer (Stage 20) | his array's `output`; every ELINT range from his ship; his blanket against ballistic weapons | **Yes, to every viewer**: `output` always is, and the ship payload carries `elintRangeBonus` (25) and `blanketBallistic` (3) while he serves - an opponent's own OEW under his Disruption and its hit chance against a unit under his blanket are previewed with them; his array's tooltip shows the ranges. The officer list stays own-team; a disguised Chameleon ship's payload is its simulacrum's and carries neither. The -2 on sensor criticals is never sent |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
 | Scanner | the late-EW allowance | Own-team only: the client asks `officers.listFor`, which an enemy payload never carries |
@@ -617,7 +656,12 @@ committed.
 | **16** | FV's EM hardening rebuilt to the tabletop rules, the Ring Base hardened; the Expert Surge Officer on top. **BUILT 2026-10-18** (§9.22) | Hardened units no longer immune: -2 once a turn on the critical (dropout) roll of a system an EM weapon affects, through the real `doDamage`; a forced dropout ignored on 1-2, a forced shutdown resisted on 1, power losses one less, at the Burst Beam family, Shock Cannon and others; other EM effects and armour-ignoring damage as against anyone; the flat -1 stand-in gone from every Ipsha hull. The officer: Ipsha only, 10%, the Mag-Gravitic Reactor; +2/+1 power by size, previewed in the lobby; +1 per EM hit, +N on an N-cannon Surge Cannon shot, his own Spark Field too; -3 and 1-2 on his ship; Spark Fields 1 weaker against him |
 | **17** | Expert Ion Technician (Cascor), his thrust boost on the Hypergraviton Blaster's path. **BUILT 2026-10-18** (§9.23) | +1 per die (capped at the face) on rolled ion weapons, +1 a hit on fixed ones (the Ion Torpedo, a Ballistic weapon in FV, included), nothing on a roll of 0; stacking with Elite Crew, replaced by a Gunner's; Rad Cannons 12 boxes, the C&C at +4, criticals forced on Scanner, Engine, Reactor and Sub Reactor; the boost - 3 thrust for 1d10+1, one level per gun (a second refused in the real power.js), once a turn, a loaded rolled gun only, hidden from opponents, the engine's thrust lowered in the real movement.js; a boosted gun that does not fire discharges at the turn change; Cascor only, 10%, in the Engine |
 | **18** | Expert Pilot, added by the user - the first officer bought as a COUNT. **BUILT 2026-10-19** (§9.24) | Up to 4 (Raiders 2), never more than the flight's craft, each in his own craft from the first; +1 OB each; one free jinking level each, beyond the jinking limit, in the real movement.js (`jinkinglimit` itself untouched); each lost with his own craft, and following it on a split, his share of the cost with him; Spark Fields 1 weaker per pilot on a turn the flight neither jinks nor fires (an interception not counting); the Evader's -1 already reaching Spark Fields; pilots the flight's one officer; 100% of a craft each for a flight of six, scaled; the buy dialog holding the count to the flight size |
-| **19+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **19** | Expert Targeter, added by the user - the first officer posted in a Structure block. **BUILT 2026-10-20** (§9.26) | Offered on every outer block of a Raiders or Llort hull (Llort 20%), one per block (never moved onto a held one), on a Medium ship's one block with a second-side twin only where the two sides differ, never elsewhere; +4 on a called shot by a covered weapon, nothing on an ordinary shot or a flat-profile call, the -8 kept; a block covers its location's weapons, a Medium ship's side its hit chart's reach through Primary; a covered Gunner's +3 neither used nor spent; the kill roll on this turn's damage only; a move between blocks and a side switch on the Stage 10 rules (serving nowhere that turn), free in Fleet Selection; the insignia in the bar, an officers-only tooltip on it, its click opening the Officers menu in Initial Orders |
+| **20** | Expert ELINT Officer, added by the user. **BUILT 2026-10-20** (§9.27) | Offered on the ELINT hulls of the user's 19 factions only (Abbai and Abbai WotCR 15%, the rest 30%; never the Centauri or Drazi WotCR, the Early EA, a custom faction or an OSAT), posted in the strongest array; that array +1, every array -2 on criticals, his kill roll included; SOEW, Disruption and Jamming 38 hexes, SDEW 63 (its base corrected to 50), Blanket 25, at declaration (the real Initial Orders menu) and at use (the real EW sweeps, both ends); his blanket a third against ballistic weapons only, fractions kept, the best ELINT per weapon kind, in the real `calculateHitBase` and the live client breakdown; the numbers to every viewer, the officer to his own team |
+| **21** | Expert Tailgunner, added by the user, with the tail gun rule FV lacked. **BUILT 2026-10-21** (§9.28) | A tail gun flagged on the 15 flights that have one (one a craft, firing aft beside a forward weapon), in the static blueprint; -10% on a turn its craft fires another direct-fire weapon - not another craft's, not a missile or torpedo launch, an interception, Meteor Defence, last turn's order or the ram - unless the flight has a navigator (7 of the 15, or one bought); the forward guns never penalised; the Tailgunner offered on those 15 only, 50% of a craft scaled; under him no penalty, or +5% on a tail gun without one and no other weapon; lost with his craft; the hit-chance breakdown and the tooltip line on the client, as on the server |
+| **22** | Expert Turret Officer (Vree), added by the user - placed in a turret-mounted weapon, aiding his whole turret. **BUILT 2026-10-21** (§9.29) | Offered on every turret-mounted weapon of the 12 Vree hulls with turrets, 5%, one to a turret (a ship as many as it has turrets), never the Custom Ships' Shadow Xonn; +1 fire control on every weapon of his turret (not +2 on a Gunner's), -1 on their criticals (his kill roll included), -2 on their jam roll; a turret none of whose weapons fires a shot sheltered - an interception not counting - so a hit-chart roll on its weapons takes the destroyed-system fallback, a called shot still hitting, inside the real `Firing::fireWeapons` only; disabled with his own weapon; movable, never onto a turret another holds; the lobby's fire control and Turret Mount line, the client's one-per-turret rules |
+| **23** | Expert Anticipator, one of the original 25 (Hard). **BUILT 2026-10-21** (§9.30) | 15%, the Torata 10%, in the C&C; the d100 of both initiative rolls thrown twice for his ship, the higher kept; one turn in the Firing phase - a real turnleft / turnright, its thrust through the thrusters on the Movement phase's panel - only with the turn delay complete (no snap turn) and the thrust unspent, before the ship declares direct fire, once a turn, never with a unit attached, kept by the server for his ship only and hidden from enemies until firing resolves, its facing the one this turn's fire meets; a commit refused while its thrust is unassigned; every damage roll of two or more dice one die larger, the lowest dropped (the real `lib/dice.php` and both harness stubs alike), the Pentagon Array's five rakes included, never a one-die or fixed roll or a ram, on a Gunner's weapon with his +1 per die as well |
+| **24+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -658,8 +702,12 @@ committed.
 | Ion Technician | Rad Cannons always score 12, with no roll? Forced crits on Sensors, Engine and Reactor on every hit? When is the thrust boost declared? Is "+4 on C&C crits" a penalty? **Rules text 2026-10-18 (§9.23)** settles all four: 12 Structure boxes instead of 10 (the Rad Cannon rolls nothing anyway); a forced critical roll on a sensors, engine or reactor hit; the boost "is made at the same time systems are activated or deactivated for extra power" - Initial Orders; the C&C's roll "at +4 on the die instead of the listed +2" - his ship's Rad Cannons hitting an enemy C&C. Asked: may one gun take more than one boost? A boosted gun that does not fire - build the discharge? Does a Sub Reactor count as the reactor? **RULED 2026-10-18:** the boost was first ruled **repeatable** (every 3 thrust another 1d10+1), then, once built, **re-ruled to one level per gun** a turn (the recommendation); the **discharge is built**, with a tooltip line; a **Sub Reactor counts**. |
 | Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? **Rules text 2026-10-18 (§9.22)** settles the first: "Capital ships and larger receive +2 points of power, while medium ships and HCVs get +1" - the reactor. **RULED 2026-10-18:** the −3 is "−1 on EM-hit systems" (the tabletop −2 → −3 step, where the rule says); then, the user finding FV's hardening to be a simplification, **FV's EM hardening rebuilt to the tabletop rules** (supplied) and the Ring Base hardened, the officer on top; the −2 **once per system per turn**; EM effects the tabletop hardening does not list **apply normally** (the old immunity lines commented out with a note, to revisit); armour-ignoring EM weapons **ignore Ipsha armour fully**; the flat −1 stand-in **removed** from every Ipsha hull; **his own Spark Field gains the +1**. |
 | Expert Pilot | *Added 2026-10-19 with his rules text and notes (§9.24).* Several pilots beside another officer (D9 says one; the Spark Field text pictures "four pilots and an evader")? 100% of a fighter each, or the §9.9 scaled rule? The Spark Field relief "if he forgoes all his other benefits for the entire turn" is a per-turn choice: build a toggle? Which factions are "Raiders"? **RULED 2026-10-19:** pilots **ARE the flight's one officer** (1-4 of them, never beside another); **scaled** by §9.9 (100% of a craft each, for a flight of six); the relief **automatic** - "if flight doesn't jink or fire that turn they can get the damage reduction"; **the Raiders faction only**. |
+| Expert Targeter | *Added 2026-10-20 with his rules text and notes (§9.26).* His post is a Structure block, and FV rolls d20 + ALL the block's damage for one: under D3 that kills him almost at once - keep D3, roll on this turn's damage, or no kill roll? Which weapons does a Medium ship's side aid: those its hit chart reaches directly, through its Primary result too, or those in that section? A Gunner's gun he covers: both bonuses, his alone, or the Gunner's ("does not combine")? Where does the insignia go on a block's bar? **RULED 2026-10-20:** d20 + **this turn's damage** to the block, 20+ kills, the new code "heavily gated"; the side's **hit chart reach, Primary included**; **his +4 only** - the Gunner keeps his +1 fire control, his once-per-battle +3 neither used nor spent while covered; **in the bar, after the section name**. **Re-ruled after the play test (game 4495):** one **per Structure block**, not per ship, and never moved onto a block another Targeter holds. |
+| Expert ELINT Officer | *Added 2026-10-20 with his rules text and the user's list of races (§9.27).* Two WotCR factions carry ELINT hulls the list does not name (Abbai Matriarchate (WotCR), Drazi Freehold (WotCR)): which get him? "The range of all ELINT functions" - which ranges? On a hull with several ELINT arrays, the -2 on every array or his own? His blanket's third: keep FV's fractions or round down? **RULED 2026-10-20 (all as recommended):** the **Abbai WotCR at the Abbai 15%**, the Drazi WotCR left out (as the Centauri WotCR); the **ranged functions** - SOEW, SDEW, Blanket, Disruption, Jamming - not Detect Stealth or the stealth detection range; the -2 on **every** array; **fractions kept** (BDEW 10 gives 3.33 against a ballistic). |
+| Expert Tailgunner | *Added 2026-10-21 with his rules text and the user's note (§9.28):* FV applies no tail gun penalty (FV_factions.txt: "In tabletop, this gun has -2 penalty when fired together with main gun. In FV it does not"), so build it first - a tail gun firing alone is free, fired in the same turn as the forward guns -10% - flagging the few fighters with a tail gun rather than testing every fighter. Which tail guns take the penalty? Which tail-gun flights may buy him? A penalised tail gun fired alone under him: +5%, or nothing? **RULED 2026-10-21:** the penalty on the Tiqincc, the Tiqus and the custom tail-gun fighters **"unless $this->hasNavigator = true"** (so never the Badger or the Rogolon Vostor); **all 15** tail-gun flights may buy him; **no bonus** for a penalised tail gun fired alone. **Re-ruled after the first build:** only the craft's other **direct-fire** weapons fired in the Firing Phase count - never a ballistic launch from Initial Orders. |
+| Expert Turret Officer | *Added 2026-10-21 with his rules text and the user's notes (§9.29):* FV has no turret system, so he is a system enhancement on a turret weapon - FV already marks turret weapons (the jammable mounts) and their turret mates (the linked firing group) - aiding every weapon on that turret, one officer to a turret; "sheltered" is automatic when no weapon on the turret fires, instead of a declaration UI. Does an interception count as the turret firing? Does a Gunner's +1 on that turret combine with his? Is a turret weapon linked to no other a turret of its own? May he move? **RULED 2026-10-21:** **offensive fire only** breaks the shelter (a turret may intercept and stay sheltered); **no combining** - the Gunner's +1 replaces his on the Gunner's gun, the -1, the -2 and the shelter still apply; **each unlinked turret weapon is its own turret** (Xorr 2, Xonn 3, Tyllz 6); **movable**, as the other placed officers. |
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
-| Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? |
+| Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? **Rules text and note 2026-10-21 (§9.30)** settle both: a single turn "if desired", with "Turn Delay complete and enough thrust ... left unused to complete a turn maneuver", "not a roll, pivot, snap turn, or other maneuver" - the user's note: "similar to a fighter's combat pivot except that there are no associated firing penalties and thrust must still be spent on ship thrusters as normal"; 10% for the Torata, 50% more for everyone else (15%). Asked: does the turn take effect before fire resolves, as a combat pivot does, or after all fire? On an Expert Gunner's weapon, the extra die too, or only the Gunner's +1 per die ("does not combine")? **RULED 2026-10-21:** **like a combat pivot** - this turn's fire, his and at him, meets the new facing; on a Gunner's weapon **both apply**. |
 | Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). **RULED 2026-10-15: Grome Autocracy only** (§9.12); the Matter-weapon hull test is kept beside it. **Rules text and rulings 2026-10-16 (§9.14):** "moved into one specific weapon instead of his normal station" - **one or the other, never both**; that weapon gets the +1 / +1 "but no others do", and its rate of fire +1 (Stage 10); "disabled if the weapon takes any damage at all (after armor), and automatically killed if the weapon is destroyed" - **and the ordinary kill roll too**. |
 | Gunner | Size caps for LCVs and bases? Which weapons are eligible: any with fire control, ballistics too? Does he stack with Gunsights? **Rules text and rulings 2026-10-16 (§9.14):** +1 to hit (not EW) and +1 per die capped at the face, always; 5% of the base cost, doubled on non-Yolu ships; at most 1 on a medium ship or smaller, 2 heavy, 3 capital, 4 enormous; **any weapon Gunsights may be bought for** (ballistics included), stacking with Gunsights and with Elite Crew; "does not combine any to-hit or damage bonuses with those of other elite officers" - **on his weapon his own replace the Matter Weapons Expert's**. Once-per-scenario rate of fire, piercing mode and +3 called shot: not combinable, Hard (§3.3), not built; moving between weapons: §8. **Stage 10 (user, 2026-10-16, §9.16) - all three automatic:** the faster reload after the first firing that used neither other ability (**RULED: saved for a later firing** when the first used one); +15% on his weapon's first called shot that is not Piercing; Piercing as an ADDED firing mode on a gun without one, removed once fired - **RULED: single-mode Standard/Raking direct-fire guns only, at the usual -4 with no fighters** - and +4 on a native Piercing gun's first Piercing shot. All three tied to HIM, not the weapon. Moving officers between posts in Initial Orders (blue `#90b1ee` Officers menu); **RULED: the Matter Weapons Expert moves between the C&C and his Matter weapons too**. |
 | Fighter officers | Post = the first craft? A craft has no d20 critical roll (its test is a d10 dropout), so: no kill roll at all, or a d20 + damage roll on any damage to his craft, 20+ kills? (Default: none; he is lost with his craft.) Does he go with that craft on a split-launch? Missileer's "+5 OB": is that +1 OB (5 %)? Evader: always on, or toggled like jinking? Coordinator's "180°+" = three combat pivots in one turn? **RULED 2026-10-11:** the post is the first craft; he is lost **with his craft** (destroyed or dropped out), with **no kill roll**; a dock, a partial dock or a split launch never loses him, and he **stays on the flight row he was bought on** (a "- Split" row never carries him). Missileer: **+1 OB** on a launch that gets the flight's OB, priced **half a craft once, plus 1 per missile the whole flight can carry**. Evader: **always on**. Expert Motivator: **a full officer** (one per flight, lost with his craft, hidden), under his old id, effect and price. Coordinator: Stage 9. **RE-RULED 2026-10-11 (round 2, §9.7):** a **remotely controlled** unit (`$remoteControl`, the Orieni Hunter-Killers) carries no officer of any kind - "they have no pilots". An officer's abilities apply only to the part of the flight that holds his fighter, so when the flight splits **he follows his fighter**: the new row gets him, posted in its first craft, and his cost; the old row loses him from the next turn. The Evader's −1 OB also lowering mine detection is accepted. |
@@ -679,7 +727,7 @@ committed.
 | **The kill roll is not the post's real roll**: an override that skips the parent leaves `$lastCritRoll` stale | Read `$lastCritRoll` only when it was set **this turn**; otherwise roll the formula (§4.4). Overrides today: Scanner and ELINT Scanner call the parent; a missile launcher skips it only when its magazine explodes; a fighter never posts a ship officer |
 | **Hot-path cost** in to-hit, damage and the sort comparator | `TacGamedata::$officersPresent`; test the gate by forcing it false |
 | **The fighter price exception** missed at one of seven sites | One tuple flag, and a Stage 4 exit test across buy, edit, copy and save/reload |
-| **A Dice-level change** (Anticipator's re-roll) breaks every damage line in the harness | Add the same static to the harness's own `Dice` stub ([[project_replay_harness]]) |
+| **A Dice-level change** (Anticipator's re-roll) breaks every damage line in the harness | Add the same static to the harness's own `Dice` stub ([[project_replay_harness]]). *Done in Stage 23 (§9.30): `$extraDie` and `keepBest` in replayHarness.php and officersHarness.php; officersHarness runs one rule table over its stub AND the real `lib/dice.php` (evaluated in a namespace whose `random_int` is forced), so the pair cannot drift unseen.* |
 | **Lobby re-application compounds** a stat bump | Idempotent from a remembered blueprint value, as `systemEnhancements.apply` is |
 | **Shared client system references**: bumping one Matter gun bumps every gun of that class | Copy on first write ([[arch_client_system_shared_reference]]) |
 | **A withdrawn offer** silently drops saved officers while keeping their cost | §4.9; never retire an `OFF_` id without a `loadSavedFleet` conversion |
@@ -2845,3 +2893,665 @@ at most 3 craft), 2 on 57 (Raiders by the faction rule, and flights of at most 2
 4. Not play-tested: no local game holds a pilot flight. Worth a test: buy 2 pilots on a flight of 6 (57 each, "Expert Pilot (2)"),
    drop the size to 1 (one left), back to 6; in game, OB +10, jink to the limit + 2 with the first two levels free; then a turn
    without jinking or firing inside an Ipsha Spark Field (2 less on each fighter).
+
+### 9.25 Expert Evader made an Evade order; Expert Dogfighter wins ties (2026-10-20)
+
+**User request, 2026-10-20** (replacing §9.6's "Evader: always on"): "Expert Evader should be a movement ability used in Firing Phase,
+like a Combat Pivot. Use the Jink icon for Movement UI (but without the + and - buttons), movement tooltip reads 'Evade' for the icon
+and it's hidden after being clicked (cancelled in the usual way for cancelling movement orders, the red cancel button). OB reduced in
+client after Evade icon clicked. Effects of Evader applied on the server the same as they are now when an 'Evade' movement order is
+present. Otherwise Evader does not apply any effects." And: "Expert Dogfighter should also break Initiative ties in the same way as
+Expert Helmsman does for ships (in addition to the Initiative bonus it already has)."
+
+**Built with defaults, stated here (ask before changing):**
+- Evade sits behind the combat pivot's gate, `weaponManager.canCombatTurn`: only before the flight declares direct fire. That also
+  keeps the shown hit chances current - no declared shot was priced at the old OB.
+- No thrust, once a turn; Cancel takes it back (the red button, as for a combat pivot), after which it can be given again.
+- "That turn" = the turn the row is dated: the -1 OB and -1 damage apply to everything resolved on it, so fire resolved in the
+  Firing phase. Shots resolved BEFORE the order exists (Pre-Firing, movement-phase hazards) see no Evade.
+- Hidden from the opponent until the Firing phase resolves, as combat pivots are: the row AND its -1 OB.
+- A Dogfighter's flight tied with a Helmsman's ship: both "win", so the ordinary tie-break (bonus, then id) settles it.
+
+**Design.**
+- The order is a movement row, type `evade` (value 0, no thrust), made by `shipManager.movement.doEvade`, offered by `canEvade`
+  (Firing phase, a serving Evader - `officers.canEvade` ↔ `Officers::mayEvade` - not yet given this turn, on the board, not attached,
+  `canCombatTurn`). `isFiringPhaseMove` (a combat pivot or an Evade) replaced the combat-pivot-only tests in
+  `hasDeletableMovements`, `deleteMove` and both Saved Orders phase-3 sites. FireGamePhase::process already submits a flight's
+  phase-3 movement; `Movement::validateMovement` now keeps one `evade` row a turn for a flight whose Evader serves, asked of the
+  authoritative load (the POST-side ship carries no officers: it is rebuilt from the client's JSON).
+- Server effects: `Movement::hasEvaded($ship, $turn)`; `applyEvader` takes the OB only on such a turn (movement rows are loaded
+  before `Officers::apply`); `evaderDamageReduction($flight, $turn)` gets getDamageMod's turn. The registry's `publish` of
+  `offensivebonus` stays (the owner's preview reads the published figure).
+- Client OB: `officers.pendingEvadeOb` = 1 while an Evade row is still the client's own (id -1); a sent row has its real id and the
+  server's OB already carries it. Read by `displayStat` (ShipInfo, SystemInfo, the ship window rail) and `computeOEW`'s
+  `effectiveOB` (the live hit chance). DERIVED, never written into `ship.offensivebonus`, so Cancel, Saved Orders and a reload
+  cannot double-count it. The registry entry lost its `stats: { offensivebonus: -1 }`: the lobby shows the full OB now.
+- Masking: `TacGamedata::hideEnemyCombatPivots` strips an enemy flight's `evade` row with its pivots and gives its OB back
+  (`Officers::hideEvadeOb`).
+- UI: `#evade` in game.php (`data-movement-type="Evade"`), drawn astern with the jink art (no value, no +/-) in the slot after the
+  jink stack, Cancel behind it; `ShipMovementCallbacks.evadeCallback` (also removes the hover label, since the icon hides under the
+  pointer). `FirePhaseStrategy.setSelectedShip` draws the movement UI for a flight that can Evade or has.
+- Dogfighter: `Officers::winsInitiativeTies` = Helmsman OR Dogfighter. No client twin needed (§9.2: the client never sees a tie).
+- Docs: the Evader card (how to Evade, effects that turn) and the Dogfighter card (+ the tie line); the Helmsman card's tie line
+  now names both. officers.js summaries updated ("+5 initiative, wins ties"; "Evade in the Firing phase: ...").
+
+**Verified.**
+- `officersHarness.php` **1212 / 0**: no Evade = no effect; Evade this turn = -1 OB and +1 getDamageMod, another turn's = nothing;
+  gate off; an Evade row with no Evader; a lost Evader with a row; Spark Field 5 with an Evade, 6 without; the payload's -1 with an
+  Evade; the REAL `hideEnemyCombatPivots` hiding row and -1 from the enemy, keeping both for the owner; the REAL `sortShips`: a
+  Dogfighter beats a higher bonus in either order, Helmsman vs Dogfighter settled by the bonus, a lost Dogfighter wins nothing.
+- `officersClientHarness.js` **451 / 0**: the REAL movement.js `canEvade` / `doEvade` / `deleteMove` / `isFiringPhaseMove` (the row's
+  shape, OB 7 -> 6 -> 7 through Cancel, a sent row not taken twice, last turn's row, the fire gate, no / lost / enemy Evader,
+  Movement phase); lobby Evader OB unchanged (35 shown). **456** after the play-test fix below.
+- **Play test, game 4494 (user, same day): the Evade icon showed but a click did nothing.** `UI.shipMovement.evadeCallback` had
+  never been written (one edit of the build was lost) and the binding was in twice, so jQuery bound `undefined`. Fixed. The client
+  harness now drives the CLICK through the REAL `UI/shipMovement.js` and `ShipMovementCallbacks.js` (fake jQuery): one click handler,
+  the row made, the icon gone and Cancel shown on the redraw, every `.on()` handler in shipMovement.js defined. Mutation-checked: with
+  the handler removed, 4 FAILs.
+- `enhancementsDifferential.js` **698 / 0**; `enhancementsHarness` **280 / 0** (fingerprint unchanged). Bundles rebuilt (`fvbuild -Client`).
+- Replay: **153 / 2** - games **4467** and **4475** FAIL as intended: each holds an Evader flight that (necessarily) never Evaded, so
+  its OB is 1 higher (4475's recomputed to-hit 100 -> 105). NOT re-recorded, pending the user's OK. 4488 SKIP as before.
+  `fvbuild -Check` stops earlier on a NEW ship-data validator error not from this work: KobolRanger's hit chart names a "Jump
+  Drive" on location 0 that it does not have.
+- Not play-tested in a browser.
+
+### 9.26 Stage 19: Expert Targeter (2026-10-20)
+
+**Rules text (user, 2026-10-20) - a 30th officer, not in the original brief.** "Expert Targeter: One area in which Raiders excel is
+that of knocking critical systems (weapons, thrusters, etc.) off enemy units. In many cases, this is the only way they can complete
+their goal of capturing freighters with their cargo intact. The expert target is a true boon to a Raider band. With him on the ship,
+called shots have a +4 bonus to hit. This does not provide any benefit to normal attacks, only called shots. It does not cancel the
+usual -8 called shot penalty, either. Location: One structure block. All weapons attached to this block receive the benefit. On a
+medium ship, he must choose either forward or aft weapons, and will aid only those weapons which can be hit from the chosen
+direction (on the Hit Location Chart). Cost: 10% of the ship's base cost for Raiders. Availability: Raiders. Llort can also take at
+double the cost." The user's notes: a System Enhancement on the non-Primary Structure blocks, movable to the other outer blocks
+during battle; a Medium ship has one block, so instead of Move its menu has a Front / Aft selection (Left / Right on a LeftRight
+hull; default Front / Left), and switching sides in Initial Orders costs him that turn, as any officer move does; care with the
+insignia on a block's bar ("less room, especially on the Starboard side"); and a hover tooltip on the bar giving the officer's
+details "and nothing else", which the bar does not have today.
+
+**Measured before asking.**
+- FV's Structure makes the ordinary critical roll - d20 + ALL its damage - and simply has no criticals to apply, so under D3 the
+  roll kills him: a block that has taken 10 kills him on 55% of later hit-turns, from 19 on certainly - and on a Medium ship most
+  hits land on the one block.
+- Raiders + Llort have 41 hulls with ONE Structure block (33 Medium ships, 7 LCVs, the Hawk - MediumShipLeftRight - and the Llort
+  Graemlar OSAT, D9's). Every other hull of theirs has outer blocks, the bases' through `Structure::createAsOuter`; the Vree-built
+  Jia and Vastar keep their weapons in the ring's locations.
+- On those 41 the hit chart and the weapons' locations disagree: the Hactrus's four PRIMARY beams are hit only from the FRONT chart
+  ("0:Light Particle Beam"), and the Hawk's FRONT cannon only through PRIMARY. Read off the charts: the 7 LCVs reach every weapon
+  from both sides; 12 hulls reach nothing from the aft chart but what Primary gives; 22 split, 13 of them with Primary-chart weapons
+  reachable from either side; no weapon is out of every side's reach.
+
+**Rulings (user, 2026-10-20, asked before building):**
+1. His kill roll is **d20 + the damage his block took THIS turn** (through armour), 20+ killed - not D3's roll on all the block's
+   damage. "Make any new code heavily gated since this will be a rare occurrence."
+2. A Medium ship's side aids the weapons **its hit chart reaches, directly or through its Primary result** - so a Primary-chart
+   weapon is aided from either side, and an LCV's every weapon from both.
+3. A called shot from an **Expert Gunner's** gun that he covers gets **his +4 only**: the Gunner keeps his +1 fire control; his
+   once-per-battle +3 called shot is neither used nor spent while the gun is covered, so it is still his if he moves or the
+   Targeter falls.
+4. The insignia sits **in the bar, after the section name**.
+5. *(After the user's play test, game 4495, the same day.)* **One per eligible Structure block**, "like other System Enhancements",
+   not one per ship - and a Targeter is never moved onto a block where another one is. Built as a `shipLimit` (`targeterLimit`, the
+   blocks he could serve in: 4 on a four-block capital, 2 on an HCV, 6 on a six-block base, 1 on a Medium ship) - the offer's cap
+   slot, which the lobby's `set()` already obeys. `keepPlacedRows`' one officer to a system, and the move rule's occupancy test
+   (mayMoveTo; the lobby's lobbyPostAs; the game's `destinations`), already kept two off one block: proved, not changed. With one
+   per block no weapon is ever covered twice.
+
+**Built with defaults, stated here (ask before changing):**
+- **Posts.** Any outer Structure block (location not 0) of a Raiders or Llort hull; a hull with none - a Medium ship, an LCV - is
+  offered its Primary Structure. ~~One per ship~~ - **re-ruled the same day (ruling 5): one per block** he could serve in.
+- **A block covers the weapons in its own location** ("attached to this block"), so Primary weapons never, and a weapon a hit chart
+  happens to reach from that side ("0:..." entries) only if it sits in the block's location. The jump drive (a `Weapon` in FV) never.
+- **A Medium ship's sides** are its hit chart's non-Primary locations in order - 1 / 2 (Front / Aft), or 3 / 4 (Left / Right) on a
+  LeftRight hull - each reaching, from its own bearing, every weapon its chart names ("N:" redirects and "TAG:" entries included;
+  Structure ignored) and, through its "Primary" result, every weapon the Primary chart names. He covers the FIRST side when bought.
+  The second side is offered (OFF_TARG2) only where the two sides reach different weapons, so an LCV has no selector.
+- **+4 (+20%)** on a standard called shot - a call on a system with no flat profile of its own, i.e. every call that pays the -8;
+  the -8 itself unchanged (-16 against a base); nothing on an ordinary shot or a Kirishiac flat-profile call. Ballistic called shots
+  too (declared in Initial Orders, resolved when he serves or not).
+- A **called Piercing shot** from a covered Gunner's gun: the Gunner's Piercing branch is unchanged (his Piercing ability is not a
+  called-shot bonus), and the +4 applies.
+- **Out of action.** Disabled when his block is destroyed (an outer block also falls with the Primary - the ship is lost then
+  anyway); killed on ruling 1's roll, made on every turn the block takes damage through armour, while he serves or on the turn he is
+  put out. Pre-battle damage destroying his block refunds him (Stage 15's rule).
+- **Moves.** Between outer blocks in Initial Orders by Stage 10's rules (one a turn, serving nowhere that turn, never onto a
+  destroyed block); free in Fleet Selection (Stage 15). A **side switch is a move to his own post** - the transfer note names his
+  own block, and he becomes the other side's id there - so it costs the turn exactly as a move does, and is free in Fleet Selection.
+- **Price** 10% of the hull, Llort 20% ($factionRules); "Raiders" is the `Raiders` faction (the Stage 18 reading - not the
+  Escalation Wars raider factions).
+
+**Design.**
+- ⭐ **Two placed ids, the twin pattern** (OFF_MWE / OFF_MWEW, OFF_RELI / OFF_RELIP): `OFF_TARG` - a block, or a single-block hull's
+  first side - and `OFF_TARG2` (`sameAs` OFF_TARG: his faction rules and price, one or the other) - its second side. A per-system
+  row on the Structure, so the lobby buys him in the block's own menu (the health bar already opens it; Hardened Armour is sold
+  there), and saved fleets, the D13 name check, the D11 refund and the sanitiser come free; `keepPlacedRows`' one officer per system
+  keeps the two side rows exclusive. New registry keys: `switchTo` (the id he becomes on his own post - the side switch) and `side`
+  (which of a single-block hull's sides he covers). `shipLimit` `targeterLimit` (ruling 5): one per block he could serve in.
+- **The +4**: `Officers::targeterShotBonus` beside `gunnerShotBonus` in `Weapon::calculateHitBase`, behind `$officersPresent`, and
+  only for a standard called shot: a list walk on a called shot by a ship with officers. `gunnerShotBonus` asks `targeterFor` before
+  spending the called +3. ⚠️ MIRROR PAIR `officers.targeterShotBonus` in `weaponManager.computeShotModifiers` ("Expert Targeter").
+- **Coverage is the server's alone**: `Officers::targeterCovers` (location, or `sideReach` over the hit chart through
+  `getSystemsByNameLoc`), sent to the owner as the payload's `covers` (weapon ids) - so the client mirror reads a list and copies no
+  hit-chart logic. The lobby needs no coverage (it shows no hit chance).
+- **The kill roll** (ruling 1): one branch in `rollKills` for a Structure post, `blockKillRoll` = d20 + floor(`damageReceivedOnTurn`)
+  + the critRollMods - reached only for a post holding an officer that took damage this turn, behind `$officersPresent`.
+- **The side switch**: `mayMoveTo` answers a move to his own post with his `switchTo` id, where that is offered; `moveTargets` then
+  lists his own block among the `targets`, which the client reads as "may switch". Everything after - the note, `transit`, `moving`,
+  the blue insignia - is Stage 10's.
+- **UI.** `ShipSection`'s bar: the insignia after the name; the pick outline on a destination bar; a click hands a pick its answer,
+  and in Initial Orders opens the Officers menu (SystemClicked, menu); a hover (or long press) raises the officers-only tooltip
+  (`SystemInfo` `officersOnly`) through the bar's own StructureMouseOver / Out events, in game and in the lobby, only when the viewer
+  has an officer listed there. The Officers menu and the lobby menu's footer show a side selector for a side-switching Targeter in
+  place of Move. `officers.systemName` names a block by its section ("Aft Structure #20").
+
+**Files.** Server: `Officers.php` (constants, `$factionRules` OFF_TARG, registry `OFF_TARG` / `OFF_TARG2` after OFF_RELIP; `mayMoveTo`'s
+switch; `isTargeterPost`, `isTargeterSecondSide`, `hasOuterBlock`, `hullSides`, `sideReach`, `targeterCovers`, `coveredWeapons`,
+`targeterFor`, `targeterShotBonus`; `gunnerShotBonus`; `rollKills` / `blockKillRoll`; `addForJson` `covers`), `Enhancements.php`
+(per-system registry entries and wrappers), `weapon.php` (`calculateHitBase`). Client: `officers.js`, `weaponManager.js`, React
+`ShipSection.js`, `SystemInfo.js`, `OfficersMenu.js`, `SystemEnhancementsSection.js`, `ApplyDamageMenu.js`, `PhaseStrategy.js`,
+`gamelobby.js`, `systemEnhancements.js` (the two labels). Docs: an Expert Targeter card (Ship Officers, alphabetical), About Officers
+(buying in a block, moving, the insignia and the bar's tooltip). Statics, bundles and the served copy rebuilt; no new PHP class.
+
+**Measured.** 254 OFF_TARG offers (Raiders 203, Llort 51) and 34 OFF_TARG2 (Raiders 33 - 32 Medium ships and the Hawk - Llort 1, the
+Terillon), statics +7.3 KB uncompressed. Caps (the offer's 6th slot, ruling 5): 1 on a Medium ship, 2 on an HCV, 4 on a four-block
+capital, 6 on a six-block base.
+
+**Verified.**
+- `officersHarness.php` **1316 / 0 with the database** (96 new): the registry pair; offers on every outer block (Battlewagon 4, a base's
+  6 createAsOuter blocks), Llort 20%, a Medium ship's two sides, an LCV's one, none for the Omega, an OSAT or a Dilgar hull, none with
+  OFF_TARG opted out, the Gunner still weapons-only; posts from rows (a Primary block or a weapon buys nothing; one per block, two on
+  one block one); the sanitiser; coverage through the payload's `covers` - a block's own weapons (not the Primary ones, the jump drive
+  or the RammingAttack), the Wolf's two sides with its Primary beam in both, the Hactrus's Primary beams on its front chart, the
+  Hawk's Front cannon from both sides, the Lshon's every weapon; the REAL `calculateHitBase` (+20% on a covered call, nothing ordinary,
+  uncovered, gate off, disabled, killed, moving; the Aft weapons once he arrives; the Medium ship's sides; a covered Gunner's +5 and
+  +20 with nothing spent, his +15 back once the Targeter is killed); the kill roll (17 + 3 kills, 16 + 3 does not, 30 earlier damage
+  ignored, the ship's critRollMod, no roll without damage through armour, a block destroyed this turn rolled, last turn's
+  disabled); moves (to Port, refused to the Primary block, a weapon, his own block on a big ship, a wreck; targets; two Targeters -
+  never onto the other's block, onto a free one, onto a killed one's; each one's targets the free blocks); the side switch (moving
+  to his own block that turn, OFF_TARG2 the next, back again; refused on an LCV; targets; saveTransfers' note), a Gunner's own-gun
+  order still refused; a REAL saved fleet (a Battlewagon's Aft block at 54, a Wolf's Aft side at 45), rolled back.
+- `officersClientHarness.js` **500 / 0** (44 new): the registry mirror and order; block names; summaries; sides; the +4 and its
+  states; the Gunner's +3 giving way; the REAL `computeShotModifiers`; the side selector in the REAL OfficersMenu (order, claim,
+  "ordered to switch", the blue insignia, cancel); the REAL ShipSection bar (insignia after the name, gold / killed, nothing without
+  an officer, the pick outline, a click ordering the move, the Initial Orders menu click, nothing in the Firing phase, the hover's
+  element); the officers-only SystemInfo; the REAL PhaseStrategy.js hover handlers (shown, hidden, another block, a menu left open);
+  the lobby (one row a block, the selector, a free switch and back, an LCV, Move on a big ship, a second Targeter bought, never moved
+  onto it); the REAL footer.
+- `enhancementsDifferential.js` **707 / 0** (9 new: `targ`, `targ+gun` on Areko; `targ`, `targ2`, `targ+targ2` on the Wolf, added for
+  the placed cases only); `enhancementsHarness` **282 / 0** (fingerprint unchanged - ship-level offers only).
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0**.
+- **Mutation-tested: 34 breaks (16 server, 18 client), all caught**, files byte-identical afterwards. One first exited on an unguarded
+  read (`payload.element.tag`) rather than a FAIL line; the check was made null-safe and then reported it.
+- **Play test, game 4495 (user, 2026-10-20)** - read off its rows and a real load: three Targeters (a Pillager and an IML Attack
+  Cruiser moved between blocks on turn 2, the Terillon switched to Aft - an OffTransfer to its own block, OFF_TARG2 from turn 3). On
+  turn 1 the cruiser's covered Port beam needed 115 against 95 for its uncovered Starboard beam on the same target, and the Terillon's
+  covered Front Scattergun 70 against 50 for its Aft one - +20 exactly. The user then re-ruled the limit (ruling 5).
+
+**Follow-up (user request, 2026-10-20): the bar's ✦ and the menu outline** - both observations of the first build, fixed:
+- A block carrying a system enhancement (Hardened Armour) shows SystemIcon's ✦ on its bar (`EnhancementStar`, now exported), after
+  the name and before an officer's insignia - SystemIcon's badge order. Own team only, as the icon's (`systemEnhancements.hasAny`,
+  which skips officer rows: a Targeter alone lights no ✦).
+- The lobby menu's outline (helpers/menuTarget) draws on the block's bar while its menu is open, in the menu's focus blue, on the
+  bar's edge as the pick outline is.
+- **Room on the bar, measured** (`officersE2E/lobby19.mjs`, standalone, real bundles): every one of the 78 hulls with a 3-digit
+  Port / Starboard / quarter block, plus Battlewagon, Brigand, Wolf, Hawk, Sanctuary, Erlorra, Kaedashkada and Omega, Hardened Armour
+  on every block and a Targeter on every block offered one - **463 / 0**: no badge ever overlaps the readout, no readout is ever
+  clipped. "Starboard" was the one name a 128px side column had no room for (49 bars, the Battlewagon's 52/52 among them), so with a
+  badge it reads **"Stbd"** - the window's own quarter spelling. The name, never the readout, shortens with an ellipsis if still
+  short of room (the readout does not shrink): 4 bars, the Kaedashkada (New)'s quarter blocks with both badges and 3-digit boxes.
+- officersClientHarness **507 / 0** (7 new: the ✦ and its order, the ✦ alone, none elsewhere, the ellipsis and the fixed readout,
+  "Stbd" only with a badge, the outline on the menu's block only, gone on close). Bundles rebuilt, served copy synced.
+
+### 9.27 Stage 20: Expert ELINT Officer (2026-10-20)
+
+**Rules text (user, 2026-10-20) - a 31st officer, not in the original brief.** "Expert ELINT Officer: With Abbai advances in electronics
+and communications, it is only natural they have experts in this field. The expert ELINT officer is one such individual. He provides the
+following advantages: The sensor rating of his ship is increased by + 1. All critical hit rolls against the sensors are reduced by 2. The
+range of all ELINT functions is increased by 25% (round fractions of 0.5 or more up). If the ship puts up blanket protection, the total EW
+value is divided by 3 (not 4) for purposes of ballistic weapons only. Thus, if 12 EW is applied to blanket protection, all friendly units in
+range receive - 3 to their defense ratings for normal weapons and - 4 versus ballistic types. Location: Sensors. Cost: 15% of the ship's
+base value for Abbai factions. Availability: ELINT vessel only. Double the cost for non-Abbai vessels. Not available for races whose current
+mainline ships do not have at least an 8 sensor rating." The user's notes: the non-Abbai factions that may take him are the Centauri
+Republic (not the WotCR Centauri), the Earth Alliance (not EA Early), Narn, Minbari Federation, Yolu, Torata, Gaim, Drazi, Vree, Dilgar,
+Brakiri, Hyach, Markab, Corillani, Llort, Deneth and the Minbari Protectorate; no custom faction for now.
+
+**Measured before asking.**
+- FV's ELINT ranges: SOEW 30 (ELINT to target and to the supported ship), SDEW 30 at declaration but **50 in the server's firing check**
+  (`EW::getSupportedDEW`; the tooltip says 30), Blanket 20, Disruption 30, Jamming 30 (`HkJamming::JAM_RANGE`). Detect
+  Stealth has no range: +2 detection per point, on top of an ELINT's x3 stealth detection range. Declaration is checked only in the client
+  (the Initial Orders menu's `isInElintDistance`); use, on both ends (the EW sweeps, ew.js twins).
+- FV's blanket keeps fractions: the best ELINT's points x0.25 (BDEW 10 = 2.5), taken once in `EW::getBlanketDEW` - which every hit
+  calculation asks, ballistic or not.
+- From the statics: 44 ELINT hulls in the 19 named factions, 52 with the Abbai WotCR (3 of whose 8 are OSATs, D9's); none mixes a plain
+  Scanner with an ELINT array; four carry several arrays - Oracle Scout AM (6 + 4), Oracle Scout Epsilon (7 + 4), Eyehawk (8 + 4),
+  Fwellgon AM (6 + 2 + 2). Two WotCR factions the list does not name carry ELINT hulls: Abbai Matriarchate (WotCR) and Drazi Freehold (WotCR).
+
+**Rulings (user, 2026-10-20, asked before building - all as recommended):**
+1. The **Abbai WotCR are Abbai** (15%); the Drazi WotCR are left out, as the Centauri WotCR are.
+2. His +25% covers the **ranged functions only**: SOEW, SDEW, Blanket, Disruption, Jamming - 30 -> 38, 50 -> 63 (SDEW), 20 -> 25. Detect
+   Stealth and the stealth detection range are unchanged.
+3. The -2 is on the critical rolls of **every** sensor array on his ship; the +1 on his own.
+4. His blanket's third **keeps FV's fractions**: BDEW 10 gives 2.5 against an ordinary weapon and 3.33 against a ballistic one.
+
+**Built with defaults, stated here (ask before changing):**
+- **Post**: his ship's strongest ELINT array by output (the first on a tie - none exists among his hulls); the Chameleon suite is one.
+  Out of action as any officer: disabled when the array is destroyed, killed on its own critical roll of 20+ - which his -2 eases ("including
+  any modifications", the Technician's and the Security Officer's precedent). Pre-battle damage destroying it refunds him (Stage 15).
+- **Against each weapon kind the best ELINT wins**: his 9 points beside a plain ELINT's 12 give 3 against either (2.25 / 3 for his); his 12
+  beside a plain 12 give 3, and 4 against a ballistic. Fighter missiles count as ballistic (a fighter's direct fire ignores the blanket as
+  before).
+- **Public numbers** (the 2026-10-10 rule): the ranges and the ballistic third reach every viewer (`elintRangeBonus`, `blanketBallistic` on
+  the ship payload) - an opponent's own OEW under his Disruption, and its hit chance against a unit under his blanket, need them - and the
+  array's tooltip shows them to everyone; the officer himself stays own-team.
+- 30% / Abbai 15%, rounded up as every officer's; one per ship.
+
+**Design.**
+- Registry `OFF_ELINT` after OFF_ION (the last fixed-post ship officer), post `elint` (findPost: the strongest `ElintScanner`), `$factionRules`
+  `only` (the 19 factions) + `pct` (the two Abbai factions at 15). `applyElintOfficer`: `output` +1 on his array, `critRollMod` -2 on every
+  `Scanner` of his ship.
+- ⭐ **`Officers::elintRange($elint, $base)` is THE range of an ELINT function**: 25% longer while he serves, rounded half up in whole numbers
+  (`intdiv(base x 125 + 50, 100)`), behind `$officersPresent`. Asked at every range test: `EW::getBlanketDEW` (20), `getSupportedOEW`
+  (30, both legs), `getSupportedDEW` (50), `getDistruptionEW` (30), `HkJamming` (`JAM_RANGE`). ⚠️ MIRROR PAIR `officers.elintRange`, which reads
+  the published percent (`ew.elintRange` delegates; ew.js getSupportedOEW / getSupportedBDEW / getDistruptionEW and the Initial Orders menu's
+  `isInElintDistance` ask it).
+- **The ballistic third**: `EW::getBlanketDEW($gamedata, $target, $ballistic = false)`; for a ballistic shot (behind `$officersPresent`) each
+  ELINT's points pass through `Officers::ballisticBlanket` - x4/3 for his, counted in the quarters the existing x0.25 takes, so the best
+  ELINT still wins and every other shot runs the unchanged path. `Weapon::calculateHitBase` passes `$this->ballistic`; every other caller
+  (EdjdAbduction) the default. ⚠️ MIRROR PAIR `ew.getSupportedBDEW(ship, ballistic)` / `officers.ballisticBlanket`, at weaponManager's two
+  call sites (the live `computeBaseDefenceBreakdown`; `calculateBaseHitChange`, whose ShipTooltip caller has no weapon - ordinary).
+- **Lobby**: his +1 is added at read time in `shipManager.systems.getOutput` / `getOutputNoBoost` for an EW system (`officers.sensorBonus`,
+  0 in game - the server raised `output`), so the icon and the EW pool show it; the differential compares it (an EW system's output +
+  sensorBonus, as the reactor's + reactorBonus). The array's Special text is rewritten as it is shown (`officers.elintSpecial`, from
+  `adjustDataDisplay`): "30 hexes" -> 38, "20 hexes" -> 25, and the blanket's quarter gains "(per 3 against ballistic weapons)" - in game
+  for every viewer off the published numbers, in the lobby off his bought row.
+
+**Files.** Server: `Officers.php` (constants, `$factionRules`, registry, findPost `elint`, `applyElintOfficer`, `elintRange`, `ballisticBlanket`,
+`addForJson`), `EW.php` (the four sweeps), `HkJamming.php`, `weapon.php` (calculateHitBase). Client: `officers.js` (registry row, findPost,
+`sensorBonus`, `elintRangeBonus`, `elintRange`, `ballisticBlanket`, `elintSpecial`, adjustDataDisplay), `ew.js` (`elintRange` and the three
+sweeps), `systems.js` (getOutput / getOutputNoBoost), `weaponManager.js` (two call sites), `UI/shipTooltipInitialOrdersMenu.js`
+(isInElintDistance). Docs: an Expert ELINT Officer card (Ship Officers, alphabetical - first, before the Engineer) and his numbers in About
+Officers' list of what an opponent sees. Statics rebuilt; no new PHP class, no React change.
+
+**Measured.** 49 OFF_ELINT offers (the 44 + the Abbai WotCR's 5 non-OSAT hulls), statics +2.6 KB uncompressed: Abbai 2, Abbai WotCR 5,
+Brakiri 7, Centauri Republic 5 (the Dargan Chameleon included), Corillani 2, Deneth 1, Dilgar 2, Drazi Freehold 1, Earth Alliance 3, Gaim 2,
+Hyach 2, Llort 1, Markab 2 (the Shadrak base included), Minbari Federation 2, Minbari Protectorate 2, Narn 5 (three of them unofficial
+zzunoff hulls), Torata 2, Vree 2, Yolu 1.
+
+**Verified.**
+- `officersHarness.php` **1374 / 0 with the database** (55 new): the registry; offers and prices on 13 hulls across the factions (Skiatha 690
+  -> 104, Delphi 825 -> 248, the Nota at the Abbai 15%), none for the Garut, the Oracle Alpha, the Egret, the Explorer Prototype, the Kirva
+  OSAT, the Omega or the G'Quan; posts (the 6-array of the Oracle, the Fwellgon's 6, the Chameleon suite), unmoved by Improved Sensors and
+  Poor Crew; a doctored row buys nothing; +1 on his array only, -2 on both of the Oracle's, the EW pool +1, a Hyach array too; the REAL
+  testCritical roll 21 -> 19 (survives), 22 -> 20 (killed, one note); killed or disabled last turn - nothing, ranges 30, nothing published;
+  the payload per viewer; `elintRange` (38 / 25 / 63 / 0, gate off 30); the REAL `getBlanketDEW` (3 / 4 at 22, nothing at 26, a plain ELINT
+  nothing at 22 and 3 / 3 at 18, 2.5 / 3.33 for 10 points, gate off, two ELINTs both ways), `getSupportedOEW` (35: 3 / 0, 39: 0),
+  `getSupportedDEW` (55: 2 / 0, 64: 0), `getDistruptionEW` (35: 2 / 0, 39: 0), `HkJamming::resolveJamming` (rolled at 35 from his only); the
+  REAL `calculateHitBase` - a Norsca's Ion Torpedo needs 5% less under his blanket 12, its Rad Cannon the same.
+- `officersClientHarness.js` **530 / 0** (23 new): the registry mirror and order; findPost on the Oracle's and the Chameleon's REAL static
+  systems; `sensorBonus` (lobby, other array, none, in game, pre-battle destroyed); the REAL systems.js getOutput / getOutputNoBoost;
+  `elintRange` / `ballisticBlanket`; the REAL ew.js getSupportedBDEW, getSupportedOEW and getDistruptionEW; the REAL
+  computeBaseDefenceBreakdown (BDEW 4 against a ballistic, 3 against a beam); the tooltip text (published, lobby, none, the Chameleon
+  suite's own text unchanged); the REAL SystemInfo (an opponent's array: the ranges, no officer; his own: his line too); the REAL Initial
+  Orders menu's SOEW / SDEW / DIST buttons at 35 and 39 hexes.
+- `enhancementsDifferential.js` **709 / 0** (2 new: `elint`, `elint+sens+poor1` on the Nota); `enhancementsHarness` **283 / 0** - the
+  fingerprint re-recorded twice and proved additions only: one offer line (the Nota's, old copy `fingerprint.before-officers-stage20.txt`),
+  then 32 new case blocks (16 hulls x 2), the rest byte-identical.
+- `initialOrdersTooltipHarness.js` reads its known 4 / 10, identical to the output recorded on a clean tree (its stale stub lacks
+  `shipManager.isTargetable` - [[arch_stale_stage_harnesses]]) - so the menu's range is tested in officersClientHarness instead.
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0**. Legacy bundles carry the change (the watcher's); served copy synced.
+- **Mutation-tested: 31 breaks (17 server, 14 client), all caught**, files byte-identical afterwards. One first exited on an unguarded read
+  (`findPost(...).name` on null, when the Chameleon suite was dropped from the post) rather than a FAIL line; the check was made null-safe and
+  then reported it.
+
+**Follow-up (user, 2026-10-20, the same day): two FV ELINT corrections, for every ELINT, not only his.**
+- **SDEW's base range is 50**, as the server's firing check already had it: the Initial Orders menu's Add / Remove SDEW now offer it up to 50
+  hexes (was 30), the ELINT array's tooltip and the FAQ say 50. With him 63 (the tooltip rewrites 50 -> 63 as well). The client's
+  `ew.getSupportedDEW` - the hit-chance preview - checked no range at all; it now drops SDEW beyond `ew.elintRange(elint, 50)`, as the server
+  does at firing (user request, the same day; client 532 / 0, mutation 2 / 2).
+- **The blanket drawn on the map** (`ShipIcon.showBDEW`, user report the same day: it drew 20 hexes around his ship) - the radius is now
+  `ew.elintRange(ship, 20)`, 25 with him, off the published number, so an opponent's map shows his reach too. client 533 / 0 (the REAL
+  showBDEW, its HexRegion stubbed: 25 / 20), mutation 1 / 1. The Kirishiac module arc (`ELINT_ARC_HEXES` 30) is left: no Kirishiac unit
+  can take him.
+- **Blanket Protection's ConstrainedEW is the ELINT's**: `EW::getBlanketDEW` gave a fifth instead of a quarter when the TARGET was a Mindrider,
+  once after the loop; now each ELINT's own ability decides, per ELINT, as `ew.getSupportedBDEW` always did. Unchanged wherever no Mindrider
+  ELINT is on the board (a quarter of the best, or the best of the quarters, is one number); a Mindrider ELINT's blanket on an ally is now a
+  fifth (BDEW 10: 2.5 -> 2), an ordinary ELINT's on a Mindrider a quarter (12: 2.4 -> 3).
+- officersHarness **1375 / 0** (+1), client **531 / 0** (+1, SDEW 50 / 63 in the real menu; the tooltip checks now name SDEW 63 and
+  Disruption 38 apart); statics rebuilt (the array's text); kirishiacRefits 168 / 88, enhancements 283, differential 709, replay 162 / 0 - no
+  corpus game moved. Mutation 3 / 3 (the target read back, the menu's 30 back, the tooltip's 50 left long).
+
+### 9.28 Stage 21: tail guns, and the Expert Tailgunner (2026-10-21)
+
+**Rules text (user, 2026-10-21) - a 31st officer, not in the original brief.** "Expert Tailgunner: This fighter-only officer is adept at
+operating his fighter's tailgun in concert with the forward-mounted weapons, and can train the rest of his fight in this special skill. The
+flight receives no penalties when using the tailgun in the same turn as the other guns. Cost: Half the cost of a fighter. Availability: Races
+can use this officer if they have fighters that meet the requirements e.g. an aft mounted weapon. If the tailgun has no penalty associated
+with it, as in the Badger, the officer provides a +5% to hit with that gun only." The user's notes: FV may not apply any tail gun penalty
+(the Cascor Tiqincc's -10%; the Earth Alliance Badger has none) - if not, build it first: a tail gun fired alone is free, fired in the same
+turn as the forward guns -10%; and rather than testing every fighter, flag the few that have a tail gun.
+
+**FV had no penalty.** FV_factions.txt said it outright ("Tiqincc ... In tabletop, this gun has -2 penalty when fired together with main
+gun. In FV it does not."), and nothing in the to-hit code knew a tail gun. Measured over the statics: **15 flights** carry one - a weapon
+whose arc covers dead astern and not dead ahead, beside a forward weapon (side guns, 0-180 / 180-360, excluded): Tiqincc, Tiqus, Badger,
+Kobol Raptor Support, Circasian Kolam, Sal-bez Crevnen / Drazchk / Okchn, Velrax Resterax / Resterax Refit / Soress PDC, Rogolon Vastur /
+Vostor / Vostor AM and the Star Wars ARC. Only the Tiqincc's notes named a penalty. The one local game holding any (4241, two Tiqincc,
+surrendered on turn 1) fired nothing, so the replay corpus could not move.
+
+**Rulings (user, 2026-10-21, asked before building):**
+1. **The penalty: the Tiqincc, the Tiqus and the custom fighters found "unless $this->hasNavigator = true".** That is a rule, not a list: a
+   flight with a navigator never takes it, so 8 of the 15 are penalised (Tiqincc, Tiqus, the three Sal-bez, the two Resterax, the ARC) and
+   7 are not (the Badger, the three Rogolons, the Kobol, the Kolam, the Soress) - the two official Rogolon Vostors included, both navigated.
+2. **All 15 tail-gun flights may buy him** (offered: the four official flights only).
+3. **No +5% for a penalised tail gun fired alone** under him: the +5% is for a gun with no penalty in its rules; a penalised one only has it
+   waived.
+4. **Only DIRECT-FIRE weapons count** (re-ruled after the first build, which counted every weapon): "it should not count ballistic weapons
+   fired in Initial Orders phase like Torpedoes, only other direct fire weapons fired during Firing Phase."
+
+**Built with defaults, stated here (ask before changing):**
+- "The other guns" = any other DIRECT-FIRE weapon of the SAME craft fired offensively that turn (ruling 4): a weapon flagged `ballistic`
+  (FV's flag is per weapon, never per mode) never counts, nor do an interception, a self-intercept, a Meteor Defence declaration or the
+  ramming attack - exactly the filter `isFtrFiringNonBallisticWeapons` already applies (`!ballistic && firedOffensivelyOnTurn`). Each craft
+  is its own: another craft's forward gun does not touch this one's tail gun.
+- Only the tail gun is penalised; the forward guns never are.
+- A Navigator BOUGHT on a penalised flight (the ARC may buy one, 10 points) lifts the penalty too - it is the same `hasNavigator`, which the
+  server already publishes once bought.
+- Lost with his craft (destroyed, dropped out), as every fighter officer; no kill roll. "Half the cost of a fighter": 50% of a craft for a
+  flight of six, scaled by §9.9 (Tiqincc 12 / 23 / 46 at 3 / 6 / 12 craft; Badger 35 a six).
+
+**Design.**
+- ⭐ **`Weapon::$tailGun` is PROTECTED** (false), set by `setTailGun()` in the fighter's own file (one line each in the 15), and read by
+  `isTailGun()`. `ShipCompactor::annotateSystems` writes `tailGun: true` into the static blueprint - the `$seedsBelowFullCharge` /
+  `survivesStructureDestruction` route - so it is on no payload: a PUBLIC property on Weapon lands on every missile of every MissileRack's
+  payload (MissileRack::stripForJson reflects public properties). game.php reads it off the blueprint, as the lobby does.
+- ⭐ **`Weapon::getTailGunMod($flight, $turn)` is THE rule**, one line in calculateHitBase's fighter branch (every tail-gun class reaches the
+  base method - none overrides it): -`TAIL_GUN_PENALTY` (2, -10%) when `craftFiresOtherWeapon` (the craft's other non-ballistic weapons),
+  unless `$flight->hasNavigator`; under a
+  serving Tailgunner (`Officers::hasTailgunner`, behind `$officersPresent`) 0 on a penalised gun, +`Officers::TAILGUNNER_BONUS` (1) on the
+  others. ⚠️ MIRROR PAIR with `weaponManager.getTailGunMod` / `craftFiresOtherWeapon` (the real `getFighterBySystem`), which
+  `computeShotModifiers` shows as "Tail Gun -2" or "Expert Tailgunner +1". The preview follows the orders declared so far: a tail gun
+  declared before its craft's other guns shows no penalty, though the server's resolution has it.
+- The registry entry `OFF_TAIL` (last - a doctored second row never displaces an officer bought before him) `needs` `hasTailGun` (the first
+  craft carries a flagged weapon) ↔ `officers.passesNeeds` 'tailGun'. No `apply`, no published stat.
+- **Tooltip**: the server writes a "Tail Gun" line on the gun ("-10% on a turn its fighter fires another direct-fire weapon", or "No penalty
+  (navigator)"); `officers.tailGunLine` (through `adjustDataDisplay`) keeps it right for a Navigator bought in the lobby and, for his own team,
+  under the officer ("No penalty (Expert Tailgunner)" / "+5% (Expert Tailgunner)").
+- Docs: an Expert Tailgunner card (Fighter Officers, alphabetical - last), explaining the tail gun rule too. FV_factions.txt's Tiqincc line
+  corrected.
+
+**Files.** Server: `weapon.php` (`$tailGun`, `setTailGun`, `isTailGun`, `TAIL_GUN_PENALTY`, `getTailGunMod`, `craftFiresOtherWeapon`, the
+calculateHitBase line, the data line), `Officers.php` (`TAILGUNNER_BONUS`, `OFF_TAIL`, `hasTailGun`, `hasTailgunner`, header), `ShipCompactor.php`
+(annotateSystems), the 15 fighter files. Client: `weaponManager.js` (`getTailGunMod`, `craftFiresOtherWeapon`, the breakdown line),
+`officers.js` (registry row, `passesNeeds`, `hasTailgunner`, `tailGunLine`, the adjustDataDisplay hook). Docs `ammo-options.html`;
+`FV_factions.txt`. Statics, legacy bundles (`scripts/bundle-legacy.js` - the watcher was not running) and the served copy rebuilt; no new
+class, no schema change.
+
+**Measured.** Statics +1,780 B in all: 15 `tailGun` flags (one a craft), 15 offers, 15 "Tail Gun" lines. Offers: Tiqincc 23, Tiqus 23,
+Badger 35, Kobol 48, Kolam 19, Crevnen 9, Drazchk 26, Okchn 50, Resterax 22, Soress 43, Resterax Refit 25, Vastur 63, Vostor 43, Vostor AM
+43, ARC 38.
+
+**Verified.**
+- `officersHarness.php` **1413 / 0 with the database** (38 new): the 15 flags (one a craft, aft, beside a forward gun;
+  navigators on the 7); the blueprint flag on the tail gun alone, none on an Aurora; the tooltip lines; offers on exactly the 15 at their
+  prices, none on an Aurora, a shuttle, a ship or a Hunter-Killer; flightPrice 12 / 23 / 46; doctored rows; the REAL `calculateHitBase` -
+  -10% with the craft's forward gun, none with another craft's, an interception / self-intercept / Meteor Defence, last turn's order or the
+  ram, none with a navigator (one bought too), the Tiqus's -10%, the forward gun never penalised, the Badger none, the ARC's torpedo launch
+  NOT counting (ruling 4) and its Medium Lasers counting; under him none on the Tiqincc (alone no bonus), the -10% back with the gate off, beside a Dogfighter, or with his craft lost
+  last turn (not this turn), the Badger's tail gun +5% alone or with the forward gun, its forward gun nothing, +5% on a Tiqincc with a
+  Navigator bought.
+- `officersClientHarness.js` **553 / 0** (20 new): the registry row; EVERY static blueprint - the 15 flagged flights are exactly those with a
+  rear-only gun beside a forward one, and exactly those offered him; the lobby derivation (a Tiqincc yes, a doctored Aurora row no); the real
+  `getTailGunMod` and `computeShotModifiers` on two-craft flights built from the real static blueprints (each case the server's, the ARC's
+  torpedo and lasers included, and a tail gun's own declared order not counting against it); the tooltip
+  line through `adjustDataDisplay`. The Stage 18 "OFF_PILOT last in the registry" check now reads one from last.
+- `enhancementsDifferential.js` **709 / 0** (no case added: he moves no lobby stat, and no differential hull has a tail gun);
+  `enhancementsHarness` **284 / 0** (fingerprint unchanged: ships only).
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0**.
+- **Mutation-tested: 37 breaks (20 server, 17 client), 36 caught**, files byte-identical afterwards (both harnesses green again). The one
+  miss is equivalent: `hasTailgunner` dropping its `$turn` - its only caller passes the current turn, the default. A first pass on the
+  pre-ruling-4 code (35 breaks) had missed one more, a tail gun's own order counting against it on the client - the check was added.
+
+**Observations, not changed:**
+1. officersHarness's Stage 18 rail-escape check ("...and a run let some pilots go and kept others") failed once in four runs during this
+   stage - it needs a random_int escape of 1-3 pilots within 40 tries, and its comment's P(miss) ~ 1e-18 is clearly too optimistic. Not
+   touched by this stage; worth making deterministic.
+2. Not play-tested: no local game holds a tail-gun flight. Worth a test: a Tiqincc flight firing both guns at one target (the tail gun's hit
+   chance 10% lower in the breakdown and the log), then one with an Expert Tailgunner (23 points) doing the same (no penalty), and a Badger
+   with one (+5% on its Uni-Pulse tail gun only).
+
+### 9.29 Stage 22: Expert Turret Officer (2026-10-21)
+
+**Rules text (user, 2026-10-21) - a 32nd officer, not in the original brief.** "Expert Turret Officer: The expert turret officer is adept at
+using his turret efficiently and getting its weapons out of harm's way when necessary. This has the following effects: Weapons on the turret
+gain +1 to hit. When rolling for critical hits against turret-mounted weapons, subtract 1 from the die roll. When rolling for the special
+turret jam critical, subtract 2 from the die roll. If no weapon on the turret fires in a given turn, the owning player can declare it to be
+'sheltered.' If this is done, no incoming fire can hit its weapons unless they use called shots. Location: One turret-mounted weapon. The
+turret operator can only aid that turret, not any other turrets on the same ship (if any). Cost: 5% of the ship's [base cost]. Availability:
+Vree only." The user's notes: FV has no turret system, but it already marks turret weapons and the other weapons on the same turret - so he is
+a system enhancement on a turret weapon, every weapon on that turret benefits, one officer per turret; and a turret with an officer whose
+weapons did not fire is simply sheltered, with no new UI for the declaration.
+
+**What FV calls a turret.** A turret-mounted weapon is one with the turret JAM (`setArcRestriction`, the "Turret Mount" tooltip line - the Vree
+saucers' primary mounts, [[arch_vree_turret_jam]]); its turret is `Weapon::getTurretMates` - its linked firing group ("Turret 1"), or the gun
+alone. Measured: 12 Vree hulls, 35 turret weapons - Xorr Turret 1 (2 cannons) + a lone cannon; Ximm a lone cannon + Turret 1 (2 defenders);
+Xixx two mixed turrets; Xavan two; Xonn two mixed turrets + a lone cannon; Vymish one; Vaarl, Vaarka one gun; Vyreel, Xill, Xurr two lone
+guns; the Tyllz starbase six lone Shredders. The Custom Ships' Shadow Xonn carries jammable mounts too, but is not Vree.
+
+**Rulings (user, 2026-10-21, asked before building):**
+1. **Only OFFENSIVE fire breaks the shelter**: a turret may intercept (or hold a weapon for Meteor Defence) and stay sheltered.
+2. **No combining with an Expert Gunner** on the same turret: on the Gunner's gun his +1 replaces the Turret Officer's (the Gunner's own text,
+   the Matter expert's Stage 8 precedent); the -1, the -2 and the shelter still apply to it.
+3. **A turret weapon linked to no other is a turret of its own** (FV's "turret of one"): the Xorr may carry 2, the Xonn 3, the Tyllz 6.
+4. **Movable**, as the other placed officers (free in Fleet Selection, Stage 10's rules in battle).
+
+**Built with defaults, stated here (ask before changing):**
+- "+1 to hit" = +1 fire control on every mode of every weapon on his turret, the Gunner's way (`isModified` - public, as Gunsights).
+- "Cost: 5% of the ship's" (the text stops there) = 5% of the hull's base cost, per officer (Xorr 28, Tyllz 175).
+- His post is the weapon he is bought on: he is disabled when THAT weapon is destroyed, even while a turret mate fights on, and his kill roll
+  is that weapon's critical roll - his own -1 included, as the Technician's -2 is in his.
+- The jam is its own d20, not a critical roll, so only the -2 applies to it (17+ becomes 19+), not the -1 as well.
+- Shelter is decided once, at the start of the ship and fighter fire in `Firing::fireWeapons`, when every order of the turn exists. The rams
+  that resolve before it (collisions, not fire) and Pre-Firing (which resolves before the turn's own orders are declared - meteors, the
+  Pre-Firing weapons) are not sheltered against. Any fire order type but intercept / selfIntercept / meteorDefence is a shot
+  (`Weapon::firedOffensivelyOnTurn`, the Tailgunner's filter) - a ballistic launch from Initial Orders included (no Vree turret weapon is one).
+- A hit rolled onto a sheltered weapon takes the DESTROYED-system fallback of the pool that rolled it: another system of that name or tag
+  (the tag pool's next repair priority), else the section's Structure. A called shot at one hits it (it is resolved before any pool).
+
+**Design.**
+- ⭐ **One per TURRET is a new registry key, `perTurret`** (`Officers::isPerTurret`): `keepPlacedRows` refuses a second of him on one turret
+  (the sanitiser and the load), `mayMoveTo` refuses a move onto a turret another holds - on the same "in action that turn or the next" terms
+  as a post - and `turretLimit` (`shipLimit`) caps a ship at its turret count. `Officers::turretKey` names a turret (`group:` + linked
+  firing group, else `mount:` + id); ⚠️ MIRROR PAIR with `officers.turretKey`, which reads the static blueprint's `linkedFiringGroup`.
+- `isTurretPost` (`hosts`) = `Weapon::isTurretMount()` (new, a method so it never reaches the blueprint); `getTurretMates` made public.
+- Effects (`applyTurretOfficer`): `raiseEveryMode` - the Gunner's +1, now shared by `applyGunner` - on every mate a serving Gunner does not
+  hold, and `critRollMod` -1 on every mate. Jam: `Officers::turretJamRelief` in `Weapon::testArcRestriction`, behind `$officersPresent`.
+- ⭐ **Shelter**: `Officers::openShelter($gamedata)` / `closeShelter()` around the ship and fighter fire loops of `Firing::fireWeapons`,
+  holding a per-request set; `Officers::isSheltered($ship, $system)` (one `empty()` in every other game) is read by
+  `BaseShip::getSystemsByNameLoc` (not-destroyed branch) and `getSystemsByTag` (as `isDestroyed`) - every hit-chart roll of
+  `getHitSystemByTable` / `ByDice`, Flash and Piercing charts included. Server only: nothing is sent.
+- Client (`officers.js`): the registry row (`perTurret`); `placedEntries`, `placedBlock` ("This turret already has the Expert Turret Officer
+  (on ...)") and `lobbyPostAs` mirror the one-per-turret rule; `fireControlRaise` now takes the ship and SUMS (Gunner 1 alone; else Turret
+  Officer + Matter expert), so the lobby preview and `pendingMoveFireControl` cover him; `turretOfficerOn` + `turretMountLine` rewrite
+  the owner's "Turret Mount" line to 19+ "(Expert Turret Officer)" through `adjustDataDisplay` (a jammed line is left alone).
+  `systemEnhancements.LABELS` gains OFF_TURR.
+- Docs: an Expert Turret Officer card (Ship Officers, after the Technician), and the About Officers bullets (placing, moving, what shows).
+
+**Files.** Server: `Officers.php` (constants, `$factionRules`, registry entry + `perTurret` doc, `keepPlacedRows`, `isPerTurret`, `mayMoveTo`,
+the Turret Officer block, `raiseEveryMode`, header), `Enhancements.php` (per-system entry, eligible / price wrappers, the sanitiser's notice),
+`weapon.php` (`isTurretMount`, public `getTurretMates`, the jam relief), `ShipClasses.php` (the two pools), `firing.php` (open / close).
+Client: `officers.js`, `systemEnhancements.js`. Docs `ammo-options.html`. Statics, legacy bundles (`scripts/bundle-legacy.js` - the watcher
+was not running) rebuilt; no new class, no schema change.
+
+**Measured.** Statics +853 B: 35 offers on 12 hulls (Xorr 3 at 28 cap 2, Tyllz 6 at 175 cap 6, Xonn 5 at 60 cap 3, Vymish 2 at 15 cap 1, ...).
+
+**Verified.**
+- `officersHarness.php` **1502 / 0 with the database** (89 new): the registry; every Vree hull's offers against its own turret mounts, price
+  and turret count; none for the Shadow Xonn, a Raiders-flown Xorr, an opt-out, an Omega, a turretless Vree hull, a Vree OSAT or an exterior
+  gun; posts (one to a turret by lowest id, two turrets two officers, a Gunner winning a shared gun, doctored rows); the sanitiser's kept
+  rows, prices and notice; fire control (live, every mode, a mode switch) and critRollMod on the mates only, the lone cannon on its own; a
+  Gunner's gun +1 not +2, the Turret Officer's back once that Gunner is killed; disabled with his own gun, not a mate's; the kill roll 19
+  lives / 20 dies (a Gunner on his turret eased, on another turret not); the payload per viewer; the REAL `testArcRestriction` (17 jams
+  without him, 18 not and 19 does with him, another turret's officer, the gate off, his kill last turn or his move changing nothing - his
+  kill this turn still relieving); shelter (no shot, an interception /
+  self-intercept / Meteor Defence, a shot this turn and last, two turrets, the gate, killed this turn / last turn, moving); the pools; the
+  REAL `getHitSystemByTable` (baseline a cannon, Turret 1 sheltered -> the lone cannon, every turret -> the front Structure, a called shot
+  -> its cannon); the REAL `Firing::fireWeapons` (a probe weapon sees the shelter open while its shot resolves, closed after); moves on the
+  Xonn (to a mate, the lone cannon, a free turret; refused onto a held turret, allowed once its officer is dead; the payload's targets).
+- `officersClientHarness.js` **577 / 0** (24 new): the registry; EVERY static blueprint (12 hulls, exactly the Turret Mount weapons, 5%, the
+  turret count; no other faction); a lobby Xorr from its real static blueprint - the derived post, fire control on the mates only, the
+  tooltip rows, the Turret Mount line (19+, the lone cannon unchanged, a jammed line untouched), one to a turret in `set()` / `placedBlock` /
+  the menu row, the cap, a Gunner's gun +1 not +2, pre-battle destruction, `lobbyDestinations` / `lobbyMove`; in game nothing added, a
+  pending move dropping the +1 and the 19+, an enemy's ship unchanged, the real `SystemInfo`.
+- `enhancementsDifferential.js` **725 / 0** (16 new: the Xorr and the Xonn added for placed cases only - a Gunner, Gunner + Gunsights,
+  a Gunner on every gun; the Turret Officer alone, on every turret weapon, with a Gunner or Gunsights on his mate, with a Gunner on his gun);
+  `enhancementsHarness` **285 / 0** (fingerprint unchanged: ship-level offers only).
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0** (no corpus game has a Vree turret officer).
+- **Mutation-tested: 46 breaks (28 server, 14 client, 4 through the differential), all caught**, files byte-identical afterwards. The
+  first pass missed one - the jam relief not asking whether he serves - so the jam checks gained his kill last turn / this turn and a move.
+
+**Follow-up (user, the same day): the Antimatter Shredder's Shredder mode keeps its 0/0/0.** "Fire control for the Antimatter Shredder
+should remain 0/0/0 (e.g. no bonuses from Gunner or Turret Officers, or any others actually) since it uses its own special hit
+calculation." Built for its Shredder mode (mode 1) only - the one with fire control 0/0/0 and its own per-target attacks (they resolve through
+the ordinary calculateHitBase, so a raised mode 1 would have raised every Shredder attack); its Raking and Piercing modes are plain Antimatter
+Cannon modes and keep every bonus. ⭐ One rule, `Weapon::$fixedFireControlModes` (PROTECTED, `array(1)` on AntimatterShredder) asked
+through `hasFixedFireControl($mode)` by EVERY fire control raiser: `Officers::raiseEveryMode` (Gunner, Turret Officer), `raiseMatterModes`,
+`Enhancements::sysEnhApplyGSGT` (Gunsights - a stored refit row is applied unchecked, so `sysEnhFixedFireControl` guards a non-weapon).
+`ShipCompactor::annotateSystems` writes `fixedFireControlModes` into the static blueprint (13 Shredders), which the lobby's raisers read:
+`systemEnhancements.hasFixedFireControl` (its Gunsights preview) and `officers.hasFixedFireControl` (`fireControlRaise` - so the lobby preview
+and `pendingMoveFireControl` give mode 1 nothing). Docs: the Gunsights, Gunner and Turret Officer cards. Gates after it: officersHarness
+**1512 / 0** (10 new - every raiser alone and together, a mode switch, Gunsights' bare applier, the Xonn's mixed turret), client **582 / 0**
+(5 new - the statics, the lobby previews, lobby Gunsights, a pending move), differential **725 / 0** (its Xonn cases put the officer on a
+Shredder), enhancements 285 / 0; **10 more breaks, all caught** (the Gunsights live-value guard needed the bare-applier check: on a real load
+changeFiringMode re-reads the array over it).
+
+**Second follow-up (user, the same day): no officer's called-shot bonus on a Shredder-mode attack either.** Asked: an Expert Gunner's
+once-per-battle +15% called shot and an Expert Targeter's +20% still reached a Shredder-mode attack at a fighter (and the Gunner's was spent by
+the first) - `prepareShredderOrders` declares one order per craft with `calledid` = that craft, so calculateHitBase saw standard called shots.
+Ruled: "yes, the shredder should not benefit from these either". ⭐ One rule, `Officers::bonusCall($weapon, $called, $mode = null)` - a call
+fired in a fixed-fire-control mode (`hasFixedFireControl`, the same "own hit calculation" marker) is no call to an officer - asked by
+`targeterShotBonus`, `gunnerShotBonus` (so nothing is spent) and `firingSpentAbility` (so the faster reload is not held back by a Shredder
+firing). ⚠️ MIRROR PAIR `officers.bonusCall` in `gunnerShotBonus` / `targeterShotBonus` (the client never previews a Shredder-mode call - it
+targets a hex - but the pair stays honest). The Raking and Piercing modes keep both bonuses. No Raiders or Llort hull carries a Shredder, so the
+Targeter half is a rule with no current case. Docs: the Gunner card's Notes. Gates: officersHarness **1518 / 0** (6 new - the REAL
+calculateHitBase at an Aurora flight for a Gunner and a Targeter on a Shredder, their Raking called shots, targeterShotBonus per mode, the
+faster reload after Shredder-mode attacks and after a called Raking shot), client **583 / 0** (1 new), differential 725 / 0, `-Check` replay
+162 / 0; legacy bundles rebuilt. **7 breaks, all caught** (the first pass missed the reload one - its fixture's flight was not in the game, so
+no call resolved; fixed).
+
+**Observations, not changed:**
+1. Not play-tested. Worth a test: a Xorr with a Turret Officer on Turret 1 that holds its fire for a turn while an enemy fires at it (hits
+   that roll Turret 1 go to the lone cannon or Structure; a called shot at a Turret 1 cannon still lands), then fires (no shelter); the
+   Turret 1 cannons' fire control +5% to both players; the owner's Turret Mount line at 19+.
+2. A Vree turret's Antiproton Defenders keep intercepting while sheltered (ruling 1) - worth a look in play whether that feels right.
+
+### 9.30 Stage 23: Expert Anticipator (2026-10-21)
+
+**Rules text (user, 2026-10-21) - one of the original 25 (Hard tier, §3.3).** "Expert Anticipator: The Torata appreciate flexibility in all
+things, not just their weapons. When they find an individual who can consider many different options at once, and come up with the
+appropriate solution quickly, they put him on the bridge of a ship and let him go to work. While some of these abilities may be psi-related,
+many are simply instincts that happen to turn out correctly more often than not. This provides the following advantages: When rolling for
+initiative, this officer's ship rolls the die twice. The player then selects the higher one. This represents the officer's ability to 'look
+ahead' at the battlefield and correctly predict enemy actions. After moving his ship, the player can use his Expert Anticipator to 'predict'
+any remaining maneuvers still to come in the turn. To do this, he must ensure that his ship's Turn Delay is complete and enough thrust is left
+unused to complete a turn maneuver. Then, at the end of during Firing, he can execute a single turn, if desired. This ability can only be
+used for a turn, not a roll, pivot, snap turn, or other maneuver. By correctly interpreting the exact location of the target, this officer
+can improve the damage of his ship's offensive weapons. When rolling for damage, roll an extra die and drop the lowest die from the
+calculation. For example, a pentagon array would roll six dice, and if these came up 10, 8, 6, 5, 4, and 1, the 1 would be dropped. This
+ability works only on weapons that roll at least two dice for damage, so it would not affect a light particle beam. Similarly, it would not
+affect a fixed-damage weapon like a bolter or pulsar. Cost: 10% of the ship's base value for Torata. Location: CnC. Availability: Races other
+than the Torata pay 50% more for this officer." The user's note: the turn "is similar to a fighter's combat pivot except that there are no
+associated firing penalties and thrust must still be spent on ship thrusters as normal."
+
+**What FV had.** Initiative is a d100 at two sites (`Manager::generateIniative`, `SimultaneousMovementRule::generateIniative`). Damage dice all
+go through `Dice::d`, set up per shot by `Weapon::getFinalDamage` (Elite Crew's and the Gunner's `$perDieBonus`). Measured over every
+ship weapon class (1,861 hulls, 391 classes): 194 modes roll their damage as ONE call of two or more dice, 104 one die, 172 none (fixed). Seven
+modes make several calls: the **Pentagon Array** (five 1d10 rakes, one call each - the rules' own example), the custom **Light Phase Disruptor**'s
+concentrated shot (two 3d6 rakes), and the three **Unreliable** weapons, whose first d10 is a MISFIRE roll, not damage. In the Firing phase a
+ship's movement rows were all thrown away (`Movement::validateMovement`); only flights kept combat pivots and the Evader's Evade, and the thrust
+panel existed only in `MovementPhaseStrategy`.
+
+**Rulings (user, 2026-10-21, asked before building):**
+1. **The turn takes effect like a combat pivot** (the text's "at the end of during Firing" being garbled): given in the Firing phase before the
+   ship declares direct fire, with no to-hit penalty, and this turn's fire - his own and the fire at him - meets the new facing.
+2. **On an Expert Gunner's weapon both apply**: the extra die, and the Gunner's +1 on every die (not the Ion Technician's "the Gunner's
+   replaces it").
+
+**Built with defaults, stated here (ask before changing):**
+- 15% for everyone, 10% for the `Torata Regency` ("50% more" for other races); every faction may buy him (D9's exclusions aside).
+- The initiative die is thrown twice in both initiative rules (ordinary and simultaneous-movement categories); the second only for his ship,
+  so every other ship's roll is unchanged. Nothing about it is shown: the initiative itself is public as always.
+- "Roll an extra die" = one more die of the same size, raised by any per-die bonus like the others, the lowest of all dropped. One call of 2+ dice
+  is one damage roll. The Pentagon Array's five rakes are one roll (six dice, the lowest RAKE dropped); the Light Phase Disruptor's two 3d6 rakes
+  one 6d6 roll (now rolled die by die, then split three and three - the same dice in the same order without him); an Unreliable weapon's
+  misfire d10 never counts. At fighters the Pentagon's pulses are each their own 1d10, so they gain nothing. Never a ram (not one of the ship's
+  weapons - the Religious Leader's exclusion). Same scope as Elite Crew's per-die bonus: weapons that roll damage outside `getFinalDamage`
+  (a handful of AoE and custom paths) are untouched.
+- The turn is a REAL turn - heading and facing - at the ordinary turn cost (the Navigator's ladder applies), assigned to the thrusters on the
+  Movement phase's own panel; "Turn Delay complete" is `calculateCurrentTurndelay` = 0 with no agile snap-turn exception; once a turn; a new turn
+  delay starts from it (next turn the ship moves that far before it turns again); every other rule of `canTurn` applies (not while pivoting,
+  rolling, out of alignment, adrift, with the engine gone, on a jump-out). **Not while a unit is attached to his ship** (a boarding pod, a
+  grappling claw, a docked unit): attached units follow their host only in the Movement phase (`MovementGamePhase::process`), so they would be
+  left facing the old way.
+- Enemies see it only once firing resolves (the combat pivots' masking); it then replays as an ordinary turn.
+
+**Design.**
+- `Officers`: registry `OFF_ANTI` (`post` cnc, `apply` null - right after the ELINT Officer, the last fixed-post ship officer), `$factionRules`
+  Torata 10; `initiativeRoll($ship)` (both roll sites), `extraDamageDie($ship, $weapon)`, `mayAnticipate($ship)` (behind `$officersPresent`).
+- ⭐ **`Dice::$extraDie` + `Dice::keepBest($rolls, $max)`** (lib/dice.php): while the flag is up, a `d()` of two or more dice keeps its best
+  `$times` of `$times + 1`; a weapon rolling its damage dice one call at a time hands them to `keepBest` itself (the Pentagon Array, the Light Phase
+  Disruptor). `Weapon::getFinalDamage` sets and restores the flag around `getDamage()`, beside `$perDieBonus`. ⚠️ MIRROR PAIR with BOTH harness
+  stubs (replayHarness.php, officersHarness.php) - officersHarness runs one rule table over its stub and over the real file.
+- ⭐ **`Movement::ANTICIPATED_TURN` / `isAnticipatedTurn`**: an ordinary `turnleft` / `turnright` row whose `value` is `anticipate` (the column is
+  varchar(100), already holding `combatpivot`). `validateMovement`'s Firing-phase filter keeps ONE for a ship (`mayAnticipate` on the
+  authoritative load, none already this turn - `hasAnticipated`) and still drops every other ship row; flights unchanged.
+  `TacGamedata::hideEnemyCombatPivots` strips it for enemies while the Firing phase is open. Fire resolution reads the ship's last row, so its
+  facing is the one his arcs and the incoming shots use. ⚠️ MIRROR PAIR with `shipManager.movement.ANTICIPATED_TURN` / `isAnticipatedTurn`.
+- Client (`movement.js`): `canTurn` asks `canAnticipate` in the Firing phase (phase 3 only: the combat pivot's gate `weaponManager.canCombatTurn`,
+  `officers.canAnticipate`, once a turn) and refuses a turn delay outright there; `doNormalTurn` marks the row in phase 3; `isFiringPhaseMove`
+  includes it (so Cancel and Saved Orders handle it). `FirePhaseStrategy` draws the movement UI for a ship that may turn or has, and borrows
+  `MovementPhaseStrategy`'s `onAssignThrust` / `repositionThrustUi` for the thrust panel. `gamedata.doCommit` (Firing phase) refuses a commit while
+  his turn's thrust is unassigned. `officers.js`: the registry row and `canAnticipate` (⚠️ MIRROR PAIR with `Officers::mayAnticipate`).
+- Docs: an Expert Anticipator card (Ship Officers - first, alphabetically).
+
+**Files.** Server: `lib/dice.php`, `weapon.php` (getFinalDamage), `particle.php` (PentagonArray), `customs.php` (customLtPhaseDisruptorShip),
+`Officers.php`, `Manager.php` and `SimultaneousMovementRule.php` (the roll), `handlers/movement.php`, `TacGamedata.php` (masking). Client:
+`officers.js`, `movement.js`, `renderer/phaseStrategy/FirePhaseStrategy.js`, `gamedata.js`. Docs `ammo-options.html`. Harnesses: the `Dice` stubs
+of `replayHarness.php` and `officersHarness.php`. Statics and legacy bundles (`scripts/bundle-legacy.js` - the watcher was not running) rebuilt;
+no new class, no schema change.
+
+**Measured.** Statics +~89 KB: 1,815 offers (16 on Torata hulls - the Dartoc 65, the Golthar 60). Fingerprint: exactly 16 new offer lines (the
+fingerprinted hulls), nothing else moved (proved by stripping them and byte-comparing to the old baseline, kept as
+`fingerprint.before-officers-stage23.txt`).
+
+**Verified.**
+- `officersHarness.php` **1578 / 0 with the database** (57 new): the registry place, offers and prices (Torata 10%, four other factions 15%, none
+  for a flight or an OSAT), the C&C post, no stat at load; `initiativeRoll` (two dice, the higher kept either way; one die without him, with the
+  gate off, or with his C&C destroyed last turn) and the REAL `Manager::generateIniative` and `SimultaneousMovementRule::generateIniative`; the
+  Dice rule as ONE table over the REAL `lib/dice.php` (evaluated in a namespace whose `random_int` is forced) AND the harness stub; the REAL
+  `getFinalDamage` - a Heavy Laser five dice with the 1 dropped, a Standard Particle Beam one die, both statics back to 0 after the shot, no ram,
+  the gate, a pre-battle-destroyed C&C, a Gunner's laser with both bonuses (and a Gunner alone), the Pentagon Array's six dice and rakes (and one
+  die a pulse at fighters), the Light Phase Disruptor's 6d6 split, the Unreliable Matter Cannon's misfire d10; `validateMovement` (one marked turn
+  kept of several rows, none for a ship without him, with the gate off, a turn already stored, a unit attached or his C&C destroyed; a turn stored
+  LAST turn not counting; a flight's combat pivot kept and a marked turn not), the masking per viewer, the facing after the row.
+- `officersClientHarness.js` **608 / 0** (25 new): the registry row; `officers.canAnticipate`; the REAL movement.js - canTurn both ways, the row
+  doTurn writes (marked, heading and facing, thrust required, uncommitted, the panel opened), one a turn, Cancel, a sent row, last turn's, turn
+  delay (an agile ship's snap turn refused in phase 3 though allowed in phase 2), an ordinary unmarked turn in the Movement phase, thrust short,
+  after direct fire, no officer / lost / enemy / attached; the REAL `UI/shipMovement.js` + `ShipMovementCallbacks.js` (both arrows drawn, the
+  right arrow's click makes the row, redrawn without arrows and with Cancel once paid, no arrows for a ship without him); the REAL
+  `gamedata.doCommit` in a sandbox (an unpaid turn refuses the commit naming that ship only; a paid turn or another player's does not); the REAL
+  `FirePhaseStrategy` (the movement UI for his ship only, the thrust panel through the Movement phase's handler).
+- `enhancementsDifferential.js` **725 / 0** (no case added: he moves no lobby stat); `enhancementsHarness` **286 / 0** (fingerprint re-recorded,
+  additions only).
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0** (no corpus game has an Anticipator; the replay stub's new
+  `$extraDie`/`keepBest` read 0 throughout).
+- **Mutation-tested: 45 breaks (29 server, 16 client), 43 caught**, files byte-identical afterwards. Runner `mutate23.js` in the session
+  scratchpad only. The two misses are equivalent: `d()`'s `$times >= 2` (a one-die array passes through `keepBest`'s own guard unchanged) and
+  `mayAnticipate`'s flight test (its one caller excludes flights, and no flight can hold him). The first pass also missed `getFinalDamage`
+  not restoring the flag - the "statics back to 0" check ran after the plain ship's shot, which resets it; it now runs after his.
+
+**Observations, not changed:**
+1. Not play-tested. Worth a test: a Torata Dartoc with him - its initiative across a few turns; a Pentagon Array volley at a ship (six dice in
+   the log's damage, five rakes); in the Firing phase, after moving with the turn delay done and thrust left, the turn arrows, the thrust panel,
+   then the ship firing on its new facing and the enemy's hits landing on its new sides; the enemy seeing the turn only after firing resolves.
+2. Weapons that roll damage outside `getFinalDamage` (customBSG, customEscalation, customNexus, plasma.php's two AoE paths, specialWeapons'
+   waveform check) get neither Elite Crew's per-die bonus nor his extra die - the existing scope, kept.

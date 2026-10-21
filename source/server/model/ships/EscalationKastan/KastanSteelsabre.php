@@ -67,7 +67,7 @@ class KastanSteelsabre extends HeavyCombatVessel{
             ),
             1=> array(
                     4 => "Thruster",
-                    6 => "Medium Plasma Cannoncher",
+                    6 => "Medium Plasma Cannon",
 					9 => "Light Plasma Cannon",
 					18 => "Structure",
                     20 => "Primary",

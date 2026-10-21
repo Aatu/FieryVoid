@@ -40,6 +40,7 @@ class CraytanNeprinScoutRefit2 extends HeavyCombatVesselLeftRight{
 		$this->addLeftSystem(new CargoBay(2, 12));
         $this->addLeftSystem(new Hangar(2, 2, 2, 5));
 		$this->addLeftSystem(new NexusACIDS(2, 6, 2, 180, 360));
+        $this->addLeftSystem(new ConnectionStrut(3));
                 
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 4));
@@ -47,6 +48,7 @@ class CraytanNeprinScoutRefit2 extends HeavyCombatVesselLeftRight{
 		$this->addRightSystem(new CargoBay(2, 12));
         $this->addRightSystem(new Hangar(2, 2, 2, 1));
 		$this->addRightSystem(new NexusACIDS(2, 6, 2, 0, 180));
+        $this->addRightSystem(new ConnectionStrut(3));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(3, 40));
@@ -66,7 +68,7 @@ class CraytanNeprinScoutRefit2 extends HeavyCombatVesselLeftRight{
             3=> array(
 					2 => "Connection Strut",
                     6 => "Thruster",
-					9 => "ELINT Scannter",
+					9 => "ELINT Scanner",
 					11 => "Advanced Close-In Defense System",
 					12 => "Hangar",
 					18 => "Structure",
@@ -75,7 +77,7 @@ class CraytanNeprinScoutRefit2 extends HeavyCombatVesselLeftRight{
             4=> array(
 					2 => "Connection Strut",
                     6 => "Thruster",
-					9 => "ELINT Scannter",
+					9 => "ELINT Scanner",
 					11 => "Advanced Close-In Defense System",
 					12 => "Hangar",
 					18 => "Structure",

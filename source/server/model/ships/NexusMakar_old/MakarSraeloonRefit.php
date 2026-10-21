@@ -24,13 +24,20 @@ class MakarSraeloonRefit extends SmallStarBaseFourSections{
 		$this->turndelaycost = 0;
 
 //		$this->fighters = array("superheavy"=>4);
+		$this->notes = 'Ramming damage is +33% greater due to large quantities of on board water.';
 
 		$this->forwardDefense = 18;
 		$this->sideDefense = 18;
 
+		//Need this to boost the Qom Yomin ramming factor to account for all of the water on board
+		//Qom Yomin manned units typically have a +33% to ram
+	    $hitBonus = 0; //there is no bonus to hit
+	    $rammingAttack = new RammingAttack(0, 0, 360, 465, $hitBonus, true, 0); //actual damage - NOT calculated, but designed (130)
+		$this->addPrimarySystem($rammingAttack);
+
 		$this->addPrimarySystem(new Reactor(4, 35, 0, 0));
 		$this->addPrimarySystem(new CnC(4, 24, 0, 0));
-		$this->addPrimarySystem(new Scanner(4, 14, 5, 7));
+		$this->addPrimarySystem(new ELINTScanner(4, 16, 5, 7));
 		$this->addPrimarySystem(new Hangar(4, 6, 6));
 		$this->addPrimarySystem(new CargoBay(4, 15));
 		$this->addPrimarySystem(new CargoBay(4, 30));
@@ -115,7 +122,7 @@ class MakarSraeloonRefit extends SmallStarBaseFourSections{
 				10 => "Water Caster",
 				14 => "Cargo Bay",
 				15 => "Hangar",
-				17 => "Scanner",
+				17 => "ELINT Scanner",
 				19 => "Reactor",
 				20 => "C&C",
 			),

@@ -8,7 +8,7 @@ class DalithornPinnace extends FighterFlight{
         $this->faction = "Nexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornPinnace";
         $this->shipClass = "Arentith Pinnace";
-        $this->imagePath = "img/ships/Nexus/velraxHisskar.png";
+        $this->imagePath = "img/ships/Nexus/Dalithorn_Pinnace2.png";
 		$this->unofficial = true;
 	    $this->isd = 2113;
 //        $this->canvasSize = 150;

@@ -91,7 +91,7 @@ class KlingonD7 extends HeavyCombatVessel{
                 11 => "Scanner",
                 13 => "Engine",
                 15 => "Hangar",
-                16 => "Micro Jump Drive",
+                16 => "Warp Drive",
                 17 => "Cloaking Device",
                 19 => "Reactor",
                 20 => "C&C",

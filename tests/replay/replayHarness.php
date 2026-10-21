@@ -77,16 +77,32 @@ class Dice {
        in the corpus dies with "Access to undeclared static property". Keep the capping rule
        identical as well, or the harness would record damage the game would never deal. */
     public static $perDieBonus = 0;
+    //An Expert Anticipator's extra damage die (OFFICERS_PLAN.md Stage 23): written by getFinalDamage for every roll, read by keepBest
+    public static $extraDie = 0;
 
     public static function d($max, $times = 1) {
         $total = 0;
         $bonus = (int)self::$perDieBonus;
+        if (self::$extraDie > 0 && $times >= 2) {
+            $rolls = array();
+            for ($i = 0; $i < $times; $i++) $rolls[] = self::roll($max, $bonus);
+            return array_sum(self::keepBest($rolls, $max));
+        }
         for ($i = 0; $i < $times; $i++) {
-            $roll = mt_rand(1, (int)$max);
-            if ($bonus > 0) $roll = min((int)$max, $roll + $bonus);
-            $total += $roll;
+            $total += self::roll($max, $bonus);
         }
         return $total;
+    }
+    private static function roll($max, $bonus) {
+        $roll = mt_rand(1, (int)$max);
+        if ($bonus > 0) $roll = min((int)$max, $roll + $bonus);
+        return $roll;
+    }
+    public static function keepBest(array $rolls, $max) {
+        if (self::$extraDie <= 0 || count($rolls) < 2) return $rolls;
+        $rolls[] = self::roll($max, (int)self::$perDieBonus);
+        unset($rolls[array_search(min($rolls), $rolls)]);
+        return array_values($rolls);
     }
     public static function seed($seed) {
         mt_srand((int)$seed);

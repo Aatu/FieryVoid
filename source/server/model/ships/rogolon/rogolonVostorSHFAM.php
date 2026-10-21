@@ -55,7 +55,9 @@ class RogolonVostorSHFAM extends SuperHeavyFighter{
 			$fighter->addFrontSystem(new RogolonLtPlasmaGun(330, 30, 5, 2));
             $fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base 
 
-			$fighter->addAftSystem(new RogolonLtPlasmaGun(150, 210, 5, 1));
+			$aftGun = new RogolonLtPlasmaGun(150, 210, 5, 1);
+			$aftGun->setTailGun(); //tail gun (Weapon::getTailGunMod)
+			$fighter->addAftSystem($aftGun);
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
         
 			$this->addSystem($fighter);

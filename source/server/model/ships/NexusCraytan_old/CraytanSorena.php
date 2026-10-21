@@ -38,13 +38,15 @@ class CraytanSorena extends HeavyCombatVesselLeftRight{
 		$this->addLeftSystem(new NexusHeavySentryGun(2, 7, 3, 300, 60));
 		$this->addLeftSystem(new NexusLightAssaultCannon(2, 6, 3, 330, 30));
 		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 120, 360));
-                
+        $this->addLeftSystem(new ConnectionStrut(3));
+               
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 4));
         $this->addRightSystem(new Hangar(2, 1, 1, 1));
 		$this->addRightSystem(new NexusHeavySentryGun(2, 7, 3, 300, 60));
 		$this->addRightSystem(new NexusLightAssaultCannon(2, 6, 3, 330, 30));
 		$this->addRightSystem(new NexusCIDS(2, 4, 2, 0, 240));
+        $this->addRightSystem(new ConnectionStrut(3));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(3, 40));

@@ -9,10 +9,11 @@ class DalithornMinesweeperRefit2 extends MediumShip{
         $this->phpclass = "DalithornMinesweeperRefit2";
         $this->imagePath = "img/ships/Nexus/Dalithorn_Frigate2.png";
         $this->shipClass = "Velivorn Minesweeper";
+			$this->variantOf = "Omethiron Heavy Frigate";
+			$this->occurence = "rare";
 		$this->unofficial = true;
         $this->canvasSize = 100;
 	    $this->isd = 2116;
-        $this->limited = 10;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 12;

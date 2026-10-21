@@ -51,7 +51,7 @@ class SshelathKosluka extends LCV{
         $this->hitChart = array(
         		0=> array( 
         				10 => "Structure",
-        				12 => "1:Light Class-O Missile Rack",
+        				12 => "1:Light O-Missile Rack",
         				15 => "1:Defense Laser",
 						17 => "0:Engine",
         				19 => "0:Reactor",
@@ -59,7 +59,7 @@ class SshelathKosluka extends LCV{
         		),
         		1=> array( //redirect to PRIMARY
         				10 => "Structure",
-        				12 => "1:Light Class-O Missile Rack",
+        				12 => "1:Light O-Missile Rack",
         				15 => "1:Defense Laser",
 						17 => "0:Engine",
         				19 => "0:Reactor",
@@ -67,7 +67,7 @@ class SshelathKosluka extends LCV{
         		),
         		2=> array( //redirect to PRIMARY
         				10 => "Structure",
-        				12 => "1:Light Class-O Missile Rack",
+        				12 => "1:Light O-Missile Rack",
         				15 => "1:Defense Laser",
 						17 => "0:Engine",
         				19 => "0:Reactor",

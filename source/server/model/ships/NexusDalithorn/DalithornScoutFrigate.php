@@ -31,8 +31,8 @@ class DalithornScoutFrigate extends MediumShip{
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 2));
         $this->addPrimarySystem(new Hangar(1, 1, 1));
 		$this->addPrimarySystem(new Magazine(3, 10));
-        $this->addPrimarySystem(new Thruster(2, 11, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(2, 11, 0, 4, 4));        
+        $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 3));
+        $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 4));        
         
         $this->addFrontSystem(new ELINTScanner(3, 10, 4, 2));
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 240, 60));

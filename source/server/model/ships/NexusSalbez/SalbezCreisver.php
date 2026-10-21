@@ -63,7 +63,7 @@ class SalbezCreisver extends MediumShip{
 		1=> array(
 			5 => "Thruster",
 			7 => "Light Mag Gun",
-			10 => "Light Laser",
+			10 => "Improved Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),

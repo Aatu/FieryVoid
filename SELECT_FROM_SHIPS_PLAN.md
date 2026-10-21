@@ -599,8 +599,10 @@ it is a rule that removes literal duplicates — the current menu already prints
 indistinguishable "Mine" lines today.
 
 **(3) Density tier.** Above **8 rows** the card switches to `.fv-hexpicker--dense`: a
-single-line **34px** row with a **26px** silhouette and the class inline after the name
-instead of beneath it. **On coarse pointers the row floor stays 44px regardless** — a mis-tap
+**34px** row with a **26px** silhouette and a 13px name, the class still beneath it.
+*(Revised 2026-10-21: the class originally moved inline after the name. That saved no height —
+both lines fit in 34px — and long class names truncated the name to a few letters.)*
+**On coarse pointers the row floor stays 44px regardless** — a mis-tap
 here commits a deployment, so comfort loses to safety.
 
 > **Grouping and density are now two independent thresholds**, which they were not in the

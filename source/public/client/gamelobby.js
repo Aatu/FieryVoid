@@ -6711,15 +6711,17 @@ jQuery(function () {
 	  cursor off the icon to reach the menu's own buttons would close it.*/
 	var systemInfoState = null;
 
+	//officersOnly (OFFICERS_PLAN.md Stage 19): a Structure bar's tooltip, naming the block's officers and nothing else
 	var showInfo = function (payload) {
 		if (systemInfoState && systemInfoState.menu) return;   //a sticky menu wins over hover
 		uiManager.showSystemInfo({
 			ship: payload.ship,
 			selectedShip: null,
 			system: payload.system,
-			boundingBox: getBoundingBox(payload.element)
+			boundingBox: getBoundingBox(payload.element),
+			officersOnly: Boolean(payload.officersOnly)
 		});
-		systemInfoState = { menu: false };
+		systemInfoState = { menu: false, officersOnly: Boolean(payload.officersOnly) };
 	};
 
 	/*Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §5.2) gave the lobby its first
@@ -6761,6 +6763,16 @@ jQuery(function () {
 				} else {
 					showInfo(payload);
 				}
+				break;
+			/* A section's Structure health bar (ShipSection): there is no map to draw its arc on here, but a block holding an
+			   officer (the Expert Targeter, Stage 19) names him in the officers-only tooltip, as in game. */
+			case 'StructureMouseOver':
+				if (payload.element && payload.structure && window.officers && officers.hasPostTooltip(payload.ship, payload.structure)) {
+					showInfo({ ship: payload.ship, system: payload.structure, element: payload.element, officersOnly: true });
+				}
+				break;
+			case 'StructureMouseOut':
+				if (systemInfoState && systemInfoState.officersOnly) hideInfo(false);
 				break;
 			case 'SystemClicked': //tap/click = show info too (the touch path relies on it)
 				if (uiManager.canShowSystemInfoMenu(payload.ship, payload.system)) {

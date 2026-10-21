@@ -60,7 +60,7 @@ class HkJamming
             if ($elint->id === $flight->id) continue;
             if (!$elint->isElint()) continue;
             if ($elint->team === $flight->team) continue; //jamming is hostile
-            if (Mathlib::getDistanceHex($flight, $elint) > self::JAM_RANGE) continue;
+            if (Mathlib::getDistanceHex($flight, $elint) > Officers::elintRange($elint, self::JAM_RANGE)) continue; //an Expert ELINT Officer's 38 (OFFICERS_PLAN.md Stage 20)
 
             $totalJam += $elint->getEWbyType("JAM", $gamedata->turn, $flight);
         }

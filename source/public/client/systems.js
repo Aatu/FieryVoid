@@ -92,6 +92,8 @@ shipManager.systems = {
             return 0;
 
         var output = system.output + system.outputMod + shipManager.power.getBoost(system);
+        //a lobby Expert ELINT Officer's +1 on his array (OFFICERS_PLAN.md Stage 20); 0 in game, where the server raised `output`
+        if (system.outputType === 'EW' && window.officers) output += officers.sensorBonus(ship, system);
         output = Math.max(0, output); //output cannot be negative!
         /* Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 2.2): an Energy Draining Field takes
            thrust off an Engine and power off a Reactor for one turn. The server applies it in
@@ -117,6 +119,7 @@ shipManager.systems = {
             return 0;
 
         var output = system.output + system.outputMod;
+        if (system.outputType === 'EW' && window.officers) output += officers.sensorBonus(ship, system); //see getOutput above
         output = Math.max(0, output); //output cannot be negative!
         //EDF drain - see the note in getOutput above.
         if (system.edfDrain) output = Math.max(0, output - system.edfDrain);

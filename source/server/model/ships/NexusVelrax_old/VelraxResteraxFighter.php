@@ -45,6 +45,7 @@ class VelraxResteraxFighter extends FighterFlight{
 	        $light = new NexusLightIonGun(330, 30, 0, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);
 			$aftLight = new NexusLightIonGun(150, 210, 0, 1);
+			$aftLight->setTailGun(); //tail gun (Weapon::getTailGunMod)
 			
 			$fighter->addAftSystem($aftLight);
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			

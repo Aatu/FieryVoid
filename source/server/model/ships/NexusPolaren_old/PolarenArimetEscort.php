@@ -54,7 +54,7 @@ class PolarenArimetEscort extends LCV{
         		0=> array( 
         				10 => "Structure",
         				13 => "1:Sand Caster",
-        				15 => "1:Light Maser",
+        				15 => "1:Light Blast Cannon",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -62,7 +62,7 @@ class PolarenArimetEscort extends LCV{
         		1=> array( //redirect to PRIMARY
         				10 => "Structure",
         				13 => "1:Sand Caster",
-        				15 => "1:Light Maser",
+        				15 => "1:Light Blast Cannon",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -70,7 +70,7 @@ class PolarenArimetEscort extends LCV{
         		2=> array( //redirect to PRIMARY
         				10 => "Structure",
         				13 => "1:Sand Caster",
-        				15 => "1:Light Maser",
+        				15 => "1:Light Blast Cannon",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

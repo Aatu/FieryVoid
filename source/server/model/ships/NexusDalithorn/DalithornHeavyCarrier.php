@@ -4,7 +4,7 @@ class DalithornHeavyCarrier extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 535;
+	$this->pointCost = 510;
 	$this->faction = "Nexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornHeavyCarrier";
         $this->imagePath = "img/ships/Nexus/Dalithorn_JumpDreadnought2.png";

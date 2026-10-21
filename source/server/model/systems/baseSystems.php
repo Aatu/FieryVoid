@@ -2309,7 +2309,7 @@ class ElintScanner extends Scanner implements SpecialAbility{
 	}
         $this->data["Special"] .= "Allows additional Sensor operations (see FAQ for more details):";
         $this->data["Special"] .= "<br> - SOEW: Friendly ships gain half of ELINT ships' OEW bonus against targets. Requires line of sight to and being within 30 hexes of target and friendly ship at declaration and firing.";		     
-        $this->data["Special"] .= "<br> - SDEW: Boosts target's DEW (by 1 for 2 points allocated). Range 30 hexes at declaration and firing.";		     
+        $this->data["Special"] .= "<br> - SDEW: Boosts target's DEW (by 1 for 2 points allocated). Range 50 hexes at declaration and firing.";		     
         $this->data["Special"] .= "<br> - Blanket Protection: All friendly units within 20 hexes (incl. fighters) get +1 DEW per 4 points allocated. Cannot combine with other ELINT activities.";		     
         $this->data["Special"] .= "<br> - Disruption: Reduce enemy ships' OEW / CCEW by 1 per 3 points allocated (split evenly, cannot bring OEW on a target below 0). Range 30 hexes at both declaration and firing.";	
 		$this->data["Special"] .= "<br> - Detect Stealth: Increases stealth detection range of this ship by +2 per point of EW.";

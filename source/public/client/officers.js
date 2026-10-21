@@ -76,6 +76,15 @@ window.officers = {
 		   Gunner's, is in the summary only. The boost buttons come with the payload (boostable, priced in thrust). */
 		{ id: 'OFF_ION', label: 'Expert Ion Technician', post: 'engine', needs: 'ionWeapon',
 			summary: 'Ion weapons have increased damage; Rad Cannons stronger; Boost ion weapons with thrust' },
+		/* Stage 20: in the ELINT array. Its +1 output is previewed in the lobby (sensorBonus - in game the server raised `output`); the
+		   -2 on sensor criticals is the server's alone. His longer ranges and his blanket against ballistics are read in game off the
+		   numbers the server publishes to every viewer (elintRange, ballisticBlanket); the array's tooltip shows both (elintSpecial). */
+		{ id: 'OFF_ELINT', label: 'Expert ELINT Officer', post: 'elint',
+			summary: '+1 sensors, -2 on sensor criticals; ELINT ranges +25%; Blanket Protection gives +1 DEW per 3 points against ballistic weapons' },
+		/* Stage 23: no stat moves. His initiative roll and his extra damage die are the server's; his Firing-phase turn is
+		   movement.js's (canAnticipate - the turn arrows in the Firing phase). */
+		{ id: 'OFF_ANTI', label: 'Expert Anticipator', post: 'cnc',
+			summary: 'Initiative rolled twice, best kept; one turn in the Firing Phase; damage rolls of 2+ dice roll one extra die and drop the lowest' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -90,12 +99,28 @@ window.officers = {
 		   offers say which). The same officer as OFF_RELI (sameAs), with the same effects. */
 		{ id: 'OFF_RELIP', label: 'Expert Religious Leader', placed: true, sameAs: 'OFF_RELI', movable: true, stats: { iniativebonus: 10 },
 			summary: '+10 initiative, +1 damage on every hit; once he is lost: +20 initiative, +1 sensors, +5% to be hit' },
+		/* Stage 19: the Expert Targeter, in a STRUCTURE block (ShipSection's bar carries his insignia, his tooltip and, in Initial
+		   Orders, his menu). His +4 is the hit-chance preview's (targeterShotBonus), over the weapons the server says he covers
+		   (`covers`). On a hull with one block (a Medium ship) he covers one side of its hit chart: OFF_TARG the first (Front, or
+		   Left), OFF_TARG2 the second (sameAs) - `side` - and `switchTo` is the side selector's other id (a move to his own post). */
+		{ id: 'OFF_TARG', label: 'Expert Targeter', placed: true, movable: true, side: 1, switchTo: 'OFF_TARG2',
+			summary: '+20% on called shots (the called shot penalty still applies)' },
+		{ id: 'OFF_TARG2', label: 'Expert Targeter', placed: true, sameAs: 'OFF_TARG', movable: true, side: 2, switchTo: 'OFF_TARG',
+			summary: '+20% on called shots (the called shot penalty still applies)' },
+		/* Stage 22: the Expert Turret Officer, in a turret-mounted weapon, aiding every weapon on that turret (turretKey: its linked firing
+		   group, or the gun alone). One to a turret (`perTurret`). His +1 fire control is previewed in the lobby (displayFireControl - in game
+		   the server raised it); his -1 on criticals, the -2 on the jam roll (the Turret Mount line says it - turretMountLine) and the shelter
+		   are the server's. */
+		{ id: 'OFF_TURR', label: 'Expert Turret Officer', placed: true, movable: true, perTurret: true,
+			summary: 'Turret weapons: +1 fire control, -1 on criticals, -2 on the jam roll; if turret does not fire, can only be hit by called shots' },
 		{ id: 'OFF_DOG', label: 'Expert Dogfighter', post: 'craft', flight: true, stats: { iniativebonus: 5 },
-			summary: '+5 initiative' },
+			summary: '+5 initiative, wins ties' },
 		{ id: 'OFF_MSL', label: 'Expert Missileer', post: 'craft', flight: true, perMissile: 1, needs: 'missiles',
 			summary: '+5 offensive bonus for missiles' },
-		{ id: 'OFF_EVAD', label: 'Expert Evader', post: 'craft', flight: true, stats: { offensivebonus: -1 },
-			summary: '-5 offensive bonus, -1 damage to hits on this flight' },
+		/* No `stats`: his -1 OB is only on a turn the flight Evades (user request 2026-10-20) - the server's once the row is
+		   sent, pendingEvadeOb's until then. */
+		{ id: 'OFF_EVAD', label: 'Expert Evader', post: 'craft', flight: true,
+			summary: 'Evade in the Firing phase: that turn -5 offensive bonus, -1 damage to hits on this flight' },
 		{ id: 'EXP_MOTIV', label: 'Expert Motivator', post: 'craft', flight: true, stats: { critRollMod: -2 },
 			summary: '-2 on dropout rolls' },
 		{ id: 'OFF_COOR', label: 'Expert Coordinator', post: 'craft', flight: true,
@@ -105,7 +130,11 @@ window.officers = {
 		   server's alone. The count's limit arrives in the offer (Officers::maxCount: 4, Raiders 2), and rowMax holds it to the
 		   flight size in the buy dialog. */
 		{ id: 'OFF_PILOT', label: 'Expert Pilot', post: 'craft', flight: true, multi: true, stats: { offensivebonus: 1 },
-			summary: 'Each: +5 offensive bonus and one free jinking level beyond the limit' }
+			summary: 'Each: +5 offensive bonus and one free jinking level beyond the limit' },
+		/* Stage 21: only for a flight with a tail gun (`needs`). No stat moves - his effect is the hit-chance preview's
+		   (weaponManager.getTailGunMod) and the tail gun's tooltip line (tailGunLine). */
+		{ id: 'OFF_TAIL', label: 'Expert Tailgunner', post: 'craft', flight: true, needs: 'tailGun',
+			summary: 'No penalty for firing the tail gun with the other guns; +5% with a tail gun that has no penalty' }
 	],
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV, the Expert
@@ -137,6 +166,7 @@ window.officers = {
 	   "cnC" carrying the FlagBridge special ability - the class property every FlagBridge declares.
 	     cnc      the first C&C that is not a Flag Bridge; failing that, the first one of any kind
 	     scanner  the strongest scanner by output - the list and the pick Elite Crew's lobby mirror uses
+	     elint    the strongest ELINT array by output (Stage 20): a scanner named elintScanner, or the Chameleon suite
 	     reactor  the biggest reactor by maxhealth - likewise
 	     engine   the strongest engine by output - the pick Poor Crew's and ADV_ENG's lobby mirrors use
 	     maggrav  the first Mag-Gravitic Reactor that can be hit: a reactor with fixedPower (the Thirdspace drive has it
@@ -169,6 +199,11 @@ window.officers = {
 			var scanners = (window.shipManager && shipManager.systems && typeof shipManager.systems.getScannerList === 'function')
 				? shipManager.systems.getScannerList(ship) : [];
 			return this.strongest(ship, scanners, 'output', -1);
+		}
+		if (post === 'elint') {
+			var arrays = (window.shipManager && shipManager.systems && typeof shipManager.systems.getScannerList === 'function')
+				? shipManager.systems.getScannerList(ship).filter(function (s) { return s && (s.name === 'elintScanner' || s.name === 'chameleonSensors'); }) : [];
+			return this.strongest(ship, arrays, 'output', -1);
 		}
 		if (post === 'reactor') {
 			return this.strongest(ship, systems.filter(function (s) { return s && s.name === 'reactor'; }), 'maxhealth', -1000);
@@ -262,7 +297,8 @@ window.officers = {
 	     laserWeapon   the hull carries a weapon with a Laser mode (the Expert Laser Technician)
 	     plasmaWeapon  the hull carries a weapon with a Plasma mode (the Expert Plasma Scientist)
 	     ionWeapon     the hull carries a weapon with an Ion mode, or an Ion Torpedo (the Expert Ion Technician)
-	     missiles      the flight carries missiles (the Expert Missileer) */
+	     missiles      the flight carries missiles (the Expert Missileer)
+	     tailGun       the flight's craft has a tail gun - a weapon the blueprint flags `tailGun` (the Expert Tailgunner) */
 	passesNeeds: function passesNeeds(ship, officer) {
 		if (!officer.needs) return true;
 		var self = this;
@@ -279,6 +315,10 @@ window.officers = {
 			return this.systemsOf(ship).some(function (s) { return self.isIonWeapon(s); });
 		}
 		if (officer.needs === 'missiles') return this.missilesPerCraft(ship) > 0;
+		if (officer.needs === 'tailGun') {
+			var craft = ship.flight ? this.firstCraft(ship) : null;
+			return !!craft && this.systemsOf(craft).some(function (s) { return s && s.tailGun === true; });
+		}
 		return false;
 	},
 
@@ -414,8 +454,9 @@ window.officers = {
 
 	/* The lobby's derived track 2: one officer per bought row, posted in its system - after D13's name check,
 	   with his ship-level self winning (sameAs), a system hosting ONE, and no officer past his ship cap
-	   (registry order, then system id). Pre-battle damage that destroys his weapon refunds him (D11, the row
-	   is gone); damage that does not still disables the Matter expert from the start (anyDamage).
+	   (registry order, then system id), a `perTurret` officer one to a turret (Stage 22). Pre-battle damage that
+	   destroys his weapon refunds him (D11, the row is gone); damage that does not still disables the Matter
+	   expert from the start (anyDamage).
 	   ⚠️ MIRROR PAIR with Officers::pickPlacedPosts / ::keepPlacedRows (PHP). */
 	placedEntries: function placedEntries(ship, shipLevel) {
 		var rows = this.placedRows(ship);
@@ -423,7 +464,7 @@ window.officers = {
 		var self = this;
 		var aboard = {};
 		(shipLevel || []).forEach(function (entry) { aboard[entry.id] = true; });
-		var hosted = {}, count = {}, out = [];
+		var hosted = {}, count = {}, turrets = {}, out = [];
 		this.REGISTRY.forEach(function (officer) {
 			if (!officer.placed || (officer.sameAs && aboard[officer.sameAs])) return;
 			rows.filter(function (row) { return row[0] === officer.id; })
@@ -433,8 +474,11 @@ window.officers = {
 				.forEach(function (c) {
 					var id = parseInt(c.system.id, 10);
 					if (hosted[id] || (count[officer.id] || 0) >= self.placedLimit(ship, officer.id)) return;
+					var turret = officer.perTurret ? officer.id + '|' + self.turretKey(c.system) : null;
+					if (turret !== null && turrets[turret]) return;
 					hosted[id] = true;
 					count[officer.id] = (count[officer.id] || 0) + 1;
+					if (turret !== null) turrets[turret] = true;
 					var entry = { id: officer.id, post: c.system.id };
 					if (officer.anyDamage ? self.isPostDamaged(ship, c.system) : self.isPostDestroyed(ship, c.system)) {
 						entry.out = 0;
@@ -477,6 +521,14 @@ window.officers = {
 			if (rowSystem !== id && row[0] === enhID) elsewhere.push(row);
 		});
 		if (reason) return reason;
+		//Stage 22: one Expert Turret Officer to a turret - a turret mate of this weapon may already hold him
+		var system = officer.perTurret ? this.systemById(ship, id) : null;
+		var mate = system ? elsewhere.filter(function (row) { return self.turretKey(self.systemById(ship, row[6])) === self.turretKey(system); })[0] : null;
+		if (mate) {
+			var held = this.systemById(ship, mate[6]);
+			return 'This turret already has the ' + this.label(enhID) + ' (on ' + (held ? (held.displayName || held.name) : mate[7]) + ' #' + mate[6]
+				+ '): he aids every weapon on his turret, one to a turret.';
+		}
 		var cap = this.placedLimit(ship, enhID);
 		if (elsewhere.length >= cap) {
 			var where = elsewhere.map(function (row) {
@@ -655,7 +707,15 @@ window.officers = {
 			if (!open('pierce')) return 0;
 			return (entry.mode !== undefined && parseInt(weapon.firingMode, 10) === parseInt(entry.mode, 10)) ? 0 : this.PIERCE_PENALTY;
 		}
-		return (called && open('called')) ? this.GUNNER_CALLED_BONUS : 0;
+		//Stage 19: on a gun a serving Expert Targeter covers, his +4 is the called shot's - the Gunner's +3 neither used nor spent
+		return (this.bonusCall(weapon, called) && open('called') && !this.targeterCovering(ship, weapon)) ? this.GUNNER_CALLED_BONUS : 0;
+	},
+
+	/* Is this a called shot an officer's called-shot bonus reaches (the Gunner's +3, the Targeter's +4)? Never in a mode whose hit calculation
+	   is its own (hasFixedFireControl - the Antimatter Shredder's Shredder mode, whose attacks at fighters are called shots).
+	   ⚠️ MIRROR PAIR with Officers::bonusCall (PHP). */
+	bonusCall: function bonusCall(weapon, called) {
+		return Boolean(called) && !this.hasFixedFireControl(weapon, weapon ? weapon.firingMode : null);
 	},
 
 	/* ------------------------------------------------------------------ moving officers (Stage 10) */
@@ -727,7 +787,17 @@ window.officers = {
 
 	systemName: function systemName(ship, systemId) {
 		var s = this.systemById(ship, systemId);
-		return (s ? (s.displayName || s.name) : 'system') + ' #' + systemId;
+		return (s ? this.postName(s) : 'system') + ' #' + systemId;
+	},
+
+	/* A system's name for an officer line: its display name - or, for a Structure block (Stage 19, the Expert Targeter's post),
+	   its section's, "Aft Structure", the ship window's own section names (ShipSection SECTION_NAMES). */
+	SECTION_NAMES: { 0: 'Primary', 1: 'Forward', 2: 'Aft', 3: 'Port', 4: 'Starboard', 31: 'Port Fwd', 32: 'Port Aft', 41: 'Stbd Fwd', 42: 'Stbd Aft' },
+	postName: function postName(system) {
+		if (system && system.name === 'structure' && this.SECTION_NAMES[system.location] !== undefined) {
+			return this.SECTION_NAMES[system.location] + ' Structure';
+		}
+		return system ? (system.displayName || system.name) : 'system';
 	},
 
 	//"(moving to Heavy Laser #12 - serves there from turn 5)", or '' while he is not moving
@@ -735,7 +805,100 @@ window.officers = {
 		var to = this.movingTo(ship, entry);
 		if (to === null) return '';
 		var pending = (entry.moving === undefined || entry.moving === null);
-		return '(' + (pending ? 'ordered to ' : 'moving to ') + this.systemName(ship, to) + ' - serves there from turn ' + (this.currentTurn() + 1) + ')';
+		var from = ' from turn ' + (this.currentTurn() + 1) + ')';
+		if (String(to) === String(entry.post)) { //Stage 19: a side switch is a move to his own post
+			return '(' + (pending ? 'ordered to switch to ' : 'switching to ') + this.sideName(ship, this.get(entry.id).switchTo) + ' - covers it' + from;
+		}
+		return '(' + (pending ? 'ordered to ' : 'moving to ') + this.systemName(ship, to) + ' - serves there' + from;
+	},
+
+	/* ------------------------------------------------------------------ the Expert Targeter (Stage 19) */
+
+	/* His effect line, with the weapons he covers: "... - Aft weapons" (his block's section), or a Medium ship's side - "Front
+	   weapons". What those weapons are is the server's (`covers`). Every other officer: his registry summary. */
+	summaryOf: function summaryOf(ship, entry) {
+		var officer = this.get(entry.id);
+		if (!officer) return '';
+		if ((officer.sameAs || officer.id) !== 'OFF_TARG') return officer.summary;
+		return officer.summary + ' - ' + this.coverName(ship, entry) + ' weapons';
+	},
+
+	coverName: function coverName(ship, entry) {
+		if (!this.hasOuterBlock(ship)) return this.sideName(ship, entry.id);
+		var post = this.systemById(ship, entry.post);
+		return (post && this.SECTION_NAMES[post.location] !== undefined) ? this.SECTION_NAMES[post.location] : 'his block\'s';
+	},
+
+	//a Structure block outside the Primary section - a hull with none (a Medium ship) posts him in its Primary Structure, by side
+	hasOuterBlock: function hasOuterBlock(ship) {
+		return this.systemsOf(ship).some(function (s) { return s && s.name === 'structure' && (parseInt(s.location, 10) || 0) !== 0; });
+	},
+
+	/* "Front" / "Aft", or "Left" / "Right" on a LeftRight hull: the side `id` covers - the hull's hit chart's non-Primary locations in
+	   order, his `side` picking the first or the second (Officers::hullSides, PHP). */
+	SIDE_NAMES: { 1: 'Front', 2: 'Aft', 3: 'Left', 4: 'Right' },
+	sideName: function sideName(ship, id) {
+		var officer = this.get(id);
+		var sides = Object.keys((ship && ship.hitChart) || {}).map(function (k) { return parseInt(k, 10); })
+			.filter(function (k) { return k !== 0 && !isNaN(k); }).sort(function (a, b) { return a - b; });
+		var side = sides[((officer && officer.side) || 1) - 1];
+		return this.SIDE_NAMES[side] || 'his side\'s';
+	},
+
+	/* The serving Targeter covering this weapon - not one ordered to move or switch this turn (he serves nowhere then, as the server
+	   will rule once the order is sent) - or null. In game only: `covers` comes with the server's list. */
+	targeterCovering: function targeterCovering(ship, weapon) {
+		var turn = this.currentTurn();
+		var self = this;
+		return this.listFor(ship).filter(function (e) {
+			var officer = self.get(e.id);
+			return officer && (officer.sameAs || officer.id) === 'OFF_TARG' && self.serves(e, turn) && self.transferOf(ship, e) === null
+				&& Array.isArray(e.covers) && e.covers.map(String).indexOf(String(weapon.id)) !== -1;
+		})[0] || null;
+	},
+
+	/* What he adds to THIS shot's hit chance, in d20 units: +4 on a standard called shot (one that pays the -8) by a weapon he covers;
+	   nothing on any other shot. Asked for the SHOOTER, so always an own-team ship with its list.
+	   ⚠️ MIRROR PAIR with Officers::targeterShotBonus (PHP). */
+	TARGETER_CALLED_BONUS: 4,
+	targeterShotBonus: function targeterShotBonus(ship, weapon, called) {
+		if (!this.bonusCall(weapon, called) || !ship || !weapon || ship.flight) return 0;
+		return this.targeterCovering(ship, weapon) ? this.TARGETER_CALLED_BONUS : 0;
+	},
+
+	/* The side selector, in place of Move, for a Targeter who may switch sides - in game, one whose `targets` hold his own post
+	   (Officers::mayMoveTo); in Fleet Selection, one whose other side this block offers. [{id, name, current}], or null. */
+	sideChoices: function sideChoices(ship, entry) {
+		var officer = entry ? this.get(entry.id) : null;
+		if (!ship || !officer || !officer.switchTo) return null;
+		var may = this.isDerived(ship)
+			? Boolean(window.systemEnhancements) && Boolean(systemEnhancements.offerFor(ship, entry.post, officer.switchTo))
+			: Array.isArray(entry.targets) && entry.targets.map(String).indexOf(String(entry.post)) !== -1;
+		if (!may) return null;
+		var mine = { id: entry.id, name: this.sideName(ship, entry.id), current: true };
+		var other = { id: officer.switchTo, name: this.sideName(ship, officer.switchTo), current: false };
+		return (officer.side || 1) === 1 ? [mine, other] : [other, mine];
+	},
+
+	/* Fleet Selection: switch him to his other side now, free - his row traded for the other side's on the same block, both at his
+	   price (Officers::rowPrice), and put back if that is refused. true when he switched. */
+	lobbySwitchSide: function lobbySwitchSide(ship, entry) {
+		var officer = entry ? this.get(entry.id) : null;
+		if (!officer || !officer.switchTo || !window.systemEnhancements || !this.sideChoices(ship, entry)) return false;
+		var sysBefore = parseFloat(ship.pointCostSysEnh) || 0;
+		systemEnhancements.set(ship, entry.post, entry.id, 0);
+		var landed = systemEnhancements.set(ship, entry.post, officer.switchTo, 1) === 1;
+		if (!landed) systemEnhancements.set(ship, entry.post, entry.id, 1);
+		ship.pointCost = (parseFloat(ship.pointCost) || 0) + ((parseFloat(ship.pointCostSysEnh) || 0) - sysBefore);
+		systemEnhancements.apply(ship);
+		this.afterLobbyChange(ship);
+		return landed;
+	},
+
+	/* Has the viewer an officer to read about on this system (posted, or arriving this turn)? The Structure bar's officers-only
+	   tooltip (ShipSection) shows only then - a block has nothing else to say. */
+	hasPostTooltip: function hasPostTooltip(ship, system) {
+		return Boolean(ship && system) && (this.onPost(ship, system.id).length > 0 || this.arrivingAt(ship, system.id).length > 0);
 	},
 
 	//"(arriving from Medium Laser #8 - serves here from turn 5)"
@@ -877,8 +1040,10 @@ window.officers = {
 				if (!window.systemEnhancements || !systemEnhancements.offerFor(ship, system.id, candidate.id)) continue;
 				var others = this.placedRows(ship).filter(function (row) {
 					return row[0] === candidate.id && !(row[0] === entry.id && String(row[6]) === String(entry.post));
-				}).length;
-				if (others >= this.placedLimit(ship, candidate.id)) continue;
+				});
+				if (others.length >= this.placedLimit(ship, candidate.id)) continue;
+				//Stage 22: nor onto a turret another Expert Turret Officer holds (between the guns of his own turret he may move)
+				if (candidate.perTurret && others.some(function (row) { return self.turretKey(self.systemById(ship, row[6])) === self.turretKey(system); })) continue;
 				return candidate.id;
 			}
 			var post = this.findPost(ship, candidate.post);
@@ -982,10 +1147,21 @@ window.officers = {
 		if (!ship || !system || ship.flight || !this.isDerived(ship)) return rows;
 		var self = this;
 		var entries = this.onPost(ship, system.id);
+		/* Stage 19: a Medium ship's block is offered the Expert Targeter twice, once per side (OFF_TARG, OFF_TARG2) - one officer,
+		   so one row: the side bought, or his first side while neither is. The footer's side selector trades one for the other. */
+		rows = rows.filter(function (row) {
+			var officer = row.officer ? self.get(row.enhID) : null;
+			if (!officer || !officer.side || row.count > 0) return true;
+			var twinBought = rows.some(function (other) { return other.enhID === officer.switchTo && other.count > 0; });
+			return !twinBought && officer.side === 1;
+		});
 		rows.forEach(function (row) {
 			var officer = row.officer && row.count > 0 ? self.get(row.enhID) : null;
 			var entry = officer && officer.movable ? entries.filter(function (e) { return e.id === row.enhID; })[0] : null;
-			if (entry) row.moveTo = self.lobbyDestinations(ship, entry);
+			if (!entry) return;
+			//a Targeter on a single-block hull has no other post: his side, if this block offers him the other one, is the choice
+			if (officer.side && !self.hasOuterBlock(ship)) row.sides = self.sideChoices(ship, entry);
+			else row.moveTo = self.lobbyDestinations(ship, entry);
 		});
 		entries.forEach(function (entry) {
 			var officer = self.get(entry.id);
@@ -1053,6 +1229,51 @@ window.officers = {
 	waivesCombatPivotPenalty: function waivesCombatPivotPenalty(ship) {
 		if (!(ship && ship.flight && this.isActive(ship, 'OFF_COOR'))) return false;
 		return shipManager.movement.getCombatPivotRotation(ship) < this.COMBAT_PIVOT_FULL;
+	},
+
+	/* Expert Tailgunner: does he serve this flight - read by weaponManager.getTailGunMod (the hit chance) and tailGunLine. Asked for
+	   the SHOOTER, always an own-team flight with its list. ⚠️ MIRROR PAIR with Officers::hasTailgunner (PHP). */
+	TAILGUNNER_BONUS: 1,
+	hasTailgunner: function hasTailgunner(ship) {
+		return !!(ship && ship.flight && this.isActive(ship, 'OFF_TAIL'));
+	},
+
+	/* A tail gun's "Tail Gun" tooltip line, as getTailGunMod would price it: the server writes the blueprint's (penalty, or a
+	   navigator's "No penalty"), and this keeps it right for a Navigator bought on the flight and for an Expert Tailgunner -
+	   whose part only his own team sees, as his list is theirs alone. */
+	tailGunLine: function tailGunLine(ship, value) {
+		if (!ship || !ship.flight) return value;
+		var penalised = !ship.hasNavigator;
+		if (this.hasTailgunner(ship)) return penalised ? 'No penalty (Expert Tailgunner)' : '+' + (this.TAILGUNNER_BONUS * 5) + '% (Expert Tailgunner)';
+		return penalised ? value : 'No penalty (navigator)';
+	},
+
+	/* Expert Evader (user request 2026-10-20): may this flight order an Evade - the Firing-phase movement order
+	   (movement.js canEvade / doEvade) without which he does nothing. Own team only, through his list.
+	   ⚠️ MIRROR PAIR with Officers::mayEvade (PHP). */
+	canEvade: function canEvade(ship) {
+		return !!(ship && ship.flight && this.isActive(ship, 'OFF_EVAD'));
+	},
+
+	/* ...and his -1 OB while the Evade row is still the client's own (id -1): once it has been sent, the server's
+	   load applies it (Officers::applyEvader) and the row comes back with its real id. Read by displayStat and the
+	   hit chance (weaponManager.computeOEW). A row that Cancel takes away takes the -1 with it. */
+	pendingEvadeOb: function pendingEvadeOb(ship) {
+		if (!this.canEvade(ship) || !window.gamedata) return 0;
+		for (var i in ship.movement) {
+			var move = ship.movement[i];
+			if (move && move.type === 'evade' && move.turn == gamedata.turn && move.id == -1) return 1;
+		}
+		return 0;
+	},
+
+	/* Expert Anticipator (Stage 23): may this SHIP make its one Firing-phase turn (movement.js canAnticipate / canTurn) - never with
+	   a unit attached to it, which only the Movement phase moves with its host. Own team only, through his list.
+	   ⚠️ MIRROR PAIR with Officers::mayAnticipate (PHP). */
+	canAnticipate: function canAnticipate(ship) {
+		if (!ship || ship.flight) return false;
+		if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) return false;
+		return this.isActive(ship, 'OFF_ANTI');
 	},
 
 	/* "Officers (2)" - the one line the ship window's gold Enhancements block shows for them (user request
@@ -1150,6 +1371,8 @@ window.officers = {
 			if (officer.stats && officer.stats[field]) value += officer.stats[field];
 			if (officer.adjust) value = this[officer.adjust](field, value);
 		}
+		//in game: an Expert Evader's Evade not yet sent (the server applied a sent one)
+		if (field === 'offensivebonus') value -= this.pendingEvadeOb(ship);
 		return value;
 	},
 
@@ -1259,24 +1482,71 @@ window.officers = {
 	   cannot target that size, and stays so) when:
 	     - an Expert Gunner serves IN it - every mode;
 	     - otherwise, in a Matter mode, the C&C Matter Weapons Expert serves, or the weapon-mounted one serves in
-	       it. A Gunner's +1 replaces the Matter expert's on his own weapon (user ruling 2026-10-16), never adds.
+	       it; and, every mode, an Expert Turret Officer serves on its turret (Stage 22). A Gunner's +1 replaces the
+	       Matter expert's and the Turret Officer's on his own weapon (user rulings 2026-10-16, 2026-10-21), never adds.
 	   Gunsights is already in system.fireControl (systemEnhancements.apply), so the two show stacked.
-	   ⚠️ MIRROR PAIR with Officers::applyGunner / applyMatterExpert / applyWeaponMatterExpert (PHP). */
+	   ⚠️ MIRROR PAIR with Officers::applyGunner / applyMatterExpert / applyWeaponMatterExpert / applyTurretOfficer (PHP). */
 	displayFireControl: function displayFireControl(ship, system) {
 		var fc = system ? system.fireControl : null;
 		if (!Array.isArray(fc)) return fc;
-		if (!this.fireControlRaise(this.servingDerived(ship), system)) return fc;
-		return fc.map(function (v) { return (v === null || v === undefined) ? v : (parseInt(v, 10) || 0) + 1; });
+		var raise = this.fireControlRaise(ship, this.servingDerived(ship), system);
+		if (!raise) return fc;
+		return fc.map(function (v) { return (v === null || v === undefined) ? v : (parseInt(v, 10) || 0) + raise; });
 	},
 
-	//1 when the officers in `serving` raise this weapon's fire control in its current mode (displayFireControl's rule), else 0
-	fireControlRaise: function fireControlRaise(serving, system) {
+	/* how much the officers in `serving` raise this weapon's fire control in its current mode (displayFireControl's rule): 0, 1 or more -
+	   0 in a mode whose fire control is fixed (the Antimatter Shredder's Shredder mode), as the server never raises one */
+	fireControlRaise: function fireControlRaise(ship, serving, system) {
+		if (this.hasFixedFireControl(system, system.firingMode)) return 0;
+		var self = this;
 		var on = function (id) {
 			return serving.some(function (entry) { return entry.id === id && String(entry.post) === String(system.id); });
 		};
 		if (on('OFF_GUN')) return 1;
-		return (this.isMatterWeapon(system) && this.isMatterMode(system, system.firingMode)
-			&& (on('OFF_MWEW') || serving.some(function (entry) { return entry.id === 'OFF_MWE'; }))) ? 1 : 0;
+		var turret = serving.some(function (entry) {
+			return entry.id === 'OFF_TURR' && self.turretKey(self.systemById(ship, entry.post)) === self.turretKey(system);
+		}) ? 1 : 0;
+		return turret + ((this.isMatterWeapon(system) && this.isMatterMode(system, system.firingMode)
+			&& (on('OFF_MWEW') || serving.some(function (entry) { return entry.id === 'OFF_MWE'; }))) ? 1 : 0);
+	},
+
+	/* May nothing raise this firing mode's fire control? The static blueprint's `fixedFireControlModes` (the Antimatter Shredder's
+	   Shredder mode). ⚠️ MIRROR PAIR with Weapon::hasFixedFireControl (PHP); systemEnhancements.hasFixedFireControl reads the same key. */
+	hasFixedFireControl: function hasFixedFireControl(system, mode) {
+		var fixed = system ? system.fixedFireControlModes : null;
+		return Array.isArray(fixed) && fixed.map(Number).indexOf(parseInt(mode, 10)) !== -1;
+	},
+
+	/* Which turret a weapon is on (Stage 22): its linked firing group, or the weapon alone - "a turret of one". The static blueprint carries
+	   linkedFiringGroup wherever it is set. null for no system. ⚠️ MIRROR PAIR with Officers::turretKey (PHP). */
+	turretKey: function turretKey(system) {
+		if (!system) return null;
+		var group = system.linkedFiringGroup;
+		return (group !== undefined && group !== null) ? 'group:' + group : 'mount:' + parseInt(system.id, 10);
+	},
+
+	/* The Expert Turret Officer serving on this weapon's turret - not one ordered to move this turn (he serves nowhere then, as the server
+	   reads a committed order) - or null. The lobby's derived list and the owner's server list both answer; an enemy's is empty. */
+	turretOfficerOn: function turretOfficerOn(ship, system) {
+		if (!ship || !system || ship.flight) return null;
+		var self = this;
+		var turn = this.currentTurn();
+		var turret = this.turretKey(system);
+		return this.listFor(ship).filter(function (entry) {
+			return entry.id === 'OFF_TURR' && self.serves(entry, turn) && self.transferOf(ship, entry) === null
+				&& self.turretKey(self.systemById(ship, entry.post)) === turret;
+		})[0] || null;
+	},
+
+	/* A turret-mounted weapon's "Turret Mount" tooltip line under an Expert Turret Officer: the jam roll's threshold 2 higher ("subtract 2
+	   from the die roll" - 17+ reads 19+), and his name. The server writes the blueprint's line; only his own team sees this one. A turret
+	   already jammed ("JAMMED - locked to ...") has no roll left to show. */
+	TURRET_JAM_RELIEF: 2,
+	turretMountLine: function turretMountLine(ship, system, value) {
+		var text = String(value);
+		var roll = /on a (\d+)\+ \(d20\)/.exec(text);
+		if (!roll || !this.turretOfficerOn(ship, system)) return value;
+		return text.replace(roll[0], 'on a ' + ((parseInt(roll[1], 10) || 0) + this.TURRET_JAM_RELIEF) + '+ (d20)') + ' (Expert Turret Officer)';
 	},
 
 	/* Stage 10 (user request 2026-10-16): the fire control an officer ordered to move THIS turn - not yet committed - still
@@ -1291,7 +1561,7 @@ window.officers = {
 		var turn = this.currentTurn();
 		var serving = this.listFor(ship).filter(function (entry) { return self.serves(entry, turn); });
 		var staying = serving.filter(function (entry) { return self.transferOf(ship, entry) === null; });
-		return this.fireControlRaise(serving, weapon) - this.fireControlRaise(staying, weapon);
+		return this.fireControlRaise(ship, serving, weapon) - this.fireControlRaise(ship, staying, weapon);
 	},
 
 	/* Expert Jump Officer, in the lobby: the hexes he adds to THIS drive's range - 0 unless it is his post.
@@ -1571,6 +1841,61 @@ window.officers = {
 			.replace('Engine: output reduced by 2.', 'Engine: output reduced by 2, and critical roll forced.<br> - Reactor or Sub Reactor: critical roll forced.');
 	},
 
+	/* ------------------------------------------------------------------ Expert ELINT Officer (Stage 20) */
+
+	ELINT_SENSORS: 1,           //⚠️ MIRROR of Officers::ELINT_SENSORS (PHP)
+	ELINT_RANGE_PCT: 25,        //...ELINT_RANGE_PCT - the lobby's own figure; in game the server publishes it (elintRangeBonus)
+	ELINT_BLANKET_BALLISTIC: 3, //...ELINT_BLANKET_BALLISTIC - likewise (blanketBallistic)
+
+	/* In the lobby: what he adds to THIS array's output - +1 on his own post, 0 anywhere else. shipManager.systems.getOutput adds it,
+	   so the icon and the EW pool show it. In game the server raised `output` (servingDerived is empty there).
+	   ⚠️ MIRROR PAIR with Officers::applyElintOfficer (PHP). */
+	sensorBonus: function sensorBonus(ship, system) {
+		if (!system) return 0;
+		var serving = this.servingDerived(ship);
+		for (var i = 0; i < serving.length; i++) {
+			if (serving[i].id === 'OFF_ELINT' && String(serving[i].post) === String(system.id)) return this.ELINT_SENSORS;
+		}
+		return 0;
+	},
+
+	/* How much longer his ship's ELINT ranges are, in percent: in game the number the server published to every viewer while he serves
+	   (Officers::addForJson - an opponent's previews need it too), in the lobby his own while he would serve. 0 without him. */
+	elintRangeBonus: function elintRangeBonus(ship) {
+		if (!ship) return 0;
+		if (ship.elintRangeBonus !== undefined) return parseInt(ship.elintRangeBonus, 10) || 0;
+		return this.servingDerived(ship).some(function (entry) { return entry.id === 'OFF_ELINT'; }) ? this.ELINT_RANGE_PCT : 0;
+	},
+
+	/* THE range of an ELINT function from `elint`: `base` hexes, his percent longer, fractions of 0.5 or more up - 50 -> 63, 30 -> 38,
+	   20 -> 25.
+	   ⚠️ MIRROR PAIR with Officers::elintRange (PHP). */
+	elintRange: function elintRange(elint, base) {
+		var pct = this.elintRangeBonus(elint);
+		if (!pct) return base;
+		return Math.floor((base * (100 + pct) + 50) / 100);
+	},
+
+	/* His ELINT's blanket points against a ballistic weapon, scaled for the quarter ew.getSupportedBDEW takes: x4/3 while the server
+	   says his blanket counts a third (blanketBallistic). ⚠️ MIRROR PAIR with Officers::ballisticBlanket (PHP). */
+	ballisticBlanket: function ballisticBlanket(elint, blanket) {
+		var divisor = elint ? parseInt(elint.blanketBallistic, 10) || 0 : 0;
+		if (!divisor) return blanket;
+		return blanket * 4 / divisor;
+	},
+
+	/* The ELINT array's Special text as the tooltip shows it while he serves - to every viewer in game, as the numbers are public: the
+	   ranges 25% longer and the blanket's third against ballistics. A sentence worded otherwise is left as it is. */
+	elintSpecial: function elintSpecial(ship, value) {
+		if (!ship || ship.flight || !this.elintRangeBonus(ship)) return value;
+		var self = this;
+		var hexes = function (text, base) { return text.replace(new RegExp('\\b' + base + ' hexes', 'g'), self.elintRange(ship, base) + ' hexes'); };
+		var divisor = ship.blanketBallistic !== undefined ? parseInt(ship.blanketBallistic, 10) || 0 : this.ELINT_BLANKET_BALLISTIC;
+		var text = hexes(hexes(hexes(String(value), 50), 30), 20); //SDEW 50, SOEW and Disruption 30, Blanket 20
+		if (divisor) text = text.replace('per 4 points allocated.', 'per 4 points allocated (per ' + divisor + ' against ballistic weapons).');
+		return text;
+	},
+
 	/* SystemInfo's one hook into a system's data rows (and its Special text). The weapon tooltip quotes fire
 	   control only through data["Fire control (fighter/med/cap)"] - in game too, less an officer just ordered to
 	   move (pendingMoveFireControl, user request 2026-10-16) - and a jump drive its range through
@@ -1582,7 +1907,10 @@ window.officers = {
 	   where the server applies both only at damage time. Stage 12: a plasma weapon's, with an Expert Plasma Scientist's
 	   +1 or +2 (plasmaDamageLine), the same way. Stage 14: every weapon's, with an Expert Religious Leader's +1 on top
 	   (religiousDamageLine). Stage 16: an EM weapon's, with an Expert Surge Officer's +1 (surgeDamageLine). Stage 17: an ion
-	   weapon's, with an Expert Ion Technician's +1 and thrust boost (ionDamageLine), and the Rad Cannon's Special text. */
+	   weapon's, with an Expert Ion Technician's +1 and thrust boost (ionDamageLine), and the Rad Cannon's Special text. Stage 20: an
+	   ELINT array's Special text, with an Expert ELINT Officer's ranges and blanket (elintSpecial) - to every viewer, in game too.
+	   Stage 21: a fighter's tail gun's "Tail Gun" line (tailGunLine). Stage 22: a turret-mounted weapon's "Turret Mount" line, under an
+	   Expert Turret Officer (turretMountLine), and his +1 in its fire control (displayFireControl). */
 	DATA_KEY_FIRECONTROL: 'Fire control (fighter/med/cap)',
 	adjustDataDisplay: function adjustDataDisplay(ship, system, key, value) {
 		if (!system) return value;
@@ -1594,6 +1922,9 @@ window.officers = {
 			return this.surgeDamageLine(ship, system, this.religiousDamageLine(ship, system, line));
 		}
 		if (system.name === 'RadCannon' && key === 'Special') return this.radCannonSpecial(ship, value);
+		if ((system.name === 'elintScanner' || system.name === 'chameleonSensors') && key === 'Special') return this.elintSpecial(ship, value);
+		if (system.tailGun && key === 'Tail Gun') return this.tailGunLine(ship, value);
+		if (key === 'Turret Mount') return this.turretMountLine(ship, system, value);
 		if (system.name === 'jumpEngine' && (key === 'Range' || key === 'Special')) {
 			var bonus = this.jumpRangeBonus(ship, system);
 			if (!bonus) return value;

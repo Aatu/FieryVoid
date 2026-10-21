@@ -51,7 +51,8 @@ const SystemText = styled.div`
    VALUES have to reach the enemy for their own hit-chance and damage previews to be right
    (shield output, armour, thruster output), so the badge hides the LABEL, not the fact.
    It is not an information-hiding mechanism - see §12 if real masking is ever wanted. */
-const EnhancementStar = styled.div`
+//exported for a section's Structure health bar (ShipSection), whose block has no icon of its own to wear it
+export const EnhancementStar = styled.div`
     /*11px on a 32px icon: the 7px it launched at was legible only if you already knew to
       look for it (user report 2026-08-15). Still small enough to clear the icon art and the
       [n/n] load counter, which sits along the BOTTOM edge.*/

@@ -7,7 +7,7 @@ class CraytanHepron2126 extends HeavyCombatVessel{
         $this->pointCost = 380;
         $this->faction = "Nexus Craytan Union";
         $this->phpclass = "CraytanHepron2126";
-        $this->imagePath = "img/ships/Nexus/CraytanHepron.png";
+        $this->imagePath = "img/ships/Nexus/craytan_hepron.png";
 		$this->canvasSize = 150; //img has 200px per side
         $this->shipClass = "Hepron Early Cruiser (2126 refit)";
 			$this->variantOf = "Hepron Early Cruiser";

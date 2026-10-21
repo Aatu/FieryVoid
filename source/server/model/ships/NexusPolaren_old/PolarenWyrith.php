@@ -65,7 +65,7 @@ class PolarenWyrith extends HeavyCombatVesselLeftRight{
         		),
         		3=> array(
         				5 => "Thruster",
-        				8 => "Docking Collar",
+        				8 => "LCV Rail",
 						10 => "Maser",
 						11 => "Light Blast Cannon",
         				18 => "Structure",
@@ -73,7 +73,7 @@ class PolarenWyrith extends HeavyCombatVesselLeftRight{
         		),
         		4=> array(
         				5 => "Thruster",
-        				8 => "Docking Collar",
+        				8 => "LCV Rail",
 						10 => "Maser",
 						11 => "Light Blast Cannon",
         				18 => "Structure",

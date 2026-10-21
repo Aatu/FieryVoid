@@ -64,7 +64,7 @@ class VelraxVersissRefit extends HeavyCombatVesselLeftRight{
         		),
         		3=> array(
         				5 => "Thruster",
-						7 => "Laser Spear",
+						7 => "Laser Lance",
         				9 => "Dual Ion Bolter",
 						11 => "ELINT Scanner",
         				18 => "Structure",
@@ -72,11 +72,12 @@ class VelraxVersissRefit extends HeavyCombatVesselLeftRight{
         		),
         		4=> array(
         				5 => "Thruster",
-						7 => "Laser Spear",
+						7 => "Laser Lance",
         				9 => "Dual Ion Bolter",
 						11 => "ELINT Scanner",
         				18 => "Structure",
-        				20 => "Primary",        		),
+        				20 => "Primary",        
+				),
         );
     
     }

@@ -1724,7 +1724,7 @@ window.ShipIcon = function () {
         this.structureArcs = [];
     };
 
-    var BDEW_HEXES = 20; //the blanket is a fixed 20 hexes whatever the ship's BDEW rating
+    var BDEW_HEXES = 20; //the blanket is 20 hexes whatever the ship's BDEW rating - 25 with an Expert ELINT Officer (ew.elintRange)
 
     /* Blanket EW, drawn as the actual grid hexes it covers rather than a smooth hexagon
        approximating them - same treatment as the straight weapon arcs, so "am I under that
@@ -1741,7 +1741,8 @@ window.ShipIcon = function () {
 
         var hexDistance = window.coordinateConverter.getHexDistance();
         //no arc to test - the blanket covers every hex in range, so the region is the whole disc
-        var loops = buildHexRegion(BDEW_HEXES, hexDistance, function () { return true; });
+        //an Expert ELINT Officer's 25% longer reach, off the number the server publishes to every viewer (OFFICERS_PLAN.md Stage 20)
+        var loops = buildHexRegion(ew.elintRange(this.ship, BDEW_HEXES), hexDistance, function () { return true; });
 
         var color = gamedata.isMyShip(this.ship) ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() : new THREE.Color(255 / 255, 157 / 255, 0 / 255).convertSRGBToLinear();
 
@@ -1749,7 +1750,7 @@ window.ShipIcon = function () {
         //zigzag boundary - 246 segments, not the edges of 1261 little hexagons.
         var hexagon = buildRegionOverlay(loops, color, 0.2, color, 0.4);
 
-        //the blanket has to cover 20 hexes at every zoom, and sit on the grid rather than the sprite
+        //the blanket has to cover its 20 (25) hexes at every zoom, and sit on the grid rather than the sprite
         addGridLockedOverlay(this.mesh, hexagon, getHexAnchor(this).offset);
         this.BDEWSprite = hexagon;
 

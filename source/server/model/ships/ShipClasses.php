@@ -2939,7 +2939,8 @@ class BaseShip {
 			//change to case ignoring:
                     //if ( ($system->displayName == $name) && ($system->location == $location) ){
 		    if ( ( (STRCASECMP($system->displayName, $name)==0) || (($system->hitChartName !== null) && (STRCASECMP($system->hitChartName, $name)==0)) ) && ($system->location == $location) ){
-                        if( ($acceptDestroyed == true) || (!$system->isDestroyed()) ){
+                        //a SHELTERED turret's weapon (Expert Turret Officer, OFFICERS_PLAN.md Stage 22) reads as destroyed while the turn's fire resolves
+                        if( ($acceptDestroyed == true) || ( (!$system->isDestroyed()) && (!Officers::isSheltered($this, $system)) ) ){
                             $returnTab[] = $system;
                         }
                     }
@@ -2976,6 +2977,8 @@ class BaseShip {
 					$remHealth = $currSystem->getRemainingHealth();
 					if($remHealth == 0) $isDestroyed = true;
 				}
+				//...and a SHELTERED turret's weapon too (Expert Turret Officer, OFFICERS_PLAN.md Stage 22), so the next priority is hit instead
+				if(!$isDestroyed && Officers::isSheltered($this, $currSystem)) $isDestroyed = true;
 				if( (!$isDestroyed) || ($acceptDestroyed) ){ //either not destroyed, or destroyed systems are accepted
 					if( (!$isDestroyed) && ($currSystem->repairPriority < $minUndestroyedPriority) ){ //is not destroyed and of lower repair priority than current best fit - clear earlier findings, new one should be prioritized!
 						$returnTab = array();
