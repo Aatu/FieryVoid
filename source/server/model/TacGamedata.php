@@ -2026,11 +2026,12 @@ class TacGamedata {
                 continue; //owner and teammates see their own pending pivots
             }
 
-            //...and an Expert Evader's Evade, the other Firing-phase movement order, with the -1 OB it brought (OFFICERS_PLAN.md)
+            //...and an Expert Evader's Evade, the other Firing-phase movement order, with the -1 OB it brought (OFFICERS_PLAN.md),
+            //and a ship's Expert Anticipator turn (Stage 23) - a ship's only Firing-phase order
             $evaded = false;
             for ($i = sizeof($ship->movement) - 1; $i >= 0; $i--) {
                 $move = $ship->movement[$i];
-                if ($move->turn == $this->turn && ($move->value == 'combatpivot' || $move->type == 'evade')) {
+                if ($move->turn == $this->turn && ($move->value == 'combatpivot' || $move->type == 'evade' || Movement::isAnticipatedTurn($move))) {
                     if ($move->type == 'evade') $evaded = true;
                     unset($ship->movement[$i]);
                 }

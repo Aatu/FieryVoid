@@ -3278,12 +3278,18 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
            (not an officer, so they stack) - each die still capped at its face. An Expert Ion Technician's +1 per die on an
            ion weapon's dice (Stage 17), likewise - but not on a Gunner's weapon, whose +1 replaces his. Behind the static. */
         if (TacGamedata::$officersPresent && $shooter instanceof BaseShip) $dieBonus += Officers::gunnerDieBonus($shooter, $this) + Officers::ionDieBonus($shooter, $this);
+        /* An Expert Anticipator (Stage 23): a damage roll of two or more dice rolls one more and drops the lowest (Dice::$extraDie) -
+           on a Gunner's weapon too, with his +1 on every die (user ruling 2026-10-21). Set and restored with the per-die bonus. */
+        $extraDie = (TacGamedata::$officersPresent && $shooter instanceof BaseShip) ? Officers::extraDamageDie($shooter, $this) : 0;
         $previousDieBonus = Dice::$perDieBonus;
+        $previousExtraDie = Dice::$extraDie;
         Dice::$perDieBonus = $dieBonus;
+        Dice::$extraDie = $extraDie;
         try {
             $damage = $this->getDamage($fireOrder);
         } finally {
             Dice::$perDieBonus = $previousDieBonus;
+            Dice::$extraDie = $previousExtraDie;
         }
         $rolled = $damage;
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);                

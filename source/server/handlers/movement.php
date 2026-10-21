@@ -34,29 +34,36 @@
             
             if ($gamedata->phase == 3){
 
-                if (!($ship instanceof FighterFlight))
-                    $ship->movement = array();
+                $isFlight = ($ship instanceof FighterFlight);
 
                 /* An Expert Evader's Evade (OFFICERS_PLAN.md, user request 2026-10-20): one row a turn, and only
                    for a flight whose Evader serves - asked of the authoritative load, since this POST-side ship
                    carries no officers. */
                 $loaded = $gamedata->getShipById($ship->id);
-                $mayEvade = ($ship instanceof FighterFlight) && TacGamedata::$officersPresent
+                $mayEvade = $isFlight && TacGamedata::$officersPresent
                     && Officers::mayEvade($loaded) && !self::hasEvaded($loaded, $gamedata->turn);
                 $evadeKept = false;
+                /* A SHIP keeps nothing but an Expert Anticipator's turn (OFFICERS_PLAN.md Stage 23): one a turn, and only
+                   while he serves - asked of the authoritative load too. */
+                $mayTurn = !$isFlight && TacGamedata::$officersPresent
+                    && Officers::mayAnticipate($loaded) && !self::hasAnticipated($loaded, $gamedata->turn);
+                $turnKept = false;
 
                 for ($i=count($ship->movement)-1;$i>=0;$i--){
                     $move = $ship->movement[$i];
 
                     $isEvade = ($move->type == "evade");
-                    if (($move->type != "pivotright" && $move->type != "pivotleft" && !$isEvade)
+                    $isTurn = self::isAnticipatedTurn($move);
+                    if (($isFlight ? ($move->type != "pivotright" && $move->type != "pivotleft" && !$isEvade) : !$isTurn)
 						||( $move->turn != $gamedata->turn )
 						||(!self::checkIsNewMove($gamedata, $ship, $move))
-						||($isEvade && (!$mayEvade || $evadeKept))){
+						||($isEvade && (!$mayEvade || $evadeKept))
+						||($isTurn && (!$mayTurn || $turnKept))){
                         unset($ship->movement[$i]);
                         continue;
                     }
                     if ($isEvade) $evadeKept = true;
+                    if ($isTurn) $turnKept = true;
 
                 }
 
@@ -1247,6 +1254,23 @@
 			if (!$ship || !is_array($ship->movement)) return false;
 			foreach ($ship->movement as $move){
 				if ($move->type == "evade" && $move->turn == $turn) return true;
+			}
+			return false;
+		}
+
+		/* An Expert Anticipator's turn (OFFICERS_PLAN.md Stage 23): the one turn his ship may make in the Firing phase, an ordinary
+		   turnleft / turnright row - heading and facing, its thrust paid through the thrusters - marked by its `value`.
+		   ⚠️ MIRROR PAIR with shipManager.movement.ANTICIPATED_TURN / isAnticipatedTurn (client movement.js doNormalTurn). */
+		const ANTICIPATED_TURN = 'anticipate';
+		public static function isAnticipatedTurn($move){
+			return ($move->type == "turnleft" || $move->type == "turnright") && (string)$move->value === self::ANTICIPATED_TURN;
+		}
+
+		//Did the ship make an Expert Anticipator's turn this turn - validateMovement's once-a-turn
+		public static function hasAnticipated($ship, $turn){
+			if (!$ship || !is_array($ship->movement)) return false;
+			foreach ($ship->movement as $move){
+				if ($move->turn == $turn && self::isAnticipatedTurn($move)) return true;
 			}
 			return false;
 		}

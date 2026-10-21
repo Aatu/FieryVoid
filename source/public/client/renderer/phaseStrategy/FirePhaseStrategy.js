@@ -7,6 +7,11 @@ window.FirePhaseStrategy = function () {
         this.animationStrategy = new window.IdleAnimationStrategy();
 
         this.deploymentSprites = [];
+
+        //An Expert Anticipator's turn (OFFICERS_PLAN.md Stage 23) pays its thrust on the Movement phase's panel - see onAssignThrust
+        this.onZoomCallbacks.push(this.repositionThrustUi.bind(this));
+        this.onScrollCallbacks.push(this.repositionThrustUi.bind(this));
+        this.shipThrustUIState = null;
     }
 
     FirePhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
@@ -30,9 +35,21 @@ window.FirePhaseStrategy = function () {
 
     FirePhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this);
+        this.uiManager.hideShipThrustUI();
+        this.shipThrustUIState = null;
         this.shipIconContainer.getArray().forEach(function (icon) {
             icon.removeHexagonArcs();
         });
+    };
+
+    /* EXPERT ANTICIPATOR (OFFICERS_PLAN.md Stage 23): his ship's Firing-phase turn is an ordinary turn row (movement.js doNormalTurn),
+       whose thrust the player assigns on the same panel as in the Movement phase - so the panel's two handlers are that phase's own. */
+    FirePhaseStrategy.prototype.onAssignThrust = function (payload) {
+        return MovementPhaseStrategy.prototype.onAssignThrust.call(this, payload);
+    };
+
+    FirePhaseStrategy.prototype.repositionThrustUi = function () {
+        return MovementPhaseStrategy.prototype.repositionThrustUi.call(this);
     };
 
     FirePhaseStrategy.prototype.onHexClicked = function (payload) {
@@ -203,9 +220,10 @@ window.FirePhaseStrategy = function () {
     FirePhaseStrategy.prototype.setSelectedShip = function (ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
         //added extra check for combat pivots to allow cancelling these when flight has 0 thrust - DK 10.24
-        //...and an Expert Evader's Evade, to give or to cancel (OFFICERS_PLAN.md)
+        //...and an Expert Evader's Evade, to give or to cancel (OFFICERS_PLAN.md), and a ship's Expert Anticipator turn (Stage 23)
         if (shipManager.movement.canPivot(ship) || (shipManager.movement.countCombatPivot(ship) > 0)
-            || shipManager.movement.canEvade(ship) || shipManager.movement.hasEvaded(ship)) {
+            || shipManager.movement.canEvade(ship) || shipManager.movement.hasEvaded(ship)
+            || shipManager.movement.canAnticipate(ship) || shipManager.movement.hasAnticipated(ship)) {
             this.drawMovementUI(this.selectedShip);
         }
     };

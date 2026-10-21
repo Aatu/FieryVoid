@@ -1077,16 +1077,14 @@ class customLtPhaseDisruptorShip extends Raking{
 
 	public function getDamage($fireOrder){ 
 		switch($this->firingMode){
-			case 1: //damage for concentrated shot
-				$this->rakes = array();
-				$damage = 0;
-				$rake = Dice::d(6, 3);
-				$damage+=$rake;
-				$this->rakes[] = $rake;
-				$rake = Dice::d(6, 3);
-				$damage+=$rake;
-				$this->rakes[] = $rake;
-				return $damage; 
+			case 1: //damage for concentrated shot: two rakes of 3d6
+				/* rolled die by die, so an Expert Anticipator (OFFICERS_PLAN.md Stage 23) adds ONE die to the shot's 6d6 and drops
+				   its lowest (Dice::keepBest), not one to each rake; the kept dice are then split three and three */
+				$dice = array();
+				for ($i = 0; $i < 6; $i++) $dice[] = Dice::d(6);
+				$dice = Dice::keepBest($dice, 6);
+				$this->rakes = array(array_sum(array_slice($dice, 0, 3)), array_sum(array_slice($dice, 3, 3)));
+				return array_sum($this->rakes);
 				break;
 			case 2:
 				$damage = Dice::d(6, 3); //damage for separate shot

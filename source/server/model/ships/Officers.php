@@ -67,6 +67,9 @@
    Stage 22: the Expert Turret Officer (Vree) - placed in a turret-mounted weapon, aiding every weapon on that TURRET (Weapon::getTurretMates):
    +1 fire control, -1 on criticals, -2 on the turret jam roll, and a turret that fires no shot SHELTERED from all but called shots
    (openShelter). One to a turret (`perTurret`).
+   Stage 23: the Expert Anticipator - initiative rolled twice, the higher kept (initiativeRoll); one turn in the Firing phase, as a
+   fighter's combat pivot (Movement::ANTICIPATED_TURN); and a damage roll of two or more dice one die larger, its lowest dropped
+   (Dice::$extraDie).
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -187,6 +190,8 @@ class Officers{
 			'pct' => array('Abbai Matriarchate' => 15, 'Abbai Matriarchate (WotCR)' => 15)),
 		//"Availability: Vree only" - not the Custom Ships' Shadow-built Xonn, whose turrets are Vree-style too
 		'OFF_TURR' => array('only' => array('Vree Conglomerate')),
+		//"10% of the ship's base value for Torata ... Races other than the Torata pay 50% more for this officer" - the registry's 15
+		'OFF_ANTI' => array('pct' => array('Torata Regency' => 10)),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -355,6 +360,17 @@ class Officers{
 		   unchanged); the -2 on every array; the blanket's fractions kept, as FV's quarter keeps them. Both range and blanket reach
 		   every viewer (addForJson). 30%, the Abbai 15%, for the races of the user's list only ($factionRules). */
 		'OFF_ELINT' => array('label' => 'Expert ELINT Officer', 'post' => 'elint', 'pct' => 30, 'apply' => 'applyElintOfficer'),
+		/* Expert Anticipator (Stage 23; rules text, user 2026-10-21), in the C&C. "When rolling for initiative, this officer's ship
+		   rolls the die twice. The player then selects the higher one" (initiativeRoll). After moving, with the ship's turn delay
+		   complete and the thrust for it unspent, ONE turn in the Firing phase - "not a roll, pivot, snap turn, or other maneuver" -
+		   paid through the thrusters as any turn (the user's note: a fighter's combat pivot, with no firing penalty): a turnleft /
+		   turnright row marked Movement::ANTICIPATED_TURN, kept by Movement::validateMovement only for his ship (mayAnticipate),
+		   hidden from enemies until firing resolves (TacGamedata::hideEnemyCombatPivots). And "when rolling for damage, roll an
+		   extra die and drop the lowest ... only on weapons that roll at least two dice" (extraDamageDie - Dice::$extraDie and
+		   Dice::keepBest). Rulings (user 2026-10-21): the turn is a combat pivot's - given before the ship declares direct fire, and
+		   this turn's fire, his and at him, meets the new facing; on a Gunner's weapon the extra die AND the Gunner's +1 per die.
+		   15%, the Torata 10% ($factionRules). No stat moves at load. */
+		'OFF_ANTI' => array('label' => 'Expert Anticipator', 'post' => 'cnc', 'pct' => 15, 'apply' => null),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -2581,6 +2597,32 @@ class Officers{
 	public static function isSheltered($ship, $system){
 		if (empty(self::$sheltered)) return false;
 		return isset(self::$sheltered[(int)$ship->id][(int)$system->id]);
+	}
+
+	/* ------------------------------------------------------------------ Expert Anticipator (Stage 23) */
+
+	/* "When rolling for initiative, this officer's ship rolls the die twice. The player then selects the higher one" - the d100 of
+	   both initiative rolls (Manager::generateIniative and SimultaneousMovementRule::generateIniative), which run on the load of the
+	   turn being rolled for. The second die is thrown only for his ship, so every other ship's roll is the die it always was. */
+	public static function initiativeRoll($ship){
+		$roll = Dice::d(100);
+		if (TacGamedata::$officersPresent && self::isActive($ship, 'OFF_ANTI')) $roll = max($roll, Dice::d(100));
+		return $roll;
+	}
+
+	/* "Roll an extra die and drop the lowest die from the calculation" - 1 for a shot of his ship's weapons, which
+	   Weapon::getFinalDamage hands to Dice::$extraDie; the "at least two dice" half is the Dice rule. Never a ram: ramming is not one
+	   of the ship's weapons (the Religious Leader's exclusion). On a serving Gunner's weapon as well (user ruling 2026-10-21). */
+	public static function extraDamageDie($ship, $weapon){
+		if ($weapon instanceof RammingAttack) return 0;
+		return self::isActive($ship, 'OFF_ANTI') ? 1 : 0;
+	}
+
+	/* Who may give the Firing-phase turn - Movement::validateMovement, on the authoritative load (a POST-side ship has no officers).
+	   Never a ship something is attached to (a boarding pod, a grappling claw, a docked unit): attached units are moved with their
+	   host only in the Movement phase (MovementGamePhase::process), so they would be left facing the old way. */
+	public static function mayAnticipate($ship){
+		return !($ship instanceof FighterFlight) && empty($ship->hasAttached) && self::isActive($ship, 'OFF_ANTI');
 	}
 
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */

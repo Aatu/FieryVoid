@@ -81,6 +81,10 @@ window.officers = {
 		   numbers the server publishes to every viewer (elintRange, ballisticBlanket); the array's tooltip shows both (elintSpecial). */
 		{ id: 'OFF_ELINT', label: 'Expert ELINT Officer', post: 'elint',
 			summary: '+1 sensors, -2 on sensor criticals; ELINT ranges +25%; Blanket Protection gives +1 DEW per 3 points against ballistic weapons' },
+		/* Stage 23: no stat moves. His initiative roll and his extra damage die are the server's; his Firing-phase turn is
+		   movement.js's (canAnticipate - the turn arrows in the Firing phase). */
+		{ id: 'OFF_ANTI', label: 'Expert Anticipator', post: 'cnc',
+			summary: 'Initiative rolled twice, best kept; one turn in the Firing Phase; damage rolls of 2+ dice roll one extra die and drop the lowest' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -1261,6 +1265,15 @@ window.officers = {
 			if (move && move.type === 'evade' && move.turn == gamedata.turn && move.id == -1) return 1;
 		}
 		return 0;
+	},
+
+	/* Expert Anticipator (Stage 23): may this SHIP make its one Firing-phase turn (movement.js canAnticipate / canTurn) - never with
+	   a unit attached to it, which only the Movement phase moves with its host. Own team only, through his list.
+	   ⚠️ MIRROR PAIR with Officers::mayAnticipate (PHP). */
+	canAnticipate: function canAnticipate(ship) {
+		if (!ship || ship.flight) return false;
+		if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) return false;
+		return this.isActive(ship, 'OFF_ANTI');
 	},
 
 	/* "Officers (2)" - the one line the ship window's gold Enhancements block shows for them (user request

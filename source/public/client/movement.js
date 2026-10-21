@@ -1464,12 +1464,43 @@ shipManager.movement = {
         return c;
     },
 
-    /* The movement orders a flight may give in the Firing phase - a combat pivot, or an Expert Evader's Evade - and so the
-       only rows Cancel can take back there (hasDeletableMovements, deleteMove) and Saved Orders keeps (savedOrders.js). */
+    /* The movement orders a unit may give in the Firing phase - a flight's combat pivot or Expert Evader's Evade, a ship's Expert
+       Anticipator turn - and so the only rows Cancel can take back there (hasDeletableMovements, deleteMove) and Saved Orders
+       keeps (savedOrders.js). */
     isFiringPhaseMove: function isFiringPhaseMove(move) {
         if (!move) return false;
         if (move.type == "evade") return true;
+        if (shipManager.movement.isAnticipatedTurn(move)) return true;
         return move.value == "combatpivot" && (move.type == "pivotleft" || move.type == "pivotright");
+    },
+
+    /* EXPERT ANTICIPATOR (OFFICERS_PLAN.md Stage 23): after moving, with its turn delay complete and the thrust for it unspent, his
+       ship may make ONE turn in the Firing phase - an ordinary turnleft / turnright row (doNormalTurn: heading and facing, thrust
+       through the thrusters on the thrust panel), marked ANTICIPATED_TURN. A combat pivot's in all else (user ruling 2026-10-21):
+       given before the ship declares direct fire (weaponManager.canCombatTurn), Cancel takes it back, no to-hit penalty, and this
+       turn's fire - his and at him - meets the new facing. The turn arrows come from canTurn, which asks canAnticipate.
+       ⚠️ MIRROR PAIR with Movement::ANTICIPATED_TURN / isAnticipatedTurn (PHP); the server keeps the row only for a ship whose
+       Anticipator serves (Movement::validateMovement). */
+    ANTICIPATED_TURN: 'anticipate',
+    isAnticipatedTurn: function isAnticipatedTurn(move) {
+        return !!move && (move.type == "turnleft" || move.type == "turnright") && move.value === shipManager.movement.ANTICIPATED_TURN;
+    },
+
+    hasAnticipated: function hasAnticipated(ship) {
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move && move.turn == gamedata.turn && shipManager.movement.isAnticipatedTurn(move)) return true;
+        }
+        return false;
+    },
+
+    canAnticipate: function canAnticipate(ship) {
+        if (gamedata.gamephase != 3 || ship.flight) return false;
+        if (!(window.officers && officers.canAnticipate(ship))) return false;
+        if (shipManager.movement.hasAnticipated(ship)) return false;
+        if (shipManager.isDestroyed(ship)) return false;
+        if (shipManager.getTurnDeployed(ship) > gamedata.turn) return false;
+        return weaponManager.canCombatTurn(ship);
     },
 
     /* EXPERT EVADER (OFFICERS_PLAN.md, user request 2026-10-20): Evade is a Firing-phase movement order, like a combat pivot
@@ -2941,7 +2972,11 @@ shipManager.movement = {
            the courtesy half, not the enforcement. */
         if (gamedata.gamephase == -1 && shipManager.isArrivingReinforcement(ship)) return false;
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
-        if (gamedata.gamephase != 2) return false;
+        /* EXPERT ANTICIPATOR (OFFICERS_PLAN.md Stage 23): his ship's one turn in the Firing phase - canAnticipate is its gate,
+           and every rule below still applies to it, the turn delay without the agile snap-turn exception. */
+        if (gamedata.gamephase == 3) {
+            if (!shipManager.movement.canAnticipate(ship)) return false;
+        } else if (gamedata.gamephase != 2) return false;
         if (shipManager.movement.extendedTurnForbids(ship, right ? 'turnright' : 'turnleft')) return false;
         if (ship.osat && (!ship.flight)) { //OSAT but not MicroSAT
             for (var i = 0; i < ship.systems.length; i++) {
@@ -2967,6 +3002,8 @@ shipManager.movement = {
         var turndelay = shipManager.movement.calculateCurrentTurndelay(ship);
         var previous = shipManager.movement.getLastCommitedMove(ship);
         if (turndelay > 0) {
+            //An Expert Anticipator's turn needs "his ship's Turn Delay complete" - and is never a snap turn.
+            if (gamedata.gamephase == 3) return false;
             //An agile ship's snap turn may follow straight on from a turn - but not from the
             //completion of an extended turn, which is a single 60° turn (D7).
             if (!(ship.agile && previous && previous.turn == gamedata.turn && shipManager.movement.isTurn(previous)
@@ -3068,7 +3105,8 @@ shipManager.movement = {
             at_initiative: shipManager.getIniativeOrder(ship),
             turn: gamedata.turn,
             forced: false,
-            value: 0
+            //a turn given in the Firing phase is an Expert Anticipator's (canTurn) - marked, as a combat pivot is
+            value: gamedata.gamephase == 3 ? shipManager.movement.ANTICIPATED_TURN : 0
         };
 
         if (!ship.flight) {
