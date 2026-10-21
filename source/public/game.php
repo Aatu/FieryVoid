@@ -771,6 +771,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
             <canvas id="jinkcanvas" width="40" height="40"></canvas>
         </div>
 
+        <!-- An Expert Evader's Evade (OFFICERS_PLAN.md): Firing phase, the jink art without its value or +/- (UI/shipMovement.js) -->
+        <div id="evade" class="movement-icon" data-movement-type="Evade">
+            <canvas id="evadecanvas" width="40" height="40"></canvas>
+        </div>
+
         <div id="contraction" class="movement-icon" data-movement-type="Contraction">
 			<div class="centercontainer">
                 <span class="contractionvalue value centercontent">0</span>

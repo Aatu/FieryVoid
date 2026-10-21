@@ -85,6 +85,21 @@ const Button = styled.div`
     }
 `;
 
+/* Stage 19: an Expert Targeter on a Medium ship's one block picks a SIDE instead of a post - two buttons, the side he will cover
+   lit. The other side is a move to his own post (Officers::mayMoveTo, `switchTo`), so it costs the turn as Move Officer does. */
+const SideSwitch = styled.div`
+    display: flex;
+    gap: 2px;
+`;
+
+const SideButton = styled(Button)`
+    ${props => props.$on && `
+        background: ${INK.bar};
+        color: #0b1520;
+        cursor: default;
+    `}
+`;
+
 class OfficersMenu extends Component {
 
     move(e, entry) {
@@ -98,6 +113,43 @@ class OfficersMenu extends Component {
         officers.cancelTransfer(this.props.ship, entry);
     }
 
+    //the side he covers now: cancels a switch; the other side: orders one (to his own post)
+    side(e, entry, side, order) {
+        e.stopPropagation(); e.preventDefault();
+        if (side.current) {
+            if (order) officers.cancelTransfer(this.props.ship, entry);
+        } else if (!order) {
+            officers.setTransfer(this.props.ship, entry, entry.post);
+        }
+    }
+
+    renderSides(entry, sides, order, i, nextTurn) {
+        const other = sides.find(side => !side.current);
+        return (
+            <React.Fragment key={`${entry.id}-${i}`}>
+                <Row>
+                    <span>{officers.label(entry.id)}</span>
+                    <SideSwitch>
+                        {sides.map(side => {
+                            const on = order ? !side.current : side.current;
+                            return (
+                                <SideButton key={side.id} $on={on} onClick={e => this.side(e, entry, side, order)}
+                                    title={on ? `He covers the ${side.name} weapons` : `Cover the ${side.name} weapons instead`}>
+                                    {side.name}
+                                </SideButton>
+                            );
+                        })}
+                    </SideSwitch>
+                </Row>
+                <Note>
+                    {order
+                        ? `Switching to ${other.name}: he covers nothing for the rest of this turn, and the ${other.name} weapons from turn ${nextTurn}.`
+                        : 'Switching sides takes the rest of the turn: he covers nothing until the next.'}
+                </Note>
+            </React.Fragment>
+        );
+    }
+
     render() {
         const { ship, system } = this.props;
         const nextTurn = officers.currentTurn() + 1;
@@ -106,6 +158,8 @@ class OfficersMenu extends Component {
                 <Header>Officers</Header>
                 {officers.movableOn(ship, system.id).map((entry, i) => {
                     const order = officers.transferOf(ship, entry);
+                    const sides = officers.sideChoices(ship, entry);
+                    if (sides) return this.renderSides(entry, sides, order, i, nextTurn);
                     return (
                         <React.Fragment key={`${entry.id}-${i}`}>
                             <Row>

@@ -2255,6 +2255,20 @@ window.gamedata = {
                 return false;
             }
 
+            //An Expert Anticipator's turn (OFFICERS_PLAN.md Stage 23) is an ordinary turn row: it is not made until its thrust is assigned
+            var unpaidTurnShips = gamedata.ships.filter(function (ship) {
+                return ship.userid == gamedata.thisplayer && shipManager.movement.hasAnticipated(ship) && shipManager.movement.checkHasUncommitted(ship);
+            });
+            if (unpaidTurnShips.length > 0) {
+                var unpaidTurnError = "The following ships have a turn whose thrust is not assigned:<br>";
+                unpaidTurnShips.forEach(function (unpaidShip) {
+                    unpaidTurnError += gamedata.shipNameSpan(unpaidShip, '- ' + unpaidShip.name) + '<br>';
+                });
+                unpaidTurnError += "Assign its thrust, or cancel the turn, before you can commit the turn.";
+                window.confirm.error(unpaidTurnError, function () { });
+                return false;
+            }
+
 
             //check ammo magazine		
             //ammo usage check - AmmoMagazine equipped units

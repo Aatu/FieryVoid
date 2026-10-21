@@ -397,7 +397,7 @@ class FighterFlight extends BaseShip
         }
         $mod = array_sum($affectingSystems);
         //Expert Evader: -1 damage on every hit (OFFICERS_PLAN.md Stage 4), behind the one static boolean
-        if (TacGamedata::$officersPresent) $mod += Officers::evaderDamageReduction($this);
+        if (TacGamedata::$officersPresent) $mod += Officers::evaderDamageReduction($this, $turn); //only on a turn the flight evades
         return $mod;
     }
 

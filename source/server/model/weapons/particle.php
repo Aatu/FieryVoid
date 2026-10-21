@@ -1937,23 +1937,11 @@ class PentagonArray extends Raking{
             $damage = Dice::d(10);
         }else{
             $this->rakes = array();
-            $damage = 0;
-            $rake = Dice::d(10);
-            $damage+=$rake;
-            $this->rakes[] = $rake;
-            $rake = Dice::d(10);
-            $damage+=$rake;
-            $this->rakes[] = $rake;
-            $rake = Dice::d(10);
-            $damage+=$rake;
-            $this->rakes[] = $rake;
-            $rake = Dice::d(10);
-            $damage+=$rake;
-            $this->rakes[] = $rake;
-            $rake = Dice::d(10);
-            $damage+=$rake;
-            $this->rakes[] = $rake;
-        }    
+            for ($i = 0; $i < 5; $i++) $this->rakes[] = Dice::d(10);
+            //Expert Anticipator (OFFICERS_PLAN.md Stage 23): six rakes rolled, the lowest dropped - his rules' own example
+            $this->rakes = Dice::keepBest($this->rakes, 10);
+            $damage = array_sum($this->rakes);
+        }
 		return $damage;
 	}			
 

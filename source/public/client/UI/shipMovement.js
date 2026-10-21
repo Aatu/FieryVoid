@@ -82,6 +82,7 @@ window.UI = {
 
             UI.shipMovement.jinkElement = $("#jink", ui);
             UI.shipMovement.jinkvalueElement = UI.shipMovement.jinkElement.find(".jinkvalue");
+            UI.shipMovement.evadeElement = $("#evade", ui);
 
             UI.shipMovement.accElement = $("#accelerate", ui);
             UI.shipMovement.deaccElement = $("#deaccelerate", ui);
@@ -131,6 +132,7 @@ window.UI = {
 
             UI.shipMovement.morejinkElement.on("click touchstart contextmenu", UI.shipMovement.morejinkCallback);
             UI.shipMovement.lessjinkElement.on("click touchstart contextmenu", UI.shipMovement.lessjinkCallback);
+            UI.shipMovement.evadeElement.on("click touchstart", UI.shipMovement.evadeCallback);
 
             UI.shipMovement.halfphaseElement.on("click touchstart", UI.shipMovement.halfphaseCallback);
 
@@ -195,6 +197,11 @@ window.UI = {
 
         lessjinkCallback: function lessjinkCallback(e) {
             UI.shipMovement.callbackHandler.lessjinkCallback(e);
+        },
+
+        evadeCallback: function evadeCallback(e) {
+            e.stopPropagation();
+            UI.shipMovement.callbackHandler.evadeCallback(e);
         },
 
         halfphaseCallback: function halfphaseCallback(e) {
@@ -688,6 +695,15 @@ window.UI = {
                 UI.shipMovement.drawUIElement(lessjink, pos.x, pos.y, 16, dis * 1.4, angle, "img/minus.png", "lessjinkcanvas", 0);
             } else {
                 lessjink.hide();
+            }
+
+            //EVADE - an Expert Evader's Firing-phase order: the jink art, no +/- or value; gone once given (Cancel takes it back)
+            var evade = UI.shipMovement.evadeElement;
+            if (shipManager.movement.canEvade(ship)) {
+                dis += 30;
+                UI.shipMovement.drawUIElement(evade, pos.x, pos.y, s, dis * 1.4, angle, "img/jink.png", "evadecanvas", shipHeading);
+            } else {
+                evade.hide();
             }
 
             //HALF PHASING

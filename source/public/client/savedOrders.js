@@ -236,7 +236,7 @@ window.savedOrders = {
 			var moves = [];
 			for (var m = 0; m < (ship.movement || []).length; m++) {
 				var move = ship.movement[m];
-				if (move && move.turn == turn && move.id == -1 && move.value == "combatpivot") moves.push(move);
+				if (move && move.turn == turn && move.id == -1 && shipManager.movement.isFiringPhaseMove(move)) moves.push(move); //pivots and an Evade
 			}
 			if (moves.length) rec.move = moves;
 		}
@@ -478,7 +478,7 @@ window.savedOrders = {
 		if (phase === 3 && Array.isArray(ship.movement)) {
 			for (var m = ship.movement.length - 1; m >= 0; m--) {
 				var move = ship.movement[m];
-				if (move && move.turn == turn && move.id == -1 && move.value == "combatpivot") {
+				if (move && move.turn == turn && move.id == -1 && shipManager.movement.isFiringPhaseMove(move)) {
 					ship.movement.splice(m, 1);
 					moved = true;
 				}

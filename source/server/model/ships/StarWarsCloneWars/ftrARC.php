@@ -45,6 +45,7 @@ class ftrARC extends FighterFlight{
             $frontGun = new CWLaserCannonsFtr(330, 30, 5);
             $frontGun->displayName = "Medium Lasers";
             $aftGun = new CWLaserCannonsFtr(150, 210, 2, 1);
+            $aftGun->setTailGun(); //tail gun (Weapon::getTailGunMod)
             $aftGun->displayName = "Blaster";
 
             $fighter->addFrontSystem(new CWFighterProtonLauncher(3, 330, 30));

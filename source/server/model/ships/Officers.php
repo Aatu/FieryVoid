@@ -58,6 +58,18 @@
    Stage 18: the Expert Pilot - the first officer bought as a COUNT (`multi`): up to four on one flight, one in each of its first
    crafts, each +1 OB and a free jinking level beyond the limit (client, movement.js), and Spark Fields 1 weaker on his flight on a
    turn it neither jinks nor fires (pilotSparkRelief). Several pilots are still the flight's ONE officer (D9).
+   Stage 19: the Expert Targeter (Raiders, Llort) - the first officer posted in a STRUCTURE block: +4 on called shots by the weapons
+   he covers (targeterShotBonus) - his block's, or on a Medium ship one side's of its hit chart (sideReach) - and a side switch that is
+   a move to his own post (`switchTo`). His kill roll counts only that turn's damage to the block (blockKillRoll).
+   Stage 20: the Expert ELINT Officer - his array +1, -2 on sensor criticals, every ELINT range 25% longer (elintRange).
+   Stage 21: the Expert Tailgunner - a fighter officer for flights with a TAIL GUN (Weapon::$tailGun): no penalty for firing it
+   with the forward guns, or +5% with it where it has none (Weapon::getTailGunMod).
+   Stage 22: the Expert Turret Officer (Vree) - placed in a turret-mounted weapon, aiding every weapon on that TURRET (Weapon::getTurretMates):
+   +1 fire control, -1 on criticals, -2 on the turret jam roll, and a turret that fires no shot SHELTERED from all but called shots
+   (openShelter). One to a turret (`perTurret`).
+   Stage 23: the Expert Anticipator - initiative rolled twice, the higher kept (initiativeRoll); one turn in the Firing phase, as a
+   fighter's combat pivot (Movement::ANTICIPATED_TURN); and a damage roll of two or more dice one die larger, its lowest dropped
+   (Dice::$extraDie).
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -114,6 +126,16 @@ class Officers{
 	const RAD_CNC_CRIT_MOD = 4;          //...: "If they hit C&C, the critical roll is at +4 on the die instead of the listed +2"
 	const PILOT_OB = 1;                  //Expert Pilot: "+1 to the flight's offensive bonus" (+5% in FV)
 	const PILOT_SPARK_RELIEF = 1;        //...: "will also reduce [spark field] damage by 1 point if he forgoes all his other benefits"
+	const TARGETER_CALLED_BONUS = 4;     //Expert Targeter: "called shots have a +4 bonus to hit" - the -8 stays ("It does not cancel ...")
+	const ELINT_SENSORS = 1;             //Expert ELINT Officer: "The sensor rating of his ship is increased by + 1"
+	const ELINT_CRIT_MOD = -2;           //...: "All critical hit rolls against the sensors are reduced by 2"
+	const ELINT_RANGE_PCT = 25;          //...: "The range of all ELINT functions is increased by 25% (round fractions of 0.5 or more up)"
+	const ELINT_BLANKET_BALLISTIC = 3;   //...: blanket protection's total "divided by 3 (not 4) for purposes of ballistic weapons only"
+	const TAILGUNNER_BONUS = 1;          //Expert Tailgunner: on a tail gun with no penalty, "+5% to hit with that gun only"
+	const TURRET_CRIT_MOD = -1;          //Expert Turret Officer: "When rolling for critical hits against turret-mounted weapons, subtract 1"
+	const TURRET_JAM_RELIEF = 2;         //...: "When rolling for the special turret jam critical, subtract 2 from the die roll"
+	//...a Medium ship's side, looked at from its own bearing (a "TAG:" hit chart entry is arc-filtered): Front, Aft, Left, Right
+	private static $sideBearing = array(1 => 0, 2 => 180, 3 => 270, 4 => 90);
 	//the fire orders that are NOT the flight firing, for his Spark Field relief: interception uses neither OB nor jinking
 	private static $notFiring = array('intercept', 'selfIntercept', 'meteorDefence');
 
@@ -156,6 +178,20 @@ class Officers{
 		'OFF_ION'  => array('only' => array('Cascor Commonwealth')),
 		//"Up to four expert pilots in the same flight are cumulative, except for Raider flights, which can use no more than two"
 		'OFF_PILOT' => array('max' => array('Raiders' => 2)),
+		//"Cost: 10% of the ship's base cost for Raiders. Availability: Raiders. Llort can also take at double the cost."
+		'OFF_TARG' => array('only' => array('Raiders', 'Llort'), 'pct' => array('Llort' => 20)),
+		/* "15% of the ship's base value for Abbai factions ... Double the cost for non-Abbai vessels. Not available for races whose
+		   current mainline ships do not have at least an 8 sensor rating" - the races are the user's list (2026-10-20): not the
+		   Centauri WotCR, the Early Earth Alliance or the Drazi WotCR, and no custom faction for now; the Abbai WotCR are Abbai. */
+		'OFF_ELINT' => array('only' => array('Abbai Matriarchate', 'Abbai Matriarchate (WotCR)', 'Centauri Republic', 'Earth Alliance',
+			'Narn Regime', 'Minbari Federation', 'Yolu Confederation', 'Torata Regency', 'Gaim Intelligence', 'Drazi Freehold',
+			'Vree Conglomerate', 'Dilgar Imperium', 'Brakiri Syndicracy', 'Hyach Gerontocracy', 'Markab Theocracy', 'Corillani Theocracy',
+			'Llort', 'Deneth Tribes', 'Minbari Protectorate'),
+			'pct' => array('Abbai Matriarchate' => 15, 'Abbai Matriarchate (WotCR)' => 15)),
+		//"Availability: Vree only" - not the Custom Ships' Shadow-built Xonn, whose turrets are Vree-style too
+		'OFF_TURR' => array('only' => array('Vree Conglomerate')),
+		//"10% of the ship's base value for Torata ... Races other than the Torata pay 50% more for this officer" - the registry's 15
+		'OFF_ANTI' => array('pct' => array('Torata Regency' => 10)),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -197,7 +233,13 @@ class Officers{
 	   Stage 14:
 	     lost        (optional) the static method applying what his LOSS does, on every turn after he was disabled
 	                 or killed in battle (isLost) - in place of `apply`, which only runs while he serves
-	     lostPublish (optional) `publish`'s list for the turns `lost` runs */
+	     lostPublish (optional) `publish`'s list for the turns `lost` runs
+	   Stage 19:
+	     side        (optional) which of a single-block hull's two sides he covers (1 = its first, 2 = its second - hullSides)
+	     switchTo    (optional) the officer he becomes when ordered to his OWN post (mayMoveTo): the Expert Targeter's side switch
+	   Stage 22:
+	     perTurret   (optional) true: one of him to a TURRET (turretKey - a weapon's linked firing group, or the weapon alone), not only
+	                 one to a system - at purchase and load (keepPlacedRows) and when he moves (mayMoveTo) */
 	private static $registry = array(
 		/* Expert Helmsman: +5 initiative (FV units, QX1), wins initiative ties, and -1 on the die he
 		   rolls on a meteor swarm's impact chart (user, 2026-10-10). The tie-break is
@@ -310,6 +352,25 @@ class Officers{
 		   only for a hull carrying an ion weapon. No stat moves at load: every rule is asked at damage time. */
 		'OFF_ION'  => array('label' => 'Expert Ion Technician', 'post' => 'engine', 'pct' => 10, 'apply' => null,
 			'needs' => 'hasIonWeapon'),
+		/* Expert ELINT Officer (Stage 20; rules text, user 2026-10-20), in his ship's ELINT array - "ELINT vessel only", so a hull
+		   without one is never offered him. His array +1 output, and -2 on the critical rolls of every sensor array on his ship
+		   (applyElintOfficer); every ELINT function's range 25% longer, rounded half up (elintRange: 30 -> 38, 50 -> 63, 20 -> 25); and his
+		   blanket protection counts a third, not a quarter, against ballistic weapons (ballisticBlanket). Rulings (user 2026-10-20):
+		   the ranged functions only - SOEW, SDEW, Blanket, Disruption, Jamming (Detect Stealth and the stealth detection range
+		   unchanged); the -2 on every array; the blanket's fractions kept, as FV's quarter keeps them. Both range and blanket reach
+		   every viewer (addForJson). 30%, the Abbai 15%, for the races of the user's list only ($factionRules). */
+		'OFF_ELINT' => array('label' => 'Expert ELINT Officer', 'post' => 'elint', 'pct' => 30, 'apply' => 'applyElintOfficer'),
+		/* Expert Anticipator (Stage 23; rules text, user 2026-10-21), in the C&C. "When rolling for initiative, this officer's ship
+		   rolls the die twice. The player then selects the higher one" (initiativeRoll). After moving, with the ship's turn delay
+		   complete and the thrust for it unspent, ONE turn in the Firing phase - "not a roll, pivot, snap turn, or other maneuver" -
+		   paid through the thrusters as any turn (the user's note: a fighter's combat pivot, with no firing penalty): a turnleft /
+		   turnright row marked Movement::ANTICIPATED_TURN, kept by Movement::validateMovement only for his ship (mayAnticipate),
+		   hidden from enemies until firing resolves (TacGamedata::hideEnemyCombatPivots). And "when rolling for damage, roll an
+		   extra die and drop the lowest ... only on weapons that roll at least two dice" (extraDamageDie - Dice::$extraDie and
+		   Dice::keepBest). Rulings (user 2026-10-21): the turn is a combat pivot's - given before the ship declares direct fire, and
+		   this turn's fire, his and at him, meets the new facing; on a Gunner's weapon the extra die AND the Gunner's +1 per die.
+		   15%, the Torata 10% ($factionRules). No stat moves at load. */
+		'OFF_ANTI' => array('label' => 'Expert Anticipator', 'post' => 'cnc', 'pct' => 15, 'apply' => null),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -347,6 +408,32 @@ class Officers{
 		'OFF_RELIP' => array('label' => 'Expert Religious Leader', 'placed' => true, 'pct' => 15, 'sameAs' => 'OFF_RELI',
 			'hosts' => 'isReligiousPost', 'nonWeapon' => true, 'apply' => 'applyReligiousLeader', 'publish' => array('iniativebonus'),
 			'lost' => 'applyReligiousFrenzy', 'lostPublish' => array('iniativebonus', 'forwardDefense', 'sideDefense'), 'movable' => true),
+		/* Expert Targeter (Stage 19; rules text, user 2026-10-20), in a STRUCTURE block: "called shots have a +4 bonus to hit ... only
+		   called shots. It does not cancel the usual -8" (targeterShotBonus). "All weapons attached to this block receive the
+		   benefit" - the weapons in its location; "on a medium ship, he must choose either forward or aft weapons, and will aid only
+		   those weapons which can be hit from the chosen direction (on the Hit Location Chart)" - a hull with no outer block posts him
+		   in its Primary Structure, covering one side's reach on its hit chart (sideReach). OFF_TARG is a block, or such a hull's
+		   first side (Front, or Left); OFF_TARG2 its second (Aft, or Right) - the same officer (sameAs), offered only where the two
+		   sides differ. Rulings (user 2026-10-20): the side's reach includes its Primary result; his kill roll counts only that
+		   turn's damage to the block (blockKillRoll); on a Gunner's gun his +4 replaces the Gunner's called-shot +3. One per block
+		   he could serve in, like a system enhancement (user ruling 2026-10-20 - targeterLimit; a block hosts one officer). Moves to
+		   another outer block no other officer holds (movable); on a single-block hull switches side as a move to his own post
+		   (switchTo). 10%, Llort 20%, Raiders and Llort only ($factionRules). No stat moves at load. */
+		'OFF_TARG' => array('label' => 'Expert Targeter', 'placed' => true, 'pct' => 10, 'hosts' => 'isTargeterPost', 'nonWeapon' => true,
+			'apply' => null, 'movable' => true, 'side' => 1, 'switchTo' => 'OFF_TARG2', 'shipLimit' => 'targeterLimit'),
+		'OFF_TARG2' => array('label' => 'Expert Targeter', 'placed' => true, 'pct' => 10, 'sameAs' => 'OFF_TARG', 'hosts' => 'isTargeterSecondSide',
+			'nonWeapon' => true, 'apply' => null, 'movable' => true, 'side' => 2, 'switchTo' => 'OFF_TARG'),
+		/* Expert Turret Officer (Stage 22; rules text, user 2026-10-21), in a TURRET-MOUNTED weapon (Weapon::isTurretMount - the Vree saucers'
+		   jammable mounts), aiding every weapon on that turret (Weapon::getTurretMates: his gun's linked firing group, or his gun alone) and
+		   "not any other turrets on the same ship": +1 to hit - fire control, the Gunner's way - and -1 on their critical rolls
+		   (applyTurretOfficer); -2 on the turret jam roll (turretJamRelief, asked by Weapon::testArcRestriction); and on a turn none of
+		   them fires, the turret is SHELTERED - "no incoming fire can hit its weapons unless they use called shots" (openShelter,
+		   isSheltered) - automatically, in place of the player's declaration (the user's note). Rulings (user 2026-10-21): only a SHOT
+		   breaks the shelter (an interception does not); on a gun a serving Expert Gunner holds, the Gunner's +1 replaces his ("does not
+		   combine"), his other effects still apply; a turret-mounted weapon linked to no other is a turret of its own; movable. One to a
+		   turret (perTurret), so a ship may carry one per turret (turretLimit). 5% of the ship's base cost, Vree only ($factionRules). */
+		'OFF_TURR' => array('label' => 'Expert Turret Officer', 'placed' => true, 'pct' => 5, 'hosts' => 'isTurretPost',
+			'apply' => 'applyTurretOfficer', 'movable' => true, 'perTurret' => true, 'shipLimit' => 'turretLimit'),
 
 		/* FIGHTER OFFICERS (Stage 4). A flight carries ONE officer in total (D9), posted on its first
 		   craft. He is lost with that craft - destroyed, or dropped out - and never by a dock, a partial
@@ -354,7 +441,8 @@ class Officers{
 		   carries him. No kill roll: a craft has no d20 critical roll, only the d10 dropout test (user
 		   rulings 2026-10-11). Priced off one craft, scaled by the flight's size (flightPrice). ⚠️ Saved
 		   fleets bought under the Stage 4 prices are re-priced on reload (legacyPrice). */
-		/* Expert Dogfighter: +5 initiative (FV units, QX1). 50% of a craft. */
+		/* Expert Dogfighter: +5 initiative (FV units, QX1), and wins initiative ties as the Helmsman does (user request
+		   2026-10-20, winsInitiativeTies). 50% of a craft. */
 		'OFF_DOG'  => array('label' => 'Expert Dogfighter', 'post' => 'craft', 'flight' => true, 'pct' => 50,
 			'apply' => 'applyDogfighter', 'publish' => array('iniativebonus')),
 		/* Expert Missileer: "+5 OB for missiles" = +1 OB (the +5 is FV's displayed %) on every ballistic
@@ -365,7 +453,9 @@ class Officers{
 		'OFF_MSL'  => array('label' => 'Expert Missileer', 'post' => 'craft', 'flight' => true, 'pct' => 50,
 			'perMissile' => 1, 'apply' => null, 'needs' => 'hasMissiles'),
 		/* Expert Evader: "-1 to hit with the flight's own weapons, -1 damage on all incoming fire",
-		   always on (user ruling 2026-10-11). -1 OB, which is what every fighter to-hit path reads on
+		   only on a turn the flight EVADES (user request 2026-10-20, replacing "always on"): an 'evade'
+		   movement row ordered in the Firing phase like a combat pivot (Movement::hasEvaded; client
+		   movement.js doEvade). -1 OB, which is what every fighter to-hit path reads on
 		   both ends (the client never reads a flight's toHitBonus), and +1 in FighterFlight::getDamageMod.
 		   100% of a craft - NOT per craft (user ruling 2026-10-15). */
 		'OFF_EVAD' => array('label' => 'Expert Evader', 'post' => 'craft', 'flight' => true, 'pct' => 100,
@@ -399,6 +489,14 @@ class Officers{
 		   for a flight of six and scaled by its size (§9.9, the Evader's rule). Last in the list, as the newest. */
 		'OFF_PILOT' => array('label' => 'Expert Pilot', 'post' => 'craft', 'flight' => true, 'pct' => 100, 'multi' => 4,
 			'apply' => 'applyPilot', 'publish' => array('offensivebonus')),
+		/* Expert Tailgunner (Stage 21; rules text, user 2026-10-21): "adept at operating his fighter's tailgun in concert with the
+		   forward-mounted weapons, and can train the rest of his flight in this special skill. The flight receives no penalties when
+		   using the tailgun in the same turn as the other guns ... If the tailgun has no penalty associated with it, as in the Badger,
+		   the officer provides a +5% to hit with that gun only" - Weapon::getTailGunMod asks hasTailgunner. "Half the cost of a
+		   fighter": 50% of a craft. "Races can use this officer if they have fighters that meet the requirements e.g. an aft mounted
+		   weapon": a flight whose craft carries a weapon flagged as its tail gun (hasTailGun) - every faction (user ruling: all 15). */
+		'OFF_TAIL' => array('label' => 'Expert Tailgunner', 'post' => 'craft', 'flight' => true, 'pct' => 50,
+			'apply' => null, 'needs' => 'hasTailGun'),
 	);
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV) - so the
@@ -586,6 +684,8 @@ class Officers{
 	              SecondaryCnC is not a CnC subclass, so it is never picked.
 	     scanner  the strongest Scanner by output (ELINT scanners included) - the one Elite Crew,
 	              Poor Crew and Improved Sensors move, so they agree on a hull with two.
+	     elint    the strongest ELINT array by output (Stage 20): an ElintScanner, the Chameleon suite included - never a
+	              Kirishiac ELINT module, which is no Scanner. No officer-eligible hull mixes a plain Scanner with an array.
 	     reactor  the biggest Reactor by maxhealth - Elite Crew's rule (a malus would sit on the main
 	              reactor too); Mag-Grav reactors included.
 	     engine   the strongest Engine by output - the one Poor Crew and ADV_ENG move (Stage 5)
@@ -615,6 +715,8 @@ class Officers{
 				return $any;
 			case 'scanner':
 				return self::strongest($ship, 'Scanner', 'output', -1);
+			case 'elint':
+				return self::strongest($ship, 'ElintScanner', 'output', -1);
 			case 'reactor':
 				return self::strongest($ship, 'Reactor', 'maxhealth', -1000);
 			case 'maggrav':
@@ -750,7 +852,8 @@ class Officers{
 	   sanitiseSystemEnhancements, at buy, save and reload, which names what it drops) and for the load
 	   (pickPlacedPosts). $pairs: array(array(id, systemid), ...). Walked in registry order, then system id:
 	     - a system hosts ONE placed officer (so a doctored Gunner + Matter expert on one gun keeps the Gunner);
-	     - no officer passes his ship cap (placedLimit).
+	     - no officer passes his ship cap (placedLimit);
+	     - a `perTurret` officer (Stage 22, the Expert Turret Officer): one to a turret (turretKey).
 	   Returns the keys of $pairs that stand, in that order. ⚠️ MIRROR PAIR with officers.placedEntries (JS). */
 	public static function keepPlacedRows($ship, array $pairs){
 		$order = array_flip(array_keys(self::$registry));
@@ -762,17 +865,25 @@ class Officers{
 			if ((int)$pairs[$a][1] !== (int)$pairs[$b][1]) return (int)$pairs[$a][1] - (int)$pairs[$b][1];
 			return $a - $b;
 		});
-		$hosted = array(); $count = array(); $kept = array();
+		$hosted = array(); $count = array(); $turrets = array(); $kept = array();
 		foreach ($keys as $key){
 			list($id, $systemid) = $pairs[$key];
 			if (!self::isPlacedOfficer($id) || isset($hosted[(int)$systemid])) continue;
 			$n = isset($count[$id]) ? $count[$id] : 0;
 			if ($n >= self::placedLimit($ship, $id)) continue;
+			$turret = self::isPerTurret($id) ? self::turretKey($ship->getSystemById((int)$systemid)) : null;
+			if ($turret !== null && isset($turrets[$id][$turret])) continue;
 			$hosted[(int)$systemid] = true;
 			$count[$id] = $n + 1;
+			if ($turret !== null) $turrets[$id][$turret] = true;
 			$kept[] = $key;
 		}
 		return $kept;
+	}
+
+	//a placed officer who is one to a TURRET, not only one to a system (Stage 22) - keepPlacedRows, mayMoveTo, the sanitiser's notice
+	public static function isPerTurret($id){
+		return !empty(self::$registry[$id]['perTurret']);
 	}
 
 	/* How many of this placed officer one ship may carry: his `shipLimit` method, or 1 ("one of each type").
@@ -982,27 +1093,35 @@ class Officers{
 	   (the client offers only those) all ask it:
 	     - a movable officer, serving (not disabled or killed before $m), moving at most once a turn;
 	     - a post he could hold (postAs: a weapon he could be bought for; the Matter Weapons Expert's C&C), not
-	       his own, and not destroyed;
+	       his own, and not destroyed - his own only for an officer who becomes another there (`switchTo`, Stage 19: the
+	       Expert Targeter's switch to a Medium ship's other side), costing the turn as any move does;
 	     - not the post of another placed officer still in action that turn or the next - one officer to a
 	       weapon (Stage 8), and no swaps: the post must be free when he sets out. A disabled or killed
-	       officer holds nobody's post. */
+	       officer holds nobody's post;
+	     - a `perTurret` officer (Stage 22): nor a turret another of him holds, on the same terms - between the guns of
+	       his own turret he may move. */
 	private static function mayMoveTo($ship, array $list, $i, $target, $m){
 		$entry = $list[$i];
 		$stay = self::stayOn($entry, $m);
 		if ($stay === null || empty(self::$registry[$stay['id']]['movable'])) return null;
 		if (!empty($entry['transit']) && in_array((int)$m, $entry['transit'], true)) return null;
-		if ((int)$target->id === (int)$stay['post']) return null;
+		$own = ((int)$target->id === (int)$stay['post']);
+		if ($own && empty(self::$registry[$stay['id']]['switchTo'])) return null;
 		list($out) = self::outState($ship, $entry);
 		if ($out !== null && $out < $m) return null; //"Disabled or Killed Officers cannot be moved"
-		$as = self::postAs($ship, $stay['id'], $target);
+		$as = $own ? self::switchAs($ship, $stay['id'], $target) : self::postAs($ship, $stay['id'], $target);
 		if ($as === null) return null;
 		$fell = self::disabledTurn($ship, $target);
 		if ($fell !== null && $fell < $m) return null;
+		$turret = self::isPerTurret($as) ? self::turretKey($target) : null;
 		foreach ($list as $j => $other){
 			if ($j === $i) continue;
 			foreach (array($m, $m + 1) as $t){
 				$held = self::stayOn($other, $t);
-				if ($held === null || (int)$held['post'] !== (int)$target->id || !self::holdsAPost($held['id'])) continue;
+				if ($held === null || !self::holdsAPost($held['id'])) continue;
+				if ((int)$held['post'] !== (int)$target->id){
+					if ($turret === null || $held['id'] !== $as || self::turretKey($ship->getSystemById($held['post'])) !== $turret) continue;
+				}
 				list($otherOut) = self::outState($ship, $other);
 				if ($otherOut === null || $otherOut >= $m) return null;
 			}
@@ -1027,6 +1146,12 @@ class Officers{
 		return null;
 	}
 
+	//Stage 19: the officer he becomes on his own post ($registry `switchTo`), where the hull offers him there - or null
+	private static function switchAs($ship, $id, $system){
+		$to = isset(self::$registry[$id]['switchTo']) ? self::$registry[$id]['switchTo'] : null;
+		return ($to !== null && Enhancements::systemEnhancementOffered($ship, $system, $to)) ? $to : null;
+	}
+
 	/* "Any primary non-weapon system" (the Religious Leader) - a system of the PRIMARY section that is not a weapon and not
 	   Structure. Not one that can never be targeted either (a technical system - the Hyach Specialists, an ammo magazine, a
 	   Mag-Grav "technical" reactor): an officer there could never be disabled or killed. ⚠️ A jump drive IS a Weapon in FV
@@ -1041,6 +1166,114 @@ class Officers{
 	   there he is OFF_RELI, bought in the Officers section, so one post never has two ways to buy him. */
 	private static function isReligiousPost($system, $ship){
 		return self::isPrimaryNonWeapon($ship, $system) && $system !== self::findPost($ship, 'cnc');
+	}
+
+	/* ------------------------------------------------------------------ the Expert Targeter (Stage 19) */
+
+	/* How many Expert Targeters one ship may carry (`shipLimit`): one per block he could serve in - "1 per eligible (structure)
+	   system, like other System Enhancements" (user ruling 2026-10-20). keepPlacedRows' one officer to a system does the rest, and
+	   mayMoveTo's occupancy test keeps a moving Targeter off a block another one holds. A single-block hull: 1. */
+	private static function targeterLimit($ship){
+		$n = 0;
+		foreach ($ship->systems as $system) if (self::isTargeterPost($system, $ship)) $n++;
+		return max(1, $n);
+	}
+
+	/* OFF_TARG's posts (`hosts`): "One structure block" - any outer block (the user's note: the non-Primary blocks); a hull with
+	   none, a Medium ship or an LCV, has one block, its Primary Structure, and he covers one side of its hit chart there. */
+	private static function isTargeterPost($system, $ship){
+		if (!($system instanceof Structure)) return false;
+		if (self::hasOuterBlock($ship)) return (int)$system->location !== 0;
+		return $system === $ship->getStructureSystem(0) && count(self::hullSides($ship)) > 0;
+	}
+
+	/* OFF_TARG2's (`hosts`): that one block again, covering its SECOND side - offered only where the two sides reach different
+	   weapons, so an LCV (whose three charts are one) has no choice to make. */
+	private static function isTargeterSecondSide($system, $ship){
+		if (!($system instanceof Structure) || self::hasOuterBlock($ship) || $system !== $ship->getStructureSystem(0)) return false;
+		$sides = self::hullSides($ship);
+		if (count($sides) !== 2) return false;
+		$first = array_keys(self::sideReach($ship, $sides[0]));
+		$second = array_keys(self::sideReach($ship, $sides[1]));
+		sort($first); sort($second);
+		return $first !== $second;
+	}
+
+	//a Structure block outside the Primary section (Structure::createAsOuter's included)
+	private static function hasOuterBlock($ship){
+		foreach ($ship->systems as $system){
+			if ($system instanceof Structure && (int)$system->location !== 0) return true;
+		}
+		return false;
+	}
+
+	//a single-block hull's sides: its hit chart's non-Primary locations, in order - 1 and 2 (Front, Aft), or 3 and 4 (Left, Right)
+	private static function hullSides($ship){
+		$sides = array();
+		foreach (array_keys((array)$ship->hitChart) as $loc) if ((int)$loc !== 0) $sides[] = (int)$loc;
+		sort($sides);
+		return $sides;
+	}
+
+	/* ⭐ "Those weapons which can be hit from the chosen direction (on the Hit Location Chart)": every weapon (by id) the side's hit
+	   chart names - "N:" redirects and "TAG:" entries resolved as a hit would resolve them (getSystemsByNameLoc), from the side's own
+	   bearing - and, through its "Primary" result, every weapon the Primary chart names (user ruling 2026-10-20). Structure and the
+	   jump drive (a Weapon in FV) are never his. */
+	private static function sideReach($ship, $side, $viaPrimary = true){
+		$out = array();
+		if (!isset($ship->hitChart[$side])) return $out;
+		$bearing = isset(self::$sideBearing[$side]) ? self::$sideBearing[$side] : 0;
+		foreach ($ship->hitChart[$side] as $name){
+			if (strcasecmp($name, 'Structure') === 0) continue;
+			if (strcasecmp($name, 'Primary') === 0){
+				if ($viaPrimary && (int)$side !== 0) $out += self::sideReach($ship, 0, false);
+				continue;
+			}
+			foreach ($ship->getSystemsByNameLoc($name, $side, $bearing, true) as $system){
+				if ($system instanceof Weapon && !($system instanceof JumpEngine)) $out[(int)$system->id] = $system;
+			}
+		}
+		return $out;
+	}
+
+	/* Does this Targeter's entry cover $weapon? "All weapons attached to this block": the weapons in his block's location; on a
+	   single-block hull, his side's hit chart reach (sideReach) - his `side`, the first or the second. */
+	private static function targeterCovers($ship, array $entry, $weapon){
+		if (!($weapon instanceof Weapon) || $weapon instanceof JumpEngine) return false;
+		$post = $ship->getSystemById($entry['post']);
+		if ($post === null) return false;
+		if (self::hasOuterBlock($ship)) return (int)$weapon->location === (int)$post->location;
+		$sides = self::hullSides($ship);
+		$k = (isset(self::$registry[$entry['id']]['side']) ? (int)self::$registry[$entry['id']]['side'] : 1) - 1;
+		return isset($sides[$k]) && isset(self::sideReach($ship, $sides[$k])[(int)$weapon->id]);
+	}
+
+	//...every weapon he covers, by id: the payload's `covers` (own team only), so the client's preview copies no hit-chart rule
+	private static function coveredWeapons($ship, array $entry){
+		$ids = array();
+		foreach ($ship->systems as $system){
+			if (self::targeterCovers($ship, $entry, $system)) $ids[] = (int)$system->id;
+		}
+		return $ids;
+	}
+
+	//the Expert Targeter serving on $turn who covers $weapon, or null
+	private static function targeterFor($ship, $weapon, $turn){
+		foreach ($ship->getOfficers() as $entry){
+			if (self::rulesId($entry['id']) !== 'OFF_TARG' || !self::serves($entry, $turn)) continue;
+			if (self::targeterCovers($ship, $entry, $weapon)) return $entry;
+		}
+		return null;
+	}
+
+	/* ⭐ HIS +4 - Weapon::calculateHitBase, in d20 units, behind $officersPresent, beside the Gunner's. A STANDARD called shot only
+	   ($called: a call that pays the -8 - not a Kirishiac flat-profile one): "This does not provide any benefit to normal attacks,
+	   only called shots. It does not cancel the usual -8 called shot penalty, either." Nothing to look up on any other shot, nor on an
+	   Antimatter Shredder's attack at a fighter (bonusCall).
+	   ⚠️ MIRROR PAIR with officers.targeterShotBonus (JS), in weaponManager.computeShotModifiers. */
+	public static function targeterShotBonus($ship, $weapon, $called, $gamedata){
+		if (!self::bonusCall($weapon, $called)) return 0;
+		return (self::targeterFor($ship, $weapon, (int)$gamedata->turn) !== null) ? self::TARGETER_CALLED_BONUS : 0;
 	}
 
 	//an officer who occupies his post as far as another's move is concerned: a placed or movable one
@@ -1219,7 +1452,7 @@ class Officers{
 	   and 20 or more kills every officer posted there.
 	   The roll is the post's own from Pass 1 when it made one this turn; otherwise (Pass 1 skips a
 	   destroyed system, and a missile launcher whose magazine exploded never reached the parent) the
-	   same formula is rolled here.
+	   same formula is rolled here. A Structure post (Stage 19, the Expert Targeter) rolls on this turn's damage alone (blockKillRoll).
 	   ⚠️ Writes straight through Manager::insertIndividualNote - a sweep inside advance()
 	   ([[arch_individual_notes_and_phase_hooks]]) - and updates the in-memory list, so anything later
 	   in this request reads him as killed.
@@ -1241,8 +1474,12 @@ class Officers{
 			foreach ($byPost as $postId => $indexes){
 				$post = $ship->getSystemById($postId);
 				if ($post === null || !$post->isDamagedOnTurn($turn)) continue;
-				$roll = $post->getCritRollOnTurn($turn);
-				if ($roll === null) $roll = self::rollFor($ship, $post);
+				if ($post instanceof Structure){
+					$roll = self::blockKillRoll($ship, $post, $turn); //Stage 19: only an Expert Targeter lives in a block
+				} else {
+					$roll = $post->getCritRollOnTurn($turn);
+					if ($roll === null) $roll = self::rollFor($ship, $post);
+				}
 				if ($roll < self::KILL_ROLL) continue;
 				foreach ($indexes as $i){
 					$id = $list[$i]['id'];
@@ -1275,6 +1512,14 @@ class Officers{
 		return Dice::d(20) + floor($post->getTotalDamage()) + $mod + $ship->critRollMod;
 	}
 
+	/* An officer in a STRUCTURE block (the Expert Targeter, Stage 19): d20 + the damage the block took THIS turn through its armour
+	   + the block's and the ship's critRollMod (user ruling 2026-10-20). The block's own Pass 1 roll counts all its damage, as every
+	   system's does, which on a block that has been fought over kills him at once. Reached only from rollKills, for a block holding
+	   an officer that was damaged this turn - "heavily gated since this will be a rare occurrence". */
+	private static function blockKillRoll($ship, $block, $turn){
+		return Dice::d(20) + floor($block->damageReceivedOnTurn($turn)) + $block->critRollMod + $ship->critRollMod;
+	}
+
 	//DBManager's bulk note loop hands every OffKilled note here instead of to its system (§4.4)
 	public static function isKillNote($note){
 		return $note->notekey === self::KILL_NOTE;
@@ -1295,9 +1540,11 @@ class Officers{
 		$ship->iniativebonus += 5;
 	}
 
-	//Expert Helmsman: "wins ties" - TacGamedata::sortShips, behind $officersPresent
+	/* Expert Helmsman and Expert Dogfighter (user request 2026-10-20): "wins ties" - TacGamedata::sortShips, behind
+	   $officersPresent. A Helmsman's ship and a Dogfighter's flight tied with each other both win, so the usual
+	   tie-break settles it. */
 	public static function winsInitiativeTies($ship){
-		return self::isActive($ship, 'OFF_HELM');
+		return self::isActive($ship, 'OFF_HELM') || self::isActive($ship, 'OFF_DOG');
 	}
 
 	//Expert Helmsman: -1 on the meteor impact chart's die - RammingAttack::resolveMeteors
@@ -1362,14 +1609,14 @@ class Officers{
 		}
 	}
 
-	//+1 on every non-null fire control of a weapon's Matter modes, live and per mode (applyMatterExpert's rule)
+	//+1 on every non-null fire control of a weapon's Matter modes, live and per mode (applyMatterExpert's rule) - never a fixed one
 	private static function raiseMatterModes($system){
 		if (!empty($system->fireControlArray) && is_array($system->fireControlArray)){
 			foreach ($system->fireControlArray as $mode => $fc){
-				if (is_array($fc) && self::isMatterMode($system, $mode)) $system->fireControlArray[$mode] = self::bumpFireControl($fc);
+				if (is_array($fc) && self::isMatterMode($system, $mode) && !$system->hasFixedFireControl($mode)) $system->fireControlArray[$mode] = self::bumpFireControl($fc);
 			}
 		}
-		if (self::isMatterMode($system, $system->firingMode)) $system->fireControl = self::bumpFireControl($system->fireControl);
+		if (self::isMatterMode($system, $system->firingMode) && !$system->hasFixedFireControl($system->firingMode)) $system->fireControl = self::bumpFireControl($system->fireControl);
 		$system->isModified = true;
 	}
 
@@ -1403,12 +1650,18 @@ class Officers{
 		//his Piercing shot, while he still has it, on a gun with no Piercing mode of its own: a mode to fire it in
 		//(BEFORE the +1 below, so the added mode carries it too)
 		if (self::abilityOpen($entry, 'pierce', $turn) && self::mayAddPiercing($weapon)) $entry['mode'] = self::addPiercingMode($weapon, self::spentOn($entry, 'pierce', $turn));
+		self::raiseEveryMode($weapon);
+	}
+
+	/* +1 on every non-null fire control of every mode, live and per mode (applyGunner's rule; the Expert Turret Officer's too, Stage 22) -
+	   never on a mode whose fire control is fixed (Weapon::hasFixedFireControl: the Antimatter Shredder's Shredder mode) */
+	private static function raiseEveryMode($weapon){
 		if (!empty($weapon->fireControlArray) && is_array($weapon->fireControlArray)){
 			foreach ($weapon->fireControlArray as $mode => $fc){
-				if (is_array($fc)) $weapon->fireControlArray[$mode] = self::bumpFireControl($fc);
+				if (is_array($fc) && !$weapon->hasFixedFireControl($mode)) $weapon->fireControlArray[$mode] = self::bumpFireControl($fc);
 			}
 		}
-		$weapon->fireControl = self::bumpFireControl($weapon->fireControl);
+		if (!$weapon->hasFixedFireControl($weapon->firingMode)) $weapon->fireControl = self::bumpFireControl($weapon->fireControl);
 		$weapon->isModified = true;
 	}
 
@@ -1473,7 +1726,9 @@ class Officers{
 	     a Piercing shot      his Piercing ability, if he still has it: on a gun that may already pierce, +4 - the
 	                          usual -4 waived ("no penalty where it is"); in the mode added for him, nothing more
 	                          (that mode carries the penalty) - either way it is spent;
-	     a called shot        otherwise, +3 ("a called shot at +3"), spent - never on a Piercing shot;
+	     a called shot        otherwise, +3 ("a called shot at +3"), spent - never on a Piercing shot, nor (Stage 19) on a gun
+	                          a serving Expert Targeter covers, whose +4 is that shot's instead (targeterShotBonus), nor on an
+	                          Antimatter Shredder's attack at a fighter (bonusCall);
 	   The faster reload is the turn change's (fasterReload). ⚠️ MIRROR PAIR with officers.gunnerShotBonus (JS). */
 	public static function gunnerShotBonus($ship, $weapon, $called, $gamedata){
 		$turn = (int)$gamedata->turn;
@@ -1485,9 +1740,19 @@ class Officers{
 			self::spend($ship, $i, 'pierce', $turn, $gamedata);
 			return (isset($entry['mode']) && (int)$weapon->firingMode === (int)$entry['mode']) ? 0 : self::PIERCE_PENALTY;
 		}
-		if (!$called || !self::abilityOpen($entry, 'called', $turn)) return 0;
+		if (!self::bonusCall($weapon, $called) || !self::abilityOpen($entry, 'called', $turn)) return 0;
+		//Stage 19 (user ruling 2026-10-20): on a gun a serving Expert Targeter covers, his +4 is the called shot's bonus - the
+		//Gunner's +3 is neither used nor spent, so it is still his if he moves or the Targeter falls
+		if (self::targeterFor($ship, $weapon, $turn) !== null) return 0;
 		self::spend($ship, $i, 'called', $turn, $gamedata);
 		return self::GUNNER_CALLED_BONUS;
+	}
+
+	/* Is $called a called shot an officer's called-shot bonus reaches (the Gunner's +3, the Targeter's +4)? Never one fired in a mode with a
+	   hit calculation of its own (Weapon::hasFixedFireControl): the Antimatter Shredder's attacks at fighters are called shots, one at each
+	   craft, but its Shredder mode gains no officer's bonus and spends none (user 2026-10-21). ⚠️ MIRROR PAIR with officers.bonusCall (JS). */
+	private static function bonusCall($weapon, $called, $mode = null){
+		return $called && !(($weapon instanceof Weapon) && $weapon->hasFixedFireControl($mode ?? $weapon->firingMode));
 	}
 
 	/* ⭐ A TURN OFF THE RELOAD - Weapon::onAdvancingGamedata, behind $officersPresent, on the loading the new turn
@@ -1541,7 +1806,7 @@ class Officers{
 				if (self::abilityOpen($entry, 'pierce', $fired)) return true;
 				continue;
 			}
-			if ((int)$order->calledid < 1 || !self::abilityOpen($entry, 'called', $fired)) continue;
+			if ((int)$order->calledid < 1 || !self::bonusCall($weapon, true, $mode) || !self::abilityOpen($entry, 'called', $fired)) continue;
 			$target = $gamedata->getShipById($order->targetid);
 			$called = $target ? $target->getCalledSystemAsAimed($order) : null;
 			if ($called !== null && $called->getTargetProfileOverride() === null) return true;
@@ -2206,6 +2471,160 @@ class Officers{
 		return false;
 	}
 
+	/* ------------------------------------------------------------------ Expert ELINT Officer (Stage 20) */
+
+	/* +1 output on the array he sits in - `output` reaches every client and ew.js sums it into the EW pool, so the game needs
+	   nothing more (the lobby previews it - officers.sensorBonus) - and -2 on the critical rolls of EVERY sensor array on his ship
+	   (user ruling 2026-10-20), each array's own critRollMod, which ShipSystem::testCritical reads: so it also eases his kill roll
+	   on his array, as the Technician's -2 does on his reactor. Nothing displays a critical modifier. */
+	private static function applyElintOfficer($ship, $entry, $turn){
+		$array = $ship->getSystemById($entry['post']);
+		if ($array !== null) $array->output += self::ELINT_SENSORS;
+		foreach ($ship->systems as $system){
+			if ($system instanceof Scanner) $system->critRollMod += self::ELINT_CRIT_MOD;
+		}
+	}
+
+	/* ⭐ THE range of an ELINT function from $elint (a unit): $base hexes, 25% longer while his officer serves, fractions of 0.5 or more
+	   rounded up - 30 -> 38, 20 -> 25, 50 -> 63. Every ELINT range test asks it: EW::getSupportedOEW (both legs), getSupportedDEW,
+	   getBlanketDEW and getDistruptionEW, and HkJamming's. The ranged functions only (user ruling 2026-10-20): Detect Stealth has no
+	   range of its own, and an ELINT's stealth detection range is not one of its functions. One static read in a game without officers.
+	   ⚠️ MIRROR PAIR with officers.elintRange (JS), which reads the `elintRangeBonus` addForJson publishes. */
+	public static function elintRange($elint, $base){
+		if (!TacGamedata::$officersPresent || !self::isActive($elint, 'OFF_ELINT')) return $base;
+		return intdiv((int)$base * (100 + self::ELINT_RANGE_PCT) + 50, 100);
+	}
+
+	/* His blanket against a BALLISTIC weapon: "the total EW value is divided by 3 (not 4) for purposes of ballistic weapons only" - the
+	   ELINT's blanket points, scaled for the quarter EW::getBlanketDEW takes of each ELINT's: x4/3, so 12 points give 4 against a
+	   ballistic weapon and 3 against anything else, and against each the best ELINT covering the unit wins. Fractions are kept, as the
+	   quarter keeps them (user ruling 2026-10-20: 10 points give 3.33). Asked for a ballistic shot only, behind $officersPresent.
+	   ⚠️ MIRROR PAIR with officers.ballisticBlanket (JS), which reads the `blanketBallistic` addForJson publishes. */
+	public static function ballisticBlanket($elint, $blanket){
+		if (!self::isActive($elint, 'OFF_ELINT')) return $blanket;
+		return $blanket * 4 / self::ELINT_BLANKET_BALLISTIC;
+	}
+
+	/* ------------------------------------------------------------------ the Expert Turret Officer (Stage 22) */
+
+	//OFF_TURR's posts (`hosts`): "One turret-mounted weapon" - a mount that can jam (Weapon::isTurretMount), any of its turret's guns
+	private static function isTurretPost($system, $ship){
+		return $system instanceof Weapon && $system->isTurretMount();
+	}
+
+	/* Which turret a weapon is on, as a key on its ship: its linked firing group - Weapon::getTurretMates' own test - or, for a mount linked
+	   to no other, the weapon alone ("a turret of one", user ruling 2026-10-21). null for anything that is not a weapon.
+	   ⚠️ MIRROR PAIR with officers.turretKey (JS). */
+	private static function turretKey($system){
+		if (!($system instanceof Weapon)) return null;
+		return ($system->linkedFiringGroup !== null) ? 'group:' . $system->linkedFiringGroup : 'mount:' . (int)$system->id;
+	}
+
+	//How many Expert Turret Officers one ship may carry (`shipLimit`): one per turret ("1 Officer per turret", the user's note)
+	private static function turretLimit($ship){
+		$turrets = array();
+		foreach ($ship->systems as $system){
+			if (self::isTurretPost($system, $ship)) $turrets[self::turretKey($system)] = true;
+		}
+		return max(1, count($turrets));
+	}
+
+	/* Every weapon on his turret: +1 to hit - +1 on every non-null fire control of every mode, the Gunner's rule (raiseEveryMode), which
+	   isModified sends to every viewer as Gunsights' is - except on a gun a serving Expert Gunner holds: the Gunner "does not combine any
+	   to-hit or damage bonuses with those of other elite officers" (user ruling 2026-10-21, the Matter expert's precedent). And -1 on
+	   every one's critical rolls (their critRollMod, which ShipSystem::testCritical reads) - so his own kill roll, and a Gunner's on that
+	   turret, are eased too, as the Technician's -2 eases his. */
+	private static function applyTurretOfficer($ship, $entry, $turn){
+		$post = $ship->getSystemById($entry['post']);
+		if (!($post instanceof Weapon)) return;
+		foreach ($post->getTurretMates($ship) as $weapon){
+			$weapon->critRollMod += self::TURRET_CRIT_MOD;
+			if (!self::servesOn($ship, 'OFF_GUN', $weapon, $turn)) self::raiseEveryMode($weapon);
+		}
+	}
+
+	//the Expert Turret Officer serving on $turn on $weapon's turret, or null
+	private static function turretOfficerFor($ship, $weapon, $turn){
+		$turret = self::turretKey($weapon);
+		if ($turret === null) return null;
+		foreach ($ship->getOfficers() as $entry){
+			if ($entry['id'] !== 'OFF_TURR' || !self::serves($entry, $turn)) continue;
+			if (self::turretKey($ship->getSystemById($entry['post'])) === $turret) return $entry;
+		}
+		return null;
+	}
+
+	/* -2 on the turret jam roll of a weapon on his turret - Weapon::testArcRestriction, behind $officersPresent. The jam is its own d20,
+	   not a critical roll, so his -1 on criticals is not added to it: "When rolling for the special turret jam critical, subtract 2". */
+	public static function turretJamRelief($ship, $weapon, $turn){
+		return (self::turretOfficerFor($ship, $weapon, (int)$turn) !== null) ? self::TURRET_JAM_RELIEF : 0;
+	}
+
+	/* ⭐ SHELTERED TURRETS: "If no weapon on the turret fires in a given turn, the owning player can declare it to be 'sheltered.' If this
+	   is done, no incoming fire can hit its weapons unless they use called shots." Built AUTOMATIC - no declaration (the user's note): a
+	   turret a serving Expert Turret Officer holds, none of whose weapons fires a SHOT this turn - an interception, a self-intercept or a
+	   Meteor Defence declaration is not one (user ruling 2026-10-21: Weapon::firedOffensivelyOnTurn). Decided ONCE, when every order of
+	   the turn is known: Firing::fireWeapons opens it before the ship and fighter fire and closes it after (the rams before it are
+	   collisions, and Pre-Firing resolves before the turn's own orders exist). Read by the hit-chart pools (BaseShip::getSystemsByNameLoc
+	   and ::getSystemsByTag), where a sheltered weapon reads as DESTROYED: a hit that rolls it takes the chart's usual fallback - another
+	   system of that name or tag, else the section's Structure. A called shot at one is resolved before any pool is asked
+	   (getHitSystemByTable), so it hits as ever. Server only: an opponent sees where the hits land, nothing more. */
+	private static $sheltered = array(); //ship id => array(system id => true), while Firing::fireWeapons resolves the turn's fire
+
+	public static function openShelter($gamedata){
+		self::$sheltered = array();
+		if (!TacGamedata::$officersPresent) return;
+		$turn = (int)$gamedata->turn;
+		foreach ($gamedata->ships as $ship){
+			foreach ($ship->getOfficers() as $entry){
+				if ($entry['id'] !== 'OFF_TURR' || !self::serves($entry, $turn)) continue;
+				$post = $ship->getSystemById($entry['post']);
+				if (!($post instanceof Weapon)) continue;
+				$mates = $post->getTurretMates($ship);
+				foreach ($mates as $weapon){
+					if ($weapon->firedOffensivelyOnTurn($turn)) continue 2;
+				}
+				foreach ($mates as $weapon) self::$sheltered[(int)$ship->id][(int)$weapon->id] = true;
+			}
+		}
+	}
+
+	public static function closeShelter(){
+		self::$sheltered = array();
+	}
+
+	//Is $system a sheltered turret's weapon in the fire being resolved now (openShelter)? One empty() in every other game.
+	public static function isSheltered($ship, $system){
+		if (empty(self::$sheltered)) return false;
+		return isset(self::$sheltered[(int)$ship->id][(int)$system->id]);
+	}
+
+	/* ------------------------------------------------------------------ Expert Anticipator (Stage 23) */
+
+	/* "When rolling for initiative, this officer's ship rolls the die twice. The player then selects the higher one" - the d100 of
+	   both initiative rolls (Manager::generateIniative and SimultaneousMovementRule::generateIniative), which run on the load of the
+	   turn being rolled for. The second die is thrown only for his ship, so every other ship's roll is the die it always was. */
+	public static function initiativeRoll($ship){
+		$roll = Dice::d(100);
+		if (TacGamedata::$officersPresent && self::isActive($ship, 'OFF_ANTI')) $roll = max($roll, Dice::d(100));
+		return $roll;
+	}
+
+	/* "Roll an extra die and drop the lowest die from the calculation" - 1 for a shot of his ship's weapons, which
+	   Weapon::getFinalDamage hands to Dice::$extraDie; the "at least two dice" half is the Dice rule. Never a ram: ramming is not one
+	   of the ship's weapons (the Religious Leader's exclusion). On a serving Gunner's weapon as well (user ruling 2026-10-21). */
+	public static function extraDamageDie($ship, $weapon){
+		if ($weapon instanceof RammingAttack) return 0;
+		return self::isActive($ship, 'OFF_ANTI') ? 1 : 0;
+	}
+
+	/* Who may give the Firing-phase turn - Movement::validateMovement, on the authoritative load (a POST-side ship has no officers).
+	   Never a ship something is attached to (a boarding pod, a grappling claw, a docked unit): attached units are moved with their
+	   host only in the Movement phase (MovementGamePhase::process), so they would be left facing the old way. */
+	public static function mayAnticipate($ship){
+		return !($ship instanceof FighterFlight) && empty($ship->hasAttached) && self::isActive($ship, 'OFF_ANTI');
+	}
+
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */
 
 	//Expert Dogfighter: +5 initiative, ELITE_SW's line
@@ -2224,17 +2643,32 @@ class Officers{
 		return self::missilesPerCraft($ship) > 0;
 	}
 
-	/* Expert Evader, to hit: -1 OB, which every fighter to-hit path on both ends reads (and the
-	   published stat the shooter's own preview needs). */
+	/* Expert Evader, to hit: -1 OB on a turn the flight evades, which every fighter to-hit path on both
+	   ends reads (and the published stat the shooter's own preview needs). The movement rows are loaded
+	   before apply runs; the client takes the -1 off itself while its Evade row is still unsent
+	   (officers.pendingEvadeOb), and an enemy does not see it before the Firing phase resolves
+	   (hideEvadeOb). */
+	const EVADE_OB = 1;
 	private static function applyEvader($ship, $entry, $turn){
-		$ship->offensivebonus -= 1;
+		if (Movement::hasEvaded($ship, $turn)) $ship->offensivebonus -= self::EVADE_OB;
 	}
 
-	/* Expert Evader, damage: 1 point off every hit on the flight - FighterFlight::getDamageMod, the
-	   flight's defensive choke point (Weapon::getFinalDamage subtracts it), behind $officersPresent.
-	   No client mirror: no client damage preview exists. */
-	public static function evaderDamageReduction($flight){
-		return self::isActive($flight, 'OFF_EVAD') ? 1 : 0;
+	/* TacGamedata::hideEnemyCombatPivots has just taken an enemy flight's Evade row out of the payload: its OB
+	   goes back to what it was without one, so the published figure does not give the order away. */
+	public static function hideEvadeOb($flight){
+		if (self::isActive($flight, 'OFF_EVAD')) $flight->offensivebonus += self::EVADE_OB;
+	}
+
+	/* Expert Evader, damage: 1 point off every hit on the flight on a turn it evades -
+	   FighterFlight::getDamageMod, the flight's defensive choke point (Weapon::getFinalDamage subtracts
+	   it), behind $officersPresent. No client mirror: no client damage preview exists. */
+	public static function evaderDamageReduction($flight, $turn){
+		return (self::isActive($flight, 'OFF_EVAD', $turn) && Movement::hasEvaded($flight, $turn)) ? 1 : 0;
+	}
+
+	//Who may order an Evade - Movement::validateMovement, on the authoritative load (a POST-side ship has no officers)
+	public static function mayEvade($flight){
+		return ($flight instanceof FighterFlight) && self::isActive($flight, 'OFF_EVAD');
 	}
 
 	//Expert Motivator: -2 on dropout rolls, Fighter::testCritical's flight critRollMod (as EXP_MOTIV always was)
@@ -2286,6 +2720,23 @@ class Officers{
 			if (!in_array($order->type, self::$notFiring, true)) return 0;
 		}
 		return $pilots * self::PILOT_SPARK_RELIEF;
+	}
+
+	/* ------------------------------------------------------------------ Expert Tailgunner (Stage 21) */
+
+	//"if they have fighters that meet the requirements e.g. an aft mounted weapon" - a weapon its fighter's file flags as the tail gun
+	private static function hasTailGun($ship){
+		$craft = self::firstCraft($ship);
+		if ($craft === null) return false;
+		foreach ($craft->systems as $system){
+			if ($system instanceof Weapon && $system->isTailGun()) return true;
+		}
+		return false;
+	}
+
+	//Does an Expert Tailgunner serve this flight on $turn - Weapon::getTailGunMod, behind $officersPresent. ⚠️ MIRROR PAIR with officers.hasTailgunner (JS).
+	public static function hasTailgunner($flight, $turn){
+		return self::isActive($flight, 'OFF_TAIL', $turn);
 	}
 
 	/* ------------------------------------------------------------------ repairs (Stage 5) */
@@ -2592,6 +3043,14 @@ class Officers{
 			if (empty($officer[$key])) continue;
 			foreach ($officer[$key] as $field) $strippedShip->$field = $ship->$field;
 		}
+		/* Stage 20: an Expert ELINT Officer's longer ranges and his blanket's ballistic divisor, to every viewer - an opponent's own OEW
+		   under his Disruption, and its hit chance against a unit under his blanket, are previewed with them (elintRange,
+		   ballisticBlanket). Numbers, not a name: the officer list below stays own-team. A disguised Chameleon ship's payload is its
+		   simulacrum's, which carries neither. */
+		if (self::isActive($ship, 'OFF_ELINT')){
+			$strippedShip->elintRangeBonus = self::ELINT_RANGE_PCT;
+			$strippedShip->blanketBallistic = self::ELINT_BLANKET_BALLISTIC;
+		}
 		if (!TacGamedata::$currentGameFinished && !$ship->isRevealedToCurrentViewer()) return;
 		$out = array();
 		$saves = $ship->getOfficerSaves();
@@ -2607,6 +3066,8 @@ class Officers{
 			if (isset($entry['moving'])) $row['moving'] = $entry['moving'];
 			if (!empty($entry['abilities'])) $row['abilities'] = $entry['abilities'];
 			if (isset($entry['mode'])) $row['mode'] = $entry['mode'];
+			//Stage 19: the weapons an Expert Targeter covers, by id - the client's hit-chance preview reads them (officers.targeterShotBonus)
+			if (self::rulesId($entry['id']) === 'OFF_TARG') $row['covers'] = self::coveredWeapons($ship, $entry);
 			if (!empty(self::$registry[$entry['id']]['movable']) && (int)TacGamedata::$currentPhase === 1 && !TacGamedata::$currentGameFinished){
 				$targets = self::moveTargets($ship, $list, $i, $turn);
 				if (!empty($targets)) $row['targets'] = $targets;
