@@ -643,8 +643,10 @@
 
 /* ── Dense tier ──────────────────────────────────────────────────────────────
    Above --hp-dense-at UNITS in the hex (not rendered rows — a 20-stack that
-   collapses to 8 rows is still a dense hex). One line per row: the class moves
-   inline after the name instead of sitting beneath it. */
+   collapses to 8 rows is still a dense hex). The class stays BENEATH the name:
+   both lines at dense sizes (~33px) fit inside --hp-row-h-dense, so the row
+   height and art carry the saving. Putting the class inline saved nothing and
+   truncated the name to make room for it. */
 .fv-hexpicker--dense .fv-hexpicker__row {
     min-height: var(--hp-row-h-dense);
 }
@@ -664,20 +666,11 @@
 }
 
 .fv-hexpicker--dense .fv-hexpicker__text {
-    flex-direction: row;
-    align-items: baseline;
-    gap: 6px;
     padding: 2px 0;
 }
 
 .fv-hexpicker--dense .fv-hexpicker__name {
-    flex: 0 1 auto;
     font-size: 13px;
-}
-
-.fv-hexpicker--dense .fv-hexpicker__meta {
-    flex: 1 1 auto;
-    overflow: hidden;
 }
 
 /* ── Sheet (mobile / coarse pointer) ─────────────────────────────────────────
