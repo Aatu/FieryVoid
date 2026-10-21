@@ -28,7 +28,10 @@ a tail gun that has none (§9.28) - committed (`3f8de3e6b`). Stage 22, the Exper
 and aiding his whole turret - +1 fire control, -1 on criticals, -2 on the turret jam roll, and a turret that fires no shot SHELTERED from
 all but called shots (§9.29) - committed (`260780e57`, `20cc13c40`). Stage 23, the Expert Anticipator (Torata 10%, everyone else 15%), in the
 C&C - initiative rolled twice and the higher kept, one turn in the Firing phase as a fighter's combat pivot, and every damage roll of two or
-more dice one die larger with its lowest dropped (§9.30) - BUILT 2026-10-21, uncommitted.** Written
+more dice one die larger with its lowest dropped (§9.30) - committed (`b03679743`). Stage 24, the Breaching Expert (Balosians, Yolu, Narn and
+Gaim 25% of one pod, everyone else 50%), in a breaching pod - the flight +1 thrust, his pod's Marines Elite, his pod's first capture party
+three attack rolls on its first turn aboard, and at most 20% of a fleet's pods in the Fleet Correctness Report (§9.31) - BUILT 2026-10-21,
+uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -91,8 +94,11 @@ own; and he moves as the other placed officers do (Stage 22, §9.29). Later that
 of the original 25 - with a note (his Firing-phase turn "is similar to a fighter's combat pivot except that there are no associated firing
 penalties and thrust must still be spent on ship thrusters as normal"), and ruled two questions: the turn takes effect as a combat pivot does,
 before fire resolves, so this turn's fire meets the new facing; and on an Expert Gunner's weapon the extra die and the Gunner's +1 per die
-both apply (Stage 23, §9.30). Each officer's own rules questions still only need ruling when that officer's stage starts. Next step: the
-rest of the Hard tier, one officer at a time.
+both apply (Stage 23, §9.30). Later that day they supplied the Breaching Expert's rules text - one of the original 25 - and ruled four
+questions: in a pair of pods his Elite benefit and his triple capture roll are his own pod's only ("single pod"), the +1 thrust the flight's;
+his price is 25% (50%) of ONE pod, not scaled by the flight's size; the fleet's 20% is a Fleet Correctness Report line, as every
+fleet-composition rule is; and on a pod already Elite only the Elite clause adds nothing (Stage 24, §9.31). Each officer's own rules
+questions still only need ruling when that officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
 > §11 concluded that officers "are an ordinary ship-level enhancement … and need nothing from this
@@ -277,7 +283,7 @@ Medium-sized job (§3.4).
 | Officer | Why it is hard | The cheap half, if wanted early |
 |---|---|---|
 | **Expert Quartermaster** | Makes this ship's other enhancements and ammo free, which touches every price display, total and the saved-fleet bucket split; a fleet-% price; a random post; "+10 turn delay" is unclear | −30 initiative; the C&C critical modifier |
-| **Breaching Expert** | His post is **one pod inside a flight**, and per-craft ids do not exist in the lobby (WEAPON plan D7). Adds a fleet-wide "20 % of all pods" cap, a change to the capture roll ([ShipSystem.php:951](source/server/model/systems/ShipSystem.php#L951)), and "+1 thrust" for one craft of a flight that moves as one | — |
+| **Breaching Expert** | His post is **one pod inside a flight**, and per-craft ids do not exist in the lobby (WEAPON plan D7). Adds a fleet-wide "20 % of all pods" cap, a change to the capture roll ([ShipSystem.php:951](source/server/model/systems/ShipSystem.php#L951)), and "+1 thrust" for one craft of a flight that moves as one. *Built in Stage 24 (§9.31) as an ordinary fighter officer in the flight's first pod: the fighter framework already gives a craft-level post, so "his pod" is that craft; the thrust is the flight's (user ruling); the 20 % is a Fleet Correctness Report line (user ruling); the triple roll is a mark on his capture party's critical.* | — |
 | **Expert Evangelist** | Fleet-wide state: +1 to hit while he serves, then −10 initiative (QX1) and −1 to hit if he is **killed**, for every ship, with a client to-hit mirror. Also a fleet-% price, a random post, and the CPN/OSF gate exists only in notes prose | — |
 | **Expert Laser Technician** | "+1 damage per power point sent, up to +50 %" needs a new per-turn allocation UI, persistence and a cap. *Built in Stage 11 (§9.17) with no new UI or persistence: the user's design note made every laser use the existing BOOST (power entries type 2, the generic boost buttons), so the allocation, its storage and the power balance all came free; what was new is the cap, a per-turn pool, and hiding the boosts from opponents.* | +3 Spinal / +2 Blast / +1 other lasers, through `getBonusDamage` (`SpinalLaser`, `BlastLaser`, `ImprovedBlastLaser`, `LtBlastLaser` exist) |
 | **Expert Software Engineer** | Bonus fire-control points spendable in the Firing phase need a new allocation window (`HyachComputer` only allocates in Initial Orders, [baseSystems.php:12862](source/server/model/systems/baseSystems.php#L12862)). Also a "first point of damage ignored" rule in the damage path, a submarine detection range, and a self-contradictory specialist clause (§6, Software Engineer) | — |
@@ -334,7 +340,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Quartermaster | `OFF_QM` | random primary | 1 |
 | Expert Geneticist | `OFF_GENE` | C&C | 1 |
 | Expert Scavenger | `OFF_SCAV` | Engine | 1 |
-| Breaching Expert | `OFF_BRCH` | one pod | — (§3.3) |
+| Breaching Expert *(Stage 24, §9.31)* | `OFF_BRCH` | his pod: a breaching pod flight's first craft | 1 (flight), breaching pods only, priced off one pod (`unscaled`) |
 | Expert Analyst | `OFF_ANLY` | Scanner | 1 |
 | Expert Evangelist | `OFF_EVAN` | random primary | 1 |
 | Expert Laser Technician | `OFF_LASR` | Reactor | 1 |
@@ -498,6 +504,7 @@ masking: individual notes never reach any client.
 | Expert Targeter (Stage 19) | the hit chance of a called shot by a weapon he covers; which weapons those are (`covers`) | **Own team only**: the +4 is in the owner's own hit-chance preview ("Expert Targeter") and nowhere else; an opponent sees only the needed % the combat log prints for the shot, as for a Gunner's +3. The covered weapon ids ride the officer payload, which an opponent never receives |
 | Expert Tailgunner (Stage 21) | the hit chance of his flight's tail guns | **Own team only**: the owner's hit-chance preview ("Expert Tailgunner" +5, or no "Tail Gun" -10) and the tail gun's tooltip line; an opponent sees only the needed % the combat log prints. The tail gun's own penalty is public: every viewer's tooltip has the "Tail Gun" line |
 | Expert Turret Officer (Stage 22) | his turret's weapons' fire control; their critical and jam rolls; where hits land on a sheltered turret | Fire control: **yes, to every viewer**, as the Gunner's (isModified). The -1 on criticals is never sent (nothing displays one); the jam's 19+ is in the owner's "Turret Mount" line only. The shelter is server-only: an opponent sees where the hits land (another system, or Structure), never why |
+| Breaching Expert (Stage 24) | a pod flight's `freethrust`; his pod's Marines Elite at delivery; his capture party's three attack rolls | Thrust: **yes, to every viewer** (his `publish` - the boarding hit chance reads it on both ends). The Elite is asked at delivery and never written into the weapon, whose "Elite" tooltip line every viewer is sent - so it stays the hull's, and his own team's client adds him to it. Which capture party is his is a key in its critical's `param`, stripped from every payload (`ShipSystem::stripForJson`). An opponent sees results only: an Elite mission class on one pod's party, the delivery and combat rolls the log prints |
 | Expert ELINT Officer (Stage 20) | his array's `output`; every ELINT range from his ship; his blanket against ballistic weapons | **Yes, to every viewer**: `output` always is, and the ship payload carries `elintRangeBonus` (25) and `blanketBallistic` (3) while he serves - an opponent's own OEW under his Disruption and its hit chance against a unit under his blanket are previewed with them; his array's tooltip shows the ranges. The officer list stays own-team; a disguised Chameleon ship's payload is its simulacrum's and carries neither. The -2 on sensor criticals is never sent |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
@@ -661,7 +668,8 @@ committed.
 | **21** | Expert Tailgunner, added by the user, with the tail gun rule FV lacked. **BUILT 2026-10-21** (§9.28) | A tail gun flagged on the 15 flights that have one (one a craft, firing aft beside a forward weapon), in the static blueprint; -10% on a turn its craft fires another direct-fire weapon - not another craft's, not a missile or torpedo launch, an interception, Meteor Defence, last turn's order or the ram - unless the flight has a navigator (7 of the 15, or one bought); the forward guns never penalised; the Tailgunner offered on those 15 only, 50% of a craft scaled; under him no penalty, or +5% on a tail gun without one and no other weapon; lost with his craft; the hit-chance breakdown and the tooltip line on the client, as on the server |
 | **22** | Expert Turret Officer (Vree), added by the user - placed in a turret-mounted weapon, aiding his whole turret. **BUILT 2026-10-21** (§9.29) | Offered on every turret-mounted weapon of the 12 Vree hulls with turrets, 5%, one to a turret (a ship as many as it has turrets), never the Custom Ships' Shadow Xonn; +1 fire control on every weapon of his turret (not +2 on a Gunner's), -1 on their criticals (his kill roll included), -2 on their jam roll; a turret none of whose weapons fires a shot sheltered - an interception not counting - so a hit-chart roll on its weapons takes the destroyed-system fallback, a called shot still hitting, inside the real `Firing::fireWeapons` only; disabled with his own weapon; movable, never onto a turret another holds; the lobby's fire control and Turret Mount line, the client's one-per-turret rules |
 | **23** | Expert Anticipator, one of the original 25 (Hard). **BUILT 2026-10-21** (§9.30) | 15%, the Torata 10%, in the C&C; the d100 of both initiative rolls thrown twice for his ship, the higher kept; one turn in the Firing phase - a real turnleft / turnright, its thrust through the thrusters on the Movement phase's panel - only with the turn delay complete (no snap turn) and the thrust unspent, before the ship declares direct fire, once a turn, never with a unit attached, kept by the server for his ship only and hidden from enemies until firing resolves, its facing the one this turn's fire meets; a commit refused while its thrust is unassigned; every damage roll of two or more dice one die larger, the lowest dropped (the real `lib/dice.php` and both harness stubs alike), the Pentagon Array's five rakes included, never a one-die or fixed roll or a ram, on a Gunner's weapon with his +1 per die as well |
-| **24+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **24** | Breaching Expert, one of the original 25 (Hard). **BUILT 2026-10-21** (§9.31) | Offered on all 42 breaching pods and nothing else carrying Marines; 25% of one pod for the Balosians, Yolu, Narn and Gaim, 50% for everyone else, the same at any flight size (lobby and server); in the first pod, the flight's one officer, no kill roll, lost with his pod; the flight +1 thrust, published, previewed in the lobby, reaching the boarding speed match; his pod's Marines Elite at delivery (-1, the Elite mission classes), never the other pod's, nothing more on a pod Elite already, the "Elite" tooltip line his team's only; his pod's first delivered capture party - never a failed delivery, a Sabotage or a Rescue - three attack rolls on its first turn aboard in the real capture combat, still one attacker to the defenders, once per scenario through a reload; the mark never sent; the Fleet Correctness Report's "Breaching Experts" line, 20% of the fleet's pods rounded half up |
+| **25+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -690,7 +698,7 @@ committed.
 | Quartermaster | "Free" = this ship's own other enhancements and ammo? What is "+10 turn delay"? How much on C&C crits? Post: random primary? Price: 5 % of the game's points limit? |
 | Geneticist | "Scenario only" = never offered unless a hull opts in, or a Create Game rule? "−1 to hit other ships" = this ship's own weapons? **RULED 2026-10-10: offered on every hull with a C&C** ("scenario only" is by agreement, as the doc card says). The −1 was built with its default: this ship's own weapons. **RE-RULED 2026-10-15: Dilgar Imperium only** (§9.12). |
 | Scavenger | A critical first, else 4 boxes? Which system first? May he repair Structure? **RULED 2026-10-15** (§9.8): **a critical first** (as the Engineer, same order and C&C roll), else 4 boxes, by Self Repair's default system order; **Structure yes**, never a destroyed system or anything on a destroyed section, never this turn's damage. His rules text adds a **once-per-scenario save** - "up to six points of damage can be ignored in any single volley" - ruled **automatic**: spent on the first hit that would destroy the C&C, a reactor or a Structure block when ignoring up to 6 points saves it ("note the Gaim Bulkhead already has a similar function"). The campaign clauses (permanent repairs after the battle) are not built. **Widened 2026-10-15 (§9.10): Scanners and Engines too.** **Faction prices 2026-10-15 (§9.12): 15% for the Descari, 20% for Balosians, Raiders and Llort.** |
-| Breaching Expert | "+1 thrust" for one pod of a flight that moves as one? "20 % of total pods": fleet-wide, rounded down? What are "3 attack rolls on the first boarding turn" in FV's capture-mission terms? |
+| Breaching Expert | "+1 thrust" for one pod of a flight that moves as one? "20 % of total pods": fleet-wide, rounded down? What are "3 attack rolls on the first boarding turn" in FV's capture-mission terms? **Rules text 2026-10-21 (§9.31)** settles the last two: "No more than 20% of a fleets breaching pods (round fractions of 0.5 or more up)"; "the pod's contingent gets three attack rolls on the first turn of combat. It is still destroyed by a single hit" - three d10s for its CaptureShip critical on its first turn, one attacker to the defenders. Asked: in a pair of pods, whose Marines get the Elite benefit and the triple roll? His price: one pod flat, or §9.9's scaled rule? The 20%: a report line, also refused in the buy dialog, or enforced by the server? "He does not provide any further benefits" on a pod already Elite: the Elite clause only, or everything? **RULED 2026-10-21 (all as recommended):** **his pod only** (the thrust is the flight's); **one pod, flat**; **a Fleet Correctness Report line**; **the Elite clause only** - +1 thrust and the triple roll still apply. |
 | Analyst | Does he need range, line of sight or an OEW lock? Every enemy ship, or only those in range? Weapon arming is already public in FV: leave it so? **Moved to the Hard tier 2026-10-16** (the full rules are more complex than the brief): his own plan and ruling round when he is reached. |
 | Coordinator | **Rules text 2026-10-16** (§9.15): "may make a combat pivot for half the normal thrust cost (i.e., 1 point instead of 2) and with no weapons fire penalties as a result, unless the combat pivot was a full 180°, in which case a penalty of −1 is applied"; one-half the base cost of the fighter; one coordinator per flight. Built with defaults, not ruled: (a) "a full 180°" = this turn's combat pivots, rights against lefts, have turned the flight 3 hex sides or more (R-L-R is 60°, no penalty; four one way passed through 180°, penalty); (b) half rounded **up** (a shuttle's 3 → 2, a pivot-cost-3 flight's 5 → 3); (c) the −1 is waived on every shot of the flight that turn, ballistic launches included (the penalty's own scope). |
 | Evangelist | The fleet = this player's ships, or the whole team? His penalty is worded "if killed": does a merely **disabled** Evangelist (post destroyed, kill roll survived) cost the fleet its +1 without the −10 initiative / −1 to hit? (Default: yes, the penalty needs a kill.) Is the penalty permanent? Do reinforcements that arrive later get the bonus? |
@@ -3555,3 +3563,107 @@ fingerprinted hulls), nothing else moved (proved by stripping them and byte-comp
    then the ship firing on its new facing and the enemy's hits landing on its new sides; the enemy seeing the turn only after firing resolves.
 2. Weapons that roll damage outside `getFinalDamage` (customBSG, customEscalation, customNexus, plasma.php's two AoE paths, specialWeapons'
    waveform check) get neither Elite Crew's per-die bonus nor his extra die - the existing scope, kept.
+
+### 9.31 Stage 24: Breaching Expert (2026-10-21)
+
+**Rules text (user, 2026-10-21) - one of the original 25 (Hard tier, §3.3).** "Breaching Expert (single pod): This highly trained breaching
+specialist accompanies a breaching pod on its mission, greatly enhancing its capabilities. The following benefits are provided to the pod:
+The pod receives +1 thrust and ignores any loss of thrust due to damage. The pod's Marines receive benefits as if they were Elite. Any chart
+that lists a benefit for an Elite unit would also apply it to this pod. If this officer is used by a race that already provides Elite
+advantages on these charts by default (e.g. narn or Gaim), He does not provide any further benefits. If attempting to capture a ship, the
+pod's contingent gets three attack rolls on the first turn of combat. It is still destroyed by a single hit from the enemy, however. This
+benefit can be received only once per scenario. Location: Breaching pod. Cost: 25% of the cost of the breaching pod. Availability: Any race
+may purchase one, but races other than Balosian, Yolu, Narn or Gaim double the cost. No more than 20% of a fleets breaching pods (round
+fractions of 0.5 or more up) can use these experts."
+
+**What FV had.**
+- **42 breaching pods**: 40 flights in the `'Breaching Pods'` hangar class (the two Chariot Breaching Sleds among them), and the Minbari
+  Protectorate's Ronati and the Nausicaan pods, which ride shuttle hangars. Every one is `maxFlightSize` 2 with a pointCost for six, so a
+  pod costs pointCost / 6. Four superheavies also carry Marines (the Dalithorn Assault Pinnace and Customs Vessel, the two Nausicaan
+  Gliders) - not pods.
+- **Elite** in FV is the Marines weapon's `eliteMarines`: -1 on the delivery roll (`getDeliveryRollMod`) and the Elite mission classes
+  (`CaptureShipElite`, `SabotageElite`, `RescueMissionElite`), whose rolls are -1 (`getMarineRollMod`). The Narn T'Rakh and Gaim Ech'Akki pods
+  are built Elite; most others may buy Elite Marines (`ELT_MAR`). No other chart lists an Elite benefit for a pod.
+- **Capture**: a delivered party is a `CaptureShip` critical on the target's C&C from the next turn; each turn `ShipSystem::doCaptureMission`
+  rolls one d10 per party (5 or less kills a defender) and one per defender (5 or less eliminates a party).
+- **Thrust**: FV takes no thrust from a flight for damage. The only drain is the Walkers' Energy Draining Field
+  (`FighterFlight::getEffectiveFreeThrust`) - a field's effect, not damage.
+- No officer had a fleet-wide cap. Fleet-composition rules (hangar and pod capacity) are lines in the lobby's Fleet Correctness Report
+  (`gamelobby.js` `checkChoices`), reported, not enforced.
+
+**Rulings (user, 2026-10-21, asked before building - all as recommended):**
+1. In a pair of pods the Elite benefit and the triple capture roll are **his own pod's only** ("single pod"); the +1 thrust is the flight's,
+   as a flight moves as one.
+2. His price is 25% (50%) of **one pod, flat** - not §9.9's scaled rule, which would charge a pair a third of it.
+3. The 20% is **a Fleet Correctness Report line**, as every fleet-composition rule is - not refused in the buy dialog, not enforced by the server.
+4. On a pod already Elite, "he does not provide any further benefits" covers **the Elite clause only**: the +1 thrust and the triple roll still apply.
+
+**Built with defaults, stated here (ask before changing):**
+- A breaching pod = a flight whose craft carries Marines and that is in the `'Breaching Pods'` hangar class or has "Breaching Pod" in its class
+  name: the 42 above. (Before counting, the user was told "41"; 42 is the measured number.)
+- He stays in his pod, under every fighter officer's rules: lost when it is destroyed or drops out, no kill roll, following it onto a split-off
+  row with his cost, the flight's one officer (D9).
+- The triple roll is **spent when his pod's first capture party is delivered** (its critical made), whatever becomes of him afterwards; a
+  delivery that fails spends nothing, nor does a Sabotage or a Rescue party. The party rolls three d10s, each at its own modifiers, on the turn
+  its critical starts (its first turn aboard), and is still one attacker to the defenders.
+- "Ignores any loss of thrust due to damage": nothing to build. The Energy Draining Field's drain still applies.
+- The fleet's pods are counted craft by craft (a flight's size); its experts are the Breaching Experts that would serve (one officer per
+  flight). 20% rounded half up = floor((pods x 20 + 50) / 100): 3 pods for the first, 8 for two, 13 for three - so one flight of two pods
+  never qualifies alone. The line shows only while the fleet carries one.
+- His Elite is asked at delivery, never written into `eliteMarines`: that weapon's "Elite" tooltip line is sent to every viewer. His team's
+  client shows "Yes (Breaching Expert)". No combat-log line names him (D4).
+
+**Design.**
+- `Officers`: registry `OFF_BRCH` (post `craft`, `flight`, pct 50, new key **`unscaled`**, `apply` applyBreachingExpert - +1 `freethrust` -
+  `publish` freethrust, `needs` isBreachingPod), last; `$factionRules` 25 for the four races. `flightPrice` returns an `unscaled` officer's
+  listed price (rowPrice, legacyPrice and shareWithCraft follow it). `isBreachingPod`; `eliteMarines($flight, $weapon, $turn)` (the serving
+  officer in the craft that carries the weapon - `breachingExpertIndex`); `spendCaptureAssault` (one OffUsed note, ability `capture`, through
+  Stage 10's `spend`); `captureRolls($critical, $gamedata)`; `BREACH_PARTY_KEY` ('expert'), the key in his party's critical's `param`.
+- `Marines` (specialWeapons.php): `isElite($shooter, $gamedata)`, asked by `getDeliveryRollMod` and once per delivery for the four
+  mission-class choices; the capture branch marks his party. ⚠️ The Grappling Claw repeats the same Elite lines - untouched.
+- `ShipSystem::doCaptureMission`: each party attacks `captureRolls` times. `ShipSystem::stripForJson`: a critical's `param` is sent without
+  `BREACH_PARTY_KEY`, to every viewer.
+- Client: `officers.js` - the registry row (`unscaled`, `needs: 'breachingPod'`, `stats` freethrust 1), `isBreachingPod` (⚠️ MIRROR PAIR),
+  `flightCost` / `priceNote` for an `unscaled` officer, `marinesEliteLine` through `adjustDataDisplay`, `ABILITY_NAMES.capture`,
+  `breachingFleetCheck`. `gamelobby.js` `checkChoices`: "Breaching Experts: n (allowed up to m: 20% of p breaching pods)". React:
+  ShipNotesPanel's and ShipInfo's flight Thrust through `displayStat` (the lobby's preview; in game the server's published figure).
+- Docs: a Breaching Expert card (Fighter Officers - first, alphabetically), and the section's cost paragraph names him as the exception.
+
+**Files.** Server: `Officers.php`, `weapons/specialWeapons.php` (Marines), `systems/ShipSystem.php`. Client: `officers.js`, `gamelobby.js`,
+`UI/reactJs/shipWindow/ShipNotesPanel.js`, `UI/reactJs/system/ShipInfo.js`. Docs `ammo-options.html`. Harnesses: `officersHarness.php`,
+`officersClientHarness.js`, `enhancementsHarness.php` (a pod hull and four cases in the diffdump), `enhancementsDifferential.js` (flight
+`freethrust` compared). Statics and bundles rebuilt (`fvbuild -Statics`, `-Client`); no new class, no schema change - `tac_critical.param` is
+varchar(200), and a party's JSON grows by 11 characters (`,"expert":1`).
+
+**Measured.** Statics +1,974 B: 42 offers. The enhancements fingerprint is unchanged (it covers ships only).
+
+**Verified.**
+- `officersHarness.php` **1556 / 0 with `--no-db`** (52 new): the 42 pods offered him and the four Marine superheavies, the Streib Combat Pod, a
+  fighter flight and a ship not; eleven prices; `flightPrice` / `rowPrice` / `legacyPrice` unscaled and the pair split; the first pod, one
+  officer per flight, no kill roll; +1 thrust, `getEffectiveFreeThrust`, published to owner and enemy with the list to the owner only, the
+  REAL `calculateHitBase` speed match (a target 7 faster: his pair 30%, the twin 0), lost with his pod (destroyed or dropped out), kept when
+  the other pod falls; the REAL `getDeliveryRollMod` and `onDamagedSystem` - his pod's Marines Elite, the other pod's and a twin's not, never
+  written into the weapon, nothing more for Narn pods or bought Elite Marines; the capture assault - a failed delivery spends nothing, his
+  first party marked and one OffUsed note ("Breaching Expert: capture assault used"), no second (in the same load, or after a reload's note),
+  the other pod's party unmarked, the payload's `abilities`; `captureRolls`; the REAL `doCaptureMission` - three attacks on the first turn,
+  one on the second, one for an ordinary party, eliminated by a single defender's hit; the mark stripped from both viewers' payload.
+- `officersClientHarness.js` **629 / 0** (21 new; two registry-order checks moved one place): the row; every static flight - the client's
+  pod test and the server's offers agree (42); prices and the buy dialog's note; the lobby list and thrust through the REAL ShipNotesPanel
+  and ShipInfo; the in-game thrust; the "Elite" line (his pod, the other, lost, an enemy, a Narn pair) through the REAL SystemInfo; the used
+  ability's line; `breachingFleetCheck`; the REAL `checkChoices` (in a sandbox) - OK, FAILURE, no line.
+- `enhancementsDifferential.js` **742 / 0** (17 new cases on an Abbai pod; `freethrust` now compared on every flight case);
+  `enhancementsHarness` **287 / 0**.
+- **Mutation-tested: 42 breaks (22 server, 2 differential, 18 client), 42 caught**, files byte-identical afterwards; every catch by a Stage 24
+  check. Runner `mutate24.js` in the session scratchpad only. One more mutant was equivalent: the half-up offset +50 -> +40 (20% of whole
+  pods is a multiple of 0.2, so any offset from 40 to 59 rounds alike); +30 and +60 are caught.
+- ⚠️ NOT yet run: `officersHarness.php` with the database, and `fvbuild -Check` (the replay corpus). The FieryVoid database container was
+  stopped and the DouglasChanges stack held its ports.
+
+**Observations, not changed:**
+1. Not play-tested. Worth a test: two pairs of pods with one Expert - the Fleet Correctness Report's line; his pair's thrust in the lobby and
+   in game; a capture delivery from his pod and its first turn's three attacks in the log's "Boarding Combat Summary"; his team's Marines
+   tooltip "Yes (Breaching Expert)", the enemy's "No".
+2. `breachingPodBrixadiiB.php` declares `phpclass` "breachingPodBrixadii", its predecessor's - a contributor typo; its static blueprint is
+   keyed under the old name in its own faction file.
+3. The orphan static `ZTrek Playtest Other Factions.json` (2026-09-26, a faction name the generator no longer writes) still holds a Nausicaan
+   pod without the offer; the client harness's sweep reads only the files of the last statics run.

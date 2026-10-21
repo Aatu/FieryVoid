@@ -70,6 +70,10 @@
    Stage 23: the Expert Anticipator - initiative rolled twice, the higher kept (initiativeRoll); one turn in the Firing phase, as a
    fighter's combat pivot (Movement::ANTICIPATED_TURN); and a damage roll of two or more dice one die larger, its lowest dropped
    (Dice::$extraDie).
+   Stage 24: the Breaching Expert - a fighter officer for BREACHING PODS (isBreachingPod), priced off his ONE pod whatever the
+   flight's size (`unscaled`): the flight +1 thrust, his pod's Marines Elite (eliteMarines), and his pod's first capture party
+   three attack rolls on its first turn aboard (spendCaptureAssault, captureRolls). Fleet-wide, at most 20% of a fleet's pods - the
+   lobby's Fleet Correctness Report (gamelobby.js).
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -134,6 +138,9 @@ class Officers{
 	const TAILGUNNER_BONUS = 1;          //Expert Tailgunner: on a tail gun with no penalty, "+5% to hit with that gun only"
 	const TURRET_CRIT_MOD = -1;          //Expert Turret Officer: "When rolling for critical hits against turret-mounted weapons, subtract 1"
 	const TURRET_JAM_RELIEF = 2;         //...: "When rolling for the special turret jam critical, subtract 2 from the die roll"
+	const BREACH_THRUST = 1;             //Breaching Expert: "The pod receives +1 thrust" - the flight's, as a flight moves as one
+	const BREACH_CAPTURE_ROLLS = 3;      //...: "the pod's contingent gets three attack rolls on the first turn of combat"
+	const BREACH_PARTY_KEY = 'expert';   //...the capture party he sent: a key in its CaptureShip critical's param (never sent - ShipSystem::stripForJson)
 	//...a Medium ship's side, looked at from its own bearing (a "TAG:" hit chart entry is arc-filtered): Front, Aft, Left, Right
 	private static $sideBearing = array(1 => 0, 2 => 180, 3 => 270, 4 => 90);
 	//the fire orders that are NOT the flight firing, for his Spark Field relief: interception uses neither OB nor jinking
@@ -192,6 +199,9 @@ class Officers{
 		'OFF_TURR' => array('only' => array('Vree Conglomerate')),
 		//"10% of the ship's base value for Torata ... Races other than the Torata pay 50% more for this officer" - the registry's 15
 		'OFF_ANTI' => array('pct' => array('Torata Regency' => 10)),
+		//"25% of the cost of the breaching pod ... Any race may purchase one, but races other than Balosian, Yolu, Narn or Gaim double the
+		//cost" - the registry's 50, and 25 here
+		'OFF_BRCH' => array('pct' => array('Balosian Underdwellers' => 25, 'Yolu Confederation' => 25, 'Narn Regime' => 25, 'Gaim Intelligence' => 25)),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -214,6 +224,8 @@ class Officers{
 	     multi       (optional, Stage 18) bought as a COUNT, up to this many (or $factionRules' `max`), and never
 	                 more than the flight has craft: one officer in each of its first crafts, every one of them
 	                 applying his effects (the Expert Pilot). Together they are still the flight's one officer.
+	     unscaled    (optional, Stage 24) true: his pct of one craft is his price whatever the flight's size - he serves in a single
+	                 craft, so a flight of two pays what a flight of one does (the Breaching Expert: "25% of the cost of the breaching pod")
 	   Placed officers (Stage 8) carry, instead of a post key:
 	     placed      true: the player picks his post, a weapon, in that system's own menu - a per-system row
 	                 (Enhancements::$systemEnhancementRegistry), never an enhancementOptions offer
@@ -497,6 +509,19 @@ class Officers{
 		   weapon": a flight whose craft carries a weapon flagged as its tail gun (hasTailGun) - every faction (user ruling: all 15). */
 		'OFF_TAIL' => array('label' => 'Expert Tailgunner', 'post' => 'craft', 'flight' => true, 'pct' => 50,
 			'apply' => null, 'needs' => 'hasTailGun'),
+		/* Breaching Expert (Stage 24; rules text, user 2026-10-21): "This highly trained breaching specialist accompanies a breaching pod on
+		   its mission ... The pod receives +1 thrust and ignores any loss of thrust due to damage" - the FLIGHT's thrust (applyBreachingExpert;
+		   a flight moves as one), and FV takes no thrust from a flight for damage, so the second half has nothing to ignore. "The pod's Marines
+		   receive benefits as if they were Elite" - his own pod's only (user ruling: "single pod"), asked by Marines::isElite (eliteMarines);
+		   on a pod already Elite - the Narn and Gaim pods, or Elite Marines bought - that half adds nothing (user ruling), the rest still
+		   applies. "If attempting to capture a ship, the pod's contingent gets three attack rolls on the first turn of combat. It is still
+		   destroyed by a single hit ... only once per scenario": spendCaptureAssault marks the party at delivery, captureRolls rolls three.
+		   "25% of the cost of the breaching pod" - of his ONE pod, not scaled by the flight's size (`unscaled`, user ruling); 50% for races
+		   other than the Balosians, Yolu, Narn and Gaim ($factionRules). Breaching pods only (`needs`). "No more than 20% of a fleets
+		   breaching pods" is the lobby's Fleet Correctness Report (user ruling), as every fleet-composition rule is. Last in the list, as
+		   the newest. */
+		'OFF_BRCH' => array('label' => 'Breaching Expert', 'post' => 'craft', 'flight' => true, 'pct' => 50, 'unscaled' => true,
+			'apply' => 'applyBreachingExpert', 'publish' => array('freethrust'), 'needs' => 'isBreachingPod'),
 	);
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV) - so the
@@ -651,9 +676,11 @@ class Officers{
 	   price and a 12-craft flight twice it. $count (Stage 18): an officer bought as a count is $count
 	   times the listed price, scaled and rounded up ONCE for the row - the lobby's own sum (enhCost is
 	   price x count): 2 Expert Pilots on a 3-craft Aurora are ceil(114 x 3/6) = 57.
+	   Stage 24: an `unscaled` officer is his listed price, whatever the size (a Breaching Expert in his one pod).
 	   ⚠️ MIRROR PAIR with officers.flightCost. */
 	public static function flightPrice($flight, $id, $crafts, $count = 1){
 		$officer = self::$registry[$id];
+		if (!empty($officer['unscaled'])) return self::craftPrice($flight, self::pctFor($flight, $id)) * max(1, (int)$count);
 		$crafts = max(1, (int)$crafts);
 		$standard = self::standardFlight($flight);
 		$price = intdiv(self::craftPrice($flight, self::pctFor($flight, $id)) * max(1, (int)$count) * $crafts + $standard - 1, $standard);
@@ -1675,7 +1702,8 @@ class Officers{
 	/* ------------------------------------------------------------------ once per battle, and faster reloads (Stage 10) */
 
 	//what a spent ability is called in its note and the tooltip
-	private static $abilityNames = array('reload' => 'faster reload', 'pierce' => 'Piercing shot', 'called' => 'called shot');
+	private static $abilityNames = array('reload' => 'faster reload', 'pierce' => 'Piercing shot', 'called' => 'called shot',
+		'capture' => 'capture assault'); //Stage 24: the Breaching Expert's (spendCaptureAssault)
 
 	/* Is this ability still his on $turn? Spent ON $turn still counts: that turn's shot is the one that spent it
 	   (so every order his gun fires that turn, and a replay of it, reads the same). */
@@ -2737,6 +2765,73 @@ class Officers{
 	//Does an Expert Tailgunner serve this flight on $turn - Weapon::getTailGunMod, behind $officersPresent. ⚠️ MIRROR PAIR with officers.hasTailgunner (JS).
 	public static function hasTailgunner($flight, $turn){
 		return self::isActive($flight, 'OFF_TAIL', $turn);
+	}
+
+	/* ------------------------------------------------------------------ Breaching Expert (Stage 24) */
+
+	/* A BREACHING POD, the units he may serve in: a flight whose craft carries Marines and that FV names a breaching pod - in the
+	   'Breaching Pods' hangar class (40 flights, the Chariot Breaching Sleds among them) or by its class name (the Minbari Protectorate's
+	   Ronati and the Nausicaan pods, which ride shuttle hangars). Never a superheavy that carries Marines (the Dalithorn Assault Pinnace and
+	   Customs Vessel, the Nausicaan Gliders). Also what the Fleet Correctness Report counts for his 20%.
+	   ⚠️ MIRROR PAIR with officers.isBreachingPod (JS). */
+	public static function isBreachingPod($ship){
+		if (!($ship instanceof FighterFlight)) return false;
+		if ($ship->hangarRequired !== 'Breaching Pods' && stripos((string)$ship->shipClass, 'Breaching Pod') === false) return false;
+		$craft = self::firstCraft($ship);
+		if ($craft === null) return false;
+		foreach ($craft->systems as $system){
+			if ($system instanceof Marines) return true;
+		}
+		return false;
+	}
+
+	/* "The pod receives +1 thrust" - the flight's, as it moves as one. Published: the boarding hit chance reads the shooter's thrust on
+	   both ends (Marines::calculateHitBase, weaponManager.calculateBoardingAction), and so does the flight's movement. "...and ignores any
+	   loss of thrust due to damage": FV takes no thrust from a flight for damage, so there is nothing to ignore - an Energy Draining
+	   Field's drain (FighterFlight::getEffectiveFreeThrust) is a field's effect, not damage, and still applies. */
+	private static function applyBreachingExpert($ship, $entry, $turn){
+		$ship->freethrust += self::BREACH_THRUST;
+	}
+
+	/* "The pod's Marines receive benefits as if they were Elite" - the Marines of HIS pod (user ruling 2026-10-21: "single pod"), on
+	   $turn: the delivery roll's -1 and the Elite mission classes, whose rolls are -1 (Marines::isElite, behind $officersPresent). Asked
+	   at delivery and never written into Marines::$eliteMarines, whose "Elite" tooltip line is sent to every viewer - so it stays the
+	   hull's own, and only his team's client adds him to it (officers.marinesEliteLine). Marines Elite already (the Narn and Gaim pods,
+	   or Elite Marines bought) gain nothing more (user ruling) - the caller asks eliteMarines first. */
+	public static function eliteMarines($flight, $weapon, $turn){
+		return self::breachingExpertIndex($flight, $weapon, $turn) !== null;
+	}
+
+	//the index of the Breaching Expert serving on $turn in the craft that carries $weapon, or null
+	private static function breachingExpertIndex($flight, $weapon, $turn){
+		if (!($flight instanceof FighterFlight)) return null;
+		$craft = $flight->getFighterBySystem($weapon->id);
+		if (!$craft) return null;
+		return self::servingIndex($flight, 'OFF_BRCH', $craft, $turn);
+	}
+
+	/* "If attempting to capture a ship, the pod's contingent gets three attack rolls on the first turn of combat. It is still destroyed
+	   by a single hit from the enemy ... This benefit can be received only once per scenario." Marines::onDamagedSystem, as a capture
+	   party from his pod is DELIVERED (its CaptureShip critical made) while he serves and has sent none before: spent then - one OffUsed
+	   note - and true, so the caller marks the party (BREACH_PARTY_KEY in its critical's param) and it rolls three on its first turn
+	   aboard (captureRolls), whatever becomes of him meanwhile. A delivery that fails spends nothing; nor does a Sabotage or a Rescue
+	   party. Behind $officersPresent. */
+	public static function spendCaptureAssault($flight, $weapon, $gamedata){
+		$turn = (int)$gamedata->turn;
+		$i = self::breachingExpertIndex($flight, $weapon, $turn);
+		if ($i === null) return false;
+		$entry = $flight->getOfficers()[$i];
+		if (isset($entry['abilities']['capture'])) return false;
+		self::spend($flight, $i, 'capture', $turn, $gamedata);
+		return true;
+	}
+
+	/* How many attack rolls a capture party makes this turn (ShipSystem::doCaptureMission): BREACH_CAPTURE_ROLLS on its first turn
+	   aboard - the turn its critical starts - when his (spendCaptureAssault), else one. The attack only: to the defenders it is still
+	   one attacker, eliminated by a single hit. */
+	public static function captureRolls($critical, $gamedata){
+		if (!is_array($critical->param) || empty($critical->param[self::BREACH_PARTY_KEY])) return 1;
+		return ((int)$critical->turn === (int)$gamedata->turn) ? self::BREACH_CAPTURE_ROLLS : 1;
 	}
 
 	/* ------------------------------------------------------------------ repairs (Stage 5) */

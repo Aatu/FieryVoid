@@ -337,6 +337,8 @@ public function setParentFighter($fighter) {
             $strippedSystem->criticals = array_map(function($crit) {
                 $c = clone $crit;
                 if ($c->param === null || $c->param === '') unset($c->param);
+                //OFFICERS_PLAN.md Stage 24: which capture party a Breaching Expert sent is never sent (D4 - the officer stays hidden)
+                else if (is_array($c->param) && isset($c->param[Officers::BREACH_PARTY_KEY])) unset($c->param[Officers::BREACH_PARTY_KEY]);
                 return $c;
             }, $this->criticals);
         }
@@ -1007,10 +1009,13 @@ public function setParentFighter($fighter) {
 		$attackerHits = 0;
 		foreach ($attackers as $attacker) {
 			$rollMod = $this->getMarineRollMod($attacker, $ship, $gamedata);
-			$roll = Dice::d(10);
-			$modifiedRoll = $roll + $rollMod;
-			if ($modifiedRoll <= 5) {
-				$attackerHits++;
+			//A Breaching Expert's capture party attacks three times on its first turn aboard - still one attacker to the defenders (OFFICERS_PLAN.md Stage 24)
+			for ($attack = Officers::captureRolls($attacker, $gamedata); $attack > 0; $attack--) {
+				$roll = Dice::d(10);
+				$modifiedRoll = $roll + $rollMod;
+				if ($modifiedRoll <= 5) {
+					$attackerHits++;
+				}
 			}
 		}
 

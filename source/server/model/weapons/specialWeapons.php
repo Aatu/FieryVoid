@@ -9587,10 +9587,16 @@ class Marines extends Weapon implements SpecialAbility{
 	}
 
 
+	/* Are these Marines Elite: the hull's or bought (eliteMarines), or - OFFICERS_PLAN.md Stage 24 - those of a pod a serving Breaching
+	   Expert is in (Officers::eliteMarines). Asked, never written into eliteMarines: its "Elite" tooltip line goes to every viewer. */
+	private function isElite($shooter, $gamedata){
+		if ($this->eliteMarines) return true;
+		return TacGamedata::$officersPresent && Officers::eliteMarines($shooter, $this, $gamedata->turn);
+	}
 
 	private function getDeliveryRollMod($shooter, $target, $gamedata, $fireOrder){
 		$rollMod = 0;
-		if($this->eliteMarines) $rollMod -= 1; //Elite Marines board more easily.
+		if($this->isElite($shooter, $gamedata)) $rollMod -= 1; //Elite Marines board more easily.
 
 		if($target->faction == "Narn Regime" || $target->faction == "Gaim Intelligence" || $target->faction == "Escalation Wars Sshel'ath Alliance")	$rollMod += 1; //Certain factions defend harder! 
 
@@ -9660,6 +9666,7 @@ class Marines extends Weapon implements SpecialAbility{
 		}
 
 		if($deliveryRoll <= 5){ //successful delivery, continue with applying critical effects.
+			$elite = $this->isElite($shooter, $gamedata); //Elite Marines, or a serving Breaching Expert's pod (OFFICERS_PLAN.md Stage 24)
 
 
 
@@ -9669,9 +9676,11 @@ class Marines extends Weapon implements SpecialAbility{
 
 					$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt to capture enemy ship next turn.";			
 						if($cnc){
-								if($this->eliteMarines){//Are Marines Elite?
+								if($elite){//Are Marines Elite?
 									$crit = new CaptureShipElite(-1, $ship->id, $cnc->id, 'CaptureShipElite', $gamedata->turn+1); //Takes effect next turn.
 									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
+									//A Breaching Expert's capture party: three attacks on its first turn aboard (Officers::captureRolls), once per scenario
+									if(TacGamedata::$officersPresent && Officers::spendCaptureAssault($shooter, $this, $gamedata)) $crit->param[Officers::BREACH_PARTY_KEY] = 1;
 									$crit->updated = true;
 									$cnc->criticals[] =  $crit;
 									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
@@ -9690,7 +9699,7 @@ class Marines extends Weapon implements SpecialAbility{
 
 					if($fireOrder->calledid != -1 && !($system instanceof Structure) && $system->location != 0){//Is a called shot, and not somehow attacking structure, place crit on system.
 							$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt to sabotage " . $system->displayName ." system next turn.";
-						if($this->eliteMarines){//Are Marines Elite?
+						if($elite){//Are Marines Elite?
 							$crit = new SabotageElite(-1, $ship->id, $system->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
 							$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 							$crit->updated = true;
@@ -9706,7 +9715,7 @@ class Marines extends Weapon implements SpecialAbility{
 					}else{ //Has targeted ship generally, not a specific system (or somehow retargeted to structure).  Apply crit to CnC.
 						$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt sabotage operations on enemy ship next turn.";								
 							if($cnc){
-									if($this->eliteMarines){//Are Marines Elite?
+									if($elite){//Are Marines Elite?
 										$crit = new SabotageElite(-1, $ship->id, $cnc->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
 										$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 										$crit->updated = true;
@@ -9728,7 +9737,7 @@ class Marines extends Weapon implements SpecialAbility{
 
 					$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt their rescue mission next turn.";			
 						if($cnc){
-								if($this->eliteMarines){//Are Marines Elite?
+								if($elite){//Are Marines Elite?
 									$crit = new RescueMissionElite(-1, $ship->id, $cnc->id, 'RescueMissionElite', $gamedata->turn+1); //Takes effect next turn.
 									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 									$crit->updated = true;

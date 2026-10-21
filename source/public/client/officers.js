@@ -134,7 +134,13 @@ window.officers = {
 		/* Stage 21: only for a flight with a tail gun (`needs`). No stat moves - his effect is the hit-chance preview's
 		   (weaponManager.getTailGunMod) and the tail gun's tooltip line (tailGunLine). */
 		{ id: 'OFF_TAIL', label: 'Expert Tailgunner', post: 'craft', flight: true, needs: 'tailGun',
-			summary: 'No penalty for firing the tail gun with the other guns; +5% with a tail gun that has no penalty' }
+			summary: 'No penalty for firing the tail gun with the other guns; +5% with a tail gun that has no penalty' },
+		/* Stage 24: only for a breaching pod (`needs`), in its first pod. `unscaled`: his price is his ONE pod's, whatever the flight's
+		   size (flightCost). The flight's +1 thrust is previewed (stats - in game the server raised and published it); his pod's Elite
+		   Marines are the server's at delivery, and its Marines' "Elite" line says so to his own team (marinesEliteLine); his capture
+		   assault is the server's alone. The fleet's 20% is the Fleet Correctness Report's (breachingFleetCheck). */
+		{ id: 'OFF_BRCH', label: 'Breaching Expert', post: 'craft', flight: true, unscaled: true, needs: 'breachingPod', stats: { freethrust: 1 },
+			summary: '+1 thrust; his pod\'s Marines count as Elite; once per battle, his pod\'s first capture party makes three attack rolls on its first turn aboard' }
 	],
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV, the Expert
@@ -298,7 +304,8 @@ window.officers = {
 	     plasmaWeapon  the hull carries a weapon with a Plasma mode (the Expert Plasma Scientist)
 	     ionWeapon     the hull carries a weapon with an Ion mode, or an Ion Torpedo (the Expert Ion Technician)
 	     missiles      the flight carries missiles (the Expert Missileer)
-	     tailGun       the flight's craft has a tail gun - a weapon the blueprint flags `tailGun` (the Expert Tailgunner) */
+	     tailGun       the flight's craft has a tail gun - a weapon the blueprint flags `tailGun` (the Expert Tailgunner)
+	     breachingPod  the flight is a breaching pod (isBreachingPod - the Breaching Expert) */
 	passesNeeds: function passesNeeds(ship, officer) {
 		if (!officer.needs) return true;
 		var self = this;
@@ -319,7 +326,18 @@ window.officers = {
 			var craft = ship.flight ? this.firstCraft(ship) : null;
 			return !!craft && this.systemsOf(craft).some(function (s) { return s && s.tailGun === true; });
 		}
+		if (officer.needs === 'breachingPod') return this.isBreachingPod(ship);
 		return false;
+	},
+
+	/* A BREACHING POD: a flight whose craft carries Marines and that FV names a breaching pod - the 'Breaching Pods' hangar class, or
+	   "Breaching Pod" in its class name (the Minbari Protectorate's and the Nausicaan pods ride shuttle hangars). Never a superheavy
+	   carrying Marines. ⚠️ MIRROR PAIR with Officers::isBreachingPod (PHP). */
+	isBreachingPod: function isBreachingPod(ship) {
+		if (!ship || !ship.flight) return false;
+		if (ship.hangarRequired !== 'Breaching Pods' && String(ship.shipClass || '').toLowerCase().indexOf('breaching pod') === -1) return false;
+		var craft = this.firstCraft(ship);
+		return !!craft && this.systemsOf(craft).some(function (s) { return s && (s.name === 'Marines' || s.name === 'ExtraMarines'); });
 	},
 
 	//⚠️ MIRROR PAIR with Officers::isLaserWeapon (PHP)
@@ -644,7 +662,7 @@ window.officers = {
 	},
 
 	//"(used: called shot, turn 3; Piercing shot, turn 4)" - the Gunner's spent once-per-battle abilities, or ''
-	ABILITY_NAMES: { reload: 'faster reload', pierce: 'Piercing shot', called: 'called shot' },
+	ABILITY_NAMES: { reload: 'faster reload', pierce: 'Piercing shot', called: 'called shot', capture: 'capture assault' }, //capture: the Breaching Expert's (Stage 24)
 	abilitiesText: function abilitiesText(entry) {
 		var spent = entry && entry.abilities ? entry.abilities : null;
 		if (!spent) return '';
@@ -1248,6 +1266,48 @@ window.officers = {
 		return penalised ? value : 'No penalty (navigator)';
 	},
 
+	/* ------------------------------------------------------------------ Breaching Expert (Stage 24) */
+
+	/* A pod's Marines' "Elite" tooltip line: the server writes the hull's ("Yes" for the Narn's and Gaim's own Elite Marines, or bought ones -
+	   lobbyEnhancements writes those in the lobby), and this adds a serving Breaching Expert in the craft that carries them - for his own team
+	   only, as his list is theirs alone. Marines Elite already keep their "Yes": he adds nothing there (user ruling 2026-10-21).
+	   ⚠️ MIRROR PAIR with Officers::eliteMarines (PHP). */
+	marinesEliteLine: function marinesEliteLine(ship, system, value) {
+		if (!ship || !ship.flight || value === 'Yes') return value;
+		var craft = this.craftHolding(ship, system);
+		if (!craft) return value;
+		var turn = this.currentTurn();
+		var self = this;
+		var his = this.onPost(ship, craft.id).some(function (entry) { return entry.id === 'OFF_BRCH' && self.serves(entry, turn); });
+		return his ? 'Yes (Breaching Expert)' : value;
+	},
+
+	//the craft of a flight whose systems include `system` (by id), or null
+	craftHolding: function craftHolding(ship, system) {
+		var self = this;
+		return this.systemsOf(ship).filter(function (craft) {
+			return craft && self.systemsOf(craft).some(function (s) { return s && String(s.id) === String(system.id); });
+		})[0] || null;
+	},
+
+	/* "No more than 20% of a fleets breaching pods (round fractions of 0.5 or more up) can use these experts" - the Fleet Correctness
+	   Report's line (gamelobby.js checkChoices; user ruling 2026-10-21: reported, as every fleet-composition rule is, not enforced). Pods
+	   are counted CRAFT by craft (a flight's size) over every breaching pod in `ships`; experts are the Breaching Experts that would serve
+	   (listFor - one officer to a flight). With pods in flights of two at most, a fleet needs three pods for its first expert. */
+	BREACH_FLEET_PCT: 20,
+	breachingFleetCheck: function breachingFleetCheck(ships) {
+		var pods = 0;
+		var experts = 0;
+		var self = this;
+		(ships || []).forEach(function (ship) {
+			if (!self.isBreachingPod(ship)) return;
+			pods += parseInt(ship.flightSize, 10) || 1;
+			experts += self.listFor(ship).filter(function (entry) { return entry.id === 'OFF_BRCH'; }).length;
+		});
+		//pods x 20% rounded half up, in whole numbers: floor((pods x 20 + 50) / 100)
+		return { pods: pods, experts: experts, allowed: Math.floor((pods * this.BREACH_FLEET_PCT + 50) / 100) };
+	},
+
 	/* Expert Evader (user request 2026-10-20): may this flight order an Evade - the Firing-phase movement order
 	   (movement.js canEvade / doEvade) without which he does nothing. Own team only, through his list.
 	   ⚠️ MIRROR PAIR with Officers::mayEvade (PHP). */
@@ -1318,12 +1378,14 @@ window.officers = {
 	   up, plus his perCraftExtra per craft (user ruling 2026-10-15). enhCost is the row's own sum (price x
 	   count) - so officers bought as a count (Stage 18, Expert Pilots) are scaled and rounded up ONCE for
 	   the row, as Officers::flightPrice's $count; `extra` is perCraftExtra(ship, enhID), worked out once by the caller.
+	   Stage 24: an `unscaled` officer costs his listed price at any size (a Breaching Expert serves in his one pod).
 	   ⚠️ MIRROR PAIR with Officers::flightPrice (PHP). */
 	flightCost: function flightCost(enhID, count, enhCost, size, extra, standard) {
 		var cost = Number(enhCost) || 0;
 		size = Number(size) || 1;
 		if (!this.isFighterOfficer(enhID)) return cost * size;
 		if ((parseInt(count, 10) || 0) < 1) return 0;
+		if (this.get(enhID).unscaled) return cost;
 		standard = Number(standard) || 6;
 		return Math.ceil(cost * size / standard) + (Number(extra) || 0) * size;
 	},
@@ -1338,6 +1400,7 @@ window.officers = {
 		if (officer && officer.multi) {
 			return enhancement[4] + 'pts each' + (standard > 1 ? ' per ' + standard + ' craft' : '') + ', one per craft';
 		}
+		if (officer && officer.unscaled) return enhancement[4] + 'pts, in one craft'; //Stage 24: the same at any flight size
 		var note = enhancement[4] + 'pts' + (standard > 1 ? ' per ' + standard + ' craft' : '');
 		var extra = this.perCraftExtra(ship, enhancement[0]);
 		if (extra > 0) note += ' + ' + extra + 'pts per craft';
@@ -1359,7 +1422,7 @@ window.officers = {
 	},
 
 	/* A ship field as a window should show it: iniativebonus, forwardDefense, sideDefense, toHitBonus, a
-	   flight's offensivebonus, and the Navigator's turncost, pivotcost, rollcost and accelcost. ⚠️ MIRROR
+	   flight's offensivebonus and (Stage 24) freethrust, and the Navigator's turncost, pivotcost, rollcost and accelcost. ⚠️ MIRROR
 	   PAIR with Officers::apply's stat changes (PHP) - enhancementsDifferential.js compares the two through
 	   this function. */
 	displayStat: function displayStat(ship, field) {
@@ -1910,7 +1973,8 @@ window.officers = {
 	   weapon's, with an Expert Ion Technician's +1 and thrust boost (ionDamageLine), and the Rad Cannon's Special text. Stage 20: an
 	   ELINT array's Special text, with an Expert ELINT Officer's ranges and blanket (elintSpecial) - to every viewer, in game too.
 	   Stage 21: a fighter's tail gun's "Tail Gun" line (tailGunLine). Stage 22: a turret-mounted weapon's "Turret Mount" line, under an
-	   Expert Turret Officer (turretMountLine), and his +1 in its fire control (displayFireControl). */
+	   Expert Turret Officer (turretMountLine), and his +1 in its fire control (displayFireControl). Stage 24: a pod's Marines' "Elite"
+	   line, under a Breaching Expert (marinesEliteLine). */
 	DATA_KEY_FIRECONTROL: 'Fire control (fighter/med/cap)',
 	adjustDataDisplay: function adjustDataDisplay(ship, system, key, value) {
 		if (!system) return value;
@@ -1924,6 +1988,7 @@ window.officers = {
 		if (system.name === 'RadCannon' && key === 'Special') return this.radCannonSpecial(ship, value);
 		if ((system.name === 'elintScanner' || system.name === 'chameleonSensors') && key === 'Special') return this.elintSpecial(ship, value);
 		if (system.tailGun && key === 'Tail Gun') return this.tailGunLine(ship, value);
+		if (key === 'Elite' && (system.name === 'Marines' || system.name === 'ExtraMarines')) return this.marinesEliteLine(ship, system, value);
 		if (key === 'Turret Mount') return this.turretMountLine(ship, system, value);
 		if (system.name === 'jumpEngine' && (key === 'Range' || key === 'Special')) {
 			var bonus = this.jumpRangeBonus(ship, system);

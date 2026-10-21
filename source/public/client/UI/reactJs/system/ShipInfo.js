@@ -150,7 +150,7 @@ class ShipInfo extends React.Component {
 				   modified chance on top of these*/}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Profile - Front/Side: </Header>{ship.forwardDefense * 5}/{ship.sideDefense * 5}</Entry>}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Initiative: </Header>{window.officers ? officers.displayIniativeBonus(ship) : ship.iniativebonus}</Entry>}
-				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Thrust: </Header>{ship.freethrust}</Entry>}
+				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Thrust: </Header>{window.officers ? officers.displayStat(ship, 'freethrust') : ship.freethrust}</Entry>}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Turn Cost: </Header>{ship.turncost}</Entry>}										
 				{ship.flight && isRevealed && ship.turndelay && <Entry key={reactKey++}><Header>Turn Delay: </Header>{ship.turndelaycost}</Entry>}											
 				{ship.flight && isRevealed && <Entry key={reactKey++}>&nbsp;</Entry>}

@@ -2242,6 +2242,28 @@ window.gamedata = {
 		}
 		checkResult += "<br>";
 
+		/* OFFICERS_PLAN.md Stage 24 - the Breaching Expert: "No more than 20% of a fleets breaching pods (round fractions of 0.5 or more
+		   up) can use these experts" (officers.breachingFleetCheck counts both). Reported, as every fleet-composition rule is, and only
+		   while the fleet carries one. */
+		if (window.officers) {
+			var fleetUnits = [];
+			for (var b in gamedata.ships) {
+				if (gamedata.ships[b].slot == slotid) fleetUnits.push(gamedata.ships[b]);
+			}
+			var breaching = officers.breachingFleetCheck(fleetUnits);
+			if (breaching.experts > 0) {
+				checkResult += " Breaching Experts: " + breaching.experts + " (allowed up to " + breaching.allowed
+					+ ": " + officers.BREACH_FLEET_PCT + "% of " + breaching.pods + " breaching pod" + (breaching.pods === 1 ? "" : "s") + ")";
+				if (breaching.experts > breaching.allowed) {
+					checkResult += R_FAILURE;
+					problemFound = true;
+				} else {
+					checkResult += R_OK;
+				}
+				checkResult += "<br>";
+			}
+		}
+
 		checkResult += " Total Assault Shuttles: " + totalFtrAS;
 		checkResult += " (allowed up to " + totalHangarAS + ")";
 		if (totalFtrAS > totalHangarAS) { //Asssault Shuttle total is not within limits

@@ -446,7 +446,7 @@ class ShipNotesPanel extends React.Component {
                            systems mutate them live), so the profile reads the same way as
                            ManoeuvreStats' - user request 2026-07-23*/}
                         <StatRow><StatLabel>Profile - Front / Side</StatLabel><StatValue>{ship.forwardDefense * 5}/{ship.sideDefense * 5}</StatValue></StatRow>
-                        <StatRow><StatLabel>Thrust</StatLabel><StatValue>{ship.freethrust}</StatValue></StatRow>
+                        <StatRow><StatLabel>Thrust</StatLabel><StatValue>{statOf(ship, 'freethrust')}</StatValue></StatRow>
                         <StatRow><StatLabel>Turn Cost / Delay</StatLabel><StatValue>{ship.turncost} / {ship.turndelaycost == 0 ? 0 : ship.turndelaycost}</StatValue></StatRow>
                         {<StatRow><StatLabel>Accel. / Pivot / Roll</StatLabel><StatValue>{ship.accelcost} / {ship.pivotcost} / {ship.rollcost}</StatValue></StatRow>}                                            
                         <StatRow><StatLabel>Initiative</StatLabel><StatValue>{statOf(ship, 'iniativebonus')}</StatValue></StatRow>
