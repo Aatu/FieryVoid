@@ -3415,9 +3415,21 @@ and `pendingMoveFireControl` give mode 1 nothing). Docs: the Gunsights, Gunner a
 **1512 / 0** (10 new - every raiser alone and together, a mode switch, Gunsights' bare applier, the Xonn's mixed turret), client **582 / 0**
 (5 new - the statics, the lobby previews, lobby Gunsights, a pending move), differential **725 / 0** (its Xonn cases put the officer on a
 Shredder), enhancements 285 / 0; **10 more breaks, all caught** (the Gunsights live-value guard needed the bare-applier check: on a real load
-changeFiringMode re-reads the array over it). Not covered by this, noted: an Expert Gunner's once-per-battle +15% called shot and an Expert
-Targeter's +20% still apply to (and the Gunner's is spent on) a Shredder-mode attack at a fighter - those attacks are standard called shots in
-calculateHitBase; not fire control, so left as they were.
+changeFiringMode re-reads the array over it).
+
+**Second follow-up (user, the same day): no officer's called-shot bonus on a Shredder-mode attack either.** Asked: an Expert Gunner's
+once-per-battle +15% called shot and an Expert Targeter's +20% still reached a Shredder-mode attack at a fighter (and the Gunner's was spent by
+the first) - `prepareShredderOrders` declares one order per craft with `calledid` = that craft, so calculateHitBase saw standard called shots.
+Ruled: "yes, the shredder should not benefit from these either". ⭐ One rule, `Officers::bonusCall($weapon, $called, $mode = null)` - a call
+fired in a fixed-fire-control mode (`hasFixedFireControl`, the same "own hit calculation" marker) is no call to an officer - asked by
+`targeterShotBonus`, `gunnerShotBonus` (so nothing is spent) and `firingSpentAbility` (so the faster reload is not held back by a Shredder
+firing). ⚠️ MIRROR PAIR `officers.bonusCall` in `gunnerShotBonus` / `targeterShotBonus` (the client never previews a Shredder-mode call - it
+targets a hex - but the pair stays honest). The Raking and Piercing modes keep both bonuses. No Raiders or Llort hull carries a Shredder, so the
+Targeter half is a rule with no current case. Docs: the Gunner card's Notes. Gates: officersHarness **1518 / 0** (6 new - the REAL
+calculateHitBase at an Aurora flight for a Gunner and a Targeter on a Shredder, their Raking called shots, targeterShotBonus per mode, the
+faster reload after Shredder-mode attacks and after a called Raking shot), client **583 / 0** (1 new), differential 725 / 0, `-Check` replay
+162 / 0; legacy bundles rebuilt. **7 breaks, all caught** (the first pass missed the reload one - its fixture's flight was not in the game, so
+no call resolved; fixed).
 
 **Observations, not changed:**
 1. Not play-tested. Worth a test: a Xorr with a Turret Officer on Turret 1 that holds its fire for a turn while an enemy fires at it (hits

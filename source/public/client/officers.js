@@ -704,7 +704,14 @@ window.officers = {
 			return (entry.mode !== undefined && parseInt(weapon.firingMode, 10) === parseInt(entry.mode, 10)) ? 0 : this.PIERCE_PENALTY;
 		}
 		//Stage 19: on a gun a serving Expert Targeter covers, his +4 is the called shot's - the Gunner's +3 neither used nor spent
-		return (called && open('called') && !this.targeterCovering(ship, weapon)) ? this.GUNNER_CALLED_BONUS : 0;
+		return (this.bonusCall(weapon, called) && open('called') && !this.targeterCovering(ship, weapon)) ? this.GUNNER_CALLED_BONUS : 0;
+	},
+
+	/* Is this a called shot an officer's called-shot bonus reaches (the Gunner's +3, the Targeter's +4)? Never in a mode whose hit calculation
+	   is its own (hasFixedFireControl - the Antimatter Shredder's Shredder mode, whose attacks at fighters are called shots).
+	   ⚠️ MIRROR PAIR with Officers::bonusCall (PHP). */
+	bonusCall: function bonusCall(weapon, called) {
+		return Boolean(called) && !this.hasFixedFireControl(weapon, weapon ? weapon.firingMode : null);
 	},
 
 	/* ------------------------------------------------------------------ moving officers (Stage 10) */
@@ -851,7 +858,7 @@ window.officers = {
 	   ⚠️ MIRROR PAIR with Officers::targeterShotBonus (PHP). */
 	TARGETER_CALLED_BONUS: 4,
 	targeterShotBonus: function targeterShotBonus(ship, weapon, called) {
-		if (!called || !ship || !weapon || ship.flight) return 0;
+		if (!this.bonusCall(weapon, called) || !ship || !weapon || ship.flight) return 0;
 		return this.targeterCovering(ship, weapon) ? this.TARGETER_CALLED_BONUS : 0;
 	},
 

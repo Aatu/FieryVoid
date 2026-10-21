@@ -1252,10 +1252,11 @@ class Officers{
 
 	/* ⭐ HIS +4 - Weapon::calculateHitBase, in d20 units, behind $officersPresent, beside the Gunner's. A STANDARD called shot only
 	   ($called: a call that pays the -8 - not a Kirishiac flat-profile one): "This does not provide any benefit to normal attacks,
-	   only called shots. It does not cancel the usual -8 called shot penalty, either." Nothing to look up on any other shot.
+	   only called shots. It does not cancel the usual -8 called shot penalty, either." Nothing to look up on any other shot, nor on an
+	   Antimatter Shredder's attack at a fighter (bonusCall).
 	   ⚠️ MIRROR PAIR with officers.targeterShotBonus (JS), in weaponManager.computeShotModifiers. */
 	public static function targeterShotBonus($ship, $weapon, $called, $gamedata){
-		if (!$called) return 0;
+		if (!self::bonusCall($weapon, $called)) return 0;
 		return (self::targeterFor($ship, $weapon, (int)$gamedata->turn) !== null) ? self::TARGETER_CALLED_BONUS : 0;
 	}
 
@@ -1710,7 +1711,8 @@ class Officers{
 	                          usual -4 waived ("no penalty where it is"); in the mode added for him, nothing more
 	                          (that mode carries the penalty) - either way it is spent;
 	     a called shot        otherwise, +3 ("a called shot at +3"), spent - never on a Piercing shot, nor (Stage 19) on a gun
-	                          a serving Expert Targeter covers, whose +4 is that shot's instead (targeterShotBonus);
+	                          a serving Expert Targeter covers, whose +4 is that shot's instead (targeterShotBonus), nor on an
+	                          Antimatter Shredder's attack at a fighter (bonusCall);
 	   The faster reload is the turn change's (fasterReload). ⚠️ MIRROR PAIR with officers.gunnerShotBonus (JS). */
 	public static function gunnerShotBonus($ship, $weapon, $called, $gamedata){
 		$turn = (int)$gamedata->turn;
@@ -1722,12 +1724,19 @@ class Officers{
 			self::spend($ship, $i, 'pierce', $turn, $gamedata);
 			return (isset($entry['mode']) && (int)$weapon->firingMode === (int)$entry['mode']) ? 0 : self::PIERCE_PENALTY;
 		}
-		if (!$called || !self::abilityOpen($entry, 'called', $turn)) return 0;
+		if (!self::bonusCall($weapon, $called) || !self::abilityOpen($entry, 'called', $turn)) return 0;
 		//Stage 19 (user ruling 2026-10-20): on a gun a serving Expert Targeter covers, his +4 is the called shot's bonus - the
 		//Gunner's +3 is neither used nor spent, so it is still his if he moves or the Targeter falls
 		if (self::targeterFor($ship, $weapon, $turn) !== null) return 0;
 		self::spend($ship, $i, 'called', $turn, $gamedata);
 		return self::GUNNER_CALLED_BONUS;
+	}
+
+	/* Is $called a called shot an officer's called-shot bonus reaches (the Gunner's +3, the Targeter's +4)? Never one fired in a mode with a
+	   hit calculation of its own (Weapon::hasFixedFireControl): the Antimatter Shredder's attacks at fighters are called shots, one at each
+	   craft, but its Shredder mode gains no officer's bonus and spends none (user 2026-10-21). ⚠️ MIRROR PAIR with officers.bonusCall (JS). */
+	private static function bonusCall($weapon, $called, $mode = null){
+		return $called && !(($weapon instanceof Weapon) && $weapon->hasFixedFireControl($mode ?? $weapon->firingMode));
 	}
 
 	/* ⭐ A TURN OFF THE RELOAD - Weapon::onAdvancingGamedata, behind $officersPresent, on the loading the new turn
@@ -1781,7 +1790,7 @@ class Officers{
 				if (self::abilityOpen($entry, 'pierce', $fired)) return true;
 				continue;
 			}
-			if ((int)$order->calledid < 1 || !self::abilityOpen($entry, 'called', $fired)) continue;
+			if ((int)$order->calledid < 1 || !self::bonusCall($weapon, true, $mode) || !self::abilityOpen($entry, 'called', $fired)) continue;
 			$target = $gamedata->getShipById($order->targetid);
 			$called = $target ? $target->getCalledSystemAsAimed($order) : null;
 			if ($called !== null && $called->getTargetProfileOverride() === null) return true;
