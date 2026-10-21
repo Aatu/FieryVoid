@@ -17,6 +17,7 @@ import {
  *   ├ OFFICERS ────────────────────────────────┤  the Buy dialog's Officers blue - placed officers
  *   │ Expert Gunner        [-] [ 1 ] [+]   93p │  (OFFICERS_PLAN.md Stage 8)
  *   │ [Move]                 Officers: 93 pts  │  Move: Stage 15, in the footer so no row changes shape
+ *   │ [Front][Aft]           Officers: 45 pts  │  ...or a Medium ship's Expert Targeter's side (Stage 19)
  *
  * ⭐ This is a RENDERER, not a decision-maker. It takes `rows` already built by
  * systemEnhancements.menuRowsFor, so "what may this system have" stays in exactly one
@@ -214,12 +215,48 @@ class EnhancementRow extends Component {
     }
 }
 
+/* Stage 19: an Expert Targeter on a Medium ship's one block chooses a SIDE (Front / Aft, or Left / Right) in the footer's Move slot -
+   two Move-sized buttons, the side he covers lit. Free in Fleet Selection (officers.lobbySwitchSide). */
+const SideButton = styled(MoveButton)`
+    ${props => props.$on && `
+        background: ${SECTION_INK.officer.bar};
+        color: #0b1520;
+        cursor: default;
+        &:hover {
+            background: ${SECTION_INK.officer.bar};
+            color: #0b1520;
+        }
+    `}
+`;
+
+const SideSwitch = styled.div`
+    flex: 0 0 auto;
+    display: flex;
+    gap: 2px;
+`;
+
 class SystemEnhancementsSection extends Component {
 
+    renderSides(mover) {
+        const { onSide } = this.props;
+        if (typeof onSide !== 'function') return null;
+        return (
+            <SideSwitch>
+                {mover.sides.map(side => (
+                    <SideButton key={side.id} $on={side.current}
+                        title={side.current ? `The ${mover.label} covers the ${side.name} weapons`
+                            : `Cover the ${side.name} weapons instead (free in Fleet Selection)`}
+                        onClick={e => { e.stopPropagation(); if (!side.current) onSide(mover.enhID); }}>{side.name}</SideButton>
+                ))}
+            </SideSwitch>
+        );
+    }
+
     /* Stage 15: the footer's Move, for the officer posted here who may move (`moveTo` - officers.decorateMenuRows). Greyed,
-       and saying why, when there is nowhere for him to go. */
+       and saying why, when there is nowhere for him to go. Stage 19: a Targeter's side selector in its place (`sides`). */
     renderMove(mover) {
         const { onMove } = this.props;
+        if (mover && Array.isArray(mover.sides)) return this.renderSides(mover);
         if (!mover || typeof onMove !== 'function') return null;
         const can = mover.moveTo.length > 0;
         const title = can
@@ -240,8 +277,8 @@ class SystemEnhancementsSection extends Component {
         const spent = list => list.reduce((sum, row) => sum + (row.count > 0 ? row.price : 0), 0);
         const refitTotal = spent(refits);
         const officerTotal = spent(officers);
-        //a system hosts one officer who holds a post, so one Move at most (Stage 15)
-        const mover = officers.find(row => row.count > 0 && Array.isArray(row.moveTo));
+        //a system hosts one officer who holds a post, so one Move at most (Stage 15) - or one side selector (Stage 19)
+        const mover = officers.find(row => row.count > 0 && (Array.isArray(row.moveTo) || Array.isArray(row.sides)));
 
         return (
             <React.Fragment>

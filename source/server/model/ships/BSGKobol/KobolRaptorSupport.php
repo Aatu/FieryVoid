@@ -64,6 +64,7 @@ class KobolRaptorSupport extends FighterFlight{
 //            $fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
 
             $aftGun = new LightScattergun(150, 210); //always a single mount for this weapon
+            $aftGun->setTailGun(); //tail gun (Weapon::getTailGunMod)
             $aftGun->displayName = "Heavy MEC Cannon";
             $fighter->addAftSystem($aftGun);
 

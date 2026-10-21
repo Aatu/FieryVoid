@@ -69,6 +69,7 @@ class VelraxSoressPDC extends FighterFlight{
 //			$fighter->addAftSystem($hvyGun);
 
             $aftGun = new NexusLightIonGun(120, 240, 0);
+            $aftGun->setTailGun(); //tail gun (Weapon::getTailGunMod)
             $aftGun->displayName = "Light Ion Gun";
             $fighter->addFrontSystem($aftGun);
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

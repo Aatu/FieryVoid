@@ -41,6 +41,7 @@ class Tiqincc extends FighterFlight{
             $fighter->addFrontSystem($frontGun);
 			
             $rearGun = new Ionizer(150, 210, 1);
+            $rearGun->setTailGun(); //tail gun (Weapon::getTailGunMod)
             $fighter->addAftSystem($rearGun);
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

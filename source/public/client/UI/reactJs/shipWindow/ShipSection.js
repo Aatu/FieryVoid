@@ -1,7 +1,9 @@
 import * as React from "react";
 import styled from "styled-components"
-import SystemIcon from "../system/SystemIcon"
+import SystemIcon, { OfficerInsignia, EnhancementStar } from "../system/SystemIcon"
 import { canApplyPreBattleDamage, canApplyMineDamage } from "../system/SystemInfoButtons"
+import { SECTION_INK, MENU_CHROME } from "../system/menuControls";
+import { isMenuTarget } from "../helpers/menuTarget";
 import theme from "../styled/theme";
 
 /*SCS-style section panel (SHIPWINDOW_REDESIGN_PLAN.md Stage 1a): dotted panel with a
@@ -83,8 +85,23 @@ const SectionHeader = styled.div`
     border-bottom: 1px solid ${theme.colors.healthOk};
     overflow: hidden;
     /*lobby pre-battle damage: the bar is the only way to reach a section's Structure,
-      which has no icon of its own in the grid*/
+      which has no icon of its own in the grid - and (OFFICERS_PLAN.md Stage 19) an Expert Targeter's menu or pick*/
     ${props => props.$damageable ? 'cursor: pointer;' : ''}
+    /*A block the officer being moved may go to (officers.isPickTarget, Stage 19): SystemIcon's pick outline, in the Officers
+      blue, drawn on the bar's own edge (a 15px bar has no room for it inside)*/
+    ${props => props.$officerPick ? `
+        cursor: pointer;
+        outline: 2px solid ${SECTION_INK.officer.bar};
+        outline-offset: 0;
+        box-shadow: 0 0 8px ${SECTION_INK.officer.bar};
+    ` : ''}
+    /*The lobby's system menu is open on this block (helpers/menuTarget - SystemIcon's outline, user request 2026-10-20), in
+      the menu's focus blue, on the bar's edge as the pick outline is*/
+    ${props => props.$menuTarget ? `
+        outline: 2px solid ${MENU_CHROME.focus};
+        outline-offset: 0;
+        box-shadow: 0 0 8px ${MENU_CHROME.focus};
+    ` : ''}
 
     /*structure health fill - the header line doubles as the section's health bar*/
     &::before {
@@ -115,11 +132,40 @@ const SectionName = styled.span`
     white-space: nowrap;
     color: ${theme.colors.text};
     text-shadow: black 0 0 4px, black 0 0 4px;
+    /*A bar with badges after its name (Stage 19: the ✦, an officer's insignia) can run out of room - a Starboard block of 100+
+      boxes in a 128px side column. The NAME gives way, with an ellipsis, so the badges and the readout stay whole. The padding
+      and the negative margin cancel out: they only give the text shadow room inside the clipped box.*/
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 3px 2px;
+    margin: -3px -2px;
+`;
+
+/*The name and its badges, kept together on the left so the readout stays right-aligned: the ✦ of a block carrying a system
+  enhancement (Hardened Armour - user request 2026-10-20; the bar is the block's only icon) and, on a block that hosts an officer
+  (OFFICERS_PLAN.md Stage 19, user ruling 2026-10-20: "in the bar, after the name"), his insignia - SystemIcon's own two, in its
+  badge row's order and gap. They sit over the health fill, as the name does.*/
+const SectionLabel = styled.span`
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    min-width: 0;
+`;
+
+const BadgeSlot = styled.span`
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 1px;
 `;
 
 const StructureText = styled.span`
     position: relative;
     z-index: 1;
+    flex-shrink: 0; /*the readout never gives way - the name does (SectionName)*/
     font-family: ${theme.fonts.mono};
     font-size: 10px;
     line-height: 1;
@@ -171,13 +217,31 @@ class ShipSection extends React.Component {
       ApplyDamageMenu every other system uses, and destroying it runs battleDamage's mirror of
       ShipSystem::isDestroyed's cascade over the section.
       Gated on canApplyPreBattleDamage, so game.php is untouched: the bar has never been
-      clickable there and nothing else listens for a SystemClicked carrying a Structure.*/
+      clickable there and nothing else listens for a SystemClicked carrying a Structure.
+      OFFICERS_PLAN.md Stage 19 - the Expert Targeter lives in a block, so the bar is also his post: it answers a "Move" pick
+      (lobby and game, as SystemIcon.clickSystem does), and in Initial Orders it opens his Officers menu (officers.canManage -
+      Move Officer, or a Medium ship's side selector), the menu game.php opens for any other system.*/
     onStructureClick(event) {
         const { ship, systems } = this.props;
         const structure = getStructure(systems);
 
         if (this.ignoreNextClick) {
             this.ignoreNextClick = false;
+            return;
+        }
+
+        if (structure && window.officers && officers.picking && officers.pickTarget(ship, structure)) {
+            event.stopPropagation();
+            this.hideStructureArc();
+            return;
+        }
+
+        if (structure && window.officers && !canApplyPreBattleDamage(ship, structure) && officers.canManage(ship, structure)) {
+            event.stopPropagation();
+            this.hideStructureArc();
+            window.uiEvents.relay('SystemClicked', {
+                ship: ship, system: structure, element: event.currentTarget, showMenu: true
+            });
             return;
         }
 
@@ -211,10 +275,12 @@ class ShipSection extends React.Component {
         this.hideStructureArc();
     }
 
+    /*`element`: the bar, for the officers-only tooltip a block holding an officer raises with its arc (Stage 19) - the game's
+      and the lobby's handlers draw it only when officers.hasPostTooltip says so*/
     showStructureArc() {
         const { ship, systems } = this.props;
         this.arcShown = true;
-        window.uiEvents.relay('StructureMouseOver', { ship: ship, structure: getStructure(systems) });
+        window.uiEvents.relay('StructureMouseOver', { ship: ship, structure: getStructure(systems), element: this.headerElement });
     }
 
     hideStructureArc() {
@@ -312,6 +378,17 @@ class ShipSection extends React.Component {
         //rolled ship: this section is drawn on the opposite side - flip the icon art
         //horizontally so weapon/thruster facings match the drawn side
         const mirrored = displayLocation !== undefined && displayLocation !== location;
+        //OFFICERS_PLAN.md Stage 19: an officer posted in this block (own team only - officers.listFor, D4), as SystemIcon shows one
+        const officerState = (structure && window.officers) ? officers.postState(ship, structure.id) : null;
+        const officerPick = Boolean(structure && window.officers) && officers.isPickTarget(ship, structure);
+        const officerMenu = Boolean(structure && window.officers) && officers.canManage(ship, structure);
+        //a block's system enhancement (Hardened Armour): SystemIcon's star rule - own team only, through ship.systemEnhancements
+        const star = Boolean(structure && window.systemEnhancements) && systemEnhancements.hasAny(ship, structure.id);
+        /*"Starboard" is the one name that does not leave a 128px side column room for a badge (measured over every hull with
+          3-digit side blocks, officersE2E/lobby19.mjs): with one it reads "Stbd", the window's own quarter-section spelling.
+          Anything still too long shortens with an ellipsis (SectionName).*/
+        const sectionName = nameOverride || SECTION_NAMES[location] || "";
+        const shownName = ((star || officerState) && sectionName === "Starboard") ? "Stbd" : sectionName;
 
         return (
             <ShipSectionContainer $location={location} $area={area} $valign={valign} $justify={justify} $wide={wide} $isTerrain={isTerrain} $minHeight={minHeight} $hidden={hidden}>
@@ -319,9 +396,12 @@ class ShipSection extends React.Component {
                 {/*nameOverride: ships with a single side structure spread over both
                    quarter sections read plain "Port"/"Starboard" (set by ShipWindow)*/}
                 {structure && <SectionHeader
+                    ref={el => { this.headerElement = el; }}
                     $health={health}
                     $criticals={hasCriticals(structure)}
-                    $damageable={canApplyPreBattleDamage(ship, structure) || canApplyMineDamage(ship)}
+                    $damageable={canApplyPreBattleDamage(ship, structure) || canApplyMineDamage(ship) || officerMenu}
+                    $officerPick={officerPick}
+                    $menuTarget={isMenuTarget(ship, structure)}
                     onClick={this.onStructureClick}
                     onMouseOver={this.onStructureMouseOver}
                     onMouseOut={this.onStructureMouseOut}
@@ -329,7 +409,13 @@ class ShipSection extends React.Component {
                     onTouchMove={this.onStructureTouchMove}
                     onTouchEnd={this.onStructureTouchEnd}
                     onTouchCancel={this.onStructureTouchCancel}>
-                    <SectionName>{nameOverride || SECTION_NAMES[location] || ""}</SectionName>
+                    <SectionLabel>
+                        <SectionName>{shownName}</SectionName>
+                        {(star || officerState) && <BadgeSlot>
+                            {star && <EnhancementStar title="Carries a system enhancement">✦</EnhancementStar>}
+                            {officerState && <OfficerInsignia state={officerState} title={officers.describePost(ship, structure.id)} />}
+                        </BadgeSlot>}
+                    </SectionLabel>
                     <StructureText $destroyed={health === 0}>
                         {mineDamage ? mineLeft : structure.maxhealth - damageManager.getDamage(ship, structure)}/{mineDamage ? mineMax : structure.maxhealth} A{shipManager.systems.getArmour(ship, structure)}
                     </StructureText>

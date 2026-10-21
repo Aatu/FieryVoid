@@ -190,6 +190,16 @@ class Weapon extends ShipSystem
     //            their turrets are 360 deg so weapon arcs can't express this on their own).
     //Only meaningful alongside a non-null $linkedFiringGroup. Pruned from the static blueprint when null.
     public $linkedFiringSpread = null;
+    /* A FIGHTER's TAIL GUN (OFFICERS_PLAN.md Stage 21): a rear-arc gun beside its craft's forward weapons, flagged by the
+       fighter's own file with setTailGun(). It fires at -TAIL_GUN_PENALTY on a turn its craft fires another direct-fire weapon, unless
+       the flight has a navigator, and an Expert Tailgunner trains it (getTailGunMod). PROTECTED, like $seedsBelowFullCharge:
+       the client reads it off the static blueprint, where ShipCompactor::annotateSystems writes it (isTailGun). */
+    protected $tailGun = false;
+    /* Firing modes whose fire control NOTHING may raise - no Gunsights, no Expert Gunner, Turret Officer or Matter Weapons Expert: a mode
+       with a hit calculation of its own (the Antimatter Shredder's Shredder mode keeps its 0/0/0, user 2026-10-21). Asked through
+       hasFixedFireControl by every fire control raiser; PROTECTED, like $tailGun - the lobby reads it off the static blueprint, where
+       ShipCompactor::annotateSystems writes it (getFixedFireControlModes). */
+    protected $fixedFireControlModes = array();
     public $noOverkill = false; //this will let simplify entire Matter line enormously!
     protected $noOverkillArray = array();
     public $doOverkill = false; //opposite of $noOverkill - allows Piercing shots to overkill (eg. Shadow Heavy Molecular Slicer Beam has such ability)
@@ -306,6 +316,21 @@ class Weapon extends ShipSystem
     public property on purpose: methods aren't serialised into the static ship blueprint.*/
     public function isArcRestricted(){
         return $this->arcRestricted;
+    }
+
+    /*is this weapon TURRET-MOUNTED - a mount that can jam (setArcRestriction)? Its turret is getTurretMates. The Expert Turret
+    Officer's posts (OFFICERS_PLAN.md Stage 22). A method, like isArcRestricted, so it never reaches the static blueprint.*/
+    public function isTurretMount(){
+        return $this->reducedArcStart !== null;
+    }
+
+    //may nothing raise this firing mode's fire control ($fixedFireControlModes)? ⚠️ MIRROR PAIR with the client's fixedFireControlModes readers
+    public function hasFixedFireControl($mode){
+        return in_array((int)$mode, $this->fixedFireControlModes, true);
+    }
+
+    public function getFixedFireControlModes(){
+        return $this->fixedFireControlModes;
     }
 
     public $useOEW = true;
@@ -795,7 +820,9 @@ class Weapon extends ShipSystem
         if (!$this->isDamagedOnTurn($gamedata->turn)) return; //only a hit this turn triggers the roll
         if ($this->hasCritical("ReducedArcs", false)) return; //already jammed
 
-        if (Dice::d(20) < $this->arcRestrictionThreshold) return;
+        //an Expert Turret Officer on this turret: "subtract 2 from the die roll" (OFFICERS_PLAN.md Stage 22)
+        $relief = TacGamedata::$officersPresent ? Officers::turretJamRelief($ship, $this, $gamedata->turn) : 0;
+        if (Dice::d(20) - $relief < $this->arcRestrictionThreshold) return;
 
         foreach ($this->getTurretMates($ship) as $mate){
             if ($mate->hasCritical("ReducedArcs", false)) continue; //don't double up on a mate already jammed
@@ -806,8 +833,9 @@ class Weapon extends ShipSystem
     }
 
     /* This weapon plus every other weapon sharing its turret - same non-null linkedFiringGroup on the
-       same unit. An unlinked mount is a turret of one. */
-    protected function getTurretMates($ship)
+       same unit. An unlinked mount is a turret of one. Public for the Expert Turret Officer, who aids
+       every weapon on his turret (Officers, Stage 22). */
+    public function getTurretMates($ship)
     {
         $mates = array($this);
         if ($this->linkedFiringGroup === null) return $mates;
@@ -1020,12 +1048,19 @@ class Weapon extends ShipSystem
 		if ($this->linkedFiringGroup !== null && $this->linkedFiringSpread !== null) {
 			$this->data["Firing Link"] = "Mounted on " . $this->linkedFiringGroup;
 		}
+		//A fighter's tail gun (OFFICERS_PLAN.md Stage 21) - the client rewrites the line for a Navigator bought in the lobby and
+		//for an Expert Tailgunner (officers.tailGunLine)
+		if ($this->tailGun) {
+			$unit = $this->getUnit();
+			$this->data["Tail Gun"] = ($unit && !empty($unit->hasNavigator)) ? 'No penalty (navigator)'
+				: '-' . (self::TAIL_GUN_PENALTY * 5) . '% on a turn its fighter fires another direct-fire weapon';
+		}
 		//Turret jam - tell the player the mount can lock up before it happens, and confirm it after.
 		//The "Arc" line (set by the parent call below) always shows the arc currently in effect.
 		if ($this->reducedArcStart !== null) {
 			$this->data["Turret Mount"] = $this->arcRestricted
 				? "JAMMED - locked to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
-				: "Whole turret May jam to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
+				: "Whole turret may jam to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
 					. " on a " . $this->arcRestrictionThreshold . "+ (d20) whenever damaged";
 		}
         $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' . $this->priorityAF;
@@ -1533,6 +1568,41 @@ public function getFullStartLoading()
         return false;
     } //endof function isFtrFiringNonBallisticWeapons
 
+    const TAIL_GUN_PENALTY = 2; //-10%: the tabletop -2 for firing a tail gun "together with main gun" (FV_factions.txt, the Tiqincc)
+
+    public function setTailGun(){
+        $this->tailGun = true;
+    }
+
+    public function isTailGun(){
+        return $this->tailGun;
+    }
+
+    /* ⭐ A tail gun's to-hit modifier (OFFICERS_PLAN.md Stage 21), in calculateHitBase's fighter branch: -TAIL_GUN_PENALTY on a
+       turn its craft also fires another DIRECT-FIRE weapon - "not ballistic weapons fired in Initial Orders phase like Torpedoes, only
+       other direct fire weapons fired during Firing Phase" (user ruling 2026-10-21); an interception, a Meteor Defence declaration and
+       the ramming attack are not firing it either - isFtrFiringNonBallisticWeapons' own filter - unless the flight has a navigator to work it
+       (user ruling 2026-10-21: the Badger, the Rogolon Vostor, a Navigator bought on an ARC). An Expert Tailgunner serving that
+       turn waives the penalty; a tail gun without one gains Officers::TAILGUNNER_BONUS instead, "with that gun only", and a
+       penalised one fired alone gains nothing (user ruling). ⚠️ MIRROR PAIR with weaponManager.getTailGunMod (JS). */
+    public function getTailGunMod($flight, $turn){
+        if (!$this->tailGun || !($flight instanceof FighterFlight)) return 0;
+        $penalised = !$flight->hasNavigator;
+        if (TacGamedata::$officersPresent && Officers::hasTailgunner($flight, $turn)) return $penalised ? 0 : Officers::TAILGUNNER_BONUS;
+        if (!$penalised || !$this->craftFiresOtherWeapon($flight, $turn)) return 0;
+        return -self::TAIL_GUN_PENALTY;
+    }
+
+    protected function craftFiresOtherWeapon($flight, $turn){
+        $craft = $flight->getFighterBySystem($this->id);
+        if ($craft === null) return false;
+        foreach ($craft->systems as $system){
+            if ($system === $this || !($system instanceof Weapon) || $system->isRammingAttack || $system->ballistic) continue;
+            if ($system->firedOffensivelyOnTurn($turn)) return true;
+        }
+        return false;
+    }
+
     public function getFiringHex($gamedata, $fireOrder){
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
 		$pos = $shooter->getHexPos();
@@ -1845,7 +1915,7 @@ public function getFullStartLoading()
           calculation and has to be zeroed wherever $dew is (two sites below).*/
         $disguisedDEW = $target->getDisguisedDEWFor($shooter, $gamedata->turn);
         $dewFake = ($disguisedDEW !== null) ? $disguisedDEW : $dew;
-        $bdew = EW::getBlanketDEW($gamedata, $target);
+        $bdew = EW::getBlanketDEW($gamedata, $target, $this->ballistic); //a ballistic: an Expert ELINT Officer's blanket counts a third (OFFICERS_PLAN.md Stage 20)
         $sdew = EW::getSupportedDEW($gamedata, $target);
         /* STEALTH COATING - THE LOCK (SHIP_ENHANCEMENTS_PLAN.md D9, §2.2.4): a weapon that uses OEW,
            fired by a unit holding OEW >= 1 on the target after disruption EW. Captured HERE, straight
@@ -1900,9 +1970,12 @@ public function getFullStartLoading()
 
         /* OFFICERS_PLAN.md Stage 10 - an Expert Gunner's once-per-battle shot: +4 on his gun's first native Piercing
            shot, +3 on its first called shot (Officers::gunnerShotBonus spends it). One static read for every other
-           shot in the game. ⚠️ MIRROR PAIR with officers.gunnerShotBonus, in weaponManager.computeShotModifiers. */
+           shot in the game. ⚠️ MIRROR PAIR with officers.gunnerShotBonus, in weaponManager.computeShotModifiers.
+           Stage 19: and an Expert Targeter's +4 on a standard called shot by a weapon he covers (officers.targeterShotBonus). */
         if (TacGamedata::$officersPresent) {
-            $mod += Officers::gunnerShotBonus($shooter, $this, $calledSystem !== null && $calledProfileOverride === null, $gamedata);
+            $standardCalledShot = ($calledSystem !== null && $calledProfileOverride === null);
+            $mod += Officers::gunnerShotBonus($shooter, $this, $standardCalledShot, $gamedata);
+            $mod += Officers::targeterShotBonus($shooter, $this, $standardCalledShot, $gamedata);
         }
 
         if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)) { //leaving instanceof OSAT here - assuming MicroSATs will not suffer this penalty (Dovarum seems to be able to turn/pivot like a superheavy fighter it's based on)
@@ -1931,6 +2004,7 @@ public function getFullStartLoading()
                 $coordinated = TacGamedata::$officersPresent && Officers::waivesCombatPivotPenalty($shooter, $gamedata->turn);
             	 if(!$shooter->ignoreManoeuvreMods && !$coordinated) $mod -= 1;
             }
+            $mod += $this->getTailGunMod($shooter, $gamedata->turn); //a tail gun fired with its craft's other direct-fire weapons (Stage 21)
 
             $effectiveOB = $shooter->offensivebonus;
             $firstFighter = $shooter->getSampleFighter();
@@ -3204,12 +3278,18 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
            (not an officer, so they stack) - each die still capped at its face. An Expert Ion Technician's +1 per die on an
            ion weapon's dice (Stage 17), likewise - but not on a Gunner's weapon, whose +1 replaces his. Behind the static. */
         if (TacGamedata::$officersPresent && $shooter instanceof BaseShip) $dieBonus += Officers::gunnerDieBonus($shooter, $this) + Officers::ionDieBonus($shooter, $this);
+        /* An Expert Anticipator (Stage 23): a damage roll of two or more dice rolls one more and drops the lowest (Dice::$extraDie) -
+           on a Gunner's weapon too, with his +1 on every die (user ruling 2026-10-21). Set and restored with the per-die bonus. */
+        $extraDie = (TacGamedata::$officersPresent && $shooter instanceof BaseShip) ? Officers::extraDamageDie($shooter, $this) : 0;
         $previousDieBonus = Dice::$perDieBonus;
+        $previousExtraDie = Dice::$extraDie;
         Dice::$perDieBonus = $dieBonus;
+        Dice::$extraDie = $extraDie;
         try {
             $damage = $this->getDamage($fireOrder);
         } finally {
             Dice::$perDieBonus = $previousDieBonus;
+            Dice::$extraDie = $previousExtraDie;
         }
         $rolled = $damage;
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);                

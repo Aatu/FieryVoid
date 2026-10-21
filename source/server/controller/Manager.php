@@ -2631,7 +2631,7 @@ class Manager{
             foreach ($gamedata->ships as $key=>$ship){
                 $mod =  $ship->getCommonIniModifiers( $gamedata );
                 $iniBonus =  $ship->getInitiativebonus($gamedata);
-                $ship->iniative = Dice::d(100) + $iniBonus + $mod;    
+                $ship->iniative = Officers::initiativeRoll($ship) + $iniBonus + $mod; //the d100 - twice for an Expert Anticipator's ship
             }
 	    /*Initiative ties are displayed wrongly in the interface due to changes intended for simultaneous movement.
 	    	to prevent this from happening, forcefully break ties here - sort ships appropriately and make their Ini different by adding appropriate value

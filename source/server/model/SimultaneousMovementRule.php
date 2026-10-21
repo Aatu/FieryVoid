@@ -36,7 +36,7 @@ class SimultaneousMovementRule implements JsonSerializable {
 
             $iniBonus =  $ship->getInitiativebonus($gameData);
 
-            $iniative = Dice::d(100) + $iniBonus + $mod;
+            $iniative = Officers::initiativeRoll($ship) + $iniBonus + $mod; //the d100 - twice for an Expert Anticipator's ship
 
             $ship->unmodifiedIniative = $iniative;
             $ship->iniative = $this->getIniativeCategory($iniative);

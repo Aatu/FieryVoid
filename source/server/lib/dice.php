@@ -24,21 +24,49 @@ require_once dirname(__DIR__) . '/lib/random_compat-2.0.2/lib/random.php';
            0 on every ordinary request, so an ordinary roll costs one integer comparison. */
         public static $perDieBonus = 0;
 
+        /* ⭐ EXPERT ANTICIPATOR (OFFICERS_PLAN.md Stage 23) - "When rolling for damage, roll an extra die and drop the
+           lowest die from the calculation ... This ability works only on weapons that roll at least two dice for damage".
+           1 while one shot's getDamage() runs for his ship, 0 otherwise - Weapon::getFinalDamage is its single writer, with
+           the same set-and-restore rule as $perDieBonus above. A roll of two or more dice in ONE call keeps its best
+           $times of $times + 1 (keepBest); a one-die call is untouched, which is the "at least two dice" rule. A weapon that
+           rolls its damage dice in separate calls (the Pentagon Array's five rakes) hands them to keepBest itself. */
+        public static $extraDie = 0;
+
         public static function d($max, $times = 1){
-            
+
             $total = 0;
             $bonus = (int)self::$perDieBonus;
-            
-            for ($i=0;$i<$times;$i++){
-                $roll = random_int(1 , $max);
-                //min(): the cap is the die's own face value, so a maxed die is never improved.
-                if ($bonus > 0) $roll = min($max, $roll + $bonus);
-                $total += $roll;
+
+            if (self::$extraDie > 0 && $times >= 2){
+                $rolls = array();
+                for ($i=0;$i<$times;$i++) $rolls[] = self::roll($max, $bonus);
+                return array_sum(self::keepBest($rolls, $max));
             }
-        
-        
+
+            for ($i=0;$i<$times;$i++){
+                $total += self::roll($max, $bonus);
+            }
+
+
             return $total;
         }
-    
+
+        private static function roll($max, $bonus){
+            $roll = random_int(1 , $max);
+            //min(): the cap is the die's own face value, so a maxed die is never improved.
+            if ($bonus > 0) $roll = min($max, $roll + $bonus);
+            return $roll;
+        }
+
+        /* The dice of ONE damage roll, each already rolled (and raised by $perDieBonus): while $extraDie is set and there are two
+           or more, one more die of $max is rolled - raised the same way - and the lowest of them all dropped. Returned in the
+           order rolled, the extra die last, so a weapon keeping its dice as rakes keeps them in order. Unchanged otherwise. */
+        public static function keepBest(array $rolls, $max){
+            if (self::$extraDie <= 0 || count($rolls) < 2) return $rolls;
+            $rolls[] = self::roll($max, (int)self::$perDieBonus);
+            unset($rolls[array_search(min($rolls), $rolls)]);
+            return array_values($rolls);
+        }
+
     }
 ?>
