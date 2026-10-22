@@ -1814,6 +1814,8 @@ public function setParentFighter($fighter) {
 
 			}        
 		}
+		//OFFICERS_PLAN.md Stage 26: an Expert Software Engineer's Hyach Computer ignores the first point of every hit - armour nothing pierces or wears
+		if(TacGamedata::$officersPresent) $effectiveArmor += Officers::computerArmour($target, $this, $gamedata);
 
 		if($weapon->damageType =='Flash'){//treat only enough damage to destroy system as entire shot! the rest is only overkill 
 			$maxDamageToDeal = $systemHealth +$effectiveArmor;

@@ -1184,7 +1184,9 @@ window.gamedata = {
                                 notSetAA.push(myShips[ship]);
                             }
                         } else if (myShips[ship].systems[syst].name == "hyachComputer") {
-                            if (myShips[ship].systems[syst].canIncreaseAnything()) {
+                            //OFFICERS_PLAN.md Stage 26: the one point an Expert Software Engineer lets the player hold to the Firing phase is no oversight
+                            if (myShips[ship].systems[syst].canIncreaseAnything()
+                                && !(window.officers && officers.bfcpHeldBack(myShips[ship], myShips[ship].systems[syst]))) {
                                 notSetFC.push(myShips[ship]);
                             }
                         }

@@ -90,6 +90,12 @@ window.officers = {
 		   his armed shuttle is the server's hangars', and his speech is his C&C's Activate box in the Firing phase (canSpeak). */
 		{ id: 'OFF_POL', label: 'Expert Political Officer', post: 'cnc', needs: 'capital',
 			summary: 'An armed shuttle, one free Expert Navigator, Helmsman, Engineer or Scanner, and 5 free Hardened Armour (not on Structure); once per battle a speech in the Firing Phase: +30 initiative next turn' },
+		/* Stage 26: Hyach only (the offers' - his post, the Hyach Computer, is Hyach-only too). His +1 BFCP is previewed in the lobby (computerBonus -
+			in game the server raised `output`); the point he lets the player hold to the Firing phase is the Computer's own menu (HyachComputer
+			.firingMode); his armour point and signature masking are the server's; his Specialist reuse comes in his payload (`reuse` -
+			specialistReusable). */
+		{ id: 'OFF_SOFT', label: 'Expert Software Engineer', post: 'computer',
+			summary: '+1 BFCP (lost only with the Computer), which may be held back to the Firing Phase; the Computer ignores the first point of every hit; a stealth ship is detected as if 5 hexes further away (fighters at half range); one Defence, Sensor, Targeting or Weapon Specialist may be used a second time' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -185,6 +191,7 @@ window.officers = {
 	     jump     the first jump drive that opens jump points: a legacy drive's range is 0 (markLegacy), the
 	              lobby JUMP_ACC case's own test. The one gate drive (JumpgateCapital) is on terrain, which
 	              carries no officers.
+	     computer the Hyach Computer (Stage 26)
 	     craft    a flight's first craft - the lobby's one fighter card, id 1
 	   ⚠️ D2: the server picks from BLUEPRINT values, before any enhancement moves an output, but a lobby
 	   fleet ship has already had lobbyEnhancements.apply - Poor Crew has taken a point off its strongest
@@ -232,6 +239,12 @@ window.officers = {
 		if (post === 'jump') {
 			for (var j = 0; j < systems.length; j++) {
 				if (systems[j] && systems[j].name === 'jumpEngine' && Number(systems[j].range) > 0) return systems[j];
+			}
+			return null;
+		}
+		if (post === 'computer') {
+			for (var c = 0; c < systems.length; c++) {
+				if (systems[c] && systems[c].name === 'hyachComputer') return systems[c];
 			}
 			return null;
 		}
@@ -669,8 +682,9 @@ window.officers = {
 	},
 
 	//"(used: called shot, turn 3; Piercing shot, turn 4)" - the Gunner's spent once-per-battle abilities, or ''
-	//capture: the Breaching Expert's (Stage 24); speech: the Expert Political Officer's (Stage 25)
-	ABILITY_NAMES: { reload: 'faster reload', pierce: 'Piercing shot', called: 'called shot', capture: 'capture assault', speech: 'speech' },
+	//capture: the Breaching Expert's (Stage 24); speech: the Expert Political Officer's (Stage 25); reuse: the Expert Software Engineer's (Stage 26)
+	ABILITY_NAMES: { reload: 'faster reload', pierce: 'Piercing shot', called: 'called shot', capture: 'capture assault', speech: 'speech',
+		reuse: 'Specialist reuse' },
 	abilitiesText: function abilitiesText(entry) {
 		var spent = entry && entry.abilities ? entry.abilities : null;
 		if (!spent) return '';
@@ -1501,6 +1515,67 @@ window.officers = {
 		});
 	},
 
+	/* ------------------------------------------------------------------ Expert Software Engineer (Stage 26) */
+
+	//"The specialist must be of the software category" - the Hyach Specialists the user named. ⚠️ MIRROR PAIR with Officers::$softwareSpecialists (PHP).
+	SOFTWARE_SPECIALISTS: ['Defence', 'Sensor', 'Targeting', 'Weapon'],
+	SOFTWARE_BFCP: 1, //Officers::SOFTWARE_BFCP
+
+	/* May the player hold one of `computer`'s points back to the Firing phase - its Expert Software Engineer serving in it? The Computer's
+	   Firing-phase menu (HyachComputer.firingMode) and the Initial Orders commit's unassigned-BFCP warning (bfcpHeldBack) ask it. Through his
+	   list, so never an enemy's. ⚠️ MIRROR PAIR with Officers::holdsFiringBFCP (PHP). */
+	holdsFiringBFCP: function holdsFiringBFCP(ship, computer) {
+		if (!ship || !computer) return false;
+		var turn = this.currentTurn();
+		var self = this;
+		return this.listFor(ship).some(function (entry) {
+			return entry.id === 'OFF_SOFT' && String(entry.post) === String(computer.id) && self.serves(entry, turn);
+		});
+	},
+
+	//Is what Initial Orders leaves unassigned no more than the point he may hold to the Firing phase? Then the commit does not warn about it.
+	bfcpHeldBack: function bfcpHeldBack(ship, computer) {
+		if (!this.holdsFiringBFCP(ship, computer)) return false;
+		return (Number(computer.output) || 0) - (Number(computer.BFCPtotal_used) || 0) <= this.SOFTWARE_BFCP;
+	},
+
+	/* In the lobby: his +1 BFCP on his Computer, 0 anywhere else - in game the server raised `output`. The tooltip's BFCP line shows it
+	   (bfcpLine). ⚠️ MIRROR PAIR with Officers::applySoftwareEngineer (PHP). */
+	computerBonus: function computerBonus(ship, system) {
+		if (!system) return 0;
+		var serving = this.servingDerived(ship);
+		for (var i = 0; i < serving.length; i++) {
+			if (serving[i].id === 'OFF_SOFT' && String(serving[i].post) === String(system.id)) return this.SOFTWARE_BFCP;
+		}
+		return 0;
+	},
+
+	//the Computer's "Bonus Fire Control Points (BFCP)" line, "used/total", with the lobby's preview of his point
+	bfcpLine: function bfcpLine(ship, system, value) {
+		var bonus = this.computerBonus(ship, system);
+		var parts = String(value).split('/');
+		if (!bonus || parts.length !== 2) return value;
+		return parts[0] + '/' + ((parseFloat(parts[1]) || 0) + bonus);
+	},
+
+	/* The software Specialists his ship may use a second time now: the server's list (Officers::specialistReuse - each used once, on an
+	   earlier turn; none once one has been used twice), sent to his own team while he serves. [] without him. */
+	specialistReuseList: function specialistReuseList(ship) {
+		var turn = this.currentTurn();
+		var self = this;
+		var entry = this.listFor(ship).filter(function (e) { return e.id === 'OFF_SOFT' && self.serves(e, turn); })[0];
+		return (entry && Array.isArray(entry.reuse)) ? entry.reuse : [];
+	},
+
+	/* May `type` be used again this turn, through him: on the server's list, and no OTHER Specialist of that list already being used again
+	   this turn ("This only works for one specialist per scenario")? HyachSpecialists canUse / canDecrease and the Specialists menu ask it. */
+	specialistReusable: function specialistReusable(ship, specialists, type) {
+		var list = this.specialistReuseList(ship);
+		if (list.indexOf(type) === -1) return false;
+		var used = (specialists && specialists.specAllocatedCount) ? specialists.specAllocatedCount : {};
+		return !list.some(function (other) { return other !== type && used[other] > 0; });
+	},
+
 	/* "Officers (2)" - the one line the ship window's gold Enhancements block shows for them (user request
 	   2026-10-11: a count, like "System Enhancements (n)", the detail living on each post's tooltip). Own
 	   team only, through listFor; null with none aboard.
@@ -2139,7 +2214,8 @@ window.officers = {
 	   ELINT array's Special text, with an Expert ELINT Officer's ranges and blanket (elintSpecial) - to every viewer, in game too.
 	   Stage 21: a fighter's tail gun's "Tail Gun" line (tailGunLine). Stage 22: a turret-mounted weapon's "Turret Mount" line, under an
 	   Expert Turret Officer (turretMountLine), and his +1 in its fire control (displayFireControl). Stage 24: a pod's Marines' "Elite"
-	   line, under a Breaching Expert (marinesEliteLine). */
+	   line, under a Breaching Expert (marinesEliteLine). Stage 26: the Hyach Computer's BFCP line in the lobby, with an Expert Software
+	   Engineer's point (bfcpLine). */
 	DATA_KEY_FIRECONTROL: 'Fire control (fighter/med/cap)',
 	adjustDataDisplay: function adjustDataDisplay(ship, system, key, value) {
 		if (!system) return value;
@@ -2155,6 +2231,7 @@ window.officers = {
 		if (system.tailGun && key === 'Tail Gun') return this.tailGunLine(ship, value);
 		if (key === 'Elite' && (system.name === 'Marines' || system.name === 'ExtraMarines')) return this.marinesEliteLine(ship, system, value);
 		if (key === 'Turret Mount') return this.turretMountLine(ship, system, value);
+		if (system.name === 'hyachComputer' && key === 'Bonus Fire Control Points (BFCP)') return this.bfcpLine(ship, system, value);
 		if (system.name === 'jumpEngine' && (key === 'Range' || key === 'Special')) {
 			var bonus = this.jumpRangeBonus(ship, system);
 			if (!bonus) return value;

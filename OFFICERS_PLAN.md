@@ -33,8 +33,11 @@ Gaim 25% of one pod, everyone else 50%), in a breaching pod - the flight +1 thru
 three attack rolls on its first turn aboard, and at most 20% of a fleet's pods in the Fleet Correctness Report (§9.31) - committed
 (`30cb21e5d`). Stage 25, the Expert Political Officer (Centauri capital ships and larger, 40%), in the C&C - an armed shuttle, one free Expert
 Navigator, Helmsman, Engineer or Scanner, five free Hardened Armour (what the player leaves unchosen picked at random as the fleet is committed),
-and once per battle a stirring speech in the Firing phase, told in the combat log, for +30 initiative next turn (§9.32) - BUILT 2026-10-21,
-uncommitted.** Written
+and once per battle a stirring speech in the Firing phase, told in the combat log, for +30 initiative next turn (§9.32) - committed
+(`ce9f8e8a2`). Stage 26, the Expert Software Engineer (Hyach, 15%), in the Hyach Computer - one more bonus fire control point that damage never
+takes and that may be held back to the Firing phase, the Computer ignoring the first point of every hit, a stealth ship's signature masked (5 hexes
+further, fighters at half range), and one software Specialist used a second time - with the Computer Specialist rebuilt to its own rules on the same
+Firing-phase allocation (§9.33) - BUILT 2026-10-22, uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -104,7 +107,11 @@ fleet-composition rule is; and on a pod already Elite only the Elite clause adds
 Expert Political Officer with his rules text and notes - the free expert as the dearest of those bought (one at random with none), the armour
 as five free Hardened Armour (random ones for any left unplaced), the speech as an Activate menu on the C&C in the Firing phase ("Speech!" /
 "Cancel speech"), told in the combat log - and ruled four questions: both Centauri factions; the random picks the server's, at battle start;
-his armed shuttle on top of Elite Crew's; and no +30 unless he still serves on the turn it lands (Stage 25, §9.32). Each officer's own rules
+his armed shuttle on top of Elite Crew's; and no +30 unless he still serves on the turn it lands (Stage 25, §9.32). On 2026-10-22 they supplied
+the Expert Software Engineer's rules text - one of the original 25 - with notes (the software Specialists are Defence, Sensor, Targeting and Weapon;
++1 armour on the Computer would do if the damage rule proved complicated - it did not), and ruled three questions: the Firing-phase hold built, and the
+Computer Specialist rebuilt to its own rules (once per scenario, in the Firing phase, +1 point and every point reshuffled) on the same allocation; the cap
+of two per category stays, for both; and a software Specialist used on turn N may be used again from turn N+1 (Stage 26, §9.33). Each officer's own rules
 questions still only need ruling when that officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
@@ -293,7 +300,7 @@ Medium-sized job (§3.4).
 | **Breaching Expert** | His post is **one pod inside a flight**, and per-craft ids do not exist in the lobby (WEAPON plan D7). Adds a fleet-wide "20 % of all pods" cap, a change to the capture roll ([ShipSystem.php:951](source/server/model/systems/ShipSystem.php#L951)), and "+1 thrust" for one craft of a flight that moves as one. *Built in Stage 24 (§9.31) as an ordinary fighter officer in the flight's first pod: the fighter framework already gives a craft-level post, so "his pod" is that craft; the thrust is the flight's (user ruling); the 20 % is a Fleet Correctness Report line (user ruling); the triple roll is a mark on his capture party's critical.* | — |
 | **Expert Evangelist** | Fleet-wide state: +1 to hit while he serves, then −10 initiative (QX1) and −1 to hit if he is **killed**, for every ship, with a client to-hit mirror. Also a fleet-% price, a random post, and the CPN/OSF gate exists only in notes prose | — |
 | **Expert Laser Technician** | "+1 damage per power point sent, up to +50 %" needs a new per-turn allocation UI, persistence and a cap. *Built in Stage 11 (§9.17) with no new UI or persistence: the user's design note made every laser use the existing BOOST (power entries type 2, the generic boost buttons), so the allocation, its storage and the power balance all came free; what was new is the cap, a per-turn pool, and hiding the boosts from opponents.* | +3 Spinal / +2 Blast / +1 other lasers, through `getBonusDamage` (`SpinalLaser`, `BlastLaser`, `ImprovedBlastLaser`, `LtBlastLaser` exist) |
-| **Expert Software Engineer** | Bonus fire-control points spendable in the Firing phase need a new allocation window (`HyachComputer` only allocates in Initial Orders, [baseSystems.php:12862](source/server/model/systems/baseSystems.php#L12862)). Also a "first point of damage ignored" rule in the damage path, a submarine detection range, and a self-contradictory specialist clause (§6, Software Engineer) | — |
+| **Expert Software Engineer** | Bonus fire-control points spendable in the Firing phase need a new allocation window (`HyachComputer` only allocates in Initial Orders, [baseSystems.php:12862](source/server/model/systems/baseSystems.php#L12862)). Also a "first point of damage ignored" rule in the damage path, a submarine detection range, and a self-contradictory specialist clause (§6, Software Engineer). *Built in Stage 26 (§9.33): the user's rules text settled the specialist clause and made the "submarine" a stealth unit; the Firing-phase window is the Computer's own menu reopened in the Firing phase, written as one note through `saveFirePhaseDeclaration` and judged on the loaded ship - built so that the rebuilt Computer Specialist rides it too (user ruling); the damage rule is one line beside the Scavenger's save.* | — |
 | **Expert Ion Technician** | "3 thrust → 1d10+1 on one ion weapon" is a per-turn spend with UI. *Built in Stage 17 (§9.23) with no new UI or storage: the user's note pointed at the Hypergraviton Blaster, whose boost is the generic one priced in thrust - so the Laser Technician's payload pattern with `thrustBoosted` gave the buttons, the thrust balance and the commit check for free; what was new is the discharge of a boosted gun that does not fire, at the turn change.* | +1 per die and +1 flat on Ion-class weapons; +4 on C&C crits; the Rad Cannon's flat 12 and forced crits are Medium |
 | **Expert Surge Officer** | Six unrelated hooks: EM damage, combined Surge Cannon shots, capacitor power by ship size, EM-hardening −3, a d6 to resist deactivation, Spark Field −1. *Built in Stage 16 (§9.22): the rules text made it reactor power by ship size; his two hardening clauses needed FV's EM hardening rebuilt to the tabletop rules first (WeaponEM), the bigger half of the stage.* | +1 damage on Electromagnetic-class weapons |
 | **Expert Ballistic Officer** | "+1 magazine round per launcher" moves the lobby's ammo limits, which are derived from magazine capacity at offer time. Free missile swaps are lobby ammo pricing | +5 launch range (`range` **and** `rangeArray` — the same mode-switch trap — and sent to the client) |
@@ -360,7 +367,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert ELINT Officer *(added 2026-10-20, §9.27)* | `OFF_ELINT` | the ELINT array | 1 |
 | Expert Turret Officer *(added 2026-10-21, §9.29)* | `OFF_TURR` | a chosen turret-mounted weapon, aiding every weapon on its turret | 2, one to a turret |
 | Expert Political Officer *(added 2026-10-21, §9.32)* | `OFF_POL` | C&C | 1, Centauri capital ships and larger |
-| Expert Software Engineer | `OFF_SOFT` | Computer | 1 |
+| Expert Software Engineer *(Stage 26, §9.33)* | `OFF_SOFT` | Computer | 1, Hyach only |
 | Expert Ion Technician | `OFF_ION` | Engine | 1 |
 | Expert Surge Officer | `OFF_SURG` | Mag-Grav Reactor | 1 |
 | Expert Ballistic Officer | `OFF_BALL` | C&C | 1 |
@@ -514,6 +521,7 @@ masking: individual notes never reach any client.
 | Expert Turret Officer (Stage 22) | his turret's weapons' fire control; their critical and jam rolls; where hits land on a sheltered turret | Fire control: **yes, to every viewer**, as the Gunner's (isModified). The -1 on criticals is never sent (nothing displays one); the jam's 19+ is in the owner's "Turret Mount" line only. The shelter is server-only: an opponent sees where the hits land (another system, or Structure), never why |
 | Breaching Expert (Stage 24) | a pod flight's `freethrust`; his pod's Marines Elite at delivery; his capture party's three attack rolls | Thrust: **yes, to every viewer** (his `publish` - the boarding hit chance reads it on both ends). The Elite is asked at delivery and never written into the weapon, whose "Elite" tooltip line every viewer is sent - so it stays the hull's, and his own team's client adds him to it. Which capture party is his is a key in its critical's `param`, stripped from every payload (`ShipSystem::stripForJson`). An opponent sees results only: an Elite mission class on one pod's party, the delivery and combat rolls the log prints |
 | Expert Political Officer (Stage 25) | `iniativebonus` (+30 the turn after his speech); his speech itself; the armour of his five free Hardened Armour; an armed shuttle in a hangar | **Yes**: the speech is a combat log line every player reads once firing resolves ("The Political Officer on-board <ship> begins a stirring speech about ...", user request) - so his speech names him; the +30 through his `publish`. The armour and the armed shuttle show exactly as any bought refit and any hangar's contents do. Which expert he brought and which armour is free stay as hidden as any officer and refit |
+| Expert Software Engineer (Stage 26) | the Computer's `output` (+1); where a point placed in the Firing phase went; the Computer's armour point; his stealth ship's detection; a Specialist used a second time | `output`: **yes, to every viewer**, as the Technician's. The Firing-phase allocation: **own team only until firing resolves** - an opponent's payload and tooltip carry Initial Orders' allocation while the Firing phase is open (`HyachComputer::shownBFCP`), since where a point went would point at the targets; afterwards it is public, as Initial Orders' always was. The armour point shows only as the damage the log records (one more armour), the masking only as a stealth ship staying hidden, the second Specialist use as that Specialist's line in its "used this turn" list, which every viewer is sent anyway. The list of Specialists he would let the ship reuse rides his own team's officer payload (`reuse`) |
 | Expert ELINT Officer (Stage 20) | his array's `output`; every ELINT range from his ship; his blanket against ballistic weapons | **Yes, to every viewer**: `output` always is, and the ship payload carries `elintRangeBonus` (25) and `blanketBallistic` (3) while he serves - an opponent's own OEW under his Disruption and its hit chance against a unit under his blanket are previewed with them; his array's tooltip shows the ranges. The officer list stays own-team; a disguised Chameleon ship's payload is its simulacrum's and carries neither. The -2 on sensor criticals is never sent |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
@@ -679,7 +687,8 @@ committed.
 | **23** | Expert Anticipator, one of the original 25 (Hard). **BUILT 2026-10-21** (§9.30) | 15%, the Torata 10%, in the C&C; the d100 of both initiative rolls thrown twice for his ship, the higher kept; one turn in the Firing phase - a real turnleft / turnright, its thrust through the thrusters on the Movement phase's panel - only with the turn delay complete (no snap turn) and the thrust unspent, before the ship declares direct fire, once a turn, never with a unit attached, kept by the server for his ship only and hidden from enemies until firing resolves, its facing the one this turn's fire meets; a commit refused while its thrust is unassigned; every damage roll of two or more dice one die larger, the lowest dropped (the real `lib/dice.php` and both harness stubs alike), the Pentagon Array's five rakes included, never a one-die or fixed roll or a ram, on a Gunner's weapon with his +1 per die as well |
 | **24** | Breaching Expert, one of the original 25 (Hard). **BUILT 2026-10-21** (§9.31) | Offered on all 42 breaching pods and nothing else carrying Marines; 25% of one pod for the Balosians, Yolu, Narn and Gaim, 50% for everyone else, the same at any flight size (lobby and server); in the first pod, the flight's one officer, no kill roll, lost with his pod; the flight +1 thrust, published, previewed in the lobby, reaching the boarding speed match; his pod's Marines Elite at delivery (-1, the Elite mission classes), never the other pod's, nothing more on a pod Elite already, the "Elite" tooltip line his team's only; his pod's first delivered capture party - never a failed delivery, a Sabotage or a Rescue - three attack rolls on its first turn aboard in the real capture combat, still one attacker to the defenders, once per scenario through a reload; the mark never sent; the Fleet Correctness Report's "Breaching Experts" line, 20% of the fleet's pods rounded half up |
 | **25** | Expert Political Officer, added by the user. **BUILT 2026-10-21** (§9.32) | Offered on the 60 capital ships and larger of the Centauri Republic and its WotCR, 40%, in the C&C; a free Expert Navigator, Helmsman, Engineer or Scanner - the dearest bought, a tie to the first in the registry - in the buy dialog, the fleet list, Fleet Selection's own writes and a saved fleet; five free Hardened Armour, the dearest, never Structure, priced 0 by the sanitiser and the lobby alike, none with his C&C destroyed; whatever is left unchosen picked at random as the fleet is committed, never Structure, a destroyed or already-armoured system; one more armed shuttle than Elite Crew gives, none with Poor Crew; "Speech!" / "Cancel speech" on his C&C in the Firing phase, once per battle, judged on the loaded ship; a "SPEECH:" combat log line as firing resolves; +30 initiative on the next turn while he still serves, shown to every viewer |
-| **26+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **26** | Expert Software Engineer, one of the original 25 (Hard), with the Hyach Computer Specialist rebuilt to its own rules. **BUILT 2026-10-22** (§9.33) | Offered on the 13 Hyach hulls with a Computer (not the OSAT), 15%, Hyach only, in the Computer; its BFCP +1, never taken by damage (a base's 26 boxes leave him his point); one point left free in Initial Orders placed in the Firing phase - added, nothing moved, the cap of two kept - through the Computer's own menu, written as one note at the fire commit, judged on the loaded ship, used by that turn's shots, hidden from opponents until firing resolves, never carried into the next Initial Orders; no unassigned-BFCP warning for that one point; the first point of every hit on the Computer ignored, armour-ignoring weapons included, through the real damage path; a stealth ship (the Alichi Kav and Tal) detected as if 5 hexes further away, a flight's detection range halved and rounded up, through the real detection sweep; a Defence, Sensor, Targeting or Weapon Specialist used once usable again from the next turn, once per scenario, its effect applied again, shown "(again)" in the Specialists menu, no Specialist slot spent. The Computer Specialist: in the Firing phase only, +1 BFCP (it was +2 and +1 a category), every point reshuffled within the cap, cancelled back to Initial Orders' allocation |
+| **27+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -716,7 +725,7 @@ committed.
 | Plasma Scientist | *Added 2026-10-17 with his rules text (§9.18).* Which plasma weapons are "medium or heavy"? Does a battery start the battle holding the extra point? Are the web's range and the battery's capacity shown to opponents? **RULED 2026-10-17:** every plasma weapon but the light ones (`Officers::$plasmaClassBonus`); yes, a battery still holding its deployment charge starts full; yes, to every viewer (a displayed stat is public). |
 | Security Officer | *Added 2026-10-17 with his rules text (§9.19).* The user's note settles the main one: "shift all die rolls by up to 2 in any direction desired by the defending player" is a fixed **+2** ("higher rolls are almost always worse for marine attackers ... no need to build in a player choice"). Asked: do the defenders' own Capture rolls (5 or less hits) shift too? Breaching pods only, or Grappling Claws and transporters as well? 7.5% exactly, or 8%? On a hull with two C&Cs, which gets the -2? **RULED 2026-10-17 (all as recommended):** defenders **-2** too (Elite Crew's pattern, doubled); **every boarding party**; **7.5% exactly** (a percent may now carry one decimal place); **his own C&C only**. |
 | Religious Leader | *Added 2026-10-17 with his rules text (§9.20).* Are "+10 initiative" and "+5 to its defense profiles" FV's displayed units or tabletop? What is a "volley" for his +1 damage? Does the ship keep the +1 damage once he is lost? Is the Minbari Protectorate one of the "Minbari" factions? **RULED 2026-10-17:** **FV display units** (+10, then +20; the profiles +1 point each, +5%); **+1 per hit** (each pulse, each gun's shot, a raking shot once, never per die); the frenzy **keeps** the +1 damage; **Minbari Federation only** - the Protectorate is not included. |
-| Software Engineer | "Lets the computer specialist use their ability twice" and "Incompatible with Computer Specialist" contradict each other. Which one stands? "Submarine" = the Hyach stealth hulls (Alichi Kav and Tal)? Whose detection range gets +5? |
+| Software Engineer | "Lets the computer specialist use their ability twice" and "Incompatible with Computer Specialist" contradict each other. Which one stands? "Submarine" = the Hyach stealth hulls (Alichi Kav and Tal)? Whose detection range gets +5? **Rules text 2026-10-22 (§9.33)** settles all three: "permits a specialist to use his abilities a second time ... of the software category ... only ... one specialist per scenario" (the user's note: Defence, Sensor, Targeting and Weapon); "if aboard a stealth unit ... five hexes further away for detection purposes ... except for fighters, which halve their detection range (round fractions up)". Asked: build the Firing-phase hold of the extra BFCP, or +1 in Initial Orders only? May his point take a category past two? A specialist used on turn N - again from N+1 or N+2 ("wait at least a full turn")? **RULED 2026-10-22:** **build the hold** - and **rebuild the Computer Specialist to its own rules** on it ("Once per scenario, this specialist adds 1 point to the ship's bonus fire control points and allows these points to be reshuffled to any desired values. This ability is activated during the Firing Phase ... The usual restrictions on the allocation of bonus fire control points must be observed"); **the cap stays two**, and the rebuilt Computer Specialist no longer raises it either; **from turn N+1**. The user's note on the damage clause: "+1 Armour to the Computer system is fine, if adding a damage reduction that affects armour-ignoring weapons is unnecessarily complicated" - it was not (one line beside the Scavenger's save), so the full rule is built. |
 | Ion Technician | Rad Cannons always score 12, with no roll? Forced crits on Sensors, Engine and Reactor on every hit? When is the thrust boost declared? Is "+4 on C&C crits" a penalty? **Rules text 2026-10-18 (§9.23)** settles all four: 12 Structure boxes instead of 10 (the Rad Cannon rolls nothing anyway); a forced critical roll on a sensors, engine or reactor hit; the boost "is made at the same time systems are activated or deactivated for extra power" - Initial Orders; the C&C's roll "at +4 on the die instead of the listed +2" - his ship's Rad Cannons hitting an enemy C&C. Asked: may one gun take more than one boost? A boosted gun that does not fire - build the discharge? Does a Sub Reactor count as the reactor? **RULED 2026-10-18:** the boost was first ruled **repeatable** (every 3 thrust another 1d10+1), then, once built, **re-ruled to one level per gun** a turn (the recommendation); the **discharge is built**, with a tooltip line; a **Sub Reactor counts**. |
 | Surge Officer | Which systems are the "caps" that get +2 / +1 power? Is "EMHardened gives −3" a change for the whole ship? **Rules text 2026-10-18 (§9.22)** settles the first: "Capital ships and larger receive +2 points of power, while medium ships and HCVs get +1" - the reactor. **RULED 2026-10-18:** the −3 is "−1 on EM-hit systems" (the tabletop −2 → −3 step, where the rule says); then, the user finding FV's hardening to be a simplification, **FV's EM hardening rebuilt to the tabletop rules** (supplied) and the Ring Base hardened, the officer on top; the −2 **once per system per turn**; EM effects the tabletop hardening does not list **apply normally** (the old immunity lines commented out with a note, to revisit); armour-ignoring EM weapons **ignore Ipsha armour fully**; the flat −1 stand-in **removed** from every Ipsha hull; **his own Spark Field gains the +1**. |
 | Expert Pilot | *Added 2026-10-19 with his rules text and notes (§9.24).* Several pilots beside another officer (D9 says one; the Spark Field text pictures "four pilots and an evader")? 100% of a fighter each, or the §9.9 scaled rule? The Spark Field relief "if he forgoes all his other benefits for the entire turn" is a per-turn choice: build a toggle? Which factions are "Raiders"? **RULED 2026-10-19:** pilots **ARE the flight's one officer** (1-4 of them, never beside another); **scaled** by §9.9 (100% of a craft each, for a flight of six); the relief **automatic** - "if flight doesn't jink or fire that turn they can get the damage reduction"; **the Raiders faction only**. |
@@ -3830,3 +3839,159 @@ old copy `fingerprint.before-officers-stage25.txt`.
    to `speechLog` (the methods themselves are; the phases need a whole game in the database).
 3. Elite Crew's own armed shuttle comes "loaded with one set of standard missiles" only as far as FV's armed shuttle classes already carry
    them - nothing new for his.
+
+### 9.33 Stage 26: Expert Software Engineer (2026-10-22)
+
+**Rules text (user, 2026-10-22) - one of the original 25.** "Expert Software Engineer: This computer programmer is unique to the Hyach. He
+provides several abilities that enhance the ship's computer, all of which operate constantly. The Hyach computer provides one extra bonus fire
+control point (BFCP). This is lost only if the computer is completely destroyed. The player can leave this extra BFCP point unallocated until the
+Weapons Fire Step of the Combat Sequence, recording it along with his weapons fire orders. The Hyach Computer ignores the first point of damage in
+any volley (essentially, it can be treated as having an extra point of armor that cannot be damaged, destroyed or bypassed by weapons that affect or
+ignore armor). If aboard a stealth unit, advanced electronic signature masking software makes the ship appear as though it were five hexes further
+away for detection purposes (but not for weapons fire or other reasons), except for fighters, which halve their detection range (round fractions
+up). Working as a team, the Expert Software Engineer permits a specialist to use his abilities a second time during the scenario. The specialist
+must be of the software category, and must wait at least a full turn after using his special function before he can use it again. This only works
+for one specialist per scenario. Location: Computer. Cost: 15% of the ship's base cost. Availability: Hyach only." The user's notes: "Specialists in
+the Software category are; Defence, Sensor, Targeting, and Weapon. Just adding +1 Armour to the Computer system is fine, if adding a damage reduction
+that affects armour-ignoring weapons is unnecessarily complicated."
+
+**What FV had.**
+- **13 hulls** qualify: every Hyach Gerontocracy hull with a Hyach Computer - two medium ships, five HCVs (two of them the stealth Alichi Kav and
+  Tal) and six bases - but not the Takalti Kal, an OSAT (D9). No other faction's hull carries a Hyach Computer. Every one of the 13 has Specialists.
+- **The Hyach Computer** (`HyachComputer`): `output` BFCP, allocated in Initial Orders only, at most `BFCPpertype` (2) to a category, stored as one
+  individual note per point (key its index, value its FC type) and read back by `onIndividualNotesLoaded` - Initial Orders pre-fills last turn's,
+  every other load counts this turn's. Only `getFCBonus`, in `Weapon::calculateHitBase`, uses them: the bonus is the allocation of the target's
+  category. Its damage loss - 1 BFCP per 5 boxes - lived in `setSystemDataWindow`, which runs only as the payload is built (`beforeTurn`), never at
+  fire resolution; nothing on the server checks an allocation against it. The allocation and output reach every viewer.
+- **The Hyach Specialists**: chosen at deployment, each used once by the player (the client's + button), each use one `allocated;<type>` note
+  that applies its effect at every load of that turn. The server writes the notes as the client sends them, unchecked; a Firing-phase use reaches
+  the database through `BaseShip::generateAdditionalNotes` (the generic note sweep never runs in the Firing phase). The **Computer Specialist** gave
+  +2 BFCP and +1 to the cap per category, in Initial Orders.
+- **A Firing-phase declaration** on a non-weapon system: `ShipSystem::saveFirePhaseDeclaration` (the Wide-Beam Lightning Array's toggle, the
+  Political Officer's speech), on the POST-side ship, judged at read time; the Firing phase resolves on a reload at phase 4.
+- **Stealth detection by range** is one sweep, `Stealth::isDetectedMovement` (end of movement): a ship detects at its first Scanner's output x2 (x5
+  a base, x3 plus Detect Stealth for ELINT), a flight at its OB, against the hex distance. The client's own range forecast is commented out.
+- **The damage path's last word before damage is marked**: `ShipSystem::assignDamageReturnOverkill`, where the Scavenger's save already sits, after
+  each weapon has worked out the armour it meets (`getSystemArmourComplete` - 0 for a weapon that ignores armour).
+
+**Rulings (user, 2026-10-22, asked before building):**
+1. **Build the Firing-phase hold** - and **rebuild the Computer Specialist to its own rules** on it: "Once per scenario, this specialist adds 1 point
+   to the ship's bonus fire control points and allows these points to be reshuffled to any desired values. This ability is activated during the
+   Firing Phase and must be done at the same time other weapons fire is targeted. The usual restrictions on the allocation of bonus fire control
+   points must be observed."
+2. **The cap per category stays two** - for his point, and for the rebuilt Computer Specialist, which no longer raises it.
+3. **A software Specialist used on turn N may be used again from turn N+1.**
+
+**Built with defaults, stated here (ask before changing):**
+- "Lost only if the computer is completely destroyed": the Computer's damage loss never takes his point (`getBFCPAvailable` - on a base, 26 boxes
+  leave him his point where the Computer alone would read -1); he is out of action with the Computer by D3 anyway, and killed by its kill roll.
+- **The hold is ONE point ADDED in the Firing phase**: Initial Orders' points stay where they are, and the cap of two still applies. The player
+  leaves a point free in Initial Orders, opens the Computer's menu in the Firing phase and presses + on a category (the menu shows only then, and
+  says "Expert Software Engineer: one held point may be added"). A point not placed is unused. The Initial Orders commit's "you have not assigned
+  available BFCP" warning ignores ONE free point while he serves (two still warn).
+- The Firing-phase allocation counts for **every shot that turn's firing resolves** - the ballistic launches of Initial Orders included, since
+  their hit chance is worked out there, as the Initial Orders points' always was.
+- It is **hidden from opponents until firing resolves**: their payload and tooltip show Initial Orders' allocation while the Firing phase is open
+  (fire orders are hidden until they resolve, and where the point went would point at the targets). It is never carried into the next turn's
+  Initial Orders pre-fill.
+- **The rebuilt Computer Specialist**: in the Firing phase only (no longer Initial Orders), once per scenario as every Specialist, +1 BFCP that turn
+  and every point free to move within the cap - its own and the Software Engineer's included. Cancelling it before the commit puts the allocation
+  back to Initial Orders'.
+- **The armour point is per hit, as armour is**: each rake, each pulse. It is added to the armour each hit on his Computer meets AFTER the weapon has
+  set that armour - so a weapon that ignores armour, or wears it down, still meets it - and the damage record carries it (one more armour). Not a
+  stat: the Computer's armour readout is unchanged.
+- **Signature masking** acts on the one range sweep (`isDetectedMovement`): every ship detector (ELINT's Detect Stealth total included) needs 5
+  hexes more range; a flight's OB is halved, rounded up. Revealing itself by firing or by EW is untouched, as are its jammer and every weapon range.
+  The Alichi Kav and Tal are the only stealth hulls offered him.
+- **The second Specialist use**: a Defence, Sensor, Targeting or Weapon Specialist used once, on an earlier turn, while he serves; the first one used
+  twice spends it for the battle; it obeys its own phase rules (Sensor in Initial Orders only) and has its full effect again. It spends no Specialist
+  slot (the menu's "Specialists Used" count stays), and the menu lists it again as "Defence (again)". The server reads the uses from the notes it
+  already loads, so nothing new is stored.
+
+**Design.**
+- `Officers`: registry `OFF_SOFT` (post `computer`, pct 15, `apply` applySoftwareEngineer) right after the Political Officer, before the placed
+  officers; `$factionRules` `only` Hyach Gerontocracy; constants `SOFTWARE_BFCP` 1, `SOFTWARE_ARMOUR` 1, `SIGNATURE_MASK_HEXES` 5;
+  `$softwareSpecialists` (⚠️ MIRROR PAIR with `officers.SOFTWARE_SPECIALISTS`). findPost `computer` = the HyachComputer. `applySoftwareEngineer`
+  (`HyachComputer::addOfficerBFCP`); `holdsFiringBFCP` (⚠️ MIRROR PAIR with `officers.holdsFiringBFCP`); `computerArmour`; `maskSignature`;
+  `specialistReuse` / `reuseSpentTurn` / `softwareUses`; addForJson's `reuse` list and `abilities.reuse` (the turn spent) on his own team's row.
+- `HyachComputer` (baseSystems.php): `FIRING_NOTE` 'firingBFCP'; protected `$officerBFCP`, `$reshuffleBFCP`, `$firingBFCP`, `$firingRequested`,
+  `$ioBFCP`, `$firingSettled`. `doIndividualNotesTransfer` keeps a marked transfer (`['firingBFCP', type per point]`) for ⭐
+  `saveFirePhaseDeclaration` - ONE note, the points comma separated ('none' for no point), filtered to its categories and three caps;
+  `onIndividualNotesLoaded` skips that note in Initial Orders' pre-fill and keeps this turn's highest-id one otherwise; ⭐ `settleFiringBFCP($turn)`
+  (⚠️ MIRROR PAIR with `HyachComputer.firingMode` / `canIncrease` / `canDecrease`) judges it once, lazily - from `getFCBonus`,
+  `setSystemDataWindow` and `stripForJson`, all after the load has resolved officers and Specialists; `getBFCPAvailable` (the damage loss,
+  never his point); `shownBFCP` / `shownBFCPTotal` (opponents in the Firing phase see Initial Orders'); `ioBFCP` to the owner's team once the
+  Firing phase's applied; `allowReshuffle`.
+- `HyachSpecialists`: the Computer case +1 output and `allowReshuffle()` (was +2 and +1 cap); `$useTurns` / `getUseTurns` from the `allocated`
+  notes; the tooltip's Computer line.
+- `ShipSystem::assignDamageReturnOverkill`: `$effectiveArmor += Officers::computerArmour(...)` behind `$officersPresent`, before the Flash cap and
+  the protectors. `Stealth::isDetectedMovement`: `Officers::maskSignature` behind `$officersPresent`.
+- Client: `officers.js` - the registry row, findPost `computer`, `SOFTWARE_SPECIALISTS`, `SOFTWARE_BFCP`, `holdsFiringBFCP`, `bfcpHeldBack`,
+  `computerBonus` / `bfcpLine` (the lobby's BFCP line, through adjustDataDisplay), `specialistReuseList` / `specialistReusable`, `ABILITY_NAMES.reuse`.
+  `model/system/baseSystems.js` - HyachComputer `lockedBFCP` (built from `ioBFCP` or the loaded allocation), `firingMode`, phase-3 branches in
+  `canIncrease` / `canDecrease`, the marked transfer, `totalOf` / `sameAllocation` / `restoreFiringBase`, `draftStatePhases` [1, 3]; HyachSpecialists
+  `canUse` (the reuse; the Computer Specialist in the Firing phase only), `canDecrease`, `isSecondUse`, `doUse` / `doDecrease` (+1 / -1 and the
+  restore; no slot spent on a second use). `gamedata.js` - the commit warning's exemption. React: `SystemInfoButtons` canBFCP (phase 3 while
+  `firingMode()`), `HyachComputerList` (buttons ask the system's own rules; the Firing-phase line), `HyachSpecialistsList` (a reusable one listed,
+  "(again)").
+- Docs: an Expert Software Engineer card (Ship Officers, between the Security and the Surge Officer); the Computer Specialist's lines in
+  `factions-tiers.html` and `files/FV_factions.txt`.
+
+**Files.** Server: `Officers.php`, `systems/baseSystems.php` (HyachComputer, HyachSpecialists, Stealth), `systems/ShipSystem.php`. Client:
+`officers.js`, `model/system/baseSystems.js`, `gamedata.js`, React `system/SystemInfoButtons.js`, `system/HyachComputerList.js`,
+`system/HyachSpecialistsList.js`. Docs `ammo-options.html`, `factions-tiers.html`, `files/FV_factions.txt`. Harnesses: `officersHarness.php`,
+`officersClientHarness.js` (its two Hyach menus added to the bundle; Stage 25's label checks brought to `ce9f8e8a2`'s "Speech!" / "No speech" /
+"SPEECH!:"), `enhancementsHarness.php` (+HyachSenchlatKam, cases `soft` and `soft+elite1`; fingerprint re-recorded, old copy
+`fingerprint.before-officers-stage26.txt`), `enhancementsDifferential.js` (the Computer's output + `computerBonus`). `yarn build` (UI bundle and
+both legacy bundles - no watcher was running) and `fvbuild -Statics`; no new class, no schema change.
+
+**Measured.** Statics +726 B: 13 offers, all Hyach. Fingerprint: 3,087 lines added, none changed - stripping the new hull's block and the two new
+cases from the new fingerprint gives the old one byte for byte.
+
+**Verified.**
+- `officersHarness.php` **1800 / 0 with the database** (1718 --no-db; 79 new): the registry place; offers and prices on four hulls (HCV, stealth
+  HCV, base, medium), none on the OSAT, a hull without a Computer, a Hyach flight or a Hyach Computer under another faction's name, and a sweep of
+  every Hyach hull - offered on exactly the 13; the Computer post; +1 BFCP, kept through damage (10 and 14 boxes on the HCV, 26 on the base), none
+  once killed; the Computer Specialist (+1 not +2, the cap 2, nothing the turn after, 5 with him) and its tooltip line; the Firing-phase allocation
+  through `getFCBonus` - his held point on Fighter or a second Capital, refused when a point moved, two were added, a third Capital, without him,
+  killed, an unknown category, past the damaged Computer's points; the Computer destroyed; the last note by id (loaded out of order); last turn's
+  note; the reshuffle (accepted, five of four refused, three on one refused, "none", with him five, last turn's Specialist none); the next Initial
+  Orders not pre-filled from it; the payload - the owner's allocation, ioBFCP and tooltip, an opponent's Initial Orders' only until firing resolves,
+  a finished game's everything, no ioBFCP without one; the REAL POST-side `saveFirePhaseDeclaration` (one note, unchanged writes none, "none", a
+  doctored list filtered); the armour point through the REAL `assignDamageReturnOverkill` (armour 4 and 0, a 1-point hit, another system, him
+  killed, the gate off); `maskSignature` and the REAL `Stealth::isDetectedMovement` against an Omega and a flight; the reuse list (N+1, two at once,
+  this turn's, not software, spent, without him, killed), a second use's effect applied, the payload's `reuse` and `abilities.reuse`, nothing to an
+  opponent; the kill roll on his post.
+- `officersClientHarness.js` **703 / 0** (40 new): the registry row and constants; every Hyach static offered where the client finds his post (13);
+  the lobby post and BFCP line, in game untouched; the REAL HyachComputer in the Firing phase - hold (add, cap, one only, take off, the marked
+  transfer, unchanged unmarked), destroyed, killed, without him, Initial Orders as ever, not my ship, a reload's `ioBFCP`; the REAL HyachSpecialists
+  - the Computer Specialist (not in Initial Orders; +1, cap 2, reshuffle, cancelled back), the reuse (used without a slot, one per scenario, cancel,
+  Sensor's phase rule, not on the list, killed), the spent line; the commit warning's exemption; the REAL `HyachSpecialistsList` ("(again)") and
+  `HyachComputerList` (its Firing-phase line, its buttons from the system's rules).
+- `enhancementsHarness` **289 / 0** (fingerprint re-recorded, additions only); `enhancementsDifferential.js` **780 / 0** (38 new cases - the Computer
+  +1 compared on the Senchlat Kam; a negative control, `computerBonus` broken, gives the two `soft` cases differing).
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0** (no corpus game uses him or the Computer Specialist's new rule).
+- **Mutation-tested: 79 breaks (46 server, 33 client and React, one through the differential), 77 caught**, files byte-identical afterwards.
+  Runner `mutate26.js` in the session scratchpad only (~30s a server mutant, ~4s a client one; `DRY=1` checks every pattern occurs once). The
+  first pass missed five, each a missing check, now added: the officer test of the hold (every "without him" note was refused by the Computer's
+  own points first - now one that fits them), last turn's Firing-phase note (it was no valid hold anyway), the payload settling with no tooltip
+  built first, the one-point limit of a hold with two points free (the Computer's total masked it), and a reused Specialist a third time in one
+  turn. Of the two left: `count >= 1` for `=== 1` in specialistReuse is equivalent (a type used twice ends the reuse before the loop); removing
+  the unknown-category check KILLS the load (the hold check's undefined index - FV's error handler ends the process), so it is load-bearing, and
+  the reshuffle's own unknown-category check now fails as a FAIL line behind it.
+
+**Observations, not changed:**
+1. Not play-tested. Worth a test: a Hyach Senchlat Kam with him - 4 BFCP; in Initial Orders allocate 3, commit without a warning; in the Firing
+   phase open the Computer, put the held point on the category of your target, fire, and see the hit chance include it; in an opponent's browser
+   the Computer shows 3 points until firing resolves. A second ship with a Computer Specialist: use it in the Firing phase and move every point.
+   An Alichi Kav with him near an enemy ship at its detection range plus 1-4 hexes: it stays hidden. A Defence Specialist used on turn 2 shows
+   "Defence (again)" from turn 3.
+2. Not covered by a harness: the commit warning's call site in `gamedata.js` and `SystemInfoButtons` canBFCP (the helpers they ask are), and
+   `FireGamePhase::process`'s existing call to `saveFirePhaseDeclaration` (the method is).
+3. The Specialists' notes are written as the client sends them, unchecked - a doctored second use of any Specialist works without him (as it
+   always has).
+4. A Computer Specialist used under the old rule shows +1 BFCP and a cap of 2 in a replay of that turn, where it showed +2 and 3: display only - the
+   shots' bonuses come from the stored notes.
+5. The Utara Tor's Computer (28 boxes, 4 BFCP) reads -1 BFCP at 25 or more boxes of damage, as it always did - so the negative-BFCP warning can fire
+   with nothing allocated.
+6. The Political Officer's docs card still says "Cancel speech"; `ce9f8e8a2` named the button "No speech".

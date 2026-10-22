@@ -775,7 +775,9 @@ const canMineSettings = (ship, system) => (gamedata.gamephase === -1) && (ship.m
 const canProxMineSettings = (ship, system) => (gamedata.gamephase === -1) && (ship.mine) && (ship.spawned == -1 && gamedata.turn == 1 || ship.spawned == gamedata.turn - 1) && (system.name == 'ProximityMine');
 
 //can do something with Hyach Computer
-const canBFCP = (ship, system) => (gamedata.gamephase === 1) && (system.name == 'hyachComputer');
+//OFFICERS_PLAN.md Stage 26: in the Firing phase too, while a point may be allocated there (an Expert Software Engineer's, or a Computer Specialist's reshuffle)
+const canBFCP = (ship, system) => (system.name == 'hyachComputer')
+	&& (gamedata.gamephase === 1 || (gamedata.gamephase === 3 && typeof system.firingMode === 'function' && system.firingMode() !== null));
 
 /*const canBFCPdisplayCurrClass = (ship, system) => canBFCP(ship, system) && system.getCurrClass() != '';
 const getBFCPcurrClassImg = (ship, system) => './img/systemicons/BFCPclasses/' + system.getCurrClass() + '.png';

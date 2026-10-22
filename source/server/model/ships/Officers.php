@@ -78,6 +78,10 @@
    four experts at no cost (freeExpertId) and five free Hardened Armour (pricePoliticalArmour), whatever the player leaves unchosen
    picked at random as the fleet is committed (placePoliticalPicks); and once per battle a stirring speech in the Firing phase, told in
    the combat log (speechLog), +30 initiative on the next turn.
+   Stage 26: the Expert Software Engineer (Hyach) - in the Hyach Computer: one more bonus fire control point, kept until the Computer
+   is destroyed and holdable to the Firing phase (HyachComputer::settleFiringBFCP); the first point of every hit on the Computer
+   ignored (computerArmour); a stealth ship's signature masked (maskSignature); and one Defence, Sensor, Targeting or Weapon
+   Specialist used a second time (specialistReuse).
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -148,6 +152,12 @@ class Officers{
 	const SPEECH_INITIATIVE = 30;        //Expert Political Officer: "This provides the ship with +30 to its initiative on that turn" - FV units, as the Quartermaster's -30 (QX1)
 	const POLITICAL_ARMOUR_SYSTEMS = 5;  //...: "+1 to their armor values. The owner must select 5 different systems ... and cannot select structure blocks"
 	const SPEECH_DAMAGE_CLASS = 'PoliticalSpeech'; //...his speech's combat log line (speechLog) - combatLog.js heads it "SPEECH:"
+	const SOFTWARE_BFCP = 1;             //Expert Software Engineer: "The Hyach computer provides one extra bonus fire control point (BFCP)"
+	const SOFTWARE_ARMOUR = 1;           //...: "ignores the first point of damage in any volley" - an armour point nothing pierces or wears
+	const SIGNATURE_MASK_HEXES = 5;      //...: a stealth ship "appear[s] as though it were five hexes further away for detection purposes"
+	/* ...: "permits a specialist to use his abilities a second time ... The specialist must be of the software category" - the Hyach
+	   Specialists the user named (2026-10-22). ⚠️ MIRROR PAIR with officers.SOFTWARE_SPECIALISTS (JS). */
+	private static $softwareSpecialists = array('Defence', 'Sensor', 'Targeting', 'Weapon');
 	/* ...: "Select either an expert navigator, expert helmsman, expert engineer, expert scanner and add him to the crew at no cost" - in
 	   REGISTRY order, which is the order a tie for the dearest goes by (freeExpertId). ⚠️ MIRROR PAIR with officers.POLITICAL_EXPERTS (JS). */
 	private static $politicalExperts = array('OFF_HELM', 'OFF_SCAN', 'OFF_ENG', 'OFF_NAV');
@@ -159,7 +169,8 @@ class Officers{
 		'the conquest of the Xon', 'the ingratitude of the Narn', 'the glory of the Imperial Fleet', 'the favour of the Great Maker',
 		'the treachery of rival Houses', 'the burden of Empire', 'the Emperor\'s latest decree', 'the sacrifices of the Orieni War',
 		'the necessity of unquestioning loyalty', 'the proper height of a hair crest', 'the virtues of a well-aged brivari',
-		'the price of a good seat at Court', 'the splendour of the Imperial Palace gardens', 'his own distinguished family',
+		'the splendour of the Imperial Palace gardens', 'his own distinguished family', 'the colour purple',
+		'the price of spoo', 'the importance of good tailoring' 
 	);
 	//...a Medium ship's side, looked at from its own bearing (a "TAG:" hit chart entry is arc-filtered): Front, Aft, Left, Right
 	private static $sideBearing = array(1 => 0, 2 => 180, 3 => 270, 4 => 90);
@@ -224,6 +235,8 @@ class Officers{
 		'OFF_BRCH' => array('pct' => array('Balosian Underdwellers' => 25, 'Yolu Confederation' => 25, 'Narn Regime' => 25, 'Gaim Intelligence' => 25)),
 		//"Availability: ... Centauri Only" - the Wars of the Centauri Republic too (user ruling 2026-10-21)
 		'OFF_POL'  => array('only' => array('Centauri Republic', 'Centauri Republic (WotCR)')),
+		//"Availability: Hyach only" - and only a Hyach hull has his post, the Computer
+		'OFF_SOFT' => array('only' => array('Hyach Gerontocracy')),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -418,6 +431,18 @@ class Officers{
 		   40%. */
 		'OFF_POL'  => array('label' => 'Expert Political Officer', 'post' => 'cnc', 'pct' => 40, 'apply' => 'applyPoliticalOfficer',
 			'publish' => array('iniativebonus'), 'needs' => 'isCapitalOrLarger'),
+		/* Expert Software Engineer (Stage 26; rules text, user 2026-10-22), in the Hyach Computer - "unique to the Hyach", so only a hull
+		   with one is offered him. "One extra bonus fire control point (BFCP). This is lost only if the computer is completely destroyed"
+		   (applySoftwareEngineer: the Computer's damage takes none of it), and "the player can leave this extra BFCP point unallocated
+		   until the Weapons Fire Step" - one point held back from Initial Orders may be placed in the Firing phase
+		   (HyachComputer::settleFiringBFCP). "The Hyach Computer ignores the first point of damage in any volley ... an extra point of
+		   armor that cannot be damaged, destroyed or bypassed" (computerArmour). "If aboard a stealth unit ... five hexes further away for
+		   detection purposes ..., except for fighters, which halve their detection range (round fractions up)" (maskSignature). "Permits
+		   a specialist to use his abilities a second time during the scenario ... of the software category ... This only works for one
+		   specialist per scenario" (specialistReuse). Rulings (user 2026-10-22): the hold built, and the Computer Specialist rebuilt to
+		   its own rules on the same Firing-phase allocation; the per-category cap stays 2; a specialist used on turn N may be used again
+		   from turn N+1. 15%, Hyach only ($factionRules). */
+		'OFF_SOFT' => array('label' => 'Expert Software Engineer', 'post' => 'computer', 'pct' => 15, 'apply' => 'applySoftwareEngineer'),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -758,6 +783,7 @@ class Officers{
 	              gate's. Through getUnitJumpEngines, never a sweep of $ship->systems ([[project_jump_points]]).
 	              No officer-eligible hull carries two (measured 2026-10-15), so "his ship's drive" and "the
 	              drive he sits in" cannot disagree.
+	     computer the Hyach Computer (Stage 26): no hull carries two.
 	     craft    a flight's first craft (Stage 4): the lobby's one fighter card, and the sample fighter
 	              getSampleFighter() answers - id 1, whether or not it is still flying. An officer bought as a
 	              count (Stage 18) takes the first craft, the next the second, and so on (nthCraft).
@@ -791,6 +817,11 @@ class Officers{
 			case 'jump':
 				foreach (JumpEngine::getUnitJumpEngines($ship) as $engine){
 					if (!$engine->isLegacyJump() && !$engine->isGateJump()) return $engine;
+				}
+				return null;
+			case 'computer':
+				foreach ($ship->systems as $system){
+					if ($system instanceof HyachComputer) return $system;
 				}
 				return null;
 		}
@@ -2879,6 +2910,83 @@ class Officers{
 		}
 	}
 
+	/* ------------------------------------------------------------------ Expert Software Engineer (Stage 26) */
+
+	/* "The Hyach computer provides one extra bonus fire control point (BFCP). This is lost only if the computer is completely destroyed":
+	   one more point on his Computer, which its damage loss (1 per 5 boxes - HyachComputer::getBFCPAvailable) never takes; he is out of
+	   action with the Computer anyway (D3). Public: the Computer's output reaches every viewer, as a Technician's reactor does. */
+	private static function applySoftwareEngineer($ship, $entry, $turn){
+		$computer = $ship->getSystemById((int)$entry['post']);
+		if ($computer instanceof HyachComputer) $computer->addOfficerBFCP(self::SOFTWARE_BFCP);
+	}
+
+	/* May the player hold one of $computer's points back to the Firing phase on $turn - its Expert Software Engineer serving in it ("The
+	   player can leave this extra BFCP point unallocated until the Weapons Fire Step ..., recording it along with his weapons fire
+	   orders")? HyachComputer::settleFiringBFCP asks it. ⚠️ MIRROR PAIR with officers.holdsFiringBFCP (JS). */
+	public static function holdsFiringBFCP($ship, $computer, $turn){
+		if (!TacGamedata::$officersPresent || !is_object($ship) || !is_object($computer)) return false;
+		return self::servesOn($ship, 'OFF_SOFT', $computer, (int)$turn);
+	}
+
+	/* "The Hyach Computer ignores the first point of damage in any volley (essentially, it can be treated as having an extra point of armor
+	   that cannot be damaged, destroyed or bypassed by weapons that affect or ignore armor)": SOFTWARE_ARMOUR on top of the armour every hit
+	   on his Computer meets, added in ShipSystem::assignDamageReturnOverkill AFTER the weapon has worked out that armour - so a weapon that
+	   ignores armour, or wears it down, still meets this point. Per hit, as armour is: each rake and each pulse. Behind $officersPresent. */
+	public static function computerArmour($ship, $system, $gamedata){
+		if (!($system instanceof HyachComputer)) return 0;
+		return self::servesOn($ship, 'OFF_SOFT', $system, (int)$gamedata->turn) ? self::SOFTWARE_ARMOUR : 0;
+	}
+
+	/* "If aboard a stealth unit, advanced electronic signature masking software makes the ship appear as though it were five hexes further
+	   away for detection purposes (but not for weapons fire or other reasons), except for fighters, which halve their detection range
+	   (round fractions up)": Stealth::isDetectedMovement - FV's one range test for detecting a stealth ship - hands over a detector's range
+	   and its distance and gets them back: a ship's distance SIGNATURE_MASK_HEXES longer, a flight's range halved, rounded up. Server only
+	   (the client's own range forecast is commented out). Behind $officersPresent. */
+	public static function maskSignature($ship, $detector, $detection, $distance, $turn){
+		if (!self::isActive($ship, 'OFF_SOFT', $turn)) return array($detection, $distance);
+		if ($detector instanceof FighterFlight) return array((int)ceil($detection / 2), $distance);
+		return array($detection, $distance + self::SIGNATURE_MASK_HEXES);
+	}
+
+	/* "Working as a team, the Expert Software Engineer permits a specialist to use his abilities a second time during the scenario. The
+	   specialist must be of the software category, and must wait at least a full turn after using his special function before he can use it
+	   again. This only works for one specialist per scenario": the software Specialists ($softwareSpecialists) this ship may use again on
+	   $turn - used once, on an EARLIER turn (user ruling 2026-10-22: from the next turn on), while he serves and before any software
+	   Specialist has been used twice. Every use is one of the Specialists' own 'allocated' notes, read back at each load
+	   (HyachSpecialists::getUseTurns), so nothing new is stored. His team's payload carries the list (addForJson), which the client offers
+	   (officers.specialistReusable). ⚠️ The Specialists write their notes as the client sends them, unchecked - every use always has. */
+	public static function specialistReuse($ship, $turn){
+		if (!self::isActive($ship, 'OFF_SOFT', $turn)) return array();
+		$uses = self::softwareUses($ship);
+		if (self::reuseSpentTurn($uses) !== null) return array();
+		$open = array();
+		foreach ($uses as $type => $turns){
+			if (count($turns) === 1 && $turns[0] < (int)$turn) $open[] = $type;
+		}
+		return $open;
+	}
+
+	//the turn the one reuse was spent: the second use of a software Specialist used twice (the earliest, were there two), or null
+	private static function reuseSpentTurn(array $uses){
+		$spent = null;
+		foreach ($uses as $turns){
+			if (count($turns) >= 2) $spent = ($spent === null) ? $turns[1] : min($spent, $turns[1]);
+		}
+		return $spent;
+	}
+
+	//each software Specialist this ship has used: type => its use turns, distinct and ascending
+	private static function softwareUses($ship){
+		$uses = array();
+		foreach ($ship->systems as $system){
+			if (!($system instanceof HyachSpecialists)) continue;
+			foreach ($system->getUseTurns() as $type => $turns){
+				if (in_array($type, self::$softwareSpecialists, true)) $uses[$type] = $turns;
+			}
+		}
+		return $uses;
+	}
+
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */
 
 	//Expert Dogfighter: +5 initiative, ELITE_SW's line
@@ -3390,6 +3498,14 @@ class Officers{
 			if (isset($entry['mode'])) $row['mode'] = $entry['mode'];
 			//Stage 19: the weapons an Expert Targeter covers, by id - the client's hit-chance preview reads them (officers.targeterShotBonus)
 			if (self::rulesId($entry['id']) === 'OFF_TARG') $row['covers'] = self::coveredWeapons($ship, $entry);
+			/* Stage 26: the software Specialists an Expert Software Engineer lets this ship use again now (officers.specialistReusable),
+			   and the turn the one reuse was spent (officers.stateText words it, as a Gunner's spent abilities) */
+			if ($entry['id'] === 'OFF_SOFT'){
+				$reuse = self::specialistReuse($ship, $turn);
+				if (!empty($reuse)) $row['reuse'] = $reuse;
+				$spent = self::reuseSpentTurn(self::softwareUses($ship));
+				if ($spent !== null) $row['abilities']['reuse'] = $spent;
+			}
 			if (!empty(self::$registry[$entry['id']]['movable']) && (int)TacGamedata::$currentPhase === 1 && !TacGamedata::$currentGameFinished){
 				$targets = self::moveTargets($ship, $list, $i, $turn);
 				if (!empty($targets)) $row['targets'] = $targets;

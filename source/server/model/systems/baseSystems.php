@@ -286,6 +286,8 @@ class Stealth extends ShipSystem implements SpecialAbility{
 		
 			// Get distance to the stealth ship and check line of sight
 			$distance = mathlib::getDistanceHex($ship, $otherShip);
+			//OFFICERS_PLAN.md Stage 26: an Expert Software Engineer's signature masking - 5 hexes further away, a fighter's range halved
+			if (TacGamedata::$officersPresent) list($totalDetection, $distance) = Officers::maskSignature($ship, $otherShip, $totalDetection, $distance, $gameData->turn);
 			$otherPos = $otherShip->getHexPos();          
 			$noLoS = !empty($blockedHexes) && Mathlib::isLoSBlocked($pos, $otherPos, $blockedHexes);
 
@@ -12936,6 +12938,18 @@ class HyachComputer extends ShipSystem implements SpecialAbility{
 	
 	public $allocatedBFCP = array('Fighter' => 0, 'MCV' => 0, 'Capital' => 0); //BFCP points allocated for given FC type
     
+	/* OFFICERS_PLAN.md Stage 26 - the FIRING-PHASE allocation: one point an Expert Software Engineer lets the player hold back from
+	   Initial Orders, or every point while a Computer Specialist is used (its own rules: "+1 point ... reshuffled to any desired values
+	   ... during the Firing Phase"). Written as one note at the fire commit (saveFirePhaseDeclaration), judged on the loaded ship
+	   (settleFiringBFCP). Protected, so no blueprint or payload carries them. */
+	const FIRING_NOTE = 'firingBFCP';
+	protected $officerBFCP = 0;         //an Expert Software Engineer's point (Officers::applySoftwareEngineer) - damage never takes it
+	protected $reshuffleBFCP = false;   //a Computer Specialist used this turn (HyachSpecialists) - every point may move in the Firing phase
+	protected $firingBFCP = null;       //this turn's Firing-phase allocation as written, one FC type per point - or null, none written
+	protected $firingRequested = null;  //POST-side: the Firing-phase allocation the client sent, for saveFirePhaseDeclaration
+	protected $ioBFCP = null;           //Initial Orders' allocation, kept once a Firing-phase one has replaced it
+	protected $firingSettled = false;
+
     protected $possibleCriticals = array(); //no available criticals - however damage to the computer will reduce BFCP available.
     
     function __construct($armour, $maxhealth, $powerReq, $output){ 
@@ -12989,10 +13003,12 @@ class HyachComputer extends ShipSystem implements SpecialAbility{
 
 public function onIndividualNotesLoaded($gamedata)
 {
+	$firingId = -1;
 	switch($gamedata->phase){
 			//What were BFCP set as last turn, load them up at start of Initial Orders.			
 			case 1: //Initial phase		
 			    foreach ($this->individualNotes as $currNote) {
+			    	if ($currNote->notekey === self::FIRING_NOTE) continue; //Stage 26: a Firing-phase allocation is never carried into the next turn
 			  		if($currNote->turn == $gamedata->turn-1) {  				    	
 			        $FCClass = $currNote->notevalue;
 
@@ -13008,6 +13024,13 @@ public function onIndividualNotesLoaded($gamedata)
 			//Otherwise, what were the points set this turn at end of Initial Orders.
 			default:					
 			    foreach ($this->individualNotes as $currNote) {
+			    	if ($currNote->notekey === self::FIRING_NOTE){ //Stage 26: this turn's Firing-phase allocation - the last written (highest id)
+			    		if ($currNote->turn == $gamedata->turn && (int)$currNote->id >= $firingId){
+			    			$firingId = (int)$currNote->id;
+			    			$this->firingBFCP = ((string)$currNote->notevalue === 'none' || (string)$currNote->notevalue === '') ? array() : explode(',', (string)$currNote->notevalue);
+			    		}
+			    		continue;
+			    	}
 			  		if($currNote->turn == $gamedata->turn) {  			    	
 			        $FCClass = $currNote->notevalue;
 
@@ -13036,13 +13059,13 @@ public function onIndividualNotesLoaded($gamedata)
 	
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);
-		$damageTaken = $this->maxhealth - ($this->getRemainingHealth()); //Check for damge taken.
-		$lostBFCP = floor($damageTaken/5);	//1 BFCP lost per 5 damage.        
-        $this->output = $this->output - $lostBFCP; //Adjust output based on damage taken, -1 point per 5 damage.
+		$this->settleFiringBFCP($turn); //Stage 26: before output drops by the damage below - getBFCPAvailable reads it
+        $this->output = $this->getBFCPAvailable(); //Adjust output based on damage taken, -1 point per 5 damage.
          
-		$this->data["Bonus Fire Control Points (BFCP)"] = $this->BFCPtotal_used . '/' . $this->output;
+		$shown = $this->shownBFCP();
+		$this->data["Bonus Fire Control Points (BFCP)"] = $this->shownBFCPTotal() . '/' . $this->output;
 		$this->data["Max Per Category"] =  $this->BFCPpertype;
-		foreach($this->allocatedBFCP as $FCType=>$BFCPallocated){
+		foreach($shown as $FCType=>$BFCPallocated){
 			$this->data[' - '.$FCType] =  $BFCPallocated . '/' . $this->BFCPpertype;
 		}
         $this->data["Special"] = "This system is responsible for Bonus Fire Control Points (BFCP) management.";	   
@@ -13053,28 +13076,124 @@ public function onIndividualNotesLoaded($gamedata)
 	
 	//always redefine $this->data for Hyach Computer! A lot of variable information goes there...
 	public function stripForJson(){
+		$this->settleFiringBFCP(TacGamedata::$currentTurn); //Stage 26
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
-        if (isset($this->allocatedBFCP) && !empty($this->allocatedBFCP)) {
-            $strippedSystem->allocatedBFCP = $this->allocatedBFCP;
+        $shown = $this->shownBFCP();
+        if (isset($shown) && !empty($shown)) {
+            $strippedSystem->allocatedBFCP = $shown;
         }  			
         //$strippedSystem->allocatedBFCP = $this->allocatedBFCP;
-        if (isset($this->BFCPtotal_used) && !empty($this->BFCPtotal_used)) {
-            $strippedSystem->BFCPtotal_used = $this->BFCPtotal_used;
+        $used = $this->shownBFCPTotal();
+        if (isset($used) && !empty($used)) {
+            $strippedSystem->BFCPtotal_used = $used;
         }  		
         //$strippedSystem->BFCPtotal_used = $this->BFCPtotal_used;
+		//Stage 26: Initial Orders' allocation, to the owner's team, once the Firing phase's replaced it - what the Firing-phase menu holds fixed
+		if ($this->ioBFCP !== null && ($this->isRevealedToCurrentViewer() || TacGamedata::$currentGameFinished)) {
+			$strippedSystem->ioBFCP = $this->ioBFCP;
+		}
 		
         return $strippedSystem;
     }
 	
 	public function doIndividualNotesTransfer(){
 		//data received in variable individualNotesTransfer, further functions will look for it in allocatedBFCP
-		if(is_array($this->individualNotesTransfer))	$this->allocatedBFCP = $this->individualNotesTransfer; //else there's nothing relevant there
+		//Stage 26: in the Firing phase a changed allocation comes as [FIRING_NOTE, one FC type per point] - kept for saveFirePhaseDeclaration
+		if (is_array($this->individualNotesTransfer) && isset($this->individualNotesTransfer[0]) && $this->individualNotesTransfer[0] === self::FIRING_NOTE) {
+			$this->firingRequested = array_slice($this->individualNotesTransfer, 1);
+		} else if(is_array($this->individualNotesTransfer))	$this->allocatedBFCP = $this->individualNotesTransfer; //else there's nothing relevant there
 		$this->individualNotesTransfer = array(); //empty, just in case
 	}		
 	
+	/* OFFICERS_PLAN.md Stage 26 - FireGamePhase::process: the allocation the player made in the Firing phase, written as ONE note, its points'
+	   FC types comma separated ('none': no point at all). This is the POST-side rebuild, which has neither officers nor this turn's
+	   Specialists, so it writes what was asked, and settleFiringBFCP judges it on the loaded ship (the Wide-Beam Lightning Array's pattern). A
+	   re-commit writes again; the last note wins. Only this Computer's categories, and no more points than their caps hold. */
+	public function saveFirePhaseDeclaration($gamedata, $dbManager){
+		if ($this->firingRequested === null) return;
+		$ship = $this->getUnit();
+		if (!$ship) return;
+		$categories = array_keys($this->allocatedBFCP);
+		$points = array();
+		foreach ($this->firingRequested as $type){
+			if (is_string($type) && in_array($type, $categories, true) && count($points) < count($categories) * $this->BFCPpertype) $points[] = $type;
+		}
+		$this->individualNotes[] = new IndividualNote(-1, TacGamedata::$currentGameID, $gamedata->turn, $gamedata->phase, $ship->id, $this->id,
+			self::FIRING_NOTE, 'Firing Phase BFCP set', empty($points) ? 'none' : implode(',', $points)); //$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+		$this->firingRequested = null;
+	}
+
+	/* ⭐ OFFICERS_PLAN.md Stage 26 - WHICH ALLOCATION THIS TURN'S SHOTS USE: Initial Orders' (allocatedBFCP, from its notes), unless the player
+	   re-allocated in the Firing phase (firingBFCP) and was allowed to:
+	     - a Computer Specialist used this turn ($reshuffleBFCP - "adds 1 point to the ship's bonus fire control points and allows these points
+	       to be reshuffled to any desired values ... during the Firing Phase ... The usual restrictions ... must be observed"): any allocation
+	       within the points available and the cap per category;
+	     - else an Expert Software Engineer serving here (Officers::holdsFiringBFCP - "the player can leave this extra BFCP point unallocated
+	       until the Weapons Fire Step"): Initial Orders' with at most ONE point added and none moved, within the same limits.
+	   Anything else leaves Initial Orders' standing whole. Judged on the LOADED ship, where both are known (the POST-side copy that wrote the
+	   note had neither), ONCE, on first use: the shots (getFCBonus), the tooltip (setSystemDataWindow) and the payload (stripForJson) all come
+	   after the load, officers included. ⚠️ MIRROR PAIR with HyachComputer.firingMode / canIncrease / canDecrease (JS). */
+	public function settleFiringBFCP($turn){
+		if ($this->firingSettled) return;
+		$this->firingSettled = true;
+		if ($this->firingBFCP === null) return;
+		$hold = !$this->reshuffleBFCP && Officers::holdsFiringBFCP($this->getUnit(), $this, $turn);
+		if (!$this->reshuffleBFCP && !$hold) return;
+		$set = array_fill_keys(array_keys($this->allocatedBFCP), 0);
+		foreach ($this->firingBFCP as $type){
+			if (!array_key_exists($type, $set)) return;
+			$set[$type]++;
+		}
+		$total = array_sum($set);
+		if ($total > $this->getBFCPAvailable()) return;
+		foreach ($set as $type => $n){
+			if ($n > $this->BFCPpertype) return;
+			if ($hold && $n < (int)$this->allocatedBFCP[$type]) return; //a held point is ADDED: Initial Orders' points stay where they are
+		}
+		if ($hold && $total > $this->BFCPtotal_used + Officers::SOFTWARE_BFCP) return;
+		$this->ioBFCP = $this->allocatedBFCP;
+		$this->allocatedBFCP = $set;
+		$this->BFCPtotal_used = $total;
+	}
+
+	/* The points this Computer has to give: its output, less 1 per 5 boxes of damage (the rule setSystemDataWindow always applied) - but never
+	   an Expert Software Engineer's point, "lost only if the computer is completely destroyed" (Stage 26). */
+	public function getBFCPAvailable(){
+		$lostBFCP = floor(($this->maxhealth - $this->getRemainingHealth())/5);	//1 BFCP lost per 5 damage.
+		$available = $this->output - $lostBFCP;
+		if ($this->officerBFCP > 0) $available = max($this->officerBFCP, $available);
+		return $available;
+	}
+
+	/* Stage 26 - what a viewer is shown: the allocation the shots use, or, to an opponent while the Firing phase it was made in is still open,
+	   Initial Orders' - fire orders stay hidden until they resolve, and where the points went would point at the targets. */
+	private function shownBFCP(){
+		if ($this->ioBFCP !== null && (int)TacGamedata::$currentPhase === 3 && !TacGamedata::$currentGameFinished && !$this->isRevealedToCurrentViewer()) {
+			return $this->ioBFCP;
+		}
+		return $this->allocatedBFCP;
+	}
+
+	private function shownBFCPTotal(){
+		$shown = $this->shownBFCP();
+		return ($shown === $this->allocatedBFCP) ? $this->BFCPtotal_used : array_sum($shown);
+	}
+
+	//an Expert Software Engineer's point (Officers::applySoftwareEngineer)
+	public function addOfficerBFCP($points){
+		$this->officerBFCP += $points;
+		$this->output += $points;
+	}
+
+	//a Computer Specialist used this turn (HyachSpecialists): every point may be moved in the Firing phase
+	public function allowReshuffle(){
+		$this->reshuffleBFCP = true;
+	}
+
 	//returns FC bonus for allocated for a given ship classes / FC index
 	public function getFCBonus($FCIndex, $turn){
+		$this->settleFiringBFCP($turn); //Stage 26: the Firing phase's allocation, where it stands
 	    if($this->isDestroyed($turn)) return 0;
 	    $FCvalue = 0;	    	
 	    $FCvalueArray = array_values($this->allocatedBFCP);        
@@ -13116,6 +13235,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 	
 	public $specDecreased = array(); //Front End counter for updating system tooltip on which Specialists were used this turn. 	
 	public $specIncreased = array(); //Front End counter for updating system tooltip on which Specialists were used this turn. 	 
+	protected $useTurns = array(); //OFFICERS_PLAN.md Stage 26: type => array(turn => true), every turn each Specialist was used (getUseTurns)
 	
     
     protected $possibleCriticals = array(); //no available criticals - in fact, this system is a technicality and should never be hit
@@ -13130,6 +13250,18 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 	public function getSpecialAbilityValue($args)
     {
 		return $this->specialAbilityValue;
+	}
+
+	/* OFFICERS_PLAN.md Stage 26: the turns each Specialist was used, distinct and ascending (type => list) - Officers::specialistReuse reads
+	   them for an Expert Software Engineer's second use. From the 'allocated' notes, so a reload rebuilds it. */
+	public function getUseTurns(){
+		$out = array();
+		foreach ($this->useTurns as $type => $turns){
+			$list = array_keys($turns);
+			sort($list);
+			$out[$type] = $list;
+		}
+		return $out;
 	}
 
     public static function sortCriticalsByRepairPriority($a, $b){ //For Repair Specialists
@@ -13242,7 +13374,11 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 			if (($explodedKey[0] == 'allocated') && ($currNote->turn == $gamedata->turn)){ //Mark when a Specialist has been used on a given turn.
 				$ship = $this->getUnit();
 			
-				if ($explodedKey[1] == 'Computer'){ //Computer BFCP increased by 2.
+				if ($explodedKey[1] == 'Computer'){ //Computer BFCP +1, and every point may be moved in the Firing phase.
+					/* OFFICERS_PLAN.md Stage 26 - the specialist's own rules (user 2026-10-22), in place of +2 BFCP and +1 per category: "Once per
+					   scenario, this specialist adds 1 point to the ship's bonus fire control points and allows these points to be reshuffled to
+					   any desired values. This ability is activated during the Firing Phase ... The usual restrictions on the allocation of bonus
+					   fire control points must be observed" - the cap per category stays. HyachComputer::settleFiringBFCP takes the reshuffle. */
 				 	$strongestSystem = null;
 					$strongestValue = -1;
 						foreach ($ship->systems as $system) {
@@ -13253,8 +13389,8 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 						            $strongestSystem = $system;
 
 						            if ($strongestValue > 0) { // Computer actually exists to be enhanced!
-						                $strongestSystem->output += 2;
-										$strongestSystem->BFCPpertype += 1;
+						                $strongestSystem->output += 1;
+										$strongestSystem->allowReshuffle();
 						            }	
 								} 		
 							}
@@ -13525,6 +13661,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 			if ($explodedKey[0] == 'allocated'){ //Update variables to show Specialist used and not available anymore.
 				 $this->allocatedSpec[$explodedKey[1]] = 1;			
 				 $this->availableSpec[$explodedKey[1]] = 0;
+				 $this->useTurns[$explodedKey[1]][(int)$currNote->turn] = true; //OFFICERS_PLAN.md Stage 26: WHEN - an Expert Software Engineer's reuse
 			}	 	
 		}
 		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
@@ -13559,7 +13696,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 	        $this->data["Special"] .= "<br>On the Turn this ship deploys, select which Specialists this ship will have available.";        	   
 	        $this->data["Special"] .= "<br>Activate Specialist(s) by clicking their '+' button during Initial Orders."; 
 	        $this->data["Special"] .= "<br>Each Specialist can be used once, with these effects on the turn they are used:";
-			$this->data["Special"] .= "<br>  - Computer: +2 BFCP, +1 BFCP per type."; 
+			$this->data["Special"] .= "<br>  - Computer: in the Firing phase, +1 BFCP and every BFCP may be reallocated."; 
 			$this->data["Special"] .= "<br>  - Defence: Profiles lowered by 10%, all intercept ratings +10%."; 
 			$this->data["Special"] .= "<br>  - Engine: +25% Thrust."; 
 			$this->data["Special"] .= "<br>  - Maneuvering: +10% thrust, Turn Cost one level lower, halves Turn Delay.";
@@ -13574,7 +13711,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 	        $this->data["Special"] .= "<br>Activate Specialist(s) by clicking their '+' button during Initial Orders."; 
 	        $this->data["Special"] .= "<br>Each Specialists can be used once, with these effects on the turn they are used:";
 				foreach($this->allocatedSpec as $specialistType => $specValue) {
-					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +2 BFCP, +1 BFCP per type.';
+					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  -  '.$specialistType . ': in the Firing phase, +1 BFCP and every BFCP may be reallocated.';
 					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  -  '.$specialistType . ': Profiles lowered by 10%, intercept ratings +10%.';
 					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +25% Thrust.';
 					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +10% thrust, Turn Cost one level lower, halves Turn Delay.';

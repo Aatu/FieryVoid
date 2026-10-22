@@ -3311,6 +3311,9 @@ var HyachComputer = function HyachComputer(json, ship) {
 	ShipSystem.call(this, json, ship);
 	this.allocatedBFCP = Object.assign({}, this.allocatedBFCP);
 	this.data = Object.assign({}, this.data);
+	/* OFFICERS_PLAN.md Stage 26: what the Firing phase starts from and a held point is added to - Initial Orders' allocation (the server's
+	   ioBFCP once a Firing-phase one has replaced it), taken as the ship is built, before any click or Save Orders restore moves it. */
+	this.lockedBFCP = Object.assign({}, this.ioBFCP || this.allocatedBFCP);
 };
 HyachComputer.prototype = Object.create(ShipSystem.prototype);
 HyachComputer.prototype.constructor = HyachComputer;
@@ -3350,6 +3353,12 @@ HyachComputer.prototype.canIncrease = function () { //check if can increase rati
 	this.getCurrClass();
 	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
 
+	if (gamedata.gamephase === 3) { //Stage 26: the Firing-phase allocation (firingMode) - a held point is ONE more than Initial Orders'
+		var mode = this.firingMode();
+		if (!mode) return false;
+		if (mode === 'hold' && this.totalOf(this.allocatedBFCP) >= this.totalOf(this.lockedBFCP) + officers.SOFTWARE_BFCP) return false;
+	}
+
 	if (this.BFCPtotal_used >= (this.output)) return false; //Is the number of BFCP points used more than possible by this HC?	
 
 	//how many are allocated?
@@ -3367,6 +3376,12 @@ HyachComputer.prototype.canIncrease = function () { //check if can increase rati
 HyachComputer.prototype.canDecrease = function () { //can decrease if something was increased
 	this.getCurrClass();
 	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover!  Should never happen.		
+
+	if (gamedata.gamephase === 3) { //Stage 26: in the Firing phase only what may move there - with a held point, only that point
+		var mode = this.firingMode();
+		if (!mode) return false;
+		if (mode === 'hold') return this.allocatedBFCP[this.currClass] > (this.lockedBFCP[this.currClass] || 0);
+	}
 
 	if (this.allocatedBFCP[this.currClass] > 0) return true;
 	return false;
@@ -3440,6 +3455,9 @@ HyachComputer.prototype.setCurrFCType = function (FCType) { //sets indicated FC 
 };
 HyachComputer.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
 	this.individualNotesTransfer = Array();
+	/* Stage 26: in the Firing phase an allocation that changed there goes marked - ['firingBFCP', one FC type per point], written as one
+	   note (HyachComputer::saveFirePhaseDeclaration) and judged on the loaded ship (settleFiringBFCP). Unchanged, it goes as ever below. */
+	if (gamedata.gamephase === 3 && this.firingMode() && !this.sameAllocation(this.allocatedBFCP, this.lockedBFCP)) this.individualNotesTransfer.push('firingBFCP');
 	//every point is denoted as single entry with damage class name
 	var FCCategories = Object.keys(this.allocatedBFCP);
 	var currType = '';
@@ -3450,9 +3468,42 @@ HyachComputer.prototype.doIndividualNotesTransfer = function () { //prepare indi
 	return true;
 };
 
-//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the allocation and its running total.
+/* ⭐ OFFICERS_PLAN.md Stage 26 - may this Computer's points be allocated in the Firing phase now, and how: 'reshuffle' while a Computer
+   Specialist is used this turn (every point - "allows these points to be reshuffled to any desired values ... during the Firing Phase"),
+   'hold' while an Expert Software Engineer serves in it (one point added to Initial Orders', none moved), or null. Own ships only.
+   ⚠️ MIRROR PAIR with HyachComputer::settleFiringBFCP (PHP). */
+HyachComputer.prototype.firingMode = function () {
+	if (!window.gamedata || gamedata.gamephase !== 3) return null;
+	var ship = this.ship;
+	if (!ship || (typeof gamedata.isMyShip === 'function' && !gamedata.isMyShip(ship))) return null;
+	if (shipManager.systems.isDestroyed(ship, this)) return null;
+	var specialists = shipManager.systems.getSystemByName(ship, 'hyachSpecialists');
+	if (specialists && specialists.specAllocatedCount && specialists.specAllocatedCount['Computer'] > 0) return 'reshuffle';
+	if (window.officers && officers.holdsFiringBFCP(ship, this)) return 'hold';
+	return null;
+};
+HyachComputer.prototype.totalOf = function (allocation) {
+	var total = 0;
+	for (var type in allocation) total += parseInt(allocation[type], 10) || 0;
+	return total;
+};
+HyachComputer.prototype.sameAllocation = function (a, b) {
+	var types = Object.keys(Object.assign({}, a, b));
+	for (var i = 0; i < types.length; i++) {
+		if ((parseInt(a[types[i]], 10) || 0) !== (parseInt(b[types[i]], 10) || 0)) return false;
+	}
+	return true;
+};
+//Stage 26: back to what the Firing phase started from - a Computer Specialist cancelled takes its reshuffle with it (HyachSpecialists.doDecrease)
+HyachComputer.prototype.restoreFiringBase = function () {
+	this.allocatedBFCP = Object.assign({}, this.lockedBFCP);
+	this.BFCPtotal_used = this.totalOf(this.allocatedBFCP);
+	this.refreshData();
+};
+
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the allocation and its running total - in the Firing phase too (Stage 26).
 HyachComputer.prototype.draftStateKeys = ['allocatedBFCP', 'BFCPtotal_used'];
-HyachComputer.prototype.draftStatePhases = [1];
+HyachComputer.prototype.draftStatePhases = [1, 3];
 HyachComputer.prototype.afterDraftRestore = function () {
 	this.refreshData();
 };
@@ -3594,15 +3645,19 @@ HyachSpecialists.prototype.canUse = function () { //check if can increase rating
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 
+	//OFFICERS_PLAN.md Stage 26: a software Specialist an Expert Software Engineer lets this ship use a second time (the server's list)
+	var reuse = window.officers ? officers.specialistReusable(this.ship, this, this.specCurrClass) : false;
+
 	//total pool of Specialists used?
-	if (!this.availableSpec[this.specCurrClass]) return false; //Not selected, can't increase or decrease on Turn 1.
-	if (this.availableSpec[this.specCurrClass] < 1) return false; //Not selected, can't increase or decrease on Turn 1.
+	if (!reuse && !this.availableSpec[this.specCurrClass]) return false; //Not selected, can't increase or decrease on Turn 1.
+	if (!reuse && this.availableSpec[this.specCurrClass] < 1) return false; //Not selected, can't increase or decrease on Turn 1.
 
 	if (gamedata.gamephase !== 1 &&
-		(this.specCurrClass == 'Computer' ||
-			this.specCurrClass == 'Power' ||
+		(this.specCurrClass == 'Power' ||
 			this.specCurrClass == 'Repair' ||
 			this.specCurrClass == 'Sensor')) return false; //Can only use on Initial Orders	
+	//Stage 26: the Computer Specialist's own rules - "This ability is activated during the Firing Phase" (it was Initial Orders, +2 BFCP)
+	if (gamedata.gamephase !== 3 && this.specCurrClass == 'Computer') return false;
 
 	if ((gamedata.gamephase !== 1 && gamedata.gamephase !== 2) &&
 		(this.specCurrClass == 'Engine' ||
@@ -3612,6 +3667,7 @@ HyachSpecialists.prototype.canUse = function () { //check if can increase rating
 
 	//Has it been allocated?
 	var allocatedThisTurn = this.specAllocatedCount[this.specCurrClass];//0 or 1
+	if (reuse) return !(allocatedThisTurn > 0); //Stage 26: its first use was an earlier turn - only this turn's counts
 	var allocatedPreviousTurns = 0;
 	if (this.allocatedSpec && this.allocatedSpec[this.specCurrClass] !== undefined && this.allocatedSpec[this.specCurrClass] !== null && this.allocatedSpec[this.specCurrClass] !== "") {
 		// allocatedSpec is not null, we can use it here
@@ -3628,14 +3684,20 @@ HyachSpecialists.prototype.canDecrease = function () { //can decrease if somethi
 	if (gamedata.gamephase == -1) return false;
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialists whatsover!
-	if (!this.availableSpec[this.specCurrClass]) return false; //Not selected, can't increase or decrease on Turn 1.
-	if (this.availableSpec[this.specCurrClass] < 1) return false; //Not selected, can't increase or decrease on Turn 1.
+	var reuse = window.officers ? officers.specialistReusable(this.ship, this, this.specCurrClass) : false; //Stage 26: a second use, cancelled
+	if (!reuse && !this.availableSpec[this.specCurrClass]) return false; //Not selected, can't increase or decrease on Turn 1.
+	if (!reuse && this.availableSpec[this.specCurrClass] < 1) return false; //Not selected, can't increase or decrease on Turn 1.
 
 	if (this.specAllocatedCount[this.specCurrClass] > 0) return true;	//If it's been increased, you can decrease.
 
 	return false;
 };
 
+
+//OFFICERS_PLAN.md Stage 26: is a use of `type` this turn its SECOND - an Expert Software Engineer's reuse (the server's list says which may)
+HyachSpecialists.prototype.isSecondUse = function (type) {
+	return Boolean(window.officers) && officers.specialistReuseList(this.ship).indexOf(type) !== -1;
+};
 
 HyachSpecialists.prototype.doSelect = function () { //increase AA usage
 	this.getCurrClass();
@@ -3674,7 +3736,7 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 
 	this.currAllocatedSpec[this.specCurrClass] = 'allocated';
 	this.specAllocatedCount[this.specCurrClass] = 1;	//Just for Status Window.
-	this.specTotal_used++;
+	if (!this.isSecondUse(this.specCurrClass)) this.specTotal_used++; //Stage 26: a second use spends no Specialist slot
 	this.specIncreased[this.specCurrClass] = true;
 	this.specDecreased[this.specCurrClass] = false;
 
@@ -3682,11 +3744,12 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 
 	switch (this.specCurrClass) {
 		case 'Computer'://Make front-end changes to Computer Output
+			//OFFICERS_PLAN.md Stage 26 - its own rules: +1 BFCP, the cap per category unchanged, every point free to move this Firing phase
+			//(HyachComputer.firingMode reads this Specialist's specAllocatedCount)
 			for (var i in ship.systems) {
 				var system = ship.systems[i];
 				if (system instanceof HyachComputer) {
-					system.output += 2;
-					system.BFCPpertype += 1; //Increase amount per category
+					system.output += 1;
 					system.refreshData();
 				}
 			}
@@ -3832,7 +3895,7 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 	this.specDecreased[this.specCurrClass] = true;
 	this.specIncreased[this.specCurrClass] = false;
 
-	this.specTotal_used--;
+	if (!this.isSecondUse(this.specCurrClass)) this.specTotal_used--; //Stage 26, as doUse
 	var ship = this.ship;
 
 	switch (this.specCurrClass) {
@@ -3841,9 +3904,8 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 				var system = ship.systems[i];
 
 				if (system instanceof HyachComputer) {
-					system.output -= 2;
-					system.BFCPpertype -= 1; //Increase amount per category
-					system.refreshData();
+					system.output -= 1;
+					system.restoreFiringBase(); //Stage 26: its reshuffle goes with it
 				}
 			}
 			break;

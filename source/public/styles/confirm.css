@@ -2305,12 +2305,15 @@
     color: var(--fv-text);
     background: transparent;
     border: 0;
+    text-align: center;
+    text-align-last: center; /* Chrome/Edge align a closed select's text by this, not text-align */
 }
 
 /* The open list is drawn by the OS on a white background, so its text has to be dark. */
 .confirm.buyDialog .enhChoiceSelect option {
     color: #000;
     background: #fff;
+    text-align: center;
 }
 
 /* ── The foot: the total on a row of its own over the buttons, right-aligned (user, Stage 9) ── */
