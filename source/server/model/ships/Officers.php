@@ -169,7 +169,7 @@ class Officers{
 		'the conquest of the Xon', 'the ingratitude of the Narn', 'the glory of the Imperial Fleet', 'the favour of the Great Maker',
 		'the treachery of rival Houses', 'the burden of Empire', 'the Emperor\'s latest decree', 'the sacrifices of the Orieni War',
 		'the necessity of unquestioning loyalty', 'the proper height of a hair crest', 'the virtues of a well-aged brivari',
-		'the splendour of the Imperial Palace gardens', 'his own distinguished family', 'the colour purple',
+		'the splendour of the Imperial Palace gardens', 'his own distinguished family', 'his favourite colour, purple',
 		'the price of spoo', 'the importance of good tailoring' 
 	);
 	//...a Medium ship's side, looked at from its own bearing (a "TAG:" hit chart entry is arc-filtered): Front, Aft, Left, Right
