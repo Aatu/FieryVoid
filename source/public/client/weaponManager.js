@@ -3240,6 +3240,9 @@ window.weaponManager = {
         if (gamedata.gamephase !== 3) return false; //R1 - Firing phase only
         if (!ship || !weapon || !weapon.weapon || !ball || !ball.fireOrder) return false;
         if (!gamedata.isMyShip(ship)) return false;
+        //The weapon must be one of THIS unit's: the order is stamped with ship.id and the weapon's id, so another
+        //unit's weapon would be written as whatever system holds that id here (game 4507 - see ShipTooltip.update).
+        if (shipManager.systems.getSystem(ship, weapon.id) !== weapon) return false;
         if (shipManager.isDestroyed(ship)) return false;
         if (!ship.flight && shipManager.isDisabled(ship)) return false;
 

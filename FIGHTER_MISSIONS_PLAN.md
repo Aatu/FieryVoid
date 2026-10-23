@@ -531,6 +531,22 @@ Gates: `fighterMissionsHarness.php` 178/0 (+10 z cases incl. the real `TacGameda
 now skips games that already hold FtrMission notes - it had picked play-test game 4506); client 76/1 (REGISTRY, §9.7);
 `fvbuild -Check` all green, replay 162/0 (the corpus has no mission notes, so no `z`).
 
+### 9.9 Play-test feedback, game 4507 (user, 2026-10-23)
+
+**A no-mission flight in a ship's hex could "intercept" for it on the client; the server never applied it.** Not the mission
+mirror - `canInterceptBallistic`'s flight branch was right. The INCOMING list's interceptor (`ShipTooltipBallisticsMenu.selectedShip`)
+was fixed when the tooltip was built, and `ShipTooltip.update` re-pointed only the button menu: open G'Quan #1's tooltip, select
+Frazi #6's guns (the selection moves to the flight, the tooltip stays), and the list went on asking `canInterceptBallistic(G'Quan,
+Frazi gun, shot at G'Quan)` - the "fire aimed at itself" case, so no mission or hex test ran. The orders were stamped with the
+G'Quan's id and the guns' ids: 4507 holds intercepts 877800/weapon 11 (the G'Quan's Energy Mine) and 14 (a Light Pulse), both with
+the Paired Particle Gun's `shots: 2`; the server dropped both (497980 credits 6 sources of 8).
+Fixes: `ShipTooltip.update` also sets `ballisticsMenu.selectedShip`; `canInterceptBallistic` refuses a weapon that is not on `ship`
+(`shipManager.systems.getSystem(ship, weapon.id) !== weapon`) - the server cannot catch this, as the posted order names a real
+system of the wrong unit.
+
+Gates: `fighterMissionsClientHarness.js` 78/1 (+2: a ship's own gun yes; a flight's gun as the ship's interceptor no - fails with the
+guard removed; the 1 = REGISTRY, §9.7). Legacy bundle rebuilt (`bundle-legacy.js`, the watcher had missed it) + `-Sync`.
+
 ---
 
 ## 10. Traps this feature walks past

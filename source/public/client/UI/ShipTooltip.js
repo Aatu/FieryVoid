@@ -125,6 +125,14 @@ window.ShipTooltip = function () {
             this.menu.currentInfo = "";
         }
 
+        //The INCOMING list's interceptor is the selected unit as well, so it has to follow the selection too. Without
+        //this, selecting a flight's guns while a ship's tooltip stayed open left that SHIP as the interceptor, and the
+        //flight's guns were offered against shots at the ship as the ship's own - no Defensive Intercept check at all
+        //(game 4507: the orders were written as the ship's systems of the same ids, and the server dropped them).
+        if (selectedShip && this.ballisticsMenu) {
+            this.ballisticsMenu.selectedShip = selectedShip;
+        }
+
         jQuery(".buttons", this.element).html("");
         jQuery(".namecontainer", this.element).html("");
         //⚠️ `.fire.targeting`, NOT `.fire`. The TARGETING heading and the rows beneath it are two
