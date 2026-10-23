@@ -535,12 +535,18 @@ window.ShipTooltip = function () {
         */
         toDisplay = '';
         if (ship.hasNavigator === true) toDisplay += 'Navigator; ';
+        /* ESCORTING RETIRED 2026-10-22 (FIGHTER_MISSIONS_PLAN.md): the Defensive Intercept mission replaced the escort
+           rule, so a flight's ballistic cover now reads in the mission line below ("Defensive Intercept: covering ...").
         var listEscorting = shipManager.listEscorting(ship);
         if (listEscorting != '') {
             toDisplay += '<span class="escorting">Escorting: </span>';
             //list of unit names
             toDisplay += listEscorting;
         }
+        */
+        //a flight's fighter mission, for every viewer (missions are always known; the CSP key ship is own team only)
+        var missionLine = (ship.flight && window.fighterMissions) ? fighterMissions.tooltipLine(ship) : null;
+        if (missionLine) toDisplay += '<span style="color:' + missionLine.color + ';">' + missionLine.text + '</span>';
         this.addEntryElement(toDisplay, toDisplay != '');
 
         if (ship.mine) {
@@ -561,7 +567,9 @@ window.ShipTooltip = function () {
             if (iniProjection && !iniProjection[ship.id]) iniProjection = null;
             var iniOrder = iniProjection ? CnC.getProjectedIniativeOrder(ship, iniProjection) : shipManager.getIniativeOrder(ship);
             var iniTotal = iniProjection ? iniProjection[ship.id].iniative : ship.iniative;
-            this.addEntryElement("Ini Order: " + iniOrder + " (total " + iniTotal + "): base " + ship.iniativebonus + "; mod " + ship.iniativeadded);
+            //a fighter mission's -60 / CSP +5 is applied when Initial Orders close, on top of the loaded modifiers (FIGHTER_MISSIONS_PLAN.md §3.6)
+            var iniMod = Number(ship.iniativeadded) + ((ship.flight && window.fighterMissions) ? fighterMissions.iniativeModifier(ship) : 0);
+            this.addEntryElement("Ini Order: " + iniOrder + " (total " + iniTotal + "): base " + ship.iniativebonus + "; mod " + iniMod);
 
             /*miscellanous info - once inserted, now disappeared; if it's needed, look for source code in Abbai branch!
             toDisplay = shipManager.systems.getMisc(ship);
@@ -642,10 +650,12 @@ window.ShipTooltip = function () {
 
             this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);
         }
+        //Scout Penetration: both profiles -1 against every shot (FIGHTER_MISSIONS_PLAN.md §3.5); the printed profile stays in brackets
+        var missionProfile = (ship.flight && window.fighterMissions) ? fighterMissions.profileModifier(ship) : 0;
         //Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24
-        var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
+        var fDef = weaponManager.calculateBaseHitChange(ship, Number(ship.forwardDefense) + missionProfile) * 5;
         fDef = parseFloat(fDef.toFixed(2));
-        var sDef = weaponManager.calculateBaseHitChange(ship, ship.sideDefense) * 5;
+        var sDef = weaponManager.calculateBaseHitChange(ship, Number(ship.sideDefense) + missionProfile) * 5;
         sDef = parseFloat(sDef.toFixed(2));
 
         this.addEntryElement("Defence (F/S): " + fDef + "(" + ship.forwardDefense * 5 + ") / " + sDef + "(" + ship.sideDefense * 5 + ")%");

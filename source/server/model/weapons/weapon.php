@@ -2007,10 +2007,13 @@ public function getFullStartLoading()
             $mod += $this->getTailGunMod($shooter, $gamedata->turn); //a tail gun fired with its craft's other direct-fire weapons (Stage 21)
 
             $effectiveOB = $shooter->offensivebonus;
+            /* FIGHTER MISSIONS (FIGHTER_MISSIONS_PLAN.md D5): the mission's term goes on the bonus BEFORE the crit and
+               mine-detection deductions, for the turn the shot belongs to. ⚠️ MIRROR PAIR with weaponManager.computeOEW. */
+            if (TacGamedata::$fighterMissionsPresent) $effectiveOB = FighterMissions::adjustOffensiveBonus($shooter, $target, $this, $fireOrder->turn, $effectiveOB);
             $firstFighter = $shooter->getSampleFighter();
             $OBcrit = $firstFighter->hasCritical("tmpsensordown");
             $mdew = $shooter->getEWByType("Detect Mines", $gamedata->turn); //-1 OB for each point of Mine Detect
-            $effectiveOB = $shooter->offensivebonus - $OBcrit - ($mdew * 2); //Every point of mdew costs 2 OB
+            $effectiveOB = $effectiveOB - $OBcrit - ($mdew * 2); //Every point of mdew costs 2 OB
             
             //if ($OBcrit > 0) {
             $effectiveOB = max(0, $effectiveOB); //cannot bring OB below 0!
@@ -2318,6 +2321,13 @@ public function getFullStartLoading()
 	                $defence += 1;
 	                $defenceFake += 1;
                 }
+            }
+            //a flight on Scout Penetration: both profiles -1 (FIGHTER_MISSIONS_PLAN.md §3.5). ⚠️ MIRROR PAIR with the
+            //'Fighter Mission' row in weaponManager.calculateHitChange. A flat called-shot profile below replaces it.
+            if (TacGamedata::$fighterMissionsPresent){
+                $scoutMod = FighterMissions::profileModifier($target, $fireOrder->turn);
+                $defence += $scoutMod;
+                $defenceFake += $scoutMod;
             }
         }
 

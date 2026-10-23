@@ -368,6 +368,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/UI/SelectFromShips.js"></script>
     <script defer src="client/UI/shipTooltipMenu.js"></script>
     <script defer src="client/UI/shipTooltipInitialOrdersMenu.js"></script>
+    <script defer src="client/UI/fighterMissionPicker.js"></script>
     <script defer src="client/UI/shipTooltipFireMenu.js"></script>
     <!-- MUST stay after shipTooltipMenu.js - it extends it at definition time (JUMP_POINTS_PLAN.md Stage 4). -->
     <script defer src="client/UI/shipTooltipMovementMenu.js"></script>
@@ -407,6 +408,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/systemEnhancements.js"></script>
     <!-- OFFICERS_PLAN.md - window.officers: the insignia, the tooltip lines and the ship-level list -->
     <script defer src="client/officers.js"></script>
+    <script defer src="client/fighterMissions.js"></script>
     <script defer src="client/savedFleets.js"></script>
     <!-- SAVE_ORDERS_PLAN.md - the floppy beside the commit tick, and the OPTIONS tab's Saved
          Orders block. Everything it calls is runtime-only, so its place in the list is free. -->

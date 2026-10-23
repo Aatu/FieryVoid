@@ -3797,6 +3797,8 @@ class DBManager
 		//JumpEngine::onIndividualNotesLoaded when it restores an 'EDJD' note, in the sweep below - so it
 		//is cleared here, for the reason the CPD gate above is.
 		TacGamedata::$abductionPresent = false;
+		//...and so is the fighter mission gate (FIGHTER_MISSIONS_PLAN.md §3.1), set by the FtrMission notes below
+		TacGamedata::$fighterMissionsPresent = false;
 
 		foreach ($gamedata->ships as $ship){
             $shipNotes = isset($allNotes[$ship->id]) ? $allNotes[$ship->id] : array();
@@ -3811,6 +3813,8 @@ class DBManager
 				}
 				//...and so are an officer's move to another post and a Gunner's spent ability (Stage 10)
 				if (Officers::takeNote($ship, $currNote)) continue;
+				//...and a fighter flight's mission (FIGHTER_MISSIONS_PLAN.md §3.1), which sits on its sample fighter
+				if (FighterMissions::takeNote($ship, $currNote)) continue;
 				//...and so is a fighter officer's move with his fighter to another flight row (Stage 4)
 				if (Officers::isMoveNote($currNote)){
 					$ship->recordOfficerMove($currNote->notevalue, $currNote->turn, $currNote->systemid);

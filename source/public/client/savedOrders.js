@@ -276,6 +276,12 @@ window.savedOrders = {
 			};
 		}
 
+		//A flight's pending fighter mission pick (FIGHTER_MISSIONS_PLAN.md §3.11), sent by the Initial Orders commit.
+		//A flight-level choice, so it cannot ride a craft's system draft.
+		if (phase === 1 && ship.flight && ship.fighterMissionOrder) {
+			rec.mission = { m: ship.fighterMissionOrder.m, k: ship.fighterMissionOrder.k || 0 };
+		}
+
 		if (ship.flight) {
 			var ftr = {};
 			for (var f in ship.systems) {
@@ -527,6 +533,12 @@ window.savedOrders = {
 			ship.arrivalHangar = rec.ship.arrivalHangar;
 		}
 
+		//the pending fighter mission becomes exactly the draft's - set, or cleared (§3.11)
+		if (phase === 1 && ship.flight) {
+			if (rec.mission && window.fighterMissions && fighterMissions.canChoose(ship)) ship.fighterMissionOrder = savedOrders.copy(rec.mission);
+			else delete ship.fighterMissionOrder;
+		}
+
 		if (ship.flight) {
 			var ftr = rec.ftr || {};
 			var seenFighters = {};
@@ -685,7 +697,7 @@ window.savedOrders = {
 	/* Orders in draft records that no longer resolve - counted for the notice. Approximate by
 	   design: a fire order is one, and a system's power or settings count as one between them. */
 	countShipOrders: function countShipOrders(rec) {
-		var n = (rec.EW ? rec.EW.length : 0) + (rec.move ? rec.move.length : 0);
+		var n = (rec.EW ? rec.EW.length : 0) + (rec.move ? rec.move.length : 0) + (rec.mission ? 1 : 0);
 		for (var id in (rec.sys || {})) n += savedOrders.countOrders(rec.sys[id]);
 		for (var fid in (rec.ftr || {})) n += savedOrders.countOrders(rec.ftr[fid]);
 		return n;

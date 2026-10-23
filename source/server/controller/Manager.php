@@ -2816,6 +2816,11 @@ class Manager{
                (Officers::saveTransfers) before writing it, and every other phase ignores the field. */
             $ship->setOfficerTransferClaims($value["officerTransfers"] ?? array());
 
+            /* FIGHTER_MISSIONS_PLAN.md §3.7 - the mission the player picked for a flight this turn, {m, k}. A CLAIM,
+               carried raw: InitialOrdersGamePhase::process checks it against the loaded flight (FighterMissions::
+               saveClaim) before writing it, and every other phase ignores the field. */
+            if ($ship instanceof FighterFlight) $ship->setFighterMissionClaim($value["fighterMission"] ?? null);
+
             $systems = $value["systems"] ?? [];
             foreach ($systems as $i => $system) {
                 $sys = $ship->getSystemById($i);

@@ -1276,6 +1276,7 @@ spl_autoload_register(
                 'fighterflight' => '/server/model/ships/FighterFlight.php',
                 'fighterimprsensors' => '/server/model/systems/baseSystems.php',
                 'fightermissilerack' => '/server/model/weapons/missile.php',
+                'fightermissions' => '/server/model/ships/FighterMissions.php',
                 'fighterrail' => '/server/model/systems/baseSystems.php',
                 'fightertorpedolauncher' => '/server/model/weapons/missile.php',
                 'firefalcon' => '/server/model/ships/drazi/firefalcon.php',

@@ -88,7 +88,15 @@ class FighterFlight extends BaseShip
     public $team;
 
     protected $dropOutBonus = 0;
-	protected $specialDropout = false; //Has special rules for dropout.    
+	protected $specialDropout = false; //Has special rules for dropout.
+
+	/* FIGHTER_MISSIONS_PLAN.md §3.1 - the flight's mission history, one array('t' => turn, 'm' => mission id,
+	   'k' => CSP key ship id or 0, 'f' => free pick) per FtrMission note, read off the notes by DBManager's note
+	   loop (FighterMissions::takeNote); and what a POST of Initial Orders asked for (a claim, checked by
+	   FighterMissions::saveClaim against the reloaded flight). PROTECTED for $crewQuality's reason: a public empty
+	   default would put a dead key on every static blueprint. */
+	protected $fighterMissions = array();
+	protected $fighterMissionClaim = null;
 
     public $movement = array();
 
@@ -192,7 +200,35 @@ class FighterFlight extends BaseShip
             $strippedShip->isModified = $this->isModified;
         }
 
+        FighterMissions::addForJson($this, $strippedShip); //every eligible flight, missions are public (FIGHTER_MISSIONS_PLAN.md §3.8)
+
         return $strippedShip;
+    }
+
+    public function getFighterMissions(){
+        return $this->fighterMissions;
+    }
+
+    //one FtrMission note (FighterMissions::takeNote), or a pick saved in this request (saveClaim)
+    public function recordFighterMission($turn, $mission, $key, $free){
+        $this->fighterMissions[] = array('t' => (int)$turn, 'm' => (string)$mission, 'k' => (int)$key, 'f' => (bool)$free);
+        TacGamedata::$fighterMissionsPresent = true;
+    }
+
+    //phase-1 masking for another player's view (FighterMissions::hideCurrentTurnChoice)
+    public function dropFighterMissionsOn($turn){
+        $this->fighterMissions = array_values(array_filter($this->fighterMissions, function($entry) use ($turn){
+            return $entry['t'] !== (int)$turn;
+        }));
+    }
+
+    public function getFighterMissionClaim(){
+        return $this->fighterMissionClaim;
+    }
+
+    //what a POST of Initial Orders asks for (Manager::getShipsFromJSON) - RAW, a claim; nothing trusts it unchecked
+    public function setFighterMissionClaim($claim){
+        $this->fighterMissionClaim = is_array($claim) ? $claim : null;
     }
 
     private $autoid = 1;

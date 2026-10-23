@@ -610,7 +610,10 @@ CnC.getIniativeCategory = function (raw) {
    swapped with a valid partner's, then +10 on the node (on the raw total, re-categorised, under simultaneous
    movement) - the bonus is the node's own and never travels with the swap (ruling C4) - then, classic movement
    only, the +1 nudge off an exact tie, node first. Only nominations this client can see are projected: its
-   own and its team's, while the phase is open. */
+   own and its team's, while the phase is open.
+   FIGHTER MISSIONS (FIGHTER_MISSIONS_PLAN.md §3.6, user 2026-10-22): the server's NEXT step at the close is
+   projected too, in the same order - FighterMissions::applyInitiative, a mission change -60 (loses its ties),
+   a Combat Space Patrol in its zone +5 (wins them). */
 CnC.getIniativeProjection = function () {
 	if (gamedata.gamephase != 1) return null;
 	var simultaneous = CnC.isSimultaneousMovement();
@@ -618,6 +621,33 @@ CnC.getIniativeProjection = function () {
 	var projection = null;
 	var changed = [];
 	var fleetsDone = {};
+	var start = function () {
+		if (projection) return;
+		projection = {};
+		gamedata.ships.forEach(function (s) { projection[s.id] = { iniative: s.iniative, raw: s.unmodifiedIniative }; });
+	};
+	//+amount on the raw total, re-categorised, under simultaneous movement; on the total itself in a classic game
+	var shift = function (id, amount) {
+		var p = projection[id];
+		if (simultaneous) {
+			p.raw = Number(p.raw) + amount;
+			p.iniative = CnC.getIniativeCategory(p.raw);
+		} else {
+			p.iniative = Number(p.iniative) + amount;
+		}
+	};
+	//classic movement only: each changed ship steps off an exact tie, +1 winning it or -1 losing it (CnC::breakCommandNodeTies)
+	var breakTies = function (ids, step) {
+		ids.forEach(function (id) {
+			var tied;
+			do {
+				tied = gamedata.ships.some(function (other) {
+					return other.id != id && Number(projection[other.id].iniative) === Number(projection[id].iniative);
+				});
+				if (tied) projection[id].iniative = Number(projection[id].iniative) + step;
+			} while (tied);
+		});
+	};
 
 	gamedata.ships.forEach(function (ship) {
 		var node = CnC.getTriadNode(ship);
@@ -627,10 +657,7 @@ CnC.getIniativeProjection = function () {
 		if (fleetsDone[fleet]) return;
 		fleetsDone[fleet] = true;
 
-		if (!projection) {
-			projection = {};
-			gamedata.ships.forEach(function (s) { projection[s.id] = { iniative: s.iniative, raw: s.unmodifiedIniative }; });
-		}
+		start();
 		var mine = projection[ship.id];
 		changed.push(ship.id);
 
@@ -643,24 +670,24 @@ CnC.getIniativeProjection = function () {
 		}
 
 		//the node keeps its +10, swapped or not
-		if (simultaneous) {
-			mine.raw = Number(mine.raw) + 10;
-			mine.iniative = CnC.getIniativeCategory(mine.raw);
-		} else {
-			mine.iniative = Number(mine.iniative) + 10;
-		}
+		shift(ship.id, 10);
 	});
 
-	if (projection && !simultaneous) {
-		changed.forEach(function (id) {
-			var tied;
-			do {
-				tied = gamedata.ships.some(function (other) {
-					return other.id != id && Number(projection[other.id].iniative) === Number(projection[id].iniative);
-				});
-				if (tied) projection[id].iniative = Number(projection[id].iniative) + 1;
-			} while (tied);
+	if (projection && !simultaneous) breakTies(changed, 1);
+
+	if (window.fighterMissions) {
+		var up = [], down = [];
+		gamedata.ships.forEach(function (ship) {
+			var amount = fighterMissions.iniativeModifier(ship);
+			if (!amount) return;
+			start();
+			shift(ship.id, amount);
+			(amount < 0 ? down : up).push(ship.id);
 		});
+		if (!simultaneous) {
+			breakTies(down, -1);
+			breakTies(up, 1);
+		}
 	}
 	return projection;
 };

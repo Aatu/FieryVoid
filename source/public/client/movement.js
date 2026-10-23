@@ -339,6 +339,8 @@ shipManager.movement = {
         var floor = shipManager.movement.getForcedJinking(ship);
         //Expert Pilots' levels do not count against the jinking limit - a separate term, never ship.jinkinglimit (the fighter's weight class)
         var limit = ship.jinkinglimit + (window.officers ? officers.freeJinks(ship) : 0);
+        //...and nor does Scout Penetration's extra level, which is paid for as usual (FIGHTER_MISSIONS_PLAN.md D10)
+        if (window.fighterMissions) limit += fighterMissions.extraJinkLevels(ship);
         if (jinking + accel > limit || jinking + accel < floor) return false;
         return true;
     },

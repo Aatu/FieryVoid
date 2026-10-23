@@ -106,8 +106,8 @@
     <dd>Resolved during normal fire resolution at the end of the turn, rather than in a separate ballistic damage
       sub-phase.</dd>
     <dt>Fighter escorts</dt>
-    <dd>Fighters can intercept ballistics aimed at a ship they are escorting if they start and end their movement in its
-      hex.</dd>
+    <dd>Fighters intercept ballistics aimed at a friendly ship only while flying the Defensive Intercept mission, and
+      only when they end their movement in its hex (see <a href="#fightermissions">Fighter Missions</a>).</dd>
     <dt>Ballistics &amp; jammers</dt>
     <dd>Power and missile launches are simultaneous, so disabling a jammer affects missile launches from the next turn,
       not the current one.</dd>
@@ -912,11 +912,64 @@
 
 <section data-key="escorts" data-title="Fighter Escorts" data-group="Rules &amp; Mechanics">
   <ul>
-    <li>Fighters can escort a friendly ship in the same hex, using their guns to help intercept ballistic weapons aimed
-      at it.</li>
-    <li>To escort a ship, the fighters must start <b>and</b> end their movement in its hex. When they do, they intercept
-      ballistics on its behalf, as long as all the other conditions for interception hold: their weapons have an
-      intercept rating, the incoming shot is in arc, the fighters are not jinking, and so on.</li>
+    <li>Fighters escort a friendly ship by flying the <b>Defensive Intercept</b> mission (see
+      <a href="#fightermissions">Fighter Missions</a>), using their guns to help intercept ballistic weapons aimed at
+      it.</li>
+    <li>A flight on that mission must <b>end</b> its movement in the ship's hex - it does not have to start the turn
+      there. It then intercepts ballistics on the ship's behalf, as long as all the other conditions for interception
+      hold: its weapons have an intercept rating, the incoming shot is in arc (its guns face the hex the ballistic was
+      launched from), and so on. It cannot cover another flight, and it cannot intercept direct fire aimed at the
+      ship.</li>
+    <li>A flight without that mission no longer escorts, even when it starts and ends its movement beside a ship.</li>
+  </ul>
+</section>
+
+<section data-key="fightermissions" data-title="Fighter Missions" data-group="Rules &amp; Mechanics">
+  <p class="fvd-lede">A fighter flight can be given a <b>mission</b> (the Kitchen Sink's optional fighter missions).
+    Missions cost nothing; pick one in Initial Orders with the <b>Fighter Mission</b> button on the flight's own
+    tooltip. Fighter missions are always known - the flight's tooltip shows every player what it is doing.</p>
+
+  <h3>The missions</h3>
+  <table>
+    <thead><tr><th>Mission</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td>No Mission</td><td>The normal role, with no mission effects.</td></tr>
+      <tr><td>Combat Space Patrol</td><td>Guards a zone of 10 hexes around a ship of your fleet that you name (its
+        <i>key ship</i>). While the flight starts a turn within 10 hexes of it, it gets +5 initiative and wins
+        initiative ties, as with an Expert Dogfighter (and on top of one). -15 to hit ships, with every weapon (never
+        below 5).</td></tr>
+      <tr><td>Anti-Ship</td><td>+5 to hit ships with anything but ballistic weapons; -15 to hit fighters (never below
+        5).</td></tr>
+      <tr><td>Scout Penetration</td><td>Both of the flight's defence profiles -5, and it may jink one level beyond its
+        normal limit if it has the thrust. -15 to hit, with every weapon (never below 5).</td></tr>
+      <tr><td>Defensive Intercept</td><td>Intercepts ballistic weapons aimed at a friendly ship whose hex it ends its
+        movement in (see <a href="#escorts">Fighter Escorts</a>). -15 to hit, with every weapon (never below
+        5).</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Choosing and changing</h3>
+  <ul>
+    <li>A flight's pick is <b>free</b> on the turn it arrives on the map: the first Initial Orders after it is deployed
+      or arrives as a reinforcement, and the first after every launch from a hangar. A flight that docks and launches
+      again keeps its mission unless you change it; a flight split off by a partial launch starts with No Mission.</li>
+    <li>Changing the mission at any other time costs <b>-60 initiative</b> on the turn of the change, and the flight
+      has no mission effects at all that turn; the new mission works from the next turn. Going back to No Mission is a
+      change, and so is naming a different key ship for a Combat Space Patrol.</li>
+    <li>Missions are chosen in Initial Orders only, alongside your EW, and your opponent sees the choice when Initial
+      Orders close. The -60 and the Combat Space Patrol bonus are applied to initiative at that moment, so the
+      initiative order can change after Initial Orders.</li>
+    <li>A Combat Space Patrol may leave its zone - you will get a reminder when it ends a move outside it - but it then
+      gets no initiative bonus. Its -15 against ships applies inside the zone and out. The key ship's name is shown to
+      your own side only.</li>
+  </ul>
+
+  <h3>Which craft</h3>
+  <ul>
+    <li>Fighters only. Shuttles of every kind (including armed and assault shuttles and flyers), breaching pods and any
+      other craft that carries marines (such as the Dalithorn Assault Pinnace and the Nausicaan Gliders), lifeboats and
+      yachts, and unmanned craft - Orieni Hunter-Killers, Mapmaker probes, drones, MicroSATs and mines - cannot fly a
+      mission.</li>
   </ul>
 </section>
 
@@ -1218,8 +1271,8 @@
     <li>Fire aimed at a <i>friendly</i> unit - but only by weapons with the free-intercept trait, and only when the
       protected unit lies between them and the incoming shot. Covering someone else is normally left to the automation,
       since the INCOMING list is shown on your own units' tooltips.</li>
-    <li>Fighter flights may protect the ship they are escorting from ballistic fire, if they end their movement in its hex
-      and were in the same hex as the ship at the start of the turn. A flight cannot cover another flight. To do it by
+    <li>Fighter flights on the <a href="#fightermissions">Defensive Intercept</a> mission may protect a friendly ship
+      from ballistic fire, if they end their movement in its hex. A flight cannot cover another flight. To do it by
       hand, select the flight and its weapons, then click the escorted ship (or pick it from the hex list): the flight
       stays selected, and the ship's INCOMING list takes the flight's weapons. Use <b>Select ship</b> in that tooltip
       to switch to the ship itself.</li>

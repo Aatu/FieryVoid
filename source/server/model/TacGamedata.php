@@ -71,6 +71,11 @@ class TacGamedata {
       from an earlier load in the same request is harmless: every rule behind it also asks the
       ship's own officer list, which is empty until that ship's onConstructed has run.*/
     public static $officersPresent = false;
+    /*FIGHTER_MISSIONS_PLAN.md §3.1 - has any flight in this load a mission note? Every per-shot mission rule (OB,
+      Scout profile, Defensive Intercept) and the initiative pass ask behind it, so an ordinary game pays one static
+      read. Set by FighterFlight::recordFighterMission; ⚠️ RESET in DBManager::getSystemDataForShips immediately before
+      the note sweep that sets it (one request loads gamedata twice), the $abductionPresent slot.*/
+    public static $fighterMissionsPresent = false;
     /*D15, second half: a FINISHED game drops every deception so the post-mortem shows what actually
       happened. Set from $this->status, read by applyChameleonDisguise() and maskChameleonArming().
       Deliberately NOT implemented by forcing the two gates above to false: maskChameleonFireOrders()
@@ -294,6 +299,9 @@ class TacGamedata {
                 $penalty = (int)$ship->getReinforcementArrivalIniModifier($this);
                 if ($penalty !== 0) $strippedShip->arrivalIniPenalty = $penalty;
             }
+
+            //FIGHTER MISSIONS (FIGHTER_MISSIONS_PLAN.md §9.8) - an opponent's CSP +5, told without naming the key ship
+            if (self::$fighterMissionsPresent) FighterMissions::addZoneForJson($ship, $strippedShip, $this);
 
             $strippedGamedata->ships[] = $strippedShip;
         }
@@ -1696,6 +1704,9 @@ class TacGamedata {
                             $system->power = array();
                         }
                     }
+
+                    //a fighter mission picked in these Initial Orders is announced with the EW (FIGHTER_MISSIONS_PLAN.md D8)
+                    if (self::$fighterMissionsPresent) FighterMissions::hideCurrentTurnChoice($ship, $this->turn);
                 }
             }
         }

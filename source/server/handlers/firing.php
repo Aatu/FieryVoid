@@ -1579,6 +1579,16 @@ class Firing
                     } else {//target is ship
                         $selfPosNow = $interceptingShip->getCoPos();
                         $targetPosNow = $target->getCoPos();
+
+                        /* ⭐ FIGHTER_MISSIONS_PLAN.md (user, 2026-10-22) - THE DEFENSIVE INTERCEPT MISSION REPLACES
+                           ESCORTING. A flight protects a friendly ship from ballistics only while flying that mission
+                           on the turn the shot belongs to, and in the ship's hex when fire resolves - it no longer has
+                           to have started the turn there. The weapon's arc toward the launch hex (above) is "face its
+                           guns towards the launch hex". ⚠️ MIRROR PAIR with weaponManager.canInterceptBallistic.
+                           The old escort rule is kept below, commented out, in case it is ever wanted back. */
+                        return ($selfPosNow == $targetPosNow) && FighterMissions::isDefensiveIntercept($interceptingShip, $fire->turn);
+
+                        /* ESCORT RULE (retired 2026-10-22 for Defensive Intercept) - same hex now AND at the end of last turn.
                         //if ($fire->turn == 1) { //first turn - assume starting positions did match (technical reasons - units cannot start on same hex!)|| Now they can - DK 27.3.26
                         //    $selfPosPrevious = $selfPosNow;
                         //    $targetPosPrevious = $targetPosNow;
@@ -1601,6 +1611,7 @@ class Firing
                         } else {
                             return false;
                         }
+                        */
                     }
                 } else { //incoming weapon is not ballistic
                     return false;

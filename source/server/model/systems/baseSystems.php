@@ -3500,7 +3500,8 @@ class CnC extends ShipSystem implements SpecialAbility {
 
 	//Simultaneous: the raw total moves and the category follows it. Classic: the total moves, and so does the
 	//ini bonus unmodified_iniative records - the Command Node's +10 IS a bonus, and the row should say so.
-	private static function shiftIniative($ship, $amount, $rule){
+	//Public since FIGHTER_MISSIONS_PLAN.md §3.6: a fighter mission's -60 / +5 moves initiative the same way.
+	public static function shiftIniative($ship, $amount, $rule){
 		if ($rule){
 			$ship->unmodifiedIniative = (int)$ship->unmodifiedIniative + $amount;
 			$ship->iniative = $rule->getIniativeCategory($ship->unmodifiedIniative);
@@ -3525,7 +3526,9 @@ class CnC extends ShipSystem implements SpecialAbility {
 		}
 	}
 
-	private static function breakCommandNodeTies($gamedata, $changed){
+	//$step +1 wins a tie (the Command Node, a Combat Space Patrol), -1 loses it (a fighter mission change) -
+	//FIGHTER_MISSIONS_PLAN.md D4. Classic movement only; public for the same reason as shiftIniative.
+	public static function breakCommandNodeTies($gamedata, $changed, $step = 1){
 		foreach ($changed as $ship){
 			do {
 				$tied = false;
@@ -3536,7 +3539,7 @@ class CnC extends ShipSystem implements SpecialAbility {
 						break;
 					}
 				}
-				if ($tied) $ship->iniative = (int)$ship->iniative + 1;
+				if ($tied) $ship->iniative = (int)$ship->iniative + $step;
 			} while ($tied);
 		}
 	}

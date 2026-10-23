@@ -1524,6 +1524,16 @@ window.gamedata = {
                 }
             }
 
+            /* FIGHTER_MISSIONS_PLAN.md R3 - a Combat Space Patrol may leave its zone, it only loses next turn's
+               initiative bonus for it: a passive notice, never a confirm (the move is legal). */
+            if (window.fighterMissions && window.savedOrders) {
+                var outsideZone = fighterMissions.outsideZone(activeShips);
+                if (outsideZone.length > 0) {
+                    savedOrders.showNotice(outsideZone.map(function (s) { return s.name; }).join(', ')
+                        + (outsideZone.length > 1 ? ' end' : ' ends') + ' outside the Combat Space Patrol zone: no initiative bonus next turn (-15 to hit ships still applies)', 8000);
+                }
+            }
+
             UI.shipMovement.hide();
 
             confirm.confirm(

@@ -2084,7 +2084,11 @@ window.weaponManager = {
             //max(0) here, not only on the sum below: the server clamps $effectiveOB before it is
             //used, so a crit-suppressed bonus must not eat into the flight's own OEW.
             //minus an Expert Evader's Evade not yet sent (officers.pendingEvadeOb; the server applies a sent one)
-            var effectiveOB = Math.max(0, shooter.offensivebonus - (window.officers ? officers.pendingEvadeOb(shooter) : 0) - OBcrit - (mdew * 2));
+            var baseOB = shooter.offensivebonus - (window.officers ? officers.pendingEvadeOb(shooter) : 0);
+            //a fighter mission's term goes on the bonus BEFORE the crit / mine deductions (FIGHTER_MISSIONS_PLAN.md D5) -
+            //⚠️ MIRROR PAIR with FighterMissions::adjustOffensiveBonus in Weapon::calculateHitBase
+            if (window.fighterMissions) baseOB = fighterMissions.adjustOffensiveBonus(shooter, target, weapon, baseOB);
+            var effectiveOB = Math.max(0, baseOB - OBcrit - (mdew * 2));
 
             if (weapon.ballistic) {
                 //A ballistic's bonus is a CONDITIONAL GRANT, not a lock, and flight OEW plays no
@@ -2537,6 +2541,10 @@ window.weaponManager = {
            ⚠️ MIRROR PAIR with the coating line in Weapon::calculateHitBase (PHP). */
         var profileCoating = (!flatProfile && ewLock.coatingLock)
             ? weaponManager.getProfileCoatingReduction(shooter, target, sPosLaunch) : 0;
+        /* A target flight on Scout Penetration: both profiles -1 (FIGHTER_MISSIONS_PLAN.md §3.5). Never under a flat
+           called-shot profile, which replaces it on the server. ⚠️ MIRROR PAIR with the profileModifier line in
+           Weapon::calculateHitBase (PHP). */
+        var missionProfile = (!flatProfile && window.fighterMissions) ? fighterMissions.profileModifier(target) : 0;
         var fireControl = weaponManager.computeFireControl(shooter, target, weapon, sPosTarget, calledid);
         //sPosLaunch threaded in for the same reason as above: the server passes $launchPos to
         //getHitChanceMod as $posmod, and it is what decides which ARC-LIMITED defensive systems
@@ -2565,6 +2573,7 @@ window.weaponManager = {
         //only so the breakdown can show the two separately; it is 0 in every game with no scan.
         var goal = baseBreakdown.total
                  - profileCoating
+                 + missionProfile
                  - jammer.jammermod - jammer.noLockMod
                  - rangePenalty
                  + ewLock.oew + ewLock.soew + fireControl
@@ -2582,7 +2591,8 @@ window.weaponManager = {
         }
         pushIfNonZero('base',             'Base Defense',      baseBreakdown.base);
         pushIfNonZero('profileCoating',   'Stealth Coating',   -profileCoating);
-        pushIfNonZero('fireControl',      'Fire Control',      fireControl);     
+        pushIfNonZero('fighterMission',   'Fighter Mission',   missionProfile);
+        pushIfNonZero('fireControl',      'Fire Control',      fireControl);
         pushIfNonZero('oew',              'OEW',               ewLock.oew);
         pushIfNonZero('soew',             'Supported OEW',     ewLock.soew);           
         pushIfNonZero('dew',              'DEW',               -baseBreakdown.dew);
@@ -3184,9 +3194,17 @@ window.weaponManager = {
         return (held - declared) >= 1;
     },
 
-    /* Same hex NOW and at the end of the previous turn - the fighter-escort rule the server applies
-       in isLegalIntercept. shipManager.isEscorting tests the start-of-turn position ONLY, which is
-       why it cannot be reused here: it would offer orders the server then drops. */
+    //Same hex NOW - the Defensive Intercept rule (FIGHTER_MISSIONS_PLAN.md), which replaced the escort rule below
+    sharesHexNow: function sharesHexNow(ship, other) {
+        var nowSelf = shipManager.getShipPosition(ship);
+        var nowOther = shipManager.getShipPosition(other);
+        return !!(nowSelf && nowOther && nowSelf.equals(nowOther));
+    },
+
+    /* Same hex NOW and at the end of the previous turn - the fighter-escort rule the server applied
+       in isLegalIntercept. RETIRED 2026-10-22 for the Defensive Intercept mission and kept for a revert
+       (canInterceptBallistic's call is commented out). shipManager.isEscorting tests the start-of-turn
+       position ONLY, which is why it could not be reused here: it would offer orders the server then drops. */
     sharesHexNowAndAtStartOfTurn: function sharesHexNowAndAtStartOfTurn(ship, other) {
         var nowSelf = shipManager.getShipPosition(ship);
         var nowOther = shipManager.getShipPosition(other);
@@ -3287,11 +3305,15 @@ window.weaponManager = {
             if (target.team !== ship.team) return false;
 
             if (ship.flight) {
-                //Fighter escort: ballistics only, never fire aimed at another flight, and the two
-                //must share a hex now AND have shared one at the end of last turn.
+                /* ⭐ DEFENSIVE INTERCEPT REPLACES ESCORTING (FIGHTER_MISSIONS_PLAN.md, user 2026-10-22): ballistics
+                   only, never fire aimed at another flight, and the flight must be flying the mission on the shot's
+                   turn and share the ship's hex NOW - it no longer has to have started the turn there.
+                   ⚠️ MIRROR PAIR with Firing::isLegalIntercept's flight branch. */
                 if (!incoming.ballistic) return false;
                 if (target.flight) return false;
-                if (!weaponManager.sharesHexNowAndAtStartOfTurn(ship, target)) return false;
+                //if (!weaponManager.sharesHexNowAndAtStartOfTurn(ship, target)) return false; //the retired escort rule
+                if (!weaponManager.sharesHexNow(ship, target)) return false;
+                if (!window.fighterMissions || !fighterMissions.isDefensiveIntercept(ship, ball.fireOrder.turn)) return false;
             } else {
                 if (!weapon.freeintercept) return false;
                 //freeinterceptspecial weapons decide third-party legality in their own server-side
