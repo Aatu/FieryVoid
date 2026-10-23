@@ -18,7 +18,7 @@ window.officers = {
 
 	ID_PREFIX: 'OFF_',
 
-	/* ⚠️ MIRROR of Officers::$registry (PHP): ids, labels, posts, `needs`, `flight`, `perMissile` and the placed
+	/* ⚠️ MIRROR of Officers::$registry (PHP): ids, labels, posts, `needs`, `flight`, `perMissile`, `multi`, `mixesWith` and the placed
 	   officers' `placed`, `sameAs` and `anyDamage`, in the SAME order - the order every list here is shown in. `summary` is the effect line the System
 	   Info tooltip prints (D12). `stats` is what the officer adds to ship fields while he serves
 	   (Officers::apply), which the lobby adds at READ time (displayStat); `adjust` names a method that
@@ -96,6 +96,12 @@ window.officers = {
 			specialistReusable). */
 		{ id: 'OFF_SOFT', label: 'Expert Software Engineer', post: 'computer',
 			summary: '+1 BFCP (lost only with the Computer), which may be held back to the Firing Phase; the Computer ignores the first point of every hit; a stealth ship is detected as if 5 hexes further away (fighters at half range); one Defence, Sensor, Targeting or Weapon Specialist may be used a second time' },
+		/* Stage 27: Gaim only (the offers'), in the largest Hangar. His boarding shift is the server's. The pods he aids - as many of his player's
+		   pods, in fleet order, as his ship's Pod Allowance - are named in their Marines' "Elite" line to his team (marinesEliteLine, through
+		   troopAidedCraft). The Bulkheads' extra box is previewed in the lobby (troopBulkheads, from lobbyEnhancements - in game the server
+		   sends the boxes). */
+		{ id: 'OFF_TROOP', label: 'Expert Troop Leader', post: 'hangar',
+			summary: '-2 to enemy boarding rolls, +2 to defenders; +1 to fleet Marine rolls; every Bulkhead +1 box' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -149,9 +155,18 @@ window.officers = {
 		/* Stage 24: only for a breaching pod (`needs`), in its first pod. `unscaled`: his price is his ONE pod's, whatever the flight's
 		   size (flightCost). The flight's +1 thrust is previewed (stats - in game the server raised and published it); his pod's Elite
 		   Marines are the server's at delivery, and its Marines' "Elite" line says so to his own team (marinesEliteLine); his capture
-		   assault is the server's alone. The fleet's 20% is the Fleet Correctness Report's (breachingFleetCheck). */
-		{ id: 'OFF_BRCH', label: 'Breaching Expert', post: 'craft', flight: true, unscaled: true, needs: 'breachingPod', stats: { freethrust: 1 },
-			summary: '+1 thrust; his pod\'s Marines count as Elite; once per battle, his pod\'s first capture party makes three attack rolls on its first turn aboard' }
+		   assault is the server's alone. The fleet's 20% is the Fleet Correctness Report's (breachingFleetCheck).
+		   Stage 27: one to a pod, as many as the flight has (`multi`), beside Expert Troop Leaders (`mixesWith`: one officer to a pod, the
+		   Breaching Experts first); the flight's thrust +1 however many (`statsOnce`). */
+		{ id: 'OFF_BRCH', label: 'Breaching Expert', post: 'craft', flight: true, unscaled: true, multi: true, mixesWith: ['OFF_TRPOD'], statsOnce: true,
+			needs: 'breachingPod', stats: { freethrust: 1 },
+			summary: '+1 thrust (once per flight); his pod\'s Marines count as Elite; once per battle, his pod\'s first capture party makes three attack rolls on its first turn aboard' },
+		/* Stage 27: the Expert Troop Leader in a Gaim breaching pod (the offers' - `needs` the pod), one to a pod (`multi`, `mixesWith`), priced
+		   at his own pod (`unscaled`). His -3 and his escape roll are the server's; his pod's Marines' "Elite" line names him to his team
+		   (marinesEliteLine). */
+		{ id: 'OFF_TRPOD', label: 'Expert Troop Leader', post: 'craft', flight: true, unscaled: true, multi: true, mixesWith: ['OFF_BRCH'],
+			needs: 'breachingPod',
+			summary: '+3 on every roll of his pod\'s marine; when eliminated escapes on a d6 of 1-4' }
 	],
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV, the Expert
@@ -192,6 +207,8 @@ window.officers = {
 	              lobby JUMP_ACC case's own test. The one gate drive (JumpgateCapital) is on terrain, which
 	              carries no officers.
 	     computer the Hyach Computer (Stage 26)
+	     hangar   the largest plain hangar bay by boxes (Stage 27), the first on a tie: a "hangar" that is not a docking bay - catapults,
+	              fighter rails and docking collars have names of their own
 	     craft    a flight's first craft - the lobby's one fighter card, id 1
 	   ⚠️ D2: the server picks from BLUEPRINT values, before any enhancement moves an output, but a lobby
 	   fleet ship has already had lobbyEnhancements.apply - Poor Crew has taken a point off its strongest
@@ -247,6 +264,9 @@ window.officers = {
 				if (systems[c] && systems[c].name === 'hyachComputer') return systems[c];
 			}
 			return null;
+		}
+		if (post === 'hangar') {
+			return this.strongest(ship, systems.filter(function (s) { return s && s.name === 'hangar' && !s.isDockingBay; }), 'maxhealth', -1);
 		}
 		return null;
 	},
@@ -395,13 +415,16 @@ window.officers = {
 	   which of the two sources answers. A flight's derived list holds ONE officer at most (D9), the
 	   first bought in registry order, as Officers::pickPosts serves - or, for an officer bought as a
 	   count (`multi`, Stage 18), that many entries: one in each of its first crafts, held to the row's
-	   limit and the flight's size. A lobby flight holds a single craft card, so there they share it. */
+	   limit and the flight's size; then (Stage 27) an officer he `mixesWith` in the crafts after his, and
+	   nobody else. A lobby flight holds a single craft card, so there they share it. */
 	listFor: function listFor(ship) {
 		if (!ship) return [];
 		if (Array.isArray(ship.officers)) return ship.officers;
 		if (!Array.isArray(ship.enhancementOptions)) return [];
 
 		var list = [];
+		var first = null; //a flight's first officer bought as a count, whose `mixesWith` may follow him
+		var crafts = 0;   //...and the crafts taken so far
 		for (var i = 0; i < this.REGISTRY.length; i++) {
 			var officer = this.REGISTRY[i];
 			if (officer.placed) continue; //track 2: placedEntries below
@@ -409,10 +432,13 @@ window.officers = {
 			if (!this.isBought(ship, officer.id)) continue;
 			var post = this.findPost(ship, officer.post);
 			if (!post || !this.passesNeeds(ship, officer)) continue;
+			if (first !== null && first.mixesWith.indexOf(officer.id) === -1) continue;
 			if (officer.multi && ship.flight) {
-				var n = Math.min(this.boughtCount(ship, officer.id), this.rowLimit(ship, officer.id), parseInt(ship.flightSize, 10) || 1);
-				for (var k = 1; k <= n; k++) list.push(this.derivedEntry(ship, officer.id, this.nthCraft(ship, k) || post));
-				break;
+				var n = Math.min(this.boughtCount(ship, officer.id), this.rowLimit(ship, officer.id), (parseInt(ship.flightSize, 10) || 1) - crafts);
+				for (var k = 1; k <= n; k++) list.push(this.derivedEntry(ship, officer.id, this.nthCraft(ship, ++crafts) || post));
+				if (first !== null || !officer.mixesWith) break;
+				first = officer;
+				continue;
 			}
 			list.push(this.derivedEntry(ship, officer.id, post));
 			if (ship.flight) break;
@@ -446,12 +472,19 @@ window.officers = {
 	},
 
 	/* The most of this row the buy dialog lets a flight of `size` take: its limit, and for an officer bought as a count
-	   (Stage 18) never more than the flight's craft ("not more than the flightSize" - user notes 2026-10-19). */
-	rowMax: function rowMax(enhID, limit, size) {
+	   (Stage 18) never more than the flight's craft ("not more than the flightSize" - user notes 2026-10-19) - less the
+	   craft `taken` by the officers he shares a flight with (Stage 27, `mixesWith`: one officer to a pod). */
+	rowMax: function rowMax(enhID, limit, size, taken) {
 		var officer = this.get(enhID);
 		var max = parseInt(limit, 10) || 0;
-		if (officer && officer.multi) max = Math.min(max, Math.max(1, parseInt(size, 10) || 1));
-		return max;
+		if (officer && officer.multi) max = Math.min(max, Math.max(1, parseInt(size, 10) || 1) - (parseInt(taken, 10) || 0));
+		return Math.max(0, max);
+	},
+
+	//Stage 27: may these two officers share one flight, one to a craft (`mixesWith`)?
+	mixes: function mixes(enhID, otherID) {
+		var officer = this.get(enhID);
+		return Boolean(officer && officer.mixesWith && officer.mixesWith.indexOf(otherID) !== -1);
 	},
 
 	/* ------------------------------------------------------------------ placed officers (Stage 8) */
@@ -1184,6 +1217,8 @@ window.officers = {
 			if (!post || !self.isPostDestroyed(ship, post)) return;
 			var pointsBefore = parseFloat(ship.pointCost) || 0;
 			self.setShipLevelRow(ship, officer.id, 0);
+			//Stage 27: an Expert Troop Leader refunded takes the Bulkheads' box lobbyEnhancements gave them
+			if (officer.id === 'OFF_TROOP' && ship.troopEnh) { self.troopBulkheads(ship, -1); ship.troopEnh = false; }
 			var points = pointsBefore - (parseFloat(ship.pointCost) || 0);
 			removed.push({ enhID: officer.id, label: officer.label, points: points, systemid: parseInt(post.id, 10),
 				systemName: post.displayName || post.name });
@@ -1309,13 +1344,20 @@ window.officers = {
 	   only, as his list is theirs alone. Marines Elite already keep their "Yes": he adds nothing there (user ruling 2026-10-21).
 	   ⚠️ MIRROR PAIR with Officers::eliteMarines (PHP). */
 	marinesEliteLine: function marinesEliteLine(ship, system, value) {
-		if (!ship || !ship.flight || value === 'Yes') return value;
+		if (!ship || !ship.flight) return value;
 		var craft = this.craftHolding(ship, system);
 		if (!craft) return value;
 		var turn = this.currentTurn();
 		var self = this;
-		var his = this.onPost(ship, craft.id).some(function (entry) { return entry.id === 'OFF_BRCH' && self.serves(entry, turn); });
-		return his ? 'Yes (Breaching Expert)' : value;
+		var line = value;
+		if (value !== 'Yes' && this.onPost(ship, craft.id).some(function (entry) { return entry.id === 'OFF_BRCH' && self.serves(entry, turn); })) {
+			line = 'Yes (Breaching Expert)';
+		}
+		//Stage 27: an Expert Troop Leader's -3 in this pod, or his ship's -1 (troopBonus) - to his team only, as his list is theirs alone
+		var troop = this.troopBonus(ship, craft, turn);
+		if (troop === -this.TROOP_POD_BONUS) return line + '; Expert Troop Leader: ' + troop + ' on its rolls';
+		if (troop) return line + '; a Troop Leader\'s ship: ' + troop + ' on its rolls';
+		return line;
 	},
 
 	//the craft of a flight whose systems include `system` (by id), or null
@@ -1329,7 +1371,7 @@ window.officers = {
 	/* "No more than 20% of a fleets breaching pods (round fractions of 0.5 or more up) can use these experts" - the Fleet Correctness
 	   Report's line (gamelobby.js checkChoices; user ruling 2026-10-21: reported, as every fleet-composition rule is, not enforced). Pods
 	   are counted CRAFT by craft (a flight's size) over every breaching pod in `ships`; experts are the Breaching Experts that would serve
-	   (listFor - one officer to a flight). With pods in flights of two at most, a fleet needs three pods for its first expert. */
+	   (listFor - since Stage 27 one to a pod). With pods in flights of two at most, a fleet needs three pods for its first expert. */
 	BREACH_FLEET_PCT: 20,
 	breachingFleetCheck: function breachingFleetCheck(ships) {
 		var pods = 0;
@@ -1342,6 +1384,91 @@ window.officers = {
 		});
 		//pods x 20% rounded half up, in whole numbers: floor((pods x 20 + 50) / 100)
 		return { pods: pods, experts: experts, allowed: Math.floor((pods * this.BREACH_FLEET_PCT + 50) / 100) };
+	},
+
+	/* ------------------------------------------------------------------ Expert Troop Leader (Stage 27) */
+
+	TROOP_POD_BONUS: 3,      //in his pod: -3 on every roll of its parties - Officers::TROOP_POD_BONUS (PHP)
+	TROOP_SHIP_POD_BONUS: 1, //aboard a ship: -1 on every roll of "his own ship's" pods - Officers::TROOP_SHIP_POD_BONUS (PHP)
+	TROOP_BULKHEAD_BOXES: 1, //every Bulkhead of his ship - Officers::TROOP_BULKHEAD_BOXES (PHP)
+
+	/* A ship's POD ALLOWANCE - the breaching pods it may carry as the Fleet Correctness Report counts them (gamelobby.js checkChoices, its
+	   per-ship profile): its "Breaching Pods" racks and HANG_BP's conversions, plus 1 - 2 on a capital, 4 on a base or an enormous unit,
+	   doubled on an Assault hull - held to its assault shuttle, heavy (or "normal") and medium slots. Off the hull's own slots: the fleet
+	   check rewrites `fighters` with the racks (and keeps the original as _originalFighters). In game the server sends his entry's
+	   (`pods`). ⚠️ MIRROR PAIR with Officers::podAllowance (PHP). */
+	podAllowance: function podAllowance(ship) {
+		if (!ship || ship.flight) return 0;
+		var fighters = ship._originalFighters || ship.fighters || {};
+		var racks = (parseInt(fighters['Breaching Pods'], 10) || 0) + (Array.isArray(ship.enhancementOptions) ? this.boughtCount(ship, 'HANG_BP') : 0);
+		var slots = (parseInt(fighters.heavy || fighters.normal, 10) || 0) + (parseInt(fighters.medium, 10) || 0) + (parseInt(fighters['assault shuttles'], 10) || 0);
+		var cap = 1;
+		if (ship.Enormous || ship.base || ship.smallBase) cap = 4;
+		else if ((parseInt(ship.shipSizeClass, 10) || 0) >= 3) cap = 2;
+		if (String(ship.shipClass || '').toLowerCase().indexOf('assault') !== -1) cap *= 2;
+		return racks + Math.min(cap, slots);
+	},
+
+	/* A unit's player's units in FLEET order - the order the fleet was bought in: in game by unit id (the server inserts them in order), in
+	   the lobby as Fleet Selection lists them (gamedata.ships' own order; its ids are strings). */
+	fleetOf: function fleetOf(unit) {
+		var all = (window.gamedata && gamedata.ships) ? Object.keys(gamedata.ships).map(function (k) { return gamedata.ships[k]; }) : [];
+		var mine = all.filter(function (u) {
+			return u && String(u.userid) === String(unit.userid) && (u.slot === undefined || unit.slot === undefined || String(u.slot) === String(unit.slot));
+		});
+		if (mine.every(function (u) { return /^\d+$/.test(String(u.id)); })) mine.sort(function (a, b) { return Number(a.id) - Number(b.id); });
+		return mine;
+	},
+
+	//a flight's crafts: every craft in game, the one card of a lobby flight standing for flightSize
+	podCraftCount: function podCraftCount(flight) {
+		return Math.max(this.systemsOf(flight).filter(Boolean).length, parseInt(flight.flightSize, 10) || 1);
+	},
+
+	/* "If any of his own ship's breaching pods attack an opponent, they gain a +1 bonus on any attack table": as many of his player's
+	   breaching pods as his ship's Pod Allowance, in fleet order, craft by craft - fixed, a lost pod's share passing to nobody (user rulings
+	   2026-10-23); several Troop Leader ships of one player add up. Own team only (his list is theirs alone). ⚠️ MIRROR PAIR with
+	   Officers::troopAidedCraft (PHP). */
+	troopAidedCraft: function troopAidedCraft(flight, craft, turn) {
+		var self = this;
+		var fleet = this.fleetOf(flight);
+		var allowance = 0;
+		fleet.forEach(function (unit) {
+			if (unit.flight) return;
+			self.listFor(unit).forEach(function (entry) {
+				if (entry.id !== 'OFF_TROOP' || !self.serves(entry, turn)) return;
+				allowance += (entry.pods !== undefined) ? (parseInt(entry.pods, 10) || 0) : self.podAllowance(unit);
+			});
+		});
+		if (allowance < 1) return false;
+		var index = this.systemsOf(flight).filter(Boolean).indexOf(craft) + 1;
+		var n = 0;
+		var pods = fleet.filter(function (unit) { return self.isBreachingPod(unit); });
+		for (var i = 0; i < pods.length; i++) {
+			for (var k = 1; k <= this.podCraftCount(pods[i]); k++) {
+				if (++n > allowance) return false;
+				if (String(pods[i].id) === String(flight.id) && k === index) return true; //by id: a lobby window may hold a copy
+			}
+		}
+		return false;
+	},
+
+	/* What his officers give a party from this pod's craft on its d10s: -3 while an Expert Troop Leader serves in it (his ship's 1 among
+	   it - user ruling), else -1 while a Troop Leader ship counts it among its pods, else 0. ⚠️ MIRROR PAIR with Officers::troopBonus (PHP). */
+	troopBonus: function troopBonus(flight, craft, turn) {
+		var self = this;
+		if (this.onPost(flight, craft.id).some(function (entry) { return entry.id === 'OFF_TRPOD' && self.serves(entry, turn); })) return -this.TROOP_POD_BONUS;
+		return this.troopAidedCraft(flight, craft, turn) ? -this.TROOP_SHIP_POD_BONUS : 0;
+	},
+
+	/* The lobby's preview of "all bulkheads on the ship are considered to have 1 extra box": lobbyEnhancements.apply adds it once per build
+	   (its maxhealth is read in too many places for a read-time preview), and dropDestroyedPosts takes it back with a refunded officer. In
+	   game the server sends each Bulkhead's boxes. `sign` +1 or -1. */
+	troopBulkheads: function troopBulkheads(ship, sign) {
+		var boxes = sign * this.TROOP_BULKHEAD_BOXES;
+		this.systemsOf(ship).forEach(function (s) {
+			if (s && s.name === 'Bulkhead') s.maxhealth = (parseInt(s.maxhealth, 10) || 0) + boxes;
+		});
 	},
 
 	/* Expert Evader (user request 2026-10-20): may this flight order an Evade - the Firing-phase movement order
@@ -1637,6 +1764,7 @@ window.officers = {
 		if (!this.isFighterOfficer(enhancement[0])) return null;
 		var standard = this.standardFlight(ship);
 		var officer = this.get(enhancement[0]);
+		if (officer && officer.multi && officer.unscaled) return enhancement[4] + 'pts each, one per pod'; //Stage 27: each his own pod's price
 		if (officer && officer.multi) {
 			return enhancement[4] + 'pts each' + (standard > 1 ? ' per ' + standard + ' craft' : '') + ', one per craft';
 		}
@@ -1668,9 +1796,12 @@ window.officers = {
 	displayStat: function displayStat(ship, field) {
 		var value = Number(ship && ship[field]) || 0;
 		var serving = this.servingDerived(ship);
+		var counted = {}; //Stage 27: an officer whose stats count once however many serve (`statsOnce` - the Breaching Experts' thrust)
 		for (var i = 0; i < serving.length; i++) {
 			var officer = this.get(serving[i].id);
 			if (!officer) continue;
+			if (officer.statsOnce && counted[officer.id]) continue;
+			counted[officer.id] = true;
 			if (officer.stats && officer.stats[field]) value += officer.stats[field];
 			if (officer.adjust) value = this[officer.adjust](field, value);
 		}

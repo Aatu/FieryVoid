@@ -37,7 +37,11 @@ and once per battle a stirring speech in the Firing phase, told in the combat lo
 (`ce9f8e8a2`). Stage 26, the Expert Software Engineer (Hyach, 15%), in the Hyach Computer - one more bonus fire control point that damage never
 takes and that may be held back to the Firing phase, the Computer ignoring the first point of every hit, a stealth ship's signature masked (5 hexes
 further, fighters at half range), and one software Specialist used a second time - with the Computer Specialist rebuilt to its own rules on the same
-Firing-phase allocation (§9.33) - BUILT 2026-10-22, uncommitted.** Written
+Firing-phase allocation (§9.33) - committed (`4e523c0df`). Stage 27, the Expert Troop Leader (Gaim), aboard a ship in its Hangar (5%) - every boarding
+roll against it 2 in its favour, +1 on the rolls of as many of his player's breaching pods as the ship can carry (its Pod Allowance), every Bulkhead a
+box tougher for the whole battle - or bought for a Gaim breaching pod (50% of a pod, one to a pod): -3 on his pod's parties' rolls, and a d6 to escape
+when one is eliminated (none on Wreak Havoc); with it, Breaching Experts one to a pod, and the two sharing a pod flight (§9.34) - BUILT 2026-10-23,
+uncommitted.** Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -111,7 +115,11 @@ his armed shuttle on top of Elite Crew's; and no +30 unless he still serves on t
 the Expert Software Engineer's rules text - one of the original 25 - with notes (the software Specialists are Defence, Sensor, Targeting and Weapon;
 +1 armour on the Computer would do if the damage rule proved complicated - it did not), and ruled three questions: the Firing-phase hold built, and the
 Computer Specialist rebuilt to its own rules (once per scenario, in the Firing phase, +1 point and every point reshuffled) on the same allocation; the cap
-of two per category stays, for both; and a software Specialist used on turn N may be used again from turn N+1 (Stage 26, §9.33). Each officer's own rules
+of two per category stays, for both; and a software Specialist used on turn N may be used again from turn N+1 (Stage 26, §9.33). On 2026-10-23 they
+added the Expert Troop Leader with his rules text and notes (no officer can move from a ship to a docked pod, so he is offered separately to Gaim pods at
+half a pod; he goes with every party from his pod, and dies with one that is eliminated unless he escapes), asked for Breaching Experts and pod Troop
+Leaders to be bought one to a pod, and ruled four questions and a follow-up: "his own ship's pods" are as many as the ship's Pod Allowance, in fleet
+order, fixed; his pod's -3 includes his ship's 1; no escape on Wreak Havoc; and a pod flight may mix the two, one to a pod (Stage 27, §9.34). Each officer's own rules
 questions still only need ruling when that officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
@@ -354,7 +362,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Quartermaster | `OFF_QM` | random primary | 1 |
 | Expert Geneticist | `OFF_GENE` | C&C | 1 |
 | Expert Scavenger | `OFF_SCAV` | Engine | 1 |
-| Breaching Expert *(Stage 24, §9.31)* | `OFF_BRCH` | his pod: a breaching pod flight's first craft | 1 (flight), breaching pods only, priced off one pod (`unscaled`) |
+| Breaching Expert *(Stage 24, §9.31)* | `OFF_BRCH` | his pod: a breaching pod flight's first craft - since Stage 27 (§9.34) one per pod, from the first | 1 (flight), breaching pods only, priced off one pod (`unscaled`); bought as a count, `mixesWith` the pod Troop Leader |
 | Expert Analyst | `OFF_ANLY` | Scanner | 1 |
 | Expert Evangelist | `OFF_EVAN` | random primary | 1 |
 | Expert Laser Technician | `OFF_LASR` | Reactor | 1 |
@@ -368,6 +376,8 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Turret Officer *(added 2026-10-21, §9.29)* | `OFF_TURR` | a chosen turret-mounted weapon, aiding every weapon on its turret | 2, one to a turret |
 | Expert Political Officer *(added 2026-10-21, §9.32)* | `OFF_POL` | C&C | 1, Centauri capital ships and larger |
 | Expert Software Engineer *(Stage 26, §9.33)* | `OFF_SOFT` | Computer | 1, Hyach only |
+| Expert Troop Leader *(added 2026-10-23, §9.34)* | `OFF_TROOP` | the largest Hangar | 1, Gaim only |
+| Expert Troop Leader, in a pod *(§9.34)* | `OFF_TRPOD` | one per pod, after any Breaching Experts | 1 (flight), Gaim breaching pods, bought as a count, priced off one pod (`unscaled`), `mixesWith` the Breaching Expert |
 | Expert Ion Technician | `OFF_ION` | Engine | 1 |
 | Expert Surge Officer | `OFF_SURG` | Mag-Grav Reactor | 1 |
 | Expert Ballistic Officer | `OFF_BALL` | C&C | 1 |
@@ -401,6 +411,7 @@ budget, drop the label from the wire, since the client holds the labels anyway.
 | Mag-Grav Reactor | the first `MagGravReactor` that can be hit (never a `MagGravReactorTechnical`) | Surge Officer (Stage 16: every Ipsha hull has exactly one) |
 | Jump Drive | the first engine `JumpEngine::getUnitJumpEngines($ship)` returns that is neither legacy nor a gate | never a bare sweep of `$ship->systems` ([[project_jump_points]]) |
 | Computer | the `HyachComputer` | |
+| Hangar | the largest plain `Hangar` by `maxhealth`, the first on a tie | Expert Troop Leader (Stage 27): never a `Catapult`, `FighterRail`, `DockingCollar` or `DockingBay` (Hangar subclasses with jobs of their own) |
 | Random primary system | a hash of (game id, ship id, officer id), **salted with `$secret_phrase`**, over location-0 systems that are targetable, not Structure and not pseudo-systems | FV is open source: an unsalted formula would let an opponent work out where the Evangelist sits and call-shot it. In the lobby there is no game id yet, so it reads "posted at battle start". Positional-id caveat in §7. |
 | A fighter | the flight's first craft | §4.10 |
 | Placed | the stored `systemid`, verified by `sysname` | the existing D13 path |
@@ -3995,3 +4006,158 @@ cases from the new fingerprint gives the old one byte for byte.
 5. The Utara Tor's Computer (28 boxes, 4 BFCP) reads -1 BFCP at 25 or more boxes of damage, as it always did - so the negative-BFCP warning can fire
    with nothing allocated.
 6. The Political Officer's docs card still says "Cancel speech"; `ce9f8e8a2` named the button "No speech".
+
+### 9.34 Stage 27: Expert Troop Leader (2026-10-23)
+
+**Rules text (user, 2026-10-23) - an officer the user added.** "Expert Troop Leader: The expert troop leader is a genetically engineered Gaim
+designed for independent thought and leadership abilities. His primary focus is in the direction and control of ground forces, which does not apply to
+most Babylon Wars situations. However, aboard a ship he still has a few abilities he can lend to his crew. If the ship is attacked by enemy breaching
+pods, he provides a penalty of 2 on all enemy rolls and a bonus of 2 on all defense rolls. If any of his own ship's breaching pods attack an opponent,
+they gain a +1 bonus on any attack table. The troop leader can also accompany a breaching pod, and if this is done, he gives a further -2 bonus (a total
+of -3 for Gaim) to any rolls. If any result appears that "kills" one of his contingents, roll a d6, and on a roll of 1-4 he manages to escape with his
+pod (but not the rest of his team e.g. the Marine unit is lost, but the Officer is not killed). This is not available on Wreak Havoc missions. The expert
+troop leader also provides heightened training to many of his crew, enhancing their reflexes. Nowhere this is more acute than with the crewmen whose job
+it is to control the bulkheads. Thus, all bulkheads on the ship are considered to have 1 extra box. This benefit remains even if the troop leader is
+killed in combat, but only for the duration of that scenario, after which the bulkheads revert to normal. Location: Hangar. Cost: 5% of the ship's base
+cost. Availability: Gaim Only." The user's notes: "We have no way to transfer Officer from ship to docked Breaching Pod atm. So we should instead also
+offer this Officer separately to Gaim Breaching Pods at the cost of 50% the price of a pod (e.g. 20pts)"; "the Troop leader accompanies any Marine that
+attacks from that pod, and so can be killed if marine unit is killed and he fails his saving throw". And a separate request: a flight of breaching pods
+may take as many Breaching Experts as it has pods ("The fleetwide cap at 20% would still apply"), and pod Troop Leaders likewise, "since their bonuses
+are on a pod basis".
+
+**What FV had.**
+- **36 Gaim hulls** with a plain hangar bay - not the three Rafa gunboats, which have none, nor the Tora OSAT. Every Gaim hull but the Tracha carries
+  Bulkheads (`Bulkhead`: 1-4 boxes, absorbing hits on its own section, automatically). One Gaim pod: the Ech'Akki, 40 a pod, its Marines built Elite.
+- **Boarding**: a delivery d10 (`Marines::getDeliveryRollMod`), the missions' d10s (`ShipSystem::getMarineRollMod` - Sabotage, Wreak Havoc, Rescue and
+  each capture attack) and the defenders' d10s in capture combat; lower is better for the boarders; the Security Officer's `boardingShift` at five
+  sites. A party is a critical whose `param` carries its pod flight (id, userid, team) - the only field it keeps from turn to turn.
+- **A party is eliminated** by a delivery roll of 9+, a defender's hit in capture combat, a Sabotage roll of 4-5 (damage dealt, then eliminated) or 9+,
+  a Wreak Havoc roll of 9+, and a Rescue roll of 7+ - or of 3-4, "complete, but heavy casualties", which ends the mission with no unit back in a pod.
+- **No flight remembers its carrier**: a launched flight carries no home ship. The lobby's Fleet Correctness Report does count each ship's pods (its
+  per-ship profile in `checkChoices`).
+- One officer per flight (D9), the Expert Pilots excepted (a count of one kind).
+
+**Rulings (user, 2026-10-23, asked before building):**
+1. **"His own ship's breaching pods"** are as many of his player's pods as the ship's **Pod Allowance** - the Fleet Correctness Report's count - wherever
+   they are; asked again, which: **in fleet order, fixed** (a lost pod's share passes to nobody).
+2. **In a pod: -3 from him** - "a further -2 bonus (a total of -3 for Gaim)" read as his ship's 1 and the further 2, both carried by the pod officer -
+   on top of the Ech'Akki's own Elite -1.
+3. **Wreak Havoc: no escape** - he dies with the party (his -3 still helps its rolls).
+4. **A pod flight may mix** Breaching Experts and Troop Leaders, **one officer to a pod**.
+
+**Built with defaults, stated here (ask before changing):**
+- His post is the **largest plain Hangar** (by boxes; the first on a tie), never a catapult, fighter rail, docking collar or docking bay. 5% of the hull,
+  Gaim only; a hull with no pod slots (Pod Allowance 0) still has the defence and the Bulkheads.
+- The defence is `boardingShift`'s +2 on the Security Officer's five sites - every boarding party, pods, Grappling Claws and transporters alike; with a
+  Security Officer, +4.
+- **Bulkheads +1 box from the start, for the whole battle**: `lost` runs his `apply`; every viewer is sent the boxes (a displayed stat). Pre-battle damage
+  on his Hangar refunds him in the lobby, so he is never aboard and gives none.
+- **Pod Allowance** = the report's per-ship count: its "Breaching Pods" racks (HANG_BP's included) + min(1 - 2 on a capital, 4 on a base or enormous
+  unit, doubled on an Assault hull -, its assault shuttle + heavy-or-"normal" + medium slots). Worked out at `pickPosts`, from the blueprint's slots
+  (Enhancements' hangar conversions rewrite `$ship->fighters` after it), carried on his entry (`pods`) and sent to his team.
+- **Fleet order** = unit id on the server (BuyingGamePhase inserts the fleet in its order), Fleet Selection's own order in the lobby; craft by craft; any
+  breaching pod of that player, whatever its faction; several Troop Leader ships of a player add their allowances; one out of action takes his away.
+- Both bonuses are asked on the roll's turn: the ship's 1 while that Troop Leader serves; the pod's 3 while its officer serves - lost with his pod, as
+  every fighter officer, so a party aboard loses it when its pod is destroyed.
+- **The escape**: a d6 for every party from his pod that is eliminated (the results above); 5-6 kills him - one `OffKilled` note on his pod. He serves
+  out the turn he dies (D3), so a second party lost that turn finds him dead and rolls nothing. A party that vanishes with a destroyed target ship rolls
+  nothing (FV resolves nothing there). No combat log line names him (D4).
+- **Breaching Experts one to a pod**: each makes his own pod's Marines Elite and has his own capture assault; the flight's +1 thrust once, however many;
+  each priced at one pod; the 20% line counts every one. **Mixed**: Breaching Experts take the first pods, Troop Leaders the next, never more officers
+  than pods; beside any other officer row, D9 (the first in registry order, alone).
+
+**Design.**
+- `Officers`: registry `OFF_TROOP` (post `hangar`, pct 5, `apply` and `lost` both `applyTroopLeader`) after the Software Engineer; `OFF_TRPOD` (post `craft`,
+  `flight`, pct 50, `unscaled`, `multi` 6 - held to maxFlightSize -, `mixesWith` OFF_BRCH, `needs` isBreachingPod) last; OFF_BRCH gains `multi` 6 and
+  `mixesWith` OFF_TRPOD. ⭐ New registry key **`mixesWith`** (pickPosts: after an officer bought as a count, one he mixes with takes the crafts after his).
+  `$factionRules` `only` Gaim for both. findPost `hangar` (`isHangarBay`). Constants TROOP_BOARDING_SHIFT 2, TROOP_SHIP_POD_BONUS 1, TROOP_POD_BONUS 3,
+  TROOP_ESCAPE_MAX 4, TROOP_BULKHEAD_BOXES 1, TROOP_PARTY_KEY 'troop'. `podAllowance` (⚠️ MIRROR PAIR with officers.podAllowance), `applyTroopLeader`,
+  `troopBonus`, `troopDeliveryMod`, `markTroopParty` / `playerHasTroopLeader`, `troopPartyRollMod` / `troopParty`, `troopDeliveryLost` / `troopPartyLost`
+  / `troopEscape`, `troopAidedCraft` (⚠️ MIRROR PAIR with officers.troopAidedCraft); `boardingShift` + his 2; `applyBreachingExpert` once a flight;
+  addForJson's `pods` on his row.
+- `Bulkhead` (baseSystems.php): protected `$boxesAdded`, `addBoxes`; stripForJson sends `maxhealth` when boxes were added.
+- `Marines` (specialWeapons.php): getDeliveryRollMod + `troopDeliveryMod`; the party's critical marked (`markTroopParty`: its craft id in `param`, only
+  for a player with a Troop Leader) after the mission switch; a delivery roll of 9+ -> `troopDeliveryLost`.
+- `ShipSystem`: getMarineRollMod + `troopPartyRollMod`; `troopPartyLost` at Wreak Havoc 9+ (`$wreakHavoc`: no escape), a Sabotage party eliminated, each
+  capture attacker eliminated, and Rescue 3-4 and 7+; stripForJson unsets TROOP_PARTY_KEY beside BREACH_PARTY_KEY.
+- Client `officers.js`: the registry rows (OFF_TROOP, OFF_TRPOD; OFF_BRCH `multi`, `mixesWith`, `statsOnce`), findPost `hangar`, listFor's mixing,
+  `rowMax(..., taken)`, `mixes`, priceNote "Npts each, one per pod", displayStat's `statsOnce`, the constants, `podAllowance` (the fleet check's
+  `_originalFighters` and HANG_BP rows), `fleetOf`, `podCraftCount`, `troopAidedCraft`, `troopBonus`, `marinesEliteLine`'s troop suffix ("Yes; Expert
+  Troop Leader: -3 on its rolls" / "...; a Troop Leader's ship: -1 on its rolls"), `troopBulkheads`, and dropDestroyedPosts giving the box back.
+  `UI/confirm.js`: `enhRowMax(target, taken)`, `mixedTaken`, clampEnhRowsToSize keeping the first rows', officerBlocked letting partners pass,
+  OFFICER_MIX_NOTE. `lobbyEnhancements.js`: case OFF_TROOP (`troopEnh`) and its reset.
+- Docs: Expert Troop Leader cards in Ship Officers (between the Technician and the Turret Officer) and Fighter Officers (after the Tailgunner); the
+  Breaching Expert's card and the Fighter Officers' opening paragraphs updated.
+
+**Files.** Server: `Officers.php`, `systems/baseSystems.php` (Bulkhead), `systems/ShipSystem.php`, `weapons/specialWeapons.php` (Marines). Client:
+`officers.js`, `UI/confirm.js`, `lobbyEnhancements.js`. Docs `ammo-options.html`. Harnesses: `officersHarness.php` (and the fixture it writes,
+`troopPodAllowanceFixture.json`), `officersClientHarness.js` (four registry-order and price-note checks moved to the new layout), `enhancementsHarness.php`
+(+gaimBassari, cases `troop` and `troop+secu`; flight hull breachingpodgaim, cases `brch2`, `trpod`, `brch+trpod`, `trpod+dog`; fingerprint re-recorded,
+old copy `fingerprint.before-officers-stage27.txt`). `fvbuild -Statics` and both legacy bundles (`node scripts/bundle-legacy.js` - no watcher ran); no React
+change, no new class, no schema change - a party's param grows by `,"troop":N` only for a player with a Troop Leader.
+
+**Measured.** Offers: OFF_TROOP on the 36 Gaim hulls, OFF_TRPOD on the Ech'Akki; every breaching pod's OFF_BRCH limit 1 -> 2. Fingerprint: 4,083 lines
+added (the Bassari's block and 34 new case blocks), none changed - stripped of them, the new fingerprint is the old one byte for byte.
+
+**Verified.**
+- `officersHarness.php` **1903 / 0 with the database** (1821 --no-db; 103 new): the ids, labels and registry places; offered on exactly the 36 Gaim
+  hulls with a hangar bay at 5%, on no other faction's hull, pod or flight; the pod officer on the Ech'Akki alone at 20, limit 2, prices of one and two;
+  the post - the biggest Hangar, the Korvex's aft, the Tocrat's first of two, never a catapult, docking bay, collar or rail; the Pod Allowance table (12
+  hulls, HANG_BP, read before the conversions) and the fixture over every hull of the statics; the defence (shift, the REAL mission and delivery
+  modifiers, the REAL capture combat, with a Security Officer 4, killed, disabled, his kill roll); the Bulkheads (+1 on all eight, the readout, sent to
+  both viewers, none without him, the REAL absorption 3 not 2, kept killed or disabled, none from pre-battle damage); his pod's -3 through the REAL delivery
+  and mission rolls, the mark (his pod, another pod of his player, none for a player without one), stripped from both viewers, lost with his pod; the ship's
+  pods (fleet order by id past a fighter flight, two ships adding, any faction's pod, fixed, killed, a Grast's 0, another player's), the REAL rolls -1 and
+  -3 not -4, the `pods` payload; the escape through the REAL delivery, Wreak Havoc, Sabotage (9+ and 4), Rescue (3, 7, a success) and capture combat - the
+  note, serving out the turn, no second roll, a later load; mixed flights (posts, thrust once, each pod Elite, each assault, the payload).
+- `officersClientHarness.js` **736 / 1** (34 new; the one failure is the user's "(repeat)" label, §9.33's): the rows and the constants against
+  Officers.php; the statics - OFF_TROOP on the 36 hulls where the client finds his Hangar, OFF_TRPOD on the Ech'Akki alone, OFF_BRCH up to 2 on every pod;
+  `podAllowance` equal to the server's on every hull with hangar slots (the fixture) and 0 on the rest; the post; the lobby list of mixed flights, the
+  thrust once, rowMax, mixes, the price note, the 20% count; the REAL buy dialog (officerBlocked, enhRowMax, clampEnhRowsToSize, the Officers line); the
+  pods aided in game (by id, two ships, killed, another player's) and in the lobby (Fleet Selection's order, one card for a pair); the Marines lines and the
+  REAL SystemInfo; the lobby Bulkheads through the REAL lobbyEnhancements (once, after an edit, refunded, unbought).
+- `enhancementsHarness` **291 / 0** (fingerprint re-recorded, additions only); `enhancementsDifferential.js` **840 / 0** (60 new cases - the Bassari's
+  Bulkheads compared box for box; the Ech'Akki's posts and thrust); negative controls in the mutation pass.
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0** (no corpus game holds a Troop Leader or a pod flight of two officers).
+- **Mutation-tested: 101 breaks (60 server, 39 client and lobby, 2 through the differential), 99 caught**, files byte-identical afterwards. One of them
+  (dropping the crafts already taken from the pod count) kills the load - a third pod that does not exist - so it is load-bearing. The first pass
+  missed five, each a missing check, now added: the "no mark" check ran in a game with no officers at all (so the mark code never ran - now the enemy
+  has a Troop Leader), twice; Rescue 7+ only tested an escape, which looks like no roll; units that carry no slot (the client's owner test was hidden by
+  the slot test); and a second `setEnhancementsShip` past apply()'s own flag. Of the two left: the client listFor's "nobody but a partner after the
+  first" guard cannot be reached today (no flight officer follows the pod Troop Leader in the registry - kept for one added later); and the
+  differential cannot see the thrust counted once - its flights hold one craft, so two Breaching Experts never both serve there - which the client
+  harness catches. Runner `mutate27.js` in the session scratchpad only (`--dry` checks every pattern occurs once). Before the pass,
+  three gaps found while writing it were closed (a fighter rail and a tied pair of bays for the post, an enemy Troop Leader ship and a fighter flight in
+  the fleet order), and the Pod Allowance's "no slots" early return was removed on both ends: racks + min(cap, 0) is already 0, so it was dead code.
+
+**Observations, not changed:**
+1. Not play-tested. Worth a test: a Gaim fleet with a Bassari (Troop Leader) and three pairs of Ech'Akki - the Marines tooltips of the first pair say
+   "-1 on its rolls", the others nothing; a pair with a Breaching Expert and a Troop Leader (the buy dialog allows both, one to a pod); his pod's capture
+   party's rolls in the log's Roll(Mod) 3 lower; the Bassari's Bulkheads at 3 boxes in both browsers; an enemy pod against the Bassari rolling 2 higher.
+2. ~~Pre-existing: a Sabotage party whose target system is destroyed switches to Wreak Havoc without its pod info.~~ Fixed the same day on the user's
+   request - and it was worse than first reported: see the follow-up below.
+3. A Grappling Claw's marines (a ship's) are no pods: neither pod clause reaches them; his ship's defence does.
+4. The lobby previews the Bulkhead box by changing `maxhealth` in lobbyEnhancements (as IPSH_ESSAN does), not at read time: `maxhealth` is read in too many
+   places. dropDestroyedPosts takes it back. (User: "That seems ok to me.")
+
+**Follow-up (user, 2026-10-23, the same day): a Sabotage party whose target is already destroyed; the Bulkhead's readout.**
+- *What the code did* (corrected - observation 2 above had it wrong): `ShipSystem::criticalPhaseEffects` opens with "a destroyed system: return", so a
+  Sabotage party aboard a system **destroyed by other fire** was never processed again - aboard for the rest of the battle doing nothing, never back in a
+  pod, never on to Wreak Havoc. The in-loop "already destroyed" branch was reached only by a second party on a system the first destroyed in the same
+  phase: it made a Wreak Havoc critical **without** the pod info, and left its own critical open.
+- *Ruled (user)*: "If the Marines can return to an attached pod then they should do so, only if no pods are available should they resort to the Wreak
+  Havoc mission" - the rule doSabotageMission already applies when a party destroys its own target.
+- *Built*: `ShipSystem::sabotageTargetsLost($ship, $gamedata)` (from the early return: each active Sabotage party aboard a destroyed system, not the
+  C&C's own Wreak Havoc parties) and `sabotageTargetLost($critical, $ship, $gamedata)` (also the in-loop branch, its body now one call): through
+  `initMarineMission` (nothing on a captured ship), the critical ended, back to an attached pod by `returnMarines` (its own pod, its player's, its team's)
+  with "The marine unit returns to a friendly pod.", else a Wreak Havoc critical on the C&C from the next turn with the pod info - a Troop Leader's mark
+  among it - and "No pods available, the marine unit switches to Wreak Havoc." The FAQ's Sabotage paragraph and the Troop Leader card say so.
+- *The Bulkhead's readout*: its static blueprint's `output` is 0 (the server sends the boxes left as `output` only in game), so a lobby window showed 0.
+  The client `Bulkhead.prototype.initializationUpdate` (model/system/baseSystems.js) sets `outputDisplay` to its boxes left - maxhealth less
+  damageManager.getDamage, the health bar's figure - on every render (SystemIcon.render runs initializeSystem); a destroyed one's 0 falls to the generic
+  readout. In game it equals the server's `output`.
+- *Verified*: officersHarness **1911 / 0 with the database** (1829 --no-db; 8 new through the REAL criticalPhaseEffects - back to the pod, no pod and the
+  Wreak Havoc critical with the pod info, a captured ship, a live gun still rolling, two parties where the first destroys the gun, a destroyed C&C's party,
+  a party not yet aboard, a party already ended); client **737 / 1** (the Bulkhead readout through the REAL damage.js: 2, 3 with his box, 1 after 2
+  damage, 0 destroyed); `fvbuild -Check` replay **162 / 0** (no corpus game had a party on a destroyed system). Mutation: 10 more breaks, all caught (two
+  only after the last two checks were added). Legacy bundles rebuilt; served copy synced.

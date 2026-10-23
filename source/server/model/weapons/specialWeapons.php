@@ -9617,6 +9617,8 @@ class Marines extends Weapon implements SpecialAbility{
 			}
 		}
 		$rollMod += Officers::boardingShift($target); //An Expert Security Officer moves every boarding roll 2 in the defender's favour.
+		//An Expert Troop Leader in this pod, or aboard a ship counting it among his pods (OFFICERS_PLAN.md Stage 27)
+		if (TacGamedata::$officersPresent) $rollMod += Officers::troopDeliveryMod($shooter, $this, $gamedata);
 
         return $rollMod;
         		
@@ -9667,6 +9669,7 @@ class Marines extends Weapon implements SpecialAbility{
 
 		if($deliveryRoll <= 5){ //successful delivery, continue with applying critical effects.
 			$elite = $this->isElite($shooter, $gamedata); //Elite Marines, or a serving Breaching Expert's pod (OFFICERS_PLAN.md Stage 24)
+			$crit = null; //the party's critical, whichever mission made it
 
 
 
@@ -9755,6 +9758,8 @@ class Marines extends Weapon implements SpecialAbility{
 					break;			
 				
 			}
+			//the pod it left, for an Expert Troop Leader's bonuses and escape roll on its missions (OFFICERS_PLAN.md Stage 27)
+			if($crit !== null && TacGamedata::$officersPresent) Officers::markTroopParty($crit, $shooter, $this, $gamedata);
 		}elseif($deliveryRoll >= 6 && $deliveryRoll <=8){//Unsuccessful delivery
 			$this->ammunition++;//Marines weren't eliminated, they just weren't delivered.  Give ammunition back to weapon.
 			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
@@ -9764,6 +9769,7 @@ class Marines extends Weapon implements SpecialAbility{
 		}else{//Roll result is 9 or over
 			$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit was eliminated whilst trying to board the enemy ship.";
 			Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.								
+			if(TacGamedata::$officersPresent) Officers::troopDeliveryLost($shooter, $this, $gamedata); //his pod's Expert Troop Leader's escape roll (Stage 27)
 			return;
 		}			
 	}//endof onDamagedSystem() 	

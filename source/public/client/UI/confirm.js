@@ -250,20 +250,35 @@ window.confirm = {
     /* The most one enhancement row's spinner may take: its limit - and for Expert Pilots, an officer bought as a count
        (OFFICERS_PLAN.md Stage 18), never more than the flight size this dialog shows (officers.rowMax). The + button, the
        typed box and the wheel all ask here; clampEnhRowsToSize takes the extra off when the size goes down. */
-    enhRowMax: function enhRowMax(target) {
+    enhRowMax: function enhRowMax(target, taken) {
         var max = target.data("max");
         var officer = window.officers ? officers.get(target.data("enhID")) : null;
         if (!officer || !officer.multi) return max;
-        return officers.rowMax(target.data("enhID"), max, parseInt($(".fighterAmount").html(), 10) || 1);
+        if (taken === undefined) taken = confirm.mixedTaken(target);
+        return officers.rowMax(target.data("enhID"), max, parseInt($(".fighterAmount").html(), 10) || 1, taken);
+    },
+
+    /* OFFICERS_PLAN.md Stage 27: the craft the officers this row's officer shares a flight with (`mixesWith` - Breaching Experts and
+       Expert Troop Leaders, one to a pod) already hold - his row may take only the rest. */
+    mixedTaken: function mixedTaken(target) {
+        var officer = officers.get(target.data("enhID"));
+        if (!officer || !officer.mixesWith) return 0;
+        var taken = 0;
+        $(".selectAmount", target.closest(".confirm")).each(function () {
+            if (this !== target[0] && officers.mixes(target.data("enhID"), $(this).data("enhID"))) taken += $(this).data("count") || 0;
+        });
+        return taken;
     },
 
     clampEnhRowsToSize: function clampEnhRowsToSize() {
         var enhNo = 0;
         var target = $(".selectAmount.shpenh" + enhNo);
+        var mixed = 0; //Stage 27: craft held by the rows above that share the flight one to a craft - the first rows keep theirs
         while (typeof target.data("enhPrice") != 'undefined') {
             var officer = window.officers ? officers.get(target.data("enhID")) : null;
             var count = target.data("count") || 0;
-            var max = confirm.enhRowMax(target);
+            var max = confirm.enhRowMax(target, (officer && officer.mixesWith) ? mixed : 0);
+            if (officer && officer.mixesWith) mixed += Math.min(count, max);
             if (officer && officer.multi && count > max) {
                 //an officer row: no price step and never an option, so its cost is price x count
                 target.data("count", max);
@@ -1288,15 +1303,21 @@ window.confirm = {
     /* D9: a flight carries ONE officer in total. Its Officers section says so up front, and a second one
        is refused (officerBlocked) with that line flashing - a passive notice, never a dialog
        (feedback_passive_notices). A ship may carry one of each, so it gets no line. The server does not
-       trust the dialog: Officers::pickPosts serves only the first officer row on a flight. */
+       trust the dialog: Officers::pickPosts serves only the first officer row on a flight.
+       Stage 27: a breaching pod flight may carry Breaching Experts and Expert Troop Leaders together, one to a pod - its line says so. */
     OFFICER_LIMIT_NOTE: 'A flight may carry only one officer type.',
+    OFFICER_MIX_NOTE: 'A flight may carry only one officer type - except Breaching Experts and Troop Leaders, one to a pod.',
 
     addOfficerLimitNote: function addOfficerLimitNote(e, ship) {
         if (!ship) return;
         var body = confirm.buySectionBody(e, 'officers');
         if (!$(".buyRow", body).length) return;
         if (ship.flight) {
-            $('<p class="buySectionNote buyOfficerNote"></p>').text(confirm.OFFICER_LIMIT_NOTE).prependTo(body);
+            var mixable = window.officers && $(".selectAmount", body).filter(function () {
+                var officer = officers.get($(this).data("enhID"));
+                return Boolean(officer && officer.mixesWith);
+            }).length > 1;
+            $('<p class="buySectionNote buyOfficerNote"></p>').text(mixable ? confirm.OFFICER_MIX_NOTE : confirm.OFFICER_LIMIT_NOTE).prependTo(body);
             return;
         }
         //a ship: one line per officer row refused because he is placed in a weapon already (officerBlock)
@@ -1307,7 +1328,8 @@ window.confirm = {
     },
 
     /* Would raising this row's count put a SECOND officer on a flight? True for a fighter officer's row
-       while another officer row of the same dialog is already bought. And on a ship, for an officer row
+       while another officer row of the same dialog is already bought - unless (Stage 27) the two share a
+       flight one to a craft (`mixesWith`), whose limit is enhRowMax's. And on a ship, for an officer row
        carrying an officerBlock: he is placed in a weapon already (Stage 8, the Matter Weapons Expert). */
     officerBlocked: function officerBlocked(target) {
         if (!window.officers) return false;
@@ -1316,7 +1338,8 @@ window.confirm = {
             if (!officers.isFighterOfficer(target.data("enhID"))) return false;
             var taken = $(".selectAmount", dialog).filter(function () {
                 var other = $(this);
-                return this !== target[0] && officers.isOfficerId(other.data("enhID")) && (other.data("count") || 0) > 0;
+                return this !== target[0] && officers.isOfficerId(other.data("enhID")) && (other.data("count") || 0) > 0
+                    && !officers.mixes(target.data("enhID"), other.data("enhID"));
             });
             if (!taken.length) return false;
         }

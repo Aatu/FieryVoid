@@ -15582,10 +15582,17 @@ class Bulkhead extends ShipSystem{
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     protected $possibleCriticals = array( ); //no critical effect applicable	
+	protected $boxesAdded = 0; //boxes beyond the blueprint's (an Expert Troop Leader's - Officers::applyTroopLeader), sent with maxhealth
 	
     function __construct($armour, $maxhealth){
         parent::__construct($armour, $maxhealth, 0, 0);
     }
+
+	//OFFICERS_PLAN.md Stage 27: "all bulkheads on the ship are considered to have 1 extra box"
+	public function addBoxes($boxes){
+		$this->maxhealth += $boxes;
+		$this->boxesAdded += $boxes;
+	}
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);     
@@ -15671,6 +15678,8 @@ class Bulkhead extends ShipSystem{
 		//$this->output = $this->getOutput();	
         $strippedSystem = parent::stripForJson();
         $strippedSystem->output = $this->getOutput();
+        //the client builds a system from its static blueprint: boxes added in game reach it here, to every viewer (a displayed stat)
+        if ($this->boxesAdded) $strippedSystem->maxhealth = $this->maxhealth;
         return $strippedSystem;
     }
 } //endof Bulkhead

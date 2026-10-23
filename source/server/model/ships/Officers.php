@@ -82,6 +82,11 @@
    is destroyed and holdable to the Firing phase (HyachComputer::settleFiringBFCP); the first point of every hit on the Computer
    ignored (computerArmour); a stealth ship's signature masked (maskSignature); and one Defence, Sensor, Targeting or Weapon
    Specialist used a second time (specialistReuse).
+   Stage 27: the Expert Troop Leader (Gaim) - on a ship, in its Hangar: every boarding roll against it 2 in its favour (boardingShift),
+   +1 on every roll of as many of his player's breaching pods as the ship's Pod Allowance (troopAidedCraft), and every Bulkhead a box
+   tougher for the whole battle; in a breaching pod (OFF_TRPOD, one to a pod): -3 on every roll of its boarding parties, and a d6 to
+   escape when one is eliminated (troopPartyLost). Breaching Experts became one to a pod as well, and the two may share a pod flight
+   (`mixesWith`).
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -155,6 +160,12 @@ class Officers{
 	const SOFTWARE_BFCP = 1;             //Expert Software Engineer: "The Hyach computer provides one extra bonus fire control point (BFCP)"
 	const SOFTWARE_ARMOUR = 1;           //...: "ignores the first point of damage in any volley" - an armour point nothing pierces or wears
 	const SIGNATURE_MASK_HEXES = 5;      //...: a stealth ship "appear[s] as though it were five hexes further away for detection purposes"
+	const TROOP_BOARDING_SHIFT = 2;      //Expert Troop Leader: "a penalty of 2 on all enemy rolls and a bonus of 2 on all defense rolls"
+	const TROOP_SHIP_POD_BONUS = 1;      //...: "If any of his own ship's breaching pods attack an opponent, they gain a +1 bonus on any attack table"
+	const TROOP_POD_BONUS = 3;           //...in a pod: "a further -2 bonus (a total of -3 for Gaim)" - the 3, his ship's 1 among them (user ruling 2026-10-23)
+	const TROOP_ESCAPE_MAX = 4;          //...: "roll a d6, and on a roll of 1-4 he manages to escape with his pod ... not available on Wreak Havoc missions"
+	const TROOP_BULKHEAD_BOXES = 1;      //...: "all bulkheads on the ship are considered to have 1 extra box"
+	const TROOP_PARTY_KEY = 'troop';     //...the craft a boarding party left, in its critical's param - read for his bonuses and his escape (never sent)
 	/* ...: "permits a specialist to use his abilities a second time ... The specialist must be of the software category" - the Hyach
 	   Specialists the user named (2026-10-22). ⚠️ MIRROR PAIR with officers.SOFTWARE_SPECIALISTS (JS). */
 	private static $softwareSpecialists = array('Defence', 'Sensor', 'Targeting', 'Weapon');
@@ -237,6 +248,9 @@ class Officers{
 		'OFF_POL'  => array('only' => array('Centauri Republic', 'Centauri Republic (WotCR)')),
 		//"Availability: Hyach only" - and only a Hyach hull has his post, the Computer
 		'OFF_SOFT' => array('only' => array('Hyach Gerontocracy')),
+		//"Availability: Gaim Only" - on a ship, and in a Gaim breaching pod (user notes 2026-10-23)
+		'OFF_TROOP' => array('only' => array('Gaim Intelligence')),
+		'OFF_TRPOD' => array('only' => array('Gaim Intelligence')),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -261,6 +275,9 @@ class Officers{
 	                 applying his effects (the Expert Pilot). Together they are still the flight's one officer.
 	     unscaled    (optional, Stage 24) true: his pct of one craft is his price whatever the flight's size - he serves in a single
 	                 craft, so a flight of two pays what a flight of one does (the Breaching Expert: "25% of the cost of the breaching pod")
+	     mixesWith   (optional, Stage 27, with `multi`) the officers who may share a flight with him, one officer to a craft: the
+	                 first in registry order takes the first crafts, the next the crafts after them (the Breaching Expert and the
+	                 Expert Troop Leader in a pod - user ruling 2026-10-23). Every other flight keeps D9's one officer.
 	   Placed officers (Stage 8) carry, instead of a post key:
 	     placed      true: the player picks his post, a weapon, in that system's own menu - a per-system row
 	                 (Enhancements::$systemEnhancementRegistry), never an enhancementOptions offer
@@ -443,6 +460,16 @@ class Officers{
 		   its own rules on the same Firing-phase allocation; the per-category cap stays 2; a specialist used on turn N may be used again
 		   from turn N+1. 15%, Hyach only ($factionRules). */
 		'OFF_SOFT' => array('label' => 'Expert Software Engineer', 'post' => 'computer', 'pct' => 15, 'apply' => 'applySoftwareEngineer'),
+		/* Expert Troop Leader (Stage 27; rules text, user 2026-10-23), aboard a ship - "Location: Hangar" (the largest). "If the ship is
+		   attacked by enemy breaching pods, he provides a penalty of 2 on all enemy rolls and a bonus of 2 on all defense rolls" -
+		   boardingShift, beside the Expert Security Officer's (every boarding party, as his). "If any of his own ship's breaching pods
+		   attack an opponent, they gain a +1 bonus on any attack table" - as many of his player's pods, in fleet order, as his ship's Pod
+		   Allowance (user ruling 2026-10-23: troopAidedCraft). "All bulkheads on the ship are considered to have 1 extra box. This
+		   benefit remains even if the troop leader is killed in combat" - so `lost` runs the same method as `apply`. "Accompany a
+		   breaching pod" is OFF_TRPOD below, a purchase of its own (user notes: no officer moves from a ship to a docked pod).
+		   5% of the hull; Gaim only ($factionRules). */
+		'OFF_TROOP' => array('label' => 'Expert Troop Leader', 'post' => 'hangar', 'pct' => 5, 'apply' => 'applyTroopLeader',
+			'lost' => 'applyTroopLeader'),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -578,10 +605,23 @@ class Officers{
 		   destroyed by a single hit ... only once per scenario": spendCaptureAssault marks the party at delivery, captureRolls rolls three.
 		   "25% of the cost of the breaching pod" - of his ONE pod, not scaled by the flight's size (`unscaled`, user ruling); 50% for races
 		   other than the Balosians, Yolu, Narn and Gaim ($factionRules). Breaching pods only (`needs`). "No more than 20% of a fleets
-		   breaching pods" is the lobby's Fleet Correctness Report (user ruling), as every fleet-composition rule is. Last in the list, as
-		   the newest. */
-		'OFF_BRCH' => array('label' => 'Breaching Expert', 'post' => 'craft', 'flight' => true, 'pct' => 50, 'unscaled' => true,
-			'apply' => 'applyBreachingExpert', 'publish' => array('freethrust'), 'needs' => 'isBreachingPod'),
+		   breaching pods" is the lobby's Fleet Correctness Report (user ruling), as every fleet-composition rule is.
+		   Stage 27 (user request 2026-10-23): as many as the flight has pods, one in each (`multi` - maxCount holds it to maxFlightSize),
+		   each priced at his one pod; each pod of his Elite and its own capture assault; the flight's +1 thrust once, however many. He may
+		   share a pod flight with Expert Troop Leaders, one officer to a pod (`mixesWith`), and takes the first pods. */
+		'OFF_BRCH' => array('label' => 'Breaching Expert', 'post' => 'craft', 'flight' => true, 'pct' => 50, 'unscaled' => true, 'multi' => 6,
+			'mixesWith' => array('OFF_TRPOD'), 'apply' => 'applyBreachingExpert', 'publish' => array('freethrust'), 'needs' => 'isBreachingPod'),
+		/* Expert Troop Leader in a breaching pod (Stage 27; user notes 2026-10-23: no officer can move from a ship to a docked pod, so he is
+		   bought for the pod "at the cost of 50% the price of a pod", and "the Troop leader accompanies any Marine that attacks from that
+		   pod"). "He gives a further -2 bonus (a total of -3 for Gaim) to any rolls" - -3 on every roll of every party from his pod (user
+		   ruling: his ship's 1 among them, so a Troop Leader ship's 1 never adds to it): troopDeliveryMod, troopPartyRollMod. "If any
+		   result appears that 'kills' one of his contingents, roll a d6, and on a roll of 1-4 he manages to escape with his pod ... This is
+		   not available on Wreak Havoc missions" - troopPartyLost; on Wreak Havoc he dies with them (user ruling). Lost with his pod as
+		   every fighter officer, and no kill roll of his own. One to a pod, as many as the flight has (`multi`), beside Breaching Experts
+		   (`mixesWith` - user ruling 2026-10-23); priced at his one pod (`unscaled`). Gaim breaching pods only ($factionRules, `needs`).
+		   Last in the list, as the newest. */
+		'OFF_TRPOD' => array('label' => 'Expert Troop Leader', 'post' => 'craft', 'flight' => true, 'pct' => 50, 'unscaled' => true, 'multi' => 6,
+			'mixesWith' => array('OFF_BRCH'), 'apply' => null, 'needs' => 'isBreachingPod'),
 	);
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV) - so the
@@ -784,6 +824,8 @@ class Officers{
 	              No officer-eligible hull carries two (measured 2026-10-15), so "his ship's drive" and "the
 	              drive he sits in" cannot disagree.
 	     computer the Hyach Computer (Stage 26): no hull carries two.
+	     hangar   the largest Hangar by boxes (Stage 27, the Expert Troop Leader), the first on a tie - a plain hangar bay, never a
+	              catapult, a fighter rail, a docking collar or a docking bay (Hangar subclasses with jobs of their own).
 	     craft    a flight's first craft (Stage 4): the lobby's one fighter card, and the sample fighter
 	              getSampleFighter() answers - id 1, whether or not it is still flying. An officer bought as a
 	              count (Stage 18) takes the first craft, the next the second, and so on (nthCraft).
@@ -824,8 +866,21 @@ class Officers{
 					if ($system instanceof HyachComputer) return $system;
 				}
 				return null;
+			case 'hangar':
+				$best = null;
+				foreach ($ship->systems as $system){
+					if (!self::isHangarBay($system)) continue;
+					if ($best === null || $system->maxhealth > $best->maxhealth) $best = $system;
+				}
+				return $best;
 		}
 		return null;
+	}
+
+	//a plain hangar bay: a Hangar, but not one of the subclasses that are catapults, rails, collars or docking bays
+	private static function isHangarBay($system){
+		return $system instanceof Hangar && !($system instanceof Catapult) && !($system instanceof FighterRail)
+			&& !($system instanceof DockingCollar) && !($system instanceof DockingBay);
 	}
 
 	//Enhancements::strongestSystem's semantics: the first in construction order wins a tie
@@ -882,22 +937,32 @@ class Officers{
 	   it) buys nothing - the server trusts the client's rows, so a doctored payload is answered here. So
 	   is a flight's second officer row (D9: one officer in total): only the first in registry order serves.
 	   An officer bought as a count (`multi`, Stage 18) is that many entries, one in each of the flight's
-	   first crafts, held to maxCount and to the craft it has. */
+	   first crafts, held to maxCount and to the craft it has. Stage 27: after one, an officer he `mixesWith`
+	   takes the crafts after his - one officer to a craft, never more than the flight has - and nobody else.
+	   An Expert Troop Leader aboard a ship carries his ship's Pod Allowance (`pods`), worked out here while
+	   $ship->fighters is still the blueprint's - Enhancements' hangar conversions rewrite it next. */
 	public static function pickPosts($ship){
 		$list = array();
 		if (self::hasOfficerRow($ship) && self::mayCarryOfficers($ship)){
+			$first = null; //a flight's first officer bought as a count, whose `mixesWith` may follow him
+			$craft = 0;    //...and the crafts taken so far
 			foreach (self::$registry as $id => $officer){
 				if (!self::isBought($ship, $id)) continue;
 				if (!self::isEligible($ship, $id)) continue;
+				if ($first !== null && !in_array($id, self::$registry[$first]['mixesWith'], true)) continue;
 				if (!empty($officer['multi']) && $ship instanceof FighterFlight){
-					$n = min(self::boughtCount($ship, $id), self::maxCount($ship, $id), self::craftCount($ship));
+					$n = min(self::boughtCount($ship, $id), self::maxCount($ship, $id), self::craftCount($ship) - $craft);
 					for ($k = 1; $k <= $n; $k++){
-						$list[] = array('id' => $id, 'post' => (int)self::nthCraft($ship, $k)->id, 'out' => null, 'how' => null);
+						$list[] = array('id' => $id, 'post' => (int)self::nthCraft($ship, ++$craft)->id, 'out' => null, 'how' => null);
 					}
-					break;
+					if ($first !== null || empty($officer['mixesWith'])) break;
+					$first = $id;
+					continue;
 				}
 				$post = self::findPost($ship, $officer['post']);
-				$list[] = array('id' => $id, 'post' => (int)$post->id, 'out' => null, 'how' => null);
+				$entry = array('id' => $id, 'post' => (int)$post->id, 'out' => null, 'how' => null);
+				if ($id === 'OFF_TROOP') $entry['pods'] = self::podAllowance($ship);
+				$list[] = $entry;
 				if ($ship instanceof FighterFlight) break;
 			}
 			if (!($ship instanceof FighterFlight)) self::pickPlacedPosts($ship, $list);
@@ -2337,9 +2402,12 @@ class Officers{
 	   getDeliveryRollMod) and its missions (ShipSystem::getMarineRollMod: Wreak Havoc, Sabotage, Rescue and its Capture
 	   combat roll) - adds it; his ship's own defending marines, who need 5 or less in Capture combat, subtract it (user
 	   rulings 2026-10-17: every boarding party, the defenders' rolls too). Server only: the client previews only the
-	   attach chance, which no crew affects. */
+	   attach chance, which no crew affects.
+	   Stage 27: an Expert Troop Leader adds his own 2 ("a penalty of 2 on all enemy rolls and a bonus of 2 on all defense
+	   rolls"), on the same rolls - beside a Security Officer's, as two different officers. */
 	public static function boardingShift($ship){
-		return self::isActive($ship, 'OFF_SECU') ? self::SECURITY_BOARDING_SHIFT : 0;
+		$shift = self::isActive($ship, 'OFF_SECU') ? self::SECURITY_BOARDING_SHIFT : 0;
+		return $shift + (self::isActive($ship, 'OFF_TROOP') ? self::TROOP_BOARDING_SHIFT : 0);
 	}
 
 	/* ------------------------------------------------------------------ Expert Religious Leader (Stage 14) */
@@ -3124,7 +3192,12 @@ class Officers{
 	   loss of thrust due to damage": FV takes no thrust from a flight for damage, so there is nothing to ignore - an Energy Draining
 	   Field's drain (FighterFlight::getEffectiveFreeThrust) is a field's effect, not damage, and still applies. */
 	private static function applyBreachingExpert($ship, $entry, $turn){
-		$ship->freethrust += self::BREACH_THRUST;
+		//Stage 27: the flight's +1 once, however many Breaching Experts serve in it - the first one serving adds it
+		foreach ($ship->getOfficers() as $other){
+			if ($other['id'] !== 'OFF_BRCH' || !self::serves($other, $turn)) continue;
+			if ((int)$other['post'] === (int)$entry['post']) $ship->freethrust += self::BREACH_THRUST;
+			return;
+		}
 	}
 
 	/* "The pod's Marines receive benefits as if they were Elite" - the Marines of HIS pod (user ruling 2026-10-21: "single pod"), on
@@ -3166,6 +3239,148 @@ class Officers{
 	public static function captureRolls($critical, $gamedata){
 		if (!is_array($critical->param) || empty($critical->param[self::BREACH_PARTY_KEY])) return 1;
 		return ((int)$critical->turn === (int)$gamedata->turn) ? self::BREACH_CAPTURE_ROLLS : 1;
+	}
+
+	/* ------------------------------------------------------------------ Expert Troop Leader (Stage 27) */
+
+	/* A ship's POD ALLOWANCE - the breaching pods it may carry as the lobby's Fleet Correctness Report counts them (gamelobby.js
+	   checkChoices, its per-ship profile): its dedicated "Breaching Pods" racks (HANG_BP's conversions included, as the report adds them),
+	   plus 1 - 2 on a capital ship, 4 on a base or an enormous unit, doubled on an Assault hull - held to the assault shuttle, heavy (or
+	   "normal") and medium slots it has to host them (so none from a hull without). "His own ship's breaching pods" are as many as this (user ruling
+	   2026-10-23). Off the BLUEPRINT's slots: pickPosts asks before Enhancements converts any. ⚠️ MIRROR PAIR with officers.podAllowance (JS). */
+	public static function podAllowance($ship){
+		$fighters = is_array($ship->fighters) ? $ship->fighters : array();
+		$racks = (int)($fighters['Breaching Pods'] ?? 0) + self::boughtCount($ship, 'HANG_BP');
+		$slots = (int)(($fighters['heavy'] ?? 0) ?: ($fighters['normal'] ?? 0)) + (int)($fighters['medium'] ?? 0) + (int)($fighters['assault shuttles'] ?? 0);
+		$cap = 1;
+		if (!empty($ship->Enormous) || !empty($ship->base) || !empty($ship->smallBase)) $cap = 4;
+		else if ((int)$ship->shipSizeClass >= 3) $cap = 2;
+		if (stripos((string)$ship->shipClass, 'assault') !== false) $cap *= 2;
+		return $racks + min($cap, $slots);
+	}
+
+	/* "All bulkheads on the ship are considered to have 1 extra box. This benefit remains even if the troop leader is killed in combat" -
+	   so `lost` runs this too: every turn of the battle. A displayed stat, so every viewer is sent it (Bulkhead::stripForJson). Never while
+	   pre-battle damage on his Hangar leaves him not aboard at all (the lobby refunds him). */
+	private static function applyTroopLeader($ship, $entry, $turn){
+		foreach ($ship->systems as $system){
+			if ($system instanceof Bulkhead) $system->addBoxes(self::TROOP_BULKHEAD_BOXES);
+		}
+	}
+
+	/* What his officers give a party from this pod's $craft on its d10s (lower is better for a boarder): -3 while an Expert Troop Leader
+	   serves in that very pod (his ship's 1 among it - user ruling 2026-10-23), else -1 while a Troop Leader aboard a ship counts the craft
+	   among his ship's pods (troopAidedCraft), else 0. */
+	private static function troopBonus($flight, $craft, $gamedata, $turn){
+		if (self::servingIndex($flight, 'OFF_TRPOD', $craft, $turn) !== null) return -self::TROOP_POD_BONUS;
+		return self::troopAidedCraft($flight, $craft, $gamedata, $turn) ? -self::TROOP_SHIP_POD_BONUS : 0;
+	}
+
+	//Marines::getDeliveryRollMod, behind $officersPresent: the delivery roll of a party from the pod carrying $weapon
+	public static function troopDeliveryMod($flight, $weapon, $gamedata){
+		if (!self::isBreachingPod($flight)) return 0;
+		$craft = $flight->getFighterBySystem($weapon->id);
+		return $craft ? self::troopBonus($flight, $craft, $gamedata, (int)$gamedata->turn) : 0;
+	}
+
+	/* Marines::onDamagedSystem, as a party is DELIVERED, behind $officersPresent: the craft it left, in its critical's param
+	   (TROOP_PARTY_KEY) - the only field a party carries from turn to turn - so its mission rolls and its end find that pod's officer, or
+	   its place among a Troop Leader ship's pods, again. Only where it could matter: a breaching pod of a player with a Troop Leader aboard
+	   any unit. Never sent (ShipSystem::stripForJson). */
+	public static function markTroopParty($critical, $flight, $weapon, $gamedata){
+		if (!self::isBreachingPod($flight) || !is_array($critical->param) || !self::playerHasTroopLeader($gamedata, $flight->userid)) return;
+		$craft = $flight->getFighterBySystem($weapon->id);
+		if ($craft) $critical->param[self::TROOP_PARTY_KEY] = (int)$craft->id;
+	}
+
+	//does this player have an Expert Troop Leader aboard any unit of the game - whatever has become of him since
+	private static function playerHasTroopLeader($gamedata, $userid){
+		foreach ($gamedata->ships as $ship){
+			if ($ship->userid != $userid) continue;
+			foreach ($ship->getOfficers() as $entry){
+				if ($entry['id'] === 'OFF_TROOP' || $entry['id'] === 'OFF_TRPOD') return true;
+			}
+		}
+		return false;
+	}
+
+	/* ShipSystem::getMarineRollMod - a Sabotage, Wreak Havoc or Rescue roll and every capture attack - behind $officersPresent: a marked
+	   party's bonus on this turn, from the pod it left. A pod's officer is lost with his pod; the party still finds its flight. */
+	public static function troopPartyRollMod($critical, $gamedata){
+		$party = self::troopParty($critical, $gamedata);
+		return ($party === null) ? 0 : self::troopBonus($party[0], $party[1], $gamedata, (int)$gamedata->turn);
+	}
+
+	//a marked party's array(its flight, the craft it left), or null
+	private static function troopParty($critical, $gamedata){
+		if (!is_array($critical->param) || empty($critical->param[self::TROOP_PARTY_KEY]) || !isset($critical->param['id'])) return null;
+		$flight = $gamedata->getShipById((int)$critical->param['id']);
+		if (!($flight instanceof FighterFlight)) return null;
+		$craft = $flight->getSystemById((int)$critical->param[self::TROOP_PARTY_KEY]);
+		return ($craft instanceof Fighter) ? array($flight, $craft) : null;
+	}
+
+	//Marines::onDamagedSystem, behind $officersPresent: a party from the pod carrying $weapon eliminated boarding (a delivery roll of 9+)
+	public static function troopDeliveryLost($flight, $weapon, $gamedata){
+		if (!($flight instanceof FighterFlight)) return;
+		$craft = $flight->getFighterBySystem($weapon->id);
+		if ($craft) self::troopEscape($flight, $craft, $gamedata, false);
+	}
+
+	/* ShipSystem's missions, behind $officersPresent: a marked party eliminated - by the defenders in capture combat, or on a Sabotage (4-5,
+	   9+), Rescue (3-4, "heavy casualties", its unit never back in a pod; 7+) or Wreak Havoc (9+) roll; $wreakHavoc for the last. */
+	public static function troopPartyLost($critical, $gamedata, $wreakHavoc = false){
+		$party = self::troopParty($critical, $gamedata);
+		if ($party !== null) self::troopEscape($party[0], $party[1], $gamedata, $wreakHavoc);
+	}
+
+	/* "If any result appears that 'kills' one of his contingents, roll a d6, and on a roll of 1-4 he manages to escape with his pod (but not
+	   the rest of his team ...). This is not available on Wreak Havoc missions" - there he dies with them, no roll (user ruling 2026-10-23).
+	   The pod's serving Expert Troop Leader; killed is the kill rule's own record, one OffKilled note on his pod, written straight through
+	   (the delivery and the missions run inside advance()). He serves the rest of the turn he dies (D3), so a second party lost that turn
+	   finds him killed already and rolls nothing. No combat log line names him (D4). */
+	private static function troopEscape($flight, $craft, $gamedata, $wreakHavoc){
+		$turn = (int)$gamedata->turn;
+		$i = self::servingIndex($flight, 'OFF_TRPOD', $craft, $turn);
+		if ($i === null) return;
+		$list = $flight->getOfficers();
+		if ($list[$i]['how'] === 'killed') return;
+		if (!$wreakHavoc && Dice::d(6) <= self::TROOP_ESCAPE_MAX) return;
+		$list[$i]['out'] = $turn;
+		$list[$i]['how'] = 'killed';
+		$flight->setOfficers($list);
+		Manager::insertIndividualNote(new IndividualNote(-1, $gamedata->id, $turn, $gamedata->phase, $flight->id, (int)$craft->id,
+			self::KILL_NOTE, substr(self::getLabel('OFF_TRPOD') . ' killed', 0, 40), 'OFF_TRPOD'));
+	}
+
+	/* "If any of his own ship's breaching pods attack an opponent, they gain a +1 bonus on any attack table": "his own ship's" are as many
+	   pods as his ship's Pod Allowance (podAllowance), given to his player's breaching pods in FLEET order - unit id, the order the fleet was
+	   bought in and the lobby lists it - craft by craft, on the map, in a hangar or lost: FIXED, so a lost pod's share passes to nobody
+	   (user rulings 2026-10-23). Several Troop Leader ships of one player add their allowances; one out of action takes his away.
+	   ⚠️ MIRROR PAIR with officers.troopAidedCraft (JS). */
+	public static function troopAidedCraft($flight, $craft, $gamedata, $turn){
+		$allowance = 0;
+		foreach ($gamedata->ships as $ship){
+			if ($ship->userid != $flight->userid || $ship instanceof FighterFlight) continue;
+			foreach ($ship->getOfficers() as $entry){
+				if ($entry['id'] === 'OFF_TROOP' && self::serves($entry, $turn)) $allowance += (int)($entry['pods'] ?? 0);
+			}
+		}
+		if ($allowance < 1) return false;
+		$pods = array();
+		foreach ($gamedata->ships as $ship){
+			if ($ship->userid == $flight->userid && self::isBreachingPod($ship)) $pods[(int)$ship->id] = $ship;
+		}
+		ksort($pods);
+		$n = 0;
+		foreach ($pods as $pod){
+			foreach ($pod->systems as $c){
+				if (!($c instanceof Fighter)) continue;
+				if (++$n > $allowance) return false;
+				if ((int)$pod->id === (int)$flight->id && (int)$c->id === (int)$craft->id) return true;
+			}
+		}
+		return false;
 	}
 
 	/* ------------------------------------------------------------------ repairs (Stage 5) */
@@ -3506,6 +3721,8 @@ class Officers{
 				$spent = self::reuseSpentTurn(self::softwareUses($ship));
 				if ($spent !== null) $row['abilities']['reuse'] = $spent;
 			}
+			//Stage 27: an Expert Troop Leader's Pod Allowance - his team's client counts the pods he aids (officers.troopAidedCraft)
+			if ($entry['id'] === 'OFF_TROOP') $row['pods'] = (int)($entry['pods'] ?? 0);
 			if (!empty(self::$registry[$entry['id']]['movable']) && (int)TacGamedata::$currentPhase === 1 && !TacGamedata::$currentGameFinished){
 				$targets = self::moveTargets($ship, $list, $i, $turn);
 				if (!empty($targets)) $row['targets'] = $targets;

@@ -1506,6 +1506,33 @@
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
+      <h3>Expert Troop Leader</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The ship's Hangar (the largest, if it has more than one) - never a catapult, a fighter rail or a docking system.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>Every boarding roll against the ship is 2 worse for the boarders - their delivery roll and every roll of their
+            mission aboard - and the ship's own defending marines roll 2 better in Capture combat. Grappling Claws and
+            transporters count too, and an Expert Security Officer on the same ship adds his 2.</li>
+          <li>-1 (better) on every roll - the delivery and every mission roll - of as many of your breaching pods as the ship can
+            carry: its <b>Pod Allowance</b>, as the Fleet Correctness Report counts it - 1 for a ship, 2 for a capital ship, 4 for
+            a base, doubled on an Assault ship, never more than its assault shuttle, heavy and medium hangar slots, plus any
+            Breaching Pod racks. The pods are your fleet's in the order you bought them, pod by pod, wherever they are. A pod
+            that is lost keeps its share. Several Troop Leaders add their allowances.</li>
+          <li>Every Bulkhead on the ship has 1 extra box, for the whole battle - even after he is disabled or killed.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>5% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship. Gaim Intelligence only.</dd>
+        <dt>Notes</dt>
+        <dd>He can be bought for a Gaim breaching pod instead (see the Expert Troop Leader under Fighter Officers): a pod with
+          one of its own gets his -3, never -4. Your pods' Marines tooltips say which of them he helps. The extra Bulkhead boxes
+          show to your opponent; the officer himself stays hidden.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
       <h3>Expert Turret Officer</h3>
       <dl class="fvd-spec">
         <dt>Post</dt>
@@ -1569,21 +1596,23 @@
 <section data-key="fighterofficers" data-title="Fighter Officers" data-group="Officers">
   <p class="fvd-lede">Officers for fighter flights. A flight may carry only one of them, and he flies in its first
     fighter: he is lost if that fighter is destroyed or drops out, and goes with it if it is split off from the flight
-    (see <a href="#losingofficers">Losing an officer</a>). The one exception is the Expert Pilot: a flight may carry
-    up to four of them (in place of any other officer), one in each of its first fighters.</p>
+    (see <a href="#losingofficers">Losing an officer</a>). The exceptions: a flight may carry up to four Expert Pilots (in
+    place of any other officer), one in each of its first fighters; and a breaching pod flight may carry a Breaching Expert
+    or an Expert Troop Leader in each of its pods, the two together if you like.</p>
   <p>Each officer's cost is for a standard flight of six fighters. A flight of another size pays it in proportion,
     rounded up: three fighters pay half, nine one and a half times, twelve double. A single superheavy fighter pays it
-    in full. The Breaching Expert is the exception: he serves in one pod, so his cost is the same whatever the size of
-    its flight.</p>
+    in full. The Breaching Expert and the Expert Troop Leader are the exceptions: each serves in one pod, so each costs the
+    same whatever the size of his flight.</p>
   <div class="fvd-cards">
     <article class="fvd-card fvd-card--wide">
       <h3>Breaching Expert</h3>
       <dl class="fvd-spec">
         <dt>Post</dt>
-        <dd>The flight's first breaching pod.</dd>
+        <dd>One in each of the flight's breaching pods, from the first.</dd>
         <dt>Effect</dt>
         <dd><ul>
-          <li>+1 Thrust for the flight - which also helps its pods match a faster target's speed to attach.</li>
+          <li>+1 Thrust for the flight, however many Breaching Experts it carries - which also helps its pods match a faster
+            target's speed to attach.</li>
           <li>The Marines in his own pod count as Elite: -1 on their delivery roll, and on the rolls of every mission they
             carry out. Marines that are Elite already (the Narn and Gaim pods, or Elite Marines bought) gain nothing more.</li>
           <li>Once per battle: the first marine unit his pod delivers on a <b>Capture Ship</b> mission makes three attack
@@ -1591,9 +1620,10 @@
             hit.</li>
         </ul></dd>
         <dt>Cost</dt>
-        <dd>50% of one pod's cost; 25% for the Balosians, Yolu, Narn and Gaim. The same whatever the size of the flight.</dd>
+        <dd>50% of one pod's cost each; 25% for the Balosians, Yolu, Narn and Gaim. The same whatever the size of the flight.</dd>
         <dt>Limit</dt>
-        <dd>1 officer per flight. Only offered to breaching pods. No more than 20% of a fleet's breaching pods may carry
+        <dd>One per pod. A Gaim pod flight may carry Breaching Experts and Expert Troop Leaders together, one officer to a pod -
+          the Breaching Experts take the first pods. Only offered to breaching pods. No more than 20% of a fleet's breaching pods may carry
           one (fractions of 0.5 or more rounded up), counted pod by pod: a fleet needs 3 pods for one, 8 for two, 13 for
           three. The Fleet Correctness Report checks this.</dd>
         <dt>Notes</dt>
@@ -1730,6 +1760,30 @@
           Alliance Badger; its tooltip has a <b>Tail Gun</b> line. Fired in the same Firing Phase as any of its fighter's
           other direct-fire weapons, it takes -10% to hit, unless the flight has a navigator to work it. Missiles and
           torpedoes launched in Initial Orders, intercepting and ramming do not count.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h3>Expert Troop Leader</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>One in each of the flight's pods not taken by a Breaching Expert, from the first.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>-3 (better) on every roll of the marine units his pod sends: their delivery roll, and every roll of their mission
+            aboard - on top of the Gaim pods' own Elite -1. A Troop Leader ship's -1 does not add to it.</li>
+          <li>He goes with every unit his pod sends. Whenever one of them is eliminated - boarding, by the defenders in Capture
+            combat, or on a Sabotage or Rescue roll (a Rescue completed "with heavy casualties" included) - roll a d6: on 1-4 he
+            escapes back to his pod, on 5 or 6 he is killed. On a <b>Wreak Havoc</b> mission (a Sabotage with no called shot, or
+            one whose system is destroyed with no pod to return to) there is no escape: he dies with them.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>50% of one pod's cost each (20 points on the Ech'Akki). The same whatever the size of the flight.</dd>
+        <dt>Limit</dt>
+        <dd>One per pod, beside any Breaching Experts - one officer to a pod. Gaim breaching pods only.</dd>
+        <dt>Notes</dt>
+        <dd>The Expert Troop Leader can also serve aboard a ship (see Ship Officers). Like every fighter officer, he is lost with
+          his pod. He serves out the turn he is killed. His pod's Marines tooltip names him to you; your opponent never learns he
+          was there.</dd>
       </dl>
     </article>
   </div>

@@ -4380,6 +4380,13 @@ var Bulkhead = function (json, ship) {
 Bulkhead.prototype = Object.create(ShipSystem.prototype);
 Bulkhead.prototype.constructor = Bulkhead;
 
+/* Its readout is the boxes it has left - Bulkhead::getOutput, which the server sends as `output` in game. A static blueprint carries 0, so a lobby
+   window showed 0: the figure is worked out here instead, as its health bar's (user request 2026-10-23). 0 falls through to the generic readout. */
+Bulkhead.prototype.initializationUpdate = function () {
+	this.outputDisplay = Math.max(0, (parseInt(this.maxhealth, 10) || 0) - damageManager.getDamage(this.ship, this));
+	return this;
+};
+
 
 
 var PowerCapacitor = function PowerCapacitor(json, ship) {
