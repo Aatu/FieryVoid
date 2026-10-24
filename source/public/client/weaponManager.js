@@ -2411,6 +2411,13 @@ window.weaponManager = {
             }
         }
 
+        /* An Expert Warrior's precision strike (OFFICERS_PLAN.md Stage 28): his ship's first called shot without its penalty; and +2 at the
+           unit his charge holds against (his +1 is in the weapon's fire control). ⚠️ MIRROR PAIR with the Stage 28 lines in Weapon::calculateHitBase. */
+        var precision = window.officers ? officers.precisionStrike(shooter, weapon, target, standardCalledShot) : 0;
+        if (precision !== 0) otherDetail.push({ label: 'Precision Strike', value: precision });
+        var chargeHit = window.officers ? officers.chargeHitBonus(shooter, weapon, target) : 0;
+        if (chargeHit !== 0) otherDetail.push({ label: 'Charge', value: chargeHit });
+
         /* An Expert Gunner's once-per-battle shot (OFFICERS_PLAN.md Stage 10): +4 on his gun's first native Piercing
            shot, +3 on its first called shot. ⚠️ MIRROR PAIR with the gunnerShotBonus line in Weapon::calculateHitBase. */
         var gunnerShot = window.officers ? officers.gunnerShotBonus(shooter, weapon, standardCalledShot) : 0;

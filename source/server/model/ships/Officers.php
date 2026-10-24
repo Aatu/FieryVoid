@@ -166,6 +166,14 @@ class Officers{
 	const TROOP_ESCAPE_MAX = 4;          //...: "roll a d6, and on a roll of 1-4 he manages to escape with his pod ... not available on Wreak Havoc missions"
 	const TROOP_BULKHEAD_BOXES = 1;      //...: "all bulkheads on the ship are considered to have 1 extra box"
 	const TROOP_PARTY_KEY = 'troop';     //...the craft a boarding party left, in its critical's param - read for his bonuses and his escape (never sent)
+	const WARRIOR_DIE_BONUS = 1;         //Expert Warrior: "+ 1 to hit with all weapons (applyWarrior), and all weapons cause +1 extra damage per die"
+	const WARRIOR_INI = 10;              //...: "a +10 bonus to its initiative and any fighters or shuttles it launches receive the same" - FV units (user)
+	const WARRIOR_CRIT_MOD = -1;         //...: "All critical hits, regardless of system, have a -1 on their rolls"
+	const WARRIOR_CAUSED_CRIT = 1;       //...: "and any critical hits caused by the expert warrior's ship gain +1 on their dice"
+	const CHARGE_HIT = 2;                //...a charge: "he gains a further + 2 to hit that unit with all his ship's weapons"
+	const CHARGE_MIN_HEXES = 4;          //...: "He must move at least 4 hexes towards the enemy" - 4 hexes nearer by the end of his move
+	const SUPREME_INITIATIVE = 50;       //...: "supreme anticipation, earning his ship a + 50 initiative bonus ... on the next turn" - FV units (user)
+	const SUPREME_PENALTY = -50;         //...: "However, on the turn after that one, his ship suffers a -50 penalty"
 	/* ...: "permits a specialist to use his abilities a second time ... The specialist must be of the software category" - the Hyach
 	   Specialists the user named (2026-10-22). ⚠️ MIRROR PAIR with officers.SOFTWARE_SPECIALISTS (JS). */
 	private static $softwareSpecialists = array('Defence', 'Sensor', 'Targeting', 'Weapon');
@@ -251,6 +259,8 @@ class Officers{
 		//"Availability: Gaim Only" - on a ship, and in a Gaim breaching pod (user notes 2026-10-23)
 		'OFF_TROOP' => array('only' => array('Gaim Intelligence')),
 		'OFF_TRPOD' => array('only' => array('Gaim Intelligence')),
+		//"Availability: Drazi only" - the Wars of the Centauri Republic's Drazi too (user ruling 2026-10-23)
+		'OFF_WARR' => array('only' => array('Drazi Freehold', 'Drazi Freehold (WotCR)')),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -470,6 +480,18 @@ class Officers{
 		   5% of the hull; Gaim only ($factionRules). */
 		'OFF_TROOP' => array('label' => 'Expert Troop Leader', 'post' => 'hangar', 'pct' => 5, 'apply' => 'applyTroopLeader',
 			'lost' => 'applyTroopLeader'),
+		/* Expert Warrior (Stage 28; rules text, user 2026-10-23) - "Tor 'galla", the Chosen, in the C&C. "+ 1 to hit with all weapons, and
+		   all weapons cause +1 extra damage per die" (+1 fire control: applyWarrior; warriorDieBonus - on a serving Expert Gunner's weapon the
+		   Gunner's +1 and +1 replace his: user ruling); "+10 bonus to its initiative and any fighters or shuttles it launches receive the same
+		   initiative" - flights launched from his ship in battle (user ruling: applyLaunchedFlights); "All critical hits, regardless of
+		   system, have a -1 on their rolls" (applyWarrior), "and any critical hits caused by the expert warrior's ship gain +1 on their dice"
+		   (markCausedCriticals). Once per scenario each, never two in a turn: a CHARGE declared in the Movement phase at a unit the player
+		   picks (user ruling: Movement::CHARGE, validateCharge; +2 to hit that unit when the run holds - chargeTarget, chargeHitBonus), with one snap turn
+		   cheaper (the client's); a PRECISION STRIKE - his ship's first called shot, without the called shot penalty (the user's note:
+		   precisionStrike); and SUPREME ANTICIPATION - ordered in the Firing phase from his C&C, as the Political Officer's speech (the
+		   user's note: saveAnticipation), +50 initiative next turn while he serves and -50 the turn after. 50%; Drazi only ($factionRules). */
+		'OFF_WARR' => array('label' => 'Expert Warrior', 'post' => 'cnc', 'pct' => 50, 'apply' => 'applyWarrior',
+			'publish' => array('iniativebonus'), 'lost' => 'applyWarriorLost', 'lostPublish' => array('iniativebonus')),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -1114,6 +1136,7 @@ class Officers{
 			list($list[$i]['out'], $list[$i]['how']) = self::outState($ship, $entry);
 		}
 		self::resolveUses($ship, $list);
+		self::resolveCharges($ship, $list); //Stage 28: an Expert Warrior's charge, off his movement
 		$ship->setOfficers($list);
 
 		foreach ($list as $i => $entry){
@@ -1835,7 +1858,8 @@ class Officers{
 	//what a spent ability is called in its note and the tooltip
 	private static $abilityNames = array('reload' => 'faster reload', 'pierce' => 'Piercing shot', 'called' => 'called shot',
 		'capture' => 'capture assault', //Stage 24: the Breaching Expert's (spendCaptureAssault)
-		'speech' => 'speech');          //Stage 25: the Expert Political Officer's (saveSpeech)
+		'speech' => 'speech',           //Stage 25: the Expert Political Officer's (saveSpeech)
+		'precision' => 'precision strike', 'anticipation' => 'anticipation'); //Stage 28: the Expert Warrior's (precisionStrike, saveAnticipation)
 
 	/* Is this ability still his on $turn? Spent ON $turn still counts: that turn's shot is the one that spent it
 	   (so every order his gun fires that turn, and a replay of it, reads the same). */
@@ -1904,6 +1928,8 @@ class Officers{
 		//Stage 19 (user ruling 2026-10-20): on a gun a serving Expert Targeter covers, his +4 is the called shot's bonus - the
 		//Gunner's +3 is neither used nor spent, so it is still his if he moves or the Targeter falls
 		if (self::targeterFor($ship, $weapon, $turn) !== null) return 0;
+		//Stage 28: likewise on the gun making an Expert Warrior's precision strike this turn - the penalty waived is the shot's bonus
+		if (self::precisionWeapon($ship, $weapon, $gamedata, $turn)) return 0;
 		self::spend($ship, $i, 'called', $turn, $gamedata);
 		return self::GUNNER_CALLED_BONUS;
 	}
@@ -1938,7 +1964,7 @@ class Officers{
 				$data->loading += 1;
 			} else if (!empty($officer['abilities']) && self::abilityOpen($entry, 'reload', $fired)
 				&& !self::spentOn($entry, 'pierce', $fired) && !self::spentOn($entry, 'called', $fired)
-				&& !self::firingSpentAbility($weapon, $entry, $fired, $gamedata)){
+				&& !self::firingSpentAbility($ship, $weapon, $entry, $fired, $gamedata)){
 				self::spend($ship, $i, 'reload', $fired, $gamedata);
 				$data->loading += 1;
 			}
@@ -1955,8 +1981,10 @@ class Officers{
 	   called shot was), because the spend itself is not in this gamedata: Manager::advanceGameState runs the turn
 	   change on the gamedata it loaded BEFORE the firing, and FireGamePhase::advance resolved the shots on a
 	   gamedata of its own - so its OffUsed note and its in-memory spend are both invisible here (game 4484: the
-	   faster reload went with a Piercing shot on turns 1 and 6). Interceptions spend neither. */
-	private static function firingSpentAbility($weapon, array $entry, $fired, $gamedata){
+	   faster reload went with a Piercing shot on turns 1 and 6). Interceptions spend neither. Stage 28: nor the called shots of a gun that made
+	   an Expert Warrior's precision strike that turn (gunnerShotBonus). */
+	private static function firingSpentAbility($ship, $weapon, array $entry, $fired, $gamedata){
+		$precision = self::precisionWeapon($ship, $weapon, $gamedata, $fired);
 		foreach ($weapon->fireOrders as $order){
 			if ((int)$order->turn !== (int)$fired || (int)$order->weaponid !== (int)$weapon->id) continue;
 			if (strpos((string)$order->type, 'ntercept') !== false) continue;
@@ -1966,7 +1994,7 @@ class Officers{
 				if (self::abilityOpen($entry, 'pierce', $fired)) return true;
 				continue;
 			}
-			if ((int)$order->calledid < 1 || !self::bonusCall($weapon, true, $mode) || !self::abilityOpen($entry, 'called', $fired)) continue;
+			if ((int)$order->calledid < 1 || $precision || !self::bonusCall($weapon, true, $mode) || !self::abilityOpen($entry, 'called', $fired)) continue;
 			$target = $gamedata->getShipById($order->targetid);
 			$called = $target ? $target->getCalledSystemAsAimed($order) : null;
 			if ($called !== null && $called->getTargetProfileOverride() === null) return true;
@@ -3383,6 +3411,346 @@ class Officers{
 		return false;
 	}
 
+	/* ------------------------------------------------------------------ Expert Warrior (Stage 28) */
+
+	//the index of this ship's Expert Warrior if he serves on $turn, or null
+	private static function warriorIndex($ship, $turn){
+		foreach ($ship->getOfficers() as $i => $entry){
+			if ($entry['id'] === 'OFF_WARR' && self::serves($entry, $turn)) return $i;
+		}
+		return null;
+	}
+
+	/* +10 initiative (published to every viewer: `publish`); -1 on EVERY critical roll his ship makes - the ship's critRollMod, which
+	   ShipSystem::testCritical adds for each system and the kill roll of every officer aboard reads too ("including any modifications",
+	   D3); and his Supreme Anticipation: +50 on the turn after he ordered it, -50 on the turn after that (anticipationShift).
+	   "+ 1 to hit with all weapons": +1 on every non-null fire control of every mode of every weapon (raiseEveryMode - the Gunner's rule, and
+	   the C&C Matter Weapons Expert's way of reaching a whole ship, so it shows in each weapon's fire control as theirs do: user request after
+	   play test 4509). Not the ram - ramming is not one of the ship's weapons (the Religious Leader's exclusion) - nor a jump drive (JumpEngine
+	   extends Weapon), nor a serving Expert Gunner's weapon, whose +1 replaces his ("does not combine any to-hit or damage bonuses with those
+	   of other elite officers" - user ruling 2026-10-23). ⚠️ MIRROR PAIR with officers.fireControlRaise (JS). */
+	private static function applyWarrior($ship, $entry, $turn){
+		$ship->iniativebonus += self::WARRIOR_INI + self::anticipationShift($entry, $turn, true);
+		$ship->critRollMod += self::WARRIOR_CRIT_MOD;
+		foreach ($ship->systems as $system){
+			if (!($system instanceof Weapon) || $system instanceof RammingAttack || $system instanceof JumpEngine) continue;
+			if (!self::servesOn($ship, 'OFF_GUN', $system, $turn)) self::raiseEveryMode($system);
+		}
+	}
+
+	/* `lost`: once he is out of action in battle, only the -50 his anticipation still owes - "on the turn after that one, his ship suffers
+	   a -50 penalty" - whether or not he lived to give the +50 (which, like the Political Officer's +30, needs him serving: user ruling
+	   2026-10-21). */
+	private static function applyWarriorLost($ship, $entry, $turn){
+		$ship->iniativebonus += self::anticipationShift($entry, $turn, false);
+	}
+
+	//what his Supreme Anticipation, ordered in the Firing phase of turn N, does to the initiative of $turn: +50 on N+1 (while he serves), -50 on N+2
+	private static function anticipationShift($entry, $turn, $serving){
+		if (!isset($entry['abilities']['anticipation'])) return 0;
+		$ordered = (int)$entry['abilities']['anticipation'];
+		if ($ordered === (int)$turn - 1) return $serving ? self::SUPREME_INITIATIVE : 0;
+		if ($ordered === (int)$turn - 2) return self::SUPREME_PENALTY;
+		return 0;
+	}
+
+	/* On the turn of a CHARGE that holds (chargeTarget), "a further + 2 to hit that unit with all his ship's weapons" - Weapon::calculateHitBase,
+	   behind $officersPresent, in d20 units: a shot modifier, as it is for one unit only (his standing +1 is fire control - applyWarrior). The
+	   charge's own, so on a Gunner's weapon too. Never the ram - ramming is not one of the ship's weapons (the Religious Leader's exclusion).
+	   ⚠️ MIRROR PAIR with officers.chargeHitBonus (JS). */
+	public static function chargeHitBonus($ship, $weapon, $target, $gamedata){
+		if (!$target || $ship instanceof FighterFlight || $weapon instanceof RammingAttack) return 0;
+		$charged = self::chargeTarget($ship, $gamedata);
+		return ($charged !== null && (int)$charged->id === (int)$target->id) ? self::CHARGE_HIT : 0;
+	}
+
+	/* "All weapons cause +1 extra damage per die" - Weapon::getFinalDamage adds it to Elite Crew's Dice::$perDieBonus, each die capped at its
+	   face, as the Gunner's; a weapon whose damage is not rolled gains nothing. Not on a serving Gunner's weapon, whose +1 replaces his (user
+	   ruling), nor the ram. */
+	public static function warriorDieBonus($ship, $weapon){
+		if ($weapon instanceof RammingAttack || !self::isActive($ship, 'OFF_WARR')) return 0;
+		return self::servesOn($ship, 'OFF_GUN', $weapon, TacGamedata::$currentTurn) ? 0 : self::WARRIOR_DIE_BONUS;
+	}
+
+	/* The turn of each Expert Warrior's charge, as abilities['charge'] (the payload's "used" list): the CHARGE row itself is the record - every
+	   turn's movement loads, so nothing else is stored. Before apply, so his `apply` and the payload see it. */
+	private static function resolveCharges($ship, array &$list){
+		foreach ($list as $i => $entry){
+			if ($entry['id'] !== 'OFF_WARR') continue;
+			foreach ((array)$ship->movement as $move){
+				if ($move->type == Movement::CHARGE){
+					$list[$i]['abilities']['charge'] = (int)$move->turn;
+					break;
+				}
+			}
+		}
+	}
+
+	/* ⭐ THE CHARGE - "He can 'charge' an opponent by pointing his ship at the target and moving directly towards it for his full movement.
+	   The 'charge' is declared as this maneuver is performed. He must move at least 4 hexes towards the enemy and must have beaten him in
+	   initiative": the unit his charge row names (the player picks it - user ruling 2026-10-23), if he closed 4 hexes (chargeRunHolds) and his
+	   ship beat it on initiative (chargeBeaten - so the target had moved when he did). null otherwise. A charge that does
+	   not hold is still spent: its row is the record (resolveCharges). */
+	public static function chargeTarget($ship, $gamedata, $turn = null){
+		if ($turn === null) $turn = (int)$gamedata->turn;
+		if ($ship instanceof FighterFlight || self::warriorIndex($ship, $turn) === null) return null;
+		$row = Movement::getChargeRow($ship, $turn);
+		if ($row === null) return null;
+		$target = $gamedata->getShipById((int)$row->value);
+		if (!self::chargeable($ship, $target) || !self::chargeBeaten($ship, $target, $gamedata)) return null;
+		return self::chargeRunHolds($ship, $target, $turn) ? $target : null;
+	}
+
+	/* "Must have beaten him in initiative" = the target moved before him. Standard movement: one unit at a time, in BaseShip::hasBetterIniative's
+	   order (ties to the bonus, then the id). Simultaneous Movement: a whole bracket moves together (`iniative` IS the bracket), so only a unit
+	   of a LOWER bracket has moved - never one of his own, whatever a tie-break says (user, 2026-10-24).
+	   ⚠️ MIRROR PAIR with shipManager.movement.chargeBeaten (JS). */
+	private static function chargeBeaten($ship, $target, $gamedata){
+		if ($gamedata->rules && $gamedata->rules->hasRuleName('initiativeCategories')) return $ship->iniative > $target->iniative;
+		return BaseShip::hasBetterIniative($ship, $target);
+	}
+
+	//an enemy unit on the board - not his own team, not terrain
+	private static function chargeable($ship, $target){
+		return $target && (int)$target->id !== (int)$ship->id && (int)$target->team !== (int)$ship->team && !$target->isTerrain();
+	}
+
+	/* "He must move at least 4 hexes towards the enemy": from the hex he declared in to the hex his movement ends in this turn, at least
+	   CHARGE_MIN_HEXES nearer the target where it ended its own move (it moved first). That and the initiative are the whole test (user
+	   ruling 2026-10-24, play test 4509): the ship may turn, pivot and slip as it needs to close, so the path is not judged - nor where his
+	   bow points. The charge row comes before his first step into a hex (validateCharge); one after it does not hold. */
+	private static function chargeRunHolds($ship, $target, $turn){
+		$goal = self::positionOn($target, $turn);
+		if ($goal === null) return false;
+		$from = null;
+		$last = null;
+		foreach ((array)$ship->movement as $move){
+			if ((int)$move->turn > (int)$turn) continue;
+			if ((int)$move->turn === (int)$turn){
+				if ($move->type == Movement::CHARGE){
+					if ($last === null) return false;
+					$from = $last->position;
+				} else if ($from === null && Movement::isHexStep($move)){
+					return false;
+				}
+			}
+			$last = $move;
+		}
+		if ($from === null) return false;
+		return $from->distanceTo($goal) - $last->position->distanceTo($goal) >= self::CHARGE_MIN_HEXES;
+	}
+
+	//where a unit stood at the end of $turn's movement so far: its last row of that turn or before
+	private static function positionOn($unit, $turn){
+		$position = null;
+		foreach ((array)$unit->movement as $move){
+			if ((int)$move->turn <= (int)$turn) $position = $move->position;
+		}
+		return $position;
+	}
+
+	/* MovementGamePhase::process, on the movement a POST submits for $loaded (the authoritative load - the POST-side ship has no officers):
+	   ONE charge row is kept, and only while his Warrior serves and has not charged on an earlier turn, before the ship's first step into a
+	   hex, at an enemy unit deployed and still in the fight. Every other charge row is dropped; the rest of the movement passes untouched
+	   (his snap turn's cheaper thrust is the client's, as every turn cost is). */
+	public static function validateCharge($loaded, array $movement, $gamedata){
+		$turn = (int)$gamedata->turn;
+		$may = false;
+		if (!($loaded instanceof FighterFlight)){
+			$i = self::warriorIndex($loaded, $turn);
+			$may = ($i !== null) && self::abilityOpen($loaded->getOfficers()[$i], 'charge', $turn);
+		}
+		$kept = false;
+		$stepped = false;
+		$out = array();
+		foreach ($movement as $move){
+			if ((int)$move->turn === $turn && $move->type == Movement::CHARGE){
+				$target = $gamedata->getShipById((int)$move->value);
+				if ($may && !$kept && !$stepped && self::chargeable($loaded, $target) && !$target->isDestroyed()
+					&& $target->getTurnDeployed($gamedata) <= $turn){
+					$kept = true;
+					$out[] = $move;
+				}
+				continue;
+			}
+			if ((int)$move->turn === $turn && Movement::isHexStep($move)) $stepped = true;
+			$out[] = $move;
+		}
+		return $out;
+	}
+
+	/* ⭐ THE PRECISION STRIKE - "a single 'called shot', with only one weapon, without the usual called shot penalty", once per scenario:
+	   automatically his ship's FIRST called shot (the user's note) - of a turn's called shots, the one by his lowest-numbered weapon, the
+	   first it declared - never on a turn he charged or ordered his Supreme Anticipation ("cannot do more than one of them in a given turn").
+	   A standard called shot only, not one in a mode with a hit calculation of its own (bonusCall). The order, or null. ⚠️ MIRROR PAIR with
+	   officers.precisionWeapon (JS). */
+	private static function precisionShot($ship, $gamedata, $turn){
+		if ($ship instanceof FighterFlight) return null;
+		$i = self::warriorIndex($ship, $turn);
+		if ($i === null) return null;
+		$entry = $ship->getOfficers()[$i];
+		if (!self::abilityOpen($entry, 'precision', $turn) || self::spentOn($entry, 'anticipation', $turn)) return null;
+		if (Movement::getChargeRow($ship, $turn) !== null) return null;
+		$best = null;
+		$bestId = null;
+		foreach ($ship->systems as $weapon){
+			if (!($weapon instanceof Weapon) || $weapon instanceof RammingAttack) continue;
+			if ($bestId !== null && (int)$weapon->id >= $bestId) continue;
+			foreach ($weapon->fireOrders as $order){
+				if ((int)$order->turn !== (int)$turn || (int)$order->calledid < 1 || strpos((string)$order->type, 'ntercept') !== false) continue;
+				if (!self::bonusCall($weapon, true, (int)$order->firingMode)) continue;
+				$target = $gamedata->getShipById($order->targetid);
+				$called = $target ? $target->getCalledSystemAsAimed($order) : null;
+				if ($called === null || $called->getTargetProfileOverride() !== null) continue;
+				$best = $order;
+				$bestId = (int)$weapon->id;
+				break;
+			}
+		}
+		return $best;
+	}
+
+	/* Weapon::calculateHitBase, behind $officersPresent: on the precision strike's shot, the called shot penalty it has just added taken off
+	   again (doubled against a base, as the penalty is), and the strike spent - once per scenario, in memory and as an OffUsed note. */
+	public static function precisionStrike($ship, $weapon, $target, $fireOrder, $called, $gamedata){
+		if (!$called || !$fireOrder) return 0;
+		$turn = (int)$gamedata->turn;
+		$shot = self::precisionShot($ship, $gamedata, $turn);
+		if ($shot === null || !self::sameOrder($shot, $fireOrder)) return 0;
+		self::spend($ship, self::warriorIndex($ship, $turn), 'precision', $turn, $gamedata);
+		$waived = -(int)$weapon->getCalledShotMod();
+		return ($target && $target->base) ? 2 * $waived : $waived;
+	}
+
+	private static function sameOrder($a, $b){
+		return $a === $b || ((int)$a->id > 0 && (int)$a->id === (int)$b->id);
+	}
+
+	/* Is $weapon the one making his precision strike on $turn? An Expert Gunner's called-shot +3 is neither used nor spent on its called
+	   shots then (the Targeter's precedent - gunnerShotBonus, firingSpentAbility). */
+	private static function precisionWeapon($ship, $weapon, $gamedata, $turn){
+		$shot = self::precisionShot($ship, $gamedata, $turn);
+		return $shot !== null && (int)$shot->weaponid === (int)$weapon->id;
+	}
+
+	/* "He can make a 'supreme anticipation,' earning his ship a + 50 initiative bonus ... on the next turn": ordered in the Firing phase from
+	   his C&C's menu, as the Political Officer's speech (the user's note) - FireGamePhase::process, through CnC::saveFirePhaseDeclaration,
+	   checked on the LOADED ship and spent: one OffUsed note, read back at every later load. A second order, a doctored POST, another
+	   player's ship or a turn he charged writes nothing. */
+	public static function saveAnticipation($cnc, $gamedata){
+		if (!TacGamedata::$officersPresent || !is_object($cnc)) return;
+		$postShip = $cnc->getUnit();
+		if (!$postShip) return;
+		$ship = $gamedata->getShipById((int)$postShip->id);
+		if (!$ship || $ship instanceof FighterFlight || (int)$ship->userid !== (int)$gamedata->forPlayer) return;
+		$turn = (int)$gamedata->turn;
+		$i = self::anticipatorIndex($ship, (int)$cnc->id, $turn);
+		if ($i !== null) self::spend($ship, $i, 'anticipation', $turn, $gamedata);
+	}
+
+	/* The index of this ship's Expert Warrior if he may order his Supreme Anticipation on $turn from the C&C $systemid - posted there, serving,
+	   not yet spent, and not on a turn he charged - or null. ⚠️ MIRROR PAIR with officers.canAnticipateSupreme (JS). */
+	private static function anticipatorIndex($ship, $systemid, $turn){
+		foreach ($ship->getOfficers() as $i => $entry){
+			if ($entry['id'] !== 'OFF_WARR' || (int)$entry['post'] !== (int)$systemid || !self::serves($entry, $turn)) continue;
+			if (isset($entry['abilities']['anticipation']) || Movement::getChargeRow($ship, $turn) !== null) return null;
+			return $i;
+		}
+		return null;
+	}
+
+	/* "Any critical hits caused by the expert warrior's ship gain +1 on their dice": Criticals::setCriticals, before Pass 1, behind
+	   $officersPresent - every system of another ship that took damage through its armour this turn from a ship whose Warrior serves
+	   (Pass 1's own trigger, isDamagedOnTurn) has its critRollMod raised by 1 for this pass, once however many hits, so its critical roll
+	   and the kill roll of any officer posted there include it. Not a flight's craft - a fighter rolls for dropout, not a critical
+	   (default, stated in the plan). clearCausedCriticals takes it back after the kill rolls. */
+	private static $causedMarks = array();
+	public static function markCausedCriticals($ships, $gamedata){
+		self::$causedMarks = array();
+		$turn = (int)$gamedata->turn;
+		$warriors = array();
+		foreach ($gamedata->ships as $ship){
+			if (!($ship instanceof FighterFlight) && self::warriorIndex($ship, $turn) !== null) $warriors[(int)$ship->id] = true;
+		}
+		if (empty($warriors)) return;
+		$shooters = null; //fire order id => its shooter, built only when a damage row does not carry its shooter
+		foreach ($ships as $ship){
+			if ($ship instanceof FighterFlight) continue;
+			foreach ($ship->systems as $system){
+				foreach ($system->damage as $damage){
+					if (((int)$damage->turn !== $turn && (int)$damage->turn !== -1) || $damage->damage <= $damage->armour) continue;
+					$shooter = $damage->shooterid;
+					if ($shooter === null){
+						if ($shooters === null) $shooters = self::fireOrderShooters($gamedata, $turn);
+						$shooter = $shooters[(int)$damage->fireorderid] ?? null;
+					}
+					if ($shooter === null || !isset($warriors[(int)$shooter]) || (int)$shooter === (int)$ship->id) continue;
+					$system->critRollMod += self::WARRIOR_CAUSED_CRIT;
+					self::$causedMarks[] = $system;
+					break;
+				}
+			}
+		}
+	}
+
+	public static function clearCausedCriticals(){
+		foreach (self::$causedMarks as $system) $system->critRollMod -= self::WARRIOR_CAUSED_CRIT;
+		self::$causedMarks = array();
+	}
+
+	//this turn's fire orders, by id => shooter id - for a damage row loaded from the database, which carries its fire order but not its shooter
+	private static function fireOrderShooters($gamedata, $turn){
+		$out = array();
+		foreach ($gamedata->ships as $ship){
+			foreach ($ship->getAllFireOrders($turn) as $order) $out[(int)$order->id] = (int)$order->shooterid;
+		}
+		return $out;
+	}
+
+	/* "Any fighters or shuttles it launches receive the same initiative (but not to-hit or damage) benefit": every FLIGHT launched from a
+	   hangar of his ship in battle (user ruling 2026-10-23 - the hangars' launch notes, Hangar::getLaunchedUnits), from the turn after its
+	   launch, +10 while he serves - however many Warrior ships launched it, once. TacGamedata::onConstructed, after every ship is constructed
+	   (the carrier's officers and the flight's own iniativebonus are both settled by then), behind $officersPresent. Published to every
+	   viewer (addForJson), as his own ship's is. */
+	public static function afterShipsConstructed($gamedata){
+		self::applyLaunchedFlights($gamedata);
+		self::settleCharges($gamedata);
+	}
+
+	/* The unit each serving Expert Warrior's charge this turn holds against (chargeTarget), on his entry as `charged` - for his team's hit-chance
+	   preview (the payload, officers.chargeHitBonus) and the reticle on that unit (shipManager.movement.getChargeMarked), which have no gamedata
+	   to judge the run with. Judged once per load. */
+	private static function settleCharges($gamedata){
+		$turn = (int)$gamedata->turn;
+		foreach ($gamedata->ships as $ship){
+			if ($ship instanceof FighterFlight) continue;
+			$i = self::warriorIndex($ship, $turn);
+			if ($i === null || Movement::getChargeRow($ship, $turn) === null) continue;
+			$target = self::chargeTarget($ship, $gamedata, $turn);
+			if ($target === null) continue;
+			$list = $ship->getOfficers();
+			$list[$i]['charged'] = (int)$target->id;
+			$ship->setOfficers($list);
+		}
+	}
+
+	private static function applyLaunchedFlights($gamedata){
+		$turn = (int)$gamedata->turn;
+		foreach ($gamedata->ships as $carrier){
+			if ($carrier instanceof FighterFlight || self::warriorIndex($carrier, $turn) === null) continue;
+			foreach ($carrier->systems as $system){
+				if (!($system instanceof Hangar)) continue;
+				foreach ($system->getLaunchedUnits() as $unitId => $launchTurn){
+					if ((int)$launchTurn >= $turn) continue;
+					$flight = $gamedata->getShipById((int)$unitId);
+					if (!($flight instanceof FighterFlight) || $flight->getOfficerLaunchIni() > 0) continue;
+					$flight->iniativebonus += self::WARRIOR_INI;
+					$flight->setOfficerLaunchIni(self::WARRIOR_INI);
+				}
+			}
+		}
+	}
+
 	/* ------------------------------------------------------------------ repairs (Stage 5) */
 
 	/* Criticals::setCriticals, after Pass 2 - so after every Self Repair has spent its points - behind
@@ -3678,6 +4046,8 @@ class Officers{
 	     an isModified weapon's fire control are sent by the systems themselves.
 	   ⚠️ Cosmetic secrecy, like the refit star - §4.6 lists the numbers that reach the enemy. */
 	public static function addForJson($ship, $strippedShip){
+		//Stage 28: a flight an Expert Warrior's ship launched - its +10, to every viewer, as his own ship's (applyLaunchedFlights)
+		if ($ship->getOfficerLaunchIni() > 0) $strippedShip->iniativebonus = $ship->iniativebonus;
 		$list = $ship->getOfficers();
 		if (empty($list)) return;
 		foreach ($list as $entry){
@@ -3723,6 +4093,8 @@ class Officers{
 			}
 			//Stage 27: an Expert Troop Leader's Pod Allowance - his team's client counts the pods he aids (officers.troopAidedCraft)
 			if ($entry['id'] === 'OFF_TROOP') $row['pods'] = (int)($entry['pods'] ?? 0);
+			//Stage 28: the unit an Expert Warrior's charge holds against this turn - his team's hit-chance preview (officers.chargeHitBonus) and reticle
+			if (isset($entry['charged'])) $row['charged'] = (int)$entry['charged'];
 			if (!empty(self::$registry[$entry['id']]['movable']) && (int)TacGamedata::$currentPhase === 1 && !TacGamedata::$currentGameFinished){
 				$targets = self::moveTargets($ship, $list, $i, $turn);
 				if (!empty($targets)) $row['targets'] = $targets;

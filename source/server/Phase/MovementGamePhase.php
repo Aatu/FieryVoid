@@ -267,6 +267,10 @@ class MovementGamePhase implements Phase
 					// it there, however many turns back.
 					$ship->movement = Movement::validateJumpOutSubmission($ship->movement, $activeShipMovementBackup, $gameData);
 
+					// OFFICERS_PLAN.md Stage 28 - an Expert Warrior's charge row: one, while he may charge, before the first step,
+					// at an enemy unit. Judged on the AUTHORITATIVE ship (the POST-side one has no officers).
+					if (TacGamedata::$officersPresent) $ship->movement = Officers::validateCharge($activeShip, $ship->movement, $gameData);
+
 					// Check for detachment move in the submitted orders
 					$detachedMove = false;
 					foreach ($ship->movement as $move) {

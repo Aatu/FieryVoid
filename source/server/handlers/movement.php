@@ -1275,6 +1275,27 @@
 			return false;
 		}
 
+		/* An Expert Warrior's CHARGE (OFFICERS_PLAN.md Stage 28): a Movement-phase row of its own, at the ship's hex, no thrust, its
+		   `value` the unit charged - declared before the ship's first step into a hex (Officers::validateCharge keeps one only for a ship
+		   whose Warrior may charge). Its snap turn is an ordinary turn row marked CHARGE_SNAP_TURN, whose cheaper thrust is the client's
+		   alone (movement.php recomputes no turn cost). ⚠️ MIRROR PAIR with shipManager.movement.CHARGE / CHARGE_SNAP_TURN (client movement.js). */
+		const CHARGE = 'charge';
+		const CHARGE_SNAP_TURN = 'chargesnap';
+
+		//this turn's charge row of the ship, or null
+		public static function getChargeRow($ship, $turn){
+			if (!$ship || !is_array($ship->movement)) return null;
+			foreach ($ship->movement as $move){
+				if ($move->type == self::CHARGE && $move->turn == $turn) return $move;
+			}
+			return null;
+		}
+
+		//a row that takes the unit into another hex - a move or a slip
+		public static function isHexStep($move){
+			return $move->type == "move" || $move->type == "slipleft" || $move->type == "slipright";
+		}
+
 		/* How far this turn's combat pivots turned the flight, in hex sides, rights against lefts: right-left-right
 		   is 1, three to one side 3 (180 degrees), four to one side 4. Every flight is agile, so each combat pivot
 		   row is one 60-degree step in the direction it names (client doPivot). The Expert Coordinator's "full 180"

@@ -1974,8 +1974,13 @@ public function getFullStartLoading()
            Stage 19: and an Expert Targeter's +4 on a standard called shot by a weapon he covers (officers.targeterShotBonus). */
         if (TacGamedata::$officersPresent) {
             $standardCalledShot = ($calledSystem !== null && $calledProfileOverride === null);
+            /* Stage 28: an Expert Warrior's once-per-battle precision strike - his ship's first called shot, the penalty above taken off
+               again (before the Gunner's, whose +3 gives way to it) - and +2 at the unit his charge holds against (his +1 is fire control).
+               ⚠️ MIRROR PAIR with officers.precisionStrike / chargeHitBonus. */
+            $mod += Officers::precisionStrike($shooter, $this, $target, $fireOrder, $standardCalledShot, $gamedata);
             $mod += Officers::gunnerShotBonus($shooter, $this, $standardCalledShot, $gamedata);
             $mod += Officers::targeterShotBonus($shooter, $this, $standardCalledShot, $gamedata);
+            $mod += Officers::chargeHitBonus($shooter, $this, $target, $gamedata);
         }
 
         if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)) { //leaving instanceof OSAT here - assuming MicroSATs will not suffer this penalty (Dovarum seems to be able to turn/pivot like a superheavy fighter it's based on)
@@ -3286,8 +3291,10 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         $dieBonus = ($shooter instanceof BaseShip) ? $shooter->getCrewDieDamageBonus() : 0;
         /* An Expert Gunner in THIS weapon (OFFICERS_PLAN.md Stage 8): +1 per die more, on top of Elite Crew's
            (not an officer, so they stack) - each die still capped at its face. An Expert Ion Technician's +1 per die on an
-           ion weapon's dice (Stage 17), likewise - but not on a Gunner's weapon, whose +1 replaces his. Behind the static. */
-        if (TacGamedata::$officersPresent && $shooter instanceof BaseShip) $dieBonus += Officers::gunnerDieBonus($shooter, $this) + Officers::ionDieBonus($shooter, $this);
+           ion weapon's dice (Stage 17), likewise - but not on a Gunner's weapon, whose +1 replaces his. An Expert Warrior's +1 per die on
+           every weapon (Stage 28), likewise not on a Gunner's weapon. Behind the static. */
+        if (TacGamedata::$officersPresent && $shooter instanceof BaseShip) $dieBonus += Officers::gunnerDieBonus($shooter, $this) + Officers::ionDieBonus($shooter, $this)
+            + Officers::warriorDieBonus($shooter, $this);
         /* An Expert Anticipator (Stage 23): a damage roll of two or more dice rolls one more and drops the lowest (Dice::$extraDie) -
            on a Gunner's weapon too, with his +1 on every die (user ruling 2026-10-21). Set and restored with the per-die bonus. */
         $extraDie = (TacGamedata::$officersPresent && $shooter instanceof BaseShip) ? Officers::extraDamageDie($shooter, $this) : 0;

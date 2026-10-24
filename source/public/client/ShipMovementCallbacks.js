@@ -66,6 +66,13 @@ window.ShipMovementCallbacks = function () {
         this.updateCallback({ ship: this.ship });
     };
 
+    //An Expert Warrior's Charge (OFFICERS_PLAN.md Stage 28): wait for a target, stop waiting, or take a declared charge back. The update redraws the icon.
+    ShipMovementCallbacks.prototype.chargeCallback = function (e) {
+        e.stopPropagation();
+        shipManager.movement.toggleCharge(this.ship);
+        this.updateCallback({ ship: this.ship });
+    };
+
     ShipMovementCallbacks.prototype.morecontractionCallback = function (e) {
         e.stopPropagation();
         shipManager.movement.doContraction(this.ship, 1);

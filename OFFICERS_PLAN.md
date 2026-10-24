@@ -41,7 +41,11 @@ Firing-phase allocation (§9.33) - committed (`4e523c0df`). Stage 27, the Expert
 roll against it 2 in its favour, +1 on the rolls of as many of his player's breaching pods as the ship can carry (its Pod Allowance), every Bulkhead a
 box tougher for the whole battle - or bought for a Gaim breaching pod (50% of a pod, one to a pod): -3 on his pod's parties' rolls, and a d6 to escape
 when one is eliminated (none on Wreak Havoc); with it, Breaching Experts one to a pod, and the two sharing a pod flight (§9.34) - BUILT 2026-10-23,
-uncommitted.** Written
+uncommitted. Stage 28, the Expert Warrior (Drazi, 50%), in the C&C - +1 to hit and +1 per die on every weapon, +10 initiative for his ship and for the
+flights it launches, -1 on his ship's critical rolls and +1 on those it causes; once per battle each, never two in a turn, a Charge declared in the Movement
+phase at a unit the player picks (+2 to hit it if the run holds, one cheaper snap turn), a precision strike (his ship's first called shot without its
+penalty) and Supreme Anticipation from his C&C in the Firing phase (+50 initiative next turn, -50 the turn after) (§9.35) - BUILT 2026-10-23, uncommitted.**
+Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
 one officer per flight, D10 filter chips → new D13), logged at the top of §1. On 2026-10-10 the user added
@@ -119,7 +123,11 @@ of two per category stays, for both; and a software Specialist used on turn N ma
 added the Expert Troop Leader with his rules text and notes (no officer can move from a ship to a docked pod, so he is offered separately to Gaim pods at
 half a pod; he goes with every party from his pod, and dies with one that is eliminated unless he escapes), asked for Breaching Experts and pod Troop
 Leaders to be bought one to a pod, and ruled four questions and a follow-up: "his own ship's pods" are as many as the ship's Pod Allowance, in fleet
-order, fixed; his pod's -3 includes his ship's 1; no escape on Wreak Havoc; and a pod flight may mix the two, one to a pod (Stage 27, §9.34). Each officer's own rules
+order, fixed; his pod's -3 includes his ship's 1; no escape on Wreak Havoc; and a pod flight may mix the two, one to a pod (Stage 27, §9.34). Later that day they
+added the Expert Warrior with his rules text and notes (the Charge a new Movement-phase icon, its conditions checked by the server; the precision strike his
+first called shot; Supreme Anticipation the Political Officer's speech path, in blue; the initiative numbers already FV's), and ruled four questions: both Drazi
+factions; the +10 only for flights launched from his ship in battle; the player picks the unit charged; on a Gunner's weapon the Gunner's +1 and +1 replace his
+(Stage 28, §9.35). Each officer's own rules
 questions still only need ruling when that officer's stage starts. Next step: the rest of the Hard tier, one officer at a time.
 
 > ### Relationship to WEAPON_ENHANCEMENTS_PLAN.md §11
@@ -378,6 +386,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Software Engineer *(Stage 26, §9.33)* | `OFF_SOFT` | Computer | 1, Hyach only |
 | Expert Troop Leader *(added 2026-10-23, §9.34)* | `OFF_TROOP` | the largest Hangar | 1, Gaim only |
 | Expert Troop Leader, in a pod *(§9.34)* | `OFF_TRPOD` | one per pod, after any Breaching Experts | 1 (flight), Gaim breaching pods, bought as a count, priced off one pod (`unscaled`), `mixesWith` the Breaching Expert |
+| Expert Warrior *(added 2026-10-23, §9.35)* | `OFF_WARR` | C&C | 1, Drazi only |
 | Expert Ion Technician | `OFF_ION` | Engine | 1 |
 | Expert Surge Officer | `OFF_SURG` | Mag-Grav Reactor | 1 |
 | Expert Ballistic Officer | `OFF_BALL` | C&C | 1 |
@@ -533,6 +542,7 @@ masking: individual notes never reach any client.
 | Breaching Expert (Stage 24) | a pod flight's `freethrust`; his pod's Marines Elite at delivery; his capture party's three attack rolls | Thrust: **yes, to every viewer** (his `publish` - the boarding hit chance reads it on both ends). The Elite is asked at delivery and never written into the weapon, whose "Elite" tooltip line every viewer is sent - so it stays the hull's, and his own team's client adds him to it. Which capture party is his is a key in its critical's `param`, stripped from every payload (`ShipSystem::stripForJson`). An opponent sees results only: an Elite mission class on one pod's party, the delivery and combat rolls the log prints |
 | Expert Political Officer (Stage 25) | `iniativebonus` (+30 the turn after his speech); his speech itself; the armour of his five free Hardened Armour; an armed shuttle in a hangar | **Yes**: the speech is a combat log line every player reads once firing resolves ("The Political Officer on-board <ship> begins a stirring speech about ...", user request) - so his speech names him; the +30 through his `publish`. The armour and the armed shuttle show exactly as any bought refit and any hangar's contents do. Which expert he brought and which armour is free stay as hidden as any officer and refit |
 | Expert Software Engineer (Stage 26) | the Computer's `output` (+1); where a point placed in the Firing phase went; the Computer's armour point; his stealth ship's detection; a Specialist used a second time | `output`: **yes, to every viewer**, as the Technician's. The Firing-phase allocation: **own team only until firing resolves** - an opponent's payload and tooltip carry Initial Orders' allocation while the Firing phase is open (`HyachComputer::shownBFCP`), since where a point went would point at the targets; afterwards it is public, as Initial Orders' always was. The armour point shows only as the damage the log records (one more armour), the masking only as a stealth ship staying hidden, the second Specialist use as that Specialist's line in its "used this turn" list, which every viewer is sent anyway. The list of Specialists he would let the ship reuse rides his own team's officer payload (`reuse`) |
+| Expert Warrior (Stage 28) | `iniativebonus` (+10; +50 / -50 after his Supreme Anticipation), and a flight's his ship launched; his ship's critical modifier; his charge (a movement row); the hit chance of his ship's shots | Initiative: **yes, to every viewer** (`publish` / `lostPublish`, and a launched flight's through `addForJson`). The charge is a row of the ship's movement, which every viewer is sent - so a declared charge, and its target, are public (the tabletop declares it as it is performed). Which unit it holds against (`charged`) rides his team's officer payload, for their hit-chance preview; an opponent sees only the needed % the log prints, as for every to-hit officer. The critical modifiers are never sent (nothing displays one) |
 | Expert ELINT Officer (Stage 20) | his array's `output`; every ELINT range from his ship; his blanket against ballistic weapons | **Yes, to every viewer**: `output` always is, and the ship payload carries `elintRangeBonus` (25) and `blanketBallistic` (3) while he serves - an opponent's own OEW under his Disruption and its hit chance against a unit under his blanket are previewed with them; his array's tooltip shows the ranges. The officer list stays own-team; a disguised Chameleon ship's payload is its simulacrum's and carries neither. The -2 on sensor criticals is never sent |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
@@ -699,7 +709,9 @@ committed.
 | **24** | Breaching Expert, one of the original 25 (Hard). **BUILT 2026-10-21** (§9.31) | Offered on all 42 breaching pods and nothing else carrying Marines; 25% of one pod for the Balosians, Yolu, Narn and Gaim, 50% for everyone else, the same at any flight size (lobby and server); in the first pod, the flight's one officer, no kill roll, lost with his pod; the flight +1 thrust, published, previewed in the lobby, reaching the boarding speed match; his pod's Marines Elite at delivery (-1, the Elite mission classes), never the other pod's, nothing more on a pod Elite already, the "Elite" tooltip line his team's only; his pod's first delivered capture party - never a failed delivery, a Sabotage or a Rescue - three attack rolls on its first turn aboard in the real capture combat, still one attacker to the defenders, once per scenario through a reload; the mark never sent; the Fleet Correctness Report's "Breaching Experts" line, 20% of the fleet's pods rounded half up |
 | **25** | Expert Political Officer, added by the user. **BUILT 2026-10-21** (§9.32) | Offered on the 60 capital ships and larger of the Centauri Republic and its WotCR, 40%, in the C&C; a free Expert Navigator, Helmsman, Engineer or Scanner - the dearest bought, a tie to the first in the registry - in the buy dialog, the fleet list, Fleet Selection's own writes and a saved fleet; five free Hardened Armour, the dearest, never Structure, priced 0 by the sanitiser and the lobby alike, none with his C&C destroyed; whatever is left unchosen picked at random as the fleet is committed, never Structure, a destroyed or already-armoured system; one more armed shuttle than Elite Crew gives, none with Poor Crew; "Speech!" / "Cancel speech" on his C&C in the Firing phase, once per battle, judged on the loaded ship; a "SPEECH:" combat log line as firing resolves; +30 initiative on the next turn while he still serves, shown to every viewer |
 | **26** | Expert Software Engineer, one of the original 25 (Hard), with the Hyach Computer Specialist rebuilt to its own rules. **BUILT 2026-10-22** (§9.33) | Offered on the 13 Hyach hulls with a Computer (not the OSAT), 15%, Hyach only, in the Computer; its BFCP +1, never taken by damage (a base's 26 boxes leave him his point); one point left free in Initial Orders placed in the Firing phase - added, nothing moved, the cap of two kept - through the Computer's own menu, written as one note at the fire commit, judged on the loaded ship, used by that turn's shots, hidden from opponents until firing resolves, never carried into the next Initial Orders; no unassigned-BFCP warning for that one point; the first point of every hit on the Computer ignored, armour-ignoring weapons included, through the real damage path; a stealth ship (the Alichi Kav and Tal) detected as if 5 hexes further away, a flight's detection range halved and rounded up, through the real detection sweep; a Defence, Sensor, Targeting or Weapon Specialist used once usable again from the next turn, once per scenario, its effect applied again, shown "(again)" in the Specialists menu, no Specialist slot spent. The Computer Specialist: in the Firing phase only, +1 BFCP (it was +2 and +1 a category), every point reshuffled within the cap, cancelled back to Initial Orders' allocation |
-| **27+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **27** | Expert Troop Leader (Gaim), added by the user, with Breaching Experts one to a pod. **BUILT 2026-10-23** (§9.34) | See §9.34 |
+| **28** | Expert Warrior (Drazi), added by the user. **BUILT 2026-10-23** (§9.35) | Offered on the 51 Drazi hulls (both factions) with a C&C, 50%; +1 to hit and +1 per die on every weapon but the ram - not on a Gunner's, whose own replace them; +10 initiative, and +10 for every flight launched from his ship's bays from the turn after, while he serves; -1 on his ship's critical rolls (his kill roll included), +1 on the critical roll of an enemy system his ship damaged that turn, once, not a craft's dropout; a Charge declared before the first step at a unit the player clicks, kept by the server once, judged at fire (beaten on initiative, 4+ hexes nearer the target by the end of the move, the route free - third round, §9.35): +2 to hit it; one snap turn anywhere in the move, 1 thrust less (half on an agile ship); the precision strike - the first called shot (his lowest-numbered weapon's that turn) without its penalty, doubled at a base, a Gunner's +3 neither used nor spent; Supreme Anticipation from his C&C's blue box in the Firing phase, +50 next turn while he serves, -50 the turn after regardless; never two of the three in one turn |
+| **29+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -745,6 +757,7 @@ committed.
 | Expert Tailgunner | *Added 2026-10-21 with his rules text and the user's note (§9.28):* FV applies no tail gun penalty (FV_factions.txt: "In tabletop, this gun has -2 penalty when fired together with main gun. In FV it does not"), so build it first - a tail gun firing alone is free, fired in the same turn as the forward guns -10% - flagging the few fighters with a tail gun rather than testing every fighter. Which tail guns take the penalty? Which tail-gun flights may buy him? A penalised tail gun fired alone under him: +5%, or nothing? **RULED 2026-10-21:** the penalty on the Tiqincc, the Tiqus and the custom tail-gun fighters **"unless $this->hasNavigator = true"** (so never the Badger or the Rogolon Vostor); **all 15** tail-gun flights may buy him; **no bonus** for a penalised tail gun fired alone. **Re-ruled after the first build:** only the craft's other **direct-fire** weapons fired in the Firing Phase count - never a ballistic launch from Initial Orders. |
 | Expert Turret Officer | *Added 2026-10-21 with his rules text and the user's notes (§9.29):* FV has no turret system, so he is a system enhancement on a turret weapon - FV already marks turret weapons (the jammable mounts) and their turret mates (the linked firing group) - aiding every weapon on that turret, one officer to a turret; "sheltered" is automatic when no weapon on the turret fires, instead of a declaration UI. Does an interception count as the turret firing? Does a Gunner's +1 on that turret combine with his? Is a turret weapon linked to no other a turret of its own? May he move? **RULED 2026-10-21:** **offensive fire only** breaks the shelter (a turret may intercept and stay sheltered); **no combining** - the Gunner's +1 replaces his on the Gunner's gun, the -1, the -2 and the shelter still apply; **each unlinked turret weapon is its own turret** (Xorr 2, Xonn 3, Tyllz 6); **movable**, as the other placed officers. |
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
+| Expert Warrior | *Added 2026-10-23 with his rules text and the user's notes (§9.35):* the Charge a new Movement-phase icon in the Contraction / Half-Phase spot (the user's `chargeIcon.png`, recoloured), its conditions checked by the server; the precision strike "just on the first Called Shot of the game"; Supreme Anticipation the Political Officer's speech method, in the blue menu, with its follow-up penalty; the initiative numbers already FV's. Asked: "Drazi only" - which factions? "Any fighters or shuttles it launches" - which flights? How does a Charge pick its target, and when is it spent? On an Expert Gunner's weapon, do his +1 and +1 add to the Gunner's? **RULED 2026-10-23:** **both Drazi factions** (Freehold and its WotCR); **only flights launched from his ship in battle**; **the player picks the unit** (spending left to the default - a declared charge is spent); **the Gunner's replace his**. |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? **Rules text and note 2026-10-21 (§9.30)** settle both: a single turn "if desired", with "Turn Delay complete and enough thrust ... left unused to complete a turn maneuver", "not a roll, pivot, snap turn, or other maneuver" - the user's note: "similar to a fighter's combat pivot except that there are no associated firing penalties and thrust must still be spent on ship thrusters as normal"; 10% for the Torata, 50% more for everyone else (15%). Asked: does the turn take effect before fire resolves, as a combat pivot does, or after all fire? On an Expert Gunner's weapon, the extra die too, or only the Gunner's +1 per die ("does not combine")? **RULED 2026-10-21:** **like a combat pivot** - this turn's fire, his and at him, meets the new facing; on a Gunner's weapon **both apply**. |
 | Political Officer | *Added 2026-10-21 with his rules text and the user's notes (§9.32):* the armed shuttle is Elite Crew's own method; the free expert is the dearest of the four bought, one at random with none; the armour is five free Hardened Armour on different systems, random for any left unplaced; the speech an Activate menu on the C&C in the Firing phase ("Speech!" / "Cancel speech"), a fire order in the combat log, +30 the following turn. Asked: "Centauri Only" - which Centauri factions? When are the unmade picks made: by the server at battle start, or in the lobby at purchase? With Elite Crew too, one armed shuttle or two? The +30 if he is killed or disabled in the turn he speaks? **RULED 2026-10-21:** **both Centauri factions** (the Republic and its WotCR); **the server, at battle start** (built as the fleet's commit: rolled once and stored); **they add up**; **no +30 unless he still serves** on the turn it lands. |
 | Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). **RULED 2026-10-15: Grome Autocracy only** (§9.12); the Matter-weapon hull test is kept beside it. **Rules text and rulings 2026-10-16 (§9.14):** "moved into one specific weapon instead of his normal station" - **one or the other, never both**; that weapon gets the +1 / +1 "but no others do", and its rate of fire +1 (Stage 10); "disabled if the weapon takes any damage at all (after armor), and automatically killed if the weapon is destroyed" - **and the ordinary kill roll too**. |
@@ -4161,3 +4174,242 @@ added (the Bassari's block and 34 new case blocks), none changed - stripped of t
   a party not yet aboard, a party already ended); client **737 / 1** (the Bulkhead readout through the REAL damage.js: 2, 3 with his box, 1 after 2
   damage, 0 destroyed); `fvbuild -Check` replay **162 / 0** (no corpus game had a party on a destroyed system). Mutation: 10 more breaks, all caught (two
   only after the last two checks were added). Legacy bundles rebuilt; served copy synced.
+
+### 9.35 Stage 28: Expert Warrior (2026-10-23)
+
+**Rules text (user, 2026-10-23) - an officer the user added.** "Expert Warrior: A race so intent on conflict cannot help but produce experts in
+combat. These are referred to as 'Tor 'galla,' the Chosen ... A ship with an expert warrior receives + 1 to hit with all weapons, and all weapons cause +1
+extra damage per die. The ship receives a +10 bonus to its initiative and any fighters or shuttles it launches receive the same initiative (but not to-hit
+or damage) benefit. All critical hits, regardless of system, have a -1 on their rolls, and any critical hits caused by the expert warrior's ship gain +1 on
+their dice. Once per scenario the expert warrior can also do each of the following (but cannot do more than one of them in a given turn): He can 'charge'
+an opponent by pointing his ship at the target and moving directly towards it for his full movement. The 'charge' is declared as this maneuver is performed.
+He must move at least 4 hexes towards the enemy and must have beaten him in initiative. If this is done, he gains a further + 2 to hit that unit with all his
+ship's weapons. His ship can execute one snap turn as though it were agile, at a cost of 1 point less thrust than it should. If the ship is already agile,
+the thrust cost is halved instead. He can make a 'precision strike,' a single 'called shot', with only one weapon, without the usual called shot penalty.
+He can make a 'supreme anticipation,' earning his ship a + 50 initiative bonus (in addition to any other benefits) on the next turn. However, on the turn
+after that one, his ship suffers a -50 penalty. Location: C&C. Cost: 50% of the ship's base cost. Availability: Drazi only." The user's notes: the Charge
+"probably needs a new Movement UI symbol (can be in the same position as Contraction / Half Phase icons go ... chargeIcon.png ... it'll need recoloured).
+When clicked it activates the 'Charge' mode, but we'll still need to check the other conditions are met in server to actually apply the bonuses"; "the
+'precision strike' bonus can just be on the first Called Shot of the game"; "Supreme anticipation can follow the same method as Centauri Political
+Officer's speech mechanic ... (use Blue menu styles, not purple tho), then also have follow-up initiative penalty"; "I've already converted the
+Initiative Bonus/Penalties to FV values."
+
+**What FV had.**
+- **51 Drazi hulls** may carry him: every hull of the Drazi Freehold (25) and Drazi Freehold (WotCR) (26) with a C&C that is not an OSAT or mine - three
+  bases (Brostilli, BrostilliNew, Kromala) included. Drazi fighters, pods and shuttles are flights.
+- **To hit**: `Weapon::calculateHitBase` (ships' called shots -8, doubled against a base; the officers' block behind `$officersPresent`); the client twin
+  `weaponManager.computeShotModifiers`. **Per die**: `Dice::$perDieBonus` in `getFinalDamage` (Elite Crew, the Gunner, the Ion Technician).
+- **Critical rolls**: `ShipSystem::testCritical` adds the system's and the SHIP's `critRollMod` (fighters' dropout reads both too); damage rows made during
+  firing carry their `shooterid`, rows loaded from the database only their fire order.
+- **Launches**: a hangar launch writes a `hangarLaunchEvent` note on the bay, value led by the unit's id (`HangarOps::performLaunch`), which every load
+  reads (`Hangar::onIndividualNotesLoaded`); a launched flight keeps no link to its carrier. A flight's `iniativebonus` reaches the client from the static
+  blueprint unless something publishes it.
+- **Movement**: FV moves by initiative (lower first), so a unit that "beat" another moves after it and sees where it ended. An agile ship's snap turn is a
+  turn straight after a turn without the delay met, at its full cost (`canTurn`); movement.php recomputes no thrust cost. Non-moving rows exist
+  (`halfPhase`, `evade`, `contract`). The Minesweeping Mode icon is an on/off movement icon chosen before the first step.
+- **The speech** (Stage 25): the C&C's Activate box (SystemActivation, `active`), a phase-3 transfer, `CnC::saveFirePhaseDeclaration` -> `Officers::saveSpeech`
+  on the loaded ship (an OffUsed note), +30 on the next turn's load; the box purple through `CnC.prototype.activationMenuPurple`.
+
+**Rulings (user, 2026-10-23, asked before building):**
+1. **Both Drazi factions** - the Freehold and its WotCR (as the Political Officer's two Centauri factions).
+2. **"Any fighters or shuttles it launches"** = **flights launched from his ship in battle** - not a hangar allowance.
+3. **The player picks the unit charged** (click the icon, then the enemy); the server checks the rest.
+4. **On an Expert Gunner's weapon the Gunner's +1 to hit and +1 per die replace his** (the Gunner's "does not combine").
+
+**Built with defaults, stated here (ask before changing):**
+- **+1 to hit and +1 per die**: every weapon of his ship, ballistics included, never the ram; per die capped at the face, stacking with Elite Crew; a
+  fixed-damage weapon gains nothing. The charge's +2 stays on a Gunner's weapon (it is the charge's, not a standing bonus).
+- **+10 for launched flights**: every FighterFlight his ship's bays (hangars, catapults, rails) have launched in battle, from the turn AFTER its first
+  launch, while he serves on that turn - once, however many Warrior ships launched it; not an escape from a destroyed carrier, not an LCV or other ship.
+- **-1 on his ship's critical rolls**: the ship's `critRollMod`, so every system's roll and the kill roll of every officer aboard. **+1 caused**: a system
+  of another ship that took damage through its armour this turn from his ship (any weapon, the ram included) rolls 1 higher - once however many hits,
+  in Pass 1 and the kill roll, taken back after. Not a fighter's dropout roll (it is not a critical); not his own ship.
+- **The Charge** *(its run and snap turn superseded by the Third round below: 4 hexes nearer, route free, snap turn anywhere)*: declared before the ship's first step into a hex; the row is spent once committed whether or not the run holds (else the cheaper
+  snap turn could be had every turn - the user's ruling 3 left spending open). It holds when, against where the target ended its own move: he has the
+  better initiative (`BaseShip::hasBetterIniative`), the run is at least 4 hexes, every step a `move` (no slip) a hex closer (so never through and past
+  the target), the target within 30 degrees either side of his bow at the first step and his facing = heading there, and no turn or pivot once moving
+  (an Expert Anticipator's Firing-phase turn afterwards does not count). +2 to hit that unit with every weapon that turn, ballistics included.
+- **The snap turn**: only while charging, after the charge row and before the first step - a turn straight after a turn with the delay not met (an agile
+  ship's own snap turn, or a non-agile ship's one); 1 thrust less (never below 1), or half rounded up on an agile ship; one only. Client only, as every
+  turn cost.
+- **The precision strike**: automatic; his ship's FIRST standard called shot - of a turn's called shots, his lowest-numbered weapon's first order (the
+  order the server prices shots in) - with the called shot penalty taken off again (doubled against a base, as the penalty); a Gunner's +3 on that shot
+  neither used nor spent (the Targeter's precedent), also at the turn change's faster reload. Not on a turn he charged or ordered his anticipation.
+- **Supreme Anticipation**: "Supreme Anticipation!" / "No anticipation" in his C&C's Activate box, in the default blue; +50 on the next turn only while he
+  serves (the Political Officer's ruling), -50 on the turn after whatever became of him (`lost`). Not on a turn he charged.
+- **One a turn** is counted on the turn each is used or ordered: a Charge (Movement) blocks that turn's anticipation and precision strike; an ordered
+  anticipation (Firing) blocks that turn's precision strike.
+- **Visibility**: his initiative changes and a launched flight's are published; the charge row is ordinary movement, public (the tabletop declares it);
+  which unit it holds against rides his team's payload (`charged`).
+
+**Design.**
+- `Officers`: registry `OFF_WARR` (post `cnc`, pct 50, `apply` applyWarrior, `lost` applyWarriorLost, `publish` / `lostPublish` iniativebonus) after the Troop
+  Leader, before the placed officers; `$factionRules` `only` both Drazi factions; constants WARRIOR_DIE_BONUS 1, WARRIOR_INI 10,
+  WARRIOR_CRIT_MOD -1, WARRIOR_CAUSED_CRIT 1, CHARGE_HIT 2, CHARGE_MIN_HEXES 4, CHARGE_BOW_ARC 30, SUPREME_INITIATIVE 50, SUPREME_PENALTY -50; `$abilityNames`
+  precision / anticipation. `warriorIndex`, `applyWarrior` (+1 fire control since the follow-up below) / `applyWarriorLost` / `anticipationShift`, ⭐ `chargeHitBonus`
+  (⚠️ MIRROR PAIR with officers.chargeHitBonus; `warriorHitBonus` before the follow-up), `warriorDieBonus`, `resolveCharges` (abilities['charge'] off the movement rows, in `apply`), ⭐ `chargeTarget` / `chargeable` /
+  `chargeRunHolds` / `positionOn`, `validateCharge`, ⭐ `precisionShot` (⚠️ MIRROR PAIR with officers.precisionWeapon) / `precisionStrike` / `sameOrder` /
+  `precisionWeapon`, `saveAnticipation` / `anticipatorIndex` (⚠️ MIRROR PAIR with officers.canAnticipateSupreme), `markCausedCriticals` /
+  `clearCausedCriticals` / `fireOrderShooters`, `afterShipsConstructed` -> `applyLaunchedFlights` + `settleCharges` (`charged` on his entry);
+  `gunnerShotBonus` and `firingSpentAbility` give way to the precision strike; `addForJson` publishes a launched flight's iniativebonus and sends `charged`.
+- `Movement` (movement.php): `CHARGE` 'charge', `CHARGE_SNAP_TURN` 'chargesnap' (⚠️ MIRROR PAIR with shipManager.movement's), `getChargeRow`, `isHexStep`.
+- `BaseShip`: protected `$officerLaunchIni` + getter/setter. `Hangar`: protected `$launchedUnits` (unit id => first launch turn) from its `hangarLaunchEvent`
+  notes, `getLaunchedUnits`. `CnC::saveFirePhaseDeclaration` takes ['anticipation'] beside ['speech'].
+- Hooks: `Weapon::calculateHitBase` (precisionStrike before the Gunner's, chargeHitBonus after the Targeter's), `Weapon::getFinalDamage` (warriorDieBonus),
+  `Criticals::setCriticals` (markCausedCriticals before Pass 1, clearCausedCriticals after the kill rolls), `TacGamedata::onConstructed`
+  (afterShipsConstructed after the markers), `MovementGamePhase::process` (validateCharge on the authoritative ship).
+- Client `officers.js`: the registry row (`stats` iniativebonus 10, critRollMod -1 - the lobby preview), ABILITY_NAMES, `warriorEntry`, `isWarriorPost`,
+  `chargeHitBonus`, `fireControlRaise` (his +1, follow-up), `precisionOpen` / `precisionWeapon` / `precisionStrike`, `canCharge`, `canAnticipateSupreme`; `gunnerShotBonus` gives
+  way. `movement.js`: CHARGE / CHARGE_SNAP_TURN, `chargePicking`, `getChargeRow`, `hasSteppedThisTurn`, `canCharge`, `getChargeState`, `toggleCharge`,
+  `chargePickingFor`, `isChargeTarget`, `doCharge`, `isChargeSnap`, `chargeSnapCost`; `canTurn` allows the snap turn and prices it, `calculateRequiredThrust`
+  prices it, `doNormalTurn` marks it. `UI/shipMovement.js`: the Charge icon (`chargeIcon` art, `drawChargeIcon` - off / picking / on / locked, its label
+  naming the unit), `chargeCallback`; `ShipMovementCallbacks.chargeCallback`; `MovementPhaseStrategy.targetShip` takes the clicked enemy while it waits;
+  game.php's `#charge` element. `model/system/baseSystems.js` CnC: `activationMenuPurple` a getter (false on his C&C), `isWarriorPost`, `mayDeclare`, his
+  labels, the ['anticipation'] transfer. `weaponManager.computeShotModifiers`: "Precision Strike", "Charge" lines ("Expert Warrior" until the follow-up).
+- Art: `img/chargeIcon.png` recoloured to the movement icons' green (36,105,9), alpha kept (the white original kept in the session scratchpad only).
+- Docs: an Expert Warrior card (Ship Officers, after the Turret Officer).
+
+**Files.** Server: `Officers.php`, `ShipClasses.php` (BaseShip), `systems/baseSystems.php` (Hangar, CnC), `weapons/weapon.php`, `handlers/movement.php`,
+`handlers/criticals.php`, `TacGamedata.php`, `Phase/MovementGamePhase.php`. Client: `officers.js`, `movement.js`, `UI/shipMovement.js`,
+`ShipMovementCallbacks.js`, `renderer/phaseStrategy/MovementPhaseStrategy.js`, `model/system/baseSystems.js`, `weaponManager.js`, `game.php`,
+`img/chargeIcon.png`. Docs `ammo-options.html`. Harnesses: `officersHarness.php` (two Stage 27 registry-order checks moved), `officersClientHarness.js`,
+`enhancementsHarness.php` (+Sunhawk, cases `warr`, `warr+helm+elite1`; fingerprint re-recorded, old copy `fingerprint.before-officers-stage28.txt`),
+`enhancementsDifferential.js` (a ship's critical modifier compared through `officers.displayStat`, as every officer share). `fvbuild -Statics` and both
+legacy bundles (`node scripts/bundle-legacy.js`); no React change, no new class, no schema change.
+
+**Measured.** Statics: 51 offers, all Drazi. Fingerprint: 3,005 lines added (the Sunhawk's block and the two cases on every hull), none changed - stripped of
+them, the new fingerprint is the old one byte for byte.
+
+**Verified.**
+- `officersHarness.php` **2013 / 0 with the database** before the gap tests below; **1937 / 0 --no-db** after them: the registry place; offers and prices on
+  five hulls of both factions (a base, an agile hull, a WotCR hull), none on an OSAT, another faction or a flight, a sweep of both statics (51); the post;
+  +10 and -1 (the REAL testCritical on his reactor and C&C, his own kill roll), published, none once killed; Supreme Anticipation's +50 / -50 (killed the turn
+  he ordered it, after, on the turn it lands), published, the REAL `CnC::saveFirePhaseDeclaration` (one note, once; a speech asked, another player, a ship
+  without him, the gate off, spent, a turn he charged, killed); +5% and +1 per die through the REAL calculateHitBase / getFinalDamage (a Gunner's beam, Elite
+  Crew, the gate off, killed, the ram); the precision strike through the REAL calculateHitBase (+40% waived and +5%, spent once, this turn's, last turn's,
+  a lower-numbered gun's call - intercepting, last turn's, in a fixed mode -, a charge or anticipation that turn, killed, a Gunner's +3 neither used nor
+  spent, a base's doubled penalty) and `firingSpentAbility`; the charge's geometry (initiative, length, overshoot, a step no closer, a target that moved,
+  the bow at 9 / 30 / 35 / 60 degrees, snap turns before, a turn / pivot / slip after, a pivoted bow, declared late, an Anticipator's turn after, last turn's,
+  no Warrior, killed, another unit), +10% through the REAL calculateHitBase, the payload (`charged`, spent), `validateCharge` (kept; a second, after a step,
+  no Warrior, charged before, own team, no unit, a destroyed one, killed - dropped); the caused +1 (shooter on the row or through its fire order, two hits, armour, last turn, killed,
+  a flight, his own ship) and through the REAL `Criticals::setCriticals`; the launch record through the REAL `Hangar::onIndividualNotesLoaded`, the +10
+  (cases), its publication, and through the REAL `TacGamedata::onConstructed`.
+- `officersClientHarness.js` **800 / 1** (the one failure the user's "(repeat)" label, §9.33's): the row and constants against Officers.php / movement.php;
+  the statics (51, all Drazi with a C&C); the lobby's 263 and +10; warriorHitBonus / precisionStrike / canCharge / canAnticipateSupreme; the REAL
+  computeShotModifiers; the REAL movement.js (the charge row, its states, Cancel, the snap turn, its cost and affordability, the marking, agile); the REAL
+  shipMovement.js icon and click; the REAL MovementPhaseStrategy pick; the REAL CnC box and SystemActivation colours.
+- `enhancementsHarness` **292 / 0** (fingerprint re-recorded, additions only); `enhancementsDifferential.js` **876 / 0** (the first run caught the lobby
+  missing his -1 - added to his `stats`, and the comparison moved to read time).
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0** (no corpus game holds a Drazi Warrior).
+- **Mutation-tested:** the first run broke midway (the php container stopped); the whole set was rerun on 2026-10-24 with that day's follow-ups -
+  **136 / 137 caught + 1 equivalent**, see "Second round" below.
+
+**Observations, not changed:**
+1. Not play-tested. Worth a test: a Drazi Sunhawk with him against two enemies - its Charge icon astern in the Movement phase, click it and an enemy that
+   moved first, a snap turn to line up (1 thrust less), four hexes straight in: the Firing-phase preview shows "Charge +2" against that unit only; a called
+   shot that turn shows no penalty-waiver (the charge took the turn), a called shot on a later turn shows "Precision Strike +8" once; "Supreme Anticipation!"
+   in his C&C's blue box, +50 initiative next turn and -50 the turn after; a fighter flight launched from a Drazi carrier with him at +10 from the next turn.
+2. Not covered by a harness: `MovementGamePhase::process`'s one-line call to `validateCharge` (the method itself is), and the in-browser drawing of the icon.
+3. The charge row is public movement, so an opponent can read which unit was charged (the tabletop declares it); it also tells them he is aboard.
+4. The server never checks a turn's thrust cost or delay (log-only validation), so a doctored client could take the cheaper snap turn without a charge -
+   as it could already take any turn at any cost.
+
+**Follow-ups (user, play test 4509, 2026-10-24) - built, uncommitted.**
+1. **His +1 is FIRE CONTROL**, as every other "+1 to hit" officer's (Gunner, Turret Officer, the C&C Matter Weapons Expert): it did not show in a weapon's
+   fire control. `applyWarrior` now raises every non-null entry of every mode of every weapon (`raiseEveryMode`, so fixed-fire-control modes are left
+   alone and the weapon is sent `isModified` to every viewer, as the Gunner's are) - not the ram, not a jump drive (`JumpEngine extends Weapon`), not a
+   serving Gunner's gun (his +1 replaces it). Only the charge's +2 stays a shot modifier, as it is for one unit: `warriorHitBonus` became
+   `chargeHitBonus` (⚠️ MIRROR PAIR with officers.chargeHitBonus), `WARRIOR_HIT` is gone (both ends), the "Expert Warrior" breakdown line is gone (the
+   +1 now sits in the Fire Control figure). Lobby: `officers.fireControlRaise` adds his +1 (not `isRammingAttack`, not `jumpEngine`; the Gunner's
+   `on('OFF_GUN')` return comes first), so `displayFireControl` shows it and `pendingMoveFireControl` nets a moving Gunner to 0 on his gun. Registry
+   summary and docs card now say "+1 fire control".
+2. **The Charge icon** is painted red (`UI.shipMovement.chargeColour` #e8432e - through `drawUIElement`'s tint; the PNG's own colour no longer matters):
+   its glow PULSES while it waits for the enemy click (`#chargecanvas.charge-picking`, a tactical.css keyframe reading `--charge-glow`), and once a
+   unit is locked ('on' / 'locked') a crosshair is drawn over the art (`drawChargeReticle`, through a new optional `after` argument of
+   `drawUIElement` / `drawUIimage`). 'locked' is a little fainter (0.75).
+3. **A crosshair on the unit charged** while his ship is the SELECTED ship: `shipManager.movement.getChargeMarked` (Movement: the unit the charge row
+   names; Firing: the unit `charged` says it holds against - a broken charge marks nothing; never a destroyed unit or another phase) ->
+   `PhaseStrategy.syncChargeMarker` (one icon at a time, memo `chargeMarkedIcon`, a render kick only on a change; called from update / activate /
+   setSelectedShip / deselectShip / onShipMovementChanged - deactivate clears it through its deselect) -> `ShipIcon.setChargeMarked` (sprite built on
+   first use, one shared canvas texture in the Charge red with a dark halo, open centre; size max(0.9 hex, 0.85 x canvasSize); local z 115 - over the
+   +100 lift, under the 120 movement-group badge; rides its own icon's lifts, a mark ON the unit). A replay selects nothing.
+- Gates: officersHarness **2024 / 0** with the database (the +1 checked as fire control on the beam, the Cutter, the ram, a Peregrine's jump drive, a
+  Gunner's beam, killed; the charge's +2 at another enemy); officersClientHarness **820 / 1** (the one the "(repeat)" label; new: the lobby's +1, fireControlRaise, chargeHitBonus, the
+  icon's tint / pulse / crosshair, drawChargeReticle, getChargeMarked, the REAL syncChargeMarker and ShipIcon.setChargeMarked in sandboxes);
+  enhancementsDifferential **876 / 0**; enhancementsHarness **292 / 0** after re-recording - only the two Sunhawk Warrior cases' `strip` lines moved
+  (+280 bytes each = `fireControl` + `isModified` on its seven weapons, proved by a probe), old copy `fingerprint.before-warrior-firecontrol.txt`.
+  `fvbuild -Check`: replay **162 / 0**; both legacy bundles rebuilt (`node scripts/bundle-legacy.js`), `-Sync` done.
+- Mutation-tested: **18 / 18** (5 server, 12 client, 1 differential); the first pass missed one - the charge's +2 given at ANY unit while it holds
+  (no server check shot another enemy) - check added. The ram mutant's first "catch" was the flaky Stage 18 rail-escape check; rerun, its own check
+  fails. Runner `mutate28b.js`, session scratchpad only.
+- The original Stage 28 build's mutation line was never filled - that session's server run broke midway (the php container stopped: 33 caught,
+  2 missed, 35 broke; client 44/1, differential 2/2). CLOSED by the full rerun below.
+
+**Second round (user, play test 4509, 2026-10-24) - built, uncommitted.**
+1. **The Charge icon is GREEN until a unit is locked** (the art's own movement green, no tint, pulsing while it waits for the click), then red with
+   the crosshair ('on' / 'locked'). The crosshair on the unit charged is see-through: `UI.shipMovement.chargeTargetOpacity` (0.6), the user's knob,
+   read each time the mark is put on (`ShipIcon.CHARGE_MARK_OPACITY` retired).
+2. **The snap turn, "as though it were agile"** (user: the ship turns twice in one hex, the second turn the snap, -1 thrust): it was built so, but the
+   user could not find it. Two causes: (a) `isChargeSnap` asked `getLastCommitedMove`, which is the CHARGE ROW when the charge is declared between
+   the turns - a turn, the charge, then a turn gave no snap (the likely play-test order), and an agile Warrior ship lost its own snap turn the same
+   way; now the charge row is passed over. (b) Nothing marked it: the turn arrows are now drawn in the Charge red and read "Snap Turn Left / Right
+   (Charge)" while the next turn would be the snap (`UI.shipMovement.turnArrowTint`). Still client only; still before the first step (a turn after
+   it breaks the run anyway). Game 4509 was on turn 1: the Sunhawks' delay was clear, so their first turn was always free.
+- Harness gaps closed while rerunning the original mutation set: the "35 degree" bow fixture (5, -4) is ALSO refused by a step no closer, so the
+  arc constant was never tested alone - a 33.7-degree target (7, -5), every step closer, now is; the charge's +2 never with the ram, while it holds.
+- Gates: officersHarness **2028 / 0** with the database (1946 --no-db); officersClientHarness **825 / 1** (the "(repeat)" label; new: a turn, the
+  charge, then a turn - non-agile and agile -, the red labelled arrows through the REAL shipMovement.js, green until locked, the opacity knob);
+  enhancementsDifferential **876 / 0**; enhancementsHarness **292 / 0**; `fvbuild -Check` replay **162 / 0**; both legacy bundles rebuilt, `-Sync` done.
+- **Mutation-tested - the ORIGINAL Stage 28 set rerun in full** (its stale patterns moved to the renamed / reworked code) **plus both follow-up
+  rounds: 137 mutants** (73 server, 61 client, 3 differential), ~37 minutes, every file byte-identical after. First pass 135 caught, 2 missed:
+  #43 is EQUIVALENT (`anticipatorIndex`'s spent test - `spend()` repeats it, as Stage 25's speakerIndex); #69 (`Movement::isHexStep` not counting
+  slips) was a gap - checks added (a slip among five steps, four of them moves; a charge declared after a slip). Three "catches" came only from the
+  flaky Stage 18 rail-escape check; rerun listing every FAIL, #25 and #64 fail their own checks, #42 (`saveAnticipation`'s own-player test) did not -
+  its "another player" and "gate off" refusals ran on a ship that had ALREADY spent his anticipation, so `spend()` refused first: fresh ship, plus a
+  positive control on it. **Final: 136 caught + 1 equivalent.** The earlier partial run's two misses are closed too: the charge's +2 at any unit
+  (first round) and the bow arc constant (the (7, -5) fixture above). Runners `mutate28full.js` (built from the original `mutate28.js` by
+  `buildFull28.js`) and `recheck28.js`, session scratchpad only.
+
+**Third round (user, 2026-10-24) - the charge's path is free; RULED, built, uncommitted.** "I'd like the snap turn to be made at any point in the ship's
+movement ... a player might need to turn to move closer, and needs the snap turn later in the movement ... the 'move 4 hexes closer' and 'beats target in
+initiative' are the only rules we need to follow." This REPLACES the run's shape in "Built with defaults" above (every step closer, no slip, the bow within
+30 degrees at the first step, no turn or pivot once moving) and the snap turn's "before the first step".
+1. **The charge holds** (`Officers::chargeRunHolds`) when, from the hex he declared in to the hex his move ends in this turn, he is at least
+   `CHARGE_MIN_HEXES` (4) **nearer** the target where it ended its own move, and he beat it on initiative (unchanged). NET distance, not steps counted:
+   four hexes closer and two back is 2 nearer - no (stated reading of "4 hexes closer"). Turns, pivots, slips, passing the target and where the bow points
+   are all free. `CHARGE_BOW_ARC` is gone (PHP only - it had no JS twin). Unchanged: the charge is declared before the first step into a hex
+   (`validateCharge` drops a later one; `chargeRunHolds` refuses one after a step), spent once declared.
+2. **The snap turn** (`shipManager.movement.isChargeSnap`): the `hasSteppedThisTurn` gate is gone - one snap turn anywhere in the move, still a turn
+   straight after a turn with the delay not met, still once.
+3. Docs card rewritten (route free, snap turn anywhere).
+4. **Net reading CONFIRMED** (user, same day): "the Charging ship closes the distance to the target by at least 4 hexes during its movement".
+5. **The client offers only units he beat on initiative** (user, game 4511 turn 3: the Sunhawk at 51 could charge the Sentri at 126 and the Haven at
+   120 - and take the snap turn the server would never let hold). `shipManager.movement.isChargeTarget` now asks `shipManager.hasBetterInitive`
+   (ships.js - the twin of `BaseShip::hasBetterIniative`, ties to the bonus, then the higher id), and `canCharge` asks the new `hasChargeTarget`
+   (any unit in `gamedata.ships` that qualifies), so with no such enemy the icon does not show at all. Client only, as asked: `validateCharge` still
+   keeps a row at a unit that beat him (the server just gives no +2).
+   - officersClientHarness **831 / 1** (the "(repeat)" label; the REAL hasBetterInitive lifted from ships.js; new: an enemy after him refused, the two
+     tie-breaks, no icon when every enemy moves after him, an after-him enemy clicked while picking refused). Mutation **2 / 2** (no initiative test; the
+     icon without a target). Legacy bundles rebuilt (the watcher missed it again), `-Sync` done.
+6. **Simultaneous Movement** (user, same day): "ships can only charge units in brackets that have already moved (not ships in their own bracket)".
+   It was NOT so: `iniative` is the bracket in a SimMv game, so two units of one bracket tie and `hasBetterIniative`'s tie-break (bonus, then id)
+   let one "beat" the other, both ends. Now `Officers::chargeBeaten` (⚠️ MIRROR PAIR with `shipManager.movement.chargeBeaten`): with the
+   `initiativeCategories` rule, a strictly LOWER bracket (`iniative >`); else `hasBetterIniative` as before (standard movement moves one unit at a
+   time in that order, so its tie-break is right there). `chargeTarget` and `isChargeTarget` both ask it. Docs card says so.
+   - officersHarness **2031 / 0** (lower bracket holds, own bracket with his bonus higher no, higher no; the same tie in standard movement holds);
+     officersClientHarness **834 / 1** (the "(repeat)" label; own bracket refused with every tie-break his, lower yes, higher no, no icon with only
+     own-bracket enemies, the same tie in standard yes). Mutation **4 / 4** (each end: the rule ignored, `>=` for `>`). Bundles rebuilt, `-Sync` done.
+7. **Never a unit nearer than 4 hexes** (user, same day: "exactly 4 hexes is fine as they can move to range 0"): from 3 or nearer he could never
+   close 4, yet the charge was offered, spent, and gave the snap turn. `isChargeTarget` now also needs `getShipPosition(ship).distanceTo(
+   getShipPosition(target)) >= officers.CHARGE_MIN_HEXES` (new JS constant, ⚠️ MIRROR of Officers::CHARGE_MIN_HEXES, compared by the harness) -
+   the target has moved (chargeBeaten), so its hex is final. Asked last, after the hidden test, so a hidden unit's position is never read. Client
+   only; the server's net-4 judge already refuses such a run.
+   - officersClientHarness **837 / 1** (the "(repeat)" label; the REAL getShipPosition over the REAL hexagon Offset / Cube - the harness's stub was
+     always 3 away; new: exactly 4 yes, 3 no, his own hex no, 4 astern yes, measured from where he stands, no icon with only near enemies, the
+     constant). Mutation **2 / 2** (no distance test; `>` for `>=`). Both legacy bundles rebuilt (the watcher missed them), `-Sync` done.
+- Gates: officersHarness **2029 / 0** with the database (charge checks rewritten: past the target 5 -> 1 holds, 3 -> 1 does not; a turn / pivot / slip /
+  bow pivoted away after the first step and a snap turn half-way along all hold; the 33.7-degree target holds, a 7 -> 4 one does not; four closer and
+  two back no; two away then six in holds; the target that moved now starts BEHIND him, so only its end position passes); officersClientHarness **827 / 1**
+  (the "(repeat)" label; new: the charge, two hexes, a turn - the snap turn at 4 thrust, marked, then none more). Legacy bundles rebuilt (the watcher
+  missed `movement.js`), `-Sync` done. Mutation **5 / 5** (no step-before refusal, `>` for `>=`, the target's start position, closer steps counted
+  instead of net, the old snap gate back); runner `mutate28c.js`, session scratchpad only.

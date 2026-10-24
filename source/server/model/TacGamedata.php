@@ -439,6 +439,11 @@ class TacGamedata {
         //requires, since onConstructed() is what applies enhancements and fills special abilities.
         $this->markUnavailableSetMarkers();
 
+        /* OFFICERS_PLAN.md Stage 28 - the Expert Warrior's two rules that need the whole fleet: +10 initiative for the flights his
+           ship launched, and the unit his charge holds against this turn. Below the per-ship loop for setEdfHexes' reason (every
+           ship's officers and iniativebonus are settled by then), after the markers ($officersPresent). */
+        if (self::$officersPresent) Officers::afterShipsConstructed($this);
+
         /* Walkers of Sigma-957 (Stage 4): the EDF hex map - the twin of setBlockedHexes() above,
            built for the same reason (the targeting penalty has to be mirrored to the point by the
            client, and map-once/publish-once is what keeps the two in step).

@@ -3391,12 +3391,17 @@ class CnC extends ShipSystem implements SpecialAbility {
 
 	/* OFFICERS_PLAN.md Stage 25 - an Expert Political Officer's stirring speech, ordered with this C&C's Speech! button in the Firing
 	   phase: the client posts ['speech']. This is the POST-side rebuild, which has no officers, so Officers::saveSpeech judges it on
-	   the real load and writes it there. */
+	   the real load and writes it there. Stage 28: an Expert Warrior's Supreme Anticipation, the same way - ['anticipation'],
+	   Officers::saveAnticipation. */
 	public function saveFirePhaseDeclaration($gamedata, $dbManager){
 		$transfer = $this->individualNotesTransfer;
-		if (!is_array($transfer) || !in_array('speech', $transfer, true)) return;
+		if (!is_array($transfer)) return;
+		$speech = in_array('speech', $transfer, true);
+		$anticipation = in_array('anticipation', $transfer, true);
+		if (!$speech && !$anticipation) return;
 		$this->individualNotesTransfer = array();
-		Officers::saveSpeech($this, $gamedata);
+		if ($speech) Officers::saveSpeech($this, $gamedata);
+		if ($anticipation) Officers::saveAnticipation($this, $gamedata);
 	}
 
 	/* Initial Orders: persist the nomination the client made - it posts [1, partner id or -1] from the
@@ -4364,6 +4369,10 @@ class Hangar extends ShipSystem{
 	   hangar in the game. stripForJson reflects IS_PUBLIC only, so this is invisible to it and is
 	   copied by hand below. */
 	protected $stowedEdfRadius = 0;
+	/* OFFICERS_PLAN.md Stage 28: every unit this bay has launched, id => the turn of its FIRST launch, read off its hangarLaunchEvent notes
+	   (onIndividualNotesLoaded) - an Expert Warrior's ship gives the flights it launched his +10 initiative (Officers::applyLaunchedFlights).
+	   Protected for $stowedEdfRadius's reason. */
+	protected $launchedUnits = array();
 	private $lastSavedUsage = null;       //serialized snapshot of last persisted hangarUsage (avoids duplicate notes)
 	//Stage 15: per-carrier ordnance reload pool. Only the PRIMARY (first)
 	//hangar on a ship carries the spent counter — HangarOps::drawReload writes
@@ -4498,6 +4507,8 @@ class Hangar extends ShipSystem{
 				if ($unitId > 0){
 					if ($note->notekey === 'hangarDeployStartEvent') $deployDockTurns[$unitId] = (int)$note->turn;
 					else $launchTurns[$unitId] = (int)$note->turn;
+					//Stage 28: a real launch only (an escape from a destroyed carrier is no launch) - its first turn
+					if ($note->notekey === 'hangarLaunchEvent' && !isset($this->launchedUnits[$unitId])) $this->launchedUnits[$unitId] = (int)$note->turn;
 				}
 			} else if ($note->notekey === 'hangarUsage'){
 				$decoded = json_decode($note->notevalue, true);
@@ -5236,6 +5247,9 @@ class Hangar extends ShipSystem{
 	//Stage 19 (3.14d) - the one writer, HangarOps::publishStowedEdfRadii. A setter rather than a
 	//public property, for the blueprint reason recorded on the field itself.
 	public function setStowedEdfRadius($radius){ $this->stowedEdfRadius = max(0, (int)$radius); }
+
+	//OFFICERS_PLAN.md Stage 28 - the units this bay has launched (id => first launch turn); see $launchedUnits
+	public function getLaunchedUnits(){ return $this->launchedUnits; }
 
 	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();

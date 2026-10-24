@@ -764,7 +764,13 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 		
         <div id="halfphase" class="movement-icon" data-movement-type="Half-Phase">
             <canvas id="halfphasecanvas" width="50" height="50"></canvas>
-        </div>		
+        </div>
+
+        <!-- An Expert Warrior's Charge (OFFICERS_PLAN.md Stage 28): in the Half-Phase / Contraction spot, which no Drazi ship uses.
+             Label set by UI/shipMovement.js. -->
+        <div id="charge" class="movement-icon" data-movement-type="Charge">
+            <canvas id="chargecanvas" width="40" height="40"></canvas>
+        </div>
         
         <div id="jink" class="movement-icon" data-movement-type="Jinking">
 			<div class="centercontainer">

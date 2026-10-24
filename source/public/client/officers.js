@@ -102,6 +102,13 @@ window.officers = {
 		   sends the boxes). */
 		{ id: 'OFF_TROOP', label: 'Expert Troop Leader', post: 'hangar',
 			summary: '-2 to enemy boarding rolls, +2 to defenders; +1 to fleet Marine rolls; every Bulkhead +1 box' },
+		/* Stage 28: Drazi only (the offers'), in the C&C. The lobby previews his +10 initiative (stats - in game the server applied and published it,
+		   and gives it to the flights his ship launches) and his +1 fire control on every weapon (displayFireControl - in game the server raised it).
+		   The +2 at a unit his charge holds against and his precision strike are the hit-chance preview's (chargeHitBonus, precisionStrike); his +1
+		   per die and both critical modifiers are the server's. The Charge is movement.js's (its icon - canCharge - and the reticle on the unit
+		   charged, getChargeMarked), his Supreme Anticipation his C&C's Activate box in the Firing Phase (canAnticipateSupreme). */
+		{ id: 'OFF_WARR', label: 'Expert Warrior', post: 'cnc', stats: { iniativebonus: 10, critRollMod: -1 },
+			summary: '+1 fire control and +1 damage on all weapons; +10 initiative, also for launched flights; -1 on crit rolls, +1 on crits caused. Once per battle each, one a turn: Charge, precision strike, Supreme Anticipation' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -716,8 +723,9 @@ window.officers = {
 
 	//"(used: called shot, turn 3; Piercing shot, turn 4)" - the Gunner's spent once-per-battle abilities, or ''
 	//capture: the Breaching Expert's (Stage 24); speech: the Expert Political Officer's (Stage 25); reuse: the Expert Software Engineer's (Stage 26)
+	//charge, precision, anticipation: the Expert Warrior's (Stage 28)
 	ABILITY_NAMES: { reload: 'faster reload', pierce: 'Piercing shot', called: 'called shot', capture: 'capture assault', speech: 'speech',
-		reuse: 'Specialist reuse' },
+		reuse: 'Specialist reuse', charge: 'charge', precision: 'precision strike', anticipation: 'Supreme Anticipation' },
 	abilitiesText: function abilitiesText(entry) {
 		var spent = entry && entry.abilities ? entry.abilities : null;
 		if (!spent) return '';
@@ -781,7 +789,9 @@ window.officers = {
 			return (entry.mode !== undefined && parseInt(weapon.firingMode, 10) === parseInt(entry.mode, 10)) ? 0 : this.PIERCE_PENALTY;
 		}
 		//Stage 19: on a gun a serving Expert Targeter covers, his +4 is the called shot's - the Gunner's +3 neither used nor spent
-		return (this.bonusCall(weapon, called) && open('called') && !this.targeterCovering(ship, weapon)) ? this.GUNNER_CALLED_BONUS : 0;
+		//Stage 28: likewise on the gun making an Expert Warrior's precision strike
+		return (this.bonusCall(weapon, called) && open('called') && !this.targeterCovering(ship, weapon) && !this.precisionWeapon(ship, weapon, called))
+			? this.GUNNER_CALLED_BONUS : 0;
 	},
 
 	/* Is this a called shot an officer's called-shot bonus reaches (the Gunner's +3, the Targeter's +4)? Never in a mode whose hit calculation
@@ -1642,6 +1652,99 @@ window.officers = {
 		});
 	},
 
+	/* ------------------------------------------------------------------ Expert Warrior (Stage 28) */
+
+	CHARGE_HIT: 2,  //⚠️ MIRROR of Officers::CHARGE_HIT (PHP)
+	CHARGE_MIN_HEXES: 4,  //⚠️ MIRROR of Officers::CHARGE_MIN_HEXES (PHP) - "at least 4 hexes towards the enemy"
+
+	//this ship's Expert Warrior entry if he serves now, or null - through his list, so never an enemy's
+	warriorEntry: function warriorEntry(ship) {
+		if (!ship || ship.flight) return null;
+		var turn = this.currentTurn();
+		var self = this;
+		return this.listFor(ship).filter(function (entry) { return entry.id === 'OFF_WARR' && self.serves(entry, turn); })[0] || null;
+	},
+
+	//Is this C&C an Expert Warrior's post? Its Activate box is then his Supreme Anticipation's - blue, with his labels (CnC, model/system/baseSystems.js)
+	isWarriorPost: function isWarriorPost(ship, system) {
+		if (!ship || !system) return false;
+		return this.listFor(ship).some(function (entry) { return entry.id === 'OFF_WARR' && String(entry.post) === String(system.id); });
+	},
+
+	/* What his charge adds to the hit chance of one of his ship's shots, in d20 units: +2 at the unit it holds against this turn (`charged`,
+	   judged by the server), with every weapon but the ram. His standing +1 is fire control (fireControlRaise; in game the server's).
+	   ⚠️ MIRROR PAIR with Officers::chargeHitBonus (PHP). */
+	chargeHitBonus: function chargeHitBonus(ship, weapon, target) {
+		var entry = this.warriorEntry(ship);
+		if (!entry || !target || !weapon || weapon.isRammingAttack) return 0;
+		return (entry.charged !== undefined && entry.charged !== null && String(entry.charged) === String(target.id)) ? this.CHARGE_HIT : 0;
+	},
+
+	/* May his precision strike still be made this turn: not spent on an earlier turn, and no other of his abilities this turn - not a charge
+	   (its movement row), not his Supreme Anticipation (spent, or ordered now on his C&C's Activate box). */
+	precisionOpen: function precisionOpen(ship) {
+		var entry = this.warriorEntry(ship);
+		if (!entry) return false;
+		var turn = this.currentTurn();
+		var spent = entry.abilities || {};
+		var on = function (key) { return spent[key] !== undefined && spent[key] !== null ? (parseInt(spent[key], 10) || 0) : null; };
+		if (on('precision') !== null && on('precision') < turn) return false;
+		if (on('anticipation') === turn) return false;
+		var cnc = this.systemById(ship, entry.post);
+		if (cnc && cnc.active && window.gamedata && gamedata.gamephase == 3) return false;
+		return !(window.shipManager && shipManager.movement && typeof shipManager.movement.getChargeRow === 'function'
+			&& shipManager.movement.getChargeRow(ship));
+	},
+
+	/* Is this weapon's called shot his precision strike - "a single 'called shot', with only one weapon": his ship's first called shot, so of this
+	   turn's the one by his lowest-numbered weapon (the server prices them in that order). `called`: the shot asked about is a standard called
+	   shot. ⚠️ MIRROR PAIR with Officers::precisionShot (PHP). */
+	precisionWeapon: function precisionWeapon(ship, weapon, called) {
+		if (!ship || !weapon || ship.flight || weapon.isRammingAttack || !this.bonusCall(weapon, called) || !this.precisionOpen(ship)) return false;
+		var mine = parseInt(weapon.id, 10);
+		var turn = this.currentTurn();
+		var self = this;
+		return !this.systemsOf(ship).some(function (other) {
+			if (!other || !other.weapon || other.isRammingAttack || parseInt(other.id, 10) >= mine) return false;
+			return (other.fireOrders || []).some(function (order) {
+				if (!order || order.turn != turn || !(parseInt(order.calledid, 10) > 0) || String(order.type).indexOf('ntercept') !== -1) return false;
+				if (self.hasFixedFireControl(other, order.firingMode)) return false;
+				var target = window.gamedata && typeof gamedata.getShip === 'function' ? gamedata.getShip(order.targetid) : null;
+				var calledSystem = (target && window.shipManager) ? shipManager.systems.getSystem(target, order.calledid) : null;
+				return Boolean(calledSystem) && calledSystem.targetProfile == null;
+			});
+		});
+	},
+
+	//...and what it adds to that shot: the called shot penalty taken off again, doubled against a base as the penalty is (Officers::precisionStrike)
+	precisionStrike: function precisionStrike(ship, weapon, target, called) {
+		if (!this.precisionWeapon(ship, weapon, called)) return 0;
+		var waived = -(Number(weapon.calledShotMod) || 0);
+		return (target && target.base) ? 2 * waived : waived;
+	},
+
+	/* May this ship declare a charge now (movement.js canCharge, its Charge icon): his own team's, he serves, and he has not charged on an earlier
+	   turn. Through his list, so never an enemy's. ⚠️ MIRROR PAIR with Officers::validateCharge's test (PHP). */
+	canCharge: function canCharge(ship) {
+		var entry = this.warriorEntry(ship);
+		if (!entry || (window.gamedata && typeof gamedata.isMyShip === 'function' && !gamedata.isMyShip(ship))) return false;
+		var spent = entry.abilities ? entry.abilities.charge : undefined;
+		return spent === undefined || spent === null || (parseInt(spent, 10) || 0) >= this.currentTurn();
+	},
+
+	/* May he order his Supreme Anticipation now, from `system` - the Activate box of the C&C he is posted in: the Firing Phase, his own team's ship,
+	   he serves, it is unspent, and his ship did not charge this turn ("cannot do more than one of them in a given turn").
+	   ⚠️ MIRROR PAIR with Officers::anticipatorIndex (PHP). */
+	canAnticipateSupreme: function canAnticipateSupreme(ship, system) {
+		if (!system || !window.gamedata || gamedata.gamephase != 3) return false;
+		if (typeof gamedata.isMyShip === 'function' && !gamedata.isMyShip(ship)) return false;
+		var entry = this.warriorEntry(ship);
+		if (!entry || String(entry.post) !== String(system.id)) return false;
+		if (entry.abilities && entry.abilities.anticipation !== undefined && entry.abilities.anticipation !== null) return false;
+		return !(window.shipManager && shipManager.movement && typeof shipManager.movement.getChargeRow === 'function'
+			&& shipManager.movement.getChargeRow(ship));
+	},
+
 	/* ------------------------------------------------------------------ Expert Software Engineer (Stage 26) */
 
 	//"The specialist must be of the software category" - the Hyach Specialists the user named. ⚠️ MIRROR PAIR with Officers::$softwareSpecialists (PHP).
@@ -1916,10 +2019,12 @@ window.officers = {
 	   cannot target that size, and stays so) when:
 	     - an Expert Gunner serves IN it - every mode;
 	     - otherwise, in a Matter mode, the C&C Matter Weapons Expert serves, or the weapon-mounted one serves in
-	       it; and, every mode, an Expert Turret Officer serves on its turret (Stage 22). A Gunner's +1 replaces the
-	       Matter expert's and the Turret Officer's on his own weapon (user rulings 2026-10-16, 2026-10-21), never adds.
+	       it; and, every mode, an Expert Turret Officer serves on its turret (Stage 22); and, every mode of every
+	       weapon but the ram and a jump drive, an Expert Warrior serves in the C&C (Stage 28). A Gunner's +1 replaces
+	       the Matter expert's, the Turret Officer's and the Warrior's on his own weapon (user rulings 2026-10-16,
+	       2026-10-21, 2026-10-23), never adds.
 	   Gunsights is already in system.fireControl (systemEnhancements.apply), so the two show stacked.
-	   ⚠️ MIRROR PAIR with Officers::applyGunner / applyMatterExpert / applyWeaponMatterExpert / applyTurretOfficer (PHP). */
+	   ⚠️ MIRROR PAIR with Officers::applyGunner / applyMatterExpert / applyWeaponMatterExpert / applyTurretOfficer / applyWarrior (PHP). */
 	displayFireControl: function displayFireControl(ship, system) {
 		var fc = system ? system.fireControl : null;
 		if (!Array.isArray(fc)) return fc;
@@ -1940,7 +2045,9 @@ window.officers = {
 		var turret = serving.some(function (entry) {
 			return entry.id === 'OFF_TURR' && self.turretKey(self.systemById(ship, entry.post)) === self.turretKey(system);
 		}) ? 1 : 0;
-		return turret + ((this.isMatterWeapon(system) && this.isMatterMode(system, system.firingMode)
+		var warrior = (!system.isRammingAttack && system.name !== 'jumpEngine'
+			&& serving.some(function (entry) { return entry.id === 'OFF_WARR'; })) ? 1 : 0;
+		return turret + warrior + ((this.isMatterWeapon(system) && this.isMatterMode(system, system.firingMode)
 			&& (on('OFF_MWEW') || serving.some(function (entry) { return entry.id === 'OFF_MWE'; }))) ? 1 : 0);
 	},
 

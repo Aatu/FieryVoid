@@ -422,8 +422,9 @@ CnC.prototype.isCommandNodeThisTurn = function () {
 CnC.prototype.doIndividualNotesTransfer = function () {
 	this.individualNotesTransfer = "";
 	//OFFICERS_PLAN.md Stage 25: an Expert Political Officer's speech, ordered this Firing phase (CnC::saveFirePhaseDeclaration reads it)
+	//Stage 28: or, on an Expert Warrior's C&C, his Supreme Anticipation
 	if (gamedata.gamephase == 3 && this.active && gamedata.isMyShip(this.ship)) {
-		this.individualNotesTransfer = ['speech'];
+		this.individualNotesTransfer = [this.isWarriorPost() ? 'anticipation' : 'speech'];
 		return true;
 	}
 	if (gamedata.gamephase != 1 || !this.isTriadNode() || !gamedata.isMyShip(this.ship)) return false;
@@ -439,24 +440,39 @@ CnC.prototype.doIndividualNotesTransfer = function () {
    and has not spoken (officers.canSpeak). `active` is this turn's order alone - posted at the commit (doIndividualNotesTransfer), judged
    and spent by the server (Officers::saveSpeech), told in the combat log as firing resolves; the +30 is the next turn's. It is no
    power boost, so the icon does not glow as one (suppressActiveBoost). The box wears the Hyach Computer's purple (user request
-   2026-10-21) - the speech is the only thing a C&C's Activate box ever holds. */
+   2026-10-21) - the speech is the only thing a C&C's Activate box ever holds.
+   ===== EXPERT WARRIOR'S SUPREME ANTICIPATION (OFFICERS_PLAN.md Stage 28) - the same box on HIS C&C (the Drazi have no Political Officer), in
+   the default blue (user request) with his labels: "+ 50 initiative bonus ... on the next turn" (officers.canAnticipateSupreme). */
 CnC.prototype.suppressActiveBoost = true;
-CnC.prototype.activationMenuPurple = true;
+
+//The Warrior's C&C answers false - a getter, so the one prototype serves both officers (SystemActivation reads it as a property)
+Object.defineProperty(CnC.prototype, 'activationMenuPurple', {
+	get: function () { return !this.isWarriorPost(); },
+	configurable: true
+});
+
+CnC.prototype.isWarriorPost = function () {
+	return Boolean(window.officers) && officers.isWarriorPost(this.ship, this);
+};
+
+CnC.prototype.mayDeclare = function () {
+	return Boolean(window.officers) && (officers.canSpeak(this.ship, this) || officers.canAnticipateSupreme(this.ship, this));
+};
 
 CnC.prototype.canActivate = function () {
-	return !this.active && Boolean(window.officers) && officers.canSpeak(this.ship, this);
+	return !this.active && this.mayDeclare();
 };
 
 CnC.prototype.canDeactivate = function () {
-	return Boolean(this.active) && Boolean(window.officers) && officers.canSpeak(this.ship, this);
+	return Boolean(this.active) && this.mayDeclare();
 };
 
 CnC.prototype.getActivateLabel = function () {
-	return '"Speech!"';
+	return this.isWarriorPost() ? 'Anticipation!' : '"Speech!"';
 };
 
 CnC.prototype.getDeactivateLabel = function () {
-	return 'No speech';
+	return this.isWarriorPost() ? 'No anticipation' : 'No speech';
 };
 
 CnC.prototype.doActivate = function () {
