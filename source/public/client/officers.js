@@ -89,13 +89,13 @@ window.officers = {
 		   free Hardened Armour are PRICES (freeExpertId - the buy dialog and the fleet list; freeArmourRows - systemEnhancements.totalCost),
 		   his armed shuttle is the server's hangars', and his speech is his C&C's Activate box in the Firing phase (canSpeak). */
 		{ id: 'OFF_POL', label: 'Expert Political Officer', post: 'cnc', needs: 'capital',
-			summary: 'An armed shuttle, one free Expert Navigator, Helmsman, Engineer or Scanner, and 5 free Hardened Armour (not on Structure); once per battle a speech in the Firing Phase: +30 initiative next turn' },
+			summary: 'An armed shuttle, one free Officer, and 5 free Armourupgrades; once per battle make a speech in Firing Phase for +30 initiative next turn' },
 		/* Stage 26: Hyach only (the offers' - his post, the Hyach Computer, is Hyach-only too). His +1 BFCP is previewed in the lobby (computerBonus -
 			in game the server raised `output`); the point he lets the player hold to the Firing phase is the Computer's own menu (HyachComputer
 			.firingMode); his armour point and signature masking are the server's; his Specialist reuse comes in his payload (`reuse` -
 			specialistReusable). */
 		{ id: 'OFF_SOFT', label: 'Expert Software Engineer', post: 'computer',
-			summary: '+1 BFCP (lost only with the Computer), which may be held back to the Firing Phase; the Computer ignores the first point of every hit; a stealth ship is detected as if 5 hexes further away (fighters at half range); one Defence, Sensor, Targeting or Weapon Specialist may be used a second time' },
+			summary: '+1 BFCP, which may be held back to the Firing Phase; the Computer ignores 1 damage on hit; Increased stealth detection range; use a software Specialist a second time' },
 		/* Stage 27: Gaim only (the offers'), in the largest Hangar. His boarding shift is the server's. The pods he aids - as many of his player's
 		   pods, in fleet order, as his ship's Pod Allowance - are named in their Marines' "Elite" line to his team (marinesEliteLine, through
 		   troopAidedCraft). The Bulkheads' extra box is previewed in the lobby (troopBulkheads, from lobbyEnhancements - in game the server
@@ -108,7 +108,7 @@ window.officers = {
 		   per die and both critical modifiers are the server's. The Charge is movement.js's (its icon - canCharge - and the reticle on the unit
 		   charged, getChargeMarked), his Supreme Anticipation his C&C's Activate box in the Firing Phase (canAnticipateSupreme). */
 		{ id: 'OFF_WARR', label: 'Expert Warrior', post: 'cnc', stats: { iniativebonus: 10, critRollMod: -1 },
-			summary: '+1 fire control and +1 damage on all weapons; +10 initiative, also for launched flights; -1 on crit rolls, +1 on crits caused. Once per battle each, one a turn: Charge, precision strike, Supreme Anticipation' },
+			summary: '+1 fire control and damage on all weapons; +10 initiative, also on launched flights; -1 on crit rolls, +1 on crits caused. Once per battle / turn: Charge, Precision strike, Supreme Anticipation' },
 		/* Stage 29: in the C&C, on hulls with counted ballistic ammunition (`needs`; the offers' too). No stat moves. His +5 distance range is the
 		   hit-chance preview's and the Range line's (distanceRangeBonus - in game the number the server publishes to every viewer); his magazine
 		   slots and free missiles are the buy dialog's and the fleet list's (getMaxAmmoFit, ballisticFreeRounds - off the static blueprint's
@@ -130,7 +130,7 @@ window.officers = {
 		   the C&C and his Matter weapons, as one man); `abilities` - the Gunner's once-per-battle three;
 		   `reload` - his weapon reloads a turn faster. */
 		{ id: 'OFF_GUN', label: 'Expert Gunner', placed: true, movable: true, abilities: true,
-			summary: '+1 fire control and +1 damage per die. Once per battle each:  +1 turn towards reload, Piercing shot (or ignore Piercing FC penalty), +15% on called shot' },
+			summary: '+1 fire control and +1 damage per die. Once per battle each:  +1 turn towards reload, Piercing shot (or ignore Piercing penalty), +15% called shot' },
 		{ id: 'OFF_MWEW', label: 'Matter Weapons Expert', placed: true, sameAs: 'OFF_MWE', anyDamage: true, movable: true, reload: true,
 			summary: '+1 fire control and +1 damage for this Matter weapon, which reloads a turn faster;' },
 		/* Stage 15: the Expert Religious Leader away from his C&C - in any other primary non-weapon system (the server's
