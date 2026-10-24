@@ -17702,12 +17702,22 @@ class AmmoMagazine extends ShipSystem {
 	private $interceptorUsed = 0;//Communication variable.	
 	private $ammoAlreadyUsed = array();
 	public $startingAmmo = null;
+	protected $capacityAdded = 0; //OFFICERS_PLAN.md Stage 29: the slots an Expert Ballistic Officer added (addCapacity)
 		
     
     function __construct($capacity){ //magazine capacity
         parent::__construct(0, 1, 0, 1); //technical system, armor and structure don't really matter
 		$this->capacity = $capacity;
     }
+
+	/* OFFICERS_PLAN.md Stage 29: an Expert Ballistic Officer's extra slots - one a launcher this magazine feeds (Officers::raiseMagazines),
+	   added before the ammunition rows load, so a bought round fills one before it swaps out a standard round. Idempotent: asked for the
+	   same number again, it adds nothing more. */
+	public function addCapacity($slots){
+		$slots = max(0, (int)$slots);
+		$this->capacity += $slots - $this->capacityAdded;
+		$this->capacityAdded = $slots;
+	}
     
     public function setSystemDataWindow($turn){
 		//count remaining ammo total
@@ -18671,7 +18681,9 @@ class AmmoMissileHM extends AmmoMissileTemplate{
 	{
 		$launch   = isset($weapon->rangeArray[$mode]) ? $weapon->rangeArray[$mode] : $weapon->range;
 		$distance = isset($weapon->distanceRangeArray[$mode]) ? $weapon->distanceRangeArray[$mode] : $weapon->distanceRange;
-		return (int)max($launch, $distance);
+		$budget = (int)max($launch, $distance);
+		//OFFICERS_PLAN.md Stage 29: an Expert Ballistic Officer's +5 distance range is fuel too (0 stays unlimited)
+		return ($budget > 0) ? $budget + Officers::distanceRangeBonus($weapon) : $budget;
 	}
 
 	/* ======================================================================================

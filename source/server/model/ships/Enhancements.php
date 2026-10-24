@@ -2121,7 +2121,7 @@ class Enhancements{
 	  (MINE_ACC/ARM/DMG/...), which are NOT ammo, so they are listed explicitly.
 	  To restore ammo in the list, drop the isAmmoEnhancement() guards in
 	  setEnhancementsFighter / setEnhancementsShip.*/
-	private static function isAmmoEnhancement($enhID){
+	public static function isAmmoEnhancement($enhID){ //public since OFFICERS_PLAN.md Stage 29: Officers::hasMagazineOrdnance
 		if(strpos($enhID, 'AMMO_') === 0) return true;   //ship + fighter missiles
 		if(strpos($enhID, 'SHELL_') === 0) return true;  //direct-fire railgun shells
 		static $launcherMines = array('MINE_BLB','MINE_BLH','MINE_BLW','MINE_MLB','MINE_MLW','MINE_AML','MINE_BML','MINE_CML');

@@ -1805,6 +1805,8 @@ class BaseShip {
     {	    
 		//OFFICERS_PLAN.md D2 - officers' posts are picked BEFORE any enhancement moves an output
 		Officers::pickPosts($this);
+		//OFFICERS_PLAN.md Stage 29 - an Expert Ballistic Officer's magazine slots, before the ammunition rows below fill them
+		Officers::raiseMagazines($this);
 		//enhancements (in game, NOT fleet selection!)
 		Enhancements::setEnhancements($this);
 		/* PER-SYSTEM enhancements, immediately after the ship-level ones and - critically - BEFORE

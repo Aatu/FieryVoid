@@ -3495,6 +3495,7 @@ full Advanced Armor effects (by rules) for reference:
 			if(!$this->ballistic) return true; //non-ballistic weapons don't risk target moving out of range
             $distanceRange = max($this->range, $this->distanceRange); //just in case distanceRange is not filled! Then it's assumed to be the same as launch range
             if($distanceRange <=0 ) return true; //0 means unlimited range
+            $distanceRange += Officers::distanceRangeBonus($this); //OFFICERS_PLAN.md Stage 29: an Expert Ballistic Officer's +5 (never the launch range)
 
 
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);

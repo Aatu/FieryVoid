@@ -1260,8 +1260,8 @@ class AmmoMissileRackS extends Weapon{
 	}
     
 	
-	// GTS
-    protected function getAmmoMagazine(){
+	// GTS - public since OFFICERS_PLAN.md Stage 29: an Expert Ballistic Officer adds a slot to the magazine each launcher draws on
+    public function getAmmoMagazine(){
         return $this->ammoMagazine;
     }	
 	

@@ -585,6 +585,10 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                        player left unchosen are picked at random HERE, once, as the fleet is committed - stored below as the rows
                        they become (the ship-level row with the rest, the armour with $cleanSysEnh), free of charge. */
                     $cleanSysEnh = Officers::placePoliticalPicks($ship, $cleanSysEnh, $cleanPreBattle);
+                    /* OFFICERS_PLAN.md Stage 29: an Expert Ballistic Officer's free missiles left unpicked are rolled HERE, once, onto the
+                       unit's ammunition rows (free), and his extra round given to every weapon keeping its own count - written below as its
+                       turn-0 starting count. */
+                    Officers::placeBallisticPicks($ship, $cleanPreBattle);
                     //Fold the authoritative total in BEFORE submitShip, which writes it into
                     //tac_ship.enhvalue alongside the other two buckets.
                     $ship->pointCostSysEnh = $cleanSysEnh['total'];

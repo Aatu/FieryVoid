@@ -2529,6 +2529,8 @@ window.weaponManager = {
         }
 
         var maxDistance = Math.max(weapon.range, weapon.distanceRange);
+        //OFFICERS_PLAN.md Stage 29: an Expert Ballistic Officer's +5 distance range (Weapon::isInDistanceRange's twin; 0 stays unlimited)
+        if (maxDistance > 0 && window.officers) maxDistance += officers.distanceRangeBonus(shooter, weapon);
         if ((maxDistance > 0) && (maxDistance < distance)) {
             return makeResult(0, { isOutOfRange: true, breakdownReason: 'Out of range' });
         }

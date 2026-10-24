@@ -109,6 +109,12 @@ window.officers = {
 		   charged, getChargeMarked), his Supreme Anticipation his C&C's Activate box in the Firing Phase (canAnticipateSupreme). */
 		{ id: 'OFF_WARR', label: 'Expert Warrior', post: 'cnc', stats: { iniativebonus: 10, critRollMod: -1 },
 			summary: '+1 fire control and +1 damage on all weapons; +10 initiative, also for launched flights; -1 on crit rolls, +1 on crits caused. Once per battle each, one a turn: Charge, precision strike, Supreme Anticipation' },
+		/* Stage 29: in the C&C, on hulls with counted ballistic ammunition (`needs`; the offers' too). No stat moves. His +5 distance range is the
+		   hit-chance preview's and the Range line's (distanceRangeBonus - in game the number the server publishes to every viewer); his magazine
+		   slots and free missiles are the buy dialog's and the fleet list's (getMaxAmmoFit, ballisticFreeRounds - off the static blueprint's
+		   ballisticPicks / ballisticSlots), and the server's at the commit, which also gives each counted weapon its extra round. */
+		{ id: 'OFF_BALL', label: 'Expert Ballistic Officer', post: 'cnc', needs: 'countedBallistic',
+			summary: '+5 distance range for missiles; +1 round per launcher; free missile per launcher' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -351,7 +357,8 @@ window.officers = {
 	     missiles      the flight carries missiles (the Expert Missileer)
 	     tailGun       the flight's craft has a tail gun - a weapon the blueprint flags `tailGun` (the Expert Tailgunner)
 	     breachingPod  the flight is a breaching pod (isBreachingPod - the Breaching Expert)
-	     capital       a capital ship or larger, size class 3 (the Expert Political Officer) */
+	     capital       a capital ship or larger, size class 3 (the Expert Political Officer)
+	     countedBallistic  a magazine-fed ballistic launcher, or a ballistic weapon keeping a count of rounds (the Expert Ballistic Officer) */
 	passesNeeds: function passesNeeds(ship, officer) {
 		if (!officer.needs) return true;
 		var self = this;
@@ -374,6 +381,11 @@ window.officers = {
 			return !!craft && this.systemsOf(craft).some(function (s) { return s && s.tailGun === true; });
 		}
 		if (officer.needs === 'breachingPod') return this.isBreachingPod(ship);
+		if (officer.needs === 'countedBallistic') {
+			var systems = this.systemsOf(ship);
+			if (systems.some(function (s) { return self.isCountedBallistic(s) && s.checkAmmoMagazine !== true; })) return true;
+			return systems.some(function (s) { return self.isCountedBallistic(s); }) && this.hasMagazineOrdnance(ship);
+		}
 		return false;
 	},
 
@@ -1156,14 +1168,15 @@ window.officers = {
 	   later rebuilds pointCostEnh from the rows' counts (gamelobby doEditShip), so it agrees with what is written here.
 	   Stage 25: the expert an Expert Political Officer brings costs nothing (politicalDiscount, before and after), and buying or
 	   un-buying the Political Officer himself re-prices his free Hardened Armour - the refit bucket, pointCost with it.
+	   Stage 29: buying or un-buying an Expert Ballistic Officer re-prices the ammunition rounds he makes free (ballisticDiscount).
 	   false when the hull does not offer him. */
 	setShipLevelRow: function setShipLevelRow(ship, id, n) {
 		var row = this.shipLevelRow(ship, id);
 		if (!row) return false;
-		var discount = this.politicalDiscount(ship);
+		var discount = this.politicalDiscount(ship) + this.ballisticDiscount(ship);
 		var delta = (n - (parseInt(row[2], 10) || 0)) * (parseFloat(row[4]) || 0);
 		row[2] = n;
-		delta -= this.politicalDiscount(ship) - discount;
+		delta -= this.politicalDiscount(ship) + this.ballisticDiscount(ship) - discount;
 		ship.pointCostEnh = (parseFloat(ship.pointCostEnh) || 0) + delta;
 		ship.pointCost = (parseFloat(ship.pointCost) || 0) + delta;
 		if (id === 'OFF_POL' && window.systemEnhancements) {
@@ -1536,11 +1549,11 @@ window.officers = {
 		return best;
 	},
 
-	//a ship's officer rows as freeExpertId reads them
+	//a ship's rows as freeExpertId and (Stage 29, with each level's price step) ballisticFreeRounds read them
 	shipRows: function shipRows(ship) {
 		var rows = (ship && Array.isArray(ship.enhancementOptions)) ? ship.enhancementOptions : [];
 		return rows.filter(function (row) { return row && typeof row[0] === 'string'; }).map(function (row) {
-			return { id: row[0], count: parseInt(row[2], 10) || 0, price: parseFloat(row[4]) || 0 };
+			return { id: row[0], count: parseInt(row[2], 10) || 0, price: parseFloat(row[4]) || 0, step: parseFloat(row[5]) || 0 };
 		});
 	},
 
@@ -1551,9 +1564,12 @@ window.officers = {
 		return free ? rows.filter(function (row) { return row.id === free; })[0].price : 0;
 	},
 
-	/* One bought ship-level row's points for the fleet list (gamelobby enhancementLines): 0 for the free expert, else `cost`. */
+	/* One bought ship-level row's points for the fleet list (gamelobby enhancementLines): 0 for the free expert, else `cost` - less, on an
+	   ammunition row, the rounds an Expert Ballistic Officer makes free (Stage 29, ballisticFreeRounds). */
 	shipRowCost: function shipRowCost(ship, entry, cost) {
-		return (entry && entry[0] === this.freeExpertId(this.shipRows(ship))) ? 0 : cost;
+		if (entry && entry[0] === this.freeExpertId(this.shipRows(ship))) return 0;
+		var free = entry ? this.ballisticFreeRounds(this.shipRows(ship), ship && ship.ballisticPicks).saved[entry[0]] : 0;
+		return free ? cost - free : cost;
 	},
 
 	/* ⭐ Which Hardened Armour is free, as the indexes of ship.systemEnhancements: with a Political Officer bought and his C&C standing,
@@ -1820,6 +1836,128 @@ window.officers = {
 			return this.label(list[0].id) + (same > 1 ? ' (' + same + ')' : '');
 		}
 		return 'Officers (' + list.length + ')';
+	},
+
+	/* ------------------------------------------------------------------ Expert Ballistic Officer (Stage 29) */
+
+	BALLISTIC_RANGE: 5, //⚠️ MIRROR of Officers::BALLISTIC_RANGE (PHP) - the lobby's own figure; in game the server publishes it (distanceRangeBonus)
+	BALLISTIC_EXTRA_ROUND: 1, //...BALLISTIC_EXTRA_ROUND - the lobby's preview of what the commit writes
+	/* The magazine rounds that take two slots, never a free pick ("single-space (1 slot, e.g. not ammo like Starburst missiles which take 2
+	   slots)"). ⚠️ MIRROR PAIR with the server's round sizes (Officers::paidPickTypes reads AmmoMissileK / AmmoMissileM's `size`). */
+	BALLISTIC_TWO_SLOT: ['AMMO_K', 'AMMO_M'],
+
+	/* A system his `needs` counts: a magazine-fed ballistic launcher (a missile rack, a Bomb Rack, a mine launcher - checkAmmoMagazine), or a
+	   ballistic weapon keeping its own count of rounds (a Proximity Laser, a Limpet Bore). Never the jump drive. A launcher counts only where its
+	   magazine has ordnance to buy (hasMagazineOrdnance - user ruling after play test 4512). ⚠️ MIRROR PAIR with Officers::hasCountedBallisticAmmo (PHP). */
+	isCountedBallistic: function isCountedBallistic(system) {
+		if (!system || !system.weapon || !system.ballistic || system.name === 'jumpEngine') return false;
+		return system.checkAmmoMagazine === true || (parseInt(system.ammunition, 10) || 0) > 0;
+	},
+
+	//has this hull ordnance for its magazine - an ammunition offer in its blueprint? ⚠️ MIRROR PAIR with Officers::hasMagazineOrdnance (PHP)
+	hasMagazineOrdnance: function hasMagazineOrdnance(ship) {
+		return (ship && Array.isArray(ship.enhancementOptions) ? ship.enhancementOptions : []).some(function (row) {
+			return row && typeof row[0] === 'string' && /^(AMMO_|MINE_|SHELL_)/.test(row[0]);
+		});
+	},
+
+	/* An ordnance row's limit with him bought, in the buy dialog: the offer's own rule on the magazine his slots enlarge - "the per-type limit is
+	   simply derived from the magazine total" (user ruling after play test 4512): as many rounds of its size as fit (Starburst and Multiwarhead
+	   two slots), a tenth of them for Stealth and Homing missiles. A Solyrn's Heavy 280 -> 290, its Stealth 28 -> 29. `max` (the offer's) for
+	   anything else. ⚠️ MIRROR PAIR with Enhancements::setEnhancementOptionsShip's ammunition limits - officersHarness writes
+	   ballisticLimitsFixture.json from the server's own offers on an enlarged magazine, and the client harness compares every row. */
+	BALLISTIC_TENTH: ['AMMO_S', 'AMMO_HM'],
+	ballisticRowLimit: function ballisticRowLimit(ship, id, max) {
+		var slots = ship ? (parseInt(ship.ballisticSlots, 10) || 0) : 0;
+		if (!slots || typeof id !== 'string' || !/^(AMMO_|MINE_)/.test(id)) return max;
+		var magazine = this.systemsOf(ship).filter(function (s) { return s && s.name === 'ammoMagazine'; })[0];
+		if (!magazine) return max;
+		var fit = Math.floor(((parseInt(magazine.capacity, 10) || 0) + slots) / (this.BALLISTIC_TWO_SLOT.indexOf(id) !== -1 ? 2 : 1));
+		return this.BALLISTIC_TENTH.indexOf(id) !== -1 ? fit / 10 : fit;
+	},
+
+	/* A row whose rounds may be his free picks: an AMMO_ row with a price on this hull, never Basic, never a two-slot round (user ruling
+	   2026-10-24). ⚠️ MIRROR PAIR with Officers::paidPickTypes (PHP), which the commit's fill uses. */
+	isBallisticPick: function isBallisticPick(id, price) {
+		return typeof id === 'string' && id.indexOf('AMMO_') === 0 && id !== 'AMMO_B' && this.BALLISTIC_TWO_SLOT.indexOf(id) === -1 && (Number(price) || 0) > 0;
+	},
+
+	/* ⭐ HIS FREE MISSILES - "any missiles the player buys are free up to the number of missile racks on the ship ... the most expensive
+	   missile ammos are free" (the user's note): with him bought, the `picks` DEAREST rounds of the pickable rows (isBallisticPick) cost
+	   nothing - each round at its own level's price (price + level x step, as the buy dialog charges it), a tie to the lower id (the dialog
+	   and the fleet list hold their rows in different orders; only the split of a tie between rows depends on it, never the total).
+	   `rows`: [{id, count, price, step}] - a ship's own (shipRows) or a buy dialog's spinners (confirm.dialogRows);
+	   `picks`: the static blueprint's ballisticPicks. Returns {free: {id: rounds}, saved: {id: points}, discount: points}. The commit rolls
+	   whatever is left unpicked (Officers::placeBallisticPicks), so a player who buys none still gets them. */
+	ballisticFreeRounds: function ballisticFreeRounds(rows, picks) {
+		var out = { free: {}, saved: {}, discount: 0 };
+		picks = parseInt(picks, 10) || 0;
+		if (picks <= 0 || !rows.some(function (row) { return row.id === 'OFF_BALL' && row.count > 0; })) return out;
+		var self = this;
+		var rounds = [];
+		rows.forEach(function (row) {
+			if (!self.isBallisticPick(row.id, row.price)) return;
+			for (var level = 0; level < row.count; level++) rounds.push({ id: row.id, price: row.price + level * (row.step || 0) });
+		});
+		rounds.sort(function (a, b) { return (b.price - a.price) || (a.id < b.id ? -1 : (a.id > b.id ? 1 : 0)); });
+		rounds.slice(0, picks).forEach(function (round) {
+			out.free[round.id] = (out.free[round.id] || 0) + 1;
+			out.saved[round.id] = (out.saved[round.id] || 0) + round.price;
+			out.discount += round.price;
+		});
+		return out;
+	},
+
+	//what his free rounds spare this ship, in points (0 without him) - setShipLevelRow moves pointCost by it when he comes or goes
+	ballisticDiscount: function ballisticDiscount(ship) {
+		return ship ? this.ballisticFreeRounds(this.shipRows(ship), ship.ballisticPicks).discount : 0;
+	},
+
+	//is he bought on this LOBBY ship (its rows, as the server's raiseMagazines reads them)? false in game, where the server applied him
+	ballisticAboard: function ballisticAboard(ship) {
+		return this.isDerived(ship) && this.listFor(ship).some(function (entry) { return entry.id === 'OFF_BALL'; });
+	},
+
+	//the magazine slots he adds (the static blueprint's ballisticSlots) - in the lobby, while he is bought; in game the payload's capacity has them
+	ballisticSlots: function ballisticSlots(ship) {
+		return this.ballisticAboard(ship) ? (parseInt(ship.ballisticSlots, 10) || 0) : 0;
+	},
+
+	/* ⭐ HIS +5 - what a ballistic weapon of this ship adds to its distance range (never its launch range), never a Proximity Laser: in game
+	   the number the server published to every viewer while he serves (Officers::addForJson), in the lobby his own while he would serve.
+	   ⚠️ MIRROR PAIR with Officers::distanceRangeBonus (PHP). */
+	distanceRangeBonus: function distanceRangeBonus(ship, weapon) {
+		if (!ship || !weapon || !weapon.ballistic || weapon.name === 'ProximityLaserNew' || weapon.name === 'jumpEngine') return 0;
+		if (ship.distanceRangeBonus !== undefined) return parseInt(ship.distanceRangeBonus, 10) || 0;
+		return this.servingDerived(ship).some(function (entry) { return entry.id === 'OFF_BALL'; }) ? this.BALLISTIC_RANGE : 0;
+	},
+
+	/* A ballistic weapon's Range line ("30/70", or "30" where the distance range is the launch range) with his +5 on the distance part:
+	   "30/75", "30/35". Anything not in that shape, or a range of 0 (unlimited), is left as it is. */
+	ballisticRangeLine: function ballisticRangeLine(ship, system, value) {
+		var bonus = this.distanceRangeBonus(ship, system);
+		var parts = bonus ? /^\s*(\d+)\s*(?:\/\s*(\d+))?\s*$/.exec(String(value)) : null;
+		if (!parts) return value;
+		var launch = parseInt(parts[1], 10);
+		var distance = Math.max(launch, parts[2] !== undefined ? parseInt(parts[2], 10) : 0);
+		if (distance <= 0) return value;
+		return launch + '/' + (distance + bonus);
+	},
+
+	//in the lobby: a counted weapon's Ammunition line with the round the commit will give it (in game the server's count has it)
+	ballisticAmmunitionLine: function ballisticAmmunitionLine(ship, system, value) {
+		if (!this.ballisticAboard(ship) || system.checkAmmoMagazine === true || !this.isCountedBallistic(system)) return value;
+		var n = parseInt(value, 10);
+		return isNaN(n) ? value : n + this.BALLISTIC_EXTRA_ROUND;
+	},
+
+	//in the lobby: the magazine's "Total rounds: 280/280" with his slots - 280/290 (in game the server's capacity has them)
+	ballisticMagazineSpecial: function ballisticMagazineSpecial(ship, value) {
+		var slots = this.ballisticSlots(ship);
+		if (!slots) return value;
+		return String(value).replace(/Total rounds: (\d+)\/(\d+)/, function (all, rounds, capacity) {
+			return 'Total rounds: ' + rounds + '/' + ((parseInt(capacity, 10) || 0) + slots);
+		});
 	},
 
 	/* ------------------------------------------------------------------ what a flight's officer costs */
@@ -2470,6 +2608,10 @@ window.officers = {
 		if (key === 'Elite' && (system.name === 'Marines' || system.name === 'ExtraMarines')) return this.marinesEliteLine(ship, system, value);
 		if (key === 'Turret Mount') return this.turretMountLine(ship, system, value);
 		if (system.name === 'hyachComputer' && key === 'Bonus Fire Control Points (BFCP)') return this.bfcpLine(ship, system, value);
+		//Stage 29: an Expert Ballistic Officer's distance range (every viewer); in the lobby his magazine slots and a counted weapon's round
+		if (key === 'Range' && system.ballistic && system.name !== 'jumpEngine') return this.ballisticRangeLine(ship, system, value);
+		if (key === 'Ammunition') return this.ballisticAmmunitionLine(ship, system, value);
+		if (system.name === 'ammoMagazine' && key === 'Special') return this.ballisticMagazineSpecial(ship, value);
 		if (system.name === 'jumpEngine' && (key === 'Range' || key === 'Special')) {
 			var bonus = this.jumpRangeBonus(ship, system);
 			if (!bonus) return value;

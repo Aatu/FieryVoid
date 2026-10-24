@@ -174,6 +174,18 @@ class Officers{
 	const CHARGE_MIN_HEXES = 4;          //...: "He must move at least 4 hexes towards the enemy" - 4 hexes nearer by the end of his move
 	const SUPREME_INITIATIVE = 50;       //...: "supreme anticipation, earning his ship a + 50 initiative bonus ... on the next turn" - FV units (user)
 	const SUPREME_PENALTY = -50;         //...: "However, on the turn after that one, his ship suffers a -50 penalty"
+	const BALLISTIC_RANGE = 5;           //Expert Ballistic Officer: "All ballistic weapons receive +5 to their distance range (but not their launch range)"
+	const BALLISTIC_EXTRA_ROUND = 1;     //...: "All ballistic devices with limited ammunition receive one extra round of ammo"
+	/* ...: the magazine rounds he may pick free - "change one of their single-space ... missiles to any other legal type at no cost" - by
+	   enhancement id, each with the round it loads (Enhancements::setEnhancementOptionsShip's list). A pick is one of these the hull is
+	   enabled for, single-slot and priced on that hull (paidPickTypes); Basic is not among them, as no swap to it is worth anything (user
+	   ruling 2026-10-24). ⚠️ MIRROR PAIR with officers.BALLISTIC_TWO_SLOT (JS), which names the two-slot ones the client leaves out. */
+	private static $ballisticAmmo = array(
+		'AMMO_L' => 'AmmoMissileL', 'AMMO_H' => 'AmmoMissileH', 'AMMO_F' => 'AmmoMissileF', 'AMMO_A' => 'AmmoMissileA',
+		'AMMO_P' => 'AmmoMissileP', 'AMMO_D' => 'AmmoMissileD', 'AMMO_I' => 'AmmoMissileI', 'AMMO_C' => 'AmmoMissileC',
+		'AMMO_J' => 'AmmoMissileJ', 'AMMO_K' => 'AmmoMissileK', 'AMMO_M' => 'AmmoMissileM', 'AMMO_KK' => 'AmmoMissileKK',
+		'AMMO_S' => 'AmmoMissileS', 'AMMO_HM' => 'AmmoMissileHM', 'AMMO_X' => 'AmmoMissileX', 'AMMO_Z' => 'AmmoMissileZ',
+	);
 	/* ...: "permits a specialist to use his abilities a second time ... The specialist must be of the software category" - the Hyach
 	   Specialists the user named (2026-10-22). ⚠️ MIRROR PAIR with officers.SOFTWARE_SPECIALISTS (JS). */
 	private static $softwareSpecialists = array('Defence', 'Sensor', 'Targeting', 'Weapon');
@@ -261,6 +273,9 @@ class Officers{
 		'OFF_TRPOD' => array('only' => array('Gaim Intelligence')),
 		//"Availability: Drazi only" - the Wars of the Centauri Republic's Drazi too (user ruling 2026-10-23)
 		'OFF_WARR' => array('only' => array('Drazi Freehold', 'Drazi Freehold (WotCR)')),
+		//"5% of the base cost of the ship, plus 1% for each missile rack ... Races other than the Kor-Lyans pay double" - the registry's 10, and 5 here
+		//(the racks' part grows with it: `perPick`)
+		'OFF_BALL' => array('pct' => array('Kor-Lyan Kingdoms' => 5)),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -274,6 +289,8 @@ class Officers{
 	     publish  (optional) ship fields his apply moves that every viewer is sent while he serves: a
 	              displayed stat is public, only the officer is hidden (user ruling 2026-10-10)
 	     needs    (optional) a further test the hull must pass to be offered him, beyond having the post
+	     perPick  (optional, Stage 29) his pct grows by this percent of itself for every free pick the hull gives him (ballisticPicks):
+	              the Expert Ballistic Officer's "plus 1% for each missile rack" on his 5%, so it doubles with the rest outside the Kor-Lyans
 	   Fighter officers (Stage 4) also carry:
 	     flight      true: offered to flights only (and every other officer to ships only). His pct is
 	                 of ONE craft, for a standard flight; a flight of another size pays it scaled by its
@@ -492,6 +509,19 @@ class Officers{
 		   user's note: saveAnticipation), +50 initiative next turn while he serves and -50 the turn after. 50%; Drazi only ($factionRules). */
 		'OFF_WARR' => array('label' => 'Expert Warrior', 'post' => 'cnc', 'pct' => 50, 'apply' => 'applyWarrior',
 			'publish' => array('iniativebonus'), 'lost' => 'applyWarriorLost', 'lostPublish' => array('iniativebonus')),
+		/* Expert Ballistic Officer (Stage 29; rules text, user 2026-10-24), in the C&C. "All ballistic weapons receive +5 to their distance
+		   range (but not their launch range). This does not apply to proximity weapons" (distanceRangeBonus - while he serves). "All
+		   ballistic devices with limited ammunition receive one extra round of ammo. For missiles, this would be an extra missile slot":
+		   the magazine one slot more for every rack and mine launcher it feeds (raiseMagazines - the user's note), and a weapon keeping its
+		   own count one round more, written as it is committed (placeBallisticPicks). "All missile racks (but not reload racks) can change
+		   one of their single-space ... missiles to any other legal type at no cost": the N dearest paid single-slot rounds bought are free,
+		   N his ship's missile racks and Bomb Racks (ballisticPicks - the user's note), and the rest picked at random at the commit. Rulings
+		   (user 2026-10-24): only hulls with counted ballistic ammunition (`needs`); a Bomb Rack a missile rack, a mine launcher a slot only;
+		   the ammunition stays when he is lost, the range goes; a pick never Basic, a round free anyway, or a two-slot one. "5% of the base
+		   cost of the ship, plus 1% for each missile rack that received a free missile upgrade ... Races other than the Kor-Lyans pay
+		   double": 10% and +2% a pick, the Kor-Lyans 5% and +1% ($factionRules, `perPick`). No stat moves at load. */
+		'OFF_BALL' => array('label' => 'Expert Ballistic Officer', 'post' => 'cnc', 'pct' => 10, 'perPick' => 20, 'apply' => null,
+			'needs' => 'hasCountedBallisticAmmo'),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -691,12 +721,14 @@ class Officers{
 		return true;
 	}
 
-	//His price in percent for this unit's faction: $factionRules' when it names one, else the registry's
+	/* His price in percent for this unit's faction: $factionRules' when it names one, else the registry's - and for an officer with
+	   `perPick` (Stage 29), that much more again for each free pick the hull gives him (5% -> 15% on a Solyrn's 10 racks). */
 	public static function pctFor($ship, $id){
 		$faction = (string)$ship->faction;
 		$rules = self::rulesId($id);
-		if (isset(self::$factionRules[$rules]['pct'][$faction])) return self::$factionRules[$rules]['pct'][$faction];
-		return self::$registry[$id]['pct'];
+		$pct = isset(self::$factionRules[$rules]['pct'][$faction]) ? self::$factionRules[$rules]['pct'][$faction] : self::$registry[$id]['pct'];
+		if (!empty(self::$registry[$id]['perPick'])) $pct = $pct * (100 + self::$registry[$id]['perPick'] * self::ballisticPicks($ship)) / 100;
+		return $pct;
 	}
 
 	/* D9: never on Ancient hulls, OSATs (mines extend OSAT) or terrain - one shared test in front of
@@ -4033,6 +4065,189 @@ class Officers{
 		return true;
 	}
 
+	/* ------------------------------------------------------------------ Expert Ballistic Officer (Stage 29) */
+
+	/* "Ballistic devices with limited ammunition" - only hulls carrying one are offered him (user ruling 2026-10-24): a ballistic weapon
+	   keeping its own count (keepsOwnCount), or a magazine-fed launcher (a missile rack, a Bomb Rack, a mine launcher) whose magazine has
+	   ordnance to buy - never one with none, whose slots could hold nothing (user ruling after play test 4512: the Hyperion Aegis, the fast
+	   Hermes, three Chouka hulls, the Dag'Kur, the Shlassan Triumvirate). Not the old MissileLauncher racks, whose missiles FV does not count. */
+	private static function hasCountedBallisticAmmo($ship){
+		$launcher = false;
+		foreach ($ship->systems as $system){
+			if (self::keepsOwnCount($system)) return true;
+			if ($system instanceof AmmoMissileRackS) $launcher = true;
+		}
+		return $launcher && self::hasMagazineOrdnance($ship);
+	}
+
+	//has this hull ordnance for its magazine - a magazine, and an ammunition id enabled for setEnhancementOptionsShip to offer?
+	private static function hasMagazineOrdnance($ship){
+		if (self::magazineCapacity($ship) <= 0 || empty($ship->enhancementOptionsEnabled)) return false;
+		foreach ($ship->enhancementOptionsEnabled as $id){
+			if (Enhancements::isAmmoEnhancement($id)) return true;
+		}
+		return false;
+	}
+
+	/* A ballistic weapon keeping its own count of rounds (`ammunition`, persisted as it fires - a Proximity Laser, a Limpet Bore, the Nexus
+	   launchers, the Custom Ships' light racks): his extra round goes there. Asked of the CLASS's count, not what is left - a hull that has
+	   fired its last round is still offered him and still keeps him at the next load. */
+	private static function keepsOwnCount($system){
+		if (!($system instanceof Weapon) || !$system->ballistic || $system instanceof JumpEngine || $system instanceof AmmoMissileRackS) return false;
+		if (!property_exists($system, 'ammunition')) return false;
+		$defaults = (new ReflectionClass($system))->getDefaultProperties();
+		return isset($defaults['ammunition']) && (int)$defaults['ammunition'] > 0;
+	}
+
+	/* Is a Ballistic Officer BOUGHT on this unit, as its rows say? For what runs without the officer list: the commit's picks on a POST-side
+	   ship. A row the hull would not be offered buys nothing, as in pickPosts. */
+	public static function ballisticAboard($ship){
+		if (!is_object($ship) || empty($ship->enhancementOptions) || !is_array($ship->enhancementOptions)) return false;
+		if (!self::isBought($ship, 'OFF_BALL') || !self::mayCarryOfficers($ship)) return false;
+		return self::isEligible($ship, 'OFF_BALL');
+	}
+
+	//the capacity of the magazine the ammunition offers are made for - the first, as Enhancements::setEnhancementOptionsShip reads it
+	private static function magazineCapacity($ship){
+		foreach ($ship->systems as $system){
+			if ($system instanceof AmmoMagazine) return (int)$system->capacity;
+		}
+		return 0;
+	}
+
+	/* The rounds this hull may take as free picks: every AMMO_ type it is enabled for ($ballisticAmmo - never Basic) that fills ONE slot and
+	   has a price on it - a round costing nothing gains nothing from a swap (the Kor-Lyans' Interceptors) - and none at all without a
+	   magazine to offer them from. id => the round. */
+	private static function paidPickTypes($ship){
+		$types = array();
+		if (self::magazineCapacity($ship) <= 0 || empty($ship->enhancementOptionsEnabled)) return $types;
+		foreach (self::$ballisticAmmo as $id => $class){
+			if (!in_array($id, $ship->enhancementOptionsEnabled, true)) continue;
+			$round = new $class();
+			if ((int)$round->size === 1 && $round->getPrice($ship) > 0) $types[$id] = $round;
+		}
+		return $types;
+	}
+
+	/* N - his free picks, and the racks his price counts (`perPick`): the hull's missile racks and Bomb Racks (user ruling 2026-10-24), never
+	   a Reload Rack or a mine launcher; 0 on a hull with no round to pick (paidPickTypes), where no rack can receive one. From the hull's
+	   systems, so every copy of a hull reads the same. The lobby prices by the static blueprint's copy (blueprintAnnotations). */
+	public static function ballisticPicks($ship){
+		if (empty(self::paidPickTypes($ship))) return 0;
+		$racks = 0;
+		foreach ($ship->systems as $system){
+			if ($system instanceof AmmoMissileRackS && !($system instanceof BallisticMineLauncher)) $racks++;
+		}
+		return $racks;
+	}
+
+	//the picks the rows have used: every round bought of a type that may be picked, at most N
+	private static function ballisticPicksUsed($ship){
+		$types = self::paidPickTypes($ship);
+		$used = 0;
+		foreach ($ship->enhancementOptions as $entry){
+			if (isset($entry[0], $types[$entry[0]])) $used += max(0, (int)$entry[2]);
+		}
+		return min($used, self::ballisticPicks($ship));
+	}
+
+	/* "For missiles, this would be an extra missile slot": every magazine his launchers draw on, each with how many of them - its missile
+	   racks, Bomb Racks and mine launchers (user note and ruling 2026-10-24) - as array(array(magazine, count), ...). */
+	public static function ballisticSlots($ship){
+		$out = array();
+		foreach ($ship->systems as $system){
+			if (!($system instanceof AmmoMissileRackS)) continue;
+			$magazine = $system->getAmmoMagazine();
+			if (!($magazine instanceof AmmoMagazine)) continue;
+			$key = spl_object_id($magazine);
+			if (!isset($out[$key])) $out[$key] = array($magazine, 0);
+			$out[$key][1]++;
+		}
+		return array_values($out);
+	}
+
+	/* BaseShip::onConstructed, right after pickPosts and BEFORE the ammunition rows load: each magazine one slot more a launcher, so a bought
+	   round fills an empty slot before it swaps out one of the hull's standard rounds - which is how the N free picks land in the new slots,
+	   the magazine the tabletop gives. While he is aboard: the slots were filled before the battle, so losing him takes nothing away (user
+	   ruling 2026-10-24). */
+	public static function raiseMagazines($ship){
+		$aboard = false;
+		foreach ($ship->getOfficers() as $entry) if ($entry['id'] === 'OFF_BALL') $aboard = true;
+		if (!$aboard) return;
+		foreach (self::ballisticSlots($ship) as $pair) $pair[0]->addCapacity($pair[1]);
+	}
+
+	/* As the fleet is COMMITTED (BuyingGamePhase, after placePoliticalPicks), on the POST-side ship: the free picks the player left unused are
+	   rolled ONCE - each a round of one of the hull's pickable types still under its offer's limit, added to that type's row, at no cost (user
+	   ruling 2026-10-24, the Political Officer's way) - and every ballistic weapon keeping its own count is given his extra round, which the
+	   commit's turn-0 ammunition row then writes as its starting count: no load adds it again, and losing him takes nothing away. Nothing
+	   while his C&C is destroyed by pre-battle damage (the lobby refunds him then - Stage 15). Never on a saved fleet. Dice::d. */
+	public static function placeBallisticPicks($ship, $cleanPreBattle = null){
+		if (!self::ballisticAboard($ship)) return;
+		$destroyed = Enhancements::sysEnhDestroyedSystemIds($ship, $cleanPreBattle);
+		$cnc = self::findPost($ship, 'cnc');
+		if ($cnc === null || isset($destroyed[(int)$cnc->id])) return;
+
+		$missing = self::ballisticPicks($ship) - self::ballisticPicksUsed($ship);
+		if ($missing > 0){
+			$class = get_class($ship);
+			$blueprint = new $class(-1, -1, 'offers', -1);
+			/* the server's own offers - labels, limits and prices - made for the magazine HIS slots enlarge: "the per-type limit is simply derived
+			   from the magazine total" (user ruling 2026-10-24, after play test 4512), so a Solyrn's Heavy may reach 290 and its Stealth 29 */
+			foreach (self::ballisticSlots($blueprint) as $pair) $pair[0]->addCapacity($pair[1]);
+			Enhancements::setEnhancementOptions($blueprint);
+			$offers = array();
+			foreach ($blueprint->enhancementOptions as $offer) $offers[$offer[0]] = $offer;
+			$types = array_intersect_key(self::paidPickTypes($ship), $offers);
+			for (; $missing > 0; $missing--){
+				$open = array();
+				foreach ($types as $id => $round) if (self::boughtCount($ship, $id) < (int)floor($offers[$id][3])) $open[] = $id;
+				if (!$open) break;
+				self::addAmmoRound($ship, $offers[$open[Dice::d(count($open)) - 1]]);
+			}
+		}
+		foreach ($ship->systems as $system){
+			if (self::keepsOwnCount($system)) $system->ammunition += self::BALLISTIC_EXTRA_ROUND;
+		}
+	}
+
+	//one more round on the unit's row for this offer - or the offer appended with a count of 1, on a list without it
+	private static function addAmmoRound($ship, array $offer){
+		foreach ($ship->enhancementOptions as $i => $entry){
+			if (isset($entry[0]) && $entry[0] === $offer[0]){
+				$ship->enhancementOptions[$i][2] = max(0, (int)$entry[2]) + 1;
+				return;
+			}
+		}
+		$offer[2] = 1;
+		$ship->enhancementOptions[] = $offer;
+	}
+
+	/* ⭐ HIS +5 - "All ballistic weapons receive +5 to their distance range (but not their launch range). This does not apply to proximity
+	   weapons": what a ballistic weapon of his ship adds to how far its target may have gone from the launch hex (Weapon::isInDistanceRange,
+	   and a Homing Missile's fuel - MultiBombRack and MultiDefenseLauncher keep their own test, but no hull mounts either) while he
+	   serves; never a Proximity Laser, the jump drive or the ram. Behind
+	   $officersPresent. ⚠️ MIRROR PAIR with officers.distanceRangeBonus (JS), which reads the `distanceRangeBonus` addForJson publishes. */
+	public static function distanceRangeBonus($weapon){
+		if (!TacGamedata::$officersPresent || !($weapon instanceof Weapon) || !$weapon->ballistic) return 0;
+		if ($weapon instanceof ProximityLaserNew || $weapon instanceof JumpEngine || $weapon instanceof RammingAttack) return 0;
+		$ship = $weapon->getUnit();
+		if (!$ship || !self::isActive($ship, 'OFF_BALL')) return 0;
+		return self::BALLISTIC_RANGE;
+	}
+
+	/* The static blueprint's share (ShipCompactor::compactShipObject), on a hull offered him and no other: his free picks (`ballisticPicks`)
+	   and the magazine slots he adds (`ballisticSlots`) - the lobby prices the free rounds and lets the buy dialog fill the slots by them
+	   (officers.ballisticFreeRounds, confirm.getMaxAmmoFit). */
+	public static function blueprintAnnotations($ship){
+		$offered = false;
+		foreach ((array)$ship->enhancementOptions as $offer) if (isset($offer[0]) && $offer[0] === 'OFF_BALL') $offered = true;
+		if (!$offered) return array();
+		$slots = 0;
+		foreach (self::ballisticSlots($ship) as $pair) $slots += $pair[1];
+		return array('ballisticPicks' => self::ballisticPicks($ship), 'ballisticSlots' => $slots);
+	}
+
 	/* ------------------------------------------------------------------ payload */
 
 	/* BaseShip::stripForJson, after the enhancement fields.
@@ -4066,6 +4281,8 @@ class Officers{
 			$strippedShip->elintRangeBonus = self::ELINT_RANGE_PCT;
 			$strippedShip->blanketBallistic = self::ELINT_BLANKET_BALLISTIC;
 		}
+		//Stage 29: an Expert Ballistic Officer's longer distance range, to every viewer - a weapon's Range line and its hit-chance preview
+		if (self::isActive($ship, 'OFF_BALL')) $strippedShip->distanceRangeBonus = self::BALLISTIC_RANGE;
 		if (!TacGamedata::$currentGameFinished && !$ship->isRevealedToCurrentViewer()) return;
 		$out = array();
 		$saves = $ship->getOfficerSaves();

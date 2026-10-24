@@ -319,7 +319,7 @@ Medium-sized job (§3.4).
 | **Expert Software Engineer** | Bonus fire-control points spendable in the Firing phase need a new allocation window (`HyachComputer` only allocates in Initial Orders, [baseSystems.php:12862](source/server/model/systems/baseSystems.php#L12862)). Also a "first point of damage ignored" rule in the damage path, a submarine detection range, and a self-contradictory specialist clause (§6, Software Engineer). *Built in Stage 26 (§9.33): the user's rules text settled the specialist clause and made the "submarine" a stealth unit; the Firing-phase window is the Computer's own menu reopened in the Firing phase, written as one note through `saveFirePhaseDeclaration` and judged on the loaded ship - built so that the rebuilt Computer Specialist rides it too (user ruling); the damage rule is one line beside the Scavenger's save.* | — |
 | **Expert Ion Technician** | "3 thrust → 1d10+1 on one ion weapon" is a per-turn spend with UI. *Built in Stage 17 (§9.23) with no new UI or storage: the user's note pointed at the Hypergraviton Blaster, whose boost is the generic one priced in thrust - so the Laser Technician's payload pattern with `thrustBoosted` gave the buttons, the thrust balance and the commit check for free; what was new is the discharge of a boosted gun that does not fire, at the turn change.* | +1 per die and +1 flat on Ion-class weapons; +4 on C&C crits; the Rad Cannon's flat 12 and forced crits are Medium |
 | **Expert Surge Officer** | Six unrelated hooks: EM damage, combined Surge Cannon shots, capacitor power by ship size, EM-hardening −3, a d6 to resist deactivation, Spark Field −1. *Built in Stage 16 (§9.22): the rules text made it reactor power by ship size; his two hardening clauses needed FV's EM hardening rebuilt to the tabletop rules first (WeaponEM), the bigger half of the stage.* | +1 damage on Electromagnetic-class weapons |
-| **Expert Ballistic Officer** | "+1 magazine round per launcher" moves the lobby's ammo limits, which are derived from magazine capacity at offer time. Free missile swaps are lobby ammo pricing | +5 launch range (`range` **and** `rangeArray` — the same mode-switch trap — and sent to the client) |
+| **Expert Ballistic Officer** | "+1 magazine round per launcher" moves the lobby's ammo limits, which are derived from magazine capacity at offer time. Free missile swaps are lobby ammo pricing. *Built in Stage 29 (§9.36): the rules text makes it DISTANCE range, never launch range - one read-time term where FV tests it; the extra slots are the magazine's capacity raised before the ammo rows load, the free swaps a price rule (the N dearest rounds bought) with the rest rolled at the commit, as the Political Officer's picks; a weapon keeping its own count gets its extra round written once, at the commit.* | +5 launch range (`range` **and** `rangeArray` — the same mode-switch trap — and sent to the client) |
 | **Expert Anticipator** | A free **turn** for a ship in the Firing phase is a new phase-3 movement for ships (today only flights move there, as combat pivots), with masking, validation and animation. *Built in Stage 23 (§9.30): the turn is an ordinary turn row marked `anticipate`, kept by the server's Firing-phase filter for his ship only and masked with the combat pivots; its thrust is paid on the Movement phase's own panel, wired into the Firing phase. The extra die is a `Dice` flag after all, and the one weapon that rolls its damage dice one call at a time - the Pentagon Array, his rules' own example - hands them to `Dice::keepBest`.* | Rolling initiative twice is Easy. Re-rolling the lowest die is Medium: a `Dice`-level flag, which the replay harness's own `Dice` stub must mirror ([[project_replay_harness]]) |
 | **Expert Gunner, once-per-battle abilities** | A Piercing mode injected into a weapon that lacks one, and +15 % on one called shot, each once per battle and not combinable: firing-mode injection, a persisted "used", and UI. *Built in Stage 10 (§9.16), all three automatic (user simplifications), with moving officers.* | — |
 | **Expert Electrician** | Per turn: deactivate the flight's weapons, convert their max damage ÷ flight size into thrust or OB, then a d6 to see whether they stay offline | — |
@@ -389,7 +389,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Warrior *(added 2026-10-23, §9.35)* | `OFF_WARR` | C&C | 1, Drazi only |
 | Expert Ion Technician | `OFF_ION` | Engine | 1 |
 | Expert Surge Officer | `OFF_SURG` | Mag-Grav Reactor | 1 |
-| Expert Ballistic Officer | `OFF_BALL` | C&C | 1 |
+| Expert Ballistic Officer *(Stage 29, §9.36)* | `OFF_BALL` | C&C | 1, hulls with counted ballistic ammunition |
 | Expert Anticipator *(Stage 23, §9.30)* | `OFF_ANTI` | C&C | 1 |
 | Matter Weapons Expert, C&C | `OFF_MWE` | C&C | 1 |
 | Matter Weapons Expert, weapon | `OFF_MWEW` | chosen weapon | 2 |
@@ -711,7 +711,8 @@ committed.
 | **26** | Expert Software Engineer, one of the original 25 (Hard), with the Hyach Computer Specialist rebuilt to its own rules. **BUILT 2026-10-22** (§9.33) | Offered on the 13 Hyach hulls with a Computer (not the OSAT), 15%, Hyach only, in the Computer; its BFCP +1, never taken by damage (a base's 26 boxes leave him his point); one point left free in Initial Orders placed in the Firing phase - added, nothing moved, the cap of two kept - through the Computer's own menu, written as one note at the fire commit, judged on the loaded ship, used by that turn's shots, hidden from opponents until firing resolves, never carried into the next Initial Orders; no unassigned-BFCP warning for that one point; the first point of every hit on the Computer ignored, armour-ignoring weapons included, through the real damage path; a stealth ship (the Alichi Kav and Tal) detected as if 5 hexes further away, a flight's detection range halved and rounded up, through the real detection sweep; a Defence, Sensor, Targeting or Weapon Specialist used once usable again from the next turn, once per scenario, its effect applied again, shown "(again)" in the Specialists menu, no Specialist slot spent. The Computer Specialist: in the Firing phase only, +1 BFCP (it was +2 and +1 a category), every point reshuffled within the cap, cancelled back to Initial Orders' allocation |
 | **27** | Expert Troop Leader (Gaim), added by the user, with Breaching Experts one to a pod. **BUILT 2026-10-23** (§9.34) | See §9.34 |
 | **28** | Expert Warrior (Drazi), added by the user. **BUILT 2026-10-23** (§9.35) | Offered on the 51 Drazi hulls (both factions) with a C&C, 50%; +1 to hit and +1 per die on every weapon but the ram - not on a Gunner's, whose own replace them; +10 initiative, and +10 for every flight launched from his ship's bays from the turn after, while he serves; -1 on his ship's critical rolls (his kill roll included), +1 on the critical roll of an enemy system his ship damaged that turn, once, not a craft's dropout; a Charge declared before the first step at a unit the player clicks, kept by the server once, judged at fire (beaten on initiative, 4+ hexes nearer the target by the end of the move, the route free - third round, §9.35): +2 to hit it; one snap turn anywhere in the move, 1 thrust less (half on an agile ship); the precision strike - the first called shot (his lowest-numbered weapon's that turn) without its penalty, doubled at a base, a Gunner's +3 neither used nor spent; Supreme Anticipation from his C&C's blue box in the Firing phase, +50 next turn while he serves, -50 the turn after regardless; never two of the three in one turn |
-| **29+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **29** | Expert Ballistic Officer, one of the original 25 (Hard). **BUILT 2026-10-24** (§9.36) | See §9.36 |
+| **30+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -756,7 +757,7 @@ committed.
 | Expert ELINT Officer | *Added 2026-10-20 with his rules text and the user's list of races (§9.27).* Two WotCR factions carry ELINT hulls the list does not name (Abbai Matriarchate (WotCR), Drazi Freehold (WotCR)): which get him? "The range of all ELINT functions" - which ranges? On a hull with several ELINT arrays, the -2 on every array or his own? His blanket's third: keep FV's fractions or round down? **RULED 2026-10-20 (all as recommended):** the **Abbai WotCR at the Abbai 15%**, the Drazi WotCR left out (as the Centauri WotCR); the **ranged functions** - SOEW, SDEW, Blanket, Disruption, Jamming - not Detect Stealth or the stealth detection range; the -2 on **every** array; **fractions kept** (BDEW 10 gives 3.33 against a ballistic). |
 | Expert Tailgunner | *Added 2026-10-21 with his rules text and the user's note (§9.28):* FV applies no tail gun penalty (FV_factions.txt: "In tabletop, this gun has -2 penalty when fired together with main gun. In FV it does not"), so build it first - a tail gun firing alone is free, fired in the same turn as the forward guns -10% - flagging the few fighters with a tail gun rather than testing every fighter. Which tail guns take the penalty? Which tail-gun flights may buy him? A penalised tail gun fired alone under him: +5%, or nothing? **RULED 2026-10-21:** the penalty on the Tiqincc, the Tiqus and the custom tail-gun fighters **"unless $this->hasNavigator = true"** (so never the Badger or the Rogolon Vostor); **all 15** tail-gun flights may buy him; **no bonus** for a penalised tail gun fired alone. **Re-ruled after the first build:** only the craft's other **direct-fire** weapons fired in the Firing Phase count - never a ballistic launch from Initial Orders. |
 | Expert Turret Officer | *Added 2026-10-21 with his rules text and the user's notes (§9.29):* FV has no turret system, so he is a system enhancement on a turret weapon - FV already marks turret weapons (the jammable mounts) and their turret mates (the linked firing group) - aiding every weapon on that turret, one officer to a turret; "sheltered" is automatic when no weapon on the turret fires, instead of a declaration UI. Does an interception count as the turret firing? Does a Gunner's +1 on that turret combine with his? Is a turret weapon linked to no other a turret of its own? May he move? **RULED 2026-10-21:** **offensive fire only** breaks the shelter (a turret may intercept and stay sheltered); **no combining** - the Gunner's +1 replaces his on the Gunner's gun, the -1, the -2 and the shelter still apply; **each unlinked turret weapon is its own turret** (Xorr 2, Xonn 3, Tyllz 6); **movable**, as the other placed officers. |
-| Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? |
+| Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? **Rules text and notes 2026-10-24 (§9.36)** settle all three: "+5 to their distance range (but not their launch range) ... not ... proximity weapons"; "one extra round of ammo ... for missiles ... an extra missile slot" - the user's note: the ship's magazine total + 1 per missile rack, and a weapon with its own count (Proximity Laser, Limpet Bore Torpedo) +1; the swaps free, his price "5% of the base cost of the ship, plus 1% for each missile rack that received a free missile upgrade", doubled outside the Kor-Lyans - the user's note: the missiles bought free up to the racks, the dearest, the rest randomly allocated as the Political Officer's. Asked: which hulls are offered him? Do bomb racks and mine launchers count as racks? What does the ship keep when he is lost? Which rounds count as free picks, and are the unpicked ones filled? **RULED 2026-10-24:** **hulls with counted ballistic ammunition only** (235); **bomb racks are missile racks, a mine launcher adds one magazine slot only**; **the ammunition stays, the range goes**; **paid single-slot rounds only, the rest filled at the commit, his price fixed** at 5% + 1% per rack. **After play test 4512:** never a hull whose magazine has no ordnance to buy (235 -> 226); each type may be bought up to his enlarged magazine. |
 | Expert Warrior | *Added 2026-10-23 with his rules text and the user's notes (§9.35):* the Charge a new Movement-phase icon in the Contraction / Half-Phase spot (the user's `chargeIcon.png`, recoloured), its conditions checked by the server; the precision strike "just on the first Called Shot of the game"; Supreme Anticipation the Political Officer's speech method, in the blue menu, with its follow-up penalty; the initiative numbers already FV's. Asked: "Drazi only" - which factions? "Any fighters or shuttles it launches" - which flights? How does a Charge pick its target, and when is it spent? On an Expert Gunner's weapon, do his +1 and +1 add to the Gunner's? **RULED 2026-10-23:** **both Drazi factions** (Freehold and its WotCR); **only flights launched from his ship in battle**; **the player picks the unit** (spending left to the default - a declared charge is spent); **the Gunner's replace his**. |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? **Rules text and note 2026-10-21 (§9.30)** settle both: a single turn "if desired", with "Turn Delay complete and enough thrust ... left unused to complete a turn maneuver", "not a roll, pivot, snap turn, or other maneuver" - the user's note: "similar to a fighter's combat pivot except that there are no associated firing penalties and thrust must still be spent on ship thrusters as normal"; 10% for the Torata, 50% more for everyone else (15%). Asked: does the turn take effect before fire resolves, as a combat pivot does, or after all fire? On an Expert Gunner's weapon, the extra die too, or only the Gunner's +1 per die ("does not combine")? **RULED 2026-10-21:** **like a combat pivot** - this turn's fire, his and at him, meets the new facing; on a Gunner's weapon **both apply**. |
 | Political Officer | *Added 2026-10-21 with his rules text and the user's notes (§9.32):* the armed shuttle is Elite Crew's own method; the free expert is the dearest of the four bought, one at random with none; the armour is five free Hardened Armour on different systems, random for any left unplaced; the speech an Activate menu on the C&C in the Firing phase ("Speech!" / "Cancel speech"), a fire order in the combat log, +30 the following turn. Asked: "Centauri Only" - which Centauri factions? When are the unmade picks made: by the server at battle start, or in the lobby at purchase? With Elite Crew too, one armed shuttle or two? The +30 if he is killed or disabled in the turn he speaks? **RULED 2026-10-21:** **both Centauri factions** (the Republic and its WotCR); **the server, at battle start** (built as the fleet's commit: rolled once and stored); **they add up**; **no +30 unless he still serves** on the turn it lands. |
@@ -4413,3 +4414,169 @@ initiative' are the only rules we need to follow." This REPLACES the run's shape
   (the "(repeat)" label; new: the charge, two hexes, a turn - the snap turn at 4 thrust, marked, then none more). Legacy bundles rebuilt (the watcher
   missed `movement.js`), `-Sync` done. Mutation **5 / 5** (no step-before refusal, `>` for `>=`, the target's start position, closer steps counted
   instead of net, the old snap gate back); runner `mutate28c.js`, session scratchpad only.
+
+### 9.36 Stage 29: Expert Ballistic Officer (2026-10-24)
+
+**Rules text (user, 2026-10-24) - one of the original 25.** "Expert Ballistic Officer: This expert is not only skilled with the deployment of
+ballistic weapons, but also in their logistics and operations as well. He provides all of the following benefits to his ship: All ballistic weapons
+receive +5 to their distance range (but not their launch range). This does not apply to proximity weapons. All ballistic devices with limited
+ammunition receive one extra round of ammo. For missiles, this would be an extra missile slot, for example. Devices that are self-arming, such as the
+ballistic torpedo, gain no benefit. If the ammunition has a cost, it must be paid (it is not free) or no benefit is gained. All missile racks (but not
+reload racks) can change one of their single-space (1 slot, e.g. not ammo like Starburst missiles which take 2 slots) missiles to any other legal type
+at no cost. This can only be done before the scenario. Such missiles cannot be transferred between ships and will only function during that scenario
+only. Location: C&C. Cost: 5% of the base cost of the ship, plus 1% for each missile rack that received a free missile upgrade. For example, on a
+Solyrn, the cost would be 15%. Availability: Races other than the Kor-Lyans pay double the cost for this expert." The user's notes: "The free missile
+choice can be that when an Expert Ballistics Officer is selected any missiles the player buys are free up to the number of missile racks on the ship.
+Where the players buy more missiles than racks on the ship, the most expensive missile ammos are free. If the Expert Ballistics Officer is removed after
+ammo is made free, we revert to normal prices. If the player doesn't pick enough ammo types we can randomly allocate some. Similar to an Expert
+Political Officer. Because Missile launchers have a shared ammo pool in the Ship's Magazine, we should just adjust the total missiles allowed for the
+ship by the number of missile racks on ship. Weapons with Ammo pools like Proximity Laser and Limpet Bore Torpedo should have their respective ammo
+counts increased by 1."
+
+**What FV had.**
+- **Distance range** is tested in ONE place per class: `Weapon::isInDistanceRange` - a ballistic shot misses when the target ended its move more than
+  `max(range, distanceRange)` from the launch hex, so a weapon with no distance range of its own (every torpedo) has its launch range as its distance
+  range. Two classes override it (`MultiBombRack`, `MultiDefenseLauncher`, both their own `distanceRange`); a Homing Missile's fuel budget
+  (`AmmoMissileHM::getFuelBudget`) is the same figure, captured at launch. The client's only use is the hit-chance preview's "Out of range"
+  (`weaponManager.calculateHitChange`, `max(range, distanceRange)`) and the Range line shipSystem.js builds ("20/60"). The one proximity weapon is the
+  Kor-Lyan **Proximity Laser** (`ProximityLaserNew`).
+- **Ship missiles** live in ONE shared `AmmoMagazine` per hull (capacity = 20 a rack + 80 a Reload Rack: the Solyrn's 10 racks and 1 Reload Rack hold
+  280 - 200 Basic, 80 Interceptor). Other types are ship-level `AMMO_*` rows (`MINE_*` for mine launchers), a per-unit price that differs by faction
+  (Interceptors are free to the Kor-Lyans, Starburst 20 to them); each row's limit is the capacity over the round's size (Stealth and Homing a tenth).
+  At every load the rows run in `setEnhancementsShip` and `addAmmoEntry` adds each, swapping out Basic (and, for Antifighter / Chaff, Interceptor)
+  rounds once the magazine is full. The buy dialog caps the rows' total at the capacity (`confirm.getMaxAmmoFit`, Starburst and Multiwarhead 2 slots).
+  The magazine's capacity and round total reach every viewer, its types the owner's team.
+- **Rack kinds** (magazine-fed `AmmoMissileRackS` subclasses on officer-eligible ship hulls): Class-S/SO/L/LH/D/F/B/O/R/A racks (785), Bomb Racks (18),
+  and three mine launchers (40: Ballistic, Abbai, Chouka - `BallisticMineLauncher`). The old `MissileLauncher` racks (Class-S/SO and others, 27 hulls
+  have nothing else) track no ammunition in FV and fire only Basic missiles.
+- **Weapons that keep their own count** (`ammunition`): Proximity Lasers (10), Limpet Bore Torpedoes (5; the base one 10), the Nexus Kinetic Box
+  Launchers, Laser Missiles, Antifighter Launcher and Dart / Streak Interceptors, and the Custom Ships' light racks. Each persists its count in
+  `tac_ammo` when it fires (`setAmmo` on every load), and `BuyingGamePhase` writes every one's starting count as a turn-0 row when the fleet is committed.
+- **Fighters** are not his: a ship officer, and a flight's missiles ride its own magazine. FV has no ship-to-ship ammunition transfer.
+
+**Rulings (user, 2026-10-24, asked before building):**
+1. **Offered only on hulls with counted ballistic ammunition** - a magazine-fed rack or mine launcher, a Proximity Laser, a Limpet Bore or another
+   ballistic weapon keeping its own count: **235 hulls of 31 factions** (not every hull with a ballistic weapon, 497). *226 after play test 4512 -
+   see the follow-ups at the end of this section.*
+2. **Bomb racks are missile racks** (an extra slot, a free pick, +1% on his price); **a mine launcher adds one magazine slot only** (an extra mine, paid
+   as usual), no free pick and nothing on his price.
+3. **When he is disabled or killed, the ammunition stays and the range goes**: the extra slots, rounds and free missiles were loaded before the
+   battle; the +5 stops from the next turn, as every officer's effect.
+4. **Free picks are paid single-slot rounds only, the rest filled at the commit, his price fixed**: never Basic, never a round that costs nothing on
+   that hull (the Kor-Lyans' Interceptors), never Starburst or Multiwarhead; the dearest N bought are free; picks left unused are rolled once as the
+   fleet is committed (the Political Officer's way), within each type's limit; his price is always 5% + 1% per rack, doubled outside the Kor-Lyans.
+
+**Built with defaults, stated here (ask before changing):**
+- **N (his free picks and his price's racks)** = the hull's missile racks and Bomb Racks - but 0 on a hull offering no paid single-slot round (9 of the
+  175 rack hulls: the Hermes fast variants, the Hyperion Aegis, three Chouka hulls, the Dag'Kur, the Shlassan Triumvirate), where no rack can receive
+  one: 5% there. Price 5% + N%, the Kor-Lyans ('Kor-Lyan Kingdoms'); everyone else twice that; rounded up as every ship officer (Solyrn 98 of 650, an
+  EA Orion 1,050 of 3,500).
+- **+5 distance range** on every ballistic weapon of his ship but a Proximity Laser (never the Jump Engine or the ram): `max(launch, distance) + 5` - so a
+  torpedo 50 becomes 50/55 - and a Homing Missile's fuel; a base's stabilised rack (launch = distance) only its distance; the launch range never.
+  While he serves. Shown to every viewer (the Range line), as every displayed stat.
+- **Extra slots**: +1 capacity per missile rack, Bomb Rack and mine launcher, on the magazine that feeds it (Solyrn 280 -> 290). Bought rounds fill the
+  empty slots before they swap anything out, so N free picks land in the new slots - the same magazine the tabletop gives (an extra slot holding a
+  standard round, and N standard rounds swapped free). The slots hold what is bought - nothing is added to the hull's standard load.
+- **Extra round**: every ballistic weapon of his ship keeping its own count: +1, written once as its starting count at the commit (FV prices none of
+  them). Nothing on the old untracked racks.
+- **The dearest N**: every round bought on a paid single-slot row is priced at its own level (price + level x step - the Light Missile row steps); the
+  N dearest are free, a tie to the lower id (the dialog and the fleet list hold their rows in different orders; a tie only moves which row shows the
+  saving, never the total). The commit's fill picks each missing round at random among the hull's paid single-slot types still under their offer's
+  limit, as ordinary rows, at no cost.
+- "Cannot be transferred between ships": FV has no such transfer - nothing to stop.
+
+**Design.**
+- `Officers`: registry `OFF_BALL` (post `cnc`, pct 10, `perPick` 20 - his pct grows by a fifth for each free pick, so 10 -> 30 with 10 racks and the
+  Kor-Lyans' 5 -> 15; `needs` hasCountedBallisticAmmo, no `apply`) after the Warrior, before the placed officers; `$factionRules` pct 'Kor-Lyan Kingdoms'
+  5; constants BALLISTIC_RANGE 5, BALLISTIC_EXTRA_ROUND 1; `$ballisticAmmo` (AMMO_ id => round class). `ballisticAboard` (rows), `ballisticPicks` (N),
+  `ballisticSlots`, `paidPickTypes`, `ballisticPicksUsed`, `raiseMagazines` (after pickPosts, before the rows), `placeBallisticPicks` (the commit: the
+  fill and the extra rounds), ⭐ `distanceRangeBonus` (⚠️ MIRROR PAIR with officers.distanceRangeBonus), `blueprintAnnotations` (the lobby's
+  `ballisticPicks` / `ballisticSlots`, on the hulls offered him only).
+- `AmmoMagazine::addCapacity` (protected `$capacityAdded`, idempotent); `AmmoMissileRackS::getAmmoMagazine` public. Hooks: `BaseShip::onConstructed`,
+  `Weapon::isInDistanceRange`, `AmmoMissileHM::getFuelBudget`, `BuyingGamePhase` (after placePoliticalPicks), `ShipCompactor::compactShipObject`,
+  `Officers::addForJson` (`distanceRangeBonus` while he serves, to every viewer). `MultiBombRack` and `MultiDefenseLauncher` keep their own distance test
+  WITHOUT the +5: no hull mounts either (measured), so the edit was made and then withdrawn - add the term there if a hull ever gets one.
+- Client (`officers.js`): the registry row; `distanceRangeBonus` (weaponManager's "Out of range", the Range line); ⭐ `ballisticFreeRounds` (⚠️ MIRROR
+  of the server's pick test and the dearest-N rule), `ballisticDiscount`; `shipRowCost` and `confirm.enhRowCost` take the free rounds off;
+  `confirm.getMaxAmmoFit` adds his slots; `setShipLevelRow` re-prices the ammunition when he comes or goes; `adjustDataDisplay` - the Range line, and in
+  the lobby the magazine's total and a counted weapon's Ammunition line.
+- Docs: an Expert Ballistic Officer card (Ship Officers, alphabetically after the Anticipator).
+
+**Files.** Server: `Officers.php`, `ShipClasses.php` (onConstructed), `systems/baseSystems.php` (AmmoMagazine::addCapacity, AmmoMissileHM::getFuelBudget),
+`weapons/missile.php` (getAmmoMagazine public), `weapons/weapon.php` (isInDistanceRange), `Phase/BuyingGamePhase.php`, `lib/ShipCompactor.php`. Client:
+`officers.js`, `UI/confirm.js`, `weaponManager.js`. Docs `ammo-options.html`. Harnesses: `officersHarness.php`, `officersClientHarness.js`, the
+enhancements fingerprint. Statics (`fvbuild -Statics`) and both legacy bundles (`scripts/bundle-legacy.js` - no watcher was running) rebuilt; no React
+source, no new class, no schema change.
+
+**Measured.** 235 offers in 31 factions (Kor-Lyan 22, Orieni 24, EA 15 + 13 Early + 1 defences, ...); 180 of them have exactly one magazine, 55 none
+(counted weapons only) - no offered hull has two, so the buy dialog's one-magazine cap holds. Prices: Solyrn 98 (15%), Kolosk 111 (13%), Taloki 875
+(25%), Trylkan 48 (9%: 4 racks, its 4 mine launchers slots only), Fenja 15 (5%, Limpet Bores only), EA Orion 1,050 (30%), Hyperion Aegis 80 (10%: two
+racks but no paid single-slot missile, so no pick), the Abbai WotCR Motenai 63 (mine launchers only). Statics +21.7 KB raw (235 offers + 235
+`ballisticPicks` / `ballisticSlots` pairs). Fingerprint: exactly two new lines (the two harness hulls offered him, AthraskalaAM 156 and one at 75),
+proved additions-only; old copy `fingerprint.before-officers-stage29.txt`.
+
+**Verified.**
+- `officersHarness.php` **2094 / 0 with the database** (2 registry-order checks moved: the Troop Leader's and the Warrior's): the registry place; offers
+  and prices on nine hulls (the rules' Solyrn, the doubled EA Orion, the Taloki, the Kolosk's Proximity Lasers adding nothing, the Trylkan's mine
+  launchers slots only, the Koloskova, the Limpet-only Fenja, the pick-less Hyperion Aegis, the Abbai mine-launcher hull) with rowPrice and the blueprint
+  fields; none on old untracked racks (KobolAdamant), Ion Torpedoes (TraqintorNew), a Grome railgun magazine or an Omega; a sweep of every hull - offered
+  on exactly the 235, and the regenerated statics carrying the fields on exactly those; the REAL `ShipCompactor::compactShipObject`; the C&C post; a
+  doctored row. The magazine through the real construction: 290 / 280, both holding 280; bought rounds into his slots first (10 Heavy: no Basic swapped;
+  15: 5 swapped; 12 Antifighter: 2 Interceptors, the Antifighter rule), without him swapped as ever; addCapacity idempotent; the slots kept when he is
+  out of action; the Trylkan +8; a doctored Grome row nothing; an enemy sent 290 and "280/290", not the types. The +5 through the real
+  `isInDistanceRange`: Class-L 75 (76 out) with him, 70 without; Class-D 65; the Limpet 35; the Proximity Laser nothing while the same ship's rack gets
+  it; a direct-fire weapon nothing; none from the turn after his C&C fell, still on the turn it falls; the gate; a Homing Missile's fuel +5;
+  `distanceRangeBonus` published to an enemy, none from a ship without him or once he is out. The commit: unpicked picks rolled onto the rows (forced
+  dice, each type named), none past N, never counting Interceptors at 0, Starburst, Multiwarhead or a doctored Basic row; a type at its limit passed
+  over (a 30-round magazine's Stealth and Homing 3); a missing row appended as the server's offer; nothing without him or with his C&C destroyed
+  before battle; the Limpets 5 -> 6 and the Proximity Lasers 10 -> 11, the Grappling Claws and racks untouched; the count never re-added at a load,
+  and a hull fired empty still keeping him.
+- `officersClientHarness.js` **862 / 0** (the two registry checks moved; the Stage 28 "Anticipation!" and Stage 26 "(repeat)" checks brought up to the
+  labels the user committed - they had gone stale, not broken): the registry row; every static - offers, blueprint fields and `passesNeeds`
+  'countedBallistic' agree on all 235; `isBallisticPick`; the dearest-N table (a stepped Light Missile row, a tie to the lower id, fewer paid rounds
+  than picks); the fleet list's lines; `setShipLevelRow` both ways; a C&C destroyed before battle refunding him and re-pricing the missiles; the buy
+  dialog's spinners through the REAL `confirm.enhRowCost` and its room through the REAL `confirm.getMaxAmmoFit` (290 / 280); `distanceRangeBonus` in
+  the lobby and in game; the Range, Ammunition and magazine lines; the REAL `weaponManager.calculateHitChange`'s "Out of range" (75 in, 76 out).
+- `enhancementsHarness` **293 / 0** (re-recorded); `enhancementsDifferential.js` **876 / 0** (no case added: he moves no lobby stat it compares).
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0** (no corpus game has him). `-Sync` done.
+- **Mutation-tested: 52 breaks (30 server, 22 client), all caught**, files byte-identical afterwards (runner `mutate29.js`, session scratchpad only;
+  ~32 s a server mutant, ~4 s a client one). The first pass missed one: dropping the ballistic test from `keepsOwnCount` is equivalent on every hull
+  today (a Grappling Claw's CLASS count is 0, its rounds come from its constructor), now pinned with a probe class whose class count is 4.
+
+**Observations, not changed:**
+1. Not play-tested. Worth a test: a Kor-Lyan Solyrn with him - the buy dialog asks 98 for him, 3 Heavy bought read "free", 290 rounds may be bought;
+   its magazine tooltip "280/290"; after the commit, in game, the magazine 290 with the 3 Heavy and 7 more at random, every rack's Range "x/y+5"; a
+   Fenja with him - each Limpet Bore "Ammunition: 6" in game.
+2. Not covered by a harness: `BuyingGamePhase`'s one-line call to `placeBallisticPicks` (the method is; the phase needs a whole game in the database).
+3. ~~Each AMMO row's own limit is the hull's offer~~ - re-ruled after play test 4512, below.
+4. Unticking him in the buy dialog does not take back rounds bought into his slots; the server's magazine caps them at load, as it always has.
+
+**Follow-ups after play test 4512 (user, 2026-10-24).** The test game read back correctly through the real load: the Solyrn's magazine 290 (200
+Basic, 80 Interceptor, its 10 bought rounds in his slots), the Apollo's 248 (240 + 8), every rack and both of the Fenja's Limpet Bores +5 and published
+to the opponent (the officer list and the magazine's types only to their own side), the Limpets' turn-0 rows 6 and the Grappling Claws' 4, the stored
+costs 98 / 15 / 234 (his price only - every bought missile within the picks free). Then two rulings and one acceptance:
+1. **"Don't offer Ballistic Officer to hulls without Ordnance to purchase"** - read as: a magazine-fed hull is offered him only when its magazine has
+   ordnance to buy (`hasMagazineOrdnance`: a magazine, and an AMMO_ / MINE_ / SHELL_ id enabled - `Enhancements::isAmmoEnhancement`, now public),
+   since the slots could hold nothing otherwise. That drops exactly the 9 rack hulls with no ordnance at all (the Hyperion Aegis, the three fast
+   Hermes, three Chouka hulls, the Dag'Kur, the Shlassan Triumvirate): **226 offers**. The mine-layers (Abbai, Chouka) keep him - they have mines
+   to buy - and so do the 55 hulls whose counted weapons keep their own rounds (Fenja, the Nexus launchers...), which have no magazine at all: their
+   benefit is the extra round, which needs no purchase. **CONFIRMED by the user:** ships like the Fenja, whose weapons keep their own ammunition,
+   are offered him.
+   Client mirror `officers.hasMagazineOrdnance` (the blueprint's ordnance offers), in `passesNeeds` 'countedBallistic'.
+2. **"We should be able to purchase up to 290. The per-type limit is simply derived from the magazine total"** - each ordnance row's limit is the
+   offer's own rule on his enlarged magazine: floor((capacity + slots) / size), a tenth for Stealth and Homing (a Solyrn's Heavy 290, Stealth 29,
+   Starburst 145). Server: the commit's fill reads its limits off offers made on a blueprint whose magazine has his slots. Client:
+   `officers.ballisticRowLimit` (⚠️ MIRROR PAIR with setEnhancementOptionsShip's ammunition limits), asked by `confirm.enhRowMax` for an AMMO_ / MINE_
+   row while he is ticked in the dialog (the + button, the typed box and the wheel all ask enhRowMax). The static offers keep the hull's own limits.
+3. The tie rule (two equal-priced missiles: the free one goes to the lower id) stands as built.
+4. (user request, same day) The buy dialog's ordnance rows' note - "up to 280, 4pts each" - follows the row's limit: `confirm.paintOrdnanceNote`,
+   from every `getTotalCost`, writes `enhancementPriceNote` again with `enhRowMax` (the arguments it was first written from kept on the spinner as
+   `noteArgs`), so ticking him reads "up to 290", unticking "up to 280". Client 865 / 0.
+- Verified: officersHarness **2101 / 0 with the database** (new: the no-ordnance hulls refused, two probe hulls - racks with only a non-ordnance option,
+  and a zero-capacity magazine with its ammunition enabled - the 226 sweep, the statics, the enlarged limits, the fill stopping Stealth and Homing at 4
+  of a 40-slot magazine, an appended row's 290; it writes `ballisticLimitsFixture.json`); officersClientHarness **864 / 0** (the client limit rule
+  against the server's for all 1,048 ordnance rows of the 226 hulls; `enhRowMax` 290 / 29 / 145 ticked, 280 / 28 / 140 not; `passesNeeds` refusing the
+  Hyperion Aegis, keeping the Abbai mine-layer); enhancements 293 / 0 (fingerprint unchanged - no fingerprint hull was among the 9); differential 876 / 0;
+  `-Check` replay 162 / 0; statics regenerated; legacy bundles rebuilt; `-Sync` done. Mutation **12 / 12** (`mutate29b.js`); two were equivalent on
+  every hull today and are pinned by the probe hulls. ⚠️ Lesson: a server mutant run rewrote the client's fixture file, so every client mutant run
+  after it "failed" on the fixture - regenerate a harness-written fixture with a clean run before client mutants.

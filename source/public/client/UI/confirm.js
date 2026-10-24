@@ -95,6 +95,8 @@ window.confirm = {
             var _noTaken = _target.data("count");
             var _enhID = _target.data("enhID");
 
+            //OFFICERS_PLAN.md Stage 29: an Expert Ballistic Officer bought in this dialog - his slots (one a rack and mine launcher)
+            if (_enhID === 'OFF_BALL' && _noTaken > 0) capacity += parseInt(baseShip.ballisticSlots, 10) || 0;
             if (_enhID !== currentID && _noTaken > 0 && _enhID && (_enhID.startsWith("AMMO_") || _enhID.startsWith("MINE_") || _enhID.startsWith("SHELL_"))) {
                 var slots = 1;
                 if (_enhID == 'AMMO_K' || _enhID == 'AMMO_M') slots = 2;
@@ -208,6 +210,7 @@ window.confirm = {
         var target = $(".selectAmount.shpenh" + enhNo);
         while (typeof target.data("enhPrice") != 'undefined') { //as long as there are enhancements defined...
             totalCost += confirm.enhRowCost(target, flightSize);
+            confirm.paintOrdnanceNote(target);
             //go to next enhancement
             enhNo++;
             target = $(".selectAmount.shpenh" + enhNo);
@@ -229,22 +232,55 @@ window.confirm = {
         if (!window.officers) return (target.data("enhCost") || 0) * flightSize;
         if (confirm.isFreeExpert(target)) return 0; //OFFICERS_PLAN.md Stage 25: the expert an Expert Political Officer brings
         return officers.flightCost(target.data("enhID"), target.data("count"), target.data("enhCost"),
-            flightSize, target.data("perCraftExtra"), target.data("standardFlight"));
+            flightSize, target.data("perCraftExtra"), target.data("standardFlight"))
+            - confirm.ballisticSaved(target); //OFFICERS_PLAN.md Stage 29: the rounds an Expert Ballistic Officer makes free
     },
 
-    /* OFFICERS_PLAN.md Stage 25: is this spinner the expert an Expert Political Officer brings at no cost - with him bought in the same
-       dialog, the dearest of the Navigator, Helmsman, Engineer and Scanner bought there (officers.freeExpertId)? */
-    isFreeExpert: function isFreeExpert(target) {
-        if (!window.officers || officers.POLITICAL_EXPERTS.indexOf(target.data("enhID")) === -1) return false;
+    //the enhancement spinners of the dialog holding `target`, as officers.freeExpertId and officers.ballisticFreeRounds read rows
+    dialogRows: function dialogRows(target) {
         var dialog = target.closest(".confirm");
         if (!dialog.length) dialog = $(".confirm");
         var rows = [];
         $(".selectAmount", dialog).each(function () {
             var amount = $(this);
             if (typeof amount.data("enhPrice") === 'undefined') return;
-            rows.push({ id: amount.data("enhID"), count: amount.data("count") || 0, price: amount.data("enhPrice") || 0 });
+            rows.push({ id: amount.data("enhID"), count: amount.data("count") || 0, price: amount.data("enhPrice") || 0,
+                step: amount.data("enhPriceStep") || 0 });
         });
-        return officers.freeExpertId(rows) === target.data("enhID");
+        return rows;
+    },
+
+    /* OFFICERS_PLAN.md Stage 25: is this spinner the expert an Expert Political Officer brings at no cost - with him bought in the same
+       dialog, the dearest of the Navigator, Helmsman, Engineer and Scanner bought there (officers.freeExpertId)? */
+    isFreeExpert: function isFreeExpert(target) {
+        if (!window.officers || officers.POLITICAL_EXPERTS.indexOf(target.data("enhID")) === -1) return false;
+        return officers.freeExpertId(confirm.dialogRows(target)) === target.data("enhID");
+    },
+
+    /* OFFICERS_PLAN.md Stage 29: the points this ammunition spinner is spared - its share of the rounds an Expert Ballistic Officer bought
+       in the same dialog makes free, the dearest as many as the hull's blueprint gives him picks (officers.ballisticFreeRounds). */
+    ballisticSaved: function ballisticSaved(target) {
+        var id = target.data("enhID");
+        if (!window.officers || !officers.isBallisticPick(id, target.data("enhPrice"))) return 0;
+        var ship = confirm.dialogBlueprint();
+        if (!ship || !ship.ballisticPicks) return 0;
+        return officers.ballisticFreeRounds(confirm.dialogRows(target), ship.ballisticPicks).saved[id] || 0;
+    },
+
+    /* OFFICERS_PLAN.md Stage 29: an ordnance row's "up to N, Xpts each" follows its limit (enhRowMax) - an Expert Ballistic Officer ticked in
+       this dialog enlarges it (a Solyrn's Heavy: up to 290), unticking him puts the hull's own back. Repainted with every total (getTotalCost). */
+    paintOrdnanceNote: function paintOrdnanceNote(target) {
+        var args = target.data("noteArgs");
+        if (!args || !/^(AMMO_|MINE_)/.test(String(target.data("enhID")))) return;
+        var row = target.closest(".buyRow");
+        if (!row || !row.length) return;
+        $(".buyRowNote", row).html(confirm.enhancementPriceNote(confirm.enhRowMax(target), args[0], args[1], args[2], args[3]));
+    },
+
+    //the static blueprint of the unit this dialog buys or edits - an edited unit is a copy of it, so it carries the same fields
+    dialogBlueprint: function dialogBlueprint() {
+        var ship = $(".confirmok").data("shipclass") ? gamedata.getShipByType($(".confirmok").data("shipclass")) : null;
+        return ship || $(".confirmok").data("ship") || null;
     },
 
     /* The most one enhancement row's spinner may take: its limit - and for Expert Pilots, an officer bought as a count
@@ -252,6 +288,11 @@ window.confirm = {
        typed box and the wheel all ask here; clampEnhRowsToSize takes the extra off when the size goes down. */
     enhRowMax: function enhRowMax(target, taken) {
         var max = target.data("max");
+        //OFFICERS_PLAN.md Stage 29: an Expert Ballistic Officer bought in this dialog - an ordnance row's limit is his enlarged magazine's
+        if (window.officers && /^(AMMO_|MINE_)/.test(String(target.data("enhID")))
+            && confirm.dialogRows(target).some(function (row) { return row.id === 'OFF_BALL' && row.count > 0; })) {
+            max = officers.ballisticRowLimit(confirm.dialogBlueprint(), target.data("enhID"), max);
+        }
         var officer = window.officers ? officers.get(target.data("enhID")) : null;
         if (!officer || !officer.multi) return max;
         if (taken === undefined) taken = confirm.mixedTaken(target);
@@ -1288,6 +1329,8 @@ window.confirm = {
             var officerNote = window.officers ? officers.priceNote(ship, enhancement) : null;
             $(".buyRowNote", item).html(officerNote !== null ? officerNote
                 : confirm.enhancementPriceNote(enhLimit, enhPrice, enhPriceStep, enhStep, section === 'ammo'));
+            //OFFICERS_PLAN.md Stage 29: what the note was written from, so paintOrdnanceNote can write it again with another limit
+            if (officerNote === null) selectAmountItem.data('noteArgs', [enhPrice, enhPriceStep, enhStep, section === 'ammo']);
 
             $(".plusButton", item).data("enhNo", i).on("click", confirm.doOnPlusEnhancement);
             $(".minusButton", item).data("enhNo", i).on("click", confirm.doOnMinusEnhancement);
@@ -1580,8 +1623,9 @@ window.confirm = {
                     subtotal += cost;
                 }
                 $(this).toggleClass("is-taken", isTaken);
-                //the expert an Expert Political Officer brings reads "free" (OFFICERS_PLAN.md Stage 25)
-                var free = isTaken && cost === 0 && typeof amount.data("enhPrice") !== 'undefined' && confirm.isFreeExpert(amount);
+                //the expert an Expert Political Officer brings reads "free" (OFFICERS_PLAN.md Stage 25), and so does an ammunition row whose
+                //rounds an Expert Ballistic Officer makes free (Stage 29)
+                var free = isTaken && cost === 0 && typeof amount.data("enhPrice") !== 'undefined' && (confirm.isFreeExpert(amount) || confirm.ballisticSaved(amount) > 0);
                 $(".buyRowCost", this)
                     .text(isTaken ? (free ? 'free' : confirm.formatBuyPts(cost)) : '')
                     .toggleClass("is-saving", isTaken && cost < 0);
