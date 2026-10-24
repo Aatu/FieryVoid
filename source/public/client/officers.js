@@ -181,7 +181,7 @@ window.officers = {
 		   Breaching Experts first); the flight's thrust +1 however many (`statsOnce`). */
 		{ id: 'OFF_BRCH', label: 'Breaching Expert', post: 'craft', flight: true, unscaled: true, multi: true, mixesWith: ['OFF_TRPOD'], statsOnce: true,
 			needs: 'breachingPod', stats: { freethrust: 1 },
-			summary: '+1 thrust (once per flight); his pod\'s Marines count as Elite; once per battle, his pod\'s first capture party makes three attack rolls on its first turn aboard' },
+			summary: '+1 thrust; his pod\'s Marines are Elite; his pod\'s first capture mission makes three attack rolls on first attempt' },
 		/* Stage 27: the Expert Troop Leader in a Gaim breaching pod (the offers' - `needs` the pod), one to a pod (`multi`, `mixesWith`), priced
 		   at his own pod (`unscaled`). His -3 and his escape roll are the server's; his pod's Marines' "Elite" line names him to his team
 		   (marinesEliteLine). */

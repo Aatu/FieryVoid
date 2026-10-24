@@ -34,7 +34,7 @@ class ShipInfo extends React.Component {
 	render() {
 		//hideHitChart: the ship window's Notes popup reuses this block but has its own
 		//dedicated HitChartPanel, so it suppresses the chart lines here.
-		const { ship, hideHitChart, tightBottom, compactText } = this.props;
+		const { ship, hideHitChart, tightBottom, compactText, craft } = this.props;
 
 		//Purchased enhancements are surfaced in the always-visible gold Enhancements box
 		//for full grid ship windows, so they are NOT repeated inline here for those ships
@@ -108,11 +108,15 @@ class ShipInfo extends React.Component {
 		const officerTurn = window.officers ? officers.currentTurn() : 0;
 		const officerLines = [];
 		/* Expert Pilots (Stage 18) are one entry per craft: identical lines show once, "Expert Pilot (3)", and one lost with
-		   his craft gets a line of his own (its state differs). */
+		   his craft gets a line of his own (its state differs).
+		   Hovering one craft's card (`craft`, from FighterIcon): an officer bought one to a craft (`multi` - Expert Pilots, a breaching
+		   pod's Breaching Experts and Troop Leaders) shows on his own craft only; a flight's single officer serves the whole flight
+		   and still shows on every card. */
 		if (ship.flight && window.officers) {
 			const byKey = {};
 			officers.listFor(ship).forEach(entry => {
 				const officer = officers.get(entry.id);
+				if (craft && officer && officer.multi && String(entry.post) !== String(craft.id)) return;
 				const state = officers.stateText(entry);
 				const line = {
 					name: officers.label(entry.id),

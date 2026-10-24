@@ -135,7 +135,8 @@ window.PhaseStrategy = function () {
     };
 
     //officersOnly (OFFICERS_PLAN.md Stage 19): a Structure bar's tooltip, which names the block's officers and nothing else
-    PhaseStrategy.prototype.showSystemInfo = function (ship, system, element, menu, officersOnly) {
+    //craft: the flight craft card hovered (FighterIcon), so a flight's tooltip lists only the officers one-to-a-craft aboard it
+    PhaseStrategy.prototype.showSystemInfo = function (ship, system, element, menu, officersOnly, craft) {
         if (this.systemInfoState && this.systemInfoState.menu && !menu) {
             return;
         }
@@ -149,9 +150,9 @@ window.PhaseStrategy = function () {
             }
             this.uiManager.showSystemInfoMenu({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox });
         } else {
-            this.uiManager.showSystemInfo({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox, officersOnly: Boolean(officersOnly) });
+            this.uiManager.showSystemInfo({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox, officersOnly: Boolean(officersOnly), craft: craft || null });
         }
-        this.systemInfoState = { menu: menu, element: element, system: system, officersOnly: Boolean(officersOnly) && !menu }
+        this.systemInfoState = { menu: menu, element: element, system: system, officersOnly: Boolean(officersOnly) && !menu, craft: craft || null }
     }
 
     PhaseStrategy.prototype.consumeGamedata = function () {
@@ -1368,7 +1369,7 @@ window.PhaseStrategy = function () {
         var showInfo = payload.showInfo !== false;
 
         if (showInfo) {
-            this.showSystemInfo(ship, system, element, false);
+            this.showSystemInfo(ship, system, element, false, false, payload.craft);
         } else {
             this.hideSystemInfo();
         }
@@ -1717,7 +1718,7 @@ window.PhaseStrategy = function () {
         }
 
         if (this.systemInfoState) {
-            this.showSystemInfo(ship, this.systemInfoState.system, this.systemInfoState.element, this.systemInfoState.menu);
+            this.showSystemInfo(ship, this.systemInfoState.system, this.systemInfoState.element, this.systemInfoState.menu, false, this.systemInfoState.craft);
         }
 
         //Keep an open tooltip in step, the way onShipEwChanged does: toggling a Shading Field /
