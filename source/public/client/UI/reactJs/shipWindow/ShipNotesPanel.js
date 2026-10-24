@@ -326,7 +326,10 @@ const liveShipStats = (ship) => {
         /*ELITE / POOR CREW: the flat crew modifier on the DELAY only (-1 per Elite level, floored
           at 1; +1 per Poor level) - a crew's training does not change a turn's thrust cost. Same
           order as movement.js calculateTurndelayAtMove: crew first, LCV surcharge after.*/
-        const turnDelay = move.applyCrewTurnDelay(ship, Math.ceil(speed * delayRate)) + lcv;
+        //OFFICERS_PLAN.md Stage 30: an Expert Quartermaster's +10% on the raw delay first (movement.js getQuartermasterTurnDelay)
+        const rawDelay = Math.ceil(speed * delayRate);
+        const turnDelay = move.applyCrewTurnDelay(ship,
+            typeof move.getQuartermasterTurnDelay === 'function' ? move.getQuartermasterTurnDelay(ship, rawDelay) : rawDelay) + lcv;
 
         /*thrust for this turn, with the rate it came from in parens - the ship tooltip's
           format. One deliberate divergence: the parenthesised turn rate here is the

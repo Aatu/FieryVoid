@@ -1287,6 +1287,8 @@ class Reactor extends ShipSystem implements SpecialAbility {
 			
 		$explodeRoll = Dice::d(100);
 		$chance = $this->getTotalDamage();
+		//OFFICERS_PLAN.md Stage 30: tripled on the Improved Reactor an Expert Quartermaster brought
+		$chance = Officers::breachChance($ship, $this, $chance);
 			
 		//try to make actual attack to show in log - use Ramming Attack system!	- even if there is no explosion			
 		$rammingSystem = $ship->getSystemByName("RammingAttack");

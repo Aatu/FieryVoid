@@ -4819,9 +4819,9 @@ class Enhancements{
 			);
 			$out['total'] += $total;
 		}
-		/* OFFICERS_PLAN.md Stage 25: an Expert Political Officer makes up to five Hardened Armour free - priced last, on the rows that
-		   stand, so a dropped row never takes a free slot. */
-		return Officers::pricePoliticalArmour($ship, self::sanitisePlacedOfficers($ship, self::sanitiseSystemEnhancementGroups($out)), $destroyed);
+		/* OFFICERS_PLAN.md Stage 25: an Expert Political Officer makes up to five Hardened Armour free, and (Stage 30) an Expert
+		   Quartermaster one refit of his kinds - priced last, on the rows that stand, so a dropped row never takes a free slot. */
+		return Officers::priceFreeRefits($ship, self::sanitisePlacedOfficers($ship, self::sanitiseSystemEnhancementGroups($out)), $destroyed);
 	}
 
 	/* PLACED OFFICERS (Stage 8): a system hosts one, and no officer passes his ship cap - Officers::

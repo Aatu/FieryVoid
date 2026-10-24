@@ -231,9 +231,11 @@ window.confirm = {
     enhRowCost: function enhRowCost(target, flightSize) {
         if (!window.officers) return (target.data("enhCost") || 0) * flightSize;
         if (confirm.isFreeExpert(target)) return 0; //OFFICERS_PLAN.md Stage 25: the expert an Expert Political Officer brings
+        if (confirm.isFreeQuartermasterRow(target)) return 0; //Stage 30: an Expert Quartermaster's free Improved Reactor or Jump Accelerator
         return officers.flightCost(target.data("enhID"), target.data("count"), target.data("enhCost"),
             flightSize, target.data("perCraftExtra"), target.data("standardFlight"))
-            - confirm.ballisticSaved(target); //OFFICERS_PLAN.md Stage 29: the rounds an Expert Ballistic Officer makes free
+            - confirm.ballisticSaved(target) //OFFICERS_PLAN.md Stage 29: the rounds an Expert Ballistic Officer makes free
+            - confirm.quartermasterSaved(target); //Stage 30: and those an Expert Quartermaster makes free, past his
     },
 
     //the enhancement spinners of the dialog holding `target`, as officers.freeExpertId and officers.ballisticFreeRounds read rows
@@ -265,6 +267,28 @@ window.confirm = {
         var ship = confirm.dialogBlueprint();
         if (!ship || !ship.ballisticPicks) return 0;
         return officers.ballisticFreeRounds(confirm.dialogRows(target), ship.ballisticPicks).saved[id] || 0;
+    },
+
+    /* OFFICERS_PLAN.md Stage 30: is this spinner the Improved Reactor or Jump Accelerator an Expert Quartermaster bought in the same dialog
+       makes free - his refit's dearest option, the refits the edited ship already carries counted too (officers.quartermasterRefit)? */
+    isFreeQuartermasterRow: function isFreeQuartermasterRow(target) {
+        if (!window.officers || officers.QM_SHIP_REFITS.indexOf(target.data("enhID")) === -1) return false;
+        var refit = officers.quartermasterRefit(confirm.dialogShip(), confirm.dialogRows(target));
+        return Boolean(refit) && refit.option === target.data("enhID");
+    },
+
+    //Stage 30: the points this ammunition spinner is spared by an Expert Quartermaster bought in the same dialog (officers.quartermasterFreeRounds)
+    quartermasterSaved: function quartermasterSaved(target) {
+        var id = target.data("enhID");
+        if (!window.officers || !officers.isQuartermasterPick(id, target.data("enhPrice"))) return 0;
+        var ship = confirm.dialogBlueprint();
+        if (!ship || !ship.quartermasterPicks) return 0;
+        return officers.quartermasterFreeRounds(confirm.dialogRows(target), ship.quartermasterPicks, ship.ballisticPicks).saved[id] || 0;
+    },
+
+    //Stage 30: the unit this dialog edits (its refits count toward an Expert Quartermaster's free one), else the blueprint it buys
+    dialogShip: function dialogShip() {
+        return $(".confirmok").data("ship") || confirm.dialogBlueprint();
     },
 
     /* OFFICERS_PLAN.md Stage 29: an ordnance row's "up to N, Xpts each" follows its limit (enhRowMax) - an Expert Ballistic Officer ticked in
@@ -1624,8 +1648,9 @@ window.confirm = {
                 }
                 $(this).toggleClass("is-taken", isTaken);
                 //the expert an Expert Political Officer brings reads "free" (OFFICERS_PLAN.md Stage 25), and so does an ammunition row whose
-                //rounds an Expert Ballistic Officer makes free (Stage 29)
-                var free = isTaken && cost === 0 && typeof amount.data("enhPrice") !== 'undefined' && (confirm.isFreeExpert(amount) || confirm.ballisticSaved(amount) > 0);
+                //rounds an Expert Ballistic Officer makes free (Stage 29), and an Expert Quartermaster's free reactor, accelerator or rounds (Stage 30)
+                var free = isTaken && cost === 0 && typeof amount.data("enhPrice") !== 'undefined' && (confirm.isFreeExpert(amount)
+                    || confirm.ballisticSaved(amount) > 0 || confirm.isFreeQuartermasterRow(amount) || confirm.quartermasterSaved(amount) > 0);
                 $(".buyRowCost", this)
                     .text(isTaken ? (free ? 'free' : confirm.formatBuyPts(cost)) : '')
                     .toggleClass("is-saving", isTaken && cost < 0);

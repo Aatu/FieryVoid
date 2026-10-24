@@ -1475,7 +1475,9 @@ public function setParentFighter($fighter) {
             if ($roll >= $i){
                 $criticalTypes = $value;
             }
-        }            
+        }
+        //OFFICERS_PLAN.md Stage 30: the first critical an Expert Quartermaster's ship receives is patched - none of this roll's is added
+        if ($criticalTypes != -1 && Officers::patchCritical($ship, $gamedata)) return $crits;
         if ($criticalTypes != -1){
             if (is_array($criticalTypes)){
                 foreach ($criticalTypes as $phpclass){

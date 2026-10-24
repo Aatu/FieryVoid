@@ -115,6 +115,14 @@ window.officers = {
 		   ballisticPicks / ballisticSlots), and the server's at the commit, which also gives each counted weapon its extra round. */
 		{ id: 'OFF_BALL', label: 'Expert Ballistic Officer', post: 'cnc', needs: 'countedBallistic',
 			summary: '+5 distance range for missiles; +1 round per launcher; free missile per launcher' },
+		/* Stage 30: in the C&C, on every hull with one (10% Hurr, 20% elsewhere - the offers'). The lobby previews his -30 initiative (stats - in
+		   game the server applied and published it, and keeps it once he is lost). His free refit and free missiles are PRICES (quartermasterRefit
+		   - systemEnhancements.totalCost, the buy dialog and the fleet list; quartermasterFreeRounds - off the static blueprint's
+		   quartermasterPicks); the server rolls what is left at the commit. His turn delay is movement.js's (getQuartermasterTurnDelay, off the
+		   published turnDelayPenalty); the patch, the C&C's +2 and the Improved Reactor's tripled breach are the server's. `stock`: everything he
+		   brings stays when he is lost (user ruling 2026-10-24), so a patch used after it still shows. */
+		{ id: 'OFF_QM', label: 'Expert Quartermaster', post: 'cnc', stats: { iniativebonus: -30 }, stock: true,
+			summary: 'One free refit; Free missiles; first crit ignored. -30 initiative, +10% turn delay, +2 C&C criticals' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -730,14 +738,17 @@ window.officers = {
 			return officer && officer.anyDamage ? '(his weapon is damaged before battle - he will not serve)'
 				: '(post destroyed before battle - he will not serve)';
 		}
-		return '(' + (entry.how === 'killed' ? 'killed' : 'disabled') + ', turn ' + entry.out + ')';
+		var lost = '(' + (entry.how === 'killed' ? 'killed' : 'disabled') + ', turn ' + entry.out + ')';
+		//Stage 30: an officer whose abilities are the ship's stock (`stock`) may have one spent after he is lost
+		var stock = this.get(entry.id) && this.get(entry.id).stock ? this.abilitiesText(entry) : '';
+		return stock ? lost + ' ' + stock : lost;
 	},
 
 	//"(used: called shot, turn 3; Piercing shot, turn 4)" - the Gunner's spent once-per-battle abilities, or ''
 	//capture: the Breaching Expert's (Stage 24); speech: the Expert Political Officer's (Stage 25); reuse: the Expert Software Engineer's (Stage 26)
-	//charge, precision, anticipation: the Expert Warrior's (Stage 28)
+	//charge, precision, anticipation: the Expert Warrior's (Stage 28); patch: the Expert Quartermaster's (Stage 30)
 	ABILITY_NAMES: { reload: 'faster reload', pierce: 'Piercing shot', called: 'called shot', capture: 'capture assault', speech: 'speech',
-		reuse: 'Specialist reuse', charge: 'charge', precision: 'precision strike', anticipation: 'Supreme Anticipation' },
+		reuse: 'Specialist reuse', charge: 'charge', precision: 'precision strike', anticipation: 'Supreme Anticipation', patch: 'critical patch' },
 	abilitiesText: function abilitiesText(entry) {
 		var spent = entry && entry.abilities ? entry.abilities : null;
 		if (!spent) return '';
@@ -916,6 +927,7 @@ window.officers = {
 		var officer = this.get(entry.id);
 		if (!officer) return '';
 		if (officer.id === 'OFF_POL' && this.isDerived(ship)) return officer.summary + '. ' + this.politicalStatus(ship);
+		if (officer.id === 'OFF_QM' && this.isDerived(ship)) return officer.summary + '. ' + this.quartermasterStatus(ship); //Stage 30
 		if ((officer.sameAs || officer.id) !== 'OFF_TARG') return officer.summary;
 		return officer.summary + ' - ' + this.coverName(ship, entry) + ' weapons';
 	},
@@ -1169,17 +1181,19 @@ window.officers = {
 	   Stage 25: the expert an Expert Political Officer brings costs nothing (politicalDiscount, before and after), and buying or
 	   un-buying the Political Officer himself re-prices his free Hardened Armour - the refit bucket, pointCost with it.
 	   Stage 29: buying or un-buying an Expert Ballistic Officer re-prices the ammunition rounds he makes free (ballisticDiscount).
+	   Stage 30: an Expert Quartermaster's - his free reactor or accelerator and rounds (quartermasterDiscount), and his free refit.
 	   false when the hull does not offer him. */
 	setShipLevelRow: function setShipLevelRow(ship, id, n) {
 		var row = this.shipLevelRow(ship, id);
 		if (!row) return false;
-		var discount = this.politicalDiscount(ship) + this.ballisticDiscount(ship);
+		var discount = this.politicalDiscount(ship) + this.ballisticDiscount(ship) + this.quartermasterDiscount(ship);
 		var delta = (n - (parseInt(row[2], 10) || 0)) * (parseFloat(row[4]) || 0);
 		row[2] = n;
-		delta -= this.politicalDiscount(ship) + this.ballisticDiscount(ship) - discount;
+		delta -= this.politicalDiscount(ship) + this.ballisticDiscount(ship) + this.quartermasterDiscount(ship) - discount;
 		ship.pointCostEnh = (parseFloat(ship.pointCostEnh) || 0) + delta;
 		ship.pointCost = (parseFloat(ship.pointCost) || 0) + delta;
-		if (id === 'OFF_POL' && window.systemEnhancements) {
+		//Stage 30: an Expert Quartermaster coming or going re-prices his free refit, as the Political Officer does his armour
+		if ((id === 'OFF_POL' || id === 'OFF_QM') && window.systemEnhancements) {
 			var refitsBefore = parseFloat(ship.pointCostSysEnh) || 0;
 			systemEnhancements.totalCost(ship);
 			ship.pointCost += (parseFloat(ship.pointCostSysEnh) || 0) - refitsBefore;
@@ -1259,6 +1273,7 @@ window.officers = {
 		var self = this;
 		var entries = this.onPost(ship, system.id);
 		rows.forEach(function (row) { self.decorateArmourRow(ship, system, row); }); //Stage 25: an Expert Political Officer's free armour
+		rows.forEach(function (row) { self.decorateQuartermasterRow(ship, system, row); }); //Stage 30: an Expert Quartermaster's free refit (after: his prices are the whole sum)
 		/* Stage 19: a Medium ship's block is offered the Expert Targeter twice, once per side (OFF_TARG, OFF_TARG2) - one officer,
 		   so one row: the side bought, or his first side while neither is. The footer's side selector trades one for the other. */
 		rows = rows.filter(function (row) {
@@ -1565,10 +1580,17 @@ window.officers = {
 	},
 
 	/* One bought ship-level row's points for the fleet list (gamelobby enhancementLines): 0 for the free expert, else `cost` - less, on an
-	   ammunition row, the rounds an Expert Ballistic Officer makes free (Stage 29, ballisticFreeRounds). */
+	   ammunition row, the rounds an Expert Ballistic Officer makes free (Stage 29, ballisticFreeRounds). Stage 30: 0 for an Expert
+	   Quartermaster's free Improved Reactor or Jump Accelerator, and less his free rounds on an ammunition row (quartermasterFreeRounds). */
 	shipRowCost: function shipRowCost(ship, entry, cost) {
-		if (entry && entry[0] === this.freeExpertId(this.shipRows(ship))) return 0;
-		var free = entry ? this.ballisticFreeRounds(this.shipRows(ship), ship && ship.ballisticPicks).saved[entry[0]] : 0;
+		var rows = this.shipRows(ship);
+		if (entry && entry[0] === this.freeExpertId(rows)) return 0;
+		if (entry && this.QM_SHIP_REFITS.indexOf(entry[0]) !== -1) {
+			var refit = this.quartermasterRefit(ship, rows);
+			if (refit && refit.option === entry[0]) return 0;
+		}
+		var free = entry ? (this.ballisticFreeRounds(rows, ship && ship.ballisticPicks).saved[entry[0]] || 0)
+			+ (this.quartermasterFreeRounds(rows, ship && ship.quartermasterPicks, ship && ship.ballisticPicks).saved[entry[0]] || 0) : 0;
 		return free ? cost - free : cost;
 	},
 
@@ -1582,11 +1604,13 @@ window.officers = {
 		return free;
 	},
 
-	//his armour's candidates - every bought Hardened Armour not on Structure, dearest first ({index, price, id})
+	/* his armour's candidates - every bought Hardened Armour not on Structure, dearest first ({index, price, id}) - but one an Expert
+	   Quartermaster's free refit already spares (Stage 30: his comes first, as on the server - Officers::priceFreeRefits) */
 	armourCandidates: function armourCandidates(ship) {
 		var list = [];
+		var spared = this.quartermasterSpared(ship);
 		systemEnhancements.rows(ship).forEach(function (row, i) {
-			if (!row || row[0] !== 'SYS_HARM' || (parseInt(row[2], 10) || 0) < 1) return;
+			if (!row || row[0] !== 'SYS_HARM' || (parseInt(row[2], 10) || 0) < 1 || spared[i] !== undefined) return;
 			var system = systemEnhancements.systemById(ship, row[6]);
 			if (!system || system.name === 'structure') return;
 			var offer = systemEnhancements.offerFor(ship, row[6], 'SYS_HARM');
@@ -1595,16 +1619,19 @@ window.officers = {
 		return list.sort(function (a, b) { return (b.price - a.price) || (a.id - b.id); });
 	},
 
-	/* Every Hardened Armour priced again - the free ones 0, the rest their offer's price. systemEnhancements.totalCost runs it before it
-	   sums the bucket, so every write prices them as the server's sanitiser will (Officers::pricePoliticalArmour). A row no longer
-	   offered keeps what it was priced at. */
-	pricePoliticalArmour: function pricePoliticalArmour(ship) {
+	/* The free refits priced again - an Expert Quartermaster's free refit (its levels spared taken off), then a Political Officer's free
+	   Hardened Armour among the rest (0), every other row of those kinds its offer's price - so a row that WAS free and is no longer (a dearer
+	   reactor bought since) is paid again. systemEnhancements.totalCost runs it before it sums the bucket, so every write prices them as the
+	   server's sanitiser will (Officers::priceFreeRefits). A row no longer offered keeps what it was priced at. */
+	priceFreeRefits: function priceFreeRefits(ship) {
 		if (!ship || !window.systemEnhancements || !Array.isArray(ship.systemEnhancements)) return;
+		var self = this;
+		var spared = this.quartermasterSpared(ship);
 		var free = this.freeArmourRows(ship);
 		ship.systemEnhancements.forEach(function (row, i) {
-			if (!row || row[0] !== 'SYS_HARM') return;
-			var offer = systemEnhancements.offerFor(ship, row[6], 'SYS_HARM');
-			if (offer) row[4] = free[i] ? 0 : systemEnhancements.priceFor(offer, row[2]);
+			if (!row || self.QM_REFITS.indexOf(row[0]) === -1) return; //his four per-system kinds - Hardened Armour among them
+			var offer = systemEnhancements.offerFor(ship, row[6], row[0]);
+			if (offer) row[4] = free[i] ? 0 : systemEnhancements.priceFor(offer, row[2]) - (spared[i] || 0);
 		});
 	},
 
@@ -1958,6 +1985,202 @@ window.officers = {
 		return String(value).replace(/Total rounds: (\d+)\/(\d+)/, function (all, rounds, capacity) {
 			return 'Total rounds: ' + rounds + '/' + ((parseInt(capacity, 10) || 0) + slots);
 		});
+	},
+
+	/* ------------------------------------------------------------------ Expert Quartermaster (Stage 30) */
+
+	/* The six refits one of which he brings at no cost, in the rules' order - which a tie for the dearest goes by - and the two of them that are
+	   ship-level rows (the rest are bought per system). ⚠️ MIRROR PAIR with Officers::$quartermasterRefits (PHP). */
+	QM_REFITS: ['SYS_GSGT', 'SYS_ADT', 'IMPR_REA', 'SYS_THR', 'SYS_HARM', 'JUMP_ACC'],
+	QM_SHIP_REFITS: ['IMPR_REA', 'JUMP_ACC'],
+	QM_REFIT_LABELS: { SYS_GSGT: 'Gunsights', SYS_ADT: 'Advanced Defensive Targeting', IMPR_REA: 'Improved Reactor', SYS_THR: 'Improved Thrust Rating',
+		SYS_HARM: 'Hardened Armour', JUMP_ACC: 'Jump Accelerator' },
+	QM_REFIT_SYSTEMS: 2, //⚠️ MIRROR of Officers::QM_REFIT_SYSTEMS (PHP) - "any two weapons", "any two thrusters", two armoured systems
+
+	/* ⭐ HIS FREE REFIT - of the six, the DEAREST bought, as the server rules it: Gunsights, Advanced Defensive Targeting, Improved Thrust - the
+	   two dearest systems bought it, each at its dearest level; Hardened Armour - the dearest two on one side (a tie to the lower location),
+	   never Structure or a Primary system; the Improved Reactor or the Jump Accelerator - its row. A tie to the first in QM_REFITS, a tie between
+	   systems to the lower id. `rows`: the ship-level rows [{id, count, price}] - the ship's own (shipRows) or a buy dialog's (confirm.dialogRows);
+	   the refits are ship.systemEnhancements, priced by their offers (the blueprint, D10). null without him bought, with his C&C destroyed before
+	   battle or with none of the six; else {option, free: {row index: points spared}, placed, location, points}. `anyPost`: never mind his
+	   C&C (the ship-level saving - quartermasterShipSaving: the refund of an officer on a destroyed post is dropDestroyedPosts' business,
+	   which reads the saving AFTER the editor has marked the post destroyed).
+	   ⚠️ MIRROR PAIR with Officers::quartermasterRefit (PHP). */
+	quartermasterRefit: function quartermasterRefit(ship, rows, anyPost) {
+		if (!ship || ship.flight || !rows.some(function (row) { return row.id === 'OFF_QM' && row.count > 0; })) return null;
+		var cnc = this.findPost(ship, 'cnc');
+		if (!cnc || (!anyPost && this.isPostDestroyed(ship, cnc))) return null;
+		var self = this;
+		var candidates = {};
+		//read, never created: a static blueprint in a buy dialog has no refits, and must not be given an array
+		(window.systemEnhancements && Array.isArray(ship.systemEnhancements) ? ship.systemEnhancements : []).forEach(function (row, i) {
+			var count = row ? (parseInt(row[2], 10) || 0) : 0;
+			if (count < 1 || self.QM_REFITS.indexOf(row[0]) === -1) return;
+			var system = systemEnhancements.systemById(ship, row[6]);
+			var offer = systemEnhancements.offerFor(ship, row[6], row[0]);
+			if (!system || !offer || self.isPostDestroyed(ship, system)) return;
+			if (row[0] === 'SYS_HARM' && !self.isQuartermasterArmour(system)) return;
+			(candidates[row[0]] = candidates[row[0]] || []).push({ index: i, points: systemEnhancements.priceForLevel(offer, count - 1),
+				id: parseInt(system.id, 10), location: parseInt(system.location, 10) || 0 });
+		});
+		var best = null;
+		this.QM_REFITS.forEach(function (id) {
+			var choice = null;
+			if (self.QM_SHIP_REFITS.indexOf(id) !== -1) {
+				var row = rows.filter(function (r) { return r.id === id && r.count > 0; })[0];
+				if (row && row.price > 0) choice = { option: id, free: {}, placed: 0, location: null, points: row.price };
+			} else {
+				choice = self.quartermasterPair(id, candidates[id] || []);
+			}
+			if (choice && (!best || choice.points > best.points)) best = choice;
+		});
+		return best;
+	},
+
+	//the systems that make one per-system refit's share of his worth most - Hardened Armour's on one side. ⚠️ MIRROR PAIR with Officers::quartermasterPair (PHP)
+	quartermasterPair: function quartermasterPair(id, list) {
+		var self = this;
+		var sides = {};
+		list.forEach(function (candidate) {
+			var key = (id === 'SYS_HARM') ? candidate.location : 0;
+			(sides[key] = sides[key] || []).push(candidate);
+		});
+		var best = null;
+		Object.keys(sides).map(Number).sort(function (a, b) { return a - b; }).forEach(function (location) {
+			var pair = sides[location].slice().sort(function (a, b) { return (b.points - a.points) || (a.id - b.id); }).slice(0, self.QM_REFIT_SYSTEMS);
+			var free = {};
+			var points = 0;
+			pair.forEach(function (candidate) { free[candidate.index] = candidate.points; points += candidate.points; });
+			if (!best || points > best.points) {
+				best = { option: id, free: free, placed: pair.length, location: (id === 'SYS_HARM') ? location : null, points: points };
+			}
+		});
+		return best;
+	},
+
+	//may his free Hardened Armour go on this system? "Non-structure and non-primary" - ⚠️ MIRROR PAIR with Officers::isQuartermasterArmour (PHP)
+	isQuartermasterArmour: function isQuartermasterArmour(system) {
+		return Boolean(system) && system.name !== 'structure' && (parseInt(system.location, 10) || 0) !== 0;
+	},
+
+	//the rows his free refit spares on this ship's refits ({row index: points}) - what priceFreeRefits takes off, and the Political Officer's armour never counts
+	quartermasterSpared: function quartermasterSpared(ship) {
+		var refit = this.quartermasterRefit(ship, this.shipRows(ship));
+		return refit ? refit.free : {};
+	},
+
+	/* what his free Improved Reactor or Jump Accelerator spares the SHIP-LEVEL bucket (pointCostEnh): 0 when his refit is a system's, or none.
+	   Whatever his C&C's state, as the Political Officer's free expert (politicalDiscount) - see quartermasterRefit's `anyPost`. */
+	quartermasterShipSaving: function quartermasterShipSaving(ship, rows) {
+		var refit = ship ? this.quartermasterRefit(ship, rows || this.shipRows(ship), true) : null;
+		return (refit && this.QM_SHIP_REFITS.indexOf(refit.option) !== -1) ? refit.points : 0;
+	},
+
+	/* After a refit write (systemEnhancements.set, dropDestroyed): his free refit may have moved between a system and a ship-level row - two
+	   Gunsights that outbid his free Improved Reactor make the reactor paid again - so pointCostEnh and pointCost move by what the ship-level
+	   saving changed by. `before`: quartermasterShipSaving read before the write. The refit bucket the caller settles itself. */
+	settleQuartermaster: function settleQuartermaster(ship, before) {
+		var delta = before - this.quartermasterShipSaving(ship);
+		if (!delta) return;
+		ship.pointCostEnh = (parseFloat(ship.pointCostEnh) || 0) + delta;
+		ship.pointCost = (parseFloat(ship.pointCost) || 0) + delta;
+	},
+
+	/* A row whose rounds may be his free missiles: an AMMO_ row with a price on this hull, never Basic - any size (user ruling 2026-10-24: a
+	   two-slot round counts as one missile). ⚠️ MIRROR PAIR with Officers::quartermasterPickTypes (PHP). */
+	isQuartermasterPick: function isQuartermasterPick(id, price) {
+		return typeof id === 'string' && id.indexOf('AMMO_') === 0 && id !== 'AMMO_B' && (Number(price) || 0) > 0;
+	},
+
+	/* ⭐ HIS FREE MISSILES - "two special missiles of any type" for each rack, one for a Class-SO: with him bought, the `picks` DEAREST rounds of the
+	   pickable rows (isQuartermasterPick) cost nothing, each at its own level's price, a tie to the lower id - after an Expert Ballistic Officer
+	   bought in the same rows has taken his (ballisticFreeRounds): those rounds are not his. `picks` / `ballisticPicks`: the static blueprint's
+	   quartermasterPicks / ballisticPicks. Returns ballisticFreeRounds' shape. The commit rolls whatever is left unpicked
+	   (Officers::placeQuartermasterMissiles), which counts the rounds past the Ballistic Officer's as these do. */
+	quartermasterFreeRounds: function quartermasterFreeRounds(rows, picks, ballisticPicks) {
+		var out = { free: {}, saved: {}, discount: 0 };
+		picks = parseInt(picks, 10) || 0;
+		if (picks <= 0 || !rows.some(function (row) { return row.id === 'OFF_QM' && row.count > 0; })) return out;
+		var self = this;
+		var taken = this.ballisticFreeRounds(rows, ballisticPicks).free;
+		var rounds = [];
+		rows.forEach(function (row) {
+			if (!self.isQuartermasterPick(row.id, row.price)) return;
+			for (var level = 0; level < row.count; level++) rounds.push({ id: row.id, price: row.price + level * (row.step || 0) });
+		});
+		rounds.sort(function (a, b) { return (b.price - a.price) || (a.id < b.id ? -1 : (a.id > b.id ? 1 : 0)); });
+		var passed = {}; //the Ballistic Officer's are each row's dearest rounds - the first of that id in this order
+		rounds.filter(function (round) {
+			if ((passed[round.id] || 0) >= (taken[round.id] || 0)) return true;
+			passed[round.id] = (passed[round.id] || 0) + 1;
+			return false;
+		}).slice(0, picks).forEach(function (round) {
+			out.free[round.id] = (out.free[round.id] || 0) + 1;
+			out.saved[round.id] = (out.saved[round.id] || 0) + round.price;
+			out.discount += round.price;
+		});
+		return out;
+	},
+
+	//what he spares this ship's ship-level bucket in points - his free reactor or accelerator, and his free rounds - setShipLevelRow moves pointCost by it
+	quartermasterDiscount: function quartermasterDiscount(ship) {
+		if (!ship) return 0;
+		var rows = this.shipRows(ship);
+		return this.quartermasterShipSaving(ship, rows) + this.quartermasterFreeRounds(rows, ship.quartermasterPicks, ship.ballisticPicks).discount;
+	},
+
+	//does this LOBBY ship have a Quartermaster whose free refit applies (bought, his C&C standing)?
+	quartermasterOpen: function quartermasterOpen(ship) {
+		if (!ship || ship.flight || !window.systemEnhancements || !this.isDerived(ship) || !this.isBought(ship, 'OFF_QM')) return false;
+		var cnc = this.findPost(ship, 'cnc');
+		return Boolean(cnc) && !this.isPostDestroyed(ship, cnc);
+	},
+
+	/* What setting a refit on `system` to `n` levels would move this ship's points by, his free refit (and a Political Officer's armour) included
+	   - tried on the ship through the real write (systemEnhancements.set, which re-prices both buckets) and put back exactly as it was. */
+	refitTryCost: function refitTryCost(ship, system, enhID, n) {
+		var saved = { rows: systemEnhancements.clone(systemEnhancements.rows(ship)), sysEnh: ship.pointCostSysEnh, enh: ship.pointCostEnh, cost: ship.pointCost };
+		var before = (parseFloat(ship.pointCostSysEnh) || 0) + (parseFloat(ship.pointCostEnh) || 0);
+		systemEnhancements.set(ship, system.id, enhID, n);
+		var after = (parseFloat(ship.pointCostSysEnh) || 0) + (parseFloat(ship.pointCostEnh) || 0);
+		ship.systemEnhancements = saved.rows;
+		ship.pointCostSysEnh = saved.sysEnh;
+		ship.pointCostEnh = saved.enh;
+		ship.pointCost = saved.cost;
+		systemEnhancements.syncTooltip(ship);
+		return after - before;
+	},
+
+	/* The system menu's row of one of his refits (decorateMenuRows): what it costs now (the price it is charged, his part taken off), what one
+	   more level would add (refitTryCost - it may outbid his free reactor, or take a free Gunsight's place), and a note saying which is free. */
+	decorateQuartermasterRow: function decorateQuartermasterRow(ship, system, row) {
+		if (this.QM_REFITS.indexOf(row.enhID) === -1 || !this.quartermasterOpen(ship)) return;
+		var bought = systemEnhancements.rowFor(ship, system.id, row.enhID);
+		if (bought) row.price = parseFloat(bought[4]) || 0;
+		if (row.count < row.max) row.nextPrice = this.refitTryCost(ship, system, row.enhID, row.count + 1);
+		row.note = (row.note ? row.note + ' ' : '') + 'Expert Quartermaster: the dearest of his six refits is free. ' + this.quartermasterRefitText(ship) + '.';
+	},
+
+	//"Free refit: Gunsights (2 of 2)" - or what the commit will do with what is missing
+	quartermasterRefitText: function quartermasterRefitText(ship) {
+		var refit = this.quartermasterRefit(ship, this.shipRows(ship));
+		if (!refit) return 'Free refit: none bought - one is picked at random when the fleet is committed';
+		var text = 'Free refit: ' + this.QM_REFIT_LABELS[refit.option];
+		if (this.QM_SHIP_REFITS.indexOf(refit.option) !== -1) return text;
+		text += ' (' + refit.placed + ' of ' + this.QM_REFIT_SYSTEMS + ')';
+		return refit.placed < this.QM_REFIT_SYSTEMS ? text + ' - the other is placed at random when the fleet is committed' : text;
+	},
+
+	/* The lobby's line on what he has brought so far - his SystemInfo summary (summaryOf): the free refit, and his free missiles "3 of 4 bought -
+	   the rest are picked at random when the fleet is committed". */
+	quartermasterStatus: function quartermasterStatus(ship) {
+		var text = this.quartermasterRefitText(ship) + '.';
+		var picks = parseInt(ship.quartermasterPicks, 10) || 0;
+		if (!picks) return text;
+		var free = this.quartermasterFreeRounds(this.shipRows(ship), picks, ship.ballisticPicks).free;
+		var used = Object.keys(free).reduce(function (sum, id) { return sum + free[id]; }, 0);
+		text += ' Free missiles: ' + used + ' of ' + picks + ' bought';
+		return text + (used < picks ? ' - the rest are picked at random when the fleet is committed.' : '.');
 	},
 
 	/* ------------------------------------------------------------------ what a flight's officer costs */

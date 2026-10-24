@@ -603,8 +603,9 @@ window.ShipTooltip = function () {
             //level, floored at 1; +1 per Poor level), on the DELAY only - a crew's training does
             //not change what a turn costs in thrust. Applied before the LCV surcharge, matching
             //movement.js calculateTurndelayAtMove.
-            var turnDelayCost = shipManager.movement.applyCrewTurnDelay(ship,
-                Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship))) + lcvTurnSurcharge;
+            //OFFICERS_PLAN.md Stage 30: an Expert Quartermaster's +10% on the raw delay first, as the movement engine
+            var turnDelayCost = shipManager.movement.applyCrewTurnDelay(ship, shipManager.movement.getQuartermasterTurnDelay(ship,
+                Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship)))) + lcvTurnSurcharge;
 
             this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
             this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + shipManager.movement.getCombatPivotCost(ship), ship.flight === true);

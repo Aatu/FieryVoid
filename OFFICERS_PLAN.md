@@ -44,7 +44,11 @@ when one is eliminated (none on Wreak Havoc); with it, Breaching Experts one to 
 uncommitted. Stage 28, the Expert Warrior (Drazi, 50%), in the C&C - +1 to hit and +1 per die on every weapon, +10 initiative for his ship and for the
 flights it launches, -1 on his ship's critical rolls and +1 on those it causes; once per battle each, never two in a turn, a Charge declared in the Movement
 phase at a unit the player picks (+2 to hit it if the run holds, one cheaper snap turn), a precision strike (his ship's first called shot without its
-penalty) and Supreme Anticipation from his C&C in the Firing phase (+50 initiative next turn, -50 the turn after) (§9.35) - BUILT 2026-10-23, uncommitted.**
+penalty) and Supreme Anticipation from his C&C in the Firing phase (+50 initiative next turn, -50 the turn after) (§9.35) - BUILT 2026-10-23, uncommitted.
+Stage 30, the Expert Quartermaster (Hurr 10%, everyone else 20%), in the C&C - one free refit, the dearest bought of Gunsights or Advanced Defensive Targeting
+on two weapons, the Improved Reactor (its breach chance tripled), Improved Thrust on two thrusters, Hardened Armour on two systems of one side or the Jump
+Accelerator; two free special missiles a rack (one a Class-SO); what is left unchosen rolled at the commit; the ship's first critical ignored; -30 initiative,
++10% turn delay and +2 on the C&C's criticals, all of it staying when he is lost (§9.37) - BUILT 2026-10-24, uncommitted.**
 Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
@@ -312,7 +316,7 @@ Medium-sized job (§3.4).
 
 | Officer | Why it is hard | The cheap half, if wanted early |
 |---|---|---|
-| **Expert Quartermaster** | Makes this ship's other enhancements and ammo free, which touches every price display, total and the saved-fleet bucket split; a fleet-% price; a random post; "+10 turn delay" is unclear | −30 initiative; the C&C critical modifier |
+| **Expert Quartermaster** | Makes this ship's other enhancements and ammo free, which touches every price display, total and the saved-fleet bucket split; a fleet-% price; a random post; "+10 turn delay" is unclear. *Built in Stage 30 (§9.37): the rules text makes it ONE of six refits (the dearest bought - user's note) and two missiles a rack, a ship price (10% / 20%) in the C&C, and "+10%" turn delay; the hard part is that his free refit may be a ship-level row (reactor, accelerator) or per-system refits, so a write to either price bucket can move the other - the client settles the ship-level bucket after every refit write.* | −30 initiative; the C&C critical modifier |
 | **Breaching Expert** | His post is **one pod inside a flight**, and per-craft ids do not exist in the lobby (WEAPON plan D7). Adds a fleet-wide "20 % of all pods" cap, a change to the capture roll ([ShipSystem.php:951](source/server/model/systems/ShipSystem.php#L951)), and "+1 thrust" for one craft of a flight that moves as one. *Built in Stage 24 (§9.31) as an ordinary fighter officer in the flight's first pod: the fighter framework already gives a craft-level post, so "his pod" is that craft; the thrust is the flight's (user ruling); the 20 % is a Fleet Correctness Report line (user ruling); the triple roll is a mark on his capture party's critical.* | — |
 | **Expert Evangelist** | Fleet-wide state: +1 to hit while he serves, then −10 initiative (QX1) and −1 to hit if he is **killed**, for every ship, with a client to-hit mirror. Also a fleet-% price, a random post, and the CPN/OSF gate exists only in notes prose | — |
 | **Expert Laser Technician** | "+1 damage per power point sent, up to +50 %" needs a new per-turn allocation UI, persistence and a cap. *Built in Stage 11 (§9.17) with no new UI or persistence: the user's design note made every laser use the existing BOOST (power entries type 2, the generic boost buttons), so the allocation, its storage and the power balance all came free; what was new is the cap, a per-turn pool, and hiding the boosts from opponents.* | +3 Spinal / +2 Blast / +1 other lasers, through `getBonusDamage` (`SpinalLaser`, `BlastLaser`, `ImprovedBlastLaser`, `LtBlastLaser` exist) |
@@ -367,7 +371,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Navigator | `OFF_NAV` | C&C | 1 |
 | Expert Technician | `OFF_TECH` | Reactor | 1 |
 | Expert Jump Officer | `OFF_JUMP` | Jump Drive | 1 |
-| Expert Quartermaster | `OFF_QM` | random primary | 1 |
+| Expert Quartermaster *(Stage 30, §9.37)* | `OFF_QM` | C&C (his rules text - the draft's random primary dropped) | 1, every hull with a C&C |
 | Expert Geneticist | `OFF_GENE` | C&C | 1 |
 | Expert Scavenger | `OFF_SCAV` | Engine | 1 |
 | Breaching Expert *(Stage 24, §9.31)* | `OFF_BRCH` | his pod: a breaching pod flight's first craft - since Stage 27 (§9.34) one per pod, from the first | 1 (flight), breaching pods only, priced off one pod (`unscaled`); bought as a count, `mixesWith` the pod Troop Leader |
@@ -712,7 +716,8 @@ committed.
 | **27** | Expert Troop Leader (Gaim), added by the user, with Breaching Experts one to a pod. **BUILT 2026-10-23** (§9.34) | See §9.34 |
 | **28** | Expert Warrior (Drazi), added by the user. **BUILT 2026-10-23** (§9.35) | Offered on the 51 Drazi hulls (both factions) with a C&C, 50%; +1 to hit and +1 per die on every weapon but the ram - not on a Gunner's, whose own replace them; +10 initiative, and +10 for every flight launched from his ship's bays from the turn after, while he serves; -1 on his ship's critical rolls (his kill roll included), +1 on the critical roll of an enemy system his ship damaged that turn, once, not a craft's dropout; a Charge declared before the first step at a unit the player clicks, kept by the server once, judged at fire (beaten on initiative, 4+ hexes nearer the target by the end of the move, the route free - third round, §9.35): +2 to hit it; one snap turn anywhere in the move, 1 thrust less (half on an agile ship); the precision strike - the first called shot (his lowest-numbered weapon's that turn) without its penalty, doubled at a base, a Gunner's +3 neither used nor spent; Supreme Anticipation from his C&C's blue box in the Firing phase, +50 next turn while he serves, -50 the turn after regardless; never two of the three in one turn |
 | **29** | Expert Ballistic Officer, one of the original 25 (Hard). **BUILT 2026-10-24** (§9.36) | See §9.36 |
-| **30+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **30** | Expert Quartermaster, one of the original 25 (Hard). **BUILT 2026-10-24** (§9.37) | See §9.37 |
+| **31+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -738,7 +743,7 @@ committed.
 | Navigator | (a) The turn-cost ladder. The hulls use 0.25, 0.33, 0.5, 0.66, 0.75, 1, 1.25, 1.33, 1.5, 1.66, 1.75, 2 and 3. Which of those are "steps"? (b) Turn delay unchanged? (c) Accel/decel: × 0.75 per change, or on the turn's total? Which rounding? **RULED 2026-10-15** (the user supplied the rules text, §9.11): (a) the rulebook's ladder 2, 1.75, 1.66, 1.5, 1.33, 1.25, 1.0, 0.83, 0.75, 0.66, 0.5, 0.33, 0.25, 0.16, 0.1; (b) **turn delay unchanged** (asked: the text names turn cost only); (c) −25 % with the fractions kept until the turn's full cost is known, then rounded up. Pivot and roll −1, minimum 1; 7 % "dropping fractions". |
 | Technician | "Or" = the best of the three automatically, the player's choice each turn, or a fixed priority? How is 33 % rounded? **RULED 2026-10-10: the best of the three, automatically; a third, rounded down.** **RE-RULED 2026-10-15** (the full rules text, §9.10): all three at once - +2 power and −2 on reactor criticals; +1 from one system shut down for power, once a turn (a system forced offline by a critical does not count - asked); a third, rounded down, of EVERY destroyed system's power requirement, added together (asked). |
 | Jump Officer | (a) +1 over the drive's own range (4 → 5, or 6 → 7 with the Jump Accelerator)? (b) −20 before or after the Accelerator's doubling? (c) On arrival: the officer of the ship that OPENED the doorway, or each arriving rider's own? (d) Does −20 also cover the hyperspace-jump failure roll? **Rules text supplied 2026-10-15** (§9.13), which settles most of it: 5 hexes not 4; held one turn longer; −20 on the chance of the drive destroying the ship ("half the boxes ... 30%, not 50%"), never usable with every box lost; −1 on the scatter chart when HIS ship opens the vortex; 60° of unintended facing change cancelled, never past the original facing; the scatter initiative penalty −20 for HIS unit only, never a bonus; 5%; not Raiders or Belt Alliance, not without a jump drive. Built with defaults, stated in §9.13 and not yet ruled: (a) +1 on whatever the drive has (6 → 7 with an Accelerator); (b) after the doubling; (c) the facing cancel turns the DOORWAY (so every rider), the initiative relief is each unit's own officer; (d) one helper serves all three rolls, but a legacy drive is never his post, so in practice he never meets the boost-path roll. |
-| Quartermaster | "Free" = this ship's own other enhancements and ammo? What is "+10 turn delay"? How much on C&C crits? Post: random primary? Price: 5 % of the game's points limit? |
+| Quartermaster | "Free" = this ship's own other enhancements and ammo? What is "+10 turn delay"? How much on C&C crits? Post: random primary? Price: 5 % of the game's points limit? **Rules text and notes 2026-10-24 (§9.37)** settle all five: ONE of Gunsights (two weapons), Advanced Defensive Targeting (two weapons), Improved Reactor ("if the reactor is in danger of exploding, triple its chance"), Improved Thrust Rating (two thrusters), Hardened Armour (two non-Structure, non-primary systems on one side) or the Jump Accelerator free - the user's note: the dearest of those the player buys, one at random if none; two free special missiles per Class-S-or-better rack, one per Class-SO or older - the user's note: bought free up to that allowance, the rest at random; one critical ignored per scenario - the user's note: the first the ship suffers, no choice; -6 initiative (QX1: -30), +10% turn delay rounded up, +2 on the C&C's criticals; the C&C; 10% for the Hurr, double elsewhere. Asked: how the +10% turn delay applies; what stays when he is lost; which missiles may be free; where the random pick may land. **RULED 2026-10-24 (all as recommended):** **each turn's delay +10%, rounded up** (+1 on 1-10, +2 on 11-20), on the speed-and-rate delay before overthrust and Elite / Poor Crew; **everything stays** - the refit, the missiles, an unused patch and all three penalties; **any paid type the hull is offered**, a two-slot round counting as one; **the random pick only among the four refits with no drawback** - never the Improved Reactor or the Jump Accelerator. |
 | Geneticist | "Scenario only" = never offered unless a hull opts in, or a Create Game rule? "−1 to hit other ships" = this ship's own weapons? **RULED 2026-10-10: offered on every hull with a C&C** ("scenario only" is by agreement, as the doc card says). The −1 was built with its default: this ship's own weapons. **RE-RULED 2026-10-15: Dilgar Imperium only** (§9.12). |
 | Scavenger | A critical first, else 4 boxes? Which system first? May he repair Structure? **RULED 2026-10-15** (§9.8): **a critical first** (as the Engineer, same order and C&C roll), else 4 boxes, by Self Repair's default system order; **Structure yes**, never a destroyed system or anything on a destroyed section, never this turn's damage. His rules text adds a **once-per-scenario save** - "up to six points of damage can be ignored in any single volley" - ruled **automatic**: spent on the first hit that would destroy the C&C, a reactor or a Structure block when ignoring up to 6 points saves it ("note the Gaim Bulkhead already has a similar function"). The campaign clauses (permanent repairs after the battle) are not built. **Widened 2026-10-15 (§9.10): Scanners and Engines too.** **Faction prices 2026-10-15 (§9.12): 15% for the Descari, 20% for Balosians, Raiders and Llort.** |
 | Breaching Expert | "+1 thrust" for one pod of a flight that moves as one? "20 % of total pods": fleet-wide, rounded down? What are "3 attack rolls on the first boarding turn" in FV's capture-mission terms? **Rules text 2026-10-21 (§9.31)** settles the last two: "No more than 20% of a fleets breaching pods (round fractions of 0.5 or more up)"; "the pod's contingent gets three attack rolls on the first turn of combat. It is still destroyed by a single hit" - three d10s for its CaptureShip critical on its first turn, one attacker to the defenders. Asked: in a pair of pods, whose Marines get the Elite benefit and the triple roll? His price: one pod flat, or §9.9's scaled rule? The 20%: a report line, also refused in the buy dialog, or enforced by the server? "He does not provide any further benefits" on a pod already Elite: the Elite clause only, or everything? **RULED 2026-10-21 (all as recommended):** **his pod only** (the thrust is the flight's); **one pod, flat**; **a Fleet Correctness Report line**; **the Elite clause only** - +1 thrust and the triple roll still apply. |
@@ -4580,3 +4585,131 @@ costs 98 / 15 / 234 (his price only - every bought missile within the picks free
   `-Check` replay 162 / 0; statics regenerated; legacy bundles rebuilt; `-Sync` done. Mutation **12 / 12** (`mutate29b.js`); two were equivalent on
   every hull today and are pinned by the probe hulls. ⚠️ Lesson: a server mutant run rewrote the client's fixture file, so every client mutant run
   after it "failed" on the fixture - regenerate a harness-written fixture with a clean run before client mutants.
+
+### 9.37 Stage 30: Expert Quartermaster (2026-10-24)
+
+**Rules text (user, 2026-10-24) - one of the original 25.** "Expert Quartermaster: All Hurr quartermasters are experts in obtaining hard to find spares
+and other items for their ships ... ONE of the following ship enhancements (player's choice) will be present on his ship at no extra cost: Gunsight (any
+two weapons), Advanced Defensive Targeting (any two weapons), Improved Reactor (but if the reactor is in danger of exploding, triple its chance), Improved
+Thrust Rating (any two thrusters), Hardened Armor (on any two non-structure and non-primary systems on the same shipside), or Jump Accelerator. Each of the
+ship's class-S or better missile racks comes with two special missiles of any type normally available to the Hurr, at no extra cost. If the racks are of
+the class-SO or an older class, they receive only one free special missile. Due to the availability of repair parts and system patches, the ship may
+ignore one critical hit it receives during a scenario. The player must make the choice immediately after the critical roll ... Unfortunately, the
+Quartermaster is sometimes too good ... any vessel with an Expert Quartermaster will suffer a permanent -6 to its initiative roll. In addition, the
+navigation crew's response times are slowed, resulting in a +10% penalty (round fractions up) to its Turn Delay. Finally ... there is a +2 penalty on all
+critical hits against the C&C. Location: C&C. Cost: 10% of the ship's base value for Hurr. Availability: Double the cost on non-Hurr ships." The user's
+notes: the player chooses the free refit by buying it, "make the most expensive of the possible options free", one allocated at random if none is
+chosen (the Political / Ballistic Officers' way); the missiles likewise, free up to his allowance, the rest random; "remove choice of crit to repair if
+it adds to difficulty, first crit ship suffers is fine".
+
+**What FV had.**
+- The six refits: SYS_GSGT (one to a weapon), SYS_ADT and SYS_THR (several levels a system, each dearer), SYS_HARM (one to a system) - per-system rows,
+  priced by the server's sanitiser (`sanitiseSystemEnhancements`, at buy, save and reload) and in the lobby by `systemEnhancements.js`; IMPR_REA (the
+  biggest reactor, +1 power per size class) and JUMP_ACC (10% of the hull, a drive that opens jump points) - ship-level rows, whose prices sit in
+  `pointCostEnh`, a lump the server trusts.
+- A reactor's Containment Breach explodes on a d100 at or under its total damage (`Reactor::executeContainmentBreach`).
+- A turn's delay is ceil(speed x rate) (`Movement::calculateTurndelay`; client `calculateTurndelay` / `calculateTurndelayAtMove` and two readouts).
+- The Hurr Republic: 14 ships with a C&C (two Roskor bases), racks Class-S and Class-SO only, missiles Long Range, Heavy, Flash and Antifighter. The
+  Gorek in the hurr folder is a Civilians hull.
+
+**Rulings (user, 2026-10-24, asked before building - all as recommended):**
+1. **Each turn's delay +10%, rounded up** (+1 on a delay of 1-10, +2 on 11-20), on the delay speed and rate give, before overthrust and Elite / Poor Crew.
+2. **Everything stays when he is lost** - the refit, the missiles, an unused patch and all three penalties ("permanent").
+3. **Any paid missile type the hull is offered** may be free, a two-slot round counting as one missile.
+4. **The commit's random refit only among the four with no drawback** - Gunsights, Advanced Defensive Targeting, Improved Thrust, Hardened Armour - never
+   the Improved Reactor (his tripled breach) or the Jump Accelerator (it takes reactor power).
+
+**Built with defaults, stated here (ask before changing):**
+- Offered on every hull with a C&C that may carry officers (1,812 hulls), 10% for 'Hurr Republic', 20% for everyone else (`$factionRules`).
+- **What each refit is worth** (the free one is the dearest, a tie to the first in the rules' order): Gunsights / ADT / Thrust - the two dearest systems
+  bought it, each at its dearest level (one level on each of two systems is his; a second level on one system is paid); Hardened Armour - the dearest
+  two on one side (a tie to the lower location), never Structure or a Primary system; the Improved Reactor / Jump Accelerator - the hull's own offer
+  (off a fresh blueprint - a POST-side ship carries the client's row prices). The worth is what the player BOUGHT, not what the option could be.
+- **What the commit fills**: none of the six bought - one of the four at random (d4 over those the hull can take), on two random systems (a Hardened
+  Armour pair on one random side with room for both); a refit bought on one system - a second at random (on that side). Never a system destroyed
+  before battle or already holding it. A bought reactor or accelerator is whole.
+- **Free missiles**: 2 per magazine-fed rack and Bomb Rack, 1 per Class-SO (FV's older racks keep no count); mine launchers and Reload Racks none; the
+  dearest that many rounds bought free, the rest rolled at the commit. With an Expert Ballistic Officer aboard, HIS free rounds are taken first (his are
+  single-slot only, so taking his first never costs the player) and the Quartermaster's count past them.
+- With an Expert Political Officer aboard (a Centauri capital ship): the Quartermaster's free Hardened Armour first, her five among the rest.
+- **The patch**: the first critical the ship's critical ROLLS give it (`testCritical` - every critical of that one roll), automatic, once per battle,
+  stored as one OffUsed note `OFF_QM:patch` on his C&C. Not what a weapon does directly (an EM shutdown) or a magazine explosion. Shown to his team as
+  "(used: critical patch, turn N)" - after his loss too (`stock`).
+- The tripled breach only on the reactor IMPR_REA improves, and only while the Improved Reactor IS his free refit; at most 100%.
+- The +2 on his own C&C (a hull with two: his), his kill roll there included. The -30 and the turn delay are published to every viewer.
+
+**Design.**
+- `Officers`: registry `OFF_QM` (post `cnc`, pct 20, `apply` = `lost` = applyQuartermaster, `publish` = `lostPublish` iniativebonus, new key `stock`)
+  after the Ballistic Officer, before the placed officers; constants QM_INITIATIVE -30, QM_TURN_DELAY_PCT 10, QM_CNC_CRIT_MOD 2, QM_REFIT_SYSTEMS 2,
+  QM_BREACH_FACTOR 3, QM_RACK_MISSILES 2, QM_OLD_RACK_MISSILES 1; `$quartermasterRefits` (⚠️ MIRROR PAIR with officers.QM_REFITS), `$quartermasterRandom`.
+  `quartermasterAboard` (rows), `quartermasterIndex` (serving or lost in battle - never out 0), `applyQuartermaster`, ⭐ `turnDelayPenalty` (⚠️ MIRROR
+  PAIR with movement.js getQuartermasterTurnDelay), `patchCritical`, `breachChance`, ⭐ `quartermasterRefit` / `quartermasterPair` (⚠️ MIRROR PAIR with
+  officers.quartermasterRefit), `quartermasterOfferPrice`, ⭐ `priceFreeRefits` (replaces pricePoliticalArmour: his free refit, then her armour),
+  `placeQuartermasterPicks`, `quartermasterPickTypes`, `quartermasterPicks`, `placeQuartermasterMissiles`; `blueprintAnnotations` adds
+  `quartermasterPicks` (hulls offered him with picks only); `addForJson` publishes `turnDelayPenalty`. `resolveUses` keeps a `stock` officer's use made
+  after his loss. `placePoliticalPicks` no longer counts his free armour as one of her five (found by the harness).
+- Hooks: `Enhancements::sanitiseSystemEnhancements` -> priceFreeRefits; `BuyingGamePhase` placeQuartermasterPicks (before placePoliticalPicks) and
+  placeQuartermasterMissiles (after placeBallisticPicks); `ShipSystem::testCritical` patchCritical before a roll's criticals are added;
+  `Reactor::executeContainmentBreach` breachChance; `Movement::calculateTurndelay` turnDelayPenalty after ceil(speed x rate).
+- Client (`officers.js`): the registry row (`stats` iniativebonus -30, `stock`); QM_REFITS / QM_SHIP_REFITS; `quartermasterRefit` (`anyPost` for the
+  ship-level saving), `quartermasterPair`, `quartermasterSpared`, `quartermasterShipSaving`, ⭐ `settleQuartermaster` (after a refit write: the ship-level
+  bucket moves by what the reactor / accelerator saving changed), `quartermasterFreeRounds` (after the Ballistic Officer's), `quartermasterDiscount`,
+  `refitTryCost` (the system menu's next-level price: the real write tried and put back), `decorateQuartermasterRow`, `quartermasterStatus`;
+  `priceFreeRefits` (renamed from pricePoliticalArmour - and it now re-prices EVERY row of the four kinds, so one that stopped being free is paid again),
+  `armourCandidates` skips his rows, `shipRowCost`, `setShipLevelRow`, `stateText`, `summaryOf`, ABILITY_NAMES `patch`. `systemEnhancements.js`: set() and
+  dropDestroyed settle the ship-level bucket. `confirm.js`: `isFreeQuartermasterRow`, `quartermasterSaved`, `dialogShip` (the edited unit, whose refits
+  count). `movement.js` `getQuartermasterTurnDelay` in calculateTurndelay / calculateTurndelayAtMove; `ShipTooltip.js` and `ShipNotesPanel.js` (React)
+  readouts. Docs: an Expert Quartermaster card (Ship Officers, after the Political Officer).
+
+**Files.** Server: `Officers.php`, `Enhancements.php`, `Phase/BuyingGamePhase.php`, `systems/ShipSystem.php`, `systems/baseSystems.php` (Reactor),
+`handlers/movement.php`. Client: `officers.js`, `systemEnhancements.js`, `UI/confirm.js`, `movement.js`, `UI/ShipTooltip.js`,
+`UI/reactJs/shipWindow/ShipNotesPanel.js`. Docs `ammo-options.html`. Harnesses: `officersHarness.php` (writes `quartermasterFixture.json`),
+`officersClientHarness.js`, `enhancementsHarness.php` (cases `qm`, `qm+helm+elite1`) and its fingerprint. Statics and all bundles rebuilt; no new class, no
+schema change.
+
+**Measured.** 1,812 offers (statics count 1,815 lines - three hulls sit in two factions' files); 166 hulls carry `quartermasterPicks` (Boroca 4, its Early
+twin 2, the Roskor bases 16 / 32, a Solyrn 20). Prices: Boroca 50, Roskor 194, Primus 166, Gorek 28, Solyrn 130. The Boroca's options: two Gunsights 24,
+two ADT 32, two Thrust 32, a Hardened Armour pair 68, Improved Reactor 30, Jump Accelerator 50. Fingerprint: additions only (the 19 fingerprint hulls'
+offer lines, then the two new cases' blocks); old copy `fingerprint.before-officers-stage30.txt`.
+
+**Verified.**
+- `officersHarness.php` **2191 / 0 with the database** (2106 --no-db; the three registry-order checks moved): ids and notes; the registry place; prices and
+  picks on ten hulls (Hurr, Civilians, Centauri, Kor-Lyan, the Trylkan's mine launchers none, the Dagkur's Bomb Racks without ordnance none) and the
+  Athraskala's Bomb Racks counted; none on an OSAT, a mine or a flight; the sweep (1,812 offered, 166 blueprints with picks, each its own count); the REAL
+  ShipCompactor; the post; a doctored row. The free refit through the REAL sanitiser: the reactor over two Gunsights, an armour pair over the reactor, two
+  sides one free, three Gunsights two free, the ADT / Thrust tie, a two-level ADT, the accelerator, Primary and Structure never his, none without him or
+  with his C&C destroyed, the Primus with both officers (7 of 8 free); the 13-case fixture. The commit: each d4 face, a base without thrusters, half-bought
+  Gunsights and armour, the reactor whole, none without him or with his C&C destroyed, a destroyed weapon skipped, both officers on a Primus (7 systems).
+  The missiles: 4 / 1 more / none / 2 for Class-SO, none without him, his C&C destroyed or no racks, the Solyrn with the Ballistic Officer (30, and with 12
+  bought), a Starburst counted as one. The penalties: -30, +2, the REAL calculateTurndelay (6 -> 7, 11 -> 13), the 1-25 table, published to an enemy; lost -
+  all kept; pre-battle - none. The patch through the REAL testCritical: first patched (one note on his C&C, the list spent), the second added, a plain
+  ship's added, a no-critical roll spending nothing, an earlier use, lost (still patches, and a use after his loss read back), pre-battle none, the gate
+  off; and the REAL Criticals::setCriticals. The breach: 10 -> 30, none without the free reactor, the armour's refit 10, capped at 100, lost 30. A saved fleet
+  through the REAL submitSavedFleet / loadSavedFleet (his 50 stored; on reload his armour pair free, the third paid).
+- `officersClientHarness.js` **891 / 0**: the registry row and QM_REFITS; the statics (1,812 offers at 10% / 20%, 166 with picks); the fixture's 13 cases
+  replayed through the REAL systemEnhancements.totalCost and quartermasterRefit (the client's own prices); the free missiles (the Ballistic Officer first);
+  the fleet list; the REAL systemEnhancements.set moving the ship-level bucket when the armour outbids the reactor, and back; the system menu's next price
+  (30 for a 40 armour) leaving the ship untouched; setShipLevelRow both ways; dropDestroyedPosts; the buy dialog through the REAL confirm.enhRowCost (new
+  and edited ship); his summary, stateText, the initiative preview; the REAL movement.js turn delay.
+- `enhancementsHarness` **294 / 0** (re-recorded twice, additions only); `enhancementsDifferential.js` **914 / 0** (38 new cases: his -30 compared lobby
+  against server).
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0** (no corpus game has him).
+- **Mutation-tested: 53 breaks (31 server, 22 client), all caught after the follow-up checks**, files byte-identical afterwards (runner `mutate30.js`,
+  session scratchpad only; client mutants run first, then server, then a clean server run to rewrite `quartermasterFixture.json`). The first pass missed
+  four, each a missing or unsafe check, now fixed: his summary's hookup in summaryOf; the commit's fill never landing on a round free on that hull (the
+  Kor-Lyans' Interceptors - a check whose dice reach every type); a registry check that read `lost` without `?? null`, so the mutant crashed the harness
+  instead of failing a check; and a reactor price hard-coded at 30, equivalent on the Boroca (whose offer is 30) - now pinned on a Roskor base (40) and
+  the Boroca's Jump Accelerator (50).
+- Two bugs found by the harnesses on the way, fixed: `placePoliticalPicks` counted his free Hardened Armour as two of her five (she placed three); the
+  client's re-pricing skipped a refit that had STOPPED being free (it kept its 0), and the ship-level saving read the C&C after the pre-battle editor had
+  marked it destroyed (the refund lost the reactor's 30).
+
+**Observations, not changed:**
+1. Not play-tested. Worth a test: a Hurr Boroca with him - the buy dialog asks 50; buy the Improved Reactor and it reads "free"; then two Hardened Armour on
+   one side in the system menu (the first quotes +30: it goes free and the reactor is paid); after the commit, 4 free missiles. A second Boroca with him
+   and nothing else: two random refits of one of the four after the commit. In game: initiative -30, a turn at speed 4 (rate 1.5) asking a delay of 7,
+   and the first critical roll that should land a critical landing none (his tooltip: "(used: critical patch, turn N)").
+2. Not covered by a harness: BuyingGamePhase's two one-line hooks (the methods are covered). ShipTooltip.js's readout (ShipNotesPanel's too) is a
+   one-line wrap of the tested helper.
+3. A refit dropped by pre-battle damage that flips his free option names only the refit's own row in the refund warning; the ship-level move is still
+   applied (settleQuartermaster).

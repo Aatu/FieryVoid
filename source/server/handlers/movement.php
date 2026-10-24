@@ -1351,7 +1351,12 @@
             
             if ($ship instanceof FighterFlight)
 				return $turndelay;
-            
+
+            /* OFFICERS_PLAN.md Stage 30 - an Expert Quartermaster's "+10% penalty (round fractions up) to its Turn Delay": on the
+               delay speed and rate give, before overthrust shortens it (user ruling 2026-10-24). 0 for every other ship.
+               ⚠ MIRROR PAIR with movement.js getQuartermasterTurnDelay(). */
+            $turndelay += Officers::turnDelayPenalty($ship, $turndelay);
+
             $turndelay -= self::calculateExtraThrustSpent($ship, $move);
 
             /* ELITE / POOR CREW - a FLAT modifier on the delay this turn costs, never on

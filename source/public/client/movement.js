@@ -78,6 +78,18 @@ shipManager.movement = {
     //
     // Server twin: Movement::calculateTurndelay, where the floor is that function's own
     // pre-existing clamp to 1.
+    // OFFICERS_PLAN.md Stage 30 - an Expert Quartermaster's "+10% penalty (round fractions up) to its Turn Delay":
+    // one turn's delay (speed x rate, rounded up) with a tenth of it added, rounded up - +1 on a delay of 1-10, +2
+    // on 11-20 (user ruling 2026-10-24) - BEFORE overthrust shortens it and Elite / Poor Crew move it, so every
+    // caller applies it to the raw delay first. The server publishes the percent while he is aboard, lost or
+    // serving (Officers::addForJson -> ship.turnDelayPenalty), to every viewer; any other unit is unchanged.
+    // ⚠ MIRROR PAIR with Officers::turnDelayPenalty (PHP), which Movement::calculateTurndelay adds.
+    getQuartermasterTurnDelay: function getQuartermasterTurnDelay(ship, turndelay) {
+        var pct = (ship && !ship.flight && ship.turnDelayPenalty) ? (parseInt(ship.turnDelayPenalty, 10) || 0) : 0;
+        if (!pct || !(turndelay > 0)) return turndelay;
+        return turndelay + Math.floor((turndelay * pct + 99) / 100);
+    },
+
     applyCrewTurnDelay: function applyCrewTurnDelay(ship, turndelay) {
         var mod = shipManager.movement.getCrewTurnDelayModifier(ship);
         if (mod === 0) return turndelay;
@@ -4139,6 +4151,7 @@ shipManager.movement = {
         var turndelay = 0;
         if (setMoveNo >= 0) {
             turndelay = Math.ceil(ship.movement[setMoveNo].speed * shipManager.movement.getTurnDelayCost(ship)); //delay at current speed - at least as many moves are required for turn delay to be satisfied
+            turndelay = shipManager.movement.getQuartermasterTurnDelay(ship, turndelay); //Stage 30: an Expert Quartermaster's +10%, first
             //ELITE / POOR CREW: the flat crew modifier moves the REQUIRED delay, before the
             //moves already made (and the overthrust credited as moves, below) are subtracted
             //from it. Ahead of the LCV surcharge so an Elite Crew can never eat a docked LCV's
@@ -4230,6 +4243,7 @@ shipManager.movement = {
         if (shipManager.movement.getTurnDelayCost(ship) == 0) return 0;
         var turndelay = Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship));
         if (ship.flight) return turndelay; //Marcin Sawicki: fighters are NOT exception to delay rules! But so far fighters cannot overthrust...
+        turndelay = shipManager.movement.getQuartermasterTurnDelay(ship, turndelay); //Stage 30: before the overthrust below
         //agile snap turn: shortening already paid on earlier turns of the same sequence counts here too
         var moveNo = ship.movement.lastIndexOf(movement);
         if (moveNo >= 0 && shipManager.movement.isTurn(movement)) {

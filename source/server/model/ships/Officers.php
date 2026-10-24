@@ -75,7 +75,7 @@
    three attack rolls on its first turn aboard (spendCaptureAssault, captureRolls). Fleet-wide, at most 20% of a fleet's pods - the
    lobby's Fleet Correctness Report (gamelobby.js).
    Stage 25: the Expert Political Officer (Centauri capital ships and larger) - his Influence buys the ship an armed shuttle, one of
-   four experts at no cost (freeExpertId) and five free Hardened Armour (pricePoliticalArmour), whatever the player leaves unchosen
+   four experts at no cost (freeExpertId) and five free Hardened Armour (freeArmourRows, priced by priceFreeRefits), whatever the player leaves unchosen
    picked at random as the fleet is committed (placePoliticalPicks); and once per battle a stirring speech in the Firing phase, told in
    the combat log (speechLog), +30 initiative on the next turn.
    Stage 26: the Expert Software Engineer (Hyach) - in the Hyach Computer: one more bonus fire control point, kept until the Computer
@@ -176,6 +176,13 @@ class Officers{
 	const SUPREME_PENALTY = -50;         //...: "However, on the turn after that one, his ship suffers a -50 penalty"
 	const BALLISTIC_RANGE = 5;           //Expert Ballistic Officer: "All ballistic weapons receive +5 to their distance range (but not their launch range)"
 	const BALLISTIC_EXTRA_ROUND = 1;     //...: "All ballistic devices with limited ammunition receive one extra round of ammo"
+	const QM_INITIATIVE = -30;           //Expert Quartermaster: "a permanent -6 to its initiative roll" - FV units (QX1)
+	const QM_TURN_DELAY_PCT = 10;        //...: "a +10% penalty (round fractions up) to its Turn Delay" - each turn's delay (user ruling 2026-10-24)
+	const QM_CNC_CRIT_MOD = 2;           //...: "a +2 penalty on all critical hits against the C&C"
+	const QM_REFIT_SYSTEMS = 2;          //...: Gunsight and Advanced Defensive Targeting "any two weapons", Improved Thrust "any two thrusters", Hardened Armor two systems
+	const QM_BREACH_FACTOR = 3;          //...: Improved Reactor, "but if the reactor is in danger of exploding, triple its chance"
+	const QM_RACK_MISSILES = 2;          //...: "Each of the ship's class-S or better missile racks comes with two special missiles"
+	const QM_OLD_RACK_MISSILES = 1;      //...: "If the racks are of the class-SO or an older class, they receive only one free special missile"
 	/* ...: the magazine rounds he may pick free - "change one of their single-space ... missiles to any other legal type at no cost" - by
 	   enhancement id, each with the round it loads (Enhancements::setEnhancementOptionsShip's list). A pick is one of these the hull is
 	   enabled for, single-slot and priced on that hull (paidPickTypes); Basic is not among them, as no swap to it is worth anything (user
@@ -192,6 +199,12 @@ class Officers{
 	/* ...: "Select either an expert navigator, expert helmsman, expert engineer, expert scanner and add him to the crew at no cost" - in
 	   REGISTRY order, which is the order a tie for the dearest goes by (freeExpertId). ⚠️ MIRROR PAIR with officers.POLITICAL_EXPERTS (JS). */
 	private static $politicalExperts = array('OFF_HELM', 'OFF_SCAN', 'OFF_ENG', 'OFF_NAV');
+	/* Expert Quartermaster: "ONE of the following ship enhancements (player's choice) will be present on his ship at no extra cost" - in the
+	   rules' order, which a tie for the dearest goes by (quartermasterRefit). The four bought per system, then the two ship-level rows.
+	   ⚠️ MIRROR PAIR with officers.QM_REFITS (JS). */
+	private static $quartermasterRefits = array('SYS_GSGT', 'SYS_ADT', 'IMPR_REA', 'SYS_THR', 'SYS_HARM', 'JUMP_ACC');
+	//...and the ones the commit may roll when the player bought none: never the Improved Reactor or the Jump Accelerator (user ruling 2026-10-24)
+	private static $quartermasterRandom = array('SYS_GSGT', 'SYS_ADT', 'SYS_THR', 'SYS_HARM');
 	/* ...: "a stirring speech to his ship's crew, quoting the past glories of the Republic, the honor of serving the Emperor, and other
 	   political mumbo-jumbo" - the combat log names one of these at random (speechLog). */
 	private static $speechTopics = array(
@@ -276,6 +289,8 @@ class Officers{
 		//"5% of the base cost of the ship, plus 1% for each missile rack ... Races other than the Kor-Lyans pay double" - the registry's 10, and 5 here
 		//(the racks' part grows with it: `perPick`)
 		'OFF_BALL' => array('pct' => array('Kor-Lyan Kingdoms' => 5)),
+		//"10% of the ship's base value for Hurr ... Double the cost on non-Hurr ships" - the registry's 20, and 10 here
+		'OFF_QM'   => array('pct' => array('Hurr Republic' => 10)),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -330,7 +345,10 @@ class Officers{
 	     switchTo    (optional) the officer he becomes when ordered to his OWN post (mayMoveTo): the Expert Targeter's side switch
 	   Stage 22:
 	     perTurret   (optional) true: one of him to a TURRET (turretKey - a weapon's linked firing group, or the weapon alone), not only
-	                 one to a system - at purchase and load (keepPlacedRows) and when he moves (mayMoveTo) */
+	                 one to a system - at purchase and load (keepPlacedRows) and when he moves (mayMoveTo)
+	   Stage 30:
+	     stock       (optional) true: his once-per-battle abilities are the SHIP's stock, not his - one spent after he was lost still counts
+	                 (resolveUses), and he may spend it then (the Expert Quartermaster's patch: "everything stays", user ruling 2026-10-24) */
 	private static $registry = array(
 		/* Expert Helmsman: +5 initiative (FV units, QX1), wins initiative ties, and -1 on the die he
 		   rolls on a meteor swarm's impact chart (user, 2026-10-10). The tie-break is
@@ -466,7 +484,7 @@ class Officers{
 		   Only" (`needs`, $factionRules). "Expert political officers have Influence with a capital 'I'": the ship possesses one armed
 		   shuttle - Elite Crew's own retype of a default shuttle as the hangars fill (politicalArmedShuttles, asked by HangarOps); one
 		   Expert Navigator, Helmsman, Engineer or Scanner comes at no cost - the dearest of those bought (freeExpertId, the user's note);
-		   and +1 armour on 5 different systems, never Structure - five free Hardened Armour (pricePoliticalArmour). What the player
+		   and +1 armour on 5 different systems, never Structure - five free Hardened Armour (freeArmourRows). What the player
 		   leaves unchosen, the server picks at random once, as the fleet is committed (placePoliticalPicks). None of it is lost with
 		   him. "Once during each scenario ... a stirring speech ... +30 to its initiative on that turn ... announced before initiative
 		   rolls are made": ordered in the Firing phase from his C&C's menu (saveSpeech), told in that turn's combat log (speechLog), and
@@ -522,6 +540,21 @@ class Officers{
 		   double": 10% and +2% a pick, the Kor-Lyans 5% and +1% ($factionRules, `perPick`). No stat moves at load. */
 		'OFF_BALL' => array('label' => 'Expert Ballistic Officer', 'post' => 'cnc', 'pct' => 10, 'perPick' => 20, 'apply' => null,
 			'needs' => 'hasCountedBallisticAmmo'),
+		/* Expert Quartermaster (Stage 30; rules text, user 2026-10-24), in the C&C. "ONE of the following ship enhancements (player's choice)
+		   will be present on his ship at no extra cost": Gunsights on two weapons, Advanced Defensive Targeting on two weapons, the Improved
+		   Reactor ("if the reactor is in danger of exploding, triple its chance" - breachChance), Improved Thrust on two thrusters, Hardened
+		   Armour on two non-Structure, non-primary systems of one side, or the Jump Accelerator - the dearest of those the player buys (the
+		   user's note: quartermasterRefit), and what he leaves unchosen rolled as the fleet is committed (placeQuartermasterPicks). "Each of the
+		   ship's class-S or better missile racks comes with two special missiles ... class-SO or an older class ... only one": the dearest that
+		   many rounds bought are free, the rest rolled at the commit (quartermasterPicks, placeQuartermasterMissiles). "The ship may ignore one
+		   critical hit it receives during a scenario": the first its critical rolls give it (the user's note: patchCritical). "A permanent -6 to
+		   its initiative roll", "+10% (round fractions up) to its Turn Delay" (turnDelayPenalty) and "+2 on all critical hits against the C&C"
+		   (applyQuartermaster). Rulings (user 2026-10-24): each turn's delay +10%, rounded up; EVERYTHING stays when he is lost - the refit, the
+		   missiles, an unused patch (`stock`) and all three penalties (`lost`); any paid missile type the hull is offered, a two-slot round
+		   counting as one; the commit's random refit never the Improved Reactor or the Jump Accelerator. 10% for the Hurr, 20% for everyone
+		   else ($factionRules). */
+		'OFF_QM'   => array('label' => 'Expert Quartermaster', 'post' => 'cnc', 'pct' => 20, 'apply' => 'applyQuartermaster',
+			'publish' => array('iniativebonus'), 'lost' => 'applyQuartermaster', 'lostPublish' => array('iniativebonus'), 'stock' => true),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -1891,7 +1924,8 @@ class Officers{
 	private static $abilityNames = array('reload' => 'faster reload', 'pierce' => 'Piercing shot', 'called' => 'called shot',
 		'capture' => 'capture assault', //Stage 24: the Breaching Expert's (spendCaptureAssault)
 		'speech' => 'speech',           //Stage 25: the Expert Political Officer's (saveSpeech)
-		'precision' => 'precision strike', 'anticipation' => 'anticipation'); //Stage 28: the Expert Warrior's (precisionStrike, saveAnticipation)
+		'precision' => 'precision strike', 'anticipation' => 'anticipation', //Stage 28: the Expert Warrior's (precisionStrike, saveAnticipation)
+		'patch' => 'patch');            //Stage 30: the Expert Quartermaster's (patchCritical)
 
 	/* Is this ability still his on $turn? Spent ON $turn still counts: that turn's shot is the one that spent it
 	   (so every order his gun fires that turn, and a replay of it, reads the same). */
@@ -1906,7 +1940,8 @@ class Officers{
 		if (empty($uses)) return;
 		foreach ($list as $i => $entry){
 			foreach ($uses as $use){
-				if ($entry['out'] !== null && $entry['out'] < $use['turn']) continue; //a fallen officer left on that gun spent nothing
+				//a fallen officer left on that gun spent nothing - unless what he spends is the ship's stock (Stage 30, `stock`)
+				if ($entry['out'] !== null && $entry['out'] < $use['turn'] && empty(self::$registry[$entry['id']]['stock'])) continue;
 				foreach (self::staysOf($entry) as $stay){
 					if ($stay['id'] !== $use['id'] || (int)$stay['post'] !== (int)$use['post'] || !self::within($use['turn'], $stay)) continue;
 					$had = isset($list[$i]['abilities'][$use['ability']]) ? $list[$i]['abilities'][$use['ability']] : null;
@@ -2917,21 +2952,6 @@ class Officers{
 		return $free;
 	}
 
-	/* The last step of Enhancements::sanitiseSystemEnhancements - at buy, save and reload alike: the free Hardened Armour priced 0,
-	   every other SYS_HARM row at its full price, and the total summed again. $out is that method's result. */
-	public static function pricePoliticalArmour($ship, array $out, array $destroyed = array()){
-		$free = self::freeArmourRows($ship, $out['rows'], $destroyed);
-		$out['total'] = 0;
-		foreach ($out['rows'] as $i => $row){
-			if ((string)$row[0] === 'SYS_HARM'){
-				$system = $ship->getSystemById((int)$row[6]);
-				$out['rows'][$i][4] = (isset($free[$i]) || !$system) ? 0 : Enhancements::systemEnhancementTotalPrice($ship, $system, 'SYS_HARM', (int)$row[2]);
-			}
-			$out['total'] += $out['rows'][$i][4];
-		}
-		return $out;
-	}
-
 	/* As the fleet is COMMITTED (BuyingGamePhase, once per unit, right after its system enhancements are sanitised), whatever the player
 	   left unchosen is chosen at random, ONCE, and stored as ordinary rows (user ruling 2026-10-21: the server's pick) - so it is fixed
 	   for the whole game, no opponent can work it out, and every load reads it as it reads a purchase:
@@ -2952,7 +2972,10 @@ class Officers{
 			if ($choices) self::buyShipLevelRow($ship, $choices[Dice::d(count($choices)) - 1]);
 		}
 
-		$missing = self::POLITICAL_ARMOUR_SYSTEMS - count(self::freeArmourRows($ship, $out['rows'], $destroyed));
+		//Stage 30: never counting a Hardened Armour an Expert Quartermaster's free refit already spares - his come first (priceFreeRefits)
+		$refit = self::quartermasterRefit($ship, $out['rows'], $destroyed);
+		$spared = ($refit !== null) ? $refit['free'] : array();
+		$missing = self::POLITICAL_ARMOUR_SYSTEMS - count(self::freeArmourRows($ship, array_diff_key($out['rows'], $spared), $destroyed));
 		if ($missing > 0){
 			$refitted = array();
 			foreach ($out['rows'] as $row) if ((string)$row[0] === 'SYS_HARM') $refitted[(int)$row[6]] = true;
@@ -2971,7 +2994,7 @@ class Officers{
 					Enhancements::systemEnhancementPriceStep($ship, $system, 'SYS_HARM'), (int)$system->id, (string)$system->name);
 			}
 		}
-		return self::pricePoliticalArmour($ship, $out, $destroyed);
+		return self::priceFreeRefits($ship, $out, $destroyed);
 	}
 
 	//buy a ship-level officer row the hull offers: its count 1, as the buy dialog writes it (or the offer appended, on a list without it)
@@ -4238,14 +4261,314 @@ class Officers{
 
 	/* The static blueprint's share (ShipCompactor::compactShipObject), on a hull offered him and no other: his free picks (`ballisticPicks`)
 	   and the magazine slots he adds (`ballisticSlots`) - the lobby prices the free rounds and lets the buy dialog fill the slots by them
-	   (officers.ballisticFreeRounds, confirm.getMaxAmmoFit). */
+	   (officers.ballisticFreeRounds, confirm.getMaxAmmoFit). Stage 30: an Expert Quartermaster's free missiles (`quartermasterPicks`), on a
+	   hull offered him that has any - officers.quartermasterFreeRounds. */
 	public static function blueprintAnnotations($ship){
-		$offered = false;
-		foreach ((array)$ship->enhancementOptions as $offer) if (isset($offer[0]) && $offer[0] === 'OFF_BALL') $offered = true;
-		if (!$offered) return array();
-		$slots = 0;
-		foreach (self::ballisticSlots($ship) as $pair) $slots += $pair[1];
-		return array('ballisticPicks' => self::ballisticPicks($ship), 'ballisticSlots' => $slots);
+		$offered = array();
+		foreach ((array)$ship->enhancementOptions as $offer) if (isset($offer[0])) $offered[$offer[0]] = true;
+		$out = array();
+		if (isset($offered['OFF_BALL'])){
+			$slots = 0;
+			foreach (self::ballisticSlots($ship) as $pair) $slots += $pair[1];
+			$out['ballisticPicks'] = self::ballisticPicks($ship);
+			$out['ballisticSlots'] = $slots;
+		}
+		if (isset($offered['OFF_QM'])){
+			$picks = self::quartermasterPicks($ship);
+			if ($picks > 0) $out['quartermasterPicks'] = $picks;
+		}
+		return $out;
+	}
+
+	/* ------------------------------------------------------------------ Expert Quartermaster (Stage 30) */
+
+	/* Is a Quartermaster BOUGHT on this unit, as its rows say? For what runs without the officer list: his free refit's price (the sanitiser,
+	   at buy, save and reload) and the commit's picks. A row the hull would not be offered buys nothing, as in pickPosts. */
+	public static function quartermasterAboard($ship){
+		if (!is_object($ship) || empty($ship->enhancementOptions) || !is_array($ship->enhancementOptions)) return false;
+		if (!self::isBought($ship, 'OFF_QM') || !self::mayCarryOfficers($ship)) return false;
+		return self::isEligible($ship, 'OFF_QM');
+	}
+
+	/* The index of this ship's Quartermaster in its officer list while he is aboard for this battle - serving, or lost in it, as everything he
+	   brings stays (user ruling 2026-10-24) - or null: never one whose post pre-battle damage destroyed (out 0: he never came aboard). */
+	private static function quartermasterIndex($ship){
+		if (!($ship instanceof BaseShip) || $ship instanceof FighterFlight) return null;
+		foreach ($ship->getOfficers() as $i => $entry){
+			if ($entry['id'] === 'OFF_QM' && ($entry['out'] === null || (int)$entry['out'] >= 1)) return $i;
+		}
+		return null;
+	}
+
+	/* "A permanent -6 to its initiative roll" (FV's -30, QX1 - published to every viewer: `publish` / `lostPublish`) and "a +2 penalty on all
+	   critical hits against the C&C" - the critRollMod of the C&C he sits in, which ShipSystem::testCritical reads, so his own kill roll there
+	   too ("including any modifications", D3). His `apply` and his `lost` alike: both stay when he is lost (user ruling 2026-10-24). The lobby
+	   previews the initiative (officers.js `stats`); nothing displays a critical modifier. */
+	private static function applyQuartermaster($ship, $entry, $turn){
+		$ship->iniativebonus += self::QM_INITIATIVE;
+		$cnc = $ship->getSystemById($entry['post']);
+		if ($cnc !== null) $cnc->critRollMod += self::QM_CNC_CRIT_MOD;
+	}
+
+	/* "The navigation crew's response times are slowed, resulting in a +10% penalty (round fractions up) to its Turn Delay": what one turn's
+	   delay $delay (speed x rate, rounded up) gains on his ship - a tenth, rounded up: +1 on a delay of 1-10, +2 on 11-20 (user ruling
+	   2026-10-24) - before overthrust shortens it and Elite or Poor Crew move it (Movement::calculateTurndelay). Lost or serving. Published to
+	   every viewer as `turnDelayPenalty` (addForJson). ⚠️ MIRROR PAIR with shipManager.movement.getQuartermasterTurnDelay (JS). */
+	public static function turnDelayPenalty($ship, $delay){
+		if (!TacGamedata::$officersPresent || $delay <= 0 || self::quartermasterIndex($ship) === null) return 0;
+		return intdiv((int)$delay * self::QM_TURN_DELAY_PCT + 99, 100);
+	}
+
+	/* "Due to the availability of repair parts and system patches, the ship may ignore one critical hit it receives during a scenario": the
+	   FIRST one its critical rolls give it, automatically (the user's note: "first crit ship suffers is fine"), whatever system it is on - every
+	   critical that one roll gives (a reactor's 27 is two). ShipSystem::testCritical asks here before it adds a roll's result; true = ignore it.
+	   Spent as one OffUsed note on his C&C ('OFF_QM:patch'), once per battle. The ship's stock, not his: there after he is lost (`stock`).
+	   Not what a weapon does directly (an EM shutdown) or a magazine's explosion: those are no critical roll. */
+	public static function patchCritical($ship, $gamedata){
+		if (!TacGamedata::$officersPresent) return false;
+		$i = self::quartermasterIndex($ship);
+		if ($i === null) return false;
+		$list = $ship->getOfficers();
+		if (isset($list[$i]['abilities']['patch'])) return false;
+		self::spend($ship, $i, 'patch', (int)$gamedata->turn, $gamedata);
+		return true;
+	}
+
+	/* The Improved Reactor he brought: "if the reactor is in danger of exploding, triple its chance" - a containment breach's chance on the
+	   reactor that refit improves (the biggest: his `reactor` post is IMPR_REA's pick), at most 100, while the Improved Reactor IS his free refit
+	   (Reactor::executeContainmentBreach). One the player paid for while another refit was free keeps its chance. Lost or serving: the refit
+	   stays. Judged on a fresh blueprint's prices, as the commit judged it - a loaded ship's systems carry their refits (a Hardened Armour has
+	   raised the armour its price reads). Only a breach on such a ship builds one. */
+	public static function breachChance($ship, $reactor, $chance){
+		if (!TacGamedata::$officersPresent || self::quartermasterIndex($ship) === null || !self::isBought($ship, 'IMPR_REA')) return $chance;
+		$improved = self::findPost($ship, 'reactor');
+		if ($improved === null || (int)$improved->id !== (int)$reactor->id) return $chance;
+		$class = get_class($ship);
+		$choice = self::quartermasterRefit($ship, (array)$ship->systemEnhancements, array(), new $class(-1, -1, 'blueprint', -1));
+		if ($choice === null || $choice['option'] !== 'IMPR_REA') return $chance;
+		return min(100, $chance * self::QM_BREACH_FACTOR);
+	}
+
+	/* ⭐ HIS FREE REFIT - "ONE of the following ship enhancements (player's choice) will be present on his ship at no extra cost": of the six, the
+	   DEAREST the player bought (the user's note), a tie to the first in the rules' order ($quartermasterRefits). What each is worth:
+	     Gunsights, Advanced Defensive Targeting, Improved Thrust ("any two weapons", "any two thrusters"): the two dearest systems bought it,
+	       each at its dearest level - one level on each of two systems is his, a second level on one system is paid as usual;
+	     Hardened Armour ("any two non-structure and non-primary systems on the same shipside"): the dearest two on one side, a tie to the
+	       lower location - never Structure, never a Primary system;
+	     the Improved Reactor, the Jump Accelerator: the row, at the hull's own offer.
+	   A tie between systems goes to the lower id. $rows: purchase tuples (systemid at [6]) - the sanitiser's, or a loaded ship's; $priced: the
+	   unit whose systems price them (by default $ship - a blueprint, for a loaded ship). null without him bought, with his C&C in $destroyed or
+	   with none of the six bought; else array('option' => id, 'free' => array(row key => the points it is spared), 'placed' => the systems it
+	   covers, 'location' => a Hardened Armour's side, 'points' => its worth). ⚠️ MIRROR PAIR with officers.quartermasterRefit (JS). */
+	public static function quartermasterRefit($ship, array $rows, array $destroyed = array(), $priced = null){
+		if (!self::quartermasterAboard($ship)) return null;
+		$cnc = self::findPost($ship, 'cnc');
+		if ($cnc === null || isset($destroyed[(int)$cnc->id])) return null;
+		if ($priced === null) $priced = $ship;
+		$candidates = array();
+		foreach ($rows as $i => $row){
+			if (!is_array($row) || !isset($row[0], $row[2], $row[6]) || (int)$row[2] < 1) continue;
+			$id = (string)$row[0];
+			if (!in_array($id, self::$quartermasterRefits, true)) continue;
+			$system = $priced->getSystemById((int)$row[6]);
+			if (!$system || isset($destroyed[(int)$system->id])) continue;
+			if ($id === 'SYS_HARM' && !self::isQuartermasterArmour($system)) continue;
+			$candidates[$id][] = array('key' => $i, 'points' => Enhancements::systemEnhancementPrice($priced, $system, $id, (int)$row[2] - 1),
+				'system' => (int)$system->id, 'location' => (int)$system->location);
+		}
+		$best = null;
+		foreach (self::$quartermasterRefits as $id){
+			if ($id === 'IMPR_REA' || $id === 'JUMP_ACC'){
+				$points = self::isBought($ship, $id) ? self::quartermasterOfferPrice($ship, $id) : 0;
+				$choice = ($points > 0) ? array('option' => $id, 'free' => array(), 'placed' => 0, 'location' => null, 'points' => $points) : null;
+			} else {
+				$choice = self::quartermasterPair($id, isset($candidates[$id]) ? $candidates[$id] : array());
+			}
+			if ($choice !== null && ($best === null || $choice['points'] > $best['points'])) $best = $choice;
+		}
+		return $best;
+	}
+
+	//the systems that make $id's share of his free refit worth most - Hardened Armour's on one side (quartermasterRefit) - or null with none
+	private static function quartermasterPair($id, array $list){
+		$sides = array();
+		foreach ($list as $candidate) $sides[($id === 'SYS_HARM') ? $candidate['location'] : 0][] = $candidate;
+		ksort($sides);
+		$best = null;
+		foreach ($sides as $location => $side){
+			usort($side, function ($a, $b){
+				if ($a['points'] !== $b['points']) return $b['points'] - $a['points'];
+				return $a['system'] - $b['system'];
+			});
+			$free = array();
+			$points = 0;
+			foreach (array_slice($side, 0, self::QM_REFIT_SYSTEMS) as $candidate){
+				$free[$candidate['key']] = $candidate['points'];
+				$points += $candidate['points'];
+			}
+			if ($best === null || $points > $best['points']){
+				$best = array('option' => $id, 'free' => $free, 'placed' => count($free), 'location' => ($id === 'SYS_HARM') ? $location : null,
+					'points' => $points);
+			}
+		}
+		return $best;
+	}
+
+	//may his free Hardened Armour go on this system? "Non-structure and non-primary"
+	private static function isQuartermasterArmour($system){
+		return !($system instanceof Structure) && (int)$system->location !== 0;
+	}
+
+	/* What the hull's own offer of a ship-level row costs (the Improved Reactor, the Jump Accelerator) - off a fresh blueprint, never the
+	   client's row, whose price a POST-side ship carries as sent. One per class and request. */
+	private static $quartermasterOffers = array();
+	private static function quartermasterOfferPrice($ship, $id){
+		$class = get_class($ship);
+		if (!isset(self::$quartermasterOffers[$class])){
+			$blueprint = new $class(-1, -1, 'offers', -1);
+			Enhancements::setEnhancementOptions($blueprint);
+			self::$quartermasterOffers[$class] = array();
+			foreach ($blueprint->enhancementOptions as $offer) self::$quartermasterOffers[$class][$offer[0]] = (int)$offer[4];
+		}
+		return isset(self::$quartermasterOffers[$class][$id]) ? self::$quartermasterOffers[$class][$id] : 0;
+	}
+
+	/* ⭐ The FREE REFITS priced - the last step of Enhancements::sanitiseSystemEnhancements (at buy, save and reload alike) and of the commit's
+	   picks: an Expert Quartermaster's free refit first (quartermasterRefit), then an Expert Political Officer's five free Hardened Armour among
+	   the rest (freeArmourRows); every other row of those kinds at its full price, and the total summed again. A row the Quartermaster frees
+	   costs its other levels only. $out is the sanitiser's result. */
+	public static function priceFreeRefits($ship, array $out, array $destroyed = array()){
+		$refit = self::quartermasterRefit($ship, $out['rows'], $destroyed);
+		$spared = ($refit !== null) ? $refit['free'] : array();
+		$free = self::freeArmourRows($ship, array_diff_key($out['rows'], $spared), $destroyed);
+		$out['total'] = 0;
+		foreach ($out['rows'] as $i => $row){
+			if (isset($spared[$i]) || (string)$row[0] === 'SYS_HARM'){
+				$system = $ship->getSystemById((int)$row[6]);
+				$full = $system ? Enhancements::systemEnhancementTotalPrice($ship, $system, (string)$row[0], (int)$row[2]) : 0;
+				$out['rows'][$i][4] = isset($free[$i]) ? 0 : $full - (isset($spared[$i]) ? $spared[$i] : 0);
+			}
+			$out['total'] += $out['rows'][$i][4];
+		}
+		return $out;
+	}
+
+	/* As the fleet is COMMITTED (BuyingGamePhase, after the refits are sanitised, before placePoliticalPicks), what the player left of his free
+	   refit is rolled ONCE and stored as ordinary rows, free (the user's note: "If the player forgets, then randomly allocate", the Political
+	   Officer's way): with none of the six bought, one of the four with no drawback the hull can take ($quartermasterRandom - user ruling
+	   2026-10-24), on two random systems - a Hardened Armour's on one random side with room for both; with his refit on one system only, a second
+	   at random (a Hardened Armour's on that side). Always a system offered it, not destroyed by pre-battle damage and without it already. A
+	   bought Improved Reactor or Jump Accelerator is whole. Nothing while his C&C is destroyed (the lobby refunds him then - Stage 15). Never on
+	   a saved fleet: only a game's commit rolls. Dice::d. $out: sanitiseSystemEnhancements' result, returned with the rows added and priced. */
+	public static function placeQuartermasterPicks($ship, array $out, $cleanPreBattle = null){
+		if (!self::quartermasterAboard($ship)) return $out;
+		$destroyed = Enhancements::sysEnhDestroyedSystemIds($ship, $cleanPreBattle);
+		$cnc = self::findPost($ship, 'cnc');
+		if ($cnc === null || isset($destroyed[(int)$cnc->id])) return $out;
+		$choice = self::quartermasterRefit($ship, $out['rows'], $destroyed);
+		if ($choice === null){
+			$options = array();
+			foreach (self::$quartermasterRandom as $id) if (self::quartermasterSites($ship, $id, $out['rows'], $destroyed)) $options[] = $id;
+			if (!$options) return self::priceFreeRefits($ship, $out, $destroyed);
+			$choice = array('option' => $options[Dice::d(count($options)) - 1], 'placed' => 0, 'location' => null);
+		}
+		$id = $choice['option'];
+		if ($id === 'IMPR_REA' || $id === 'JUMP_ACC') return self::priceFreeRefits($ship, $out, $destroyed);
+		$sites = self::quartermasterSites($ship, $id, $out['rows'], $destroyed);
+		if ($id === 'SYS_HARM' && $sites){
+			$location = ($choice['location'] !== null) ? (int)$choice['location'] : self::quartermasterSide($sites);
+			$sites = array_values(array_filter($sites, function ($system) use ($location){ return (int)$system->location === $location; }));
+		}
+		for ($missing = self::QM_REFIT_SYSTEMS - $choice['placed']; $missing > 0 && $sites; $missing--){
+			$k = Dice::d(count($sites)) - 1;
+			$system = $sites[$k];
+			array_splice($sites, $k, 1);
+			$out['rows'][] = array($id, Enhancements::systemEnhancementLabel($id), 1, Enhancements::systemEnhancementLimit($ship, $system, $id), 0,
+				Enhancements::systemEnhancementPriceStep($ship, $system, $id), (int)$system->id, (string)$system->name);
+		}
+		return self::priceFreeRefits($ship, $out, $destroyed);
+	}
+
+	//the systems that could take $id as his free refit at the commit: offered it, not destroyed, without it already (Hardened Armour: his kind)
+	private static function quartermasterSites($ship, $id, array $rows, array $destroyed){
+		$taken = array();
+		foreach ($rows as $row) if ((string)$row[0] === $id) $taken[(int)$row[6]] = true;
+		$sites = array();
+		foreach ($ship->systems as $system){
+			$sid = (int)$system->id;
+			if (isset($destroyed[$sid]) || isset($taken[$sid])) continue;
+			if ($id === 'SYS_HARM' && !self::isQuartermasterArmour($system)) continue;
+			if (Enhancements::systemEnhancementOffered($ship, $system, $id)) $sites[] = $system;
+		}
+		return $sites;
+	}
+
+	//the side a random Hardened Armour pair goes on: one at random of the sides with room for both, else of those with room for one
+	private static function quartermasterSide(array $sites){
+		$room = array();
+		foreach ($sites as $system) $room[(int)$system->location] = (isset($room[(int)$system->location]) ? $room[(int)$system->location] : 0) + 1;
+		ksort($room);
+		$sides = array_keys(array_filter($room, function ($n){ return $n >= self::QM_REFIT_SYSTEMS; }));
+		if (!$sides) $sides = array_keys($room);
+		return $sides[Dice::d(count($sides)) - 1];
+	}
+
+	/* The rounds that may be his free missiles - "two special missiles of any type normally available": every AMMO_ type this hull is enabled
+	   for ($ballisticAmmo - never Basic) that costs something on it, whatever its size (user ruling 2026-10-24: a two-slot round counts as one
+	   missile); none without a magazine to offer them from. id => the round. */
+	private static function quartermasterPickTypes($ship){
+		$types = array();
+		if (self::magazineCapacity($ship) <= 0 || empty($ship->enhancementOptionsEnabled)) return $types;
+		foreach (self::$ballisticAmmo as $id => $class){
+			if (!in_array($id, $ship->enhancementOptionsEnabled, true)) continue;
+			$round = new $class();
+			if ($round->getPrice($ship) > 0) $types[$id] = $round;
+		}
+		return $types;
+	}
+
+	/* His free missiles: two for every missile rack and Bomb Rack, one for a Class-SO ("the class-SO or an older class" - FV's older racks keep
+	   no count and carry none), never a Reload Rack or a mine launcher; 0 on a hull with no round to pick. From the hull's systems; the lobby
+	   prices by the static blueprint's copy (blueprintAnnotations: `quartermasterPicks`). */
+	public static function quartermasterPicks($ship){
+		if (empty(self::quartermasterPickTypes($ship))) return 0;
+		$picks = 0;
+		foreach ($ship->systems as $system){
+			if (!($system instanceof AmmoMissileRackS) || $system instanceof BallisticMineLauncher) continue;
+			$picks += ($system instanceof AmmoMissileRackSO) ? self::QM_OLD_RACK_MISSILES : self::QM_RACK_MISSILES;
+		}
+		return $picks;
+	}
+
+	/* As the fleet is COMMITTED (BuyingGamePhase, after placeBallisticPicks), on the POST-side ship: the free missiles the player left unused are
+	   rolled ONCE - each a round of a pickable type still under its offer's limit, added to that type's row, at no cost (the user's note: "or
+	   randomly allocate"). An Expert Ballistic Officer aboard takes his picks first (officers.quartermasterFreeRounds), so the rounds counted
+	   here are the ones past his. Nothing while the C&C is destroyed by pre-battle damage. Never on a saved fleet. Dice::d. */
+	public static function placeQuartermasterMissiles($ship, $cleanPreBattle = null){
+		if (!self::quartermasterAboard($ship)) return;
+		$destroyed = Enhancements::sysEnhDestroyedSystemIds($ship, $cleanPreBattle);
+		$cnc = self::findPost($ship, 'cnc');
+		if ($cnc === null || isset($destroyed[(int)$cnc->id])) return;
+		$types = self::quartermasterPickTypes($ship);
+		$bought = 0;
+		foreach ($types as $id => $round) $bought += self::boughtCount($ship, $id);
+		$ballistic = self::ballisticAboard($ship);
+		$missing = self::quartermasterPicks($ship) - max(0, $bought - ($ballistic ? self::ballisticPicksUsed($ship) : 0));
+		if ($missing <= 0) return;
+		$class = get_class($ship);
+		$blueprint = new $class(-1, -1, 'offers', -1);
+		//the server's own offers - an Expert Ballistic Officer's enlarged magazine's limits, with him aboard (placeBallisticPicks)
+		if ($ballistic) foreach (self::ballisticSlots($blueprint) as $pair) $pair[0]->addCapacity($pair[1]);
+		Enhancements::setEnhancementOptions($blueprint);
+		$offers = array();
+		foreach ($blueprint->enhancementOptions as $offer) $offers[$offer[0]] = $offer;
+		$types = array_intersect_key($types, $offers);
+		for (; $missing > 0; $missing--){
+			$open = array();
+			foreach ($types as $id => $round) if (self::boughtCount($ship, $id) < (int)floor($offers[$id][3])) $open[] = $id;
+			if (!$open) break;
+			self::addAmmoRound($ship, $offers[$open[Dice::d(count($open)) - 1]]);
+		}
 	}
 
 	/* ------------------------------------------------------------------ payload */
@@ -4283,6 +4606,8 @@ class Officers{
 		}
 		//Stage 29: an Expert Ballistic Officer's longer distance range, to every viewer - a weapon's Range line and its hit-chance preview
 		if (self::isActive($ship, 'OFF_BALL')) $strippedShip->distanceRangeBonus = self::BALLISTIC_RANGE;
+		//Stage 30: an Expert Quartermaster's longer turn delay, to every viewer, lost or serving - the movement plot and the turn delay readouts
+		if (self::quartermasterIndex($ship) !== null) $strippedShip->turnDelayPenalty = self::QM_TURN_DELAY_PCT;
 		if (!TacGamedata::$currentGameFinished && !$ship->isRevealedToCurrentViewer()) return;
 		$out = array();
 		$saves = $ship->getOfficerSaves();
