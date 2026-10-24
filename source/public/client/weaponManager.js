@@ -5905,7 +5905,10 @@ window.weaponManager = {
             "Abduction",
             //PoliticalSpeech (OFFICERS_PLAN.md Stage 25): an Expert Political Officer's stirring speech - its sentence alone, under a
             //"SPEECH:" header (combatLog.logFireOrders), 0 shots on the ship's own Ramming Attack.
-            "PoliticalSpeech"
+            "PoliticalSpeech",
+            //HangarEscape (HangarOps::escapeLogOrder): a destroyed carrier's escape roll - what flew free and what was lost with the
+            //ship. 0 shots on the carrier's own Ramming Attack; its sentence continues the header with "'s".
+            "HangarEscape"
         ];
 
         //A crash into Huge terrain (multi-hex asteroid, moon) reads like the small-asteroid

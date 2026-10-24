@@ -106,7 +106,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         var grouped = {};
 
         incomingFire.forEach(function (fire) {
-            var key = fire.shooter.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode + '-' + fire.calledid; //split called shots as well!
+            var key = fire.shooter.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode + '-' + fire.calledid //split called shots as well!
+                + window.combatLog.logKindKey(fire.fireOrder, fire.shooter); //and log lines of different kinds - see combatLog.STANDALONE_LOG_KINDS
             if (grouped[key]) {
                 grouped[key].push(fire);
             } else {

@@ -43,6 +43,30 @@ window.combatLog = {
         'JumpVortexExit': 'arriving'
     },
 
+    /* ⭐ A LOG LINE NEVER SHARES AN ENTRY WITH A DIFFERENT KIND OF LOG LINE. Both groupings - the printed
+       log's groupByShipAndWeapon and the replay stream's (AllWeaponFireAgainstShipAnimation) - key on the
+       shooter, the weapon's class and the mode, and most log lines ride their unit's own Ramming Attack. So
+       an Inadequate Hangar report, a Political Officer's speech and a hangar escape on one carrier in one
+       turn folded into ONE entry, printed under whichever order came last (a speech heads "SPEECH!:" and
+       drops the ship name the others' sentences continue from). logKindKey is the suffix both keys add:
+         - a log-line kind (weaponManager.doShortLogText) adds its damage class, so different kinds part.
+           Orders of ONE kind still group, and some kinds rely on it: a terrain crash into a flight is one
+           order per fighter with the text on the first, and inadequate-landing damage links to whichever of
+           the carrier's Inadequate Hangar orders DBManager::submitDamages finds first;
+         - a kind listed here adds its order id, so every order is its own entry. Only for kinds whose every
+           order is a complete sentence with 0 shots (so no damage ever links to it).
+       Ordinary fire adds '' and groups exactly as it always has. */
+    STANDALONE_LOG_KINDS: {
+        'HangarEscape': true,
+        'PoliticalSpeech': true
+    },
+
+    logKindKey: function logKindKey(fire, shooter) {
+        if (!fire || !weaponManager.doShortLogText(fire, shooter)) return '';
+        if (combatLog.STANDALONE_LOG_KINDS[fire.damageclass]) return '-' + fire.id;
+        return '-' + fire.damageclass;
+    },
+
     /* ⭐ SERVER-AUTHORED pubnotes CANNOT COLOUR A SHIP NAME, BECAUSE THE COLOUR IS PER-VIEWER.
        gamedata.getShipLogColorCss answers in the READER's terms - green for mine, blue for an
        ally, red for an enemy in a 2-team game, the absolute team palette for an observer - and
@@ -963,7 +987,7 @@ window.combatLog = {
 
             const ship = gamedata.getShip(fire.shooterid);
             const weapon = shipManager.systems.getSystem(ship, fire.weaponid);
-            const key = `${fire.shooterid}-${weapon.constructor.name}-${fire.firingMode}-${fire.targetid}`;
+            const key = `${fire.shooterid}-${weapon.constructor.name}-${fire.firingMode}-${fire.targetid}` + combatLog.logKindKey(fire, ship);
 
             grouped[key] = grouped[key] || [];
             grouped[key].push(fire);

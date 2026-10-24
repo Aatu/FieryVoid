@@ -2995,9 +2995,17 @@ class HangarOps {
 	 * resurfacing as a ghost row once its dockedFlightId entry compacts away.
 	 * Dropping a dockedFlightId entry WITHOUT disengaging would reintroduce
 	 * that ghost, so the param is mandatory, not optional.
+	 *
+	 * Told in the combat log (bayLossLog) by the craft the carrier's escape roll
+	 * would count: no default shuttles, no wrecks, no ShadowHangar fighters - so a
+	 * bay that only sheds shuttles writes nothing. Once per loss: the evicted craft
+	 * leave the stash, so the next turn's check finds it within capacity.
 	 */
 	public static function evictCraftFromHangar($hangar, $boxesToFree, $gamedata){
 		if ($boxesToFree <= 0 || empty($hangar->hangarUsage)) return 0;
+		$carrier = $hangar->getUnit();
+		$lostParts = array();
+		$lostTotal = 0;
 
 		$indexed = array();
 		foreach ($hangar->hangarUsage as $idx => $entry){
@@ -3024,11 +3032,20 @@ class HangarOps {
 			//multi-box craft is evicted the moment one of its boxes can't fit.
 			$needCraft = (int)ceil(($boxesToFree - $freed) / $bpc);
 			$take = min($available, $needCraft);
+			$lostHere = $take;
+			$flight = null;
 			if (isset($entry['dockedFlightId']) && $take > 0) {
 				$flight = $gamedata->getShipById((int)$entry['dockedFlightId']);
 				if ($flight instanceof FighterFlight) {
-					self::disengageFighters($flight, $take, $gamedata);
+					$lostHere = count(self::disengageFighters($flight, $take, $gamedata));
+				} else {
+					$flight = null;
 				}
+			}
+			$phpclass = (string)($entry['phpclass'] ?? '');
+			if ($lostHere > 0 && empty($entry['cannotLaunch']) && !self::isDefaultShuttleClass($phpclass)) {
+				$lostParts[] = self::escapeLogPart($flight, $phpclass, $lostHere, $carrier);
+				$lostTotal += $lostHere;
 			}
 			$hangar->hangarUsage[$idx]['flightSize'] = $available - $take;
 			$freed   += $take * $bpc;
@@ -3039,6 +3056,11 @@ class HangarOps {
 		$hangar->hangarUsage = array_values(array_filter($hangar->hangarUsage, function($e){
 			return (int)($e['flightSize'] ?? 0) > 0;
 		}));
+
+		if ($lostTotal > 0 && $carrier && empty($hangar->isShadowHangar)) {
+			$bayName = (string)$hangar->displayName;
+			self::bayLossLog($carrier, "'s $bayName is damaged and can no longer hold $lostTotal of its craft.", array(), $lostParts, "the damaged $bayName", 0, $gamedata);
+		}
 
 		return $evicted;
 	}
@@ -3094,14 +3116,29 @@ class HangarOps {
 		if ($hangar->isDestroyed()){
 			//Total hangar loss: any dockedFlightId-linked craft also die.
 			//Disengage every fighter in their source flights before clearing.
+			//Told in the combat log (bayLossLog) by the craft the carrier's escape roll would
+			//count: no default shuttles, no wrecks, no ShadowHangar fighters. Runs every turn
+			//the bay stays destroyed, but the stash is empty after the first, so it logs once.
+			$lostParts = array();
+			$lostTotal = 0;
 			if (!empty($hangar->hangarUsage)) {
 				foreach ($hangar->hangarUsage as $entry) {
-					if (!isset($entry['dockedFlightId'])) continue;
-					$flight = $gamedata->getShipById((int)$entry['dockedFlightId']);
+					$phpclass = (string)($entry['phpclass'] ?? '');
+					$flight = isset($entry['dockedFlightId']) ? $gamedata->getShipById((int)$entry['dockedFlightId']) : null;
 					if ($flight instanceof FighterFlight) {
-						self::disengageFighters($flight, PHP_INT_MAX, $gamedata);
+						$n = count(self::disengageFighters($flight, PHP_INT_MAX, $gamedata));
+					} else {
+						$flight = null;
+						$n = self::isDefaultShuttleClass($phpclass) ? 0 : (int)($entry['flightSize'] ?? 0);
 					}
+					if ($n <= 0 || !empty($entry['cannotLaunch'])) continue;
+					$lostParts[] = self::escapeLogPart($flight, $phpclass, $n, $ship);
+					$lostTotal += $n;
 				}
+			}
+			if ($lostTotal > 0 && empty($hangar->isShadowHangar)) {
+				$bayName = (string)$hangar->displayName;
+				self::bayLossLog($ship, "'s $bayName is destroyed with $lostTotal craft aboard.", array(), $lostParts, "the $bayName", 0, $gamedata);
 			}
 			$hangar->hangarUsage = array();
 			return 0;
@@ -3614,11 +3651,24 @@ class HangarOps {
 	 *     stay in the remnant's paid roster at 0 combat value ("0 / their points"),
 	 *     exactly like any combat-destroyed craft.
 	 * Previously every shed craft got DisengagedFighter, so the remnant double-counted
-	 * the escapees as lost while the Split row also showed them. */
+	 * the escapees as lost while the Split row also showed them.
+	 *
+	 * Told in the combat log (bayLossLog), one entry per shed entry - each rolls its
+	 * own d20. */
 	private static function escapeShedCraft($carrier, $rail, $entry, $k, $gamedata){
 		$dockedId = isset($entry['dockedFlightId']) ? (int)$entry['dockedFlightId'] : 0;
 		$flight   = $dockedId > 0 ? $gamedata->getShipById($dockedId) : null;
-		if (!($flight instanceof FighterFlight)) return;   //anonymous/auto entry: no per-craft escape, trim only
+		$bayName  = (string)$rail->displayName;
+		if (!($flight instanceof FighterFlight)){
+			//anonymous/auto entry: no per-craft escape, trim only - so all $k are lost (default
+			//shuttles left out of the log, as from the carrier's escape roll)
+			$phpclass = (string)($entry['phpclass'] ?? '');
+			if ($k > 0 && !self::isDefaultShuttleClass($phpclass)){
+				self::bayLossLog($carrier, "'s $bayName is destroyed with $k craft aboard.", array(),
+					array(self::escapeLogPart(null, $phpclass, $k, $carrier)), "the $bayName", 0, $gamedata);
+			}
+			return;
+		}
 
 		$roll = random_int(1, 20);
 		$maxEscape = self::computeEscapeCount($roll, $k);
@@ -3632,8 +3682,10 @@ class HangarOps {
 		$escapees = ($maxEscape > 0) ? array_slice($shed, 0, $maxEscape) : array();
 		//a fighter officer among the escapees takes his cost with him (OFFICERS_PLAN.md Stage 4)
 		$officerEscapes = Officers::officerAmong($flight, $escapees, $gamedata->turn);
+		$escapeFlight = null;
 		if (!empty($escapees)){
-			self::spawnRailEscapeFlight($carrier, $rail, $entry, $flight, $escapees, $gamedata);
+			$escapeId = self::spawnRailEscapeFlight($carrier, $rail, $entry, $flight, $escapees, $gamedata);
+			if ($escapeId) $escapeFlight = $gamedata->getShipById((int)$escapeId);
 		}
 
 		//Set membership of the escapees so we can mark the rest as destroyed.
@@ -3641,6 +3693,7 @@ class HangarOps {
 		foreach ($escapees as $e){ $escapeeIds[(int)$e->id] = true; }
 
 		$escapeeCount = 0;   //left to their own row — excluded from remnant base
+		$lostCount = 0;
 		foreach ($shed as $f){
 			if ($f->isDestroyed($gamedata->turn)) continue;
 			if (isset($escapeeIds[(int)$f->id])){
@@ -3650,6 +3703,7 @@ class HangarOps {
 				$f->criticals[] = $crit;
 				$escapeeCount++;
 			} else {
+				$lostCount++;
 				//Did NOT escape — destroyed with the rail. Lethal DamageEntry (armour 0,
 				//destroyed=true) so it reads as destroyed (0 CV) and stays in the
 				//remnant's paid roster: the row shows it as "0 / its points".
@@ -3661,6 +3715,15 @@ class HangarOps {
 				$dmg->updated = true;
 				$f->damage[] = $dmg;
 			}
+		}
+
+		$total = $escapeeCount + $lostCount;
+		if ($total > 0){
+			self::bayLossLog($carrier,
+				"'s $bayName is destroyed (escape roll $roll on 1d20): $escapeeCount of $total craft escaped.",
+				($escapeFlight && $escapeeCount > 0) ? array(self::escapeLogPart($escapeFlight, '', $escapeeCount, $carrier)) : array(),
+				($lostCount > 0) ? array(self::escapeLogPart($flight, '', $lostCount, $carrier)) : array(),
+				"the $bayName", $roll, $gamedata);
 		}
 
 		//Stage 21.5/21.7 (value): only the ESCAPEES leave the remnant's value (their
@@ -7897,11 +7960,14 @@ class HangarOps {
 				$maxEscape = self::computeEscapeCount($roll, $totalDocked);
 			}
 
-			$escapedNames = array();
+			$escapes = array();
 			if ($maxEscape > 0) {
 				$chosen = self::chooseEscapees($virtuals, $maxEscape);
-				$escapedNames = self::performCarrierEscapeSpawns($carrier, $hangars, $chosen, $gamedata);
+				$escapes = self::performCarrierEscapeSpawns($carrier, $hangars, $chosen, $gamedata);
 			}
+			$escapedNames = array();
+			foreach ($escapes as $e) $escapedNames[] = $e['flight']->name;
+			self::carrierEscapeLog($carrier, $roll, $isJumpFailure, $virtuals, $escapes, $gamedata);
 
 			//The wreck holds nothing now — every escapee is in space and the
 			//rest are dead with the ship. Default shuttles that were excluded
@@ -8106,7 +8172,9 @@ class HangarOps {
 	 * bucket, then disengage every non-escapee source flight so the
 	 * fleet-list 0-CV fold hides their rows.
 	 *
-	 * Returns the list of escaped flight display names (for the replay note). */
+	 * Returns one record per escape flight actually spawned - the flight, the craft
+	 * it carried off and the escapeGroupKey of the docked craft they came from (the
+	 * replay note takes the names, carrierEscapeLog all three). */
 	private static function performCarrierEscapeSpawns($carrier, $hangars, $chosen, $gamedata){
 		//Bucket key "{hangarId}:{entryIdx}" — chosen virtuals from the same
 		//stash entry all spawn together (resurrect or single fragment).
@@ -8123,18 +8191,22 @@ class HangarOps {
 			$buckets[$key]['virtuals'][] = $v;
 		}
 
-		$names = array();
+		$escapes = array();
 		foreach ($buckets as $bucket) {
 			$hangar = $bucket['hangar'];
 			$entry  = $hangar->hangarUsage[$bucket['entryIdx']] ?? null;
 			if (!is_array($entry)) continue;
-			$name = self::spawnEscapeForBucket($carrier, $hangar, $entry, $bucket['virtuals'], $gamedata);
-			if ($name !== null) $names[] = $name;
+			$flight = self::spawnEscapeForBucket($carrier, $hangar, $entry, $bucket['virtuals'], $gamedata);
+			if ($flight !== null) $escapes[] = array(
+				'flight' => $flight,
+				'count'  => count($bucket['virtuals']),
+				'group'  => self::escapeGroupKey($bucket['virtuals'][0]),
+			);
 		}
 
 		self::markNonEscapeesDestroyed($hangars, $buckets, $gamedata);
 
-		return $names;
+		return $escapes;
 	}
 
 	/* Spawn the escape from a single stash entry. Three paths (Stage 21.4
@@ -8152,8 +8224,7 @@ class HangarOps {
 	 *  - anonymous orphan / auto-shuttle / missing-linked-flight → fresh
 	 *    FighterFlight via the new-spawn path (mirror performLaunch).
 	 *
-	 * Returns the new flight's display name (for the replay note), or null
-	 * on failure. */
+	 * Returns the escape flight, or null on failure. */
 	private static function spawnEscapeForBucket($carrier, $hangar, $entry, $virtuals, $gamedata){
 		$phpclass = (string)($entry['phpclass'] ?? '');
 		if ($phpclass === '' || !class_exists($phpclass)) return null;
@@ -8196,7 +8267,7 @@ class HangarOps {
 
 					self::applyEscapeCrits($sourceFlight, $gamedata);
 					self::writeEscapeEventNote($carrier, $hangar, $sourceFlight, $count, 'resurrected', $gamedata);
-					return $sourceFlight->name;
+					return $sourceFlight;
 				}
 
 				//Partial escape — spawn ONE "<name> - Split" K-flight carrying
@@ -8230,7 +8301,7 @@ class HangarOps {
 
 				self::applyEscapeCrits($escapeFlight, $gamedata);
 				self::writeEscapeEventNote($carrier, $hangar, $escapeFlight, $count, 'split', $gamedata);
-				return $escapeFlight->name;
+				return $escapeFlight;
 			}
 			//Linked flight missing — fall through to new-spawn.
 		}
@@ -8245,7 +8316,7 @@ class HangarOps {
 
 		self::applyEscapeCrits($flight, $gamedata);
 		self::writeEscapeEventNote($carrier, $hangar, $flight, $count, 'newspawn', $gamedata);
-		return $flight->name;
+		return $flight;
 	}
 
 	/* Apply LaunchedThisTurn (-50 init next turn) to an escapee. UNLIKE
@@ -8300,6 +8371,84 @@ class HangarOps {
 				self::disengageFighters($flight, PHP_INT_MAX, $gamedata);
 			}
 		}
+	}
+
+	/* Which docked craft a candidate is, for counting them in and out of the escape log: its
+	 * docked flight, or its class for an anonymous entry (no ship of its own to name). */
+	private static function escapeGroupKey($virtual){
+		return ((int)$virtual['flightId'] > 0) ? 'f' . (int)$virtual['flightId'] : 'c' . $virtual['phpclass'];
+	}
+
+	/* A destroyed carrier's escape in the combat log (bayLossLog): the roll, what flew free and what
+	 * went down with the ship. Counts only the craft the roll counts (no default shuttles, no
+	 * ShadowHangar fighters - buildEscapeCandidates), so it never discloses more of an enclosed bay
+	 * than the public escapeTotal does. Once per carrier: the escapeRolled gate keeps a later sweep
+	 * from reaching here. */
+	private static function carrierEscapeLog($carrier, $roll, $isJumpFailure, $virtuals, $escapes, $gamedata){
+		$total = count($virtuals);
+		if ($total <= 0) return;
+
+		//Every candidate starts lost; each escape flight takes its craft back off its source.
+		$groups = array();
+		foreach ($virtuals as $v){
+			$key = self::escapeGroupKey($v);
+			if (!isset($groups[$key])){
+				$flight = ((int)$v['flightId'] > 0) ? $gamedata->getShipById((int)$v['flightId']) : null;
+				$groups[$key] = array('flight' => $flight, 'phpclass' => $v['phpclass'], 'lost' => 0);
+			}
+			$groups[$key]['lost']++;
+		}
+		$escaped = 0;
+		$escapedParts = array();
+		foreach ($escapes as $e){
+			$escaped += $e['count'];
+			if (isset($groups[$e['group']])) $groups[$e['group']]['lost'] -= $e['count'];
+			$escapedParts[] = self::escapeLogPart($e['flight'], '', $e['count'], $carrier);
+		}
+		$lostParts = array();
+		foreach ($groups as $g){
+			if ($g['lost'] > 0) $lostParts[] = self::escapeLogPart($g['flight'], $g['phpclass'], $g['lost'], $carrier);
+		}
+
+		$opening = $isJumpFailure
+			? "'s hangar is lost with the ship in the failed jump: $escaped of $total craft escaped."
+			: "'s hangar crews scramble as the ship is destroyed (escape roll $roll on 1d20): $escaped of $total craft escaped.";
+		self::bayLossLog($carrier, $opening, $escapedParts, $lostParts, 'the ship', $roll, $gamedata);
+	}
+
+	/* A bay's loss told in the combat log - a destroyed carrier (carrierEscapeLog), a Fighter Rail
+	 * shed off a destroyed rail or structure block (escapeShedCraft), an enclosed bay destroyed on a
+	 * carrier that survives (onHangarCriticalPhase), craft a damaged bay can no longer hold
+	 * (evictCraftFromHangar). One entry per event: $opening, then who escaped,
+	 * then what was lost with $lostWith. A log line wearing a fire order's clothes
+	 * ([[howto_create_fire_orders]]): on the carrier's own RammingAttack, at itself, rolled = the d20
+	 * (1 when the event has none) so the printed log keeps it, no shot - so no damage can ever link to
+	 * it. 'HangarEscape' is in weaponManager.doShortLogText, so $opening continues the
+	 * "FIRE: <carrier>" header with "'s", and in combatLog.STANDALONE_LOG_KINDS, so two of these on one
+	 * carrier in one turn print as two entries. Every unit is a bare shiplink, coloured per reader by
+	 * the client. Written only from the live Fire Phase advance (setCriticals), whose
+	 * submitFireorders persists it. */
+	private static function bayLossLog($carrier, $opening, $escapedParts, $lostParts, $lostWith, $roll, $gamedata){
+		$ram = $carrier->getSystemByName('RammingAttack');
+		if (!$ram) return;
+
+		$notes = $opening;
+		if (!empty($escapedParts)) $notes .= '<br>Escaped: ' . implode(', ', $escapedParts) . '.';
+		if (!empty($lostParts)) $notes .= '<br>Lost with ' . $lostWith . ': ' . implode(', ', $lostParts) . '.';
+
+		$order = new FireOrder(-1, 'normal', $carrier->id, $carrier->id, $ram->id, -1, (int)$gamedata->turn, 1, 0, max(1, (int)$roll), 0, 0, 0, 0, 0, 'HangarEscape', 10000);
+		$order->pubnotes = $notes;
+		$order->addToDB = true;
+		$ram->fireOrders[] = $order;
+	}
+
+	/* "<flight> (n)" as the bay-loss log lists it: a bare shiplink, or the class name for an
+	 * anonymous entry (no ship of its own to name). */
+	private static function escapeLogPart($flight, $phpclass, $count, $carrier){
+		$label = ($flight instanceof FighterFlight)
+			? '<span class="shiplink" data-id="' . (int)$flight->id . '">' . $flight->name . '</span>'
+			: self::flightNameFor($phpclass, $carrier);
+		return $label . ' (' . (int)$count . ')';
 	}
 
 	/* Persist the escape roll on the carrier's primary hangar and write a
