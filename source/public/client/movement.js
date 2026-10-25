@@ -340,6 +340,7 @@ shipManager.movement = {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.isRedlineCooling(ship)) return false; //cooling after a Redline Pilot's afterburners: straight ahead (OFFICERS_PLAN.md Stage 32)
         if (shipManager.movement.extendedTurnForbids(ship, 'jink')) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!
         if (!ship.flight && ship.jinkinglimit <= 0) return false;
@@ -1236,6 +1237,7 @@ shipManager.movement = {
 
     canSlip: function canSlip(ship, right) {
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.isRedlineCooling(ship)) return false; //cooling after a Redline Pilot's afterburners: straight ahead (OFFICERS_PLAN.md Stage 32)
         if (shipManager.movement.extendedTurnForbids(ship, right ? 'slipright' : 'slipleft')) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
@@ -1413,6 +1415,7 @@ shipManager.movement = {
     canPivot: function canPivot(ship, right) {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
+        if (shipManager.movement.isRedlineCooling(ship)) return false; //cooling after a Redline Pilot's afterburners: straight ahead (OFFICERS_PLAN.md Stage 32)
         if (shipManager.movement.extendedTurnForbids(ship, right ? 'pivotright' : 'pivotleft')) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
@@ -1437,7 +1440,9 @@ shipManager.movement = {
         //		}
         if (ship.flight && gamedata.gamephase == 3) {
             if (!weaponManager.canCombatTurn(ship)) return false;
-            if (shipManager.movement.getCombatPivotCost(ship) > shipManager.movement.getRemainingEngineThrust(ship)) return false;
+            //a Redline Pilot's flight pivots without the thrust for it - its fire then at the tripled penalty (OFFICERS_PLAN.md Stage 32)
+            if (shipManager.movement.getCombatPivotCost(ship) > shipManager.movement.getRemainingEngineThrust(ship)
+                && !(window.officers && officers.mayRedlinePivot(ship))) return false;
         } else if (gamedata.gamephase != 2) return false;
 
         return true;
@@ -1534,6 +1539,7 @@ shipManager.movement = {
 
     canEvade: function canEvade(ship) {
         if (gamedata.gamephase != 3 || !ship.flight) return false;
+        if (shipManager.movement.isRedlineCooling(ship)) return false; //cooling after a Redline Pilot's afterburners (OFFICERS_PLAN.md Stage 32)
         if (!(window.officers && officers.canEvade(ship))) return false;
         if (shipManager.movement.hasEvaded(ship)) return false;
         if (shipManager.movement.hasJumpedOut(ship)) return false;
@@ -1800,6 +1806,107 @@ shipManager.movement = {
         return ship.agile ? Math.max(1, Math.ceil(cost / 2)) : Math.max(1, cost - 1);
     },
 
+    /* REDLINE PILOT'S AFTERBURNERS (OFFICERS_PLAN.md Stage 32): "Redline Pilots may use their afterburners above and beyond their usual tolerances.
+       If this is done, the fight increases its thrust by 50% on the current turn (round any fractions down). However, the flight is not permitted
+       to maneuver on the following turn (it must proceed straight ahead at its current speed) while the engines cool off." Ordered with the Redline
+       icon (UI/shipMovement.js) as the flight's FIRST order of the Movement phase (the user's note: then there is no thrust to give back): a
+       'redline' row - no thrust, at the flight's hex - that getRemainingEngineThrust adds officers.redlineThrustBonus for, and that Cancel or the
+       icon takes back while it is still the last row. The next turn the flight is COOLING (isRedlineCooling): every manoeuvre gate refuses it -
+       turn, slip, pivot, speed change and jink, and in the Firing phase the combat pivot and Evade (user ruling 2026-10-25). The server keeps
+       the row (Officers::validateRedline) and refuses a cooling commit that manoeuvres.
+       ⚠️ MIRROR PAIR with Movement::REDLINE / hasRedlined (PHP). */
+    REDLINE: 'redline',
+
+    //the flight's 'redline' row on `turn` (default: this one), or null
+    getRedlineRow: function getRedlineRow(ship, turn) {
+        if (!ship || !ship.movement || !window.gamedata) return null;
+        if (turn === undefined) turn = gamedata.turn;
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move && move.type === shipManager.movement.REDLINE && move.turn == turn) return move;
+        }
+        return null;
+    },
+
+    //it burned last turn, so this turn it flies straight ahead at its speed - whatever became of him. ⚠️ MIRROR PAIR with Officers::isCoolingDown (PHP).
+    isRedlineCooling: function isRedlineCooling(ship) {
+        return !!(ship && ship.flight && window.gamedata && shipManager.movement.getRedlineRow(ship, gamedata.turn - 1));
+    },
+
+    /* Has the unit ordered anything this turn - a row of its own, not one the turn made itself (preturn, forced, its start, a deployment, a host's
+       mirrored move). ⚠️ MIRROR PAIR with Movement::isOrderedRow (PHP). */
+    hasOrderedThisTurn: function hasOrderedThisTurn(ship) {
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (!move || move.turn != gamedata.turn || move.preturn || move.forced) continue;
+            if (move.type !== 'start' && move.type !== 'deploy' && move.type !== 'attached') return true;
+        }
+        return false;
+    },
+
+    canRedline: function canRedline(ship) {
+        if (!ship || !ship.flight || gamedata.gamephase != 2) return false;
+        if (!(window.officers && officers.canRedline(ship))) return false;
+        if (shipManager.movement.getRedlineRow(ship) || shipManager.movement.isRedlineCooling(ship)) return false;
+        if (shipManager.movement.hasJumpedOut(ship) || shipManager.isDestroyed(ship)) return false;
+        if (Object.keys(ship.attached || {}).length !== 0 && !ship.detached) return false; //riding another unit
+        if (gamedata.getMyActiveShips().indexOf(ship) === -1) return false;
+        if (shipManager.movement.checkHasUncommitted(ship)) return false;
+        return !shipManager.movement.hasOrderedThisTurn(ship);
+    },
+
+    /* What the Redline icon shows: null (none), 'ready' (may burn - its first order), 'on' (burning: the icon or Cancel takes it back while it is
+       the last row), 'locked' (burning, moves plotted after it) or 'cooling' (burned last turn: straight ahead this turn - the owner's only). */
+    getRedlineState: function getRedlineState(ship) {
+        if (!ship || !ship.flight || gamedata.gamephase != 2) return null;
+        var row = shipManager.movement.getRedlineRow(ship);
+        if (row) return ship.movement[ship.movement.length - 1] === row ? 'on' : 'locked';
+        if (shipManager.movement.isRedlineCooling(ship)) return (typeof gamedata.isMyShip === 'function' && gamedata.isMyShip(ship)) ? 'cooling' : null;
+        return shipManager.movement.canRedline(ship) ? 'ready' : null;
+    },
+
+    //The icon's click: burn (with its notice, and on the phase's first burn the clip), or take the burn back while it is the last row. Returns whether anything changed.
+    toggleRedline: function toggleRedline(ship) {
+        var state = shipManager.movement.getRedlineState(ship);
+        if (state === 'ready') {
+            if (!shipManager.movement.doRedline(ship)) return false;
+            if (window.officers) officers.redlineBurnFeedback(ship);
+            return true;
+        }
+        if (state === 'on') {
+            shipManager.movement.deleteMove(ship);
+            return true;
+        }
+        return false;
+    },
+
+    doRedline: function doRedline(ship) {
+        if (!shipManager.movement.canRedline(ship)) return false;
+        var lm = ship.movement[ship.movement.length - 1];
+        ship.movement[ship.movement.length] = {
+            id: -1,
+            type: shipManager.movement.REDLINE,
+            position: lm.position,
+            xOffset: lm.xOffset,
+            yOffset: lm.yOffset,
+            facing: lm.facing,
+            heading: lm.heading,
+            speed: lm.speed,
+            animating: false,
+            animated: true,
+            animationtics: 0,
+            requiredThrust: [0],
+            assignedThrust: [], //by thruster id - none (Cancel's revertAutoThrust walks it)
+            commit: true,
+            preturn: false,
+            at_initiative: shipManager.getIniativeOrder(ship),
+            turn: gamedata.turn,
+            forced: false,
+            value: 0
+        };
+        return true;
+    },
+
     /* What a flight's combat pivot (Firing phase) costs: 1.5 x its pivot cost, rounded up - halved, rounded up, by
        an Expert Coordinator (officers.combatPivotCost). The cost canPivot checks, doPivot puts on the row and the
        map tooltip quotes. */
@@ -1856,7 +1963,10 @@ shipManager.movement = {
         if (ship.flight) {
             commit = true;
             requiredThrust[0] = pivotcost;
-            assignedThrust[0] = pivotcost;
+            /* A Redline Pilot's combat pivot without the thrust for it pays what is left, and the row keeps the full cost asked - which is
+               how isRedlinePivot (and Movement::isRedlinePivot) know its fire takes the tripled penalty (OFFICERS_PLAN.md Stage 32). */
+            assignedThrust[0] = gamedata.gamephase == 3
+                ? Math.min(pivotcost, Math.max(0, shipManager.movement.getRemainingEngineThrust(ship))) : pivotcost;
         } else {
             var side = Math.floor(pivotcost / 2);
             var rear = Math.floor(pivotcost / 2);
@@ -2394,6 +2504,38 @@ shipManager.movement = {
         return !(window.officers && officers.waivesCombatPivotPenalty(ship));
     },
 
+    /* Would this flight's next combat pivot be a Redline Pilot's made without the thrust for it (OFFICERS_PLAN.md Stage 32) - the pivot arrows are
+       then drawn red (UI/shipMovement.js pivotArrowTint). */
+    isRedlinePivotNext: function isRedlinePivotNext(ship) {
+        if (!ship || !ship.flight || gamedata.gamephase != 3) return false;
+        if (shipManager.movement.getCombatPivotCost(ship) <= shipManager.movement.getRemainingEngineThrust(ship)) return false;
+        return !!(window.officers && officers.mayRedlinePivot(ship));
+    },
+
+    /* ...and how big it is, in d20 points: 0 (none), 1 - or 3 once one of this turn's pivots was a Redline Pilot's made without the thrust for
+       it, "the firing penalty for a combat pivot is tripled" (OFFICERS_PLAN.md Stage 32), however many. The hit chance and the map tooltip read
+       it. ⚠️ MIRROR PAIR with Officers::combatPivotPenalty (PHP). */
+    combatPivotPenalty: function combatPivotPenalty(ship) {
+        if (!shipManager.movement.hasCombatPivotPenalty(ship)) return 0;
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move && move.turn == gamedata.turn && shipManager.movement.isRedlinePivot(move)) return window.officers ? officers.REDLINE_PIVOT_FACTOR : 3;
+        }
+        return 1;
+    },
+
+    /* A combat pivot made without the thrust for it: the row asks the pivot's full cost and pays what the flight had left (doPivot).
+       ⚠️ MIRROR PAIR with Movement::isRedlinePivot (PHP). */
+    isRedlinePivot: function isRedlinePivot(move) {
+        if (!move || move.value != "combatpivot" || (move.type != "pivotleft" && move.type != "pivotright")) return false;
+        var sum = function (thrust) {
+            var total = 0;
+            for (var k in thrust || {}) total += Number(thrust[k]) || 0;
+            return total;
+        };
+        return sum(move.assignedThrust) < sum(move.requiredThrust);
+    },
+
     hasPivotedForShooting: function hasPivotedForShooting(ship) {
         for (var i in ship.movement) {
             var movement = ship.movement[i];
@@ -2423,6 +2565,7 @@ shipManager.movement = {
     canChangeSpeed: function canChangeSpeed(ship, accel) {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
+        if (shipManager.movement.isRedlineCooling(ship)) return false; //cooling after a Redline Pilot's afterburners: its current speed (OFFICERS_PLAN.md Stage 32)
         if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return false;
         }
@@ -2450,13 +2593,14 @@ shipManager.movement = {
             return false;
         }
 
-        //acceleration must be the first thing in a turn...
+        //acceleration must be the first thing in a turn... (a Redline Pilot's afterburners aside, which are ordered first of all - OFFICERS_PLAN.md Stage 32)
         for (var i in ship.movement) {
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn) continue;
             if (movement.preturn == false &&
                 movement.forced == false &&
                 movement.type != "speedchange" &&
+                movement.type != shipManager.movement.REDLINE &&
                 movement.type != "deploy" &&
                 movement.type != "sync" &&
                 movement.type != "attached" &&
@@ -2598,7 +2742,7 @@ shipManager.movement = {
     getRemainingEngineThrust: function getRemainingEngineThrust(ship) {
         var rem = 0;
         if (ship.flight) {
-            rem = ship.freethrust;
+            rem = ship.freethrust + (window.officers ? officers.redlineThrustBonus(ship) : 0); //+ a Redline Pilot's afterburners this turn (OFFICERS_PLAN.md Stage 32)
         } else {
             for (var i in ship.systems) {
                 var system = ship.systems[i];
@@ -2734,7 +2878,7 @@ shipManager.movement = {
     getFullEngineThrust: function getRemainingEngineThrust(ship) {
         var rem = 0;
         if (ship.flight) {
-            rem = ship.freethrust;
+            rem = ship.freethrust + (window.officers ? officers.redlineThrustBonus(ship) : 0); //+ a Redline Pilot's afterburners this turn (OFFICERS_PLAN.md Stage 32)
         } else {
             for (var i in ship.systems) {
                 var system = ship.systems[i];
@@ -3209,6 +3353,7 @@ shipManager.movement = {
     canTurn: function canTurn(ship, right, ignoreThrustCost = false) {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
+        if (shipManager.movement.isRedlineCooling(ship)) return false; //cooling after a Redline Pilot's afterburners: straight ahead (OFFICERS_PLAN.md Stage 32)
         if (ship.mine) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         

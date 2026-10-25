@@ -48,6 +48,9 @@
                 $mayTurn = !$isFlight && TacGamedata::$officersPresent
                     && Officers::mayAnticipate($loaded) && !self::hasAnticipated($loaded, $gamedata->turn);
                 $turnKept = false;
+                /* A flight cooling its engines after a Redline Pilot's afterburners (OFFICERS_PLAN.md Stage 32) keeps nothing: no combat
+                   pivot, no Evade - the row decides, on the authoritative load. */
+                $cooling = $isFlight && $loaded && Officers::isCoolingDown($loaded, $gamedata->turn);
 
                 for ($i=count($ship->movement)-1;$i>=0;$i--){
                     $move = $ship->movement[$i];
@@ -56,6 +59,7 @@
                     $isTurn = self::isAnticipatedTurn($move);
                     if (($isFlight ? ($move->type != "pivotright" && $move->type != "pivotleft" && !$isEvade) : !$isTurn)
 						||( $move->turn != $gamedata->turn )
+						||$cooling
 						||(!self::checkIsNewMove($gamedata, $ship, $move))
 						||($isEvade && (!$mayEvade || $evadeKept))
 						||($isTurn && (!$mayTurn || $turnKept))){
@@ -1309,6 +1313,36 @@
 				if ($move->turn == $turn && $move->type == self::GRAV_ROTATE) return true;
 			}
 			return false;
+		}
+
+		/* A Redline Pilot's AFTERBURNERS (OFFICERS_PLAN.md Stage 32): a Movement-phase row of its own at the flight's hex, no thrust - the flight's
+		   first order of the turn (Officers::validateRedline keeps one only for a flight whose Redline Pilot serves and which is not cooling off).
+		   It raises the flight's thrust that turn (Officers::redlineBurnThrust) and forbids every manoeuvre the next (Officers::isCoolingDown).
+		   ⚠️ MIRROR PAIR with shipManager.movement.REDLINE (client movement.js). */
+		const REDLINE = 'redline';
+
+		//Did the flight burn its afterburners on $turn
+		public static function hasRedlined($ship, $turn){
+			if (!$ship || !is_array($ship->movement)) return false;
+			foreach ($ship->movement as $move){
+				if ($move->turn == $turn && $move->type == self::REDLINE) return true;
+			}
+			return false;
+		}
+
+		/* A combat pivot made without the thrust for it - a Redline Pilot's (OFFICERS_PLAN.md Stage 32): the row asks the pivot's full cost in
+		   requiredThrust and pays what the flight had left in assignedThrust (client movement.js doPivot). Officers::combatPivotPenalty triples
+		   the turn's penalty for it. ⚠️ MIRROR PAIR with shipManager.movement.isRedlinePivot (JS). */
+		public static function isRedlinePivot($move){
+			if ($move->value != "combatpivot" || ($move->type != "pivotleft" && $move->type != "pivotright")) return false;
+			$required = is_array($move->requiredThrust) ? array_sum($move->requiredThrust) : 0;
+			$assigned = is_array($move->assignedThrust) ? array_sum($move->assignedThrust) : 0;
+			return $assigned < $required;
+		}
+
+		//a row the player ordered - not one the turn makes itself: a preturn or forced row, its start, a deployment, a mirrored host move
+		public static function isOrderedRow($move){
+			return !$move->preturn && empty($move->forced) && $move->type != "start" && $move->type != "deploy" && $move->type != "attached";
 		}
 
 		/* How far this turn's combat pivots turned the flight, in hex sides, rights against lefts: right-left-right

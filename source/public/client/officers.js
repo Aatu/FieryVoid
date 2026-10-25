@@ -194,7 +194,13 @@ window.officers = {
 		   (marinesEliteLine). */
 		{ id: 'OFF_TRPOD', label: 'Expert Troop Leader', post: 'craft', flight: true, unscaled: true, multi: true, mixesWith: ['OFF_BRCH'],
 			needs: 'breachingPod',
-			summary: '+3 on every roll of his pod\'s marine; when eliminated escapes on a d6 of 1-4' }
+			summary: '+3 on every roll of his pod\'s marine; when eliminated escapes on a d6 of 1-4' },
+		/* Stage 32: the Redline Pilot, in the flight's first craft (the offers decide the price - the Cascor's 100%, everyone else's 150%). No stat
+		   moves. His afterburners are movement.js's (the Redline icon - canRedline - and the next turn's cooling, isRedlineCooling); his combat pivot
+		   without the thrust is canPivot's and doPivot's, its tripled penalty the hit-chance preview's (combatPivotPenalty); his landing beyond the
+		   tolerance is the Dock dialog's offer (mayRedlineLand) and the server's roll; his skin dancing the server's alone. */
+		{ id: 'OFF_REDL', label: 'Redline Pilot', post: 'craft', flight: true,
+			summary: 'Skin dances ships up to speed 8; combat pivots without thrust; afterburners +50% thrust; lands beyond thrust tolerance' }
 	],
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV, the Expert
@@ -2264,6 +2270,131 @@ window.officers = {
 		var entry = this.listFor(ship).filter(function (e) { return e.id === 'OFF_GRAV' && self.serves(e, turn); })[0];
 		if (!entry) return false;
 		return !(entry.abilities && entry.abilities.rotate !== undefined && entry.abilities.rotate !== null);
+	},
+
+	/* ------------------------------------------------------------------ Redline Pilot (Stage 32) */
+
+	REDLINE_DANCE_SPEED: 8,  //⚠️ MIRROR of Officers::REDLINE_DANCE_SPEED (PHP) - the summary's figure; the skin dance itself is the server's
+	REDLINE_PIVOT_FACTOR: 3, //...REDLINE_PIVOT_FACTOR - the combat pivot penalty tripled (shipManager.movement.combatPivotPenalty)
+	REDLINE_BURN_PCT: 50,    //...REDLINE_BURN_PCT - the afterburners' thrust (redlineThrustBonus)
+	REDLINE_LANDING_DIE: 20, //...REDLINE_LANDING_DIE - the Dock dialog's risk line
+
+	//his entry on this flight while he serves now, through his list - so never an enemy's
+	redlineEntry: function redlineEntry(ship) {
+		if (!ship || !ship.flight) return null;
+		var turn = this.currentTurn();
+		var self = this;
+		return this.listFor(ship).filter(function (e) { return e.id === 'OFF_REDL' && self.serves(e, turn); })[0] || null;
+	},
+
+	/* May this flight burn its afterburners now (movement.js canRedline asks the rest - its first order, not cooling): the player's own flight, and
+	   he serves. And, in the Firing phase, pivot without the thrust (movement.js canPivot). ⚠️ MIRROR of Officers::validateRedline's test (PHP). */
+	canRedline: function canRedline(ship) {
+		if (window.gamedata && typeof gamedata.isMyShip === 'function' && !gamedata.isMyShip(ship)) return false;
+		return this.redlineEntry(ship) !== null;
+	},
+
+	mayRedlinePivot: function mayRedlinePivot(ship) {
+		return this.canRedline(ship);
+	},
+
+	/* What this turn's 'redline' row adds to a flight's thrust: half its thrust, rounded down (movement.js getRemainingEngineThrust and
+	   getFullEngineThrust). The row is the record, whatever became of him - an enemy's too, as its movement is public.
+	   ⚠️ MIRROR PAIR with Officers::redlineBurnThrust (PHP). */
+	redlineThrustBonus: function redlineThrustBonus(ship) {
+		if (!ship || !ship.flight || !window.shipManager || !shipManager.movement || typeof shipManager.movement.getRedlineRow !== 'function') return 0;
+		if (!shipManager.movement.getRedlineRow(ship)) return 0;
+		return Math.floor(Math.max(0, Number(ship.freethrust) || 0) * this.REDLINE_BURN_PCT / 100);
+	},
+
+	/* May this flight land beyond its thrust tolerance this turn - the Dock dialog offers such a carrier (findEligibleCarriersForDock): he serves,
+	   his craft still flies, and it did not burn ("The fight cannot use the afterburners during this attempt"). The server rolls the d20 as
+	   firing resolves. ⚠️ MIRROR of Officers::rollRedlineLandings' test (PHP). */
+	mayRedlineLand: function mayRedlineLand(ship) {
+		var entry = this.redlineEntry(ship);
+		if (!entry || shipManager.movement.getRedlineRow(ship)) return false;
+		var craft = this.systemById(ship, entry.post);
+		return !!craft && !shipManager.systems.isDestroyed(ship, craft);
+	},
+
+	/* A burn's feedback (movement.js toggleRedline): a passive notice of what it gives and what it costs, and - on the first burn of a Movement
+	   phase, whichever flight - the clip under it (the user's "fun thing"). */
+	redlineBurnFeedback: function redlineBurnFeedback(ship) {
+		this.notice('Afterburners! ' + ship.name + ' has +' + this.redlineThrustBonus(ship) + ' thrust this turn - next turn it must fly straight ahead while its engines cool.');
+		if (this.redlineClipShown === gamedata.turn) return;
+		this.redlineClipShown = gamedata.turn;
+		this.playRedlineClip();
+	},
+
+	/* THE CLIP: one of five short MP4s (img/redline1-5.mp4 - the user's GIFs re-encoded, 30-290 KB, muted and looping). Nothing is fetched at
+	   page load. When a Movement phase opens for a player with a flight that may burn (PhaseDirector -> prefetchRedlineClip), ONE is picked at
+	   random and fetched in idle time, so the first burn plays it at once; a burn before it arrives streams it. Shown centred under the passive
+	   notice, click-through, for its REDLINE_CLIP_MS, then faded out. */
+	REDLINE_CLIPS: 5,
+	REDLINE_CLIP_MS: { 1: 2200, 2: 2200, 3: 2200, 4: 2200, 5: 2200 }, //by clip number, ms before the fade - each a second less than at first (user, play test 4515)
+	redlineClip: null,       //{ turn, src, url } - this turn's pick, and its blob URL once fetched
+	redlineClipShown: null,  //the turn whose Movement phase has played it
+	redlineClipTimer: null,
+
+	redlineClipSource: function redlineClipSource() {
+		return 'img/redline' + (1 + Math.floor(Math.random() * this.REDLINE_CLIPS)) + '.mp4';
+	},
+
+	prefetchRedlineClip: function prefetchRedlineClip() {
+		if (!window.gamedata || gamedata.gamephase != 2 || !window.shipManager) return;
+		if (this.redlineClip && this.redlineClip.turn === gamedata.turn) return;
+		var self = this;
+		var any = (gamedata.ships || []).some(function (ship) {
+			return ship && ship.flight && self.canRedline(ship) && !shipManager.movement.isRedlineCooling(ship);
+		});
+		if (!any) return;
+		if (this.redlineClip && this.redlineClip.url) URL.revokeObjectURL(this.redlineClip.url);
+		var clip = this.redlineClip = { turn: gamedata.turn, src: this.redlineClipSource(), url: null };
+		var load = function () {
+			if (typeof fetch !== 'function' || self.redlineClip !== clip) return;
+			fetch(clip.src).then(function (response) { return response.ok ? response.blob() : null; }).then(function (blob) {
+				if (blob && self.redlineClip === clip) clip.url = URL.createObjectURL(blob);
+			}).catch(function () {});
+		};
+		if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(load, { timeout: 4000 });
+		else setTimeout(load, 1500);
+	},
+
+	playRedlineClip: function playRedlineClip() {
+		var clip = (this.redlineClip && this.redlineClip.turn === gamedata.turn) ? this.redlineClip : { src: this.redlineClipSource(), url: null };
+		var video = document.getElementById('redlineClip');
+		if (!video) {
+			video = document.createElement('video');
+			video.id = 'redlineClip';
+			video.className = 'redlineClip';
+			video.muted = true;
+			video.loop = true;
+			video.playsInline = true;
+			video.setAttribute('muted', '');
+			video.setAttribute('playsinline', '');
+			document.body.appendChild(video);
+		}
+		//under the passive notice the burn has just raised (savedOrders.showNotice places it below the phase banner)
+		var notice = $('#savedOrdersNotice');
+		var top = (notice.length && notice.css('display') !== 'none') ? (parseFloat(notice.css('top')) || 130) + notice.outerHeight() + 8 : 170;
+		clearTimeout(this.redlineClipTimer);
+		$(video).stop(true, true).css({ top: top + 'px', display: 'block', opacity: 0 });
+		video.src = clip.url || clip.src;
+		var playing = video.play();
+		if (playing && typeof playing.catch === 'function') playing.catch(function () {});
+		$(video).fadeTo(400, 1);
+		this.redlineClipTimer = setTimeout(function () {
+			$(video).fadeTo(600, 0, function () {
+				video.pause();
+				$(video).hide();
+			});
+		}, this.redlineClipTime(clip.src));
+	},
+
+	//how long a clip stays up before it fades: its REDLINE_CLIP_MS, by the number in its name
+	redlineClipTime: function redlineClipTime(src) {
+		var n = (String(src).match(/redline(\d+)\.mp4$/) || [])[1];
+		return this.REDLINE_CLIP_MS[n] || 3200;
 	},
 
 	/* ------------------------------------------------------------------ what a flight's officer costs */

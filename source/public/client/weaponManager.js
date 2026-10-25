@@ -2366,8 +2366,9 @@ window.weaponManager = {
                 var shooterJink = shipManager.movement.getJinking(shooter);
                 if (shooterJink !== 0) otherDetail.push({ label: 'Shooter Jinking', value: -shooterJink });
             }
-            if (shipManager.movement.hasCombatPivotPenalty(shooter)) {
-                otherDetail.push({ label: 'Combat Pivot', value: -1 });
+            var pivotPenalty = shipManager.movement.combatPivotPenalty(shooter); //tripled after a Redline Pilot's pivot without the thrust (OFFICERS_PLAN.md Stage 32)
+            if (pivotPenalty > 0) {
+                otherDetail.push({ label: pivotPenalty > 1 ? 'Combat Pivot (Redline)' : 'Combat Pivot', value: -pivotPenalty });
             }
             var tailGun = weaponManager.getTailGunMod(shooter, weapon);
             if (tailGun !== 0) otherDetail.push({ label: tailGun > 0 ? 'Expert Tailgunner' : 'Tail Gun', value: tailGun });
@@ -5910,6 +5911,9 @@ window.weaponManager = {
             //PoliticalSpeech (OFFICERS_PLAN.md Stage 25): an Expert Political Officer's stirring speech - its sentence alone, under a
             //"SPEECH:" header (combatLog.logFireOrders), 0 shots on the ship's own Ramming Attack.
             "PoliticalSpeech",
+            //RedlineLanding (OFFICERS_PLAN.md Stage 32): a Redline Pilot's landing beyond the thrust tolerance that held - its roll. 0 shots
+            //on his craft's Ramming Attack, at his own flight; its sentence continues the header with "'s" (a crash is the ram itself).
+            "RedlineLanding",
             //HangarEscape (HangarOps::escapeLogOrder): a destroyed carrier's escape roll - what flew free and what was lost with the
             //ship. 0 shots on the carrier's own Ramming Attack; its sentence continues the header with "'s".
             "HangarEscape"

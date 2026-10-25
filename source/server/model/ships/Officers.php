@@ -188,6 +188,12 @@ class Officers{
 	const GRAV_ENGINE_THRUST = 1;        //...: "Tweaking of the Engine improved its thrust output by 1"
 	const GRAV_THRUSTER = 1;             //...: "Increase the thrust rating of the largest aft thruster by 1 as well"
 	const GRAV_ROTATION_PENALTY = 3;     //...: "On the turn a rotation is done, the ship's weapons suffer a -3 penalty to all weapons fire" (d20 units, -15%)
+	const SKIN_DANCE_SPEED = 5;          //FV's skin dance: an Enormous unit moving faster than this cannot be danced over (RammingAttack::getSkinDancingResult)
+	const REDLINE_DANCE_SPEED = 8;       //Redline Pilot: "may perform skin dancing on capital ships moving at speeds of 8 or less" - Enormous units (user ruling 2026-10-25)
+	const REDLINE_PIVOT_FACTOR = 3;      //...: a combat pivot made without the thrust for it - "the firing penalty for a combat pivot is tripled" (-1 -> -3)
+	const REDLINE_BURN_PCT = 50;         //...: afterburners - "the fight increases its thrust by 50% on the current turn (round any fractions down)"
+	const REDLINE_LANDING_DIE = 20;      //...: a landing beyond the tolerance - "roll a d20. If the result is less than or equal to the amount ... exceeded", he crashes
+	const REDLINE_LANDING_CLASS = 'RedlineLanding'; //...a landing that holds, told in the combat log (rollRedlineLandings) - weaponManager.doShortLogText
 	/* ...: the magazine rounds he may pick free - "change one of their single-space ... missiles to any other legal type at no cost" - by
 	   enhancement id, each with the round it loads (Enhancements::setEnhancementOptionsShip's list). A pick is one of these the hull is
 	   enabled for, single-slot and priced on that hull (paidPickTypes); Basic is not among them, as no swap to it is worth anything (user
@@ -299,6 +305,8 @@ class Officers{
 		//"10% of the ship's base cost for Brakiri ... Non-Brakiri races which use gravitic drives or weapons can purchase one for 50% higher" - the
 		//registry's 15, and 10 here; which hulls is his `needs` (usesGravitics)
 		'OFF_GRAV' => array('pct' => array('Brakiri Syndicracy' => 10)),
+		//"Equal to the 100% cost of a fighter ... Races other than the Cascor increase the cost by 50%" - the registry's 150, and 100 here
+		'OFF_REDL' => array('pct' => array('Cascor Commonwealth' => 100)),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -722,10 +730,22 @@ class Officers{
 		   result appears that 'kills' one of his contingents, roll a d6, and on a roll of 1-4 he manages to escape with his pod ... This is
 		   not available on Wreak Havoc missions" - troopPartyLost; on Wreak Havoc he dies with them (user ruling). Lost with his pod as
 		   every fighter officer, and no kill roll of his own. One to a pod, as many as the flight has (`multi`), beside Breaching Experts
-		   (`mixesWith` - user ruling 2026-10-23); priced at his one pod (`unscaled`). Gaim breaching pods only ($factionRules, `needs`).
-		   Last in the list, as the newest. */
+		   (`mixesWith` - user ruling 2026-10-23); priced at his one pod (`unscaled`). Gaim breaching pods only ($factionRules, `needs`). */
 		'OFF_TRPOD' => array('label' => 'Expert Troop Leader', 'post' => 'craft', 'flight' => true, 'pct' => 50, 'unscaled' => true, 'multi' => 6,
 			'mixesWith' => array('OFF_BRCH'), 'apply' => null, 'needs' => 'isBreachingPod'),
+		/* Redline Pilot (Stage 32; rules text, user 2026-10-25) - "nothing less than fanatical", in the flight's first craft. "A fight with a
+		   Redline Pilot cannot contain any other officers": D9's one officer to a flight already. (1) He skin dances over an Enormous unit moving
+		   at speed 8 or less, not 5, at +1 for each point of its speed over 5 (skinDanceSpeedLimit - RammingAttack::getSkinDancingResult), and his
+		   craft is the one that crashes when a dance fails (redlineCrashCraft). (2) A combat pivot the flight lacks the thrust for (the client's,
+		   movement.js canPivot / doPivot - the row records what it lacked), its fire that turn at -3 instead of -1 (combatPivotPenalty). (3)
+		   Afterburners, the flight's FIRST Movement-phase order of a turn (the user's note): its thrust +50%, rounded down, that turn - a 'redline'
+		   row (redlineBurnThrust, validateRedline) - and the next turn straight ahead at its speed, no manoeuvre of any kind (isCoolingDown). (4) A
+		   landing beyond the thrust tolerance: a d20 at or under the excess and his craft rams the carrier while the rest break off, never on a
+		   turn the flight burned (rollRedlineLandings, redlineLandingHolds). Rulings (user 2026-10-25): Enormous units only; the flight's own +1
+		   per 2 points of speed over 5 is FV's existing modifier, counted once; the cooling turn forbids every manoeuvre, the Firing phase's
+		   included; an afterburner's thrust counts for a landing. "Equal to the 100% cost of a fighter" for the Cascor, 50% more for everyone
+		   else ($factionRules) - of a craft, scaled by the flight's size (§9.9). No stat moves at load. Last in the list, as the newest. */
+		'OFF_REDL' => array('label' => 'Redline Pilot', 'post' => 'craft', 'flight' => true, 'pct' => 150, 'apply' => null),
 	);
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV) - so the
@@ -4730,6 +4750,229 @@ class Officers{
 		self::spend($ship, $i, 'rotate', $turn, $gamedata);
 		MoveLock::save($dbManager, $gamedata->id, $turn, $ship->id, $own);
 		return array('rows' => $own, 'die' => $die);
+	}
+
+	/* ------------------------------------------------------------------ Redline Pilot (Stage 32) */
+
+	//the index of a flight's Redline Pilot in its list while he serves on $turn, or null
+	private static function redlineIndex($flight, $turn){
+		if (!($flight instanceof FighterFlight)) return null;
+		foreach ($flight->getOfficers() as $i => $entry){
+			if ($entry['id'] === 'OFF_REDL' && self::serves($entry, $turn)) return $i;
+		}
+		return null;
+	}
+
+	/* (1) How fast an Enormous unit may move for this unit to skin dance over it: FV's 5 - or 8 while a Redline Pilot serves its flight, "may
+	   perform skin dancing on capital ships moving at speeds of 8 or less" (Enormous units, as FV dances over no other - user ruling 2026-10-25).
+	   RammingAttack::getSkinDancingResult, which adds his "+1 for every point of speed over 5 (for the target unit)" beside FV's own modifiers -
+	   the flight's "+1 for every 2 points over 5" is FV's own already, counted once (user ruling). */
+	public static function skinDanceSpeedLimit($shooter, $turn){
+		if (TacGamedata::$officersPresent && self::redlineIndex($shooter, $turn) !== null) return self::REDLINE_DANCE_SPEED;
+		return self::SKIN_DANCE_SPEED;
+	}
+
+	/* "The Redline Pilot must always be picked as the fighter destroyed (at which time the fight loses its benefits)": his craft, while he serves
+	   and it still flies - the one a failed skin dance crashes into the hull (RammingAttack::beforePreFiringOrderResolution) and a failed landing
+	   rams the carrier with (rollRedlineLandings). null otherwise. */
+	public static function redlineCrashCraft($flight, $turn){
+		if (!TacGamedata::$officersPresent) return null;
+		$i = self::redlineIndex($flight, $turn);
+		if ($i === null) return null;
+		$craft = $flight->getSystemById($flight->getOfficers()[$i]['post']);
+		return ($craft instanceof Fighter && !$craft->isDestroyed()) ? $craft : null;
+	}
+
+	/* (2) The combat pivot penalty of a flight's fire this turn, in d20 points: 1 - or REDLINE_PIVOT_FACTOR when one of this turn's combat pivots
+	   was made without the thrust for it: "Redline Pilots may combat pivot their fight even if they do not have enough thrust left. If this is
+	   done, however, the firing penalty for a combat pivot is tripled" - once, however many such pivots, as the -1 is once. The row is the record
+	   (Movement::isRedlinePivot - the full cost asked, less paid), whatever becomes of him later in the turn. Weapon::calculateHitBase's fighter
+	   branch, behind $officersPresent. ⚠️ MIRROR PAIR with shipManager.movement.combatPivotPenalty (JS). */
+	public static function combatPivotPenalty($flight, $turn){
+		foreach ((array)$flight->movement as $move){
+			if ((int)$move->turn === (int)$turn && Movement::isRedlinePivot($move)) return self::REDLINE_PIVOT_FACTOR;
+		}
+		return 1;
+	}
+
+	/* (3) AFTERBURNERS - "the fight increases its thrust by 50% on the current turn (round any fractions down)": what this turn's 'redline' row
+	   (Movement::REDLINE, the flight's first order - validateRedline) adds to its thrust. The row is the record: once kept, the burn stands
+	   whatever becomes of him. HangarOps::canShipReceive adds it to the landing tolerance (user ruling 2026-10-25: it counts); the plot's thrust
+	   is the client's (movement.js getRemainingEngineThrust - movement.php checks no flight's thrust). ⚠️ MIRROR PAIR with
+	   officers.redlineThrustBonus (JS). */
+	public static function redlineBurnThrust($flight, $turn){
+		if (!($flight instanceof FighterFlight) || !Movement::hasRedlined($flight, $turn)) return 0;
+		return intdiv(max(0, (int)$flight->freethrust) * self::REDLINE_BURN_PCT, 100);
+	}
+
+	/* "...the flight is not permitted to maneuver on the following turn (it must proceed straight ahead at its current speed) while the engines
+	   cool off": the turn after a burn, whatever becomes of him - no turn, slip, pivot, speed change, jink or burn in the Movement phase
+	   (validateRedline), no combat pivot or Evade in the Firing phase (Movement::validateMovement) - user ruling 2026-10-25: everything.
+	   ⚠️ MIRROR PAIR with shipManager.movement.isRedlineCooling (JS). */
+	public static function isCoolingDown($flight, $turn){
+		return ($flight instanceof FighterFlight) && Movement::hasRedlined($flight, (int)$turn - 1);
+	}
+
+	//the Movement-phase orders a cooling flight may not give: every manoeuvre a flight has, a burn included (Movement::REDLINE)
+	private static $coolingForbids = array('turnleft', 'turnright', 'slipleft', 'slipright', 'pivotleft', 'pivotright', 'speedchange', 'jink', 'roll', 'redline');
+
+	/* MovementGamePhase::process, on the movement a POST submits for $loaded (the authoritative load - the POST-side flight has no officers).
+	   ONE 'redline' row is kept, only while his Redline Pilot serves and the flight is not cooling off, and only as the flight's first order of
+	   the turn - nothing it ordered before it, the turn's own rows aside (the user's note: no thrust to give back). Every other 'redline' row is
+	   dropped. A cooling flight's commit holding a manoeuvre is REFUSED: the client never lets one be plotted, and dropping a turn would break the
+	   path plotted after it. */
+	public static function validateRedline($loaded, array $movement, $gamedata){
+		$turn = (int)$gamedata->turn;
+		$cooling = self::isCoolingDown($loaded, $turn);
+		$may = !$cooling && self::redlineIndex($loaded, $turn) !== null;
+		$kept = false;
+		$ordered = false;
+		$out = array();
+		foreach ($movement as $move){
+			if ((int)$move->turn !== $turn){
+				$out[] = $move;
+				continue;
+			}
+			if ($move->type == Movement::REDLINE){
+				if ($may && !$kept && !$ordered){
+					$kept = true;
+					$out[] = $move;
+				}
+				continue;
+			}
+			if (Movement::isOrderedRow($move)){
+				if ($cooling && in_array($move->type, self::$coolingForbids, true)){
+					throw new Exception("A flight cooling its engines after its Redline Pilot's afterburners must fly straight ahead this turn. Reload the game and plot it again.");
+				}
+				$ordered = true;
+			}
+			$out[] = $move;
+		}
+		return $out;
+	}
+
+	/* (4) A LANDING BEYOND THE THRUST TOLERANCE - "Redline Pilots may attempt to land his flight on its carrier beyond the usual thrust tolerances.
+	   If this is attempted, roll a d20. If the result is less than or equal to the amount of thrust by which the tolerance is exceeded, the
+	   Redline Pilot's fighter crashes into the carrier (treat this as a 100% successful ramming attempt) and all other fighters in the fight break
+	   off. The fight cannot use the afterburners during this attempt." Rolled once firing has resolved (Firing::fireWeapons, beside the failed
+	   attachments' rams - a ram ordered any later would never resolve), for each flight a hangar's dock order names this turn whose Redline Pilot
+	   serves in a craft that still flies, that did not burn this turn, and whose speed is further from the carrier's than its thrust - its every
+	   other dock test passing (HangarOps::canShipReceive, the excess let through while the roll is pending). The roll rides his entry (`landing`)
+	   for the dock at the end of the turn (redlineLandingHolds). A crash is his craft's own Ramming Attack at the carrier, an automatic hit whose
+	   return damage lands on his craft (RammingAttack::fire); a landing that holds is a line of its own in the combat log. */
+	public static function rollRedlineLandings($gamedata, $dbManager = null){
+		if (!TacGamedata::$officersPresent) return;
+		$turn = (int)$gamedata->turn;
+		foreach ($gamedata->ships as $carrier){
+			if ($carrier instanceof FighterFlight) continue;
+			foreach ($carrier->systems as $hangar){
+				if (!($hangar instanceof Hangar) || empty($hangar->pendingDockOrder)) continue;
+				foreach ($hangar->pendingDockOrder as $order){
+					$flight = $gamedata->getShipById((int)($order['flightId'] ?? 0));
+					if (!($flight instanceof FighterFlight) || $flight->isDestroyed()) continue;
+					$i = self::redlineIndex($flight, $turn);
+					if ($i === null || self::redlineCrashCraft($flight, $turn) === null || Movement::hasRedlined($flight, $turn)) continue;
+					$list = $flight->getOfficers();
+					if (isset($list[$i]['landing']) && (int)$list[$i]['landing']['turn'] === $turn) continue; //rolled for another bay's order
+					$excess = self::landingExcess($carrier, $flight, $turn);
+					if ($excess <= 0) continue;
+					$list[$i]['landing'] = array('turn' => $turn, 'excess' => $excess, 'roll' => null);
+					$flight->setOfficers($list);
+					if (!HangarOps::canShipReceive($hangar, $carrier, $flight, 1, $gamedata)){
+						unset($list[$i]['landing']); //a dock that fails for another reason rolls nothing
+						$flight->setOfficers($list);
+						continue;
+					}
+					$roll = Dice::d(self::REDLINE_LANDING_DIE);
+					$list[$i]['landing']['roll'] = $roll;
+					$flight->setOfficers($list);
+					if ($roll <= $excess){
+						self::redlineCrash($carrier, $flight, $roll, $excess, $gamedata, $dbManager);
+						self::breakOffDocks($flight, $gamedata);
+					} else {
+						self::redlineLandingLog($carrier, $flight, $roll, $excess, $gamedata);
+					}
+				}
+			}
+		}
+	}
+
+	//how far the flight's speed is from the carrier's beyond its thrust this turn, an afterburner's included (0 within it)
+	private static function landingExcess($carrier, $flight, $turn){
+		$carrierMove = $carrier->getLastMovement();
+		$flightMove = $flight->getLastMovement();
+		if (!$carrierMove || !$flightMove) return 0;
+		$thrust = (int)$flight->freethrust + self::redlineBurnThrust($flight, $turn);
+		return max(0, abs((int)$carrierMove->speed - (int)$flightMove->speed) - $thrust);
+	}
+
+	/* HangarOps::canShipReceive, for a flight further from the carrier's speed than its thrust: does a Redline Pilot's landing hold this turn - his
+	   roll above the excess (null: rollRedlineLandings is still asking the dock's other tests). No roll this turn, no landing. */
+	public static function redlineLandingHolds($flight, $gamedata){
+		if (!TacGamedata::$officersPresent || !($flight instanceof FighterFlight)) return false;
+		$turn = (int)$gamedata->turn;
+		foreach ($flight->getOfficers() as $entry){
+			if ($entry['id'] !== 'OFF_REDL' || !isset($entry['landing']) || (int)$entry['landing']['turn'] !== $turn) continue;
+			return $entry['landing']['roll'] === null || (int)$entry['landing']['roll'] > (int)$entry['landing']['excess'];
+		}
+		return false;
+	}
+
+	/* "...the Redline Pilot's fighter crashes into the carrier (treat this as a 100% successful ramming attempt)": his craft's own Ramming Attack at
+	   the carrier, an automatic hit ('TerrainCrash', as the failed attachments' rams - Firing::createFailedAttachRamOrders) whose return damage
+	   lands on his craft, persisted before it resolves so its damage links to it, and resolved now. The rest of the flight breaks off: the dock
+	   then finds no landing (redlineLandingHolds). */
+	private static function redlineCrash($carrier, $flight, $roll, $excess, $gamedata, $dbManager){
+		$craft = self::redlineCrashCraft($flight, (int)$gamedata->turn);
+		if ($craft === null) return;
+		$ram = null;
+		foreach ($craft->systems as $sub) if (!empty($sub->isRammingAttack)) $ram = $sub;
+		$move = $flight->getLastMovement();
+		if (!$ram || !$move) return;
+		$fire = new FireOrder(-1, 'normal', $flight->id, $carrier->id, $ram->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0,
+			$move->position->q, $move->position->r, 'TerrainCrash', 10000);
+		$fire->pubnotes = '<br>REDLINE CRASH! The Redline Pilot tried to land ' . $excess . ' beyond his flight\'s thrust and rolled ' . $roll
+			. ' (1-' . $excess . ' crashes): his fighter rams the carrier, and the rest of the flight breaks off.';
+		$fire->addToDB = true;
+		if ($dbManager){
+			$fire->id = (int)$dbManager->submitSingleFireorder($gamedata->id, $fire);
+			$fire->addToDB = false;
+		}
+		$ram->fireOrders[] = $fire;
+		$ram->calculateHitBase($gamedata, $fire);
+		$ram->fire($gamedata, $fire);
+	}
+
+	/* "...and all other fighters in the fight break off": every dock order this turn naming the flight is withdrawn, from every hangar of every
+	   ship. ⚠️ Not left to canShipReceive: the end-of-turn whole-flight dock (HangarOps::buildDockBays) asks it and goes on whatever it answers,
+	   so on that path a refusal would not stop the dock. */
+	private static function breakOffDocks($flight, $gamedata){
+		foreach ($gamedata->ships as $ship){
+			if ($ship instanceof FighterFlight) continue;
+			foreach ($ship->systems as $hangar){
+				if (!($hangar instanceof Hangar) || empty($hangar->pendingDockOrder)) continue;
+				$kept = array_values(array_filter($hangar->pendingDockOrder, function ($order) use ($flight){
+					return (int)($order['flightId'] ?? 0) !== (int)$flight->id;
+				}));
+				$hangar->pendingDockOrder = empty($kept) ? null : $kept;
+			}
+		}
+	}
+
+	/* A landing beyond the tolerance that holds: its roll in the combat log - a log line wearing a fire order's clothes ([[howto_create_fire_orders]]),
+	   HangarEscape's shape: on his craft's Ramming Attack, at its own flight, rolled = the d20, no shot, so no damage links to it. In
+	   weaponManager.doShortLogText, its sentence continues the "FIRE: <flight>" header with "'s"; in combatLog.STANDALONE_LOG_KINDS. */
+	private static function redlineLandingLog($carrier, $flight, $roll, $excess, $gamedata){
+		$craft = self::redlineCrashCraft($flight, (int)$gamedata->turn);
+		if ($craft === null) return;
+		$ram = null;
+		foreach ($craft->systems as $sub) if (!empty($sub->isRammingAttack)) $ram = $sub;
+		if (!$ram) return;
+		$order = new FireOrder(-1, 'normal', $flight->id, $flight->id, $ram->id, -1, $gamedata->turn, 1, 0, (int)$roll, 0, 0, 0, 0, 0, self::REDLINE_LANDING_CLASS, 10000);
+		$order->pubnotes = '\'s Redline Pilot brings it in to land ' . $excess . ' beyond its thrust: rolled ' . $roll . ' on a d20 (1-' . $excess
+			. ' would crash) - down safely aboard <span class="shiplink" data-id="' . (int)$carrier->id . '">' . $carrier->name . '</span>.';
+		$order->addToDB = true;
+		$ram->fireOrders[] = $order;
 	}
 
 	/* ------------------------------------------------------------------ payload */

@@ -81,6 +81,13 @@ window.ShipMovementCallbacks = function () {
         this.updateCallback({ ship: this.ship });
     };
 
+    //A Redline Pilot's afterburners (OFFICERS_PLAN.md Stage 32): burn, or take the burn back while it is the last order. The update redraws the icon.
+    ShipMovementCallbacks.prototype.redlineCallback = function (e) {
+        e.stopPropagation();
+        shipManager.movement.toggleRedline(this.ship);
+        this.updateCallback({ ship: this.ship });
+    };
+
     ShipMovementCallbacks.prototype.morecontractionCallback = function (e) {
         e.stopPropagation();
         shipManager.movement.doContraction(this.ship, 1);

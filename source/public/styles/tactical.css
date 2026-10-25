@@ -712,6 +712,21 @@ body {
     pointer-events: none;
 }
 
+/* A Redline Pilot's afterburner clip (OFFICERS_PLAN.md Stage 32, officers.playRedlineClip): centred under the passive notice above, click-through
+   like it; officers.playRedlineClip sets its top and fades it in and out. */
+.redlineClip {
+    display: none;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(500px, calc(100vw - 32px));
+    height: auto;
+    border-radius: 7px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    pointer-events: none;
+}
+
 .shipclickable {
     position: absolute;
     width: 50px;

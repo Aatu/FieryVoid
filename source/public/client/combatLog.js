@@ -58,7 +58,8 @@ window.combatLog = {
        Ordinary fire adds '' and groups exactly as it always has. */
     STANDALONE_LOG_KINDS: {
         'HangarEscape': true,
-        'PoliticalSpeech': true
+        'PoliticalSpeech': true,
+        'RedlineLanding': true
     },
 
     logKindKey: function logKindKey(fire, shooter) {

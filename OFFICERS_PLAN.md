@@ -52,7 +52,11 @@ Accelerator; two free special missiles a rack (one a Class-SO); what is left unc
 Stage 31, the Expert Graviton Controller (Brakiri 10%; any other hull of a B5 setting with a gravitic drive or a gravitic weapon 15%), in the Engine - +1 on
 every hit by a gravitic beam, a Graviton Pulsar's pulses counted as though it rolled 5% lower, the Engine and the largest aft thruster +1 (kept when he is
 lost), and once per battle a rotation of the gravitic drive in the Movement phase: a d6 the server rolls picks the new facing, -15% to hit that turn, and
-the rotation and every move before it LOCKED - a generic movement lock in tac_systemdata, kept on a reload (§9.38) - BUILT 2026-10-25, uncommitted.**
+the rotation and every move before it LOCKED - a generic movement lock in tac_systemdata, kept on a reload (§9.38) - BUILT 2026-10-25, uncommitted.
+Stage 32, the Redline Pilot (the Cascor 100% of a fighter, everyone else 150%), in a flight's first craft - skin dancing over an Enormous unit up to speed 8,
+his own fighter the one that crashes; a combat pivot without the thrust for it, its fire at -15%; afterburners as the flight's first order of a turn, +50% thrust,
+then a turn straight ahead with no manoeuvre of any kind; and a landing beyond the thrust tolerance on a d20, his fighter ramming the carrier on a roll at or
+under the excess (§9.39) - BUILT 2026-10-25, uncommitted.**
 Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
@@ -377,6 +381,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Jump Officer | `OFF_JUMP` | Jump Drive | 1 |
 | Expert Quartermaster *(Stage 30, §9.37)* | `OFF_QM` | C&C (his rules text - the draft's random primary dropped) | 1, every hull with a C&C |
 | Expert Graviton Controller *(Stage 31, §9.38)* | `OFF_GRAV` | Engine | 1, hulls with a gravitic drive or a gravitic weapon (B5 settings) |
+| Redline Pilot *(Stage 32, §9.39)* | `OFF_REDL` | the flight's first craft | 1, every flight that may carry an officer |
 | Expert Geneticist | `OFF_GENE` | C&C | 1 |
 | Expert Scavenger | `OFF_SCAV` | Engine | 1 |
 | Breaching Expert *(Stage 24, §9.31)* | `OFF_BRCH` | his pod: a breaching pod flight's first craft - since Stage 27 (§9.34) one per pod, from the first | 1 (flight), breaching pods only, priced off one pod (`unscaled`); bought as a count, `mixesWith` the pod Troop Leader |
@@ -553,6 +558,7 @@ masking: individual notes never reach any client.
 | Expert Software Engineer (Stage 26) | the Computer's `output` (+1); where a point placed in the Firing phase went; the Computer's armour point; his stealth ship's detection; a Specialist used a second time | `output`: **yes, to every viewer**, as the Technician's. The Firing-phase allocation: **own team only until firing resolves** - an opponent's payload and tooltip carry Initial Orders' allocation while the Firing phase is open (`HyachComputer::shownBFCP`), since where a point went would point at the targets; afterwards it is public, as Initial Orders' always was. The armour point shows only as the damage the log records (one more armour), the masking only as a stealth ship staying hidden, the second Specialist use as that Specialist's line in its "used this turn" list, which every viewer is sent anyway. The list of Specialists he would let the ship reuse rides his own team's officer payload (`reuse`) |
 | Expert Warrior (Stage 28) | `iniativebonus` (+10; +50 / -50 after his Supreme Anticipation), and a flight's his ship launched; his ship's critical modifier; his charge (a movement row); the hit chance of his ship's shots | Initiative: **yes, to every viewer** (`publish` / `lostPublish`, and a launched flight's through `addForJson`). The charge is a row of the ship's movement, which every viewer is sent - so a declared charge, and its target, are public (the tabletop declares it as it is performed). Which unit it holds against (`charged`) rides his team's officer payload, for their hit-chance preview; an opponent sees only the needed % the log prints, as for every to-hit officer. The critical modifiers are never sent (nothing displays one) |
 | Expert Graviton Controller (Stage 31) | his Engine's and the largest aft thruster's `output`; his gravitic drive's rotation; the hit chance of his ship's shots that turn | Outputs: **yes**, `output` is sent unconditionally (as the Technician's), and they stay once he is lost. The rotation is a `gravRotate` row of the ship's movement, which every viewer is sent - so the rotation, and that he is aboard, are public (the tabletop rolls it in the open); its die is the server's, and the moves locked before it ride the owner's game.php only (`window.fvMoveLocks`). The -15% is the owner's hit-chance preview; an opponent sees only the needed % the log prints. His +1 on beams and the pulse count show only as their results |
+| Redline Pilot (Stage 32) | his flight's afterburners (a `redline` movement row) and the turn it cools; a combat pivot short of the thrust (the row's thrust) and its -15%; a skin dance over a unit faster than 5; a landing beyond the tolerance | **Yes**, all of it in effect: the burn is a row of the flight's movement and its thrust shows in its moves, a short pivot's row is a combat pivot's (hidden from enemies until firing resolves, as every one), the dance and the landing are rolled by the server and told in the combat log (a crash is a ram, a landing that holds a `RedlineLanding` line) - so the tabletop's open rolls, and that he is aboard, are public. The -15% is the owner's hit-chance preview |
 | Expert ELINT Officer (Stage 20) | his array's `output`; every ELINT range from his ship; his blanket against ballistic weapons | **Yes, to every viewer**: `output` always is, and the ship payload carries `elintRangeBonus` (25) and `blanketBallistic` (3) while he serves - an opponent's own OEW under his Disruption and its hit chance against a unit under his blanket are previewed with them; his array's tooltip shows the ranges. The officer list stays own-team; a disguised Chameleon ship's payload is its simulacrum's and carries neither. The -2 on sensor criticals is never sent |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
@@ -723,7 +729,8 @@ committed.
 | **28** | Expert Warrior (Drazi), added by the user. **BUILT 2026-10-23** (§9.35) | Offered on the 51 Drazi hulls (both factions) with a C&C, 50%; +1 to hit and +1 per die on every weapon but the ram - not on a Gunner's, whose own replace them; +10 initiative, and +10 for every flight launched from his ship's bays from the turn after, while he serves; -1 on his ship's critical rolls (his kill roll included), +1 on the critical roll of an enemy system his ship damaged that turn, once, not a craft's dropout; a Charge declared before the first step at a unit the player clicks, kept by the server once, judged at fire (beaten on initiative, 4+ hexes nearer the target by the end of the move, the route free - third round, §9.35): +2 to hit it; one snap turn anywhere in the move, 1 thrust less (half on an agile ship); the precision strike - the first called shot (his lowest-numbered weapon's that turn) without its penalty, doubled at a base, a Gunner's +3 neither used nor spent; Supreme Anticipation from his C&C's blue box in the Firing phase, +50 next turn while he serves, -50 the turn after regardless; never two of the three in one turn |
 | **29** | Expert Ballistic Officer, one of the original 25 (Hard). **BUILT 2026-10-24** (§9.36) | See §9.36 |
 | **30** | Expert Quartermaster, one of the original 25 (Hard). **BUILT 2026-10-24** (§9.37) | See §9.37 |
-| **31+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **32** | Redline Pilot, added by the user. **BUILT 2026-10-25** (§9.39) | See §9.39 |
+| **33+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -770,6 +777,7 @@ committed.
 | Expert Turret Officer | *Added 2026-10-21 with his rules text and the user's notes (§9.29):* FV has no turret system, so he is a system enhancement on a turret weapon - FV already marks turret weapons (the jammable mounts) and their turret mates (the linked firing group) - aiding every weapon on that turret, one officer to a turret; "sheltered" is automatic when no weapon on the turret fires, instead of a declaration UI. Does an interception count as the turret firing? Does a Gunner's +1 on that turret combine with his? Is a turret weapon linked to no other a turret of its own? May he move? **RULED 2026-10-21:** **offensive fire only** breaks the shelter (a turret may intercept and stay sheltered); **no combining** - the Gunner's +1 replaces his on the Gunner's gun, the -1, the -2 and the shelter still apply; **each unlinked turret weapon is its own turret** (Xorr 2, Xonn 3, Tyllz 6); **movable**, as the other placed officers. |
 | Ballistic Officer | "+5 distance range" = launch range of every ballistic weapon, torpedoes included? How is "+1 total magazine rounds per missile weapon" counted? How are the free swaps priced (+2 % each)? **Rules text and notes 2026-10-24 (§9.36)** settle all three: "+5 to their distance range (but not their launch range) ... not ... proximity weapons"; "one extra round of ammo ... for missiles ... an extra missile slot" - the user's note: the ship's magazine total + 1 per missile rack, and a weapon with its own count (Proximity Laser, Limpet Bore Torpedo) +1; the swaps free, his price "5% of the base cost of the ship, plus 1% for each missile rack that received a free missile upgrade", doubled outside the Kor-Lyans - the user's note: the missiles bought free up to the racks, the dearest, the rest randomly allocated as the Political Officer's. Asked: which hulls are offered him? Do bomb racks and mine launchers count as racks? What does the ship keep when he is lost? Which rounds count as free picks, and are the unpicked ones filled? **RULED 2026-10-24:** **hulls with counted ballistic ammunition only** (235); **bomb racks are missile racks, a mine launcher adds one magazine slot only**; **the ammunition stays, the range goes**; **paid single-slot rounds only, the rest filled at the commit, his price fixed** at 5% + 1% per rack. **After play test 4512:** never a hull whose magazine has no ordnance to buy (235 -> 226); each type may be bought up to his enlarged magazine. |
 | Expert Warrior | *Added 2026-10-23 with his rules text and the user's notes (§9.35):* the Charge a new Movement-phase icon in the Contraction / Half-Phase spot (the user's `chargeIcon.png`, recoloured), its conditions checked by the server; the precision strike "just on the first Called Shot of the game"; Supreme Anticipation the Political Officer's speech method, in the blue menu, with its follow-up penalty; the initiative numbers already FV's. Asked: "Drazi only" - which factions? "Any fighters or shuttles it launches" - which flights? How does a Charge pick its target, and when is it spent? On an Expert Gunner's weapon, do his +1 and +1 add to the Gunner's? **RULED 2026-10-23:** **both Drazi factions** (Freehold and its WotCR); **only flights launched from his ship in battle**; **the player picks the unit** (spending left to the default - a declared charge is spent); **the Gunner's replace his**. |
+| Redline Pilot | *Added 2026-10-25 with his rules text and the user's notes (§9.39):* the afterburners a new Movement-phase icon in the Charge / Rotate spot (the user's `redlineIcon.png`), with a clip - one of the user's five GIFs at random - under the notice on a phase's first burn, without bloating page load. Asked: how far "skin dancing on capital ships moving at speeds of 8 or less" reaches (FV dances over Enormous units only); whether the fight's "+1 for every 2 points over 5" adds to FV's own; what the cooling turn forbids; whether an afterburner's thrust counts for a landing; then the clips' format, the originals, and when a clip plays. **RULED 2026-10-25:** **Enormous units only**, his limit speed 8 with the target's +1 per point over 5; the fight's modifier **is FV's own, counted once**; the cooling turn forbids **everything** - the Firing phase's combat pivot and Evade too, a manoeuvring commit refused by the server; an afterburner's thrust **counts** for a landing; and (the user's addition) going Redline must be the flight's **first** movement order of the turn. The clips **MP4**, the GIFs **deleted**, a clip **once per Movement phase**. |
 | Anticipator | Free turn: a full turn (not a pivot) in the Firing phase, paying its thrust? "Half price for some factions": which factions? **Rules text and note 2026-10-21 (§9.30)** settle both: a single turn "if desired", with "Turn Delay complete and enough thrust ... left unused to complete a turn maneuver", "not a roll, pivot, snap turn, or other maneuver" - the user's note: "similar to a fighter's combat pivot except that there are no associated firing penalties and thrust must still be spent on ship thrusters as normal"; 10% for the Torata, 50% more for everyone else (15%). Asked: does the turn take effect before fire resolves, as a combat pivot does, or after all fire? On an Expert Gunner's weapon, the extra die too, or only the Gunner's +1 per die ("does not combine")? **RULED 2026-10-21:** **like a combat pivot** - this turn's fire, his and at him, meets the new facing; on a Gunner's weapon **both apply**. |
 | Political Officer | *Added 2026-10-21 with his rules text and the user's notes (§9.32):* the armed shuttle is Elite Crew's own method; the free expert is the dearest of the four bought, one at random with none; the armour is five free Hardened Armour on different systems, random for any left unplaced; the speech an Activate menu on the C&C in the Firing phase ("Speech!" / "Cancel speech"), a fire order in the combat log, +30 the following turn. Asked: "Centauri Only" - which Centauri factions? When are the unmade picks made: by the server at battle start, or in the lobby at purchase? With Elite Crew too, one armed shuttle or two? The +30 if he is killed or disabled in the turn he speaks? **RULED 2026-10-21:** **both Centauri factions** (the Republic and its WotCR); **the server, at battle start** (built as the fleet's commit: rolled once and stored); **they add up**; **no +30 unless he still serves** on the turn it lands. |
 | Matter Weapons Expert | May a ship carry both variants? Does the weapon variant also give that weapon the +1 fire control and damage? (Stage 8.) The C&C variant's "only for factions with matter weapons" was built with a default, not ruled: offered to a hull carrying at least one weapon with a Matter mode (§9.5). **RULED 2026-10-15: Grome Autocracy only** (§9.12); the Matter-weapon hull test is kept beside it. **Rules text and rulings 2026-10-16 (§9.14):** "moved into one specific weapon instead of his normal station" - **one or the other, never both**; that weapon gets the +1 / +1 "but no others do", and its rate of fire +1 (Stage 10); "disabled if the weapon takes any damage at all (after armor), and automatically killed if the weapon is destroyed" - **and the ordinary kill roll too**. |
@@ -4872,3 +4880,166 @@ copy `fingerprint.before-officers-stage31.txt`), `enhancementsDifferential.js` (
 4. The rotation is a row of the ship's movement, which every viewer is sent - so the rotation, and that he is aboard, are public (the tabletop rolls it in
    the open).
 5. The Gravitic Bolt is named in his rules text but has no to-hit-dependent result in FV, so his clause does nothing for it.
+
+### 9.39 Stage 32: Redline Pilot (2026-10-25)
+
+**Rules text (user, 2026-10-25) - an officer the user added.** "Redline Pilot. Redline Pilots are nothing less than fanatical. They know their fighters
+inside and out and push their machines to the maximum at every opportunity. Sometimes their great skill and daring makes them seem a bit crazy. One thing that
+is certain is that Redline Pilots can often perform such precise maneuvers that few others would ever dream of attempting, except for those who have no other
+choice but to follow orders. A fight with a Redline Pilot cannot contain any other officers. Most people with any experience under their belts believe
+Redliners to be crazy and reckless and refuse to serve with them. However, a Redline Pilot provides the following benefits to his fight: (1) A Redline Pilot
+may perform skin dancing on capital ships moving at speeds of 8 or less. Apply additional modifiers of +1 for every point of speed over 5 (for the target unit)
+and +1 for every 2 points over 5 (for the skin dancing fight). Should the skin dance attempt fail, and one of the fighters rams the target, the Redline Pilot
+must always be picked as the fighter destroyed (at which time the fight loses its benefits). (2) Redline Pilots may combat pivot their fight even if they do
+not have enough thrust left. If this is done, however, the firing penalty for a combat pivot is tripled. (3) Redline Pilots may use their afterburners above
+and beyond their usual tolerances. If this is done, the fight increases its thrust by 50% on the current turn (round any fractions down). However, the flight
+is not permitted to maneuver on the following turn (it must proceed straight ahead at its current speed) while the engines cool off. (4) Redline Pilots may
+attempt to land his flight on its carrier beyond the usual thrust tolerances. If this is attempted, roll a d20. If the result is less than or equal to the
+amount of thrust by which the tolerance is exceeded, the Redline Pilot's fighter crashes into the carrier (treat this as a 100% successful ramming attempt) and
+all other fighters in the fight break off. The fight cannot use the afterburners during this attempt. Example: A flight with 10 thrust is moving speed 24 and
+its carrier is moving 10. Normally they would not be able to land because the 14-point speed difference exceeds the Calaq's thrust by 4. If the Redline Pilot
+makes the attempt, a die roll of 1-4 will result in his fighter's destruction. Cost: Equal to the 100% cost of a fighter. Availability: Races other than the
+Cascor increase the cost by 50%." The user's notes: the afterburners need "some new way for the player to activate this during Movement Orders, probably a new
+movement icon like we have for Charge and Rotate since there is no engine system to click on" (`img/redlineIcon.png`); "the first time this is clicked during a
+movement phase ... a gif to appear on the centre of the screen underneath the usual player notification messages", one of the user's five `redline1-5.gif` at
+random, "although I'd rather not bloat page load ... So some kind of optimisation for them would be great."
+
+**What FV had.**
+- **Skin dancing** - automatic in Pre-Firing when a unit ends its move in an ENORMOUS unit's hex, of either team, never terrain (`RammingAttack::
+  beforePreFiringOrderResolution` / `getSkinDancingResult`): a Medium ship or smaller, agile (every flight), moving; the Enormous unit at speed 5 or less, and if
+  it moves the dancer heading the same way or the exact opposite. A d20 of 15 or less dances, 16-20 aborts, 21+ crashes; FV's modifiers include +1 per 2 points
+  (or part) of the dancer's speed over 5. A failed dance crashes the flight's LAST live fighter (the auto-ram 'TerrainCrash' order's `calledid`). FV dances over
+  no other unit.
+- **Combat pivot** - a flight's Firing-phase pivot: its cost (1.5 x pivotcost, rounded up) is the client's only (`getCombatPivotCost`; movement.php recomputes no
+  cost), its penalty -1 (d20, -5%) ONCE a turn on every shot (`Weapon::calculateHitBase`'s fighter branch ↔ `hasCombatPivotPenalty`).
+- **Afterburners** - none. A flight's thrust is `freethrust` less the turn's `assignedThrust` (`getRemainingEngineThrust`); movement.php checks no flight's thrust.
+- **Landing** - Dock in the Firing phase (`findEligibleCarriersForDock` / `confirm.hangarDock`), a `hangarDockOrder` note resolved at the end of the turn
+  (`Hangar::criticalPhaseEffects` → `processWholeFlightDocks`, or `processDockOrders` for a catapult); `|carrier speed - flight speed| <= freethrust`
+  (`HangarOps::canShipReceive` ↔ the client). ⚠️ The whole-flight path (`buildDockBays`) asks `canShipReceive` and goes on whatever it answers - on it, hex,
+  heading and speed are the client's alone.
+- **A ram after the turn's fire** - `Firing::createFailedAttachRamOrders`: a 'TerrainCrash' automatic hit, persisted first (so its damage links to it), resolved at
+  once; an order made later would never resolve.
+
+**Rulings (user, 2026-10-25, asked before building):**
+1. **Skin dancing: Enormous units only** - his limit is speed 8, not 5, with the target's +1 for each point over 5.
+2. **The fight's "+1 for every 2 points over 5" is FV's existing modifier, counted once.**
+3. **The cooling turn forbids everything**: turn, slip, pivot, speed change and jink in the Movement phase; the combat pivot (his short one included) and Evade
+   in the Firing phase; no burn. The server refuses a commit that manoeuvres.
+4. **An afterburner's thrust counts for a landing**; the over-tolerance landing cannot be tried on a turn the flight burned.
+5. **Going Redline must be the flight's FIRST movement order of the turn** (the user's addition: "to prevent us having to think about refunding thrust").
+6. **The clips are MP4** (re-encoded), **the GIFs deleted**, and a clip plays **once per Movement phase** - the first burn, whichever flight.
+
+**Built with defaults, stated here (ask before changing):**
+- **Offers**: every flight that may carry an officer, as the Dogfighter (359) - shuttles and breaching pods included, never a Hunter-Killer. 150% of one craft,
+  the Cascor 100%, scaled by the flight's size (§9.9): an Aurora Starfury 86 for six (43 at three), the Calaq 60.
+- **Skin dancing**: his limit while he serves (his craft lost on an earlier turn: FV's 5). His craft crashes in EVERY failed dance of his flight (over a unit at 5
+  too) while it flies; otherwise FV's pick, the last.
+- **The short pivot**: only when the pivot costs more than the thrust left; it pays what is left (0 after the first) and its row asks the full cost; -3 instead of
+  -1, once a turn however many; the row decides (a doctored client's row without him takes -3 as well); the Movement phase's pivots are untouched.
+- **The burn**: +floor(freethrust x 50%) that turn - a `redline` row, no thrust, the flight's first order (preturn and forced rows, its start and a deployment
+  are no orders); Cancel or the icon takes it back while it is the last row; it stands whatever becomes of him later, and the next turn cools whatever becomes
+  of him too (the row is the record). Public, as the Warrior's charge.
+- **The landing**: "its carrier" = any carrier the flight may dock with (FV has no home carrier). The excess = the speed difference less its thrust. Rolled once
+  a turn as firing resolves, for a flight a dock order names whose Redline Pilot serves in a craft that flies, that did not burn, and whose every other dock
+  test passes (canShipReceive, the excess let through while the roll is pending). A crash: his craft's own Ramming Attack at the carrier ('TerrainCrash' - an
+  automatic hit, damage on the ram table, the return damage on his craft) and every dock order naming the flight withdrawn - "the rest break off" (not left to
+  canShipReceive, which the whole-flight path ignores). A landing that holds: a `RedlineLanding` combat log line. A flight docking into two carriers in one turn
+  is rolled once, at the first carrier's excess.
+- **The clip**: picked at random and fetched (to a blob URL) in idle time when a Movement phase opens for a player with a flight that may burn - nothing at page
+  load, nothing for anyone else; a burn before it arrives streams it. Shown 3.2 s centred under the burn's passive notice, muted, looping, click-through, then
+  faded. A page reload lets the next first burn show one again.
+
+**Design.**
+- `Officers`: registry `OFF_REDL` (post `craft`, flight, pct 150, apply null) LAST; `$factionRules` 'Cascor Commonwealth' 100; constants SKIN_DANCE_SPEED 5,
+  REDLINE_DANCE_SPEED 8, REDLINE_PIVOT_FACTOR 3, REDLINE_BURN_PCT 50, REDLINE_LANDING_DIE 20, REDLINE_LANDING_CLASS 'RedlineLanding'. `redlineIndex`,
+  `skinDanceSpeedLimit`, `redlineCrashCraft`, ⭐ `combatPivotPenalty` (⚠️ MIRROR PAIR with shipManager.movement.combatPivotPenalty), ⭐ `redlineBurnThrust` (⚠️
+  MIRROR PAIR with officers.redlineThrustBonus), `isCoolingDown` (⚠️ MIRROR PAIR with shipManager.movement.isRedlineCooling), `$coolingForbids`, ⭐
+  `validateRedline`, ⭐ `rollRedlineLandings` (the entry's `landing` - turn, excess, roll; roll null while canShipReceive is asked), `landingExcess`,
+  `redlineLandingHolds`, `redlineCrash`, `breakOffDocks`, `redlineLandingLog`.
+- `Movement` (movement.php): `REDLINE` 'redline' (⚠️ MIRROR PAIR with shipManager.movement.REDLINE), `hasRedlined`, `isRedlinePivot` (⚠️ MIRROR PAIR with
+  shipManager.movement.isRedlinePivot), `isOrderedRow` (⚠️ MIRROR PAIR with shipManager.movement.hasOrderedThisTurn); `validateMovement` (phase 3) keeps nothing
+  for a cooling flight.
+- Hooks: `MovementGamePhase::process` (validateRedline for every flight, after validateCharge), `Weapon::calculateHitBase` (combatPivotPenalty in place of the
+  -1, behind $officersPresent), `RammingAttack::getSkinDancingResult` (the speed limit; +1 per point of the unit's speed over 5) and
+  `beforePreFiringOrderResolution` (his craft as the crash's calledid), `HangarOps::canShipReceive` (the burn's thrust; redlineLandingHolds beyond the
+  tolerance), `Firing::fireWeapons` (rollRedlineLandings after createFailedAttachRamOrders).
+- Client: `movement.js` - getRemainingEngineThrust / getFullEngineThrust (+ officers.redlineThrustBonus); `REDLINE`, `getRedlineRow`, `isRedlineCooling`,
+  `hasOrderedThisTurn`, `canRedline`, `getRedlineState` (ready / on / locked / cooling), `toggleRedline`, `doRedline`; the cooling gate in canTurn, canSlip,
+  canJink, canPivot, canChangeSpeed, canEvade; canPivot's phase-3 thrust test waived by officers.mayRedlinePivot and doPivot paying what is left;
+  `combatPivotPenalty`, `isRedlinePivot`. `officers.js` - the registry row, REDLINE_* constants, `redlineEntry`, `canRedline`, `mayRedlinePivot`,
+  `redlineThrustBonus`, `mayRedlineLand`, `redlineBurnFeedback` (the notice), the clip (`prefetchRedlineClip`, `playRedlineClip`, `redlineClipSource`).
+  `UI/shipMovement.js` - the Redline icon in the Charge / Rotate spot (knobs `redlineIcon`, `redlineReadyOpacity`, `redlineGlowColour`,
+  `redlineCoolingOpacity`; `drawRedlineIcon`, `redlineCallback`), `ShipMovementCallbacks.redlineCallback`, game.php's `#redline` element, `PhaseDirector` (the
+  prefetch, after the restores). `weaponManager.computeShotModifiers` ("Combat Pivot (Redline)" -3), `ShipTooltip` (the map tooltip's -15),
+  `shipTooltipFireMenu.js` (the burn's thrust in both dock checks; a carrier beyond the tolerance offered to his flight with its `redlineExcess`),
+  `confirm.hangarDock` (the risk line), `doShortLogText` + `combatLog.STANDALONE_LOG_KINDS` (`RedlineLanding`), `tactical.css` (`.redlineClip`).
+- Art: the user's `img/redlineIcon.png` as given; `img/redline1-5.mp4` - the GIFs re-encoded (H.264, CRF 26, the GIFs' own frame timing, no audio, faststart),
+  the GIFs deleted.
+- Docs: a Redline Pilot card (Fighter Officers, last - alphabetical), linking the FAQ's Skin Dancing.
+
+**Files.** Server: `Officers.php`, `handlers/movement.php`, `Phase/MovementGamePhase.php`, `weapons/weapon.php`, `weapons/specialWeapons.php`,
+`systems/HangarOps.php`, `handlers/firing.php`, `public/game.php`. Client: `officers.js`, `movement.js`, `UI/shipMovement.js`, `ShipMovementCallbacks.js`,
+`renderer/PhaseDirector.js`, `weaponManager.js`, `combatLog.js`, `UI/ShipTooltip.js`, `UI/shipTooltipFireMenu.js`, `UI/confirm.js`, `styles/tactical.css`,
+`img/redline1-5.mp4` (new). Docs `ammo-options.html`. Harnesses: `officersHarness.php` (the faction check's percent ceiling 200 for a fighter officer - his is of
+ONE craft; the Stage 27 registry-order check), `officersClientHarness.js` (four registry-order checks). `fvbuild -Statics`, both legacy bundles
+(`node scripts/bundle-legacy.js`), `-Sync`. No React change, no schema change, no new class (autoload unchanged).
+
+**Measured.** Statics: 359 offers - exactly where the Dogfighter is - the Cascor's at 100%. The clips 736 KB in all (217 / 47 / 139 / 297 / 38 KB) against the
+GIFs' 5.1 MB, every frame kept (28 / 45 / 23 / 44 / 10); one of them is fetched per Movement phase, and only by a player with a flight that may burn.
+
+**Verified.**
+- `officersHarness.php` **2340 / 0 with the database** (2246 / 0 --no-db): the registry place and price (Aurora 86, Calaq 60, scaled 43 / 86 / 172 and 30 / 90), none on a ship or a
+  Hunter-Killer, a shuttle offered; the statics sweep (359, where every Dogfighter is, every price); the post; a doctored row beside a Dogfighter. The REAL
+  `getSkinDancingResult` (speed 9 over 7: 11 dances, 12-16 abort, 17 crashes; over 8: +3; both at 6: +1 +1; a unit at 9 never; without him or another officer
+  FV's 5; at 5 nothing changes; his craft lost or the gate off: FV's 5; the direction rule) and the REAL `beforePreFiringOrderResolution` (his fighter crashes,
+  FV's last without him, once his is lost, or with the gate off). `isRedlinePivot`, `combatPivotPenalty`, the REAL `calculateHitBase` (-5% after a paid pivot, -15% after a short one,
+  the row deciding without him, the gate off -5%). The burn's thrust (12 +6, 10 +5, 9 +4), `isCoolingDown`, `isOrderedRow`; `validateRedline` (first order kept,
+  after a move or speed change dropped, preturn and forced rows no orders, two burns one, no Redline / another officer / his craft lost dropped, cooling: a burn
+  dropped, a turn / slip / pivot / speed change / jink / roll REFUSED, moves and a forced jink passing, refused whatever became of him, two turns on free); the
+  phase-3 `validateMovement` (combat pivots and an Evade kept, none while cooling). The landing: within the tolerance as ever; beyond it no dock before the roll; a
+  5 holds (the log line, no second roll), a 4 crashes (his craft's ram resolved, his fighter destroyed, the carrier damaged, the dock order withdrawn); the REAL
+  `processWholeFlightDocks` lands the flight after a 5 and not after a 4; no roll without him, on a burn turn (16 apart within 18 docks as ever; 20 apart never),
+  once his craft is lost, for a dock refused another way, with the gate off; two bay orders one roll.
+- `officersClientHarness.js` **1018 / 0**: the row and constants against Officers.php / movement.php; the statics (359, prices; the lobby's flightCost and price
+  note); in the REAL movement.js the thrust (12 / 18 / 16), redlineThrustBonus, canRedline and thirteen refusals, the four icon states, doRedline and Cancel; every
+  cooling gate yes normally and no while cooling (canTurn, canSlip, canJink, canPivot in both phases, canChangeSpeed, canEvade); canPivot / doPivot short of the
+  thrust (pays 1, then 0; penalty 3) and not without him; combatPivotPenalty, isRedlinePivot; the REAL computeShotModifiers ("Combat Pivot (Redline) -3"); the
+  REAL findEligibleCarriersForDock (16 apart offered only to his flight, excess 4; a burn's 18; 20 apart not at all; another heading not); in a sandbox the
+  prefetch (none without a flight that may burn, for a cooling one, or in the Firing phase, one pick a phase, fetched in idle time, any of the five), the burn's notice and the clip
+  (a muted looping video under the notice, the prefetched blob, once a phase, again next turn); the REAL shipMovement.js icon (drawn, clicked, "on", "locked",
+  "cooling", none without him); game.php, PhaseDirector, the REAL combatLog's line; the five MP4s, the icon, no GIF.
+- `enhancementsHarness` **296 / 0** (fingerprint unchanged - flights' officer offers are not in it); `enhancementsDifferential.js` **964 / 0** (he moves no
+  stat, so no case of his own).
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0** (no corpus game has him). `-Sync` done.
+- **Mutation-tested: 73 / 74 caught** (37 server against the Stage 32 sections, 37 client against the whole client harness; ~10 minutes; every file
+  byte-identical after). The first pass left three: a crash instead of a FAIL (the landing's "his craft still flies" test removed - the crash and log
+  writers now return on no craft, so it fails cleanly), the `$officersPresent` shortcut in redlineCrashCraft (a gate-off check added), and one EQUIVALENT -
+  rollRedlineLandings' own gate, which redlineCrashCraft's makes redundant (a pure early-out). Runner `mutate32.js`, session scratchpad only.
+
+**Observations, not changed:**
+1. Not play-tested. Worth a test: a Starfury flight with him (86 points). Movement: the orange icon behind the flight before its first move - click it: a notice
+   and a clip; its thrust 18 (the tooltip's "Thrust: 18/18"); the next turn the icon greyed and no turn, slide, pivot, speed change or jink offered, and in the
+   Firing phase no combat pivot. Another turn: spend all its thrust, then combat pivot in the Firing phase anyway - "Combat Pivot (Redline) -15%" in the hit
+   chance. Landing: a carrier 4 more than its thrust slower - Dock offers it with the risk line; the log shows the roll (a landing) or a ram (a crash). Skin
+   dancing: end in a moving Enormous unit's hex at speed 6-8.
+2. ⚠️ Pre-existing: `HangarOps::buildDockBays` asks `canShipReceive` and ignores its answer, so on the whole-flight dock path the server never checks the hex,
+   heading or speed (only the client does); a crash withdraws the flight's dock orders itself for that reason.
+3. Not built (not asked): an afterburner's thrust for a breaching pod's speed match when it attaches - the boarding checks still read `freethrust`.
+4. Not covered by a harness: `MovementGamePhase::process`'s validateRedline line and `Firing::fireWeapons`' rollRedlineLandings line (the methods are covered),
+   a crash with a real database (its order persisted before it resolves - `createFailedAttachRamOrders`' pattern), the dock dialog's risk line, and a real
+   browser playing the clip.
+
+**Play test 4515 follow-ups (user, 2026-10-25) - client only:**
+1. **The burn no longer stops a speed change**: `canChangeSpeed`'s "speed changes come first" loop passes over the `redline` row (the burn is still the flight's
+   own first order - the server never checked speed-change order, so nothing changed there).
+2. **Every clip a second shorter on screen** (1-3 first, then 4 and 5 too): `officers.REDLINE_CLIP_MS` is per clip (`redlineClipTime`), now 2.2 s before
+   the fade for all five (it was 3.2 s). Read as the time each stays up: redline3 is a 0.92 s loop, so the files were not trimmed.
+3. **The icon further from the flight**: it left the ships' Charge spot (42 px astern) for the flight's own astern stack, `redlineFlightDistance` px out (68,
+   then set to 64 by the user), before the jink + (still at 98 px); a Minesweeping Mode icon steps back behind it, the rest of the stack behind that.
+4. **Red pivot arrows**: in the Firing phase, while his flight lacks the thrust for a combat pivot (`shipManager.movement.isRedlinePivotNext`), both pivot
+   arrows are drawn in `redlinePivotColour` (the Charge's snap-turn red) and read "Pivot Left (Redline: without the thrust - this turn's fire at -15%)"
+   (`UI.shipMovement.pivotArrowTint`, turnArrowTint's way); exactly enough thrust, the plain arrows.
+5. **The cooling icon lighter**: opacity 0.35 -> 0.8 and `grayscale(1) brightness(1.5)` (knobs `redlineCoolingOpacity`, `redlineCoolingFilter`).
+- Gates: client **1027 / 0** (canChangeSpeed after a burn and not after a move, the clip times, the icon's place with and without Minesweeping Mode, the red
+  and plain arrows - short, exactly enough, plenty, without him, the Movement phase -, the cooling look); mutation **7 / 7** on the new code (the first pass
+  missed the "exactly enough" boundary - a check added). Both legacy bundles rebuilt, `-Sync` done.

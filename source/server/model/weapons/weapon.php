@@ -2009,7 +2009,8 @@ public function getFullStartLoading()
             if (Movement::getCombatPivots($shooter, $gamedata->turn) > 0) {
                 //an Expert Coordinator waives it short of a full 180 (OFFICERS_PLAN.md Stage 9)
                 $coordinated = TacGamedata::$officersPresent && Officers::waivesCombatPivotPenalty($shooter, $gamedata->turn);
-            	 if(!$shooter->ignoreManoeuvreMods && !$coordinated) $mod -= 1;
+                //tripled after a Redline Pilot's pivot made without the thrust for it (Stage 32)
+            	 if(!$shooter->ignoreManoeuvreMods && !$coordinated) $mod -= TacGamedata::$officersPresent ? Officers::combatPivotPenalty($shooter, $gamedata->turn) : 1;
             }
             $mod += $this->getTailGunMod($shooter, $gamedata->turn); //a tail gun fired with its craft's other direct-fire weapons (Stage 21)
 

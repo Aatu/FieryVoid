@@ -2446,6 +2446,10 @@ public static function firePreFiringWeapons($gamedata){
         //Enormous unit ram it here - see createFailedAttachRamOrders.
         self::createFailedAttachRamOrders($gamedata, $dbManager);
 
+        //OFFICERS_PLAN.md Stage 32: a Redline Pilot's landing beyond the thrust tolerance is rolled here, so a crash rams
+        //the carrier with the turn's fire (the dock itself is decided at the end of the turn, from his roll).
+        Officers::rollRedlineLandings($gamedata, $dbManager);
+
         /* WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - Extra-Dimensional Jump Drive abductions resolve
            here: after every shot (a drive or a target destroyed this turn counts for nothing) and
            BEFORE the boost-jump sweep below, so an abducted unit is already gone when that sweep looks

@@ -46,6 +46,18 @@ window.UI = {
         gravRotateReadyOpacity: 0.85,
         gravRotateGlowColour: "#f2d27a",
 
+        /* ⭐ THE REDLINE ICON (OFFICERS_PLAN.md Stage 32, a Redline Pilot's afterburners): the art (the user's), how far astern of the flight's
+           centre it stands in px (before the jink stack - user, play test 4515), how faint it is while the flight may burn, the glow it wears while
+           burning, how it looks on the turn after, while the engines cool (not clickable), and the red the pivot arrows wear in the Firing phase
+           while a pivot would be his, made without the thrust (pivotArrowTint - the Charge's snap-turn red). Change them here. */
+        redlineIcon: "img/redlineIcon.png",
+        redlineFlightDistance: 64,
+        redlineReadyOpacity: 0.85,
+        redlineGlowColour: "#ff7a1a",
+        redlineCoolingOpacity: 0.8,
+        redlineCoolingFilter: "grayscale(1) brightness(1.5)",
+        redlinePivotColour: "#e8432e",
+
         iniated: false,
         moveElement: null,
         turnleftElement: null,
@@ -118,6 +130,7 @@ window.UI = {
             UI.shipMovement.halfphaseElement = $("#halfphase", ui);
             UI.shipMovement.chargeElement = $("#charge", ui);
             UI.shipMovement.gravRotateElement = $("#gravRotate", ui);
+            UI.shipMovement.redlineElement = $("#redline", ui);
 
             UI.shipMovement.contractionElement = $("#contraction", ui);
             UI.shipMovement.morecontractionElement = $("#morecontraction", ui);
@@ -161,6 +174,7 @@ window.UI = {
             UI.shipMovement.halfphaseElement.on("click touchstart", UI.shipMovement.halfphaseCallback);
             UI.shipMovement.chargeElement.on("click touchstart", UI.shipMovement.chargeCallback);
             UI.shipMovement.gravRotateElement.on("click touchstart", UI.shipMovement.gravRotateCallback);
+            UI.shipMovement.redlineElement.on("click touchstart", UI.shipMovement.redlineCallback);
 
             UI.shipMovement.morecontractionElement.on("click touchstart", UI.shipMovement.morecontractionCallback);
             UI.shipMovement.lesscontractionElement.on("click touchstart", UI.shipMovement.lesscontractionCallback);
@@ -244,6 +258,12 @@ window.UI = {
             //A tap can arrive as touchstart AND click: one roll asked for, not two (the server would answer the second with the first anyway).
             if (UI.shipMovement.checkUITimeout()) return false;
             UI.shipMovement.callbackHandler.gravRotateCallback(e);
+        },
+
+        redlineCallback: function redlineCallback(e) {
+            //A tap can arrive as touchstart AND click: one toggle, not two that cancel out.
+            if (UI.shipMovement.checkUITimeout()) return false;
+            UI.shipMovement.callbackHandler.redlineCallback(e);
         },
 
         morecontractionCallback: function morecontractionCallback(e) {
@@ -540,6 +560,9 @@ window.UI = {
 
             dis = 60;
 
+            //A Redline Pilot's combat pivot without the thrust (OFFICERS_PLAN.md Stage 32): both pivot arrows in the Redline red (pivotArrowTint)
+            var redlinePivot = shipManager.movement.isRedlinePivotNext(ship);
+
             //PIVOT LEFT
             angle = mathlib.addToDirection(shipHeading, -90);
             var pivotleft = UI.shipMovement.pivotleftElement;
@@ -576,7 +599,9 @@ window.UI = {
                         angle,
                         "img/pivotleft.png",
                         "pivotleftcanvas",
-                        shipHeading
+                        shipHeading,
+                        undefined,
+                        UI.shipMovement.pivotArrowTint(pivotleft, redlinePivot, "Pivot Left")
                     );
                     pivotleft.show();
                 }
@@ -621,7 +646,9 @@ window.UI = {
                         angle,
                         "img/pivotright.png",
                         "pivotrightcanvas",
-                        shipHeading
+                        shipHeading,
+                        undefined,
+                        UI.shipMovement.pivotArrowTint(pivotright, redlinePivot, "Pivot Right")
                     );
                     pivotright.show();
                 }
@@ -663,6 +690,13 @@ window.UI = {
                40 is its hit box: the roll icon's centre moves out by that, and a flight's jink + by
                just enough to clear it, since that stack already starts further out - each plus
                minesweepGap. (dis is in units of 1/1.4 px.) */
+            /* AFTERBURNERS (OFFICERS_PLAN.md Stage 32) - a Redline Pilot's flight: astern, between the flight and its jink stack, redlineFlightDistance
+               px out (user, play test 4515); a Minesweeping Mode icon steps back behind it, and the stack behind that one. */
+            var redlineAt = UI.shipMovement.redlineFlightDistance;
+            if (UI.shipMovement.drawRedlineIcon(ship, pos, redlineAt, angle) && window.mineSweep && mineSweep.getModeState(ship)) {
+                dis = Math.max(dis, (redlineAt + 40 + UI.shipMovement.minesweepGap) / 1.4); //both hit boxes are 40
+            }
+
             if (UI.shipMovement.drawMinesweepIcon(ship, pos, dis * 1.4, angle)) {
                 var gap = UI.shipMovement.minesweepGap / 1.4;
                 dis += ship.flight ? 10 + gap : 40 / 1.4 + gap;
@@ -932,6 +966,50 @@ window.UI = {
             $("#gravRotatecanvas").css("filter", state === 'done' ? "drop-shadow(0 0 3px " + glow + ") drop-shadow(0 0 2px " + glow + ")" : "none");
             UI.shipMovement.drawUIElement(icon, pos.x, pos.y, 34, 30 * 1.4, angle, UI.shipMovement.gravRotateIcon, "gravRotatecanvas", 0, 40);
             return true;
+        },
+
+        /* The Redline icon (OFFICERS_PLAN.md Stage 32) for a Redline Pilot's flight, `dis` px astern, in shipManager.movement.getRedlineState's state:
+           faint while it may burn (its first order of the turn), glowing while it burns (a click takes it back while it is still the last order), and
+           grey on the turn after, while the engines cool - its label then says why the flight cannot manoeuvre. Returns whether it was drawn. */
+        drawRedlineIcon: function drawRedlineIcon(ship, pos, dis, angle) {
+            var icon = UI.shipMovement.redlineElement;
+            var state = shipManager.movement.getRedlineState(ship);
+            if (!state) {
+                icon.hide();
+                return false;
+            }
+            var bonus = window.officers ? officers.redlineThrustBonus(ship) : 0;
+            var labels = {
+                ready: "Afterburners - +50% thrust, no manoeuvres next turn",
+                on: "Afterburners: +" + bonus + " thrust this turn",
+                locked: "Afterburners: +" + bonus + " thrust this turn",
+                cooling: "Engines cooling after the afterburners"
+            };
+            //Both: moveTooltip reads the label with .data(), which caches the attribute on its first read.
+            icon.attr("data-movement-type", labels[state]).data("movement-type", labels[state]);
+            if (icon.is(":hover")) $("#movetooltip .movementType").text(labels[state]);
+            var opacities = { ready: UI.shipMovement.redlineReadyOpacity, cooling: UI.shipMovement.redlineCoolingOpacity };
+            icon.css({
+                opacity: opacities[state] || 1,
+                cursor: state === 'ready' || state === 'on' ? "pointer" : "default"
+            });
+            var glow = UI.shipMovement.redlineGlowColour;
+            var burning = state === 'on' || state === 'locked';
+            $("#redlinecanvas").css("filter", burning ? "drop-shadow(0 0 3px " + glow + ") drop-shadow(0 0 2px " + glow + ")"
+                : (state === 'cooling' ? UI.shipMovement.redlineCoolingFilter : "none"));
+            UI.shipMovement.drawUIElement(icon, pos.x, pos.y, 34, dis, angle, UI.shipMovement.redlineIcon, "redlinecanvas", 0, 40);
+            return true;
+        },
+
+        /* A pivot arrow's label, and its tint for drawUIElement: in the Firing phase, while a Redline Pilot's flight lacks the thrust for a combat pivot
+           (OFFICERS_PLAN.md Stage 32, shipManager.movement.isRedlinePivotNext) it reads "... (Redline: ...)" with what that costs and is drawn in
+           the Redline red - the Charge's snap-turn arrows' way (turnArrowTint; user, play test 4515); otherwise as ever. */
+        pivotArrowTint: function pivotArrowTint(element, redline, plain) {
+            var label = redline ? plain + " (Redline: without the thrust - this turn's fire at -15%)" : plain;
+            //Both: moveTooltip reads the label with .data(), which caches the attribute on its first read.
+            element.attr("data-movement-type", label).data("movement-type", label);
+            if (element.is(":hover")) $("#movetooltip .movementType").text(label);
+            return redline ? UI.shipMovement.redlinePivotColour : undefined;
         },
 
         /* A turn arrow's label, and its tint for drawUIElement: while its turn would be an Expert Warrior's charge snap turn (OFFICERS_PLAN.md

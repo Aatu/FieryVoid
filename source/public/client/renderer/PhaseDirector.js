@@ -113,6 +113,10 @@ window.phaseDirector = function () {
         /* Movement locks (OFFICERS_PLAN.md Stage 31, client/moveLock.js): a unit's moves up to an order it can no longer take back
            (an Expert Graviton Controller's rotation) come back, locked - after both restores above, which replace this turn's rows. */
         if (window.moveLock) moveLock.onStrategyActivated(gamedata, this.phaseStrategy);
+
+        /* A Redline Pilot's afterburner clip (OFFICERS_PLAN.md Stage 32): picked and fetched in idle time when a Movement phase opens for a player
+           with a flight that may burn - never at page load, never for anyone else. */
+        if (window.officers && typeof officers.prefetchRedlineClip === 'function') officers.prefetchRedlineClip();
     }
 
     return phaseDirector;

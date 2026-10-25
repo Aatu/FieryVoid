@@ -525,7 +525,7 @@ window.ShipTooltip = function () {
             if (commandNodeLine !== '') toDisplay += '<span style="color:#e1b000;">' + commandNodeLine + '</span>; ';
         }
         if (ship.flight === true) {
-            if (shipManager.movement.hasCombatPivotPenalty(ship)) rollPivotModifier -= 5;
+            rollPivotModifier -= 5 * shipManager.movement.combatPivotPenalty(ship); //-15 after a Redline Pilot's pivot without the thrust (OFFICERS_PLAN.md Stage 32)
         } else if (ship.osat) {
             if (shipManager.movement.hasTurned(ship)) rollPivotModifier -= 5;
         } else {

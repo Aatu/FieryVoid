@@ -4427,6 +4427,16 @@ window.confirm = {
         var $allocLabel = $allocRow.find('.dock-alloc-count');
         container.append($allocRow);
 
+        /* OFFICERS_PLAN.md Stage 32: a carrier beyond the flight's thrust is offered only for a Redline Pilot's landing (findEligibleCarriersForDock) -
+           the risk spelt out, as the server rolls it once firing resolves. */
+        carriers.forEach(function (c) {
+            var excess = parseInt(c.redlineExcess, 10) || 0;
+            if (excess <= 0) return;
+            $('<div class="multi-value-row" style="font-style:italic;padding-bottom:4px;color:#ffb070;"><span>Redline landing on ' + c.ship.name + ': ' + excess
+                + ' beyond the flight\'s thrust - a d20 of 1-' + Math.min(excess, 20) + ' crashes the Redline Pilot\'s fighter into it, and the rest break off.</span></div>')
+                .appendTo(container);
+        });
+
         // Warrior regen: spell out that the whole flight reserves its full roster of
         // hangar slots (so 4 living craft still take 6 boxes — space held for the 2
         // that regrow after the dwell). Only shown when roster > living craft.

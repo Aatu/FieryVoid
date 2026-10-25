@@ -2669,6 +2669,9 @@ $newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
 							$calledid = $fighter->id;
 						}
 					}			
+					//...but a Redline Pilot's own, whenever he flies with them: "must always be picked as the fighter destroyed" (OFFICERS_PLAN.md Stage 32)
+					$redline = Officers::redlineCrashCraft($shooter, $gamedata->turn);
+					if($redline) $calledid = $redline->id;
 				}
 		
 				//don’t repeat manual ramming order
@@ -2724,7 +2727,7 @@ $newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
         //Speed checks
         $targetSpeed = $target->getSpeed(); 
 		//Debug::log("before target speed check. Target Speed: " . $targetSpeed);			       
-        if($targetSpeed > 5) return 'Invalid';
+        if($targetSpeed > Officers::skinDanceSpeedLimit($shooter, $gamedata->turn)) return 'Invalid'; //5 - or 8 for a Redline Pilot's flight (OFFICERS_PLAN.md Stage 32)
         if($targetSpeed > 0){
 			$shooterLastMove = $shooter->getLastMovement();
 			$shooterHeading = $shooterLastMove->heading;
@@ -2743,6 +2746,7 @@ $newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
 		//Debug::log("roll " . $roll);			
 		$mod = 0;
 		if($shipSpeed > 5) $mod += ceil(($shipSpeed - 5)/2);
+		if($targetSpeed > Officers::SKIN_DANCE_SPEED) $mod += $targetSpeed - Officers::SKIN_DANCE_SPEED; //a Redline Pilot's flight over a unit faster than 5: +1 a point (Stage 32)
 		//Debug::log("speed mod " . $mod);			
 		if(Movement::isPivoting($shooter, $gamedata->turn) || Movement::isPivoting($target, $gamedata->turn)) $mod += 5; //Shooter or target is pivoting
 		//Debug::log("pivoting mod " . $mod);			

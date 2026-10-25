@@ -285,6 +285,10 @@ class MovementGamePhase implements Phase
 					// at an enemy unit. Judged on the AUTHORITATIVE ship (the POST-side one has no officers).
 					if (TacGamedata::$officersPresent) $ship->movement = Officers::validateCharge($activeShip, $ship->movement, $gameData);
 
+					// OFFICERS_PLAN.md Stage 32 - a Redline Pilot's afterburner row: one, while he serves, as the flight's first order; and a flight
+					// cooling its engines after one may not manoeuvre - such a commit is refused. Judged on the AUTHORITATIVE flight, rows and all.
+					if ($activeShip instanceof FighterFlight) $ship->movement = Officers::validateRedline($activeShip, $ship->movement, $gameData);
+
 					// Check for detachment move in the submitted orders
 					$detachedMove = false;
 					foreach ($ship->movement as $move) {

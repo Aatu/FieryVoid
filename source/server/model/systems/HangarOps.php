@@ -5484,9 +5484,11 @@ class HangarOps {
 		//Speed gap must be within flight thrust budget. Fighters can decelerate
 		//up to their freethrust to match a slower carrier, or accelerate up to
 		//freethrust to match a faster one. Per the rules dive: |delta| <= thrust.
-		$thrust = (int)($flight->freethrust ?? 0);
+		//A Redline Pilot's afterburners count this turn, and beyond it his landing
+		//holds on a d20 above the excess (OFFICERS_PLAN.md Stage 32).
+		$thrust = (int)($flight->freethrust ?? 0) + Officers::redlineBurnThrust($flight, $gamedata->turn);
 		$delta = abs((int)$carrierMove->speed - (int)$flightMove->speed);
-		if ($delta > $thrust) {
+		if ($delta > $thrust && !Officers::redlineLandingHolds($flight, $gamedata)) {
 			$reason = 'speed delta exceeds flight thrust'; return false;
 		}
 

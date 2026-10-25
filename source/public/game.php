@@ -792,6 +792,12 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         <div id="gravRotate" class="movement-icon" data-movement-type="Rotate Gravitic Drive">
             <canvas id="gravRotatecanvas" width="40" height="40"></canvas>
         </div>
+
+        <!-- A Redline Pilot's afterburners (OFFICERS_PLAN.md Stage 32): the Charge's spot again - only flights carry him, and no flight the other two.
+             Label set by UI/shipMovement.js. -->
+        <div id="redline" class="movement-icon" data-movement-type="Afterburners">
+            <canvas id="redlinecanvas" width="40" height="40"></canvas>
+        </div>
         
         <div id="jink" class="movement-icon" data-movement-type="Jinking">
 			<div class="centercontainer">
