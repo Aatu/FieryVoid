@@ -129,7 +129,7 @@ window.officers = {
 		   The rotation is movement.js's (its Gravitic Rotate icon - canGravRotate; the server rolls the die, client/moveLock.js locks the moves), and its -3 the
 		   hit-chance preview's ("Gravitic Rotation"). */
 		{ id: 'OFF_GRAV', label: 'Expert Graviton Controller', post: 'engine', needs: 'gravitics',
-			summary: 'Gravitic beams +1 damage; Graviton Pulsars count pulses 5% better; Engine and largest aft thruster +1. Once per battle rotate the gravitic drive to a random facing (-15% to hit that turn)' },
+			summary: 'Gravitic beams +1 damage; Graviton Pulsars count pulses 5% better; Engine and largest aft thruster +1. Once per battle rotate to a random facing' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
