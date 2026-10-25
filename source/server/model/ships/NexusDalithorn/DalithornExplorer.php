@@ -32,10 +32,10 @@ class DalithornExplorer extends BaseShip{
         
         $this->addPrimarySystem(new Reactor(4, 19, 0, 0));
         $this->addPrimarySystem(new CnC(4, 20, 0, 0));
-        $this->addPrimarySystem(new ElintScanner(4, 28, 8, 9));
+        $this->addPrimarySystem(new ElintScanner(4, 16, 8, 9));
         $this->addPrimarySystem(new Engine(3, 18, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(1, 2, 2));
-		$this->addPrimarySystem(new Magazine(4, 16));
+		$this->addPrimarySystem(new Hangar(1, 4, 2));
+		$this->addPrimarySystem(new Magazine(4, 8));
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
@@ -55,12 +55,12 @@ class DalithornExplorer extends BaseShip{
         $this->addAftSystem(new Catapult(1, 6));
         $this->addAftSystem(new Catapult(1, 6));
 
-        $this->addLeftSystem(new CargoBay(2, 28));
+        $this->addLeftSystem(new CargoBay(2, 20));
         $this->addLeftSystem(new NexusGasGun(2, 7, 2, 180, 360));
 		$this->addLeftSystem(new NexusProtector(2, 4, 1, 180, 360));
         $this->addLeftSystem(new Thruster(3, 14, 0, 4, 3));
 
-        $this->addRightSystem(new CargoBay(2, 28));
+        $this->addRightSystem(new CargoBay(2, 20));
         $this->addRightSystem(new NexusGasGun(2, 7, 2, 0, 180));
 		$this->addRightSystem(new NexusProtector(2, 4, 1, 0, 180));
         $this->addRightSystem(new Thruster(3, 14, 0, 4, 4));

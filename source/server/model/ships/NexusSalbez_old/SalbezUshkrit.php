@@ -75,7 +75,7 @@ class SalbezUshkrit extends BaseShipNoAft{
             ),
             1=> array(
                     5 => "Thruster",
-					7 => "Heavy Laser Cutter",
+					7 => "Laser Cutter",
 					9 => "Light Laser",
 					11 => "Bolt Torpedo",
 					18 => "Structure",

@@ -65,6 +65,7 @@ class BadgerStarfuryAM extends FighterFlight{
             
 			
             $aftGun = new PairedParticleGun(150, 210, 4, 1);
+            $aftGun->setTailGun(); //tail gun (Weapon::getTailGunMod)
             $aftGun->displayName = "Uni-Pulse Cannon";
             $fighter->addAftSystem($aftGun);
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	

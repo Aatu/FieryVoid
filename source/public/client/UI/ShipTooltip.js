@@ -517,7 +517,7 @@ window.ShipTooltip = function () {
             if (commandNodeLine !== '') toDisplay += '<span style="color:#e1b000;">' + commandNodeLine + '</span>; ';
         }
         if (ship.flight === true) {
-            if (shipManager.movement.hasCombatPivoted(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 5;
+            if (shipManager.movement.hasCombatPivotPenalty(ship)) rollPivotModifier -= 5;
         } else if (ship.osat) {
             if (shipManager.movement.hasTurned(ship)) rollPivotModifier -= 5;
         } else {
@@ -591,7 +591,7 @@ window.ShipTooltip = function () {
                 Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship))) + lcvTurnSurcharge;
 
             this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
-            this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + Math.ceil(ship.pivotcost * 1.5), ship.flight === true);
+            this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + shipManager.movement.getCombatPivotCost(ship), ship.flight === true);
             toDisplay = ''; //display Agile status
             if (ship.agile) toDisplay = ', Agile';
             this.addEntryElement('Turn Cost: ' + turncost + ' (' + shipManager.movement.getTurnCost(ship) + '); Turn Delay: ' + turnDelayCost + ' (' + shipManager.movement.getTurnDelayCost(ship) + ')' + toDisplay);

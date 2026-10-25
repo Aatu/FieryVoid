@@ -43,6 +43,7 @@ class SalbezDrazchk extends FighterFlight{
 	        $fighter->addFrontSystem($light);
 
 			$aft = new PairedParticleGun(150, 210, 1, 1);
+			$aft->setTailGun(); //tail gun (Weapon::getTailGunMod)
 			$fighter->addAftSystem($aft);
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			

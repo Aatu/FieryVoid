@@ -111,7 +111,7 @@ class TrekNausicaanScourge extends HeavyCombatVessel{
             2=> array(
 		    	2 => "Shield Projector",
 				6 => "Nacelle",
-				8 => "Plasma Projector",
+				8 => "Plasma Wave",
 				10 => "Dual Rocket Launcher",
 				11 => "Point Plasma Gun",
 				12 => "Light Plasma Projector",

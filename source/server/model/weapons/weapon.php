@@ -190,6 +190,16 @@ class Weapon extends ShipSystem
     //            their turrets are 360 deg so weapon arcs can't express this on their own).
     //Only meaningful alongside a non-null $linkedFiringGroup. Pruned from the static blueprint when null.
     public $linkedFiringSpread = null;
+    /* A FIGHTER's TAIL GUN (OFFICERS_PLAN.md Stage 21): a rear-arc gun beside its craft's forward weapons, flagged by the
+       fighter's own file with setTailGun(). It fires at -TAIL_GUN_PENALTY on a turn its craft fires another direct-fire weapon, unless
+       the flight has a navigator, and an Expert Tailgunner trains it (getTailGunMod). PROTECTED, like $seedsBelowFullCharge:
+       the client reads it off the static blueprint, where ShipCompactor::annotateSystems writes it (isTailGun). */
+    protected $tailGun = false;
+    /* Firing modes whose fire control NOTHING may raise - no Gunsights, no Expert Gunner, Turret Officer or Matter Weapons Expert: a mode
+       with a hit calculation of its own (the Antimatter Shredder's Shredder mode keeps its 0/0/0, user 2026-10-21). Asked through
+       hasFixedFireControl by every fire control raiser; PROTECTED, like $tailGun - the lobby reads it off the static blueprint, where
+       ShipCompactor::annotateSystems writes it (getFixedFireControlModes). */
+    protected $fixedFireControlModes = array();
     public $noOverkill = false; //this will let simplify entire Matter line enormously!
     protected $noOverkillArray = array();
     public $doOverkill = false; //opposite of $noOverkill - allows Piercing shots to overkill (eg. Shadow Heavy Molecular Slicer Beam has such ability)
@@ -306,6 +316,21 @@ class Weapon extends ShipSystem
     public property on purpose: methods aren't serialised into the static ship blueprint.*/
     public function isArcRestricted(){
         return $this->arcRestricted;
+    }
+
+    /*is this weapon TURRET-MOUNTED - a mount that can jam (setArcRestriction)? Its turret is getTurretMates. The Expert Turret
+    Officer's posts (OFFICERS_PLAN.md Stage 22). A method, like isArcRestricted, so it never reaches the static blueprint.*/
+    public function isTurretMount(){
+        return $this->reducedArcStart !== null;
+    }
+
+    //may nothing raise this firing mode's fire control ($fixedFireControlModes)? ⚠️ MIRROR PAIR with the client's fixedFireControlModes readers
+    public function hasFixedFireControl($mode){
+        return in_array((int)$mode, $this->fixedFireControlModes, true);
+    }
+
+    public function getFixedFireControlModes(){
+        return $this->fixedFireControlModes;
     }
 
     public $useOEW = true;
@@ -528,6 +553,27 @@ class Weapon extends ShipSystem
             if (!empty($this->fireControlArray)) $strippedSystem->fireControlArray = $this->fireControlArray;
             $strippedSystem->isModified = $this->isModified;
         }
+
+        /* An officer's added firing mode (OFFICERS_PLAN.md Stage 10): every per-mode field it filled, and the mode list -
+           to his own team, and to anyone else only in the data of the turn it was FIRED (a replay, the printed combat
+           log, which label the shot by it) or once the game is over. Until then a Piercing mode on a gun that has none
+           would point at the Gunner, so anyone else gets the fire control list without it, too. */
+        if ($this->addedMode !== null) {
+            if ($this->addedModePublic || TacGamedata::$currentGameFinished || $ship->isRevealedToCurrentViewer()) {
+                foreach ($this->addedModeFields as $field) {
+                    $strippedSystem->$field = $this->$field;
+                }
+            } else if (isset($strippedSystem->fireControlArray) && is_array($strippedSystem->fireControlArray)) {
+                $withoutIt = $strippedSystem->fireControlArray;
+                unset($withoutIt[$this->addedMode]);
+                $strippedSystem->fireControlArray = $withoutIt;
+            }
+        }
+
+        /* Officers (OFFICERS_PLAN.md): an Expert Laser Technician aboard (Stage 11) - his team is told this laser may be
+           boosted, and everyone else gets its power entries without the boosts, which would name him; an Expert Plasma
+           Scientist (Stage 12) - a Plasma Web's longer range, to everyone. Behind the static. */
+        if (TacGamedata::$officersPresent && $ship instanceof BaseShip) Officers::weaponForJson($ship, $this, $strippedSystem);
 
         //Turret jam (ReducedArcs crit): the static blueprint still carries the mount's FULL arc, so
         //the live reduced arc has to travel with the payload - the client merges JSON over the
@@ -774,7 +820,9 @@ class Weapon extends ShipSystem
         if (!$this->isDamagedOnTurn($gamedata->turn)) return; //only a hit this turn triggers the roll
         if ($this->hasCritical("ReducedArcs", false)) return; //already jammed
 
-        if (Dice::d(20) < $this->arcRestrictionThreshold) return;
+        //an Expert Turret Officer on this turret: "subtract 2 from the die roll" (OFFICERS_PLAN.md Stage 22)
+        $relief = TacGamedata::$officersPresent ? Officers::turretJamRelief($ship, $this, $gamedata->turn) : 0;
+        if (Dice::d(20) - $relief < $this->arcRestrictionThreshold) return;
 
         foreach ($this->getTurretMates($ship) as $mate){
             if ($mate->hasCritical("ReducedArcs", false)) continue; //don't double up on a mate already jammed
@@ -785,8 +833,9 @@ class Weapon extends ShipSystem
     }
 
     /* This weapon plus every other weapon sharing its turret - same non-null linkedFiringGroup on the
-       same unit. An unlinked mount is a turret of one. */
-    protected function getTurretMates($ship)
+       same unit. An unlinked mount is a turret of one. Public for the Expert Turret Officer, who aids
+       every weapon on his turret (Officers, Stage 22). */
+    public function getTurretMates($ship)
     {
         $mates = array($this);
         if ($this->linkedFiringGroup === null) return $mates;
@@ -999,12 +1048,19 @@ class Weapon extends ShipSystem
 		if ($this->linkedFiringGroup !== null && $this->linkedFiringSpread !== null) {
 			$this->data["Firing Link"] = "Mounted on " . $this->linkedFiringGroup;
 		}
+		//A fighter's tail gun (OFFICERS_PLAN.md Stage 21) - the client rewrites the line for a Navigator bought in the lobby and
+		//for an Expert Tailgunner (officers.tailGunLine)
+		if ($this->tailGun) {
+			$unit = $this->getUnit();
+			$this->data["Tail Gun"] = ($unit && !empty($unit->hasNavigator)) ? 'No penalty (navigator)'
+				: '-' . (self::TAIL_GUN_PENALTY * 5) . '% on a turn its fighter fires another direct-fire weapon';
+		}
 		//Turret jam - tell the player the mount can lock up before it happens, and confirm it after.
 		//The "Arc" line (set by the parent call below) always shows the arc currently in effect.
 		if ($this->reducedArcStart !== null) {
 			$this->data["Turret Mount"] = $this->arcRestricted
 				? "JAMMED - locked to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
-				: "Whole turret May jam to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
+				: "Whole turret may jam to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
 					. " on a " . $this->arcRestrictionThreshold . "+ (d20) whenever damaged";
 		}
         $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' . $this->priorityAF;
@@ -1028,8 +1084,27 @@ class Weapon extends ShipSystem
     public function onAdvancingGamedata($ship, $gamedata)
     {
         $data = $this->calculateLoading($gamedata);
+        //OFFICERS_PLAN.md Stage 10 - a weapon an officer reloads faster starts the new turn one turn further on
+        if ($data && TacGamedata::$officersPresent && $ship instanceof BaseShip)
+            Officers::fasterReload($ship, $this, $data, $gamedata);
         if ($data)
             SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
+    }
+
+    /* OFFICERS_PLAN.md Stage 10 - an officer's ADDED firing mode (the Expert Gunner's Piercing mode,
+       Officers::addPiercingMode): its number, the per-mode fields it filled - the static blueprint has never heard of
+       the mode, so stripForJson sends each field whole (the client merges a system's payload over its blueprint key by
+       key) - and whether anyone may see it ($addedModePublic: it was fired on the turn this data is for). PROTECTED, so
+       no blueprint carries any of it. */
+    protected $addedMode = null;
+    protected $addedModeFields = array();
+    protected $addedModePublic = false;
+
+    public function markAddedMode($mode, array $fields, $public)
+    {
+        $this->addedMode = $mode;
+        $this->addedModeFields = $fields;
+        $this->addedModePublic = (bool)$public;
     }
 
 
@@ -1286,8 +1361,9 @@ public function getFullStartLoading()
         }
 
 
-        if ($this->firedOnTurn($gamedata->turn -1)) {
-            if ($this->firedUsingMode($gamedata->turn -1)==1) {//only basic mode counts for sustaining! otherwise shot was just not sustained 
+        //OFFICERS_PLAN.md Stage 17 - a gun an Expert Ion Technician boosted with thrust that did not fire "discharges and is treated as having fired anyway"
+        if ($this->firedOnTurn($gamedata->turn -1) || (TacGamedata::$officersPresent && Officers::ionDischarged($this, $gamedata->turn -1))) {
+            if ($this->firedUsingMode($gamedata->turn -1)==1) {//only basic mode counts for sustaining! otherwise shot was just not sustained
                 if ($this->overloadshots > 0) {
                     $newExtraShots = $this->overloadshots - 1;
                     //if you have extra shots use them
@@ -1382,10 +1458,14 @@ public function getFullStartLoading()
 				}		
 			}
 		}	
-		//Matter Weapons Expert (OFFICERS_PLAN.md Stage 3): +1 on a shot in a Matter mode - weaponClass is
-		//the fired mode's by now. Behind the static, so an ordinary game pays one read per shot.
+		//Matter Weapons Expert (OFFICERS_PLAN.md Stage 3; in this weapon, Stage 8): +1 on a shot in a Matter
+		//mode - weaponClass is the fired mode's by now. Behind the static, so an ordinary game pays one read per shot.
 		if (TacGamedata::$officersPresent && $this->weaponClass === 'Matter' && $ship instanceof BaseShip){
-			$bonusDamage += Officers::matterDamageBonus($ship);
+			$bonusDamage += Officers::matterDamageBonus($ship, $this);
+		}
+		//Expert Laser Technician (Stage 11): +3 Spinal, +2 Blast, +1 any other laser - on a shot in a Laser mode. Behind the static.
+		if (TacGamedata::$officersPresent && $this->weaponClass === 'Laser' && $ship instanceof BaseShip){
+			$bonusDamage += Officers::laserDamageBonus($ship, $this);
 		}
 		return $bonusDamage;
     }   
@@ -1487,6 +1567,41 @@ public function getFullStartLoading()
 
         return false;
     } //endof function isFtrFiringNonBallisticWeapons
+
+    const TAIL_GUN_PENALTY = 2; //-10%: the tabletop -2 for firing a tail gun "together with main gun" (FV_factions.txt, the Tiqincc)
+
+    public function setTailGun(){
+        $this->tailGun = true;
+    }
+
+    public function isTailGun(){
+        return $this->tailGun;
+    }
+
+    /* ⭐ A tail gun's to-hit modifier (OFFICERS_PLAN.md Stage 21), in calculateHitBase's fighter branch: -TAIL_GUN_PENALTY on a
+       turn its craft also fires another DIRECT-FIRE weapon - "not ballistic weapons fired in Initial Orders phase like Torpedoes, only
+       other direct fire weapons fired during Firing Phase" (user ruling 2026-10-21); an interception, a Meteor Defence declaration and
+       the ramming attack are not firing it either - isFtrFiringNonBallisticWeapons' own filter - unless the flight has a navigator to work it
+       (user ruling 2026-10-21: the Badger, the Rogolon Vostor, a Navigator bought on an ARC). An Expert Tailgunner serving that
+       turn waives the penalty; a tail gun without one gains Officers::TAILGUNNER_BONUS instead, "with that gun only", and a
+       penalised one fired alone gains nothing (user ruling). ⚠️ MIRROR PAIR with weaponManager.getTailGunMod (JS). */
+    public function getTailGunMod($flight, $turn){
+        if (!$this->tailGun || !($flight instanceof FighterFlight)) return 0;
+        $penalised = !$flight->hasNavigator;
+        if (TacGamedata::$officersPresent && Officers::hasTailgunner($flight, $turn)) return $penalised ? 0 : Officers::TAILGUNNER_BONUS;
+        if (!$penalised || !$this->craftFiresOtherWeapon($flight, $turn)) return 0;
+        return -self::TAIL_GUN_PENALTY;
+    }
+
+    protected function craftFiresOtherWeapon($flight, $turn){
+        $craft = $flight->getFighterBySystem($this->id);
+        if ($craft === null) return false;
+        foreach ($craft->systems as $system){
+            if ($system === $this || !($system instanceof Weapon) || $system->isRammingAttack || $system->ballistic) continue;
+            if ($system->firedOffensivelyOnTurn($turn)) return true;
+        }
+        return false;
+    }
 
     public function getFiringHex($gamedata, $fireOrder){
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
@@ -1800,7 +1915,7 @@ public function getFullStartLoading()
           calculation and has to be zeroed wherever $dew is (two sites below).*/
         $disguisedDEW = $target->getDisguisedDEWFor($shooter, $gamedata->turn);
         $dewFake = ($disguisedDEW !== null) ? $disguisedDEW : $dew;
-        $bdew = EW::getBlanketDEW($gamedata, $target);
+        $bdew = EW::getBlanketDEW($gamedata, $target, $this->ballistic); //a ballistic: an Expert ELINT Officer's blanket counts a third (OFFICERS_PLAN.md Stage 20)
         $sdew = EW::getSupportedDEW($gamedata, $target);
         /* STEALTH COATING - THE LOCK (SHIP_ENHANCEMENTS_PLAN.md D9, §2.2.4): a weapon that uses OEW,
            fired by a unit holding OEW >= 1 on the target after disruption EW. Captured HERE, straight
@@ -1853,6 +1968,16 @@ public function getFullStartLoading()
             //else: the system's own flat profile replaces the ship's bearing profile below - no called-shot penalty, no bonus
         }
 
+        /* OFFICERS_PLAN.md Stage 10 - an Expert Gunner's once-per-battle shot: +4 on his gun's first native Piercing
+           shot, +3 on its first called shot (Officers::gunnerShotBonus spends it). One static read for every other
+           shot in the game. ⚠️ MIRROR PAIR with officers.gunnerShotBonus, in weaponManager.computeShotModifiers.
+           Stage 19: and an Expert Targeter's +4 on a standard called shot by a weapon he covers (officers.targeterShotBonus). */
+        if (TacGamedata::$officersPresent) {
+            $standardCalledShot = ($calledSystem !== null && $calledProfileOverride === null);
+            $mod += Officers::gunnerShotBonus($shooter, $this, $standardCalledShot, $gamedata);
+            $mod += Officers::targeterShotBonus($shooter, $this, $standardCalledShot, $gamedata);
+        }
+
         if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)) { //leaving instanceof OSAT here - assuming MicroSATs will not suffer this penalty (Dovarum seems to be able to turn/pivot like a superheavy fighter it's based on)
             $mod -= 1;
         }
@@ -1875,8 +2000,11 @@ public function getFullStartLoading()
         //and use OB instead of OEW
         if ($shooter instanceof FighterFlight) {
             if (Movement::getCombatPivots($shooter, $gamedata->turn) > 0) {
-            	 if(!$shooter->ignoreManoeuvreMods) $mod -= 1;
+                //an Expert Coordinator waives it short of a full 180 (OFFICERS_PLAN.md Stage 9)
+                $coordinated = TacGamedata::$officersPresent && Officers::waivesCombatPivotPenalty($shooter, $gamedata->turn);
+            	 if(!$shooter->ignoreManoeuvreMods && !$coordinated) $mod -= 1;
             }
+            $mod += $this->getTailGunMod($shooter, $gamedata->turn); //a tail gun fired with its craft's other direct-fire weapons (Stage 21)
 
             $effectiveOB = $shooter->offensivebonus;
             $firstFighter = $shooter->getSampleFighter();
@@ -3066,6 +3194,20 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
     }//endof function getSystemArmourBase
 
 
+    /* The hexes a shot's RANGE DAMAGE penalty counts, from $sourcePos to $target. Every range damage rule reads it: the
+       one in getDamageMod below, and the weapons that override getDamageMod with a rule of their own (the Plasma
+       Bolters, the Nexus Enhanced Plasmas and Charged Plasma Guns, the Nexus Heavy Plasma Charge). A plasma shot from a
+       ship with a serving Expert Plasma Scientist (OFFICERS_PLAN.md Stage 12) ignores its first two hexes - behind the
+       static, so every other shot pays one read. */
+    protected function getRangeDamageDistance($shooter, $sourcePos, $target)
+    {
+        $dis = mathlib::getDistanceHex($sourcePos, $target);
+        if (TacGamedata::$officersPresent && $this->weaponClass === 'Plasma' && $shooter instanceof BaseShip) {
+            $dis = max(0, $dis - Officers::plasmaRangeRelief($shooter));
+        }
+        return $dis;
+    }
+
     /*returns modified damage, NOT damage modifier*/
     /*this is different function that getDamageMod of unit!*/
     protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
@@ -3078,7 +3220,7 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
             } else {
                 $sourcePos = $shooter->getHexPos();
             }
-            $dis = mathlib::getDistanceHex($sourcePos, $target);
+            $dis = $this->getRangeDamageDistance($shooter, $sourcePos, $target);
             /* WALKERS OF SIGMA-957 - PLASMA ONLY: every INTERVENING hex of somebody else's
                Energy Draining Field the shot crossed counts as TWO hexes of range here, so it
                adds one apiece. Plasma's second helping on top of the doubled to-hit penalty both
@@ -3132,14 +3274,40 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
            that fired, so the two must agree. Flights and mines answer 0 - ELITE_CREW is only ever
            offered to ships (Enhancements::setEnhancementOptionsShip). */
         $dieBonus = ($shooter instanceof BaseShip) ? $shooter->getCrewDieDamageBonus() : 0;
+        /* An Expert Gunner in THIS weapon (OFFICERS_PLAN.md Stage 8): +1 per die more, on top of Elite Crew's
+           (not an officer, so they stack) - each die still capped at its face. An Expert Ion Technician's +1 per die on an
+           ion weapon's dice (Stage 17), likewise - but not on a Gunner's weapon, whose +1 replaces his. Behind the static. */
+        if (TacGamedata::$officersPresent && $shooter instanceof BaseShip) $dieBonus += Officers::gunnerDieBonus($shooter, $this) + Officers::ionDieBonus($shooter, $this);
+        /* An Expert Anticipator (Stage 23): a damage roll of two or more dice rolls one more and drops the lowest (Dice::$extraDie) -
+           on a Gunner's weapon too, with his +1 on every die (user ruling 2026-10-21). Set and restored with the per-die bonus. */
+        $extraDie = (TacGamedata::$officersPresent && $shooter instanceof BaseShip) ? Officers::extraDamageDie($shooter, $this) : 0;
         $previousDieBonus = Dice::$perDieBonus;
+        $previousExtraDie = Dice::$extraDie;
         Dice::$perDieBonus = $dieBonus;
+        Dice::$extraDie = $extraDie;
         try {
             $damage = $this->getDamage($fireOrder);
         } finally {
             Dice::$perDieBonus = $previousDieBonus;
+            Dice::$extraDie = $previousExtraDie;
         }
+        $rolled = $damage;
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);                
+        /* An Expert Laser Technician's power boost (OFFICERS_PLAN.md Stage 11): +1 per point the player put into this
+           laser, at most half of $rolled, from one pool for the turn - added after the weapon's own reductions, as
+           getDamageMod adds the flat bonuses. An Expert Plasma Scientist's +1 (+2 for a Fuser, Stage 12) - here, not
+           in getBonusDamage, because six plasma weapons override getDamageMod and drop the parent's result. An Expert Religious
+           Leader's +1 on every hit (Stage 14) - this method runs once per hit, which is his "per volley". An Expert Surge
+           Officer's +1 on every Electromagnetic hit, +1 per cannon on a combined Surge Cannon shot (Stage 16). An Expert Ion
+           Technician's +1 on an ion hit whose damage is one number, and his thrust boost's 1d10+1 a level (Stage 17). Behind the static. */
+        if (TacGamedata::$officersPresent && $shooter instanceof BaseShip){
+            $damage += Officers::laserBoostDamage($shooter, $this, $rolled, $target, $fireOrder);
+            $damage += Officers::plasmaDamageBonus($shooter, $this);
+            $damage += Officers::religiousDamageBonus($shooter, $this, $rolled);
+            $damage += Officers::surgeDamageBonus($shooter, $this, $rolled);
+            $damage += Officers::ionFlatBonus($shooter, $this, $rolled);
+            $damage += Officers::ionBoostDamage($shooter, $this, $target, $fireOrder);
+        }
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		
 		/* first attempt of StarTrek shield
@@ -3235,6 +3403,8 @@ full Advanced Armor effects (by rules) for reference:
 			$damage = $this->beforeDamagedSystem($target, $system, $damage, $armour, $gamedata, $fireOrder);
 			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos, $damageWasDealt); //Also applies armor pierced for sustained shots  - DK 02.25
 			$this->onDamagedSystem($target, $system, $effects["dmgDealt"], $effects["armorPierced"], $gamedata, $fireOrder);//weapons that do effects on hitting something
+			//EM hardening (tabletop, OFFICERS_PLAN.md §9.22): -2 on the critical roll of a hardened unit's system an EM shot affects, once a turn
+			if ($this->weaponClass === 'Electromagnetic') WeaponEM::hardenedCriticalRoll($target, $system, $gamedata->turn);
 			$damage = $effects["dmgRemaining"];
 			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier. All Sustained weapons are currently raking, so they can use standard method here - DK
 				$armourIgnored = $armourIgnored + $effects["armorPierced"]; 

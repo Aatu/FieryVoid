@@ -28,7 +28,7 @@ class BrixadiiLauncherPlatformBase extends OSAT{
         $this->addFrontSystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 270, 90));
         $this->addFrontSystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
         $this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 0, 360));
-        $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 6, 3, 5));   
         $this->addAftSystem(new Thruster(3, 6, 0, 0, 2));
                 

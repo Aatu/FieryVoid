@@ -10,8 +10,8 @@ class DalithornTroopShipRefit extends HeavyCombatVessel{
         $this->imagePath = "img/ships/Nexus/Dalithorn_Carrier2.png";
 		$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "Brethvar Troop Ship (2112)";
-//			$this->variantOf = "Threvon Flag Cruiser";
-//			$this->occurence = "uncommon";
+			$this->variantOf = "Haveroth Light Cruiser";
+			$this->occurence = "uncommon";
 		$this->unofficial = true;
         $this->isd = 2112;
         $this->limited = 33;

@@ -47,8 +47,8 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "removeJAM", condition: [isTargetable,notSelf, isElint, sourceNotFlight, targetIsRemoteControl, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasJAM, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('JAM'), info: "Remove Jamming (right-click: clear)", supportsMaxClick: true },
         { className: "addSOEW", condition: [isTargetable,isFriendly, isElint, notFlight, notMine, notSelf, isInElintDistance(30), doesNotHaveBDEW, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('SOEW'), info: "Add SOEW", supportsMaxClick: true },
         { className: "removeSOEW", condition: [isTargetable,isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('SOEW'), info: "Remove SOEW (right-click: clear)", supportsMaxClick: true },
-        { className: "addSDEW", condition: [isTargetable,isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('SDEW'), info: "Add SDEW (right-click: max)", supportsMaxClick: true },
-        { className: "removeSDEW", condition: [isTargetable,isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSDEW, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('SDEW'), info: "Remove SDEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addSDEW", condition: [isTargetable,isFriendly, isElint, notFlight, notSelf, isInElintDistance(50), /* SDEW reaches 50 (EW::getSupportedDEW) */ doesNotHaveBDEW, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('SDEW'), info: "Add SDEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeSDEW", condition: [isTargetable,isFriendly, isElint, notFlight, notSelf, isInElintDistance(50), doesNotHaveBDEW, hasSDEW, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('SDEW'), info: "Remove SDEW (right-click: clear)", supportsMaxClick: true },
         { className: "addBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW, sourceEwNotSuspended], action: addBDEW, info: "Add BDEW (right-click: max)", supportsMaxClick: true },
         { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW, sourceEwNotSuspended], action: removeBDEW, info: "Remove BDEW (right-click: clear)", supportsMaxClick: true },
         { className: "addDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth, sourceEwNotSuspended], action: addDetectSEW, info: "Add Detect Stealth (right-click: max)", supportsMaxClick: true },
@@ -493,9 +493,10 @@ window.ShipTooltipInitialOrdersMenu = function () {
         return !!(this.targetedShip && this.targetedShip.remoteControl);
     }
 
+    //the selected ship is the ELINT: an Expert ELINT Officer's ranges are 25% longer (ew.elintRange, OFFICERS_PLAN.md Stage 20)
     function isInElintDistance(distance) {
         return function () {
-            return ew.checkInELINTDistance(this.selectedShip, this.targetedShip, distance);
+            return ew.checkInELINTDistance(this.selectedShip, this.targetedShip, ew.elintRange(this.selectedShip, distance));
         };
     }
 

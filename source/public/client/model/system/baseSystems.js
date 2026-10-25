@@ -2398,7 +2398,10 @@ JumpEngine.prototype.canMaintainVortex = function () {
 	   would vanish on spawned+3 and the player would silently lose the control that keeps a jump
 	   point they are paying for open. This is the single highest-consequence line of H3's client
 	   half: everything else here would merely look wrong. */
-	if (!this.chargesVortexUpkeep() && gamedata.turn >= vortex.spawned + 3) return false;   //its last turn - see above
+	/* The cap is the payload's vortexMaxTurns (4, or 5 while an Expert Jump Officer serves in this drive -
+	   OFFICERS_PLAN.md Stage 7; JumpEngine::getMaxVortexTurns), sent while the jump point stands; 4 without it. */
+	var cap = parseInt(this.vortexMaxTurns, 10) > 0 ? parseInt(this.vortexMaxTurns, 10) : 4;
+	if (!this.chargesVortexUpkeep() && gamedata.turn >= vortex.spawned + cap - 1) return false;   //its last turn - see above
 
 	//Out of range NOW is refused by the server's declaration test too. (Straying out of range
 	//LATER, during Movement, closes the vortex at end of turn - that one is not preventable here.)
@@ -3703,10 +3706,9 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 			ship.turncost = Math.round(ship.turncost * 100) / 100;
 			ship.turndelaycost = Math.round(ship.turndelaycost * 100) / 100;
 
-			if (ship.turncost == 0.5) ship.turncost = 0.25;
-			if (ship.turncost == 0.66) ship.turncost = 0.33;
-			if (ship.turncost == 1) ship.turncost = 0.5;
-			if (ship.turncost == 1.5) ship.turncost = 0.75;
+			//Turn Cost one level down the rulebook ladder - an Expert Navigator's step, applied after his (the
+			//server has already put it into ship.turncost). OFFICERS_PLAN.md §9.11; MIRROR of the server's case.
+			if (window.officers) ship.turncost = officers.turnCostLevelDown(ship.turncost);
 
 			if (ship.turndelaycost == 0.5) ship.turndelaycost = 0.25;
 			if (ship.turndelaycost == 0.66) ship.turndelaycost = 0.33;
@@ -3858,10 +3860,7 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 			ship.turncost = Math.round(ship.turncost * 100) / 100;
 			ship.turndelaycost = Math.round(ship.turndelaycost * 100) / 100;
 
-			if (ship.turncost == 0.25) ship.turncost = 0.5;
-			if (ship.turncost == 0.33) ship.turncost = 0.66;
-			if (ship.turncost == 0.5) ship.turncost = 1;
-			if (ship.turncost == 0.75) ship.turncost = 1.5;
+			if (window.officers) ship.turncost = officers.turnCostLevelUp(ship.turncost); //undo the one-level step
 
 			if (ship.turndelaycost == 0.25) ship.turndelaycost = 0.5;
 			if (ship.turndelaycost == 0.33) ship.turndelaycost = 0.66;
@@ -4462,6 +4461,8 @@ PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare indi
 	this.individualNotesTransfer = Array();
 	//note power currently remaining ON REACTOR as charge held, but no more than remaining structure - and split between batteries
 	var capacity = shipManager.systems.getRemainingHealth(this);
+	//an Expert Plasma Scientist's extra point, while the battery stands (OFFICERS_PLAN.md Stage 12; PlasmaBattery::getMaxCapacity)
+	if (capacity > 0 && window.officers) capacity += officers.batteryCapacityBonus(this.ship, this);
 	var reactorSurplus = shipManager.power.getReactorPower(this.ship, this);
 	for (var s in this.ship.systems) {
 		var system = this.ship.systems[s];

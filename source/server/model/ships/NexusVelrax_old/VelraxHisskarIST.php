@@ -45,7 +45,7 @@ class VelraxHisskarIST extends FighterFlight{
 			$armour = array(2, 2, 1, 1);
 			$fighter = new Fighter("VelraxHisskarIST", $armour, 34, $this->id);
 			$fighter->displayName = "Hisskar";
-			$fighter->imagePath = "img/ships/Nexus/velraxHisskar.png.png";
+			$fighter->imagePath = "img/ships/Nexus/velraxHisskar.png";
 			$fighter->iconPath = "img/ships/Nexus/velraxHisskar_large.png";
 
 	        $light = new NexusLightIonGun(0, 360, 0, 1); //$startArc, $endArc, $nrOfShots

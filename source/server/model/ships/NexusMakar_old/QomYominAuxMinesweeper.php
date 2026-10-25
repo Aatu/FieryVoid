@@ -50,14 +50,14 @@ class QomYominAuxMinesweeper extends HeavyCombatVesselLeftRight{
         $this->addAftSystem(new Thruster(2, 15, 0, 8, 2));
       
         $this->addLeftSystem(new Thruster(2, 13, 0, 6, 3));
-		$this->addLeftSystem(new HKControlNode(3, 12, 2, 1));
+		$this->addLeftSystem(new HKControlNode(3, 10, 2, 1));
 		$this->addLeftSystem(new NexusLightChargeCannon(1, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusLightChargeCannon(1, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusWaterCaster(1, 4, 1, 180, 360));
 		$this->addLeftSystem(new Hangar(1, 6, 6));
 		
         $this->addRightSystem(new Thruster(2, 13, 0, 6, 4));
-		$this->addRightSystem(new HKControlNode(3, 12, 2, 1));
+		$this->addRightSystem(new HKControlNode(3, 10, 2, 1));
 		$this->addRightSystem(new NexusLightChargeCannon(1, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusLightChargeCannon(1, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusWaterCaster(1, 4, 1, 0, 180));

@@ -80,7 +80,7 @@ class PolarenLymadaRefit extends BaseShipNoAft{
             1=> array(
                     4 => "Thruster",
 					6 => "Maser",
-					12 => "Docking Collar",
+					12 => "LCV Rail",
 					18 => "Structure",
                     20 => "Primary",
             ),

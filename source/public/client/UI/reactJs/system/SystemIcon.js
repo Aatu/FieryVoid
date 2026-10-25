@@ -2,6 +2,8 @@ import * as React from "react";
 import styled from "styled-components"
 import theme from "../styled/theme";
 import { canApplyPreBattleDamage } from "./SystemInfoButtons";
+import { MENU_CHROME, SECTION_INK } from "./menuControls";
+import { isMenuTarget } from "../helpers/menuTarget";
 
 const HealthBar = styled.div`
     position: absolute;
@@ -49,7 +51,8 @@ const SystemText = styled.div`
    VALUES have to reach the enemy for their own hit-chance and damage previews to be right
    (shield output, armour, thruster output), so the badge hides the LABEL, not the fact.
    It is not an information-hiding mechanism - see §12 if real masking is ever wanted. */
-const EnhancementStar = styled.div`
+//exported for a section's Structure health bar (ShipSection), whose block has no icon of its own to wear it
+export const EnhancementStar = styled.div`
     /*11px on a 32px icon: the 7px it launched at was legible only if you already knew to
       look for it (user report 2026-08-15). Still small enough to clear the icon art and the
       [n/n] load counter, which sits along the BOTTOM edge.*/
@@ -88,8 +91,11 @@ const Insignia = styled.svg`
 
 /* The out-of-action grey is LIGHT on purpose: a disabled officer's post is usually a DESTROYED system,
    whose whole icon is blurred (System's filter) - a filter no child can escape - so a mid grey vanished
-   into the darkened art. Light grey still reads as "not gold". */
-const INSIGNIA_COLOUR = { serving: theme.colors.enhTitle, disabled: '#c4c4c4', killed: '#c4c4c4' };
+   into the darkened art. Light grey still reads as "not gold".
+   MOVING (OFFICERS_PLAN.md Stage 10): the post an officer is leaving this turn and the one he is moving to,
+   in the Officers blue (#90b1ee - the Officers menu's and the Buy dialog's Officers section's). */
+const OFFICER_BLUE = SECTION_INK.officer.bar;
+const INSIGNIA_COLOUR = { serving: theme.colors.enhTitle, disabled: '#c4c4c4', killed: '#c4c4c4', moving: OFFICER_BLUE };
 
 //exported for the fighter card (FighterIcon), a fighter officer's post being the craft itself (Stage 4)
 export const OfficerInsignia = ({ state, title }) => (
@@ -180,6 +186,20 @@ const System = styled.div`
             return 'none';
         }
     }};
+    /*The lobby's system menu is open on this system (helpers/menuTarget, user request 2026-10-16): an outline
+      drawn just inside the edge, so no border state moves and nothing reflows, in the menu's own focus blue.*/
+    ${props => props.$menuTarget ? `
+        outline: 2px solid ${MENU_CHROME.focus};
+        outline-offset: -2px;
+        box-shadow: 0 0 8px ${MENU_CHROME.focus};
+    ` : ''}
+    /*A post the officer being moved may go to (OFFICERS_PLAN.md Stage 10, officers.isPickTarget): the same inset
+      outline, in the Officers blue, while "Move Officer" waits for the player's click.*/
+    ${props => props.$officerPick ? `
+        outline: 2px solid ${OFFICER_BLUE};
+        outline-offset: -2px;
+        box-shadow: 0 0 8px ${OFFICER_BLUE};
+    ` : ''}
     /*$mirror (rolled ship, port/starboard drawn swapped): the icon ART is flipped
       horizontally on an ::after layer so its facing matches the drawn side, while
       text, health bar and state overlays stay unflipped and readable*/
@@ -278,6 +298,9 @@ class SystemIcon extends React.Component {
         const preBattleDamage = canApplyPreBattleDamage(ship, system);
 
         if ((gamedata.waiting || gamedata.replay) && !preBattleDamage) return;
+
+        //OFFICERS_PLAN.md Stage 10 - "Move Officer" is waiting for the post to move him to: this click is its answer
+        if (window.officers && officers.picking && officers.pickTarget(ship, system)) return;
 
         /* WALKERS_OF_SIGMA_PLAN.md 3.15 (Stage 17) - STOWED IS NOT DEAD, AND THIS ONE LINE IS WHY
            A DOCKED SHIP'S WHOLE WINDOW WAS INERT (user report 2026-09-12).
@@ -624,6 +647,8 @@ class SystemIcon extends React.Component {
                 $off={isOff(system)}
                 $docked={isDockedOrbital(system)}
                 $orderPending={hasPendingDockOrder(system)}
+                $menuTarget={isMenuTarget(ship, system)}
+                $officerPick={Boolean(window.officers) && officers.isPickTarget(ship, system)}
             >
                 {renderBadges(ship, system)}
                 {isMeteorDefence(ship, system) && <MeteorBadge title="Committed to meteor defence this turn">☄</MeteorBadge>}

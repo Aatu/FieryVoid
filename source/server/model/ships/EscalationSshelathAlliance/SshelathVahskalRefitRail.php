@@ -67,14 +67,14 @@ class SshelathVahskalRefitRail extends MediumShip{
 		1=> array(
 			5 => "Thruster",
 			6 => "Light Laser",
-			9 => "Defense Laser",
+			9 => "Light Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
 			6 => "Thruster",
-			10 => "Defense Laser",
+			10 => "Light Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),

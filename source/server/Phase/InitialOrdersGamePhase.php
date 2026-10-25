@@ -295,7 +295,13 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
                 $dbManager->submitEW($gameData->id, $ship->id, $ship->EW, $gameData->turn);
             }else{
                 throw new Exception("Failed to validate EW");
-            }	
+            }
+
+            /* OFFICERS_PLAN.md Stage 10 - officers ordered to another post: each claim is checked against the
+               RELOADED ship ($gd - the POST-side copy has no officers, [[arch_post_side_ship_reconstruction]])
+               and written as one OffTransfer note. An ordinary ship sends none. */
+            $claims = $ship->getOfficerTransferClaims();
+            if (!empty($claims)) Officers::saveTransfers($gd->getShipById($ship->id), $claims, $gameData);
         }
 
 

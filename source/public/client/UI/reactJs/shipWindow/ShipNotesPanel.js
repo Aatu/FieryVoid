@@ -362,11 +362,12 @@ export const ManoeuvreStats = ({ ship, live, bare }) => {
     return (
         <StatsPanel $bare={bare}>
             {!bare && <StatsTitle><StatsIcon><i /><i /><i /></StatsIcon>Ship Stats</StatsTitle>}
-            {mobile && <StatRow><StatLabel>Turn cost</StatLabel><StatValue $changed={Boolean(now && now.turnCostChanged)}>{now && now.turnCost ? now.turnCost : fix2(ship.turncost)}</StatValue></StatRow>}
+            {/*turn, accel, pivot and roll through statOf: a lobby Expert Navigator's change at read time*/}
+            {mobile && <StatRow><StatLabel>Turn cost</StatLabel><StatValue $changed={Boolean(now && now.turnCostChanged)}>{now && now.turnCost ? now.turnCost : fix2(statOf(ship, 'turncost'))}</StatValue></StatRow>}
             {mobile && <StatRow><StatLabel>Turn delay</StatLabel><StatValue $changed={Boolean(now && now.turnDelayChanged)}>{now && now.turnDelay ? now.turnDelay : fix2(ship.turndelaycost)}</StatValue></StatRow>}
-            {mobile && <StatRow><StatLabel>Accel/decel</StatLabel><StatValue>{ship.accelcost}</StatValue></StatRow>}
-            {mobile && <StatRow><StatLabel>Pivot</StatLabel><StatValue>{ship.pivotcost}</StatValue></StatRow>}
-            {mobile && <StatRow><StatLabel>Roll</StatLabel><StatValue>{ship.rollcost}</StatValue></StatRow>}
+            {mobile && <StatRow><StatLabel>Accel/decel</StatLabel><StatValue>{statOf(ship, 'accelcost')}</StatValue></StatRow>}
+            {mobile && <StatRow><StatLabel>Pivot</StatLabel><StatValue>{statOf(ship, 'pivotcost')}</StatValue></StatRow>}
+            {mobile && <StatRow><StatLabel>Roll</StatLabel><StatValue>{statOf(ship, 'rollcost')}</StatValue></StatRow>}
             <StatRow><StatLabel>Profile - Front / Side</StatLabel><StatValue $changed={Boolean(now && now.profileChanged)}>{now ? now.profile : (window.officers ? profileText(officers.displayStat(ship, 'forwardDefense'), officers.displayStat(ship, 'sideDefense')) : profileText(ship.forwardDefense, ship.sideDefense))}</StatValue></StatRow>
             {mobile && <StatRow><StatLabel>Initiative</StatLabel><StatValue $changed={Boolean(now && now.initiativeChanged)}>{now ? now.initiative : (window.officers ? officers.displayIniativeBonus(ship) : ship.iniativebonus)}</StatValue></StatRow>}
 

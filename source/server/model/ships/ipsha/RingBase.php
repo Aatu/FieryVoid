@@ -17,6 +17,8 @@ class RingBase extends StarBaseSixSections
 
 		$this->shipSizeClass = 3;
 		$this->Enormous = true;
+		$this->notes = 'EM hardened';
+		$this->EMHardened = true; //EM Hardening, as every other Ipsha unit - the tabletop rules (WeaponEM, specialWeapons.php)
 		$this->iniativebonus = -200; //no voluntary movement anyway
 		$this->turncost = 0;
 		$this->turndelaycost = 0;

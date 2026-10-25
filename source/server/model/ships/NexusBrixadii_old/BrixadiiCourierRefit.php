@@ -37,7 +37,7 @@ class BrixadiiCourierRefit extends LCV{
 		$this->addPrimarySystem(new Reactor(3, 7, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 //        $this->addPrimarySystem(new AntiquatedScanner(4, 9, 2, 3));
-    	$sensors = new Scanner(3, 9, 2, 3);
+    	$sensors = new Scanner(3, 9, 2, 4);
 			$sensors->markLCV();
 			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(3, 10, 0, 6, 3));

@@ -80,7 +80,7 @@ class Lucrehulk extends BaseShip{
         $this->addRightSystem(new CWPointDefenseLaser(2, 4, 1, 0, 180));
         $this->addRightSystem(new CWPointDefenseLaser(2, 4, 1, 0, 180));
         $this->addRightSystem(new CWPointDefenseLaser(2, 4, 1, 0, 180));
-		$this->addRightSystem(new CWTwinTurbolaser(3, 6, 3, 60, 180));
+		$this->addRightSystem(new CWQuadTurbolaser(3, 8, 4, 60, 180));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(3, 70));

@@ -46,7 +46,7 @@ class VelraxSoressPDC extends FighterFlight{
 			$armour = array(3, 2, 2, 2);
 			$fighter = new Fighter("VelraxSoressPDC", $armour, 34, $this->id);
 			$fighter->displayName = "Soress";
-			$fighter->imagePath = "img/ships/Nexus/velraxHisskar.png.png";
+			$fighter->imagePath = "img/ships/Nexus/velraxHisskar.png";
 			$fighter->iconPath = "img/ships/Nexus/velraxHisskar_large.png";
 
 			//ammo magazine itself (AND its missile options)
@@ -69,6 +69,7 @@ class VelraxSoressPDC extends FighterFlight{
 //			$fighter->addAftSystem($hvyGun);
 
             $aftGun = new NexusLightIonGun(120, 240, 0);
+            $aftGun->setTailGun(); //tail gun (Weapon::getTailGunMod)
             $aftGun->displayName = "Light Ion Gun";
             $fighter->addFrontSystem($aftGun);
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

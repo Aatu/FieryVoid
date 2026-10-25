@@ -111,7 +111,7 @@ class MakarSraeloonRefit2Rail extends SmallStarBaseFourSections{
 				8 => "Structure",
 				9 => "Light Charge Cannon",
 				10 => "Water Caster",
-				14 => "Cargo Bay",
+				14 => "Plasma Charge",
 				15 => "Hangar",
 				17 => "Scanner",
 				19 => "Reactor",

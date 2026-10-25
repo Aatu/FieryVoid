@@ -250,6 +250,16 @@ class ApplyDamageMenu extends Component {
             removed = systemEnhancements.dropDestroyed(ship);   //recomputes pointCostSysEnh
             if (removed.length) this.settleRefitCost(ship, bucketBefore);
         }
+        /* OFFICERS_PLAN.md Stage 15 (user ruling 2026-10-17): ANY officer whose post is destroyed here is removed and
+           refunded - the placed ones went with the refits above, this is a ship-level officer (a Helmsman whose C&C was
+           just destroyed). officers.dropDestroyedPosts moves pointCostEnh and pointCost itself; one warning names all. */
+        if (window.officers && typeof officers.dropDestroyedPosts === 'function') {
+            const gone = officers.dropDestroyedPosts(ship);
+            if (gone.length) {
+                removed = removed.concat(gone);
+                if (window.gamedata && typeof gamedata.calculateFleet === 'function') gamedata.calculateFleet();
+            }
+        }
 
         //Repaints icons, health bars and section headers of every open ship window.
         if (window.shipWindowManagerReact) window.shipWindowManagerReact.update();
@@ -321,6 +331,27 @@ class ApplyDamageMenu extends Component {
         this.refresh();
     }
 
+    /* OFFICERS_PLAN.md Stage 15 - the Officers footer's MOVE: the officer posted here (enhID) waits for the next click on
+       one of the systems officers.lobbyDestinations allows - outlined in the ship window, as in game - and is moved there
+       at once, free (officers.lobbyMove). The menu closes so the window is free to click, as the game's Move Officer does. */
+    startMove(enhID) {
+        const { ship, system } = this.props;
+        if (!window.officers) return;
+        const entry = officers.lobbyEntryAt(ship, system.id, enhID);
+        if (!entry || officers.lobbyDestinations(ship, entry).length === 0) return;
+        officers.startPick(ship, entry);
+        if (window.uiEvents) window.uiEvents.relay('CloseSystemInfo');
+    }
+
+    /* OFFICERS_PLAN.md Stage 19 - the Officers footer's SIDE selector: the Expert Targeter on a Medium ship's one block covers the
+       other side now, free (officers.lobbySwitchSide trades his row for the other side's). The menu stays open, showing it. */
+    switchSide(enhID) {
+        const { ship, system } = this.props;
+        if (!window.officers) return;
+        const entry = officers.lobbyEntryAt(ship, system.id, enhID);
+        if (entry && officers.lobbySwitchSide(ship, entry)) this.forceUpdate();
+    }
+
     step(direction) {
         this.setRemaining(this.remaining() + direction);
     }
@@ -354,6 +385,8 @@ class ApplyDamageMenu extends Component {
                 <SystemEnhancementsSection
                     rows={enhRows}
                     onChange={(enhID, count) => this.setEnhancement(enhID, count)}
+                    onMove={enhID => this.startMove(enhID)}
+                    onSide={enhID => this.switchSide(enhID)}
                 />
                 {enhRows.length > 0 && <SectionDivider />}
 

@@ -92,14 +92,14 @@ class SshelathSkulnaRefit extends BaseShip{
 			3=> array(
 					4 => "Thruster",
 					6 => "Light Railgun",
-					9 => "Light Particle Gun",
+					9 => "Light Particle Beam",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					4 => "Thruster",
 					6 => "Light Railgun",
-					9 => "Defense Laser",
+					9 => "Light Particle Beam",
 					18 => "Structure",
 					20 => "Primary",
 			),

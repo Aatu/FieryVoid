@@ -214,26 +214,30 @@
 			$ship->EW = $kept;
 		}
 
-    public static function getBlanketDEW($gamedata, $target)
+    /* $ballistic (Stage 20 of OFFICERS_PLAN.md): the blanket against a ballistic weapon, which an Expert ELINT Officer's ELINT
+       divides by 3, not 4 (Officers::ballisticBlanket) - Weapon::calculateHitBase passes its own flag; anything else asks for the
+       ordinary blanket. ⚠️ MIRROR PAIR with ew.getSupportedBDEW (JS). */
+    public static function getBlanketDEW($gamedata, $target, $ballistic = false)
         {
             $FDEW = 0;
+            $officers = $ballistic && TacGamedata::$officersPresent;
             foreach ($gamedata->ships as $ship)
             {
                 if ( ($ship->team == $target->team)
 					&& $ship->isElint()
-                    && Mathlib::getDistanceHex($target, $ship) <= 20
+                    && Mathlib::getDistanceHex($target, $ship) <= Officers::elintRange($ship, 20) //an Expert ELINT Officer's 25 (Stage 20)
 				){
 					//Kirishiac ELINT modules: only what the modules whose arc holds this friendly pay (refits plan R10)
                     $blanket = empty($ship->getElintModules()) ? $ship->getBlanketDEW($gamedata->turn) : ElintModules::areaPointsReaching($ship, $target, 'BDEW', $gamedata);
-                    if ( $blanket > $FDEW ) $FDEW = $blanket;
+                    if ($officers) $blanket = Officers::ballisticBlanket($ship, $blanket); //counted in the quarters taken below
+                    /* Mindrider ships have less efficient ELINT abilities - DK 19.07.24: a fifth from a ConstrainedEW ELINT, a quarter
+                       from any other. The ELINT's own ability, per ELINT, as ew.getSupportedBDEW asks it (until 2026-10-20 this was
+                       asked of the TARGET, once, after the loop - user request). */
+                    $fdew = $blanket * ($ship->hasSpecialAbility("ConstrainedEW") ? 0.2 : 0.25);
+                    if ( $fdew > $FDEW ) $FDEW = $fdew;
                 }
             }
 
-		if($target->hasSpecialAbility("ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
-            $FDEW = $FDEW * 0.2;			
-		}else{
-            $FDEW = $FDEW * 0.25;
-		}    
 			//if(($target->jammerMissile) && $FDEW < 2) $FDEW = 2; //Jammer Missiles provide 2 BDEW to all ships in range, but not in combination with normal BDEW!
 			if(isset(AmmoMissileJ::$alreadyJammed[$target->id]) && $FDEW < 2) $FDEW = 2; //Jammer Missiles provide 2 BDEW to all ships in range, but not in combination with normal BDEW!            
 				            
@@ -264,10 +268,11 @@
                 if (!$elint->isElint())
                     continue;
                 
-                if (Mathlib::getDistanceHex( $target, $elint ) > 30) 
+                $range = Officers::elintRange($elint, 30); //an Expert ELINT Officer's 38 (Stage 20)
+                if (Mathlib::getDistanceHex( $target, $elint ) > $range) 
                     continue;
                 
-                if (Mathlib::getDistanceHex( $ship, $elint ) > 30) 
+                if (Mathlib::getDistanceHex( $ship, $elint ) > $range) 
                     continue;
 
                 if (!$elint->getEWbyType("SOEW", $gamedata->turn, $ship)) 
@@ -328,7 +333,7 @@
                 if (!$elint->isElint())
                     continue;
                 
-                if (Mathlib::getDistanceHex( $ship, $elint ) > 50)
+                if (Mathlib::getDistanceHex( $ship, $elint ) > Officers::elintRange($elint, 50)) //an Expert ELINT Officer's 63 (Stage 20)
                     continue;
 
                 if($elint->hasSpecialAbility("ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
@@ -357,7 +362,7 @@
                 
                 if (!$elint->isElint()) continue;
                 
-                if (Mathlib::getDistanceHex( $ship, $elint ) > 30) continue;               
+                if (Mathlib::getDistanceHex( $ship, $elint ) > Officers::elintRange($elint, 30)) continue; //an Expert ELINT Officer's 38 (Stage 20)
 
                 $elintPos = $elint->getHexPos();
                 $shipPos = $ship->getHexPos();

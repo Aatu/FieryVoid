@@ -37,7 +37,7 @@ class BrixadiiGunSat extends MicroSAT{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 3, 3, 3);
-            $fighter = new Fighter("Rivex", $armour, 24, $this->id);
+            $fighter = new Fighter("Rivex", $armour, 28, $this->id);
             $fighter->displayName = "Microsat";
             $fighter->imagePath = "img/ships/Nexus/brixadii_gunsat.png";
             $fighter->iconPath = "img/ships/Nexus/brixadii_gunsat_large.png"; 
