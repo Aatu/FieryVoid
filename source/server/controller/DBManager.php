@@ -5194,6 +5194,94 @@ class DBManager
         $stmt->close();
     }
 
+    /* ------------------------------------------------------------------------------------
+       Movement locks (MoveLock, OFFICERS_PLAN.md Stage 31) - one tac_systemdata row per game, turn
+       and unit: system id MoveLock::SYSTEM_ID (no system, so the gamedata load skips it), key
+       MoveLock::KEY in `subsystem`, and in `data` the unit's rows of the turn up to the order it
+       can no longer take back (JSON text, as posted). Their own statements: insertSystemData binds
+       `subsystem` as an integer. Deleted when Movement ends; deleteGames and leaveSlot clear
+       tac_systemdata anyway.
+       ------------------------------------------------------------------------------------ */
+
+    /* Insert or overwrite a unit's lock. $json is the rows' JSON text. */
+    public function saveMoveLock($gameid, $turn, $shipid, $json)
+    {
+        $stmt = $this->connection->prepare(
+            "INSERT INTO tac_systemdata (systemid, subsystem, gameid, shipid, data, turn)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE data = VALUES(data)"
+        );
+        if (!$stmt) throw new Exception("Prepare failed: " . $this->connection->error);
+
+        $systemid = MoveLock::SYSTEM_ID;
+        $key = MoveLock::KEY;
+        $stmt->bind_param('isiisi', $systemid, $key, $gameid, $shipid, $json, $turn);
+        if (!$stmt->execute()) {
+            $error = $stmt->error;
+            $stmt->close();
+            throw new Exception("Execute failed: " . $error);
+        }
+        $stmt->close();
+    }
+
+    /* One unit's lock this turn - the JSON text - or null. */
+    public function getMoveLock($gameid, $turn, $shipid)
+    {
+        $out = null;
+        $stmt = $this->connection->prepare("SELECT data FROM tac_systemdata WHERE gameid = ? AND turn = ? AND shipid = ? AND systemid = ? AND subsystem = ?");
+        if (!$stmt) throw new Exception("Prepare failed: " . $this->connection->error);
+
+        $systemid = MoveLock::SYSTEM_ID;
+        $key = MoveLock::KEY;
+        $stmt->bind_param('iiiis', $gameid, $turn, $shipid, $systemid, $key);
+        $stmt->bind_result($data);
+        $stmt->execute();
+        if ($stmt->fetch()) $out = $data;
+        $stmt->close();
+
+        return $out;
+    }
+
+    /* Every unit's lock this turn, by unit id (the JSON text) - what a commit must keep. $playerid: only that player's units (game.php's restore). */
+    public function getMoveLocks($gameid, $turn, $playerid = null)
+    {
+        $out = array();
+        $systemid = MoveLock::SYSTEM_ID;
+        $key = MoveLock::KEY;
+        if ($playerid === null) {
+            $stmt = $this->connection->prepare("SELECT shipid, data FROM tac_systemdata WHERE gameid = ? AND turn = ? AND systemid = ? AND subsystem = ?");
+            if (!$stmt) throw new Exception("Prepare failed: " . $this->connection->error);
+            $stmt->bind_param('iiis', $gameid, $turn, $systemid, $key);
+        } else {
+            $stmt = $this->connection->prepare(
+                "SELECT d.shipid, d.data FROM tac_systemdata d
+                JOIN tac_ship s ON s.id = d.shipid AND s.tacgameid = d.gameid
+                WHERE d.gameid = ? AND d.turn = ? AND d.systemid = ? AND d.subsystem = ? AND s.playerid = ?"
+            );
+            if (!$stmt) throw new Exception("Prepare failed: " . $this->connection->error);
+            $stmt->bind_param('iiisi', $gameid, $turn, $systemid, $key, $playerid);
+        }
+        $stmt->bind_result($shipid, $data);
+        $stmt->execute();
+        while ($stmt->fetch()) $out[(int)$shipid] = $data;
+        $stmt->close();
+
+        return $out;
+    }
+
+    /* Every lock of a game - Movement is over (MovementGamePhase::advance). */
+    public function deleteMoveLocks($gameid)
+    {
+        $stmt = $this->connection->prepare("DELETE FROM tac_systemdata WHERE gameid = ? AND systemid = ? AND subsystem = ?");
+        if (!$stmt) throw new Exception("Prepare failed: " . $this->connection->error);
+
+        $systemid = MoveLock::SYSTEM_ID;
+        $key = MoveLock::KEY;
+        $stmt->bind_param('iis', $gameid, $systemid, $key);
+        $stmt->execute();
+        $stmt->close();
+    }
+
     /* The mines a team has found: every mine with a 'detected' note naming that team - written by
        the Movement checks, by firing, and by the live sweep itself (MineStealth::onIndividualNotesLoaded
        reads the same notes into $detected). Read fresh for every sweep request, never cached. */

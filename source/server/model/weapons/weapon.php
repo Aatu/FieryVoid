@@ -1949,6 +1949,8 @@ public function getFullStartLoading()
             if (Movement::hasPivoted($shooter, $gamedata->turn, $gamedata) /*&& !$this->ballistic*/) {
                 $mod -= 3;
             }
+            //an Expert Graviton Controller's rotation of the gravitic drive this turn (OFFICERS_PLAN.md Stage 31): -3, stacking as the pivot's does
+            if (TacGamedata::$officersPresent) $mod -= Officers::rotationPenalty($shooter, $gamedata->turn);
         }
 
         $calledProfileOverride = null; //flat fighter-style profile of the called system (Kirishiac Orbitals - "targeted as if they were fighters")
@@ -2562,6 +2564,9 @@ public function getFullStartLoading()
             $shotsFired = 1;
 			$fireOrder->shots = $this->maxpulses;
         }
+        /* An Expert Graviton Controller (OFFICERS_PLAN.md Stage 31): a gravitic weapon's pulses, once it has hit, are counted as though
+           the roll were 5 lower ("after they hit, they determine their result as though the to-hit die roll was 5% lower"). Behind the static. */
+        $pulseShift = (TacGamedata::$officersPresent && $shooter instanceof BaseShip) ? Officers::gravitonPulseShift($shooter, $this) : 0;
         for ($i = 0; $i < $shotsFired; $i++) {
             $needed = $fireOrder->needed;
             $neededFake = ($fireOrder->chameleonFake !== null) ? $fireOrder->chameleonFake['needed'] : null;
@@ -2619,7 +2624,7 @@ public function getFullStartLoading()
                 $hitsRemaining = 1;
 
                 if ($this->damageType == 'Pulse') { //possibly more than 1 hit from a shot
-                    $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled); //this takes care of all details
+                    $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled - $pulseShift); //this takes care of all details
                 }
 
                 while ($hitsRemaining > 0) {
@@ -2641,7 +2646,7 @@ public function getFullStartLoading()
                 //land on a ship that is not there. Resolved entirely on the phantom sheet.
                 $hitsRemaining = 1;
                 if ($this->damageType == 'Pulse') {
-                    $hitsRemaining = $this->rollPulses($gamedata->turn, $neededFake, $rolled);
+                    $hitsRemaining = $this->rollPulses($gamedata->turn, $neededFake, $rolled - $pulseShift);
                 }
                 while ($hitsRemaining > 0) {
                     $hitsRemaining--;
@@ -3324,6 +3329,7 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
             $damage += Officers::surgeDamageBonus($shooter, $this, $rolled);
             $damage += Officers::ionFlatBonus($shooter, $this, $rolled);
             $damage += Officers::ionBoostDamage($shooter, $this, $target, $fireOrder);
+            $damage += Officers::gravitonBeamBonus($shooter, $this, $rolled); //an Expert Graviton Controller's +1 on a Raking gravitic hit (Stage 31)
         }
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		

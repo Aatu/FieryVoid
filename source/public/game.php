@@ -70,6 +70,15 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         && empty($serverdata->waiting) && ($serverdata->status ?? '') === 'ACTIVE' && (int)$serverdata->phase === 2) {
         $mineSweepJSON = Manager::getMineSweepJSON($serverdata->id, $thisplayer, $serverdata->turn, $serverdata->phase);
     }
+
+    /* Movement locks (MoveLock, OFFICERS_PLAN.md Stage 31): this player's units' moves this turn up to an order they can no longer
+       take back (an Expert Graviton Controller's rotation) - inlined as window.fvMoveLocks and put back, locked, by
+       client/moveLock.js when Movement activates. Same gate as the sweep above. Never throws. */
+    $moveLocksJSON = 'null';
+    if ($serverdata !== null && $thisplayer > 0 && isset($serverdata->id, $serverdata->turn, $serverdata->phase)
+        && empty($serverdata->waiting) && ($serverdata->status ?? '') === 'ACTIVE' && (int)$serverdata->phase === 2) {
+        $moveLocksJSON = Manager::getMoveLocksJSON($serverdata->id, $thisplayer, $serverdata->turn, $serverdata->phase);
+    }
 ?>
 
 
@@ -180,6 +189,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         //live sweeping is on at all - the switch is MineSweep::$liveSweeping, server side only.
         echo '<script>window.fvMineSweep = ' . $mineSweepJSON . ';</script>';
         echo '<script>window.fvLiveMineSweeping = ' . (MineSweep::$liveSweeping ? 'true' : 'false') . ';</script>';
+
+        //Movement locks (see the prologue): {turn, ships} or null. Already script-safe.
+        echo '<script>window.fvMoveLocks = ' . $moveLocksJSON . ';</script>';
     ?>
     <script>
         window.Config = {
@@ -417,6 +429,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
          each hex, locks the swept steps, draws a find and interrupts the move there. Runtime-only
          calls into savedOrders.js and movement.js, so its place in the list is free. -->
     <script defer src="client/mineSweep.js"></script>
+    <!-- OFFICERS_PLAN.md Stage 31 - movement locks: a unit's moves up to an order it can no longer take back (an Expert Graviton
+         Controller's rotation, which the server rolls), kept from Cancel and put back on a reload. Runtime-only calls, so its place is free. -->
+    <script defer src="client/moveLock.js"></script>
 	<script defer src="client/power.js"></script>
     <script defer src="client/UI/shipMovement.js"></script>
     <!-- MUST stay after shipMovement.js: that file ASSIGNS window.UI, so loading this one first
@@ -770,6 +785,12 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
              Label set by UI/shipMovement.js. -->
         <div id="charge" class="movement-icon" data-movement-type="Charge">
             <canvas id="chargecanvas" width="40" height="40"></canvas>
+        </div>
+
+        <!-- An Expert Graviton Controller's gravitic drive rotation (OFFICERS_PLAN.md Stage 31): the Charge's spot - no hull carries both.
+             Label set by UI/shipMovement.js. -->
+        <div id="gravRotate" class="movement-icon" data-movement-type="Rotate Gravitic Drive">
+            <canvas id="gravRotatecanvas" width="40" height="40"></canvas>
         </div>
         
         <div id="jink" class="movement-icon" data-movement-type="Jinking">

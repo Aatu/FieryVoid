@@ -123,6 +123,13 @@ window.officers = {
 		   brings stays when he is lost (user ruling 2026-10-24), so a patch used after it still shows. */
 		{ id: 'OFF_QM', label: 'Expert Quartermaster', post: 'cnc', stats: { iniativebonus: -30 }, stock: true,
 			summary: 'One free refit; Free missiles; first crit ignored. -30 initiative, +10% turn delay, +2 C&C criticals' },
+		/* Stage 31: in the Engine, on hulls with a gravitic drive or a gravitic weapon (`needs`; the offers decide the setting and the price). The
+		   lobby previews the Engine's and the largest aft thruster's +1 (gravitonThrustBonus - in game the server raised both outputs, and keeps
+		   them once he is lost); his +1 on Raking gravitic hits raises the owner's Damage lines (gravitonDamageLine); the pulse count is the server's.
+		   The rotation is movement.js's (its Gravitic Rotate icon - canGravRotate; the server rolls the die, client/moveLock.js locks the moves), and its -3 the
+		   hit-chance preview's ("Gravitic Rotation"). */
+		{ id: 'OFF_GRAV', label: 'Expert Graviton Controller', post: 'engine', needs: 'gravitics',
+			summary: 'Gravitic beams +1 damage; Graviton Pulsars count pulses 5% better; Engine and largest aft thruster +1. Once per battle rotate the gravitic drive to a random facing (-15% to hit that turn)' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -366,7 +373,9 @@ window.officers = {
 	     tailGun       the flight's craft has a tail gun - a weapon the blueprint flags `tailGun` (the Expert Tailgunner)
 	     breachingPod  the flight is a breaching pod (isBreachingPod - the Breaching Expert)
 	     capital       a capital ship or larger, size class 3 (the Expert Political Officer)
-	     countedBallistic  a magazine-fed ballistic launcher, or a ballistic weapon keeping a count of rounds (the Expert Ballistic Officer) */
+	     countedBallistic  a magazine-fed ballistic launcher, or a ballistic weapon keeping a count of rounds (the Expert Ballistic Officer)
+	     gravitics     a gravitic drive or a gravitic weapon (the Expert Graviton Controller) - his B5-settings-only rule is a faction's, so the
+	                   offers' alone */
 	passesNeeds: function passesNeeds(ship, officer) {
 		if (!officer.needs) return true;
 		var self = this;
@@ -389,6 +398,9 @@ window.officers = {
 			return !!craft && this.systemsOf(craft).some(function (s) { return s && s.tailGun === true; });
 		}
 		if (officer.needs === 'breachingPod') return this.isBreachingPod(ship);
+		if (officer.needs === 'gravitics') {
+			return Boolean(ship.gravitic) || this.systemsOf(ship).some(function (s) { return self.isGraviticWeapon(s); });
+		}
 		if (officer.needs === 'countedBallistic') {
 			var systems = this.systemsOf(ship);
 			if (systems.some(function (s) { return self.isCountedBallistic(s) && s.checkAmmoMagazine !== true; })) return true;
@@ -748,7 +760,8 @@ window.officers = {
 	//capture: the Breaching Expert's (Stage 24); speech: the Expert Political Officer's (Stage 25); reuse: the Expert Software Engineer's (Stage 26)
 	//charge, precision, anticipation: the Expert Warrior's (Stage 28); patch: the Expert Quartermaster's (Stage 30)
 	ABILITY_NAMES: { reload: 'faster reload', pierce: 'Piercing shot', called: 'called shot', capture: 'capture assault', speech: 'speech',
-		reuse: 'Specialist reuse', charge: 'charge', precision: 'precision strike', anticipation: 'Supreme Anticipation', patch: 'critical patch' },
+		reuse: 'Specialist reuse', charge: 'charge', precision: 'precision strike', anticipation: 'Supreme Anticipation', patch: 'critical patch',
+		rotate: 'gravitic rotation' },
 	abilitiesText: function abilitiesText(entry) {
 		var spent = entry && entry.abilities ? entry.abilities : null;
 		if (!spent) return '';
@@ -2183,6 +2196,76 @@ window.officers = {
 		return text + (used < picks ? ' - the rest are picked at random when the fleet is committed.' : '.');
 	},
 
+	/* ------------------------------------------------------------------ Expert Graviton Controller (Stage 31) */
+
+	GRAV_BEAM_DAMAGE: 1,      //⚠️ MIRROR of Officers::GRAV_BEAM_DAMAGE (PHP)
+	GRAV_ENGINE_THRUST: 1,    //...GRAV_ENGINE_THRUST
+	GRAV_THRUSTER: 1,         //...GRAV_THRUSTER
+	GRAV_ROTATION_PENALTY: 3, //...GRAV_ROTATION_PENALTY - d20 units, the hit-chance preview's "Gravitic Rotation"
+
+	//a weapon with a Gravitic mode - its class, or any mode's. ⚠️ MIRROR PAIR with Officers::isGraviticWeapon (PHP)
+	isGraviticWeapon: function isGraviticWeapon(system) {
+		if (!system || !system.weapon) return false;
+		if (system.weaponClass === 'Gravitic') return true;
+		var classes = system.weaponClassArray;
+		if (!classes || typeof classes !== 'object') return false;
+		return Object.keys(classes).some(function (mode) { return classes[mode] === 'Gravitic'; });
+	},
+
+	/* "The largest aft thruster": the main thruster (direction 2) with the highest rating, the FIRST of equal ones (user ruling 2026-10-25), or
+	   null. ⚠️ MIRROR PAIR with Officers::gravitonThruster (PHP). */
+	gravitonThruster: function gravitonThruster(ship) {
+		var best = null;
+		this.systemsOf(ship).forEach(function (system) {
+			if (!system || system.name !== 'thruster' || parseInt(system.direction, 10) !== 2) return;
+			if (best === null || (parseInt(system.output, 10) || 0) > (parseInt(best.output, 10) || 0)) best = system;
+		});
+		return best;
+	},
+
+	/* In the lobby: what he adds to THIS system's output - +1 on his Engine (his post) and +1 on the largest aft thruster, 0 anywhere else.
+	   shipManager.systems.getOutput adds it, so the icons and the thrust readouts show it. In game the server raised both outputs (servingDerived
+	   is empty there). ⚠️ MIRROR PAIR with Officers::applyGravitonTweaks (PHP). */
+	gravitonThrustBonus: function gravitonThrustBonus(ship, system) {
+		if (!system || !ship || ship.flight) return 0;
+		var serving = this.servingDerived(ship);
+		for (var i = 0; i < serving.length; i++) {
+			if (serving[i].id !== 'OFF_GRAV') continue;
+			if (String(serving[i].post) === String(system.id)) return this.GRAV_ENGINE_THRUST;
+			var thruster = this.gravitonThruster(ship);
+			return (thruster && String(thruster.id) === String(system.id)) ? this.GRAV_THRUSTER : 0;
+		}
+		return 0;
+	},
+
+	/* What he adds to a hit from this weapon in mode 1 (the mode its Damage line describes): +1 for a Raking Gravitic mode while he serves - the
+	   Graviton Beam, the Gravitic Lance, the Gravitic Cutter. The lobby's derived list and the owner's server list both answer; an enemy's is empty.
+	   ⚠️ MIRROR PAIR with Officers::gravitonBeamBonus (PHP). */
+	gravitonBeamBonus: function gravitonBeamBonus(ship, system) {
+		if (!ship || ship.flight || !system || !system.weapon) return 0;
+		var classes = system.weaponClassArray, types = system.damageTypeArray;
+		var cls = (classes && typeof classes === 'object' && classes[1] !== undefined) ? classes[1] : system.weaponClass;
+		var type = (types && typeof types === 'object' && types[1] !== undefined) ? types[1] : system.damageType;
+		if (cls !== 'Gravitic' || type !== 'Raking') return 0;
+		if (!(parseInt(this.modeOneDamage(system.maxDamageArray, system.maxDamage), 10) > 0)) return 0;
+		return this.isActive(ship, 'OFF_GRAV') ? this.GRAV_BEAM_DAMAGE : 0;
+	},
+
+	gravitonDamageLine: function gravitonDamageLine(ship, system, value) {
+		return this.hitBonusLine(system, value, this.gravitonBeamBonus(ship, system));
+	},
+
+	/* May his ship rotate its gravitic drive (movement.js canGravRotate asks the rest): his own team's ship, he serves, and he has not rotated in this
+	   battle (`abilities.rotate`, the server's - spent the moment the die is rolled). ⚠️ MIRROR of Officers::rotateGravitic's checks (PHP). */
+	canGravRotate: function canGravRotate(ship) {
+		if (!ship || ship.flight || (window.gamedata && typeof gamedata.isMyShip === 'function' && !gamedata.isMyShip(ship))) return false;
+		var turn = this.currentTurn();
+		var self = this;
+		var entry = this.listFor(ship).filter(function (e) { return e.id === 'OFF_GRAV' && self.serves(e, turn); })[0];
+		if (!entry) return false;
+		return !(entry.abilities && entry.abilities.rotate !== undefined && entry.abilities.rotate !== null);
+	},
+
 	/* ------------------------------------------------------------------ what a flight's officer costs */
 
 	/* How many craft a flight's pointCost is for, so the flight a fighter officer's listed price is for:
@@ -2823,7 +2906,7 @@ window.officers = {
 			if (this.isLaserWeapon(system)) line = this.laserDamageLine(ship, system, line);
 			else if (this.isPlasmaWeapon(system)) line = this.plasmaDamageLine(ship, system, line);
 			else if (this.isIonWeapon(system)) line = this.ionDamageLine(ship, system, line);
-			return this.surgeDamageLine(ship, system, this.religiousDamageLine(ship, system, line));
+			return this.gravitonDamageLine(ship, system, this.surgeDamageLine(ship, system, this.religiousDamageLine(ship, system, line)));
 		}
 		if (system.name === 'RadCannon' && key === 'Special') return this.radCannonSpecial(ship, value);
 		if ((system.name === 'elintScanner' || system.name === 'chameleonSensors') && key === 'Special') return this.elintSpecial(ship, value);

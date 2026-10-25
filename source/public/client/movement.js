@@ -271,7 +271,8 @@ shipManager.movement = {
        the unit's committed path must pass through it. The lock is a PREFIX of the turn's rows
        (client/mineSweep.js, T13), so testing the LAST row is the whole test. */
     isLastMoveFinal: function isLastMoveFinal(ship) {
-        return !!(window.mineSweep && mineSweep.isLastRowLocked(ship));
+        return !!(window.mineSweep && mineSweep.isLastRowLocked(ship))
+            || !!(window.moveLock && moveLock.isLastRowLocked(ship)); //a movement lock too (OFFICERS_PLAN.md Stage 31, client/moveLock.js)
     },
 
     /* The Cancel button and its right-click "undo all" loop. NOT folded into hasDeletableMovements,
@@ -431,6 +432,7 @@ shipManager.movement = {
                 if (!ship.flight) break;
                 if (shipManager.movement.jinkThrust(move) > 0) { remove = i; break; }
             }
+            if (remove !== -1 && window.moveLock && moveLock.protects(ship, remove)) return; //a locked row stays (OFFICERS_PLAN.md Stage 31)
             if (remove !== -1) ship.movement.splice(remove, 1);
         } else {
             var lm = shipManager.movement.getLastCommitedMove(ship);
@@ -1568,6 +1570,57 @@ shipManager.movement = {
         return true;
     },
 
+    /* EXPERT GRAVITON CONTROLLER'S ROTATION (OFFICERS_PLAN.md Stage 31): "Once during the scenario, during the Movement Step, the gravitic drive
+       can be 'rotated.' ... Roll 1 d6 and rotate the ship to face the resulting direction ... Heading, turn status, and the like are unaffected."
+       The Gravitic Rotate icon (UI/shipMovement.js) asks the SERVER (gravRotate.php through moveLock.ask), which rolls the die and answers with a 'gravRotate'
+       row - facing die - 1, no thrust, hex, heading and speed kept, value the die - after the rows already plotted, every one of them then
+       LOCKED (client/moveLock.js: never cancelled and rolled again, kept on a reload - the user's note). At any point of the move (user ruling
+       2026-10-25). That turn every shot of the ship is at -3 (weaponManager.computeShotModifiers, "Gravitic Rotation").
+       ⚠️ MIRROR PAIR with Movement::GRAV_ROTATE / hasGravRotated (PHP). */
+    GRAV_ROTATE: 'gravRotate',
+
+    //this turn's rotate row, or null
+    getGravRotateRow: function getGravRotateRow(ship) {
+        if (!ship || !ship.movement || !window.gamedata) return null;
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move && move.type === shipManager.movement.GRAV_ROTATE && move.turn == gamedata.turn) return move;
+        }
+        return null;
+    },
+
+    hasGravRotated: function hasGravRotated(ship) {
+        return shipManager.movement.getGravRotateRow(ship) !== null;
+    },
+
+    canGravRotate: function canGravRotate(ship) {
+        if (!ship || ship.flight || gamedata.gamephase != 2 || !ship.gravitic) return false;
+        if (!(window.officers && officers.canGravRotate(ship))) return false;
+        if (shipManager.movement.getGravRotateRow(ship)) return false;
+        if (shipManager.movement.hasJumpedOut(ship) || shipManager.isDestroyed(ship)) return false;
+        if (Object.keys(ship.attached || {}).length !== 0 && !ship.detached) return false; //riding another unit
+        if (gamedata.getMyActiveShips().indexOf(ship) === -1) return false;
+        if (shipManager.movement.checkHasUncommitted(ship)) return false;
+        return !(window.moveLock && moveLock.inFlight);
+    },
+
+    //What the Rotate icon shows: null (none), 'ready' (a click rolls the die) or 'done' (rotated this turn - its label says the die).
+    getGravRotateState: function getGravRotateState(ship) {
+        if (!ship || gamedata.gamephase != 2) return null;
+        if (shipManager.movement.getGravRotateRow(ship)) return 'done';
+        return shipManager.movement.canGravRotate(ship) ? 'ready' : null;
+    },
+
+    //The icon's click: the server rolls, and its rows come back in place of the unit's (the redraw follows their ShipMovementChanged).
+    doGravRotate: function doGravRotate(ship) {
+        if (!shipManager.movement.canGravRotate(ship) || !window.moveLock) return false;
+        return moveLock.ask("gravRotate.php", ship, "ROTATING THE GRAVITIC DRIVE...", function (reply) {
+            if (window.savedOrders && typeof savedOrders.showNotice === "function") {
+                savedOrders.showNotice("Gravitic drive rotated - the die rolled " + reply.die + ". This turn's fire is at -15%.");
+            }
+        });
+    },
+
     /* EXPERT WARRIOR'S CHARGE (OFFICERS_PLAN.md Stage 28): "He can 'charge' an opponent by pointing his ship at the target and moving directly
        towards it for his full movement. The 'charge' is declared as this maneuver is performed." Declared with the Charge icon before the
        ship's first step into a hex this turn: click it, then click the enemy unit to charge, one it beat on initiative (the player picks - user ruling 2026-10-23;
@@ -2102,6 +2155,7 @@ shipManager.movement = {
                 if (move.turn != gamedata.turn) continue;
 
                 if (move.type == "contract") {
+                    if (window.moveLock && moveLock.protects(ship, i)) return; //a locked row stays (OFFICERS_PLAN.md Stage 31)
                     ship.movement.splice(i, 1);
                     shipManager.movement.amendContractValue(ship, value);
                     break;

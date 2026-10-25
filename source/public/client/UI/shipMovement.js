@@ -39,6 +39,13 @@ window.UI = {
         //...and fainter once the run has begun, when it can no longer be taken back
         chargeLockedOpacity: 0.75,
 
+        /* ⭐ THE GRAVITIC ROTATE ICON (OFFICERS_PLAN.md Stage 31, an Expert Graviton Controller's gravitic drive rotation): the art - in the gravitic
+           turn arrows' yellow -, how faint it is while the rotation may be made (a click rolls the die), and the glow it wears once the drive
+           has been rotated this turn (when it is no longer clickable). Change them here. */
+        gravRotateIcon: "img/rotateIcon.png",
+        gravRotateReadyOpacity: 0.85,
+        gravRotateGlowColour: "#f2d27a",
+
         iniated: false,
         moveElement: null,
         turnleftElement: null,
@@ -110,6 +117,7 @@ window.UI = {
 
             UI.shipMovement.halfphaseElement = $("#halfphase", ui);
             UI.shipMovement.chargeElement = $("#charge", ui);
+            UI.shipMovement.gravRotateElement = $("#gravRotate", ui);
 
             UI.shipMovement.contractionElement = $("#contraction", ui);
             UI.shipMovement.morecontractionElement = $("#morecontraction", ui);
@@ -152,6 +160,7 @@ window.UI = {
 
             UI.shipMovement.halfphaseElement.on("click touchstart", UI.shipMovement.halfphaseCallback);
             UI.shipMovement.chargeElement.on("click touchstart", UI.shipMovement.chargeCallback);
+            UI.shipMovement.gravRotateElement.on("click touchstart", UI.shipMovement.gravRotateCallback);
 
             UI.shipMovement.morecontractionElement.on("click touchstart", UI.shipMovement.morecontractionCallback);
             UI.shipMovement.lesscontractionElement.on("click touchstart", UI.shipMovement.lesscontractionCallback);
@@ -229,6 +238,12 @@ window.UI = {
             //A tap can arrive as touchstart AND click: one toggle, not two that cancel out.
             if (UI.shipMovement.checkUITimeout()) return false;
             UI.shipMovement.callbackHandler.chargeCallback(e);
+        },
+
+        gravRotateCallback: function gravRotateCallback(e) {
+            //A tap can arrive as touchstart AND click: one roll asked for, not two (the server would answer the second with the first anyway).
+            if (UI.shipMovement.checkUITimeout()) return false;
+            UI.shipMovement.callbackHandler.gravRotateCallback(e);
         },
 
         morecontractionCallback: function morecontractionCallback(e) {
@@ -751,6 +766,8 @@ window.UI = {
 
             //CHARGE - an Expert Warrior's (OFFICERS_PLAN.md Stage 28), in the Contraction / Half-Phase spot, which no Drazi ship uses
             UI.shipMovement.drawChargeIcon(ship, pos, angle);
+            //ROTATE - an Expert Graviton Controller's (OFFICERS_PLAN.md Stage 31), in the same spot: only Drazi carry a Warrior, and no Drazi hull a gravitic drive
+            UI.shipMovement.drawGravRotateIcon(ship, pos, angle);
 
             //CONTRACTION
             var contraction = UI.shipMovement.contractionElement;
@@ -886,6 +903,34 @@ window.UI = {
             canvas.css("filter", held ? "drop-shadow(0 0 3px " + glow + ") drop-shadow(0 0 2px " + glow + ")" : "none");
             UI.shipMovement.drawUIElement(icon, pos.x, pos.y, 34, 30 * 1.4, angle, UI.shipMovement.chargeIcon, "chargecanvas", 0, 40,
                 held ? UI.shipMovement.chargeColour : null, held ? UI.shipMovement.drawChargeReticle : null);
+            return true;
+        },
+
+        /* The Gravitic Rotate icon (OFFICERS_PLAN.md Stage 31) for an Expert Graviton Controller's ship, in shipManager.movement.getGravRotateState's state:
+           faint while the drive may be rotated - a click asks the server to roll the die -, glowing once it has been this turn (its label says
+           the die; the rotation and every move before it are locked). */
+        drawGravRotateIcon: function drawGravRotateIcon(ship, pos, angle) {
+            var icon = UI.shipMovement.gravRotateElement;
+            var state = shipManager.movement.getGravRotateState(ship);
+            if (!state) {
+                icon.hide();
+                return false;
+            }
+            var row = shipManager.movement.getGravRotateRow(ship);
+            var labels = {
+                ready: "Rotate Gravitic Drive - once per battle: a d6 picks the new facing, and this turn's fire is at -15%",
+                done: "Gravitic drive rotated (the die rolled " + (row ? row.value : "?") + ") - fire at -15% this turn"
+            };
+            //Both: moveTooltip reads the label with .data(), which caches the attribute on its first read.
+            icon.attr("data-movement-type", labels[state]).data("movement-type", labels[state]);
+            if (icon.is(":hover")) $("#movetooltip .movementType").text(labels[state]);
+            icon.css({
+                opacity: state === 'ready' ? UI.shipMovement.gravRotateReadyOpacity : 1,
+                cursor: state === 'ready' ? "pointer" : "default"
+            });
+            var glow = UI.shipMovement.gravRotateGlowColour;
+            $("#gravRotatecanvas").css("filter", state === 'done' ? "drop-shadow(0 0 3px " + glow + ") drop-shadow(0 0 2px " + glow + ")" : "none");
+            UI.shipMovement.drawUIElement(icon, pos.x, pos.y, 34, 30 * 1.4, angle, UI.shipMovement.gravRotateIcon, "gravRotatecanvas", 0, 40);
             return true;
         },
 

@@ -183,6 +183,11 @@ class Officers{
 	const QM_BREACH_FACTOR = 3;          //...: Improved Reactor, "but if the reactor is in danger of exploding, triple its chance"
 	const QM_RACK_MISSILES = 2;          //...: "Each of the ship's class-S or better missile racks comes with two special missiles"
 	const QM_OLD_RACK_MISSILES = 1;      //...: "If the racks are of the class-SO or an older class, they receive only one free special missile"
+	const GRAV_BEAM_DAMAGE = 1;          //Expert Graviton Controller: "All gravitic beam weapons score +1 damage" - every Raking gravitic hit (user ruling 2026-10-25)
+	const GRAV_PULSE_SHIFT = 5;          //...: "as though the to-hit die roll was 5% lower" - the d100, for a gravitic weapon's pulse count once it has hit
+	const GRAV_ENGINE_THRUST = 1;        //...: "Tweaking of the Engine improved its thrust output by 1"
+	const GRAV_THRUSTER = 1;             //...: "Increase the thrust rating of the largest aft thruster by 1 as well"
+	const GRAV_ROTATION_PENALTY = 3;     //...: "On the turn a rotation is done, the ship's weapons suffer a -3 penalty to all weapons fire" (d20 units, -15%)
 	/* ...: the magazine rounds he may pick free - "change one of their single-space ... missiles to any other legal type at no cost" - by
 	   enhancement id, each with the round it loads (Enhancements::setEnhancementOptionsShip's list). A pick is one of these the hull is
 	   enabled for, single-slot and priced on that hull (paidPickTypes); Basic is not among them, as no swap to it is worth anything (user
@@ -291,6 +296,9 @@ class Officers{
 		'OFF_BALL' => array('pct' => array('Kor-Lyan Kingdoms' => 5)),
 		//"10% of the ship's base value for Hurr ... Double the cost on non-Hurr ships" - the registry's 20, and 10 here
 		'OFF_QM'   => array('pct' => array('Hurr Republic' => 10)),
+		//"10% of the ship's base cost for Brakiri ... Non-Brakiri races which use gravitic drives or weapons can purchase one for 50% higher" - the
+		//registry's 15, and 10 here; which hulls is his `needs` (usesGravitics)
+		'OFF_GRAV' => array('pct' => array('Brakiri Syndicracy' => 10)),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -555,6 +563,17 @@ class Officers{
 		   else ($factionRules). */
 		'OFF_QM'   => array('label' => 'Expert Quartermaster', 'post' => 'cnc', 'pct' => 20, 'apply' => 'applyQuartermaster',
 			'publish' => array('iniativebonus'), 'lost' => 'applyQuartermaster', 'lostPublish' => array('iniativebonus'), 'stock' => true),
+		/* Expert Graviton Controller (Stage 31; rules text, user 2026-10-25), in the Engine. "All gravitic beam weapons score +1 damage" - every
+		   Raking gravitic weapon (user ruling: gravitonBeamBonus); "graviton pulsars or gravitic bolts ... determine their result as though the to-hit
+		   die roll was 5% lower" - a gravitic weapon's pulse count (gravitonPulseShift; a Gravitic Bolt's fixed damage has no result to change);
+		   "Tweaking of the Engine improved its thrust output by 1. Increase the thrust rating of the largest aft thruster by 1 as well" - the first of
+		   equal ones (user ruling: applyGravitonTweaks), and both stay when he is lost (user ruling: `lost`). "Once during the scenario, during the
+		   Movement Step, the gravitic drive can be 'rotated'": a d6 the SERVER rolls when the player clicks (rotateGravitic), its row and every row
+		   before it locked (MoveLock - the user's note: never cancelled and rolled again, kept on a reload), and -3 to hit that turn
+		   (rotationPenalty). Rulings (user 2026-10-25): any hull with a gravitic drive or a gravitic weapon (`needs` - outside the Nexus, Escalation
+		   Wars and other-universe settings); the rotation at any point of the move. 10% for the Brakiri, 15% for everyone else ($factionRules). */
+		'OFF_GRAV' => array('label' => 'Expert Graviton Controller', 'post' => 'engine', 'pct' => 15, 'apply' => 'applyGravitonTweaks',
+			'lost' => 'applyGravitonTweaks', 'needs' => 'usesGravitics'),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -1925,7 +1944,8 @@ class Officers{
 		'capture' => 'capture assault', //Stage 24: the Breaching Expert's (spendCaptureAssault)
 		'speech' => 'speech',           //Stage 25: the Expert Political Officer's (saveSpeech)
 		'precision' => 'precision strike', 'anticipation' => 'anticipation', //Stage 28: the Expert Warrior's (precisionStrike, saveAnticipation)
-		'patch' => 'patch');            //Stage 30: the Expert Quartermaster's (patchCritical)
+		'patch' => 'patch',             //Stage 30: the Expert Quartermaster's (patchCritical)
+		'rotate' => 'gravitic rotation'); //Stage 31: the Expert Graviton Controller's (rotateGravitic)
 
 	/* Is this ability still his on $turn? Spent ON $turn still counts: that turn's shot is the one that spent it
 	   (so every order his gun fires that turn, and a replay of it, reads the same). */
@@ -4569,6 +4589,147 @@ class Officers{
 			if (!$open) break;
 			self::addAmmoRound($ship, $offers[$open[Dice::d(count($open)) - 1]]);
 		}
+	}
+
+	/* ------------------------------------------------------------------ Expert Graviton Controller (Stage 31) */
+
+	/* A faction outside the Babylon 5 settings: one Fleet Selection files under its custom sub-groups Nexus, Escalation Wars or
+	   Other Universe (Star Trek, BSG, Star Wars...). The Expert Graviton Controller's "races which use gravitic drives or weapons"
+	   are B5 races only (user ruling 2026-10-25) - FV flags Star Trek hulls gravitic too. ⚠️ MIRROR of the tests in gamelobby.js
+	   `customSubgroups`: a sub-group added there belongs here. No client mirror is needed - the offers decide. */
+	private static $otherSettings = '/^(Nexus|Escalation Wars|BSG|12 Colonies of Kobol|Star Trek|Star Wars|StarTrek|StarWars|Trek)\b|^The System$/';
+	public static function isOtherSetting($faction){
+		return preg_match(self::$otherSettings, (string)$faction) === 1;
+	}
+
+	/* His `needs`: a hull with a gravitic drive (FV's $gravitic) or a gravitic weapon - "races which use gravitic drives or weapons",
+	   per hull (user ruling 2026-10-25) - in a B5 setting. Every Brakiri hull with an Engine passes. */
+	private static function usesGravitics($ship){
+		if (self::isOtherSetting($ship->faction)) return false;
+		if (!empty($ship->gravitic)) return true;
+		foreach ($ship->systems as $system){
+			if (self::isGraviticWeapon($system)) return true;
+		}
+		return false;
+	}
+
+	//a weapon with a Gravitic mode - its class, or any mode's in weaponClassArray. ⚠️ MIRROR PAIR with officers.isGraviticWeapon (JS)
+	private static function isGraviticWeapon($system){
+		if (!($system instanceof Weapon)) return false;
+		if ($system->weaponClass === 'Gravitic') return true;
+		return is_array($system->weaponClassArray) && in_array('Gravitic', $system->weaponClassArray, true);
+	}
+
+	/* "Tweaking of the Engine improved its thrust output by 1. Increase the thrust rating of the largest aft thruster by 1 as well":
+	   his Engine (his post) and gravitonThruster's - while he serves, and after he is lost (user ruling 2026-10-25: a tweak made
+	   before battle stays - `lost`). Both outputs reach every viewer, as every system's does. */
+	private static function applyGravitonTweaks($ship, $entry, $turn){
+		$engine = $ship->getSystemById($entry['post']);
+		$thruster = self::gravitonThruster($ship);
+		if ($engine !== null) $engine->output += self::GRAV_ENGINE_THRUST;
+		if ($thruster !== null) $thruster->output += self::GRAV_THRUSTER;
+	}
+
+	/* "The largest aft thruster ... (if equal ratings pick a random one)": the main thruster (direction 2) with the highest rating as
+	   the ship stands at the load - refits and crew quality included -, the FIRST of equal ones (user ruling 2026-10-25), or null.
+	   ⚠️ MIRROR PAIR with officers.gravitonThruster (JS). */
+	public static function gravitonThruster($ship){
+		$best = null;
+		foreach ($ship->systems as $system){
+			if (!($system instanceof Thruster) || (int)$system->direction !== 2) continue;
+			if ($best === null || (int)$system->output > (int)$best->output) $best = $system;
+		}
+		return $best;
+	}
+
+	/* ⭐ His +1 damage: Weapon::getFinalDamage, once per HIT, for a shot in a Raking Gravitic mode - the Graviton Beam, every mode of
+	   the Gravitic Lance (a Beams shot +1 on each beam) and the Gravitic Cutter (user ruling 2026-10-25: "gravitic beam weapons" are
+	   every Raking gravitic weapon). The fired mode's class and damage type are the weapon's own once changeFiringMode has run. Never
+	   on a hit whose roll is 0 (the Religious Leader's rule). Behind $officersPresent.
+	   ⚠️ MIRROR PAIR with officers.gravitonBeamBonus (JS), which raises the owner's Damage lines. */
+	public static function gravitonBeamBonus($ship, $weapon, $rolled){
+		if ($rolled <= 0 || $weapon->weaponClass !== 'Gravitic' || $weapon->damageType !== 'Raking') return 0;
+		return self::isActive($ship, 'OFF_GRAV') ? self::GRAV_BEAM_DAMAGE : 0;
+	}
+
+	/* "Graviton pulsars or gravitic bolts roll to hit normally, but after they hit, they determine their result as though the to-hit
+	   die roll was 5% lower": the d100 taken GRAV_PULSE_SHIFT lower for Weapon::fire's pulse count (Pulse::rollPulses), on a shot that
+	   has already hit, for a gravitic weapon firing pulses - the Graviton Pulsar. A Gravitic Bolt's damage is fixed and nothing reads
+	   how far under it hit, so it has no result to change. Behind $officersPresent. */
+	public static function gravitonPulseShift($ship, $weapon){
+		if ($weapon->damageType !== 'Pulse' || $weapon->weaponClass !== 'Gravitic') return 0;
+		return self::isActive($ship, 'OFF_GRAV') ? self::GRAV_PULSE_SHIFT : 0;
+	}
+
+	/* "On the turn a rotation is done, the ship's weapons suffer a -3 penalty to all weapons fire, even if the ship winds up facing the
+	   same way it was originally heading": GRAV_ROTATION_PENALTY (d20 units, -15%) on every shot of a ship with a rotate row this turn -
+	   ballistics included, stacking with the pivot's and the roll's -3 as they stack. Only the server writes the row (MoveLock drops
+	   any other), so he need not still serve. Behind $officersPresent. ⚠️ MIRROR PAIR with the "Gravitic Rotation" line of
+	   weaponManager.computeShotModifiers (JS). */
+	public static function rotationPenalty($ship, $turn){
+		return Movement::hasGravRotated($ship, $turn) ? self::GRAV_ROTATION_PENALTY : 0;
+	}
+
+	//the index of the Expert Graviton Controller serving on $turn, or null
+	private static function gravitonIndex($ship, $turn){
+		foreach ($ship->getOfficers() as $i => $entry){
+			if ($entry['id'] === 'OFF_GRAV' && self::serves($entry, $turn)) return $i;
+		}
+		return null;
+	}
+
+	/* ⭐ THE ROTATION (Manager::rotateGraviticDrive, from gravRotate.php): the player clicked his Rotate icon in the Movement phase, with
+	   $rows plotted - this turn's, as the client holds them (decoded as objects). Judged on the LOADED ship: he serves, the drive is
+	   gravitic, he has not rotated before ("once during the scenario"), the ship rides no other unit and has ordered no jump-out, and
+	   $rows make a path from where it began the turn. Then the SERVER rolls the d6 ("completely uncontrollable") and the ship faces
+	   die - 1 ("1" = facing 0, east; clockwise): one Movement::GRAV_ROTATE row after $rows - no thrust; hex, heading and speed kept; value the
+	   die -, the ability spent (one OffUsed note on his Engine), and every row up to it LOCKED (MoveLock - the user's note: "it cannot be
+	   cancelled and re-done ... and should be saved so that on page reload it remains"). Returns array('rows' => the lock, 'die' => n)
+	   or a string saying why not. Asked again on the turn it was rolled (a lost reply, a second tab), the stored lock is the answer:
+	   never a second die. */
+	public static function rotateGravitic($ship, $gamedata, array $rows, DBManager $dbManager){
+		$turn = (int)$gamedata->turn;
+		$stored = MoveLock::get($dbManager, $gamedata->id, $turn, $ship->id);
+		if ($stored !== null){
+			foreach ($stored as $row){
+				if (Movement::rowField($row, 'type') === Movement::GRAV_ROTATE) return array('rows' => $stored, 'die' => (int)Movement::rowField($row, 'value'));
+			}
+		}
+
+		$i = self::gravitonIndex($ship, $turn);
+		if ($i === null) return 'There is no Expert Graviton Controller serving on this unit.';
+		if (isset($ship->getOfficers()[$i]['abilities']['rotate'])) return 'The gravitic drive has already been rotated in this battle.';
+		if (empty($ship->gravitic)) return 'This unit has no gravitic drive.';
+		if (!empty($ship->attached)) return 'A unit attached to another cannot rotate.';
+
+		$own = array();
+		foreach ($rows as $row){
+			if (Movement::rowField($row, 'turn') != $turn) continue;
+			if (Movement::rowField($row, 'type') === 'jumpout') return 'A unit that has ordered a jump-out has finished manoeuvring.';
+			if (MoveLock::isLockType(Movement::rowField($row, 'type'))) return 'The plotted movement could not be read.';
+			if (Movement::rowField($row, 'commit') === false) return 'Confirm or cancel the thrust being assigned first.';
+			$own[] = $row;
+		}
+		$start = $ship->getLastTurnMovement($turn);
+		if (!$start || Movement::readSweepPath(Movement::toOffset($start->position), $own, $turn) === null)
+			return 'The plotted movement does not make a path from where the unit started.';
+
+		$last = empty($own) ? $start : end($own);
+		$position = Movement::toOffset(Movement::rowField($last, 'position'));
+		$die = Dice::d(6);
+		$own[] = (object)array(
+			'id' => -1, 'type' => Movement::GRAV_ROTATE,
+			'position' => (object)array('q' => $position->q, 'r' => $position->r),
+			'xOffset' => Movement::rowField($last, 'xOffset') ?? 0, 'yOffset' => Movement::rowField($last, 'yOffset') ?? 0,
+			'facing' => $die - 1, 'heading' => (int)Movement::rowField($last, 'heading'), 'speed' => (int)Movement::rowField($last, 'speed'),
+			'animating' => false, 'animated' => false, 'animationtics' => 0,
+			'requiredThrust' => array(0, 0, 0, 0, 0), 'assignedThrust' => array(),
+			'commit' => true, 'preturn' => false, 'at_initiative' => Movement::rowField($last, 'at_initiative'),
+			'turn' => $turn, 'forced' => false, 'value' => $die
+		);
+		self::spend($ship, $i, 'rotate', $turn, $gamedata);
+		MoveLock::save($dbManager, $gamedata->id, $turn, $ship->id, $own);
+		return array('rows' => $own, 'die' => $die);
 	}
 
 	/* ------------------------------------------------------------------ payload */

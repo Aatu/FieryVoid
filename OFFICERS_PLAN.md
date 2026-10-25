@@ -48,7 +48,11 @@ penalty) and Supreme Anticipation from his C&C in the Firing phase (+50 initiati
 Stage 30, the Expert Quartermaster (Hurr 10%, everyone else 20%), in the C&C - one free refit, the dearest bought of Gunsights or Advanced Defensive Targeting
 on two weapons, the Improved Reactor (its breach chance tripled), Improved Thrust on two thrusters, Hardened Armour on two systems of one side or the Jump
 Accelerator; two free special missiles a rack (one a Class-SO); what is left unchosen rolled at the commit; the ship's first critical ignored; -30 initiative,
-+10% turn delay and +2 on the C&C's criticals, all of it staying when he is lost (§9.37) - BUILT 2026-10-24, uncommitted.**
++10% turn delay and +2 on the C&C's criticals, all of it staying when he is lost (§9.37) - BUILT 2026-10-24, uncommitted.
+Stage 31, the Expert Graviton Controller (Brakiri 10%; any other hull of a B5 setting with a gravitic drive or a gravitic weapon 15%), in the Engine - +1 on
+every hit by a gravitic beam, a Graviton Pulsar's pulses counted as though it rolled 5% lower, the Engine and the largest aft thruster +1 (kept when he is
+lost), and once per battle a rotation of the gravitic drive in the Movement phase: a d6 the server rolls picks the new facing, -15% to hit that turn, and
+the rotation and every move before it LOCKED - a generic movement lock in tac_systemdata, kept on a reload (§9.38) - BUILT 2026-10-25, uncommitted.**
 Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
@@ -372,6 +376,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Technician | `OFF_TECH` | Reactor | 1 |
 | Expert Jump Officer | `OFF_JUMP` | Jump Drive | 1 |
 | Expert Quartermaster *(Stage 30, §9.37)* | `OFF_QM` | C&C (his rules text - the draft's random primary dropped) | 1, every hull with a C&C |
+| Expert Graviton Controller *(Stage 31, §9.38)* | `OFF_GRAV` | Engine | 1, hulls with a gravitic drive or a gravitic weapon (B5 settings) |
 | Expert Geneticist | `OFF_GENE` | C&C | 1 |
 | Expert Scavenger | `OFF_SCAV` | Engine | 1 |
 | Breaching Expert *(Stage 24, §9.31)* | `OFF_BRCH` | his pod: a breaching pod flight's first craft - since Stage 27 (§9.34) one per pod, from the first | 1 (flight), breaching pods only, priced off one pod (`unscaled`); bought as a count, `mixesWith` the pod Troop Leader |
@@ -547,6 +552,7 @@ masking: individual notes never reach any client.
 | Expert Political Officer (Stage 25) | `iniativebonus` (+30 the turn after his speech); his speech itself; the armour of his five free Hardened Armour; an armed shuttle in a hangar | **Yes**: the speech is a combat log line every player reads once firing resolves ("The Political Officer on-board <ship> begins a stirring speech about ...", user request) - so his speech names him; the +30 through his `publish`. The armour and the armed shuttle show exactly as any bought refit and any hangar's contents do. Which expert he brought and which armour is free stay as hidden as any officer and refit |
 | Expert Software Engineer (Stage 26) | the Computer's `output` (+1); where a point placed in the Firing phase went; the Computer's armour point; his stealth ship's detection; a Specialist used a second time | `output`: **yes, to every viewer**, as the Technician's. The Firing-phase allocation: **own team only until firing resolves** - an opponent's payload and tooltip carry Initial Orders' allocation while the Firing phase is open (`HyachComputer::shownBFCP`), since where a point went would point at the targets; afterwards it is public, as Initial Orders' always was. The armour point shows only as the damage the log records (one more armour), the masking only as a stealth ship staying hidden, the second Specialist use as that Specialist's line in its "used this turn" list, which every viewer is sent anyway. The list of Specialists he would let the ship reuse rides his own team's officer payload (`reuse`) |
 | Expert Warrior (Stage 28) | `iniativebonus` (+10; +50 / -50 after his Supreme Anticipation), and a flight's his ship launched; his ship's critical modifier; his charge (a movement row); the hit chance of his ship's shots | Initiative: **yes, to every viewer** (`publish` / `lostPublish`, and a launched flight's through `addForJson`). The charge is a row of the ship's movement, which every viewer is sent - so a declared charge, and its target, are public (the tabletop declares it as it is performed). Which unit it holds against (`charged`) rides his team's officer payload, for their hit-chance preview; an opponent sees only the needed % the log prints, as for every to-hit officer. The critical modifiers are never sent (nothing displays one) |
+| Expert Graviton Controller (Stage 31) | his Engine's and the largest aft thruster's `output`; his gravitic drive's rotation; the hit chance of his ship's shots that turn | Outputs: **yes**, `output` is sent unconditionally (as the Technician's), and they stay once he is lost. The rotation is a `gravRotate` row of the ship's movement, which every viewer is sent - so the rotation, and that he is aboard, are public (the tabletop rolls it in the open); its die is the server's, and the moves locked before it ride the owner's game.php only (`window.fvMoveLocks`). The -15% is the owner's hit-chance preview; an opponent sees only the needed % the log prints. His +1 on beams and the pulse count show only as their results |
 | Expert ELINT Officer (Stage 20) | his array's `output`; every ELINT range from his ship; his blanket against ballistic weapons | **Yes, to every viewer**: `output` always is, and the ship payload carries `elintRangeBonus` (25) and `blanketBallistic` (3) while he serves - an opponent's own OEW under his Disruption and its hit chance against a unit under his blanket are previewed with them; his array's tooltip shows the ranges. The officer list stays own-team; a disguised Chameleon ship's payload is its simulacrum's and carries neither. The -2 on sensor criticals is never sent |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
@@ -4713,3 +4719,156 @@ offer lines, then the two new cases' blocks); old copy `fingerprint.before-offic
    one-line wrap of the tested helper.
 3. A refit dropped by pre-battle damage that flips his free option names only the refit's own row in the refund warning; the ship-level move is still
    applied (settleQuartermaster).
+
+### 9.38 Stage 31: Expert Graviton Controller (2026-10-25)
+
+**Rules text (user, 2026-10-25) - an officer the user added.** "Expert Graviton Controller: Brakiri research in the area of gravities has produced a number of
+experts in the field. These can provide special abilities to the ship's weapons and drive systems, as follows: All gravitic beam weapons score +1 damage. All
+graviton pulsars or gravitic bolts roll to hit normally, but after they hit, they determine their result as though the to-hit die roll was 5% lower. For
+example, if a graviton pulsar fired needing a 50 to hit and rolled a 35, this would be treated as a 30, thus resulting in +1 to the pulse volley count roll.
+Tweaking of the Engine improved its thrust output by 1. Increase the thrust rating of the largest aft thruster by 1 as well (if equal ratings pick a random
+one). Once during the scenario, during the Movement Step, the gravitic drive can be "rotated." This is generally a desperation move, as it is completely
+uncontrollable. Roll 1 d6 and rotate the ship to face the resulting direction (with "1" indicating the east-facing of the map (heading 0 in FV terms), and
+other numbers rotating clockwise from there). Heading, turn status, and the like are unaffected. On the turn a rotation is done, the ship's weapons suffer a
+-3 penalty to all weapons fire, even if the ship winds up facing the same way it was originally heading. Location: Engine. Cost: 10% of the ship's base cost
+for Brakiri. Availability: Non-Brakiri races which use gravitic drives or weapons can purchase one for 50% higher than the listed cost." The user's notes: the
+rotation gets "its own icon similar to Contraction and Expert Warrior's 'Charge' icon" (`img/rotateIcon.png`, recoloured to the yellow of
+`graviticTurnLeft1.png`); "when clicked, the random rotation move is done and it cannot be cancelled and re-done (to prevent exploiting). And should be saved
+so that on page reload it remains, like we do with ships moving in Minesweeping Mode."
+
+**What FV had.**
+- **Gravitic drive** = the hull's `$gravitic` flag (BaseShip; the tooltip's "Gravitic Drive" note). **Gravitic weapons** = `weaponClass` (or a mode's
+  `weaponClassArray`) 'Gravitic': on ships the Graviton Pulsar (Pulse, +1 pulse / 20%), Gravitic Bolt (Standard, fixed 9/12/15), Graviton Beam, Gravitic Lance
+  (Lance / Beams / Split Beams) and Gravitic Cutter (all Raking), Gravitic Cannon (Standard), Gravitic Shifter, Gravity Net, Gravitic Mine and others.
+- 43 Brakiri hulls can take him (the bases have no Engine); the Antoph Early has gravitic weapons but no gravitic drive. Elsewhere in B5 settings, 136 more
+  hulls with an Engine carry FV's gravitic drive or a gravitic weapon (Minbari Federation 30 and Protectorate 13 - the Rogata in both -, Vree 16, Drakh 15,
+  Hyach 14, Ipsha 13, Yolu 12, Streib 5, Civilians 8, Raiders 8, Custom Ships 3); FV also flags 59 Star Trek hulls and one BSG hull gravitic, and two
+  Escalation Wars Chouka hulls mount a Gravitic Tracting Rod.
+- **Pulses** = `Pulse::rollPulses($turn, $needed, $rolled)` in `Weapon::fire` - base pulses + floor((needed - rolled) / grouping), capped at maxpulses. A
+  Standard weapon's roll decides only hit or miss, so the "5% lower" clause changes nothing for the Gravitic Bolt (fixed damage).
+- **Manoeuvre penalties** = `Weapon::calculateHitBase`: -3 (d20 units, -15%) for a ship that pivoted this turn (`Movement::hasPivoted`), ballistics included,
+  -3 for rolling - they stack; client twin `weaponManager.computeShotModifiers` ("Pivot for Shooting").
+- **Thrust**: an Engine's `output` is its thrust; a Thruster's `output` its rating, `direction` 2 = main (aft). Both are sent to every viewer.
+- **Locked moves**: Minesweeping Mode's lock (`tac_minesweep`: the rows plotted up to the swept hexes, restored on reload through `window.fvMineSweep`, the
+  commit refused unless it passes the swept hexes). `tac_systemdata` is FV's generic per-unit, per-turn key/value store (weapon loading): rows of `gameid,
+  shipid, systemid, subsystem, turn, data` (TEXT), the latest at or before the loaded turn handed to `$system->setSystemData` - a row whose system id is
+  not a system is skipped - and already cleared by `deleteGames` and `leaveSlot`. Its existing writer binds `subsystem` as an integer.
+- ⚠️ **Base rotation owns the `rotate` names**: movement.js `canRotate` / `doRotate` / `pickRotation` (a base's turn-1 rotation, rows `rotateLeft` /
+  `rotateRight`), `ShipMovementCallbacks.rotateCallback(e, right)` and `UI.shipMovement.rotateCallback` (the `#rotateleft` / `#rotateright` icons).
+
+**Rulings (user, 2026-10-25, asked before building):**
+1. **Availability: per hull, B5 settings only.** Any officer-eligible hull with FV's gravitic drive or a gravitic-class weapon (and an Engine, his post);
+   not the factions Fleet Selection files under the custom sub-groups Nexus, Escalation Wars and Other Universe (Star Trek, BSG, Star Wars...). Brakiri 10%,
+   everyone else 15%.
+2. **"Gravitic beam weapons" = every Raking gravitic weapon**: the Graviton Beam, the Gravitic Lance (all three modes) and the Gravitic Cutter.
+3. **The rotation may be made at any time in the ship's move, and the moves before it lock with it** - Minesweeping Mode's way: Cancel cannot take any of
+   them back, a reload puts them back, and the commit must keep them. Stored in the EXISTING `tac_systemdata` as a generic **movement lock** (user: "is
+   there a way to use an existing db table, or make the new db table have wider applications") - no new table, no deploy SQL.
+4. **The Engine's and aft thruster's +1 stay when he is lost** (a tweak made before battle); the weapon bonuses and the rotation need him serving.
+5. **Equal aft thrusters: the first of them** (the lowest id) - no randomness, so the lobby shows exactly which.
+
+**Built with defaults, stated here (ask before changing):**
+- **+1 damage**: on every hit a Raking gravitic mode scores (a raking shot's total, before it rakes; each of the Lance's two Beams), never a hit rolling 0,
+  in `Weapon::getFinalDamage` beside the other officers' flat bonuses.
+- **Pulses**: the roll is taken 5 lower (d100) for the pulse count of a gravitic weapon firing pulses (the Graviton Pulsar) once it has hit - never to
+  decide the hit. Interception and the hit itself are untouched.
+- **The thruster**: the aft (main) thruster with the highest rating as the ship stands at the load (refits and crew included), the first on a tie.
+- **The rotation**: his ship needs FV's gravitic drive (the Antoph Early and the non-Brakiri hulls with gravitic weapons only never rotate); he must serve
+  that turn; once per battle, spent the moment the die is rolled; not while attached to another unit (detaching that turn is fine), after a jump-out order,
+  while thrust is being assigned, or once the ship has committed. The new facing is d6 - 1 (1 = facing 0, east; clockwise), set by one `gravRotate` row (no
+  thrust; hex, heading and speed unchanged; value = the die). It is ordinary movement, so every viewer sees it (and so learns he is aboard), as the Expert
+  Warrior's charge. A passive notice tells the player the die.
+- **-3 (-15%)** to hit with every weapon of his ship on the turn of a rotation, ballistics included and stacking with the pivot and roll penalties, as
+  those do; never on an interception (no to-hit roll). The penalty follows the row, so it holds even if he is killed later that turn.
+- No confirm before the roll: a click rolls (the user's note).
+
+**Design.**
+- `Officers`: registry `OFF_GRAV` (post `engine`, pct 15, `apply` = `lost` = applyGravitonTweaks, `needs` usesGravitics) after the Quartermaster, before the
+  placed officers; `$factionRules` 'Brakiri Syndicracy' 10; constants GRAV_BEAM_DAMAGE 1, GRAV_PULSE_SHIFT 5, GRAV_ENGINE_THRUST 1, GRAV_THRUSTER 1,
+  GRAV_ROTATION_PENALTY 3; `$abilityNames` rotate. `usesGravitics` / `isGraviticWeapon` (⚠️ MIRROR PAIR with officers.isGraviticWeapon) / `isOtherSetting`
+  (⚠️ MIRROR of gamelobby.js `customSubgroups` - the harness compares them over every faction), `applyGravitonTweaks` / ⭐ `gravitonThruster` (⚠️ MIRROR PAIR
+  with officers.gravitonThruster), ⭐ `gravitonBeamBonus` (⚠️ MIRROR PAIR with officers.gravitonBeamBonus), `gravitonPulseShift`, `rotationPenalty`,
+  `gravitonIndex`, ⭐ `rotateGravitic` (the roll: checks, the `gravRotate` row, the spend - one OffUsed note `OFF_GRAV:rotate` on his Engine -, the lock).
+- `Movement` (movement.php): `GRAV_ROTATE` 'gravRotate' (⚠️ MIRROR PAIR with shipManager.movement.GRAV_ROTATE), `hasGravRotated`.
+- ⭐ **`MoveLock`** (new, `handlers/MoveLock.php`) - THE movement lock, for any order a unit cannot take back mid-move: one `tac_systemdata` row per unit and
+  turn (system id -1, key `moveLock`), holding the unit's rows of the turn up to and including the order. `save` / `get` / `forTurn`, ⭐ `keepsLock` (the
+  commit's own orders - this turn's rows that are neither preturn nor forced - must begin with the locked ones: type, hex, facing, heading, speed, and a
+  lock-type row's value - ⚠️ MIRROR PAIR with moveLock.beginsWith), `dropUnlocked` (a lock-type row outside a lock is dropped), `LOCK_TYPES` (today
+  'gravRotate' - ⚠️ MIRROR PAIR with moveLock.LOCK_TYPES), `forgetGame` (when Movement ends), MAX_BYTES / MAX_ROWS (the sweep's limits). DBManager
+  `saveMoveLock` / `getMoveLock` / `getMoveLocks` (one player's with `$playerid`) / `deleteMoveLocks`. Minesweeping Mode keeps its own table.
+- Endpoint `gravRotate.php` -> `Manager::rotateGraviticDrive` (the sweep's checks: active game, this turn's Movement, the unit moving now, the player's,
+  not committed, the player's submit lock; then a real load in a transaction and `Officers::rotateGravitic`; the reply is the lock's rows and the die).
+  Asked again on the same turn it answers the stored lock - never a second roll. game.php inlines `window.fvMoveLocks` (`Manager::getMoveLocksJSON`,
+  Movement only, never throws).
+- Hooks: `MovementGamePhase::process` (MoveLock::keepsLock beside the sweep check - a refused commit says reload; MoveLock::dropUnlocked after it),
+  `MovementGamePhase::advance` (MoveLock::forgetGame beside MineSweep::forgetGame), `Weapon::calculateHitBase` (rotationPenalty beside the pivot's),
+  `Weapon::fire` (gravitonPulseShift into both rollPulses calls), `Weapon::getFinalDamage` (gravitonBeamBonus).
+- Client: new `client/moveLock.js` (the lock, generic: `lockIndex` / `isLastRowLocked` / `protects`, ⭐ `ask` - post a locking order with this turn's rows
+  as a JSON string, the blocking overlay up, and put the rows the server answers in place -, `playerRows`, `beginsWith`, `onStrategyActivated` - the reload
+  restore, after Save Orders' and Minesweeping's); `movement.js` (`isLastMoveFinal` asks it; doJink(-1) and doContraction(-1) never splice a locked row;
+  `GRAV_ROTATE`, `getGravRotateRow`, `hasGravRotated`, `canGravRotate`, `getGravRotateState`, `doGravRotate`); `UI/shipMovement.js` (the Gravitic Rotate
+  icon in the Charge / Contraction spot - no hull carries both; knobs `gravRotateIcon` / `gravRotateReadyOpacity` / `gravRotateGlowColour`,
+  `drawGravRotateIcon`, `gravRotateCallback`), `ShipMovementCallbacks.gravRotateCallback`, game.php's `#gravRotate` element, the `moveLock.js` script tag
+  and `window.fvMoveLocks`; `PhaseDirector` (the restore); `weaponManager.computeShotModifiers` ("Gravitic Rotation" -3); `systems.js` getOutput /
+  getOutputNoBoost (`officers.gravitonThrustBonus`, the lobby's +1s); `officers.js` (the registry row, `needs` gravitics, `isGraviticWeapon`,
+  `gravitonThruster`, `gravitonThrustBonus`, `gravitonBeamBonus` / `gravitonDamageLine` in adjustDataDisplay, `canGravRotate`, ABILITY_NAMES rotate).
+  Art: `img/rotateIcon.png` (the user's) recoloured to graviticTurnLeft1's gold (139, 101, 32), alpha kept (the white original kept in the session scratchpad only).
+- Docs: an Expert Graviton Controller card (Ship Officers, between the Geneticist and the Gunner).
+
+**Files.** Server: `Officers.php`, `handlers/MoveLock.php` (new), `handlers/movement.php`, `controller/Manager.php`, `controller/DBManager.php`,
+`weapons/weapon.php`, `Phase/MovementGamePhase.php`, `public/gravRotate.php` (new), `public/game.php`; `autoload.php` regenerated (MoveLock). Client:
+`officers.js`, `moveLock.js` (new), `movement.js`, `UI/shipMovement.js`, `ShipMovementCallbacks.js`, `renderer/PhaseDirector.js`, `weaponManager.js`,
+`systems.js`, `img/rotateIcon.png`. Docs `ammo-options.html`. Harnesses: `officersHarness.php` (writes `gravitonFixture.json`; four Stage 27-30 registry-order
+checks moved), `officersClientHarness.js` (likewise four), `enhancementsHarness.php` (+Avioki; cases `grav`, `grav+eng+elite1`; fingerprint re-recorded, old
+copy `fingerprint.before-officers-stage31.txt`), `enhancementsDifferential.js` (an Engine's or thruster's output compared with gravitonThrustBonus).
+`fvbuild -Statics`, both legacy bundles (`node scripts/bundle-legacy.js`), `-Sync`. No React change, no schema change.
+
+**Measured.** Statics: 180 offers on 179 hulls (the Rogata sits in both Minbari factions' files - and they are two different hulls of one class name):
+43 Brakiri at 10% (Avioki 73, Brikorta 50, Antoph Early 40), 136 elsewhere at 15% (Sharlin 274, IML Attack Cruiser 68). Fingerprint: 3,544 lines added
+(3 offers, the Avioki's block, the two cases on every hull), none changed - every old line is kept, in order.
+
+**Verified.**
+- `officersHarness.php` **2276 / 0 with the database** (2182 / 0 --no-db): the registry place, prices on five hulls (Brakiri with and without a gravitic
+  drive, Minbari, Raiders), none on an Omega, a Star Trek or Escalation Wars hull, a base, an Ancient or a flight; isOtherSetting over 15 names and against
+  gamelobby.js's own three tests over every faction of the statics; the sweep (179 hulls, 43 Brakiri, every price); the post; a doctored row. The tweaks:
+  Engine 15 -> 16, the first of two 8s -> 9, a single 10 -> 11, an Improved Thrust making the second the largest, Elite Crew, killed (kept), his Engine
+  destroyed (thruster kept), pre-battle (none). The REAL getFinalDamage (+1 on a Graviton Beam, every Lance mode, a Cutter; none on a Pulsar, a Bolt, a
+  Cannon, once lost, the gate off; a roll of 0). The REAL Weapon::fire (the rules' example 50 / 35 -> 2 pulses; 31; 36; 50; 51 and 54 miss; 15 and 1 at the
+  cap; lost; gate off). The REAL calculateHitBase (-15% on a rotation, -30% with a pivot, last turn's none, a turn after it still -15%, gate off / no
+  officers none). rotateGravitic in memory (a fake DBManager): the row, one die, the note, the lock; asked again - the same answer, no die; each face 1-6
+  -> facing 0-5; after moves, its hex and heading; another turn's row left out; nine refusals with no die, note or save. MoveLock: keepsLock (11 cases,
+  also written to the fixture), dropUnlocked, save / forTurn / get / forgetGame. The REAL database, rolled back (game 4508): the row in tac_systemdata, a
+  gamedata load untroubled by system id -1, forTurn by player, getMoveLocksJSON, forgetGame, rotateGraviticDrive's refusals.
+- `officersClientHarness.js` **955 / 0**: the row and constants against Officers.php / movement.php / MoveLock.php; the statics (180 / 179, passesNeeds, every
+  price); gravitonThruster against the server on all 179 hulls (gravitonFixture.json); the lobby through the REAL systems.js getOutput (Engine 16, thruster
+  9 / 8; untouched in game and once his Engine is destroyed) and the Damage line (17-62 -> 18-63); gravitonBeamBonus; officers.canGravRotate; and, in a
+  sandbox with the REAL officers.js, movement.js, savedOrders.js and moveLock.js: canGravRotate and its ten refusals, doGravRotate's request (the URL, the
+  body, the moves as a string, one at a time), the answer applied, the notice, the lock (no Cancel, deleteMove refused, a move after it cancellable),
+  doJink(-1) keeping a locked jink, a refusal / a failed request / a late answer, beginsWith against all 11 fixture cases, playerRows, the reload restore
+  (put back, a draft that extends it kept, a draft that does not replaced, five cases left alone); the REAL computeShotModifiers ("Gravitic Rotation -3",
+  beside "Pivot for Shooting -3"); the REAL shipMovement.js icon (drawn, clicked -> asked, "rotated", no Cancel; none without him); game.php and
+  PhaseDirector.
+- `enhancementsHarness` **295 / 0** (fingerprint re-recorded, additions only); `enhancementsDifferential.js` **964 / 0** (50 new cases).
+- `fvbuild -Check`: autoload current, validator clean, replay **162 / 0** (no corpus game has him). `-Sync` done.
+- ⚠️ **Found by the client harness and fixed**: the first build named its functions `canRotate` / `doRotate` / `rotateCallback`, which BASE rotation already
+  uses - in movement.js's object literal the later key wins, so base rotation's `canRotate` / `doRotate` were replaced by the gravitic ones, while in
+  ShipMovementCallbacks / UI.shipMovement base rotation's `rotateCallback` won and the gravitic icon did nothing. Everything is now `gravRotate*`, and the
+  row type `gravRotate`.
+- **Mutation-tested: 85 / 85 caught** (37 client, 1 differential, 44 server, 3 server with the database; ~45 minutes; every file byte-identical
+  after; the client and differential mutants first, then a clean server run rewriting `gravitonFixture.json`). The first pass missed six, each now
+  pinned by a check of its own: `moveLock.ask`'s own one-at-a-time guard and gravRotate's byte limit (both shadowed by the next check), a refusal
+  that went on to apply its missing rows (the fixture had no plotted move to lose), the answer's server rows applied twice (none in the fixture), any
+  thruster instead of an aft one (no fixture hull had a larger non-aft thruster first - a Brathon's retro now is), and a weapon gravitic in one mode
+  only (no hull needs it - a probe). Runner `mutate31.js`, session scratchpad only.
+
+**Observations, not changed:**
+1. Not play-tested. Worth a test: a Brakiri Avioki with him (73 points) - the lobby shows the Engine 16 and one aft thruster 9; in game, its Gravitic Rotate
+   icon (gold, in the Charge spot) during its move: a click rolls (a notice says the die), the ship faces the new way with its heading kept, Cancel is gone
+   for every move before it, a page reload puts the moves and the rotation back, and the Firing-phase preview shows "Gravitic Rotation -15%". A Graviton
+   Beam's Damage line reads 18-63; a Pulsar needing 50 that rolls 35 scores two pulses.
+2. Not covered by a harness: `MovementGamePhase::process`'s two MoveLock lines and `advance`'s forgetGame (the methods are covered), gravRotate.php itself,
+   and the in-browser drawing of the icon.
+3. A unit that never commits (the Movement phase's server fallback moves it) loses a rotation it rolled - the die is spent, the lock ignored.
+4. The rotation is a row of the ship's movement, which every viewer is sent - so the rotation, and that he is aboard, are public (the tabletop rolls it in
+   the open).
+5. The Gravitic Bolt is named in his rules text but has no to-hit-dependent result in FV, so his clause does nothing for it.

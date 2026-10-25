@@ -2381,6 +2381,10 @@ window.weaponManager = {
             if (shipManager.movement.hasPivotedForShooting(shooter) && !shooter.ignoreManoeuvreMods) {
                 otherDetail.push({ label: 'Pivot for Shooting', value: -3 });
             }
+            //an Expert Graviton Controller's rotation this turn (OFFICERS_PLAN.md Stage 31). ⚠️ MIRROR PAIR with Officers::rotationPenalty (PHP)
+            if (window.officers && shipManager.movement.hasGravRotated(shooter) && !shooter.ignoreManoeuvreMods) {
+                otherDetail.push({ label: 'Gravitic Rotation', value: -officers.GRAV_ROTATION_PENALTY });
+            }
             if (shooter.osat && shipManager.movement.hasTurned(shooter)) {
                 otherDetail.push({ label: 'OSAT Turn', value: -1 });
             }

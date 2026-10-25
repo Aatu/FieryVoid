@@ -1296,6 +1296,21 @@
 			return $move->type == "move" || $move->type == "slipleft" || $move->type == "slipright";
 		}
 
+		/* An Expert Graviton Controller's ROTATION of the gravitic drive (OFFICERS_PLAN.md Stage 31): a Movement-phase row at the ship's hex,
+		   no thrust, its `facing` the one the server's d6 gave (die - 1) and its `value` the die; heading and speed unchanged. Only the server
+		   writes one (Officers::rotateGravitic), as the last row of a movement lock - MoveLock drops any other.
+		   ⚠️ MIRROR PAIR with shipManager.movement.GRAV_ROTATE (client movement.js) and MoveLock's LOCK_TYPES. */
+		const GRAV_ROTATE = 'gravRotate';
+
+		//Did the ship rotate its gravitic drive this turn - the -3 to hit (Officers::rotationPenalty)
+		public static function hasGravRotated($ship, $turn){
+			if (!$ship || !is_array($ship->movement)) return false;
+			foreach ($ship->movement as $move){
+				if ($move->turn == $turn && $move->type == self::GRAV_ROTATE) return true;
+			}
+			return false;
+		}
+
 		/* How far this turn's combat pivots turned the flight, in hex sides, rights against lefts: right-left-right
 		   is 1, three to one side 3 (180 degrees), four to one side 4. Every flight is agile, so each combat pivot
 		   row is one 60-degree step in the direction it names (client doPivot). The Expert Coordinator's "full 180"

@@ -2124,6 +2124,7 @@ spl_autoload_register(
                 'motenai1980am' => '/server/model/ships/abbai_old/motenai1980AM.php',
                 'motenaiam' => '/server/model/ships/abbai_old/motenaiAM.php',
                 'mothership' => '/server/model/ships/streib/mothership.php',
+                'movelock' => '/server/handlers/MoveLock.php',
                 'movement' => '/server/handlers/movement.php',
                 'movementgamephase' => '/server/Phase/MovementGamePhase.php',
                 'movementorder' => '/server/model/BaseClasses.php',

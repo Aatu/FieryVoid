@@ -73,6 +73,14 @@ window.ShipMovementCallbacks = function () {
         this.updateCallback({ ship: this.ship });
     };
 
+    /* An Expert Graviton Controller's rotation (OFFICERS_PLAN.md Stage 31): the server rolls the die (shipManager.movement.doGravRotate), and the
+       rows it answers redraw the unit when they land. No confirm - a click rolls (the user's note). */
+    ShipMovementCallbacks.prototype.gravRotateCallback = function (e) {
+        e.stopPropagation();
+        shipManager.movement.doGravRotate(this.ship);
+        this.updateCallback({ ship: this.ship });
+    };
+
     ShipMovementCallbacks.prototype.morecontractionCallback = function (e) {
         e.stopPropagation();
         shipManager.movement.doContraction(this.ship, 1);

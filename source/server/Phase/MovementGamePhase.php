@@ -122,6 +122,8 @@ class MovementGamePhase implements Phase
 
         //Live sweeping (MINE_DETECTION_PLAN.md T16): Movement is over, and with it every unit's swept hexes.
         MineSweep::forgetGame($dbManager, $gameData->id);
+        //...and every unit's movement lock (MoveLock, OFFICERS_PLAN.md Stage 31): a lock binds only its own turn's commit.
+        MoveLock::forgetGame($dbManager, $gameData->id);
 
         // Identify slots that have no pre-firing ships
         $preFiringSlotIds = array_keys($preFiringSlots);
@@ -207,6 +209,10 @@ class MovementGamePhase implements Phase
 		   turn. A unit's commit must pass through them, in order, or the sweep could be taken back. */
 		$sweptHexes = MineSweep::getFinalHexesForCommit($dbManager, $gameData->id, $gameData->turn);
 
+		/* MoveLock (OFFICERS_PLAN.md Stage 31) - each unit's moves this turn up to an order it can no longer take back (an Expert
+		   Graviton Controller's rotation, the server's die). A unit's commit must begin with them. */
+		$moveLocks = MoveLock::forTurn($dbManager, $gameData->id, $gameData->turn);
+
 		$activeShips = $gameData->getMyActiveShips();
 		foreach ($ships as $ship) {
 			foreach ($activeShips as $activeShip) {
@@ -237,6 +243,14 @@ class MovementGamePhase implements Phase
 							throw new Exception("A unit's movement no longer passes through the hexes it has already swept for mines. Reload the game and plot it again.");
 						}
 					}
+
+					/* MOVEMENT LOCK (MoveLock): likewise on the movement as submitted - the locked rows first, unchanged, or the commit is
+					   refused (the client never lets them be taken back). Then a lock-type row the server did not write is dropped. */
+					$moveLock = $moveLocks[$activeShip->id] ?? null;
+					if ($moveLock !== null && !MoveLock::keepsLock($moveLock, $ship->movement, $gameData->turn)) {
+						throw new Exception("A unit's movement no longer begins with the moves it can no longer take back. Reload the game and plot it again.");
+					}
+					$ship->movement = MoveLock::dropUnlocked($ship->movement, $moveLock, $gameData->turn);
 
 					// Authoritative server-side thrust validation. The client normally
 					// blocks committing an underpaid maneuver, but a tampered/buggy client
