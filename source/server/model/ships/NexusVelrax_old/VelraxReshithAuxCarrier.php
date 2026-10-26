@@ -11,7 +11,7 @@ class VelraxReshithAuxCarrier extends MediumShipLeftRight{
         $this->shipClass = "Reshith Auxiliary Carrier";
 		$this->unofficial = true;
         $this->canvasSize = 100;
-	    $this->isd = 2013;
+	    $this->isd = 2059;
 		$this->limited = 10;
 		
         $this->fighters = array("light"=>12);

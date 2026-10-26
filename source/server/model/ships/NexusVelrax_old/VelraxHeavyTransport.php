@@ -8,7 +8,7 @@ class VelraxHeavyTransport extends HeavyCombatVesselLeftRight{
 	$this->faction = "Nexus Support Units";
         $this->phpclass = "VelraxHeavyTransport";
         $this->imagePath = "img/ships/Nexus/velraxVersythe.png";
-        $this->shipClass = "Velrax Heavy Transport";
+        $this->shipClass = "Velrax Vorketh Heavy Transport";
 	    $this->isd = 2027;
         $this->canvasSize = 125;
 		$this->unofficial = true;

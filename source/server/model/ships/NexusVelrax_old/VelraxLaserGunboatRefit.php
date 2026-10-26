@@ -13,7 +13,7 @@ class VelraxLaserGunboatRefit extends LCV{
 			$this->variantOf = "Nashran Gunboat";
 			$this->occurence = "common";
 		$this->unofficial = true;
-			$this->isd = 2061;
+			$this->isd = 2059;
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'Atmospheric Capable.';

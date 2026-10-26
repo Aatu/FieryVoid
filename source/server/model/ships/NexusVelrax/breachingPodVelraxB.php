@@ -26,7 +26,7 @@ class breachingPodVelraxB extends FighterFlight{
 		$this->unitSize = 1; 		
 		
     	$this->iniativebonus = 9 * 5;
-		$this->notes = "Bonus to attaching to enemy ships.";	
+//		$this->notes = "Bonus to attaching to enemy ships.";	
         $this->populate();
     
     	$this->enhancementOptionsEnabled[] = 'ELT_MAR'; //To enable Elite Marines enhancement
