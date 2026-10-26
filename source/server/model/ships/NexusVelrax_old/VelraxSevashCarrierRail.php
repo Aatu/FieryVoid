@@ -36,7 +36,8 @@ class VelraxSevashCarrierRail extends MediumShip{
         $this->addPrimarySystem(new Hangar(1, 2, 2));
         $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 4));        
-		$this->addPrimarySystem(new FighterRail(4, 6, 6, 0, 'normal'));
+		$this->addPrimarySystem(new FighterRail(4, 3, 6, 0, 'normal'));
+		$this->addPrimarySystem(new FighterRail(4, 3, 6, 0, 'normal'));
         
 		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 7, 4, 300, 60));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));

@@ -176,6 +176,9 @@ window.gamedata = {
 			case 'Terrain':
 				powerRating = 'Tier Other';
 				break;
+			case 'Terran Federation':
+				powerRating = 'Tier 1; Custom faction; Playtest; Blakes 7';
+				break;
 			case 'The System':
 				powerRating = 'Tier Ancients, Custom faction, Playtest';
 				break;
@@ -2593,7 +2596,7 @@ window.gamedata = {
 		{ name: "Babylon 5 Wars", test: null },
 		{ name: "Nexus", test: /^Nexus\b/ },
 		{ name: "Escalation Wars", test: /^Escalation Wars\b/ },
-		{ name: "Other Universe", test: /^(BSG|12 Colonies of Kobol|Star Trek|Star Wars|StarTrek|StarWars|Trek)\b|^The System$/ }
+		{ name: "Other Universe", test: /^(BSG|12 Colonies of Kobol|Star Trek|Star Wars|StarTrek|StarWars|Trek)\b|^The System$|Terran Federation/ }
 	],
 
 	//The short tier tag on a picker row.
