@@ -1069,6 +1069,12 @@ window.ew = {
         }
         webglScene.customEvent("ShipEwChanged", { ship: ship });
     },
+    /* The range of an ELINT function from `elint`: `base` hexes, or an Expert ELINT Officer's 25% more (OFFICERS_PLAN.md Stage 20 -
+       officers.elintRange, off the numbers the server publishes to every viewer). Every ELINT range test below asks it. */
+    elintRange: function elintRange(elint, base) {
+        return window.officers ? officers.elintRange(elint, base) : base;
+    },
+
     checkInELINTDistance: function checkInELINTDistance(ship, target, distance) {
         if (!distance) distance = 30;
 
@@ -1160,8 +1166,9 @@ window.ew = {
             var elint = gamedata.ships[i];
             if (elint == ship || !shipManager.isElint(elint)) continue;
 
-            if (!ew.checkInELINTDistance(target, elint, 30)) continue; //Check distance between target ship and ELINT
-            if (!ew.checkInELINTDistance(ship, elint, 30)) continue; //Check distance between firing ship and ELINT
+            var range = ew.elintRange(elint, 30); //an Expert ELINT Officer's 38 (Stage 20)
+            if (!ew.checkInELINTDistance(target, elint, range)) continue; //Check distance between target ship and ELINT
+            if (!ew.checkInELINTDistance(ship, elint, range)) continue; //Check distance between firing ship and ELINT
 
             if (!ew.getEWByType("SOEW", elint, ship)) continue;
 
@@ -1215,6 +1222,7 @@ window.ew = {
         for (var i in elints) {
             var elint = elints[i];
             if (elint.id === ship.id) continue;
+            if (!ew.checkInELINTDistance(ship, elint, ew.elintRange(elint, 50))) continue; //SDEW only works within 50 hexes (an Expert ELINT Officer's 63) - mirrors EW::getSupportedDEW
 
             if (shipManager.hasSpecialAbility(elint, "ConstrainedEW")) {//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
                 var fdew = ew.getEWByType("SDEW", elint, ship) * 0.33;
@@ -1229,7 +1237,9 @@ window.ew = {
         return amount;
     },
 
-    getSupportedBDEW: function getSupportedBDEW(ship) {
+    /* `ballistic`: the blanket against a ballistic weapon, which an Expert ELINT Officer's ELINT divides by 3, not 4 (OFFICERS_PLAN.md
+       Stage 20 - officers.ballisticBlanket). ⚠️ MIRROR PAIR with EW::getBlanketDEW (PHP). */
+    getSupportedBDEW: function getSupportedBDEW(ship, ballistic) {
         var amount = 0;
         var elints = gamedata.getElintShips();
         for (var i in elints) {
@@ -1239,11 +1249,12 @@ window.ew = {
             //if (ship.userid != elint.userid) continue;
             if (ship.team != elint.team) continue;
 
-            if (!ew.checkInELINTDistance(ship, elint, 20)) continue;
+            if (!ew.checkInELINTDistance(ship, elint, ew.elintRange(elint, 20))) continue; //an Expert ELINT Officer's 25 (Stage 20)
 
             //Kirishiac ELINT modules: only what the modules whose arc holds this friendly pay (refits plan R10;
             //mirror of EW::getBlanketDEW)
             var blanket = ew.hasElintModules(elint) ? ew.getElintAreaPointsReaching(elint, ship, 'BDEW') : ew.getEWByType("BDEW", elint);
+            if (ballistic && window.officers) blanket = officers.ballisticBlanket(elint, blanket); //Stage 20: counted in the quarters below
 
             if (shipManager.hasSpecialAbility(elint, "ConstrainedEW")) {//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
                 var fdew = blanket * 0.2;
@@ -1267,7 +1278,7 @@ window.ew = {
             var elint = gamedata.ships[i];
             if (elint == ship || !shipManager.isElint(elint)) continue;
 
-            if (!ew.checkInELINTDistance(ship, elint, 30)) continue; //DIST only works within 30 hexes - mirrors EW::getDistruptionEW
+            if (!ew.checkInELINTDistance(ship, elint, ew.elintRange(elint, 30))) continue; //DIST only works within 30 hexes (an Expert ELINT Officer's 38) - mirrors EW::getDistruptionEW
 
             if (blockedLosHex && blockedLosHex.length > 0) {
                 var loSBlocked = mathlib.isLoSBlocked(shipManager.getShipPosition(elint), shipManager.getShipPosition(ship), blockedLosHex);

@@ -707,18 +707,22 @@ class AncientBurstBeam extends Weapon{
 		
 		if (!WeaponEM::isTargetEMResistant($ship,$system)){ //no effect at all vs Advanced Armor
 			if ($system instanceof Fighter && !($ship->superheavy)){
-				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-				$crit->updated = true;
-				$crit->inEffect = true;
-				$system->setCritical($crit); //$system->criticals[] =  $crit;
-				$fireOrder->pubnotes .= " DROPOUT! ";
+				if (!WeaponEM::resistsDropout($ship, $fireOrder)){ //EM hardening: a d6 of 1-2 resists the dropout (tabletop)
+					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->setCritical($crit); //$system->criticals[] =  $crit;
+					$fireOrder->pubnotes .= " DROPOUT! ";
+				}
 			}else if ($system instanceof Structure){
-				$reactor = $ship->getSystemByName("Reactor");
-				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
-				$crit->updated = true;
-				$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
+				if (WeaponEM::powerLoss($ship, 1) > 0){ //EM hardening: a 1-point power loss becomes none (tabletop)
+					$reactor = $ship->getSystemByName("Reactor");
+					$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
+					$crit->updated = true;
+					$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
+				}
 			}else if ($system->powerReq > 0 || $system->canOffLine ){
-				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+				if (!WeaponEM::resistsShutdown($ship, $fireOrder)) $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata); //EM hardening: a d6 of 1 resists the shutdown (tabletop)
 			} else { //force critical roll at +4
 				$system->forceCriticalRoll = true;
 				$system->critRollMod += 4;
@@ -879,7 +883,7 @@ class AncientShockCannon extends Weapon{
 				$dmgToReturn = 0; //no Structure damage
 				if (!WeaponEM::isTargetEMResistant($ship,$system)){ //advanced armor prevents non-damaging EM effects
 					$reactor = $ship->getSystemByName("Reactor");
-					$outputMod = -floor($damage/4);
+					$outputMod = -WeaponEM::powerLoss($ship, floor($damage/4)); //EM hardening: one point less (tabletop)
 					//modifying how the critical is applied - Marcin Sawicki 06.06.2023
 					while($outputMod<=-4){
 						$crit = new OutputReduced4(-1, $ship->id, $reactor->id, "OutputReduced4", $gamedata->turn);
@@ -922,11 +926,13 @@ class AncientShockCannon extends Weapon{
 			if (!WeaponEM::isTargetEMResistant($ship,$system)){ //advanced armor prevents non-damaging EM effects
 				$crit = null;
 				if ($system instanceof Fighter && !($ship->superheavy)){
-					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-					$crit->updated = true;
-					$crit->inEffect = true;
-					$system->setCritical($crit); //$system->criticals[] =  $crit;
-					$fireOrder->pubnotes .= " DROPOUT! ";
+					if (!WeaponEM::resistsDropout($ship, $fireOrder)){ //EM hardening: a d6 of 1-2 resists the dropout (tabletop)
+						$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+						$crit->updated = true;
+						$crit->inEffect = true;
+						$system->setCritical($crit); //$system->criticals[] =  $crit;
+						$fireOrder->pubnotes .= " DROPOUT! ";
+					}
 				}
 			}
             parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);

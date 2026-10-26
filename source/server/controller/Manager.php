@@ -995,6 +995,8 @@ class Manager{
 
             $gamedata->prepareForPlayer($actualTurn > $turn);
             $gamedata->setTurn($turn);
+            //OFFICERS_PLAN.md Stage 10: the load above judged officers by the CURRENT turn - put back the Piercing mode a Gunner fired on $turn
+            Officers::restoreFiredModes($gamedata, $turn);
 
             $json = json_encode($gamedata->stripForJson(), JSON_NUMERIC_CHECK);
             return $json;
@@ -1064,7 +1066,11 @@ class Manager{
                     $enhName = Enhancements::getStoredEnhancementName($ship, $enhancementEntry); //choice-valued options store the PICK here, not the label
                     $enhNo = $enhancementEntry[2];
                     if ($enhNo > 0){ //actually taken
-                        self::$dbManager->submitSavedEnhancement($listId, $shipId, $enhID, $enhNo, $enhName);
+                        /* An officer row keeps what he cost (OFFICERS_PLAN.md §9.9): his price can change
+                           under a saved fleet, and enhvalue, one lump, cannot say how much of it was his.
+                           NULL for every other row. */
+                        $enhValue = Officers::isOfficerId($enhID) ? Officers::rowPrice($ship, $enhID, $enhNo) : null;
+                        self::$dbManager->submitSavedEnhancement($listId, $shipId, $enhID, $enhNo, $enhName, $enhValue);
                     }
                 }
 
@@ -1240,20 +1246,27 @@ class Manager{
                 foreach ($shipEnh as $enhEntry) {
                     $enhID       = $enhEntry[0];
                     $numberTaken = $enhEntry[1];
-                    /* OFFICERS_PLAN.md §4.9 - an officer this unit is no longer offered drops out like any
-                       unmatched row, but is REFUNDED: enhvalue is one lump the lobby trusts, so dropping the
-                       row alone would leave the fleet paying for him (arch_retiring_ship_enhancement). The
-                       case met: a Hunter-Killer's Expert Motivator, bought while it was an enhancement -
-                       remote-controlled flights carry no officers (user ruling 2026-10-11). */
+                    /* OFFICERS_PLAN.md §4.9 / §9.9 - an officer row is RE-PRICED: enhvalue is one lump the
+                       lobby trusts, so what he cost when saved is taken out of it and today's price put in.
+                       What he cost is the row's own enhvalue, or for a row saved before rows kept one, the
+                       Stage 4 price (Officers::legacyPrice - the fighter officers were re-priced 2026-10-15).
+                       One this unit is no longer offered drops out like any unmatched row and is refunded
+                       instead, or the fleet would keep paying for him (arch_retiring_ship_enhancement). */
                     if ((int)$numberTaken > 0 && Officers::isOfficerId($enhID)) {
+                        $paid = isset($enhEntry[3]) ? (float)$enhEntry[3] : (float)Officers::legacyPrice($ship, $enhID);
                         $offered = false;
                         foreach ($ship->enhancementOptions as $option) if ($option[0] === $enhID) $offered = true;
                         if (!$offered) {
-                            $refund = Officers::rowPrice($ship, $enhID);
-                            $ship->pointCostEnh = max(0, (float)$ship->pointCostEnh - $refund);
+                            $ship->pointCostEnh = max(0, (float)$ship->pointCostEnh - $paid);
                             $sysEnhNotices[] = $ship->name . ': ' . Officers::getLabel($enhID) . ' is no longer offered on this unit'
-                                . ' - removed, and its ' . $refund . ' points refunded.';
+                                . ' - removed, and its ' . $paid . ' points refunded.';
                             continue;
+                        }
+                        $now = (float)Officers::rowPrice($ship, $enhID, $numberTaken); //the counts are written back below
+                        if ($now != $paid) {
+                            $ship->pointCostEnh = max(0, (float)$ship->pointCostEnh - $paid + $now);
+                            $sysEnhNotices[] = $ship->name . ': ' . Officers::getLabel($enhID) . ' now costs ' . $now
+                                . ' points (was ' . $paid . ').';
                         }
                     }
                     foreach ($ship->enhancementOptions as &$option) {
@@ -2618,7 +2631,7 @@ class Manager{
             foreach ($gamedata->ships as $key=>$ship){
                 $mod =  $ship->getCommonIniModifiers( $gamedata );
                 $iniBonus =  $ship->getInitiativebonus($gamedata);
-                $ship->iniative = Dice::d(100) + $iniBonus + $mod;    
+                $ship->iniative = Officers::initiativeRoll($ship) + $iniBonus + $mod; //the d100 - twice for an Expert Anticipator's ship
             }
 	    /*Initiative ties are displayed wrongly in the interface due to changes intended for simultaneous movement.
 	    	to prevent this from happening, forcefully break ties here - sort ships appropriately and make their Ini different by adding appropriate value
@@ -2787,6 +2800,11 @@ class Manager{
                eligibility and REPLACES the client's prices with the server's own (D4). Every
                other phase ignores the field, so a client cannot inject a refit mid-game. */
             $ship->systemEnhancements = $value["systemEnhancements"] ?? array();
+
+            /* OFFICERS_PLAN.md Stage 10 - officers the player ordered to another post this turn. A CLAIM,
+               carried raw: InitialOrdersGamePhase::process checks each against the loaded ship
+               (Officers::saveTransfers) before writing it, and every other phase ignores the field. */
+            $ship->setOfficerTransferClaims($value["officerTransfers"] ?? array());
 
             $systems = $value["systems"] ?? [];
             foreach ($systems as $i => $system) {

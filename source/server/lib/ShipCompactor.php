@@ -396,10 +396,15 @@ class ShipCompactor
      * $alwaysHideFireOrders / $hideFireOrdersFromEnemies in weapon.php. Reading it through an
      * accessor HERE keeps it to the static blueprint, which is the only consumer.
      *
-     * Only survivesStructureDestruction so far, and only written when TRUE: the gamelobby's
-     * pre-battle damage preview mirrors ShipSystem::isDestroyed's structure cascade itself
-     * (battleDamage.cascadeStructure), and a shield projection must not go dark there when
-     * its section's structure is destroyed.
+     * All written only when TRUE:
+     *   - survivesStructureDestruction: the gamelobby's pre-battle damage preview mirrors
+     *     ShipSystem::isDestroyed's structure cascade itself (battleDamage.cascadeStructure),
+     *     and a shield projection must not go dark there when its section's structure is
+     *     destroyed.
+     *   - orbitalMounted: a Kirishiac Orbital's systems are isTargetable = false by rule, and
+     *     SystemInfoButtons.js isPseudoSystem needs this to keep them pre-damageable.
+     *   - tailGun: a fighter's tail gun (OFFICERS_PLAN.md Stage 21) - its to-hit penalty and the
+     *     Expert Tailgunner (weaponManager.getTailGunMod, officers.tailGunLine).
      *
      * Walks $decoded by the keys of $systems: json_encode preserves an array's keys, so the
      * two are the same shape all the way down, nested flight subsystems included.
@@ -414,6 +419,16 @@ class ShipCompactor
             if (method_exists($system, 'getSurvivesStructureDestruction')
                 && $system->getSurvivesStructureDestruction()) {
                 $decoded[$key]['survivesStructureDestruction'] = true;
+            }
+            if (method_exists($system, 'getOrbitalMounted') && $system->getOrbitalMounted()) {
+                $decoded[$key]['orbitalMounted'] = true;
+            }
+            if (method_exists($system, 'isTailGun') && $system->isTailGun()) {
+                $decoded[$key]['tailGun'] = true;
+            }
+            //the firing modes no fire control bonus may raise (the Antimatter Shredder's Shredder mode) - the lobby's previews skip them
+            if (method_exists($system, 'getFixedFireControlModes') && $system->getFixedFireControlModes()) {
+                $decoded[$key]['fixedFireControlModes'] = array_values($system->getFixedFireControlModes());
             }
 
             if (!empty($system->systems) && !empty($decoded[$key]['systems'])) {

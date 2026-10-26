@@ -126,6 +126,17 @@ export const SECTION_INK = {
         btnBg: '#291914',
         btnText: '#eab99e',
     },
+    /* Placed officers (OFFICERS_PLAN.md Stage 8) - the Buy dialog's Officers section colours (confirm.css, the
+       default --buy-sec-* block: bar #90b1ee, title --fv-text-bright), so an officer reads the same in both
+       places (user request 2026-10-16). */
+    officer: {
+        rail: '#5d79a8',
+        bar: '#90b1ee',
+        wash: 'rgba(144, 177, 238, 0.24)',
+        title: '#ffffff',
+        btnBg: '#141b29',
+        btnText: '#b8cdf2',
+    },
 };
 
 /* The fallback for a ticker drawn outside any section - shaped like a SECTION_INK entry so
@@ -373,6 +384,11 @@ export const SectionBody = styled.div`
 /* Bought equipment. Bronze, and the ✦ that marks the whole feature. */
 export const EnhSectionHeader = styled(SectionBar)`
     ${band(SECTION_INK.enh)}
+`;
+
+/* The officers placed in this system - the Enhancements bar, in the Buy dialog's Officers colours. */
+export const OfficerSectionHeader = styled(SectionBar)`
+    ${band(SECTION_INK.officer)}
 `;
 
 /* Structure. Teal - taken off the old 202° slate (#23506b) when the chassis became the lobby's

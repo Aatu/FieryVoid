@@ -106,17 +106,27 @@ class ShipInfo extends React.Component {
 		   and how he left action once he has. Own team only, through officers.listFor (D4). Gold, and dimmed
 		   once he is out, exactly as SystemInfo's Officers block (its styled parts are shared). */
 		const officerTurn = window.officers ? officers.currentTurn() : 0;
-		const officerLines = (ship.flight && window.officers)
-			? officers.listFor(ship).map(entry => {
+		const officerLines = [];
+		/* Expert Pilots (Stage 18) are one entry per craft: identical lines show once, "Expert Pilot (3)", and one lost with
+		   his craft gets a line of his own (its state differs). */
+		if (ship.flight && window.officers) {
+			const byKey = {};
+			officers.listFor(ship).forEach(entry => {
 				const officer = officers.get(entry.id);
 				const state = officers.stateText(entry);
-				return {
+				const line = {
 					name: officers.label(entry.id),
 					text: (officer ? officer.summary : '') + (state ? ' ' + state : ''),
-					out: !officers.serves(entry, officerTurn)
+					out: !officers.serves(entry, officerTurn),
+					count: 1
 				};
-			})
-			: [];
+				const key = line.name + '|' + line.text + '|' + line.out;
+				if (byKey[key]) { byKey[key].count++; return; }
+				byKey[key] = line;
+				officerLines.push(line);
+			});
+			officerLines.forEach(line => { if (line.count > 1) line.name += ' (' + line.count + ')'; });
+		}
 
 		var reactKey = 0; //needed for react so each line has unique key!
 

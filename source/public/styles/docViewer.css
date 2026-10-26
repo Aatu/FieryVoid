@@ -1070,6 +1070,24 @@ html.fvd-lock body {
   font-size: 14px;
 }
 
+/* A card titled with an h3 (so it is listed as a sub-heading) still looks like a card title. */
+.fvd-content .fvd-card h3 {
+  display: block;
+  margin: 0 0 8px;
+  padding: 0;
+  font-family: inherit;
+  font-size: 14px;
+  letter-spacing: normal;
+  line-height: 1.4;
+  text-transform: none;
+  color: var(--fv-text-bright);
+  border-bottom: 0;
+}
+
+.fvd-content .fvd-card h3::before {
+  content: none;
+}
+
 .fvd-card > p {
   font-size: 13px;
 }

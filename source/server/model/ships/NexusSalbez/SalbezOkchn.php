@@ -55,6 +55,7 @@ class SalbezOkchn extends FighterFlight{
 			$fighter->addFrontSystem($plasma);
 
 			$aft = new LightParticleBeam(150, 210, 2,2);
+			$aft->setTailGun(); //tail gun (Weapon::getTailGunMod)
 			$aft->displayName = "Light Particle Gun";
 			$fighter->addAftSystem($aft);
         

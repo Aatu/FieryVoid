@@ -3077,6 +3077,7 @@ public function calculateHitBase($gamedata, $fireOrder)
 		        if ($enhID == 'MARK_FERV') $rollMod += $enhCount; //Markab Fervor causes defenders to fight harder.		        	
 			}
 		}
+		$rollMod += Officers::boardingShift($target); //An Expert Security Officer moves every boarding roll 2 in the defender's favour.
 
         return $rollMod;
         		
@@ -4285,7 +4286,7 @@ class TrekPhaserKellyType7 extends TrekPhaserBase{
 
 //New version of Photon Torp so it can be adjusteted in KellyTrek without affecting existing Trek units
 class TrekPhotonTorpKelly extends TrekPhotonTorp{
-        public $name = "TrekPhotonTorp";
+        public $name = "TrekPhotonTorpKelly";
         public $displayName = "Photon Torpedo";
 		public $iconPath = "TrekPhotonicTorpedo.png";
         public $range = 40;
@@ -4322,6 +4323,231 @@ class TrekPhotonTorpKelly extends TrekPhotonTorp{
 		
 }//endof TrekPhotonTorpKelly
 
+class TrekPhotonTorpMultiKelly extends Torpedo{
+    
+        public $name = "TrekPhotonTorpMultiKelly";
+        public $displayName = "Photon Launcher";
+		public $iconPath = "TrekPhotonicTorpedo.png";
+        public $range = 20;
+		public $distanceRange = 40;
+        public $loadingtime = 1;
+        public $shots = 3;
+        public $defaultShots = 1;
+        public $normalload = 3;
+        public $rangePenalty = 0;
+        public $fireControl = array(1, 1, 2); // fighters, <mediums, <capitals;
+	    
+		public $priority = 5; //Standard Medium weapon; maybe even heavy...
+	    
+		public $firingMode = 'Torpedo'; //firing mode - just a name essentially        
+        public $animationColor = array(51, 204, 255);       
+        //public $trailColor = array(255, 188, 0);
+        public $animation = "torpedo";
 
+		//Saturation Mode (ships only): torpedoes fired at the same ship are merged into ONE fire order
+		//by beforeFiringOrderResolution, then resolved as a single Pulse-type volley - one to-hit roll,
+		//one interception, and every $grouping points the shot beats its needed number lands another
+		//torpedo (base 1 + floor(margin/3)), capped by the number fired at that target. Fighter targets
+		//are NOT saturated: they keep one torpedo per fighter (see fire() below).
+        public $damageType = 'Pulse';
+        public $grouping = 20; //+1 per 20%
+        public $maxpulses = 3; //upper bound (matches max held torpedoes); real per-order cap set in fire()
+        public $maxpulsesArray = array();
+
+		public $canSplitShots = true;
+    	public $calledShotMod = 0; //Cannot make called shots against ships anyway, but shouldn't get modifier when we specificy specific fighters
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+
+		/*Saturation Mode resolution. Ships: a merged fire order carries $fireOrder->shots torpedoes at
+		one target; cap the Pulse volley at that count and let Weapon::fire() do one roll + one
+		interception for the whole volley. Fighters: torpedoes are aimed one-per-fighter (own calledid),
+		so resolve those in plain Standard mode - each torpedo is its own hit on its own fighter, no
+		saturation bonus.*/
+		public function fire($gamedata, $fireOrder){
+			$target = $gamedata->getShipById($fireOrder->targetid);
+			if ($target instanceof FighterFlight){ //individual targeting - one torpedo, one fighter
+				$savedType = $this->damageType;
+				$this->damageType = 'Standard'; //bypass the Pulse volley path in Weapon::fire()
+				parent::fire($gamedata, $fireOrder);
+				$this->damageType = $savedType;
+				return;
+			}
+			$this->maxpulses = max(1, (int)$fireOrder->shots); //this order's torpedo count is the cap
+			parent::fire($gamedata, $fireOrder);
+		}
+
+		//base number of torpedoes that land on a hit: the shot hit at all, so at least one
+		protected function getPulses($turn){
+			return 1;
+		}
+
+		//every $grouping (=3) points the shot beats its needed number lands an extra torpedo
+		protected function getExtraPulses($needed, $rolled){
+			return floor(($needed - $rolled) / $this->grouping);
+		}
+
+		public function rollPulses($turn, $needed, $rolled){
+			$pulses = $this->getPulses($turn);
+			$pulses += $this->getExtraPulses($needed, $rolled);
+			$pulses = min($pulses, $this->maxpulses); //no more than torpedoes fired at this target
+			$pulses = max($pulses, 1); //we only get here on a hit, so at least one lands
+			return $pulses;
+		}
+
+      
+        public function firedOnTurn($turn){  
+        	$totalShots = 0; //Counter for shots this turns          
+            foreach ($this->fireOrders as $fire){
+                if ($fire->weaponid == $this->id && $fire->turn == $turn){
+                    $totalShots += $fire->shots;
+                }
+            }
+            return $totalShots;
+        }
+        
+        public function calculateLoading(TacGamedata $gamedata)
+        {
+            $loading = new WeaponLoading($this->turnsloaded, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
+            $shotsfired = $this->firedOnTurn(TacGamedata::$currentTurn);
+            if (TacGamedata::$currentPhase == 2)
+            {
+                if  
+                ( $this->isOfflineOnTurn(TacGamedata::$currentTurn) )
+                {
+                    $loading = new WeaponLoading(0, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
+                }
+                else if ($shotsfired)
+                {
+                    $newloading = $this->turnsloaded-$shotsfired;
+                    if ($newloading < 0)
+                        $newloading = 0;
+
+                $loading = new WeaponLoading($newloading, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
+                }
+            }
+            else if (TacGamedata::$currentPhase == 1)
+            {
+                $newloading = $this->turnsloaded+1;
+                if ($newloading > $this->getNormalLoad())
+                    $newloading = $this->getNormalLoad();
+
+                $loading = new WeaponLoading($newloading, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
+            }
+
+            return $loading;
+        }//endof calculateLoading()
+
+
+		public function beforeFiringOrderResolution($gamedata) {
+		    $turn = $gamedata->turn; // Assume $turn is accessible from $gamedata
+		    $shipOrders = [];
+		    $fighterOrders = [];
+
+		    // Group fire orders by targetid and type of target
+		    foreach ($this->fireOrders as $fire) {
+		        if ($fire->weaponid == $this->id && $fire->turn == $turn) {
+		            $targetId = $fire->targetid;
+		            $targetShip = $gamedata->getShipById($targetId);
+		            
+		            if ($targetShip instanceof FighterFlight) {                    
+		                if (!isset($fighterOrders[$targetId])) {
+		                    $fighterOrders[$targetId] = [$fire]; // Initialize as an array for multiple orders
+		                } else {
+		                    $fighterOrders[$targetId][] = $fire; // Add to the list of orders for this target
+		                }
+		            } else {            
+		                if (!isset($shipOrders[$targetId])) {
+		                    $shipOrders[$targetId] = $fire;
+		                } else {
+		                    $shipOrders[$targetId]->shots += $fire->shots;
+		                }
+		            }
+		        }
+		    }
+
+		    // Process fighterOrders to ensure unique calledid for each fire order
+		    foreach ($fighterOrders as $targetId => $fires) {
+		        $fighterFlight = $gamedata->getShipById($targetId);
+
+		        // Get a list of undestroyed fighters in the flight
+		        $fighterList = [];
+		        foreach ($fighterFlight->systems as $fighter) {
+		            if (!$fighter->isDestroyed()) {
+		                $fighterList[] = $fighter; // Add to the list of valid fighters
+		            }
+		            array_unshift($fighterList, $fighter); // array_unshift adds element at the beginning of array rather than at the end		    
+		        }
+
+		        // Assign unique calledid to fire orders
+		        $fighterIndex = 0; // Keep track of the current fighter being targeted
+		        foreach ($fires as $fire) {
+		            if (!isset($fighterList[$fighterIndex])) {
+		                break; // If there are no more fighters to assign, stop
+		            }
+		            $fire->calledid = $fighterList[$fighterIndex]->id; // Assign a unique fighter
+		            $fighterIndex++; // Move to the next fighter
+		        }
+		    }
+
+		    // Combine shipOrders and fighterOrders into this->fireOrders
+		    $combinedOrders = [];
+
+		    // Merge shipOrders
+		    if (!empty($shipOrders)) {
+		        $combinedOrders = array_merge($combinedOrders, array_values($shipOrders));
+		    }
+
+		    // Merge fighterOrders
+		    if (!empty($fighterOrders)) {
+		        foreach ($fighterOrders as $orders) {
+		            $combinedOrders = array_merge($combinedOrders, $orders); // Flatten nested arrays
+		        }
+		    }
+
+		    $this->fireOrders = $combinedOrders;
+		    
+		}//endof beforeFiringOrderResolution()
+		
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+
+			$this->data["Special"] .= "Can fire at multiple targets, providing it has enough shots available.";
+			$this->data["Special"] .= "<br>Multiple torpedoes from the same launcher against the same ship are combined into a single volley with ONE to-hit roll (Saturation Mode): the shot lands one torpedo, plus one more for every 3 points it beats the needed number by (up to the number fired). Interception is rolled once for the whole volley.";
+			$this->data["Special"] .= "<br>Against enemy fighters flights, torpedoes always attack a different fighter. If there are more torpedoes than fighters, excess munitions are lost.";
+		}
+	
+	        
+        public function onConstructed($ship, $turn, $phase){
+            parent::onConstructed($ship, $turn, $phase);
+            $this->shots = $this->turnsloaded;
+        }        
+        
+        public function getDamage($fireOrder){        return 15;   }
+        public function setMinDamage(){     $this->minDamage = 15;   }
+        public function setMaxDamage(){     $this->maxDamage = 15;     }
+    
+		public function stripForJson()
+		{
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->maxVariableShots = $this->turnsloaded;
+			return $strippedSystem;
+		}     
+    
+    
+    }
 
 ?>

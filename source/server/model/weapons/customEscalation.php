@@ -2115,8 +2115,7 @@ class TractingRodHandler {
 			return;
 		}
 		if ($system->powerReq > 0 || $system->canOffLine){
-			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
-			return;
+			if (!WeaponEM::resistsShutdown($ship, $fireOrder)) $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata); //EM hardening: a d6 of 1 resists the shutdown (tabletop)
 		}
 		$system->critRollMod += 4;
 	}
@@ -2171,7 +2170,7 @@ class TractingRodHandler {
 		if (WeaponEM::isTargetEMResistant($ship,$system)) return;
 		if ($ship instanceof FighterFlight) 2;
 		if ($system->powerReq > 0 || $system->canOffLine){
-			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+			if (!WeaponEM::resistsShutdown($ship, $fireOrder)) $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata); //EM hardening: a d6 of 1 resists the shutdown (tabletop)
 		}
 		$system->critRollMod += 3;
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);	        

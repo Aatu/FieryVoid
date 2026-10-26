@@ -950,19 +950,18 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 					<input type="search" id="factionSearch" class="lb-input" placeholder="Filter factions…"
 					       aria-label="Filter factions" autocomplete="off" enterkeyhint="go">
 				</div>
-				<!-- The tier and Custom filters are CHIPS, any number on at once (user): each is a label round
-				     its old, visually hidden checkbox, which is still the state every handler reads and
-				     the thing the keyboard toggles. All / None set every tier chip at once
-				     (gamedata.setAllTierFilters) and read pressed while that is the state. -->
+				<!-- The tier and Custom filters are CHIPS, each a label round its visually hidden input, which
+				     is still the state every handler reads and the thing the keyboard moves. The tier chips
+				     are ONE choice, as the Store's category chips are (user, 2026-10-15): All shows every
+				     tier, any other only its own - so they are radios. Custom is its own checkbox, on or
+				     off whichever tier is chosen. -->
 				<div class="lb-picker-filters">
-					<button type="button" class="lb-chip lb-tier-all" id="lbTierAll" aria-pressed="true">All</button>
-					<button type="button" class="lb-chip lb-tier-none" id="lbTierNone" aria-pressed="false">None</button>
-					<span class="lb-bar-sep" aria-hidden="true">|</span>
-					<label class="lb-chip lb-chip--check"><input type="checkbox" class="tier-filter" data-tier="Tier 1" checked>Tier 1</label>
-					<label class="lb-chip lb-chip--check"><input type="checkbox" class="tier-filter" data-tier="Tier 2" checked>Tier 2</label>
-					<label class="lb-chip lb-chip--check"><input type="checkbox" class="tier-filter" data-tier="Tier 3" checked>Tier 3</label>
-					<label class="lb-chip lb-chip--check"><input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked>Ancients</label>
-					<label class="lb-chip lb-chip--check"><input type="checkbox" class="tier-filter" data-tier="Tier Other" checked>Other</label>
+					<label class="lb-chip lb-chip--check lb-tier-all"><input type="radio" name="tierFilter" class="tier-filter" data-tier="" checked>All</label>
+					<label class="lb-chip lb-chip--check"><input type="radio" name="tierFilter" class="tier-filter" data-tier="Tier 1">Tier 1</label>
+					<label class="lb-chip lb-chip--check"><input type="radio" name="tierFilter" class="tier-filter" data-tier="Tier 2">Tier 2</label>
+					<label class="lb-chip lb-chip--check"><input type="radio" name="tierFilter" class="tier-filter" data-tier="Tier 3">Tier 3</label>
+					<label class="lb-chip lb-chip--check"><input type="radio" name="tierFilter" class="tier-filter" data-tier="Tier Ancients">Ancient</label>
+					<label class="lb-chip lb-chip--check"><input type="radio" name="tierFilter" class="tier-filter" data-tier="Tier Other">Other</label>
 					<span class="lb-bar-sep" aria-hidden="true">|</span>
 					<label class="lb-chip lb-chip--check lb-chip--custom"><input type="checkbox" id="toggleCustom" class="yellow-tick">Custom</label>
 					<!-- ⚠️ DIRECTLY AFTER ITS OWN CHECKBOX, and it has to stay there. This dropdown is shown

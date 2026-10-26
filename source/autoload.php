@@ -3547,6 +3547,7 @@ spl_autoload_register(
                 'trekphotonictorp' => '/server/model/weapons/customTrek.php',
                 'trekphotontorp' => '/server/model/weapons/customTrek.php',
                 'trekphotontorpkelly' => '/server/model/weapons/customTrek.php',
+                'trekphotontorpmultikelly' => '/server/model/weapons/customTrek.php',
                 'trekplasmaburst' => '/server/model/weapons/customTrek.php',
                 'trekshieldftr' => '/server/model/weapons/customTrek.php',
                 'trekshieldprojection' => '/server/model/weapons/customTrek.php',

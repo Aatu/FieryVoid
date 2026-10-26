@@ -74,7 +74,9 @@ const FlightFighterArea = styled.div`
     max-width: ${FLIGHT_MAX_WIDTH}px;
 `;
 
-const ShipWindowContainer = styled.div`
+/* data-ship-window: the lobby finds the window an icon sits in with closest() to open its system menu beside
+   it, not over it (gamelobby.js shipWindowBox). */
+const ShipWindowContainer = styled.div.attrs({ 'data-ship-window': '' })`
     display: flex;
     flex-direction: column;
     position: absolute;
@@ -460,10 +462,70 @@ const SectionGrid = styled.div`
     grid-template-areas: ${props => props.$areas};
     justify-content: center;
     gap: 8px;
+    /*staggered big base: the two rows meet exactly on Primary's centre line (StaggerCell)*/
+    ${props => props.$staggered ? 'row-gap: 0;' : ''}
     padding: 5px 5px 5px 5px;
     box-sizing: border-box;
     width: 100%;
     overflow: hidden; /*clips the watermark now that the window itself is overflow: visible*/
+`;
+
+/*>>> STAGGERED BIG-BASE LAYOUT <<< (user report 2026-10-15: the Kirishiac Citadel's window ran
+  off the bottom of the screen). The ordinary grid stacks a big base as FOUR full bands -
+  Forward, the fore quarters, the aft quarters, Aft - because grid rows are shared by all three
+  columns, so a quarter section can never start before Forward ends. With 26 systems a section
+  that is 7 icon rows per band, ~28 rows in all, while the cells beside Forward and Aft sit empty.
+
+  A staggered base splits the window into an UPPER and a LOWER row that meet on one line, and
+  Primary straddles that line (centred on it, the same as on every other six-sided layout):
+      upper:  ctrl + Port Fwd      Forward + top half of Primary      ew + Stbd Fwd
+      lower:  Port Aft             bottom half of Primary + Aft       Stbd Aft + enh
+  Each cell packs towards the line, so the quarter sections slide up alongside Forward and down
+  alongside Aft - the hexagon the base actually is - with the gap between the fore and aft
+  quarters level with Primary's centre. The window is no wider than before and ~40% shorter.
+
+  Why the halves are sized by MEASUREMENT (alignStaggeredPrimary): a section can only straddle a
+  grid line in pure CSS by spanning two equal (1fr) rows, which mirrors whatever the upper half
+  needs into the lower one - the chrome stacked above the fore quarters then reappears as dead
+  space under Aft (~50px in game, ~130px under the lobby datasheet). Instead the upper centre cell
+  lets Primary hang half its height into the lower row (negative margin) and the lower centre cell
+  starts Aft that far down, both from --fv-prim-half, written onto the grid after each render.
+
+  Only bases past STAGGER_QUARTER_ROWS take this path (isStaggeredBase); every other window keeps
+  the shared-row grid untouched. A cell is a flex COLUMN, so its sections must not carry
+  valign/justify (align-self would act horizontally there): hugging the centre column is the
+  cell's align-items instead. The chrome sits in a StaggerChrome slot for the same reason.*/
+const StaggerCell = styled.div`
+    grid-area: ${props => props.$area};
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /*SectionGrid's own gap, so a cell keeps the grid's spacing*/
+    align-items: ${props => props.$side === 'left' ? 'flex-end' : props.$side === 'right' ? 'flex-start' : 'center'};
+    justify-content: ${props => props.$upper ? 'flex-end' : 'flex-start'};
+    ${props => {
+        //side cells: half of the usual 8px gap either side of the line, so the fore/aft
+        //quarters are split by a normal gap centred on Primary
+        if (props.$side) return `padding-${props.$upper ? 'bottom' : 'top'}: 4px;`;
+        //lower centre: Aft starts below the half of Primary hanging into this row
+        if (!props.$upper) return 'padding-top: calc(var(--fv-prim-half, 0px) + 8px);';
+        return '';
+    }}
+`;
+
+//Primary's slot in the upper centre cell: hangs half its own height across the line
+const StaggerPrimary = styled.div`
+    margin-bottom: calc(-1 * var(--fv-prim-half, 0px));
+`;
+
+/*the chrome panels' own CSS places them on the grid (grid-area / justify-self: center /
+  align-self: start). Inside a flex column align-self would act horizontally, so each sits in a
+  full-width row slot that centres it, where align-self: start is vertical again. $top pins the
+  slot to the top of its cell, the sections packing down to the line beneath it.*/
+const StaggerChrome = styled.div`
+    display: flex;
+    justify-content: center;
+    align-self: stretch;
+    ${props => props.$top ? 'margin-bottom: auto;' : ''}
 `;
 
 /*Lobby flight body: FighterList on the left, always-visible ShipNotesPanel rail to
@@ -508,7 +570,9 @@ const WatermarkLayer = styled.div`
     aspect-ratio: 1 / 1;
     max-width: 80%;
     max-height: 380px;
-    transform: translate(-50%, calc(-50% + ${props => props.$offsetY || 0}px)) rotate(-90deg);
+    /*$offsetVar (staggered big base): a measured nudge instead of a fixed one - the art centres
+      on Primary, which sits off the grid's midline when the two halves differ in height*/
+    transform: translate(-50%, calc(-50% + ${props => props.$offsetVar ? `var(${props.$offsetVar}, 0px)` : `${props.$offsetY || 0}px`})) rotate(-90deg);
     background-image: ${props => `url(${props.$img})`};
     background-size: contain;
     background-repeat: no-repeat;
@@ -612,6 +676,18 @@ const GRID_JUSTIFY = { left: 'end', lfwd: 'end', laft: 'end', right: 'start', rf
 const GRID_LOCATIONS = [1, 3, 31, 32, 0, 4, 41, 42, 2];
 const COMPACT_LOCATIONS = [1, 3, 31, 0, 4, 41, 32, 2, 42];
 const QUARTER_LOCATIONS = [31, 32, 41, 42];
+//staggered big bases (StaggerCell): the section areas each cell stacks, top to bottom.
+//A mid Port/Starboard (3/4) sharing a hull with quarters goes last in the upper cell, so
+//fore→amidships→aft still reads down the column as buildTemplateAreas orders it.
+const STAGGER_AREAS = '"lup  cup  rup" "llo  clo  rlo"';
+const STAGGER_CELLS = [
+    { area: 'lup', side: 'left', upper: true, stack: ['lfwd', 'left'] },
+    { area: 'cup', upper: true, stack: ['fwd', 'prim'] },
+    { area: 'rup', side: 'right', upper: true, stack: ['rfwd', 'right'] },
+    { area: 'llo', side: 'left', stack: ['laft'] },
+    { area: 'clo', stack: ['aft'] },
+    { area: 'rlo', side: 'right', stack: ['raft'] }
+];
 //mid + quarter Port/Starboard: the locations that make buildTemplateAreas emit a
 //middle row, which is what blocks the ctrl/ew chrome spans (see LOBBY_WATERMARK_OFFSET_Y)
 const SIDE_LOCATIONS = [3, 4, 31, 41, 32, 42];
@@ -626,6 +702,10 @@ class ShipWindow extends React.Component {
         //top-left control block; measuring the button rather than the whole block keeps the
         //lobby popup attached to it, above the Ship Stats panel)
         this.hitChartBtnRef = React.createRef();
+        //staggered big bases only: the grid the measured offsets are written onto, and the
+        //Primary slot they are measured from (alignStaggeredPrimary)
+        this.sectionGridRef = React.createRef();
+        this.staggerPrimaryRef = React.createRef();
         //openPanel: clicked open (sticky until click-outside); hoverPanel: desktop
         //hover peek on a button/popup, hides shortly after mouse-out (Notes, and Ship
         //Stats since 2026-07-26); showArt: Ship Art toggle - hides the sections and
@@ -1430,6 +1510,9 @@ class ShipWindow extends React.Component {
         //close the Hit Chart / Notes popup on any press outside it (2026-07-16 feedback)
         document.addEventListener('pointerdown', this.onDocumentPointerDown);
 
+        //before the fit: the stagger offsets change the window's natural height
+        this.alignStaggeredPrimary();
+
         //touch screens: scale the window to the screen width (and keep it right through
         //rotation / browser-chrome resizes). This is also where the size the player set with
         //the resize grip, in an earlier window or an earlier session, is applied.
@@ -1442,7 +1525,32 @@ class ShipWindow extends React.Component {
     //being destroyed, the lobby re-applying enhancements), so the fit is re-checked after
     //every render; applyScreenFit only writes when the rounded scale actually moves.
     componentDidUpdate() {
+        this.alignStaggeredPrimary();
         this.applyScreenFit();
+    }
+
+    /*Staggered big bases (StaggerCell): Primary straddles the line between the upper and lower
+      grid rows, which CSS cannot size without knowing Primary's height - so it is measured here
+      and written onto the grid as two custom properties, straight to the DOM like the screen fit
+      (no state, no extra render). Runs in did-mount / did-update, i.e. before the browser paints,
+      so the unaligned first layout is never seen.
+        --fv-prim-half  half of Primary's height: how far it hangs into the lower row, and so how
+                        far down the lower row's Aft starts.
+        --fv-art-dy     Primary's centre relative to the grid's midline, read back by the
+                        watermark so the art stays centred on Primary (the two rows differ in
+                        height whenever the chrome above the fore quarters is the tall stack).
+      offsetHeight/offsetTop are layout values, untouched by the screen-fit transform. Primary's
+      height never depends on these properties, so one pass settles; offsetTop is read AFTER the
+      write, which re-lays the grid out at the new size. No-op for every other window - only the
+      stagger branch mounts the Primary ref.*/
+    alignStaggeredPrimary() {
+        const grid = this.sectionGridRef.current;
+        const primary = this.staggerPrimaryRef.current;
+        if (!grid || !primary) return;
+
+        const half = primary.offsetHeight / 2;
+        grid.style.setProperty('--fv-prim-half', half + 'px');
+        grid.style.setProperty('--fv-art-dy', (primary.offsetTop + half - grid.clientHeight / 2) + 'px');
     }
 
     componentWillUnmount() {
@@ -1911,64 +2019,104 @@ class ShipWindow extends React.Component {
         //Officers share the gold box ("Officers (n)", OFFICERS_PLAN.md §4.7) but never enter
         //enhancementTooltip (D4), so a hull carrying only an officer needs the panel on their account
         const withEnhPanel = Boolean(ship.enhancementTooltip) || officerSummaryLine(ship) !== null;
-        const areas = buildTemplateAreas(systemsByLocation, withEnhPanel);
         const isBigBase = ship.base && !ship.smallBase;
+        //a base too tall for the shared-row grid splits around Primary instead (StaggerCell)
+        const staggered = isStaggeredBase(ship, systemsByLocation);
+        const areas = staggered ? STAGGER_AREAS : buildTemplateAreas(systemsByLocation, withEnhPanel);
+
+        const sections = GRID_LOCATIONS.map(location => {
+            if (systemsByLocation[location].length === 0) return null;
+
+            const displayLocation = rolled && MIRRORED_LOCATION[location] !== undefined ? MIRRORED_LOCATION[location] : location;
+            const area = GRID_AREAS[displayLocation];
+            //big-base quarter sections spread 4-wide so their many systems don't
+            //stack into a metre-tall window
+            const wide = location === 0 || location === 1 || location === 2
+                || (isBigBase && QUARTER_LOCATIONS.includes(location));
+            //quarter sections (31/32/41/42) size to their content, exactly like
+            //Port/Starboard (3/4). They previously carried an 84px min-height floor
+            //to give sparse six-sided hulls "presence", but a one-row section is only
+            //~57px, so that floor inflated every single-row quarter by a phantom
+            //second row of empty space. align-self start/end (GRID_VALIGN) still pins
+            //Fwd quarters to the top and Aft quarters to the bottom of the
+            //Primary-stretched column, so the spare space now falls in the
+            //transparent gap over the watermark instead of inside the panel.
+            const minHeight = undefined;
+
+            //staggered: `area` still goes in (inert grid-area in a flex column, but it keeps
+            //the section's grid margin of 0); valign/justify do not - see StaggerCell
+            return {
+                area, element: (
+                    <ShipSection
+                        key={`section-${ship.id}-${location}`}
+                        location={location}
+                        displayLocation={displayLocation}
+                        area={area}
+                        valign={staggered ? undefined : GRID_VALIGN[area]}
+                        justify={staggered ? undefined : GRID_JUSTIFY[area]}
+                        wide={wide}
+                        minHeight={minHeight}
+                        nameOverride={nameOverrides[location]}
+                        hidden={this.state.showArt}
+                        ship={ship}
+                        systems={systemsByLocation[location]}
+                    />
+                )
+            };
+        }).filter(Boolean);
 
         //lobby: manoeuvre stats under the ctrl buttons, and the always-visible
         //datasheet panel in the `ew` grid area - the exact place the EW panel has in
         //game.php (feedback 2026-07-17; the EW panel itself is meaningless pre-game)
+        const controls = this.renderControls(withHitChart, withNotes, false, lobby && !ship.mine);
+        const ewPanel = lobby ? <ShipNotesPanel ship={ship} grid hideEnhancements={withEnhPanel} /> : <ShipWindowEw ship={ship} />;
+        const enhPanel = withEnhPanel && <EnhancementsPanel ship={ship} />;
+
+        //staggered big base: one StaggerCell per grid area, the chrome slotted into its corner
+        //cells (ctrl / ew on top of the upper side cells, enh under Stbd Aft) and Primary in the
+        //slot alignStaggeredPrimary measures
+        const renderStaggerCell = (cell) => {
+            const stacked = cell.stack
+                .map(area => sections.find(section => section.area === area))
+                .filter(Boolean)
+                .map(section => section.area === 'prim'
+                    ? <StaggerPrimary key="prim" ref={this.staggerPrimaryRef}>{section.element}</StaggerPrimary>
+                    : section.element);
+            const top = cell.area === 'lup' ? controls : cell.area === 'rup' ? ewPanel : null;
+            const bottom = cell.area === 'rlo' ? enhPanel : null;
+
+            return (
+                <StaggerCell key={cell.area} $area={cell.area} $side={cell.side} $upper={cell.upper}>
+                    {top && <StaggerChrome $top>{top}</StaggerChrome>}
+                    {stacked}
+                    {bottom && <StaggerChrome>{bottom}</StaggerChrome>}
+                </StaggerCell>
+            );
+        };
+
         const sectionGrid = (
-            <SectionGrid $areas={areas}>
+            <SectionGrid ref={this.sectionGridRef} $areas={areas} $staggered={staggered}>
                 <ShipHitArea className="shipwindow-grab-slop" onClick={this.onShipClick.bind(this)} />
                 {/*Ship Art (item 3): the SAME watermark turns full colour in place while the
                    sections hide - keeps the window/image at the exact same size (no resize).
                    $offsetY: the lobby's taller chrome pushes the sections below the grid
                    midline, so the art follows them down (2026-07-23) - but only on hulls
-                   whose side sections block the chrome spans (2026-07-24).*/}
+                   whose side sections block the chrome spans (2026-07-24). A staggered base
+                   measures its nudge instead ($offsetVar, alignStaggeredPrimary).*/}
                 <WatermarkLayer
                     $img={window.AssetManager.getSmartImagePath(ship.imagePath)}
                     $art={this.state.showArt}
                     $offsetY={lobby && hasSideSections(systemsByLocation) ? LOBBY_WATERMARK_OFFSET_Y : 0}
+                    $offsetVar={staggered ? '--fv-art-dy' : undefined}
                 />
-                {this.renderControls(withHitChart, withNotes, false, lobby && !ship.mine)}
-                {lobby ? <ShipNotesPanel ship={ship} grid hideEnhancements={withEnhPanel} /> : <ShipWindowEw ship={ship} />}
-                {withEnhPanel && <EnhancementsPanel ship={ship} />}
-                {GRID_LOCATIONS.map(location => {
-                    if (systemsByLocation[location].length === 0) return null;
-
-                    const displayLocation = rolled && MIRRORED_LOCATION[location] !== undefined ? MIRRORED_LOCATION[location] : location;
-                    const area = GRID_AREAS[displayLocation];
-                    //big-base quarter sections spread 4-wide so their many systems don't
-                    //stack into a metre-tall window
-                    const wide = location === 0 || location === 1 || location === 2
-                        || (isBigBase && QUARTER_LOCATIONS.includes(location));
-                    //quarter sections (31/32/41/42) size to their content, exactly like
-                    //Port/Starboard (3/4). They previously carried an 84px min-height floor
-                    //to give sparse six-sided hulls "presence", but a one-row section is only
-                    //~57px, so that floor inflated every single-row quarter by a phantom
-                    //second row of empty space. align-self start/end (GRID_VALIGN) still pins
-                    //Fwd quarters to the top and Aft quarters to the bottom of the
-                    //Primary-stretched column, so the spare space now falls in the
-                    //transparent gap over the watermark instead of inside the panel.
-                    const minHeight = undefined;
-
-                    return (
-                        <ShipSection
-                            key={`section-${ship.id}-${location}`}
-                            location={location}
-                            displayLocation={displayLocation}
-                            area={area}
-                            valign={GRID_VALIGN[area]}
-                            justify={GRID_JUSTIFY[area]}
-                            wide={wide}
-                            minHeight={minHeight}
-                            nameOverride={nameOverrides[location]}
-                            hidden={this.state.showArt}
-                            ship={ship}
-                            systems={systemsByLocation[location]}
-                        />
-                    );
-                })}
+                {staggered
+                    ? STAGGER_CELLS.map(renderStaggerCell)
+                    : <>
+                        {controls}
+                        {ewPanel}
+                        {enhPanel}
+                        {sections.map(section => section.element)}
+                    </>}
             </SectionGrid>
         );
 
@@ -2526,6 +2674,21 @@ const buildTemplateAreas = (locations, withEnhArea) => {
 
     return rows.map(row => `"${row[0] || '.'}  ${row[1] || '.'}  ${row[2] || '.'}"`).join(' ');
 }
+
+/*>>> STAGGER THRESHOLD <<< a big base switches to the staggered layout (StaggerCell) once any
+  quarter section needs MORE than this many icon rows - 4 to a row, since big-base quarters are
+  drawn wide. At 4 the Kirishiac Citadel (26 systems a quarter = 7 rows) is the only base that
+  staggers; the next tallest, Hyach Utara Tor (14 = 4 rows), keeps the ordinary grid. Lower it
+  to stagger more bases.*/
+const STAGGER_QUARTER_ROWS = 4;
+
+//icon rows a wide (4-to-a-row) section draws. Structure is the section header, not an icon
+//(ShipSection's filterStructure) - matched by name, since lobby blueprints are jQuery.extend
+//clones that fail instanceof
+const wideIconRows = (systems) => Math.ceil(systems.filter(system => system.name !== 'structure').length / 4);
+
+const isStaggeredBase = (ship, locations) => Boolean(ship.base && !ship.smallBase)
+    && QUARTER_LOCATIONS.some(location => wideIconRows(locations[location]) > STAGGER_QUARTER_ROWS);
 
 
 export default ShipWindow;

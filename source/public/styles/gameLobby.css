@@ -1133,7 +1133,8 @@
   user-select: none;
 }
 
-.lb-chip--check > input[type="checkbox"] {
+.lb-chip--check > input[type="checkbox"],
+.lb-chip--check > input[type="radio"] {
   position: absolute;
   top: 0;
   left: 0;
@@ -1156,6 +1157,13 @@
   color: var(--fv-warn);
   background: rgba(225, 176, 0, 0.14);
   border-color: var(--fv-warn);
+}
+
+/* The Faction Picker's All tier chip, in cyan to stand apart from the tier chips beside it. */
+.lb-chip.lb-tier-all:has(> input:checked) {
+  color: #4ee0ea;
+  background: rgba(78, 224, 234, 0.16);
+  border-color: #4ee0ea;
 }
 
 .lb-chip--check:has(> input:focus-visible) {

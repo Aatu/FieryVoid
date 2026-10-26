@@ -449,10 +449,13 @@ class DBManager
         return $id;
     }
 
-	public function submitSavedEnhancement($listId, $shipid, $enhid, $numbertaken, $enhname){	
+	/* $enhvalue: what the row cost - kept for officer rows only (Manager::submitSavedFleet), NULL otherwise.
+	   ⚠️ Needs db/savedOfficerPrice.sql. */
+	public function submitSavedEnhancement($listId, $shipid, $enhid, $numbertaken, $enhname, $enhvalue = null){
 		try{
-			$sql = "INSERT INTO `tac_saved_enh` (listId, shipid, enhid, numbertaken,enhname) 
-				VALUES($listId, $shipid, '$enhid', $numbertaken, '".$this->DBEscape($enhname)."' )";
+			$value = ($enhvalue === null) ? 'NULL' : (float)$enhvalue;
+			$sql = "INSERT INTO `tac_saved_enh` (listId, shipid, enhid, numbertaken, enhname, enhvalue)
+				VALUES($listId, $shipid, '$enhid', $numbertaken, '".$this->DBEscape($enhname)."', $value )";
 			$this->insert($sql);
 		}catch(Exception $e) {
 			$this->endTransaction(true);
@@ -636,22 +639,23 @@ class DBManager
     public function getSavedEnhancementsForShip($shipid){
         $Enhancements = array();
         $stmt = $this->connection->prepare( //enhname will be used for info tooltip!
-                "SELECT 
-                    enhid, numbertaken, enhname
-                FROM 
-                    tac_saved_enh 
-                WHERE 
+                "SELECT
+                    enhid, numbertaken, enhname, enhvalue
+                FROM
+                    tac_saved_enh
+                WHERE
                     shipid = ?
                 "
             );
             if ($stmt)
             {
                 $stmt->bind_param('i', $shipid);
-                $stmt->bind_result($enhID, $numbertaken, $description);
+                $stmt->bind_result($enhID, $numbertaken, $description, $enhvalue);
                 $stmt->execute();
                 while ($stmt->fetch())
                 {
-                $Enhancements[] = array($enhID,$numbertaken,$description);
+                //enhvalue: an officer row's price, or null (db/savedOfficerPrice.sql) - a DECIMAL comes back as a string
+                $Enhancements[] = array($enhID,$numbertaken,$description, ($enhvalue === null) ? null : (float)$enhvalue);
                 }
                 $stmt->close();                
             }
@@ -3802,12 +3806,19 @@ class DBManager
 				   to its post: a Jump Engine takes any note it does not recognise for its pre-jump
 				   combat value, and HyachComputer never calls its parent. */
 				if (Officers::isKillNote($currNote)){
-					$ship->recordOfficerKill($currNote->notevalue, $currNote->turn);
+					$ship->recordOfficerKill($currNote->notevalue, $currNote->turn, $currNote->systemid);
 					continue;
 				}
+				//...and so are an officer's move to another post and a Gunner's spent ability (Stage 10)
+				if (Officers::takeNote($ship, $currNote)) continue;
 				//...and so is a fighter officer's move with his fighter to another flight row (Stage 4)
 				if (Officers::isMoveNote($currNote)){
-					$ship->recordOfficerMove($currNote->notevalue, $currNote->turn);
+					$ship->recordOfficerMove($currNote->notevalue, $currNote->turn, $currNote->systemid);
+					continue;
+				}
+				//...and the Expert Scavenger's spent save (Stage 5), which sits on his post, an Engine
+				if (Officers::isSaveNote($currNote)){
+					$ship->recordOfficerSave($currNote->notevalue, $currNote->turn);
 					continue;
 				}
 				$system = $ship->getSystemById($currNote->systemid);

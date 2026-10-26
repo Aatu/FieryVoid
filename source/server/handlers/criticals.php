@@ -138,6 +138,10 @@ class Criticals{
             }
         }
 
+        /* OFFICERS_PLAN.md Stage 5 - the Expert Engineer's and Expert Scavenger's repairs, AFTER Pass 2 so
+           every Self Repair has spent its points first. One static read for a game without officers. */
+        if (TacGamedata::$officersPresent) Officers::runRepairs($activeShips, $gamedata);
+
         /* Hangar Ops Stage 18: scan ALL ships (not just the activeShips
          * snapshot) for destroyed-this-game carriers whose docked craft
          * haven't yet had an escape roll. Rolls d20, spawns escapees as

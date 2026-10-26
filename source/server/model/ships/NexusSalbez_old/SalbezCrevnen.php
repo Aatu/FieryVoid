@@ -43,6 +43,7 @@ class SalbezCrevnen extends FighterFlight{
 	        $fighter->addFrontSystem($light);
 			
 			$aft = new PairedParticleGun(150, 210, 1, 1);
+			$aft->setTailGun(); //tail gun (Weapon::getTailGunMod)
 			$fighter->addAftSystem($aft);
 			
 //			$missile = new NexusDartFtr(2, 330, 30);

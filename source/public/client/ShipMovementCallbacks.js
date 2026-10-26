@@ -52,6 +52,14 @@ window.ShipMovementCallbacks = function () {
         this.updateCallback({ ship: this.ship });
     };
 
+    //An Expert Evader's Evade (Firing phase). The update redraws the movement UI without its icon.
+    ShipMovementCallbacks.prototype.evadeCallback = function (e) {
+        if (UI.shipMovement.checkUITimeout()) return false;
+        shipManager.movement.doEvade(this.ship);
+        jQuery("#movetooltip").remove(); //the icon hides under the pointer, which may never see a mouseleave
+        this.updateCallback({ ship: this.ship });
+    };
+
     ShipMovementCallbacks.prototype.halfphaseCallback = function (e) {
         e.stopPropagation();
         shipManager.movement.doHalfPhase(this.ship);
