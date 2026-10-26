@@ -95,6 +95,8 @@ window.confirm = {
             var _noTaken = _target.data("count");
             var _enhID = _target.data("enhID");
 
+            //OFFICERS_PLAN.md Stage 29: an Expert Ballistic Officer bought in this dialog - his slots (one a rack and mine launcher)
+            if (_enhID === 'OFF_BALL' && _noTaken > 0) capacity += parseInt(baseShip.ballisticSlots, 10) || 0;
             if (_enhID !== currentID && _noTaken > 0 && _enhID && (_enhID.startsWith("AMMO_") || _enhID.startsWith("MINE_") || _enhID.startsWith("SHELL_"))) {
                 var slots = 1;
                 if (_enhID == 'AMMO_K' || _enhID == 'AMMO_M') slots = 2;
@@ -208,6 +210,7 @@ window.confirm = {
         var target = $(".selectAmount.shpenh" + enhNo);
         while (typeof target.data("enhPrice") != 'undefined') { //as long as there are enhancements defined...
             totalCost += confirm.enhRowCost(target, flightSize);
+            confirm.paintOrdnanceNote(target);
             //go to next enhancement
             enhNo++;
             target = $(".selectAmount.shpenh" + enhNo);
@@ -227,27 +230,120 @@ window.confirm = {
        back through this too, so the dialog and the fleet can never charge differently. */
     enhRowCost: function enhRowCost(target, flightSize) {
         if (!window.officers) return (target.data("enhCost") || 0) * flightSize;
+        if (confirm.isFreeExpert(target)) return 0; //OFFICERS_PLAN.md Stage 25: the expert an Expert Political Officer brings
+        if (confirm.isFreeQuartermasterRow(target)) return 0; //Stage 30: an Expert Quartermaster's free Improved Reactor or Jump Accelerator
         return officers.flightCost(target.data("enhID"), target.data("count"), target.data("enhCost"),
-            flightSize, target.data("perCraftExtra"), target.data("standardFlight"));
+            flightSize, target.data("perCraftExtra"), target.data("standardFlight"))
+            - confirm.ballisticSaved(target) //OFFICERS_PLAN.md Stage 29: the rounds an Expert Ballistic Officer makes free
+            - confirm.quartermasterSaved(target); //Stage 30: and those an Expert Quartermaster makes free, past his
+    },
+
+    //the enhancement spinners of the dialog holding `target`, as officers.freeExpertId and officers.ballisticFreeRounds read rows
+    dialogRows: function dialogRows(target) {
+        var dialog = target.closest(".confirm");
+        if (!dialog.length) dialog = $(".confirm");
+        var rows = [];
+        $(".selectAmount", dialog).each(function () {
+            var amount = $(this);
+            if (typeof amount.data("enhPrice") === 'undefined') return;
+            rows.push({ id: amount.data("enhID"), count: amount.data("count") || 0, price: amount.data("enhPrice") || 0,
+                step: amount.data("enhPriceStep") || 0 });
+        });
+        return rows;
+    },
+
+    /* OFFICERS_PLAN.md Stage 25: is this spinner the expert an Expert Political Officer brings at no cost - with him bought in the same
+       dialog, the dearest of the Navigator, Helmsman, Engineer and Scanner bought there (officers.freeExpertId)? */
+    isFreeExpert: function isFreeExpert(target) {
+        if (!window.officers || officers.POLITICAL_EXPERTS.indexOf(target.data("enhID")) === -1) return false;
+        return officers.freeExpertId(confirm.dialogRows(target)) === target.data("enhID");
+    },
+
+    /* OFFICERS_PLAN.md Stage 29: the points this ammunition spinner is spared - its share of the rounds an Expert Ballistic Officer bought
+       in the same dialog makes free, the dearest as many as the hull's blueprint gives him picks (officers.ballisticFreeRounds). */
+    ballisticSaved: function ballisticSaved(target) {
+        var id = target.data("enhID");
+        if (!window.officers || !officers.isBallisticPick(id, target.data("enhPrice"))) return 0;
+        var ship = confirm.dialogBlueprint();
+        if (!ship || !ship.ballisticPicks) return 0;
+        return officers.ballisticFreeRounds(confirm.dialogRows(target), ship.ballisticPicks).saved[id] || 0;
+    },
+
+    /* OFFICERS_PLAN.md Stage 30: is this spinner the Improved Reactor or Jump Accelerator an Expert Quartermaster bought in the same dialog
+       makes free - his refit's dearest option, the refits the edited ship already carries counted too (officers.quartermasterRefit)? */
+    isFreeQuartermasterRow: function isFreeQuartermasterRow(target) {
+        if (!window.officers || officers.QM_SHIP_REFITS.indexOf(target.data("enhID")) === -1) return false;
+        var refit = officers.quartermasterRefit(confirm.dialogShip(), confirm.dialogRows(target));
+        return Boolean(refit) && refit.option === target.data("enhID");
+    },
+
+    //Stage 30: the points this ammunition spinner is spared by an Expert Quartermaster bought in the same dialog (officers.quartermasterFreeRounds)
+    quartermasterSaved: function quartermasterSaved(target) {
+        var id = target.data("enhID");
+        if (!window.officers || !officers.isQuartermasterPick(id, target.data("enhPrice"))) return 0;
+        var ship = confirm.dialogBlueprint();
+        if (!ship || !ship.quartermasterPicks) return 0;
+        return officers.quartermasterFreeRounds(confirm.dialogRows(target), ship.quartermasterPicks, ship.ballisticPicks).saved[id] || 0;
+    },
+
+    //Stage 30: the unit this dialog edits (its refits count toward an Expert Quartermaster's free one), else the blueprint it buys
+    dialogShip: function dialogShip() {
+        return $(".confirmok").data("ship") || confirm.dialogBlueprint();
+    },
+
+    /* OFFICERS_PLAN.md Stage 29: an ordnance row's "up to N, Xpts each" follows its limit (enhRowMax) - an Expert Ballistic Officer ticked in
+       this dialog enlarges it (a Solyrn's Heavy: up to 290), unticking him puts the hull's own back. Repainted with every total (getTotalCost). */
+    paintOrdnanceNote: function paintOrdnanceNote(target) {
+        var args = target.data("noteArgs");
+        if (!args || !/^(AMMO_|MINE_)/.test(String(target.data("enhID")))) return;
+        var row = target.closest(".buyRow");
+        if (!row || !row.length) return;
+        $(".buyRowNote", row).html(confirm.enhancementPriceNote(confirm.enhRowMax(target), args[0], args[1], args[2], args[3]));
+    },
+
+    //the static blueprint of the unit this dialog buys or edits - an edited unit is a copy of it, so it carries the same fields
+    dialogBlueprint: function dialogBlueprint() {
+        var ship = $(".confirmok").data("shipclass") ? gamedata.getShipByType($(".confirmok").data("shipclass")) : null;
+        return ship || $(".confirmok").data("ship") || null;
     },
 
     /* The most one enhancement row's spinner may take: its limit - and for Expert Pilots, an officer bought as a count
        (OFFICERS_PLAN.md Stage 18), never more than the flight size this dialog shows (officers.rowMax). The + button, the
        typed box and the wheel all ask here; clampEnhRowsToSize takes the extra off when the size goes down. */
-    enhRowMax: function enhRowMax(target) {
+    enhRowMax: function enhRowMax(target, taken) {
         var max = target.data("max");
+        //OFFICERS_PLAN.md Stage 29: an Expert Ballistic Officer bought in this dialog - an ordnance row's limit is his enlarged magazine's
+        if (window.officers && /^(AMMO_|MINE_)/.test(String(target.data("enhID")))
+            && confirm.dialogRows(target).some(function (row) { return row.id === 'OFF_BALL' && row.count > 0; })) {
+            max = officers.ballisticRowLimit(confirm.dialogBlueprint(), target.data("enhID"), max);
+        }
         var officer = window.officers ? officers.get(target.data("enhID")) : null;
         if (!officer || !officer.multi) return max;
-        return officers.rowMax(target.data("enhID"), max, parseInt($(".fighterAmount").html(), 10) || 1);
+        if (taken === undefined) taken = confirm.mixedTaken(target);
+        return officers.rowMax(target.data("enhID"), max, parseInt($(".fighterAmount").html(), 10) || 1, taken);
+    },
+
+    /* OFFICERS_PLAN.md Stage 27: the craft the officers this row's officer shares a flight with (`mixesWith` - Breaching Experts and
+       Expert Troop Leaders, one to a pod) already hold - his row may take only the rest. */
+    mixedTaken: function mixedTaken(target) {
+        var officer = officers.get(target.data("enhID"));
+        if (!officer || !officer.mixesWith) return 0;
+        var taken = 0;
+        $(".selectAmount", target.closest(".confirm")).each(function () {
+            if (this !== target[0] && officers.mixes(target.data("enhID"), $(this).data("enhID"))) taken += $(this).data("count") || 0;
+        });
+        return taken;
     },
 
     clampEnhRowsToSize: function clampEnhRowsToSize() {
         var enhNo = 0;
         var target = $(".selectAmount.shpenh" + enhNo);
+        var mixed = 0; //Stage 27: craft held by the rows above that share the flight one to a craft - the first rows keep theirs
         while (typeof target.data("enhPrice") != 'undefined') {
             var officer = window.officers ? officers.get(target.data("enhID")) : null;
             var count = target.data("count") || 0;
-            var max = confirm.enhRowMax(target);
+            var max = confirm.enhRowMax(target, (officer && officer.mixesWith) ? mixed : 0);
+            if (officer && officer.mixesWith) mixed += Math.min(count, max);
             if (officer && officer.multi && count > max) {
                 //an officer row: no price step and never an option, so its cost is price x count
                 target.data("count", max);
@@ -1257,6 +1353,8 @@ window.confirm = {
             var officerNote = window.officers ? officers.priceNote(ship, enhancement) : null;
             $(".buyRowNote", item).html(officerNote !== null ? officerNote
                 : confirm.enhancementPriceNote(enhLimit, enhPrice, enhPriceStep, enhStep, section === 'ammo'));
+            //OFFICERS_PLAN.md Stage 29: what the note was written from, so paintOrdnanceNote can write it again with another limit
+            if (officerNote === null) selectAmountItem.data('noteArgs', [enhPrice, enhPriceStep, enhStep, section === 'ammo']);
 
             $(".plusButton", item).data("enhNo", i).on("click", confirm.doOnPlusEnhancement);
             $(".minusButton", item).data("enhNo", i).on("click", confirm.doOnMinusEnhancement);
@@ -1272,15 +1370,21 @@ window.confirm = {
     /* D9: a flight carries ONE officer in total. Its Officers section says so up front, and a second one
        is refused (officerBlocked) with that line flashing - a passive notice, never a dialog
        (feedback_passive_notices). A ship may carry one of each, so it gets no line. The server does not
-       trust the dialog: Officers::pickPosts serves only the first officer row on a flight. */
+       trust the dialog: Officers::pickPosts serves only the first officer row on a flight.
+       Stage 27: a breaching pod flight may carry Breaching Experts and Expert Troop Leaders together, one to a pod - its line says so. */
     OFFICER_LIMIT_NOTE: 'A flight may carry only one officer type.',
+    OFFICER_MIX_NOTE: 'A flight may carry only one officer type - except Breaching Experts and Troop Leaders, one to a pod.',
 
     addOfficerLimitNote: function addOfficerLimitNote(e, ship) {
         if (!ship) return;
         var body = confirm.buySectionBody(e, 'officers');
         if (!$(".buyRow", body).length) return;
         if (ship.flight) {
-            $('<p class="buySectionNote buyOfficerNote"></p>').text(confirm.OFFICER_LIMIT_NOTE).prependTo(body);
+            var mixable = window.officers && $(".selectAmount", body).filter(function () {
+                var officer = officers.get($(this).data("enhID"));
+                return Boolean(officer && officer.mixesWith);
+            }).length > 1;
+            $('<p class="buySectionNote buyOfficerNote"></p>').text(mixable ? confirm.OFFICER_MIX_NOTE : confirm.OFFICER_LIMIT_NOTE).prependTo(body);
             return;
         }
         //a ship: one line per officer row refused because he is placed in a weapon already (officerBlock)
@@ -1291,7 +1395,8 @@ window.confirm = {
     },
 
     /* Would raising this row's count put a SECOND officer on a flight? True for a fighter officer's row
-       while another officer row of the same dialog is already bought. And on a ship, for an officer row
+       while another officer row of the same dialog is already bought - unless (Stage 27) the two share a
+       flight one to a craft (`mixesWith`), whose limit is enhRowMax's. And on a ship, for an officer row
        carrying an officerBlock: he is placed in a weapon already (Stage 8, the Matter Weapons Expert). */
     officerBlocked: function officerBlocked(target) {
         if (!window.officers) return false;
@@ -1300,7 +1405,8 @@ window.confirm = {
             if (!officers.isFighterOfficer(target.data("enhID"))) return false;
             var taken = $(".selectAmount", dialog).filter(function () {
                 var other = $(this);
-                return this !== target[0] && officers.isOfficerId(other.data("enhID")) && (other.data("count") || 0) > 0;
+                return this !== target[0] && officers.isOfficerId(other.data("enhID")) && (other.data("count") || 0) > 0
+                    && !officers.mixes(target.data("enhID"), other.data("enhID"));
             });
             if (!taken.length) return false;
         }
@@ -1541,8 +1647,12 @@ window.confirm = {
                     subtotal += cost;
                 }
                 $(this).toggleClass("is-taken", isTaken);
+                //the expert an Expert Political Officer brings reads "free" (OFFICERS_PLAN.md Stage 25), and so does an ammunition row whose
+                //rounds an Expert Ballistic Officer makes free (Stage 29), and an Expert Quartermaster's free reactor, accelerator or rounds (Stage 30)
+                var free = isTaken && cost === 0 && typeof amount.data("enhPrice") !== 'undefined' && (confirm.isFreeExpert(amount)
+                    || confirm.ballisticSaved(amount) > 0 || confirm.isFreeQuartermasterRow(amount) || confirm.quartermasterSaved(amount) > 0);
                 $(".buyRowCost", this)
-                    .text(isTaken ? confirm.formatBuyPts(cost) : '')
+                    .text(isTaken ? (free ? 'free' : confirm.formatBuyPts(cost)) : '')
                     .toggleClass("is-saving", isTaken && cost < 0);
             });
 
@@ -4316,6 +4426,16 @@ window.confirm = {
         var $allocRow = $('<div class="multi-value-row" style="font-weight:bold;padding-bottom:4px;"><span>Allocating: <span class="dock-alloc-count">' + initialTotal + '</span> / ' + flightCount + ' craft</span></div>');
         var $allocLabel = $allocRow.find('.dock-alloc-count');
         container.append($allocRow);
+
+        /* OFFICERS_PLAN.md Stage 32: a carrier beyond the flight's thrust is offered only for a Redline Pilot's landing (findEligibleCarriersForDock) -
+           the risk spelt out, as the server rolls it once firing resolves. */
+        carriers.forEach(function (c) {
+            var excess = parseInt(c.redlineExcess, 10) || 0;
+            if (excess <= 0) return;
+            $('<div class="multi-value-row" style="font-style:italic;padding-bottom:4px;color:#ffb070;"><span>Redline landing on ' + c.ship.name + ': ' + excess
+                + ' beyond the flight\'s thrust - a d20 of 1-' + Math.min(excess, 20) + ' crashes the Redline Pilot\'s fighter into it, and the rest break off.</span></div>')
+                .appendTo(container);
+        });
 
         // Warrior regen: spell out that the whole flight reserves its full roster of
         // hangar slots (so 4 living craft still take 6 boxes — space held for the 2

@@ -366,6 +366,11 @@ window.lobbyEnhancements = {
 						ship.hangASEnh = true;
 						break;
 
+					case 'OFF_TROOP'://Expert Troop Leader (OFFICERS_PLAN.md Stage 27): every Bulkhead +1 box - officers.troopBulkheads
+						if (!ship.troopEnh && window.officers) officers.troopBulkheads(ship, 1);
+						ship.troopEnh = true;
+						break;
+
 					case 'HANG_BP'://Default Shuttle slot to Breaching Pod slot
 						if (!ship.hangBPEnh) {
 							//ship.notes += "<br>Breaching Pod Conversion (" + enhCount + ")";
@@ -1644,6 +1649,10 @@ window.lobbyEnhancements = {
 
 				case 'HANG_BP'://Default Shuttle slot to Breaching Pod slot
 					ship.hangBPEnh = false;
+					break;
+
+				case 'OFF_TROOP'://Expert Troop Leader (Stage 27): systems were reset to the blueprint's boxes
+					ship.troopEnh = false;
 					break;
 
 				case 'HANG_MSW'://Default Shuttle unit to Minesweeping Shuttle

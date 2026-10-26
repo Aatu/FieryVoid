@@ -210,22 +210,19 @@ class HyachComputerList extends Component {
         const fcTypes = Object.keys(system.allocatedBFCP);
         const allocatedBFCP = system.allocatedBFCP;
 
-        const canIncrease = (type) => {
-            // Replicating HyachComputer.prototype.canIncrease logic locally for UI feedback
-            const totalUsed = system.BFCPtotal_used;
-            const totalMax = system.output;
-            const allocated = allocatedBFCP[type] || 0;
-            const perTypeMax = system.BFCPpertype;
-
-            if (totalUsed >= totalMax) return false;
-            if (allocated >= perTypeMax) return false;
-
-            return true;
+        /* The system's own rules (HyachComputer.prototype.canIncrease / canDecrease), asked per row - they carry the Firing phase's
+           (OFFICERS_PLAN.md Stage 26: a held point only added, a reshuffle anything), which a local copy would miss. The row asked about
+           becomes the current class only for the question. */
+        const ask = (type, rule) => {
+            const shown = system.currClass;
+            system.setCurrFCType(type);
+            const answer = Boolean(system[rule]());
+            system.currClass = shown;
+            return answer;
         };
-
-        const canDecrease = (type) => {
-            return (allocatedBFCP[type] > 0);
-        };
+        const canIncrease = (type) => ask(type, 'canIncrease');
+        const canDecrease = (type) => ask(type, 'canDecrease');
+        const firingMode = (window.gamedata && window.gamedata.gamephase === 3 && typeof system.firingMode === 'function') ? system.firingMode() : null;
 
         const canPropagate = (type) => {
             return (allocatedBFCP[type] >= 0);
@@ -271,6 +268,11 @@ class HyachComputerList extends Component {
                 <div style={{ padding: '5px', textAlign: 'center', fontSize: '10px', color: '#f2f2f2' }}>
                     Total: {system.BFCPtotal_used} / {system.output} <Divider /> Max Per Type: {system.BFCPpertype}
                 </div>
+                {firingMode && (
+                    <div style={{ padding: '0 5px 5px', textAlign: 'center', fontSize: '10px', color: '#c9a6cf' }}>
+                        {firingMode === 'reshuffle' ? 'Computer Specialist: any point may be moved' : 'Expert Software Engineer: one held point may be added'}
+                    </div>
+                )}
             </Container>
         );
     }

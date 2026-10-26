@@ -10,6 +10,11 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
     // closed changes it. Returns at once in a game where no node was nominated this turn.
     CnC::applyTriadCommandNodes($gameData, $dbManager);
 
+    // FIGHTER MISSIONS (FIGHTER_MISSIONS_PLAN.md §3.6) - a flight changing its mission takes -60, a Combat Space Patrol
+    // in its zone +5, by the Command Node's own mechanism and for the same reason it is here: the first active ship is
+    // picked below. Returns at once in a game with no mission note.
+    FighterMissions::applyInitiative($gameData, $dbManager);
+
     $dbManager->setPlayersWaitingStatusInGame($gameData->id, true);
     $gameData->setPhase(2);
 
@@ -302,6 +307,12 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
                and written as one OffTransfer note. An ordinary ship sends none. */
             $claims = $ship->getOfficerTransferClaims();
             if (!empty($claims)) Officers::saveTransfers($gd->getShipById($ship->id), $claims, $gameData);
+
+            /* FIGHTER_MISSIONS_PLAN.md §3.7 - a flight's mission pick, checked against the RELOADED flight (the POST-side
+               copy has no notes) and written as one FtrMission note when it is a real change. An ordinary flight sends none. */
+            if ($ship instanceof FighterFlight && $ship->getFighterMissionClaim() !== null){
+                FighterMissions::saveClaim($gd->getShipById($ship->id), $ship->getFighterMissionClaim(), $gameData);
+            }
         }
 
 

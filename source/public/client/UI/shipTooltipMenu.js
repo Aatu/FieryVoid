@@ -153,10 +153,12 @@ window.ShipTooltipMenu = function () {
         element.on('touchmove touchcancel', clearLongPress);
     }
 
+    //The event rides along as a second argument for an action that anchors something to its button (the fighter
+    //mission dropdown); every other action ignores it. A long press calls its action with no event.
     function onClick(shipTooltip, action, isMaxClick, event) {
         event.preventDefault();
         event.stopPropagation();
-        action.call(this, isMaxClick);
+        action.call(this, isMaxClick, event);
     }
 
     function suppressContextMenu(event) {

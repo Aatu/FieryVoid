@@ -189,6 +189,8 @@ class BaseShip {
 	   officer moved to another post) and $officerUses the OffUsed notes (array('id', 'post', 'ability',
 	   'turn') - an Expert Gunner's once-per-battle ability spent); $officerTransferClaims is what a POST of
 	   Initial Orders asked for (InitialOrdersGamePhase::process checks it against the loaded ship).
+	   Stage 28: $officerLaunchIni is the initiative an Expert Warrior's ship gives a FLIGHT it launched (Officers::applyLaunchedFlights,
+	   after every ship is constructed) - so its payload publishes the iniativebonus it moved.
 	   All PROTECTED for $crewQuality's reason: a public empty default would put a dead key on every
 	   static blueprint. */
 	protected $officers = array();
@@ -198,6 +200,7 @@ class BaseShip {
 	protected $officerTransfers = array();
 	protected $officerUses = array();
 	protected $officerTransferClaims = array();
+	protected $officerLaunchIni = 0;
 
 	
 	public $halfPhaseThrust = 0; //needed for half phasing; equal to thrust from two BioThrusters on a given ship; 0 for ships that cannot half phase, eg. vast majority
@@ -1802,6 +1805,8 @@ class BaseShip {
     {	    
 		//OFFICERS_PLAN.md D2 - officers' posts are picked BEFORE any enhancement moves an output
 		Officers::pickPosts($this);
+		//OFFICERS_PLAN.md Stage 29 - an Expert Ballistic Officer's magazine slots, before the ammunition rows below fill them
+		Officers::raiseMagazines($this);
 		//enhancements (in game, NOT fleet selection!)
 		Enhancements::setEnhancements($this);
 		/* PER-SYSTEM enhancements, immediately after the ship-level ones and - critically - BEFORE
@@ -1944,6 +1949,15 @@ class BaseShip {
 	//what a POST of Initial Orders asks for (Manager::getShipsFromJSON) - RAW, a claim; nothing trusts it unchecked
 	public function setOfficerTransferClaims($claims){
 		$this->officerTransferClaims = is_array($claims) ? $claims : array();
+	}
+
+	//Stage 28: the initiative an Expert Warrior's ship gave this flight it launched (0: none)
+	public function getOfficerLaunchIni(){
+		return $this->officerLaunchIni;
+	}
+
+	public function setOfficerLaunchIni($bonus){
+		$this->officerLaunchIni = (int)$bonus;
 	}
 
     public function getSpecialAbilitySystem($ability)

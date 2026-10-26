@@ -421,6 +421,12 @@ CnC.prototype.isCommandNodeThisTurn = function () {
 
 CnC.prototype.doIndividualNotesTransfer = function () {
 	this.individualNotesTransfer = "";
+	//OFFICERS_PLAN.md Stage 25: an Expert Political Officer's speech, ordered this Firing phase (CnC::saveFirePhaseDeclaration reads it)
+	//Stage 28: or, on an Expert Warrior's C&C, his Supreme Anticipation
+	if (gamedata.gamephase == 3 && this.active && gamedata.isMyShip(this.ship)) {
+		this.individualNotesTransfer = [this.isWarriorPost() ? 'anticipation' : 'speech'];
+		return true;
+	}
 	if (gamedata.gamephase != 1 || !this.isTriadNode() || !gamedata.isMyShip(this.ship)) return false;
 	if (!this.isCommandNodeThisTurn()) return false;
 	var swap = (this.commandNodeSwap !== undefined && this.commandNodeSwap !== null) ? this.commandNodeSwap : -1;
@@ -428,9 +434,58 @@ CnC.prototype.doIndividualNotesTransfer = function () {
 	return true;
 };
 
-//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the nomination and the swap, in the one phase they are made.
-CnC.prototype.draftStateKeys = ['commandNodeTurn', 'commandNodeSwap'];
-CnC.prototype.draftStatePhases = [1];
+/* ===== EXPERT POLITICAL OFFICER'S SPEECH (OFFICERS_PLAN.md Stage 25) ===================================
+   "Once during each scenario, the political officer can give a stirring speech to his ship's crew ... +30 to its initiative": the
+   generic Activate box (SystemActivation, which reads `active` and these labels) on his C&C, in the Firing phase only, while he serves
+   and has not spoken (officers.canSpeak). `active` is this turn's order alone - posted at the commit (doIndividualNotesTransfer), judged
+   and spent by the server (Officers::saveSpeech), told in the combat log as firing resolves; the +30 is the next turn's. It is no
+   power boost, so the icon does not glow as one (suppressActiveBoost). The box wears the Hyach Computer's purple (user request
+   2026-10-21) - the speech is the only thing a C&C's Activate box ever holds.
+   ===== EXPERT WARRIOR'S SUPREME ANTICIPATION (OFFICERS_PLAN.md Stage 28) - the same box on HIS C&C (the Drazi have no Political Officer), in
+   the default blue (user request) with his labels: "+ 50 initiative bonus ... on the next turn" (officers.canAnticipateSupreme). */
+CnC.prototype.suppressActiveBoost = true;
+
+//The Warrior's C&C answers false - a getter, so the one prototype serves both officers (SystemActivation reads it as a property)
+Object.defineProperty(CnC.prototype, 'activationMenuPurple', {
+	get: function () { return !this.isWarriorPost(); },
+	configurable: true
+});
+
+CnC.prototype.isWarriorPost = function () {
+	return Boolean(window.officers) && officers.isWarriorPost(this.ship, this);
+};
+
+CnC.prototype.mayDeclare = function () {
+	return Boolean(window.officers) && (officers.canSpeak(this.ship, this) || officers.canAnticipateSupreme(this.ship, this));
+};
+
+CnC.prototype.canActivate = function () {
+	return !this.active && this.mayDeclare();
+};
+
+CnC.prototype.canDeactivate = function () {
+	return Boolean(this.active) && this.mayDeclare();
+};
+
+CnC.prototype.getActivateLabel = function () {
+	return this.isWarriorPost() ? 'Anticipation!' : '"Speech!"';
+};
+
+CnC.prototype.getDeactivateLabel = function () {
+	return this.isWarriorPost() ? 'No anticipation' : 'No speech';
+};
+
+CnC.prototype.doActivate = function () {
+	if (this.canActivate()) this.active = true;
+};
+
+CnC.prototype.doDeactivate = function () {
+	if (this.canDeactivate()) this.active = false;
+};
+
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the Command Node's nomination and swap in Initial Orders, the speech in the Firing phase.
+CnC.prototype.draftStateKeys = ['commandNodeTurn', 'commandNodeSwap', 'active'];
+CnC.prototype.draftStatePhases = [1, 3];
 
 //The ship's Triad C&C (in any state), or null.
 CnC.getTriadNode = function (ship) {
@@ -571,7 +626,10 @@ CnC.getIniativeCategory = function (raw) {
    swapped with a valid partner's, then +10 on the node (on the raw total, re-categorised, under simultaneous
    movement) - the bonus is the node's own and never travels with the swap (ruling C4) - then, classic movement
    only, the +1 nudge off an exact tie, node first. Only nominations this client can see are projected: its
-   own and its team's, while the phase is open. */
+   own and its team's, while the phase is open.
+   FIGHTER MISSIONS (FIGHTER_MISSIONS_PLAN.md §3.6, user 2026-10-22): the server's NEXT step at the close is
+   projected too, in the same order - FighterMissions::applyInitiative, a mission change -60 (loses its ties),
+   a Combat Space Patrol in its zone +5 (wins them). */
 CnC.getIniativeProjection = function () {
 	if (gamedata.gamephase != 1) return null;
 	var simultaneous = CnC.isSimultaneousMovement();
@@ -579,6 +637,33 @@ CnC.getIniativeProjection = function () {
 	var projection = null;
 	var changed = [];
 	var fleetsDone = {};
+	var start = function () {
+		if (projection) return;
+		projection = {};
+		gamedata.ships.forEach(function (s) { projection[s.id] = { iniative: s.iniative, raw: s.unmodifiedIniative }; });
+	};
+	//+amount on the raw total, re-categorised, under simultaneous movement; on the total itself in a classic game
+	var shift = function (id, amount) {
+		var p = projection[id];
+		if (simultaneous) {
+			p.raw = Number(p.raw) + amount;
+			p.iniative = CnC.getIniativeCategory(p.raw);
+		} else {
+			p.iniative = Number(p.iniative) + amount;
+		}
+	};
+	//classic movement only: each changed ship steps off an exact tie, +1 winning it or -1 losing it (CnC::breakCommandNodeTies)
+	var breakTies = function (ids, step) {
+		ids.forEach(function (id) {
+			var tied;
+			do {
+				tied = gamedata.ships.some(function (other) {
+					return other.id != id && Number(projection[other.id].iniative) === Number(projection[id].iniative);
+				});
+				if (tied) projection[id].iniative = Number(projection[id].iniative) + step;
+			} while (tied);
+		});
+	};
 
 	gamedata.ships.forEach(function (ship) {
 		var node = CnC.getTriadNode(ship);
@@ -588,10 +673,7 @@ CnC.getIniativeProjection = function () {
 		if (fleetsDone[fleet]) return;
 		fleetsDone[fleet] = true;
 
-		if (!projection) {
-			projection = {};
-			gamedata.ships.forEach(function (s) { projection[s.id] = { iniative: s.iniative, raw: s.unmodifiedIniative }; });
-		}
+		start();
 		var mine = projection[ship.id];
 		changed.push(ship.id);
 
@@ -604,24 +686,24 @@ CnC.getIniativeProjection = function () {
 		}
 
 		//the node keeps its +10, swapped or not
-		if (simultaneous) {
-			mine.raw = Number(mine.raw) + 10;
-			mine.iniative = CnC.getIniativeCategory(mine.raw);
-		} else {
-			mine.iniative = Number(mine.iniative) + 10;
-		}
+		shift(ship.id, 10);
 	});
 
-	if (projection && !simultaneous) {
-		changed.forEach(function (id) {
-			var tied;
-			do {
-				tied = gamedata.ships.some(function (other) {
-					return other.id != id && Number(projection[other.id].iniative) === Number(projection[id].iniative);
-				});
-				if (tied) projection[id].iniative = Number(projection[id].iniative) + 1;
-			} while (tied);
+	if (projection && !simultaneous) breakTies(changed, 1);
+
+	if (window.fighterMissions) {
+		var up = [], down = [];
+		gamedata.ships.forEach(function (ship) {
+			var amount = fighterMissions.iniativeModifier(ship);
+			if (!amount) return;
+			start();
+			shift(ship.id, amount);
+			(amount < 0 ? down : up).push(ship.id);
 		});
+		if (!simultaneous) {
+			breakTies(down, -1);
+			breakTies(up, 1);
+		}
 	}
 	return projection;
 };
@@ -3272,6 +3354,9 @@ var HyachComputer = function HyachComputer(json, ship) {
 	ShipSystem.call(this, json, ship);
 	this.allocatedBFCP = Object.assign({}, this.allocatedBFCP);
 	this.data = Object.assign({}, this.data);
+	/* OFFICERS_PLAN.md Stage 26: what the Firing phase starts from and a held point is added to - Initial Orders' allocation (the server's
+	   ioBFCP once a Firing-phase one has replaced it), taken as the ship is built, before any click or Save Orders restore moves it. */
+	this.lockedBFCP = Object.assign({}, this.ioBFCP || this.allocatedBFCP);
 };
 HyachComputer.prototype = Object.create(ShipSystem.prototype);
 HyachComputer.prototype.constructor = HyachComputer;
@@ -3311,6 +3396,12 @@ HyachComputer.prototype.canIncrease = function () { //check if can increase rati
 	this.getCurrClass();
 	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
 
+	if (gamedata.gamephase === 3) { //Stage 26: the Firing-phase allocation (firingMode) - a held point is ONE more than Initial Orders'
+		var mode = this.firingMode();
+		if (!mode) return false;
+		if (mode === 'hold' && this.totalOf(this.allocatedBFCP) >= this.totalOf(this.lockedBFCP) + officers.SOFTWARE_BFCP) return false;
+	}
+
 	if (this.BFCPtotal_used >= (this.output)) return false; //Is the number of BFCP points used more than possible by this HC?	
 
 	//how many are allocated?
@@ -3328,6 +3419,12 @@ HyachComputer.prototype.canIncrease = function () { //check if can increase rati
 HyachComputer.prototype.canDecrease = function () { //can decrease if something was increased
 	this.getCurrClass();
 	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover!  Should never happen.		
+
+	if (gamedata.gamephase === 3) { //Stage 26: in the Firing phase only what may move there - with a held point, only that point
+		var mode = this.firingMode();
+		if (!mode) return false;
+		if (mode === 'hold') return this.allocatedBFCP[this.currClass] > (this.lockedBFCP[this.currClass] || 0);
+	}
 
 	if (this.allocatedBFCP[this.currClass] > 0) return true;
 	return false;
@@ -3401,6 +3498,9 @@ HyachComputer.prototype.setCurrFCType = function (FCType) { //sets indicated FC 
 };
 HyachComputer.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
 	this.individualNotesTransfer = Array();
+	/* Stage 26: in the Firing phase an allocation that changed there goes marked - ['firingBFCP', one FC type per point], written as one
+	   note (HyachComputer::saveFirePhaseDeclaration) and judged on the loaded ship (settleFiringBFCP). Unchanged, it goes as ever below. */
+	if (gamedata.gamephase === 3 && this.firingMode() && !this.sameAllocation(this.allocatedBFCP, this.lockedBFCP)) this.individualNotesTransfer.push('firingBFCP');
 	//every point is denoted as single entry with damage class name
 	var FCCategories = Object.keys(this.allocatedBFCP);
 	var currType = '';
@@ -3411,9 +3511,42 @@ HyachComputer.prototype.doIndividualNotesTransfer = function () { //prepare indi
 	return true;
 };
 
-//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the allocation and its running total.
+/* ⭐ OFFICERS_PLAN.md Stage 26 - may this Computer's points be allocated in the Firing phase now, and how: 'reshuffle' while a Computer
+   Specialist is used this turn (every point - "allows these points to be reshuffled to any desired values ... during the Firing Phase"),
+   'hold' while an Expert Software Engineer serves in it (one point added to Initial Orders', none moved), or null. Own ships only.
+   ⚠️ MIRROR PAIR with HyachComputer::settleFiringBFCP (PHP). */
+HyachComputer.prototype.firingMode = function () {
+	if (!window.gamedata || gamedata.gamephase !== 3) return null;
+	var ship = this.ship;
+	if (!ship || (typeof gamedata.isMyShip === 'function' && !gamedata.isMyShip(ship))) return null;
+	if (shipManager.systems.isDestroyed(ship, this)) return null;
+	var specialists = shipManager.systems.getSystemByName(ship, 'hyachSpecialists');
+	if (specialists && specialists.specAllocatedCount && specialists.specAllocatedCount['Computer'] > 0) return 'reshuffle';
+	if (window.officers && officers.holdsFiringBFCP(ship, this)) return 'hold';
+	return null;
+};
+HyachComputer.prototype.totalOf = function (allocation) {
+	var total = 0;
+	for (var type in allocation) total += parseInt(allocation[type], 10) || 0;
+	return total;
+};
+HyachComputer.prototype.sameAllocation = function (a, b) {
+	var types = Object.keys(Object.assign({}, a, b));
+	for (var i = 0; i < types.length; i++) {
+		if ((parseInt(a[types[i]], 10) || 0) !== (parseInt(b[types[i]], 10) || 0)) return false;
+	}
+	return true;
+};
+//Stage 26: back to what the Firing phase started from - a Computer Specialist cancelled takes its reshuffle with it (HyachSpecialists.doDecrease)
+HyachComputer.prototype.restoreFiringBase = function () {
+	this.allocatedBFCP = Object.assign({}, this.lockedBFCP);
+	this.BFCPtotal_used = this.totalOf(this.allocatedBFCP);
+	this.refreshData();
+};
+
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4): the allocation and its running total - in the Firing phase too (Stage 26).
 HyachComputer.prototype.draftStateKeys = ['allocatedBFCP', 'BFCPtotal_used'];
-HyachComputer.prototype.draftStatePhases = [1];
+HyachComputer.prototype.draftStatePhases = [1, 3];
 HyachComputer.prototype.afterDraftRestore = function () {
 	this.refreshData();
 };
@@ -3555,15 +3688,19 @@ HyachSpecialists.prototype.canUse = function () { //check if can increase rating
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 
+	//OFFICERS_PLAN.md Stage 26: a software Specialist an Expert Software Engineer lets this ship use a second time (the server's list)
+	var reuse = window.officers ? officers.specialistReusable(this.ship, this, this.specCurrClass) : false;
+
 	//total pool of Specialists used?
-	if (!this.availableSpec[this.specCurrClass]) return false; //Not selected, can't increase or decrease on Turn 1.
-	if (this.availableSpec[this.specCurrClass] < 1) return false; //Not selected, can't increase or decrease on Turn 1.
+	if (!reuse && !this.availableSpec[this.specCurrClass]) return false; //Not selected, can't increase or decrease on Turn 1.
+	if (!reuse && this.availableSpec[this.specCurrClass] < 1) return false; //Not selected, can't increase or decrease on Turn 1.
 
 	if (gamedata.gamephase !== 1 &&
-		(this.specCurrClass == 'Computer' ||
-			this.specCurrClass == 'Power' ||
+		(this.specCurrClass == 'Power' ||
 			this.specCurrClass == 'Repair' ||
 			this.specCurrClass == 'Sensor')) return false; //Can only use on Initial Orders	
+	//Stage 26: the Computer Specialist's own rules - "This ability is activated during the Firing Phase" (it was Initial Orders, +2 BFCP)
+	if (gamedata.gamephase !== 3 && this.specCurrClass == 'Computer') return false;
 
 	if ((gamedata.gamephase !== 1 && gamedata.gamephase !== 2) &&
 		(this.specCurrClass == 'Engine' ||
@@ -3573,6 +3710,7 @@ HyachSpecialists.prototype.canUse = function () { //check if can increase rating
 
 	//Has it been allocated?
 	var allocatedThisTurn = this.specAllocatedCount[this.specCurrClass];//0 or 1
+	if (reuse) return !(allocatedThisTurn > 0); //Stage 26: its first use was an earlier turn - only this turn's counts
 	var allocatedPreviousTurns = 0;
 	if (this.allocatedSpec && this.allocatedSpec[this.specCurrClass] !== undefined && this.allocatedSpec[this.specCurrClass] !== null && this.allocatedSpec[this.specCurrClass] !== "") {
 		// allocatedSpec is not null, we can use it here
@@ -3589,14 +3727,20 @@ HyachSpecialists.prototype.canDecrease = function () { //can decrease if somethi
 	if (gamedata.gamephase == -1) return false;
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialists whatsover!
-	if (!this.availableSpec[this.specCurrClass]) return false; //Not selected, can't increase or decrease on Turn 1.
-	if (this.availableSpec[this.specCurrClass] < 1) return false; //Not selected, can't increase or decrease on Turn 1.
+	var reuse = window.officers ? officers.specialistReusable(this.ship, this, this.specCurrClass) : false; //Stage 26: a second use, cancelled
+	if (!reuse && !this.availableSpec[this.specCurrClass]) return false; //Not selected, can't increase or decrease on Turn 1.
+	if (!reuse && this.availableSpec[this.specCurrClass] < 1) return false; //Not selected, can't increase or decrease on Turn 1.
 
 	if (this.specAllocatedCount[this.specCurrClass] > 0) return true;	//If it's been increased, you can decrease.
 
 	return false;
 };
 
+
+//OFFICERS_PLAN.md Stage 26: is a use of `type` this turn its SECOND - an Expert Software Engineer's reuse (the server's list says which may)
+HyachSpecialists.prototype.isSecondUse = function (type) {
+	return Boolean(window.officers) && officers.specialistReuseList(this.ship).indexOf(type) !== -1;
+};
 
 HyachSpecialists.prototype.doSelect = function () { //increase AA usage
 	this.getCurrClass();
@@ -3635,7 +3779,7 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 
 	this.currAllocatedSpec[this.specCurrClass] = 'allocated';
 	this.specAllocatedCount[this.specCurrClass] = 1;	//Just for Status Window.
-	this.specTotal_used++;
+	if (!this.isSecondUse(this.specCurrClass)) this.specTotal_used++; //Stage 26: a second use spends no Specialist slot
 	this.specIncreased[this.specCurrClass] = true;
 	this.specDecreased[this.specCurrClass] = false;
 
@@ -3643,11 +3787,12 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 
 	switch (this.specCurrClass) {
 		case 'Computer'://Make front-end changes to Computer Output
+			//OFFICERS_PLAN.md Stage 26 - its own rules: +1 BFCP, the cap per category unchanged, every point free to move this Firing phase
+			//(HyachComputer.firingMode reads this Specialist's specAllocatedCount)
 			for (var i in ship.systems) {
 				var system = ship.systems[i];
 				if (system instanceof HyachComputer) {
-					system.output += 2;
-					system.BFCPpertype += 1; //Increase amount per category
+					system.output += 1;
 					system.refreshData();
 				}
 			}
@@ -3793,7 +3938,7 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 	this.specDecreased[this.specCurrClass] = true;
 	this.specIncreased[this.specCurrClass] = false;
 
-	this.specTotal_used--;
+	if (!this.isSecondUse(this.specCurrClass)) this.specTotal_used--; //Stage 26, as doUse
 	var ship = this.ship;
 
 	switch (this.specCurrClass) {
@@ -3802,9 +3947,8 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 				var system = ship.systems[i];
 
 				if (system instanceof HyachComputer) {
-					system.output -= 2;
-					system.BFCPpertype -= 1; //Increase amount per category
-					system.refreshData();
+					system.output -= 1;
+					system.restoreFiringBase(); //Stage 26: its reshuffle goes with it
 				}
 			}
 			break;
@@ -4251,6 +4395,13 @@ var Bulkhead = function (json, ship) {
 }
 Bulkhead.prototype = Object.create(ShipSystem.prototype);
 Bulkhead.prototype.constructor = Bulkhead;
+
+/* Its readout is the boxes it has left - Bulkhead::getOutput, which the server sends as `output` in game. A static blueprint carries 0, so a lobby
+   window showed 0: the figure is worked out here instead, as its health bar's (user request 2026-10-23). 0 falls through to the generic readout. */
+Bulkhead.prototype.initializationUpdate = function () {
+	this.outputDisplay = Math.max(0, (parseInt(this.maxhealth, 10) || 0) - damageManager.getDamage(this.ship, this));
+	return this;
+};
 
 
 

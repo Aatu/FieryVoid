@@ -765,6 +765,213 @@
     }
 }
 
+/* ── Fighter mission dropdown ────────────────────────────────────────────────
+   FIGHTER_MISSIONS_PLAN.md §3.10 (client/UI/fighterMissionPicker.js). The same surface as the picker card above -
+   opaque fill, --fv-line-scs border, modal corners - because it is a menu the player clicks to commit a choice, not
+   a hover tooltip. Fixed to the viewport (the JS clamps it 8px inside), above the ship tooltip it opens from. */
+.fv-missionpicker {
+    position: fixed;
+    z-index: 7002;
+    box-sizing: border-box;
+    width: 330px;
+    max-width: calc(100vw - 16px);
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    font-family: arial;
+    font-size: 12px;
+    color: var(--fv-text-dim);
+    background-color: var(--fv-overlay);
+    border: 1px solid var(--fv-line-scs);
+    border-radius: var(--fv-radius-modal);
+}
+
+.fv-missionpicker *,
+.fv-missionpicker *::before,
+.fv-missionpicker *::after {
+    box-sizing: border-box;
+}
+
+/* A filled title bar (the in-game chrome blue, the accent rail) so the menu reads as its own panel at a glance,
+   not as more tooltip rows: a bold uppercase title, the flight's name underneath in its own case. */
+.fv-missionpicker__header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 4px 4px 4px 9px;
+    background: var(--fv-chrome);
+    border-left: 3px solid var(--fv-accent);
+    border-bottom: 1px solid var(--fv-line-scs);
+    overflow: hidden;
+}
+
+.fv-missionpicker__heading {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 3px;
+}
+
+.fv-missionpicker__title,
+.fv-missionpicker__subtitle {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fv-missionpicker__title {
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fv-text-bright);
+}
+
+.fv-missionpicker__subtitle {
+    font-size: 11px;
+    line-height: 1.2;
+    color: var(--fv-text-accent);
+}
+
+.fv-missionpicker__back,
+.fv-missionpicker__close {
+    flex: 0 0 auto;
+    width: 21px;
+    height: 21px;
+    padding: 0;
+    line-height: 19px;
+    text-align: center;
+    font-size: 14px;
+    font-family: arial;
+    color: var(--fv-text-dim);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--fv-radius-modal);
+    cursor: pointer;
+}
+
+.fv-missionpicker__back:hover,
+.fv-missionpicker__close:hover {
+    color: var(--fv-text-bright);
+    border-color: var(--fv-line-scs);
+    background: var(--fv-line-soft); /* lighter than the header's chrome fill (--fv-card-hover is darker) */
+}
+
+/* The cost of a change heads the list: neutral normally, the own-ship green when the pick is free. */
+.fv-missionpicker__cost {
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--fv-rule);
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--fv-text-dim);
+}
+
+.fv-missionpicker__cost--free {
+    color: var(--fv-own);
+}
+
+.fv-missionpicker__list {
+    max-height: 60vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+}
+
+.fv-missionpicker__row {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    min-height: 40px;
+    padding: 4px 8px 4px 7px;
+    text-align: left;
+    font-family: arial;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid var(--fv-line-soft);
+    cursor: pointer;
+}
+
+.fv-missionpicker__row:last-child {
+    border-bottom: 0;
+}
+
+.fv-missionpicker__row:hover {
+    background: var(--fv-card-hover);
+}
+
+/* The pick waiting for the commit: the accent rail and a lifted fill. */
+.fv-missionpicker__row--pending {
+    border-left-color: var(--fv-accent);
+    background: var(--fv-card);
+}
+
+.fv-missionpicker__row--disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+
+.fv-missionpicker__row--disabled:hover {
+    background: transparent;
+}
+
+.fv-missionpicker__text {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.fv-missionpicker__label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13.5px;
+    line-height: 1.15;
+    color: var(--fv-text);
+}
+
+.fv-missionpicker__note {
+    font-size: 11px;
+    line-height: 1.25;
+    color: var(--fv-text-dim);
+}
+
+/* "Selected" - the mission in force: a solid own-ship green, so it is found at a glance (the pending pick has the
+   accent rail instead). Dark text on the fill, not a tint: a tint would compound with the row's hover fill. */
+.fv-missionpicker__chip {
+    flex: 0 0 auto;
+    padding: 0 5px;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fv-text);
+    background: var(--fv-ok);
+    border: 1px solid var(--fv-own-signal);
+    border-radius: 3px;
+}
+
+.fv-missionpicker__row:focus,
+.fv-missionpicker__back:focus,
+.fv-missionpicker__close:focus {
+    outline: none;
+}
+
+.fv-missionpicker__row:focus-visible,
+.fv-missionpicker__back:focus-visible,
+.fv-missionpicker__close:focus-visible {
+    outline: 1px solid var(--fv-accent);
+    outline-offset: -1px;
+}
+
 /* ── Focus ───────────────────────────────────────────────────────────────── */
 .fv-hexpicker:focus,
 .fv-hexpicker__row:focus,

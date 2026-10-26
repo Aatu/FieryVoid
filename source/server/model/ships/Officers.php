@@ -70,6 +70,23 @@
    Stage 23: the Expert Anticipator - initiative rolled twice, the higher kept (initiativeRoll); one turn in the Firing phase, as a
    fighter's combat pivot (Movement::ANTICIPATED_TURN); and a damage roll of two or more dice one die larger, its lowest dropped
    (Dice::$extraDie).
+   Stage 24: the Breaching Expert - a fighter officer for BREACHING PODS (isBreachingPod), priced off his ONE pod whatever the
+   flight's size (`unscaled`): the flight +1 thrust, his pod's Marines Elite (eliteMarines), and his pod's first capture party
+   three attack rolls on its first turn aboard (spendCaptureAssault, captureRolls). Fleet-wide, at most 20% of a fleet's pods - the
+   lobby's Fleet Correctness Report (gamelobby.js).
+   Stage 25: the Expert Political Officer (Centauri capital ships and larger) - his Influence buys the ship an armed shuttle, one of
+   four experts at no cost (freeExpertId) and five free Hardened Armour (freeArmourRows, priced by priceFreeRefits), whatever the player leaves unchosen
+   picked at random as the fleet is committed (placePoliticalPicks); and once per battle a stirring speech in the Firing phase, told in
+   the combat log (speechLog), +30 initiative on the next turn.
+   Stage 26: the Expert Software Engineer (Hyach) - in the Hyach Computer: one more bonus fire control point, kept until the Computer
+   is destroyed and holdable to the Firing phase (HyachComputer::settleFiringBFCP); the first point of every hit on the Computer
+   ignored (computerArmour); a stealth ship's signature masked (maskSignature); and one Defence, Sensor, Targeting or Weapon
+   Specialist used a second time (specialistReuse).
+   Stage 27: the Expert Troop Leader (Gaim) - on a ship, in its Hangar: every boarding roll against it 2 in its favour (boardingShift),
+   +1 on every roll of as many of his player's breaching pods as the ship's Pod Allowance (troopAidedCraft), and every Bulkhead a box
+   tougher for the whole battle; in a breaching pod (OFF_TRPOD, one to a pod): -3 on every roll of its boarding parties, and a d6 to
+   escape when one is eliminated (troopPartyLost). Breaching Experts became one to a pod as well, and the two may share a pod flight
+   (`mixesWith`).
 
    Which FACTIONS may buy an officer, and what some of them pay, is one table: $factionRules below. */
 class Officers{
@@ -134,6 +151,82 @@ class Officers{
 	const TAILGUNNER_BONUS = 1;          //Expert Tailgunner: on a tail gun with no penalty, "+5% to hit with that gun only"
 	const TURRET_CRIT_MOD = -1;          //Expert Turret Officer: "When rolling for critical hits against turret-mounted weapons, subtract 1"
 	const TURRET_JAM_RELIEF = 2;         //...: "When rolling for the special turret jam critical, subtract 2 from the die roll"
+	const BREACH_THRUST = 1;             //Breaching Expert: "The pod receives +1 thrust" - the flight's, as a flight moves as one
+	const BREACH_CAPTURE_ROLLS = 3;      //...: "the pod's contingent gets three attack rolls on the first turn of combat"
+	const BREACH_PARTY_KEY = 'expert';   //...the capture party he sent: a key in its CaptureShip critical's param (never sent - ShipSystem::stripForJson)
+	const SPEECH_INITIATIVE = 30;        //Expert Political Officer: "This provides the ship with +30 to its initiative on that turn" - FV units, as the Quartermaster's -30 (QX1)
+	const POLITICAL_ARMOUR_SYSTEMS = 5;  //...: "+1 to their armor values. The owner must select 5 different systems ... and cannot select structure blocks"
+	const SPEECH_DAMAGE_CLASS = 'PoliticalSpeech'; //...his speech's combat log line (speechLog) - combatLog.js heads it "SPEECH:"
+	const SOFTWARE_BFCP = 1;             //Expert Software Engineer: "The Hyach computer provides one extra bonus fire control point (BFCP)"
+	const SOFTWARE_ARMOUR = 1;           //...: "ignores the first point of damage in any volley" - an armour point nothing pierces or wears
+	const SIGNATURE_MASK_HEXES = 5;      //...: a stealth ship "appear[s] as though it were five hexes further away for detection purposes"
+	const TROOP_BOARDING_SHIFT = 2;      //Expert Troop Leader: "a penalty of 2 on all enemy rolls and a bonus of 2 on all defense rolls"
+	const TROOP_SHIP_POD_BONUS = 1;      //...: "If any of his own ship's breaching pods attack an opponent, they gain a +1 bonus on any attack table"
+	const TROOP_POD_BONUS = 3;           //...in a pod: "a further -2 bonus (a total of -3 for Gaim)" - the 3, his ship's 1 among them (user ruling 2026-10-23)
+	const TROOP_ESCAPE_MAX = 4;          //...: "roll a d6, and on a roll of 1-4 he manages to escape with his pod ... not available on Wreak Havoc missions"
+	const TROOP_BULKHEAD_BOXES = 1;      //...: "all bulkheads on the ship are considered to have 1 extra box"
+	const TROOP_PARTY_KEY = 'troop';     //...the craft a boarding party left, in its critical's param - read for his bonuses and his escape (never sent)
+	const WARRIOR_DIE_BONUS = 1;         //Expert Warrior: "+ 1 to hit with all weapons (applyWarrior), and all weapons cause +1 extra damage per die"
+	const WARRIOR_INI = 10;              //...: "a +10 bonus to its initiative and any fighters or shuttles it launches receive the same" - FV units (user)
+	const WARRIOR_CRIT_MOD = -1;         //...: "All critical hits, regardless of system, have a -1 on their rolls"
+	const WARRIOR_CAUSED_CRIT = 1;       //...: "and any critical hits caused by the expert warrior's ship gain +1 on their dice"
+	const CHARGE_HIT = 2;                //...a charge: "he gains a further + 2 to hit that unit with all his ship's weapons"
+	const CHARGE_MIN_HEXES = 4;          //...: "He must move at least 4 hexes towards the enemy" - 4 hexes nearer by the end of his move
+	const SUPREME_INITIATIVE = 50;       //...: "supreme anticipation, earning his ship a + 50 initiative bonus ... on the next turn" - FV units (user)
+	const SUPREME_PENALTY = -50;         //...: "However, on the turn after that one, his ship suffers a -50 penalty"
+	const BALLISTIC_RANGE = 5;           //Expert Ballistic Officer: "All ballistic weapons receive +5 to their distance range (but not their launch range)"
+	const BALLISTIC_EXTRA_ROUND = 1;     //...: "All ballistic devices with limited ammunition receive one extra round of ammo"
+	const QM_INITIATIVE = -30;           //Expert Quartermaster: "a permanent -6 to its initiative roll" - FV units (QX1)
+	const QM_TURN_DELAY_PCT = 10;        //...: "a +10% penalty (round fractions up) to its Turn Delay" - each turn's delay (user ruling 2026-10-24)
+	const QM_CNC_CRIT_MOD = 2;           //...: "a +2 penalty on all critical hits against the C&C"
+	const QM_REFIT_SYSTEMS = 2;          //...: Gunsight and Advanced Defensive Targeting "any two weapons", Improved Thrust "any two thrusters", Hardened Armor two systems
+	const QM_BREACH_FACTOR = 3;          //...: Improved Reactor, "but if the reactor is in danger of exploding, triple its chance"
+	const QM_RACK_MISSILES = 2;          //...: "Each of the ship's class-S or better missile racks comes with two special missiles"
+	const QM_OLD_RACK_MISSILES = 1;      //...: "If the racks are of the class-SO or an older class, they receive only one free special missile"
+	const GRAV_BEAM_DAMAGE = 1;          //Expert Graviton Controller: "All gravitic beam weapons score +1 damage" - every Raking gravitic hit (user ruling 2026-10-25)
+	const GRAV_PULSE_SHIFT = 5;          //...: "as though the to-hit die roll was 5% lower" - the d100, for a gravitic weapon's pulse count once it has hit
+	const GRAV_ENGINE_THRUST = 1;        //...: "Tweaking of the Engine improved its thrust output by 1"
+	const GRAV_THRUSTER = 1;             //...: "Increase the thrust rating of the largest aft thruster by 1 as well"
+	const GRAV_ROTATION_PENALTY = 3;     //...: "On the turn a rotation is done, the ship's weapons suffer a -3 penalty to all weapons fire" (d20 units, -15%)
+	const SKIN_DANCE_SPEED = 5;          //FV's skin dance: an Enormous unit moving faster than this cannot be danced over (RammingAttack::getSkinDancingResult)
+	const REDLINE_DANCE_SPEED = 8;       //Redline Pilot: "may perform skin dancing on capital ships moving at speeds of 8 or less" - Enormous units (user ruling 2026-10-25)
+	const REDLINE_PIVOT_FACTOR = 3;      //...: a combat pivot made without the thrust for it - "the firing penalty for a combat pivot is tripled" (-1 -> -3)
+	const REDLINE_BURN_PCT = 50;         //...: afterburners - "the fight increases its thrust by 50% on the current turn (round any fractions down)"
+	const REDLINE_LANDING_DIE = 20;      //...: a landing beyond the tolerance - "roll a d20. If the result is less than or equal to the amount ... exceeded", he crashes
+	const REDLINE_LANDING_CLASS = 'RedlineLanding'; //...a landing that holds, told in the combat log (rollRedlineLandings) - weaponManager.doShortLogText
+	/* ...: the magazine rounds he may pick free - "change one of their single-space ... missiles to any other legal type at no cost" - by
+	   enhancement id, each with the round it loads (Enhancements::setEnhancementOptionsShip's list). A pick is one of these the hull is
+	   enabled for, single-slot and priced on that hull (paidPickTypes); Basic is not among them, as no swap to it is worth anything (user
+	   ruling 2026-10-24). ⚠️ MIRROR PAIR with officers.BALLISTIC_TWO_SLOT (JS), which names the two-slot ones the client leaves out. */
+	private static $ballisticAmmo = array(
+		'AMMO_L' => 'AmmoMissileL', 'AMMO_H' => 'AmmoMissileH', 'AMMO_F' => 'AmmoMissileF', 'AMMO_A' => 'AmmoMissileA',
+		'AMMO_P' => 'AmmoMissileP', 'AMMO_D' => 'AmmoMissileD', 'AMMO_I' => 'AmmoMissileI', 'AMMO_C' => 'AmmoMissileC',
+		'AMMO_J' => 'AmmoMissileJ', 'AMMO_K' => 'AmmoMissileK', 'AMMO_M' => 'AmmoMissileM', 'AMMO_KK' => 'AmmoMissileKK',
+		'AMMO_S' => 'AmmoMissileS', 'AMMO_HM' => 'AmmoMissileHM', 'AMMO_X' => 'AmmoMissileX', 'AMMO_Z' => 'AmmoMissileZ',
+	);
+	/* ...: "permits a specialist to use his abilities a second time ... The specialist must be of the software category" - the Hyach
+	   Specialists the user named (2026-10-22). ⚠️ MIRROR PAIR with officers.SOFTWARE_SPECIALISTS (JS). */
+	private static $softwareSpecialists = array('Defence', 'Sensor', 'Targeting', 'Weapon');
+	/* ...: "Select either an expert navigator, expert helmsman, expert engineer, expert scanner and add him to the crew at no cost" - in
+	   REGISTRY order, which is the order a tie for the dearest goes by (freeExpertId). ⚠️ MIRROR PAIR with officers.POLITICAL_EXPERTS (JS). */
+	private static $politicalExperts = array('OFF_HELM', 'OFF_SCAN', 'OFF_ENG', 'OFF_NAV');
+	/* Expert Quartermaster: "ONE of the following ship enhancements (player's choice) will be present on his ship at no extra cost" - in the
+	   rules' order, which a tie for the dearest goes by (quartermasterRefit). The four bought per system, then the two ship-level rows.
+	   ⚠️ MIRROR PAIR with officers.QM_REFITS (JS). */
+	private static $quartermasterRefits = array('SYS_GSGT', 'SYS_ADT', 'IMPR_REA', 'SYS_THR', 'SYS_HARM', 'JUMP_ACC');
+	//...and the ones the commit may roll when the player bought none: never the Improved Reactor or the Jump Accelerator (user ruling 2026-10-24)
+	private static $quartermasterRandom = array('SYS_GSGT', 'SYS_ADT', 'SYS_THR', 'SYS_HARM');
+	/* ...: "a stirring speech to his ship's crew, quoting the past glories of the Republic, the honor of serving the Emperor, and other
+	   political mumbo-jumbo" - the combat log names one of these at random (speechLog). */
+	private static $speechTopics = array(
+		'the past glories of the Republic', 'the honour of serving the Emperor', 'the ancient splendour of Centauri Prime',
+		'the duty owed to the Great Houses', 'the boundless destiny of the Centauri people', 'the wisdom of the Imperial Court',
+		'the conquest of the Xon', 'the ingratitude of the Narn', 'the glory of the Imperial Fleet', 'the favour of the Great Maker',
+		'the treachery of rival Houses', 'the burden of Empire', 'the Emperor\'s latest decree', 'the sacrifices of the Orieni War',
+		'the necessity of unquestioning loyalty', 'the proper height of a hair crest', 'the virtues of a well-aged brivari',
+		'the splendour of the Imperial Palace gardens', 'his own distinguished family', 'his favourite colour, purple',
+		'the price of spoo', 'the importance of good tailoring' 
+	);
 	//...a Medium ship's side, looked at from its own bearing (a "TAG:" hit chart entry is arc-filtered): Front, Aft, Left, Right
 	private static $sideBearing = array(1 => 0, 2 => 180, 3 => 270, 4 => 90);
 	//the fire orders that are NOT the flight firing, for his Spark Field relief: interception uses neither OB nor jinking
@@ -192,6 +285,28 @@ class Officers{
 		'OFF_TURR' => array('only' => array('Vree Conglomerate')),
 		//"10% of the ship's base value for Torata ... Races other than the Torata pay 50% more for this officer" - the registry's 15
 		'OFF_ANTI' => array('pct' => array('Torata Regency' => 10)),
+		//"25% of the cost of the breaching pod ... Any race may purchase one, but races other than Balosian, Yolu, Narn or Gaim double the
+		//cost" - the registry's 50, and 25 here
+		'OFF_BRCH' => array('pct' => array('Balosian Underdwellers' => 25, 'Yolu Confederation' => 25, 'Narn Regime' => 25, 'Gaim Intelligence' => 25)),
+		//"Availability: ... Centauri Only" - the Wars of the Centauri Republic too (user ruling 2026-10-21)
+		'OFF_POL'  => array('only' => array('Centauri Republic', 'Centauri Republic (WotCR)')),
+		//"Availability: Hyach only" - and only a Hyach hull has his post, the Computer
+		'OFF_SOFT' => array('only' => array('Hyach Gerontocracy')),
+		//"Availability: Gaim Only" - on a ship, and in a Gaim breaching pod (user notes 2026-10-23)
+		'OFF_TROOP' => array('only' => array('Gaim Intelligence')),
+		'OFF_TRPOD' => array('only' => array('Gaim Intelligence')),
+		//"Availability: Drazi only" - the Wars of the Centauri Republic's Drazi too (user ruling 2026-10-23)
+		'OFF_WARR' => array('only' => array('Drazi Freehold', 'Drazi Freehold (WotCR)')),
+		//"5% of the base cost of the ship, plus 1% for each missile rack ... Races other than the Kor-Lyans pay double" - the registry's 10, and 5 here
+		//(the racks' part grows with it: `perPick`)
+		'OFF_BALL' => array('pct' => array('Kor-Lyan Kingdoms' => 5)),
+		//"10% of the ship's base value for Hurr ... Double the cost on non-Hurr ships" - the registry's 20, and 10 here
+		'OFF_QM'   => array('pct' => array('Hurr Republic' => 10)),
+		//"10% of the ship's base cost for Brakiri ... Non-Brakiri races which use gravitic drives or weapons can purchase one for 50% higher" - the
+		//registry's 15, and 10 here; which hulls is his `needs` (usesGravitics)
+		'OFF_GRAV' => array('pct' => array('Brakiri Syndicracy' => 10)),
+		//"Equal to the 100% cost of a fighter ... Races other than the Cascor increase the cost by 50%" - the registry's 150, and 100 here
+		'OFF_REDL' => array('pct' => array('Cascor Commonwealth' => 100)),
 	);
 
 	/* One literal per officer (D6), walked in THIS order by apply() (D5).
@@ -205,6 +320,8 @@ class Officers{
 	     publish  (optional) ship fields his apply moves that every viewer is sent while he serves: a
 	              displayed stat is public, only the officer is hidden (user ruling 2026-10-10)
 	     needs    (optional) a further test the hull must pass to be offered him, beyond having the post
+	     perPick  (optional, Stage 29) his pct grows by this percent of itself for every free pick the hull gives him (ballisticPicks):
+	              the Expert Ballistic Officer's "plus 1% for each missile rack" on his 5%, so it doubles with the rest outside the Kor-Lyans
 	   Fighter officers (Stage 4) also carry:
 	     flight      true: offered to flights only (and every other officer to ships only). His pct is
 	                 of ONE craft, for a standard flight; a flight of another size pays it scaled by its
@@ -214,6 +331,11 @@ class Officers{
 	     multi       (optional, Stage 18) bought as a COUNT, up to this many (or $factionRules' `max`), and never
 	                 more than the flight has craft: one officer in each of its first crafts, every one of them
 	                 applying his effects (the Expert Pilot). Together they are still the flight's one officer.
+	     unscaled    (optional, Stage 24) true: his pct of one craft is his price whatever the flight's size - he serves in a single
+	                 craft, so a flight of two pays what a flight of one does (the Breaching Expert: "25% of the cost of the breaching pod")
+	     mixesWith   (optional, Stage 27, with `multi`) the officers who may share a flight with him, one officer to a craft: the
+	                 first in registry order takes the first crafts, the next the crafts after them (the Breaching Expert and the
+	                 Expert Troop Leader in a pod - user ruling 2026-10-23). Every other flight keeps D9's one officer.
 	   Placed officers (Stage 8) carry, instead of a post key:
 	     placed      true: the player picks his post, a weapon, in that system's own menu - a per-system row
 	                 (Enhancements::$systemEnhancementRegistry), never an enhancementOptions offer
@@ -239,7 +361,10 @@ class Officers{
 	     switchTo    (optional) the officer he becomes when ordered to his OWN post (mayMoveTo): the Expert Targeter's side switch
 	   Stage 22:
 	     perTurret   (optional) true: one of him to a TURRET (turretKey - a weapon's linked firing group, or the weapon alone), not only
-	                 one to a system - at purchase and load (keepPlacedRows) and when he moves (mayMoveTo) */
+	                 one to a system - at purchase and load (keepPlacedRows) and when he moves (mayMoveTo)
+	   Stage 30:
+	     stock       (optional) true: his once-per-battle abilities are the SHIP's stock, not his - one spent after he was lost still counts
+	                 (resolveUses), and he may spend it then (the Expert Quartermaster's patch: "everything stays", user ruling 2026-10-24) */
 	private static $registry = array(
 		/* Expert Helmsman: +5 initiative (FV units, QX1), wins initiative ties, and -1 on the die he
 		   rolls on a meteor swarm's impact chart (user, 2026-10-10). The tie-break is
@@ -371,6 +496,92 @@ class Officers{
 		   this turn's fire, his and at him, meets the new facing; on a Gunner's weapon the extra die AND the Gunner's +1 per die.
 		   15%, the Torata 10% ($factionRules). No stat moves at load. */
 		'OFF_ANTI' => array('label' => 'Expert Anticipator', 'post' => 'cnc', 'pct' => 15, 'apply' => null),
+		/* Expert Political Officer (Stage 25; rules text, user 2026-10-21), in the C&C - "Capital ships or larger units only. Centauri
+		   Only" (`needs`, $factionRules). "Expert political officers have Influence with a capital 'I'": the ship possesses one armed
+		   shuttle - Elite Crew's own retype of a default shuttle as the hangars fill (politicalArmedShuttles, asked by HangarOps); one
+		   Expert Navigator, Helmsman, Engineer or Scanner comes at no cost - the dearest of those bought (freeExpertId, the user's note);
+		   and +1 armour on 5 different systems, never Structure - five free Hardened Armour (freeArmourRows). What the player
+		   leaves unchosen, the server picks at random once, as the fleet is committed (placePoliticalPicks). None of it is lost with
+		   him. "Once during each scenario ... a stirring speech ... +30 to its initiative on that turn ... announced before initiative
+		   rolls are made": ordered in the Firing phase from his C&C's menu (saveSpeech), told in that turn's combat log (speechLog), and
+		   +30 on the next turn's initiative (applyPoliticalOfficer). Rulings (user 2026-10-21): both Centauri factions; the random picks
+		   the server's, at the commit; his armed shuttle on top of Elite Crew's; no +30 unless he still serves on the turn it lands.
+		   40%. */
+		'OFF_POL'  => array('label' => 'Expert Political Officer', 'post' => 'cnc', 'pct' => 40, 'apply' => 'applyPoliticalOfficer',
+			'publish' => array('iniativebonus'), 'needs' => 'isCapitalOrLarger'),
+		/* Expert Software Engineer (Stage 26; rules text, user 2026-10-22), in the Hyach Computer - "unique to the Hyach", so only a hull
+		   with one is offered him. "One extra bonus fire control point (BFCP). This is lost only if the computer is completely destroyed"
+		   (applySoftwareEngineer: the Computer's damage takes none of it), and "the player can leave this extra BFCP point unallocated
+		   until the Weapons Fire Step" - one point held back from Initial Orders may be placed in the Firing phase
+		   (HyachComputer::settleFiringBFCP). "The Hyach Computer ignores the first point of damage in any volley ... an extra point of
+		   armor that cannot be damaged, destroyed or bypassed" (computerArmour). "If aboard a stealth unit ... five hexes further away for
+		   detection purposes ..., except for fighters, which halve their detection range (round fractions up)" (maskSignature). "Permits
+		   a specialist to use his abilities a second time during the scenario ... of the software category ... This only works for one
+		   specialist per scenario" (specialistReuse). Rulings (user 2026-10-22): the hold built, and the Computer Specialist rebuilt to
+		   its own rules on the same Firing-phase allocation; the per-category cap stays 2; a specialist used on turn N may be used again
+		   from turn N+1. 15%, Hyach only ($factionRules). */
+		'OFF_SOFT' => array('label' => 'Expert Software Engineer', 'post' => 'computer', 'pct' => 15, 'apply' => 'applySoftwareEngineer'),
+		/* Expert Troop Leader (Stage 27; rules text, user 2026-10-23), aboard a ship - "Location: Hangar" (the largest). "If the ship is
+		   attacked by enemy breaching pods, he provides a penalty of 2 on all enemy rolls and a bonus of 2 on all defense rolls" -
+		   boardingShift, beside the Expert Security Officer's (every boarding party, as his). "If any of his own ship's breaching pods
+		   attack an opponent, they gain a +1 bonus on any attack table" - as many of his player's pods, in fleet order, as his ship's Pod
+		   Allowance (user ruling 2026-10-23: troopAidedCraft). "All bulkheads on the ship are considered to have 1 extra box. This
+		   benefit remains even if the troop leader is killed in combat" - so `lost` runs the same method as `apply`. "Accompany a
+		   breaching pod" is OFF_TRPOD below, a purchase of its own (user notes: no officer moves from a ship to a docked pod).
+		   5% of the hull; Gaim only ($factionRules). */
+		'OFF_TROOP' => array('label' => 'Expert Troop Leader', 'post' => 'hangar', 'pct' => 5, 'apply' => 'applyTroopLeader',
+			'lost' => 'applyTroopLeader'),
+		/* Expert Warrior (Stage 28; rules text, user 2026-10-23) - "Tor 'galla", the Chosen, in the C&C. "+ 1 to hit with all weapons, and
+		   all weapons cause +1 extra damage per die" (+1 fire control: applyWarrior; warriorDieBonus - on a serving Expert Gunner's weapon the
+		   Gunner's +1 and +1 replace his: user ruling); "+10 bonus to its initiative and any fighters or shuttles it launches receive the same
+		   initiative" - flights launched from his ship in battle (user ruling: applyLaunchedFlights); "All critical hits, regardless of
+		   system, have a -1 on their rolls" (applyWarrior), "and any critical hits caused by the expert warrior's ship gain +1 on their dice"
+		   (markCausedCriticals). Once per scenario each, never two in a turn: a CHARGE declared in the Movement phase at a unit the player
+		   picks (user ruling: Movement::CHARGE, validateCharge; +2 to hit that unit when the run holds - chargeTarget, chargeHitBonus), with one snap turn
+		   cheaper (the client's); a PRECISION STRIKE - his ship's first called shot, without the called shot penalty (the user's note:
+		   precisionStrike); and SUPREME ANTICIPATION - ordered in the Firing phase from his C&C, as the Political Officer's speech (the
+		   user's note: saveAnticipation), +50 initiative next turn while he serves and -50 the turn after. 50%; Drazi only ($factionRules). */
+		'OFF_WARR' => array('label' => 'Expert Warrior', 'post' => 'cnc', 'pct' => 50, 'apply' => 'applyWarrior',
+			'publish' => array('iniativebonus'), 'lost' => 'applyWarriorLost', 'lostPublish' => array('iniativebonus')),
+		/* Expert Ballistic Officer (Stage 29; rules text, user 2026-10-24), in the C&C. "All ballistic weapons receive +5 to their distance
+		   range (but not their launch range). This does not apply to proximity weapons" (distanceRangeBonus - while he serves). "All
+		   ballistic devices with limited ammunition receive one extra round of ammo. For missiles, this would be an extra missile slot":
+		   the magazine one slot more for every rack and mine launcher it feeds (raiseMagazines - the user's note), and a weapon keeping its
+		   own count one round more, written as it is committed (placeBallisticPicks). "All missile racks (but not reload racks) can change
+		   one of their single-space ... missiles to any other legal type at no cost": the N dearest paid single-slot rounds bought are free,
+		   N his ship's missile racks and Bomb Racks (ballisticPicks - the user's note), and the rest picked at random at the commit. Rulings
+		   (user 2026-10-24): only hulls with counted ballistic ammunition (`needs`); a Bomb Rack a missile rack, a mine launcher a slot only;
+		   the ammunition stays when he is lost, the range goes; a pick never Basic, a round free anyway, or a two-slot one. "5% of the base
+		   cost of the ship, plus 1% for each missile rack that received a free missile upgrade ... Races other than the Kor-Lyans pay
+		   double": 10% and +2% a pick, the Kor-Lyans 5% and +1% ($factionRules, `perPick`). No stat moves at load. */
+		'OFF_BALL' => array('label' => 'Expert Ballistic Officer', 'post' => 'cnc', 'pct' => 10, 'perPick' => 20, 'apply' => null,
+			'needs' => 'hasCountedBallisticAmmo'),
+		/* Expert Quartermaster (Stage 30; rules text, user 2026-10-24), in the C&C. "ONE of the following ship enhancements (player's choice)
+		   will be present on his ship at no extra cost": Gunsights on two weapons, Advanced Defensive Targeting on two weapons, the Improved
+		   Reactor ("if the reactor is in danger of exploding, triple its chance" - breachChance), Improved Thrust on two thrusters, Hardened
+		   Armour on two non-Structure, non-primary systems of one side, or the Jump Accelerator - the dearest of those the player buys (the
+		   user's note: quartermasterRefit), and what he leaves unchosen rolled as the fleet is committed (placeQuartermasterPicks). "Each of the
+		   ship's class-S or better missile racks comes with two special missiles ... class-SO or an older class ... only one": the dearest that
+		   many rounds bought are free, the rest rolled at the commit (quartermasterPicks, placeQuartermasterMissiles). "The ship may ignore one
+		   critical hit it receives during a scenario": the first its critical rolls give it (the user's note: patchCritical). "A permanent -6 to
+		   its initiative roll", "+10% (round fractions up) to its Turn Delay" (turnDelayPenalty) and "+2 on all critical hits against the C&C"
+		   (applyQuartermaster). Rulings (user 2026-10-24): each turn's delay +10%, rounded up; EVERYTHING stays when he is lost - the refit, the
+		   missiles, an unused patch (`stock`) and all three penalties (`lost`); any paid missile type the hull is offered, a two-slot round
+		   counting as one; the commit's random refit never the Improved Reactor or the Jump Accelerator. 10% for the Hurr, 20% for everyone
+		   else ($factionRules). */
+		'OFF_QM'   => array('label' => 'Expert Quartermaster', 'post' => 'cnc', 'pct' => 20, 'apply' => 'applyQuartermaster',
+			'publish' => array('iniativebonus'), 'lost' => 'applyQuartermaster', 'lostPublish' => array('iniativebonus'), 'stock' => true),
+		/* Expert Graviton Controller (Stage 31; rules text, user 2026-10-25), in the Engine. "All gravitic beam weapons score +1 damage" - every
+		   Raking gravitic weapon (user ruling: gravitonBeamBonus); "graviton pulsars or gravitic bolts ... determine their result as though the to-hit
+		   die roll was 5% lower" - a gravitic weapon's pulse count (gravitonPulseShift; a Gravitic Bolt's fixed damage has no result to change);
+		   "Tweaking of the Engine improved its thrust output by 1. Increase the thrust rating of the largest aft thruster by 1 as well" - the first of
+		   equal ones (user ruling: applyGravitonTweaks), and both stay when he is lost (user ruling: `lost`). "Once during the scenario, during the
+		   Movement Step, the gravitic drive can be 'rotated'": a d6 the SERVER rolls when the player clicks (rotateGravitic), its row and every row
+		   before it locked (MoveLock - the user's note: never cancelled and rolled again, kept on a reload), and -3 to hit that turn
+		   (rotationPenalty). Rulings (user 2026-10-25): any hull with a gravitic drive or a gravitic weapon (`needs` - outside the Nexus, Escalation
+		   Wars and other-universe settings); the rotation at any point of the move. 10% for the Brakiri, 15% for everyone else ($factionRules). */
+		'OFF_GRAV' => array('label' => 'Expert Graviton Controller', 'post' => 'engine', 'pct' => 15, 'apply' => 'applyGravitonTweaks',
+			'lost' => 'applyGravitonTweaks', 'needs' => 'usesGravitics'),
 
 		/* PLACED OFFICERS (Stage 8), posted in a weapon the player picks. AFTER every fixed-post officer, so
 		   apply() has already raised the C&C Matter Weapons Expert's guns when it reaches them, and before
@@ -497,6 +708,44 @@ class Officers{
 		   weapon": a flight whose craft carries a weapon flagged as its tail gun (hasTailGun) - every faction (user ruling: all 15). */
 		'OFF_TAIL' => array('label' => 'Expert Tailgunner', 'post' => 'craft', 'flight' => true, 'pct' => 50,
 			'apply' => null, 'needs' => 'hasTailGun'),
+		/* Breaching Expert (Stage 24; rules text, user 2026-10-21): "This highly trained breaching specialist accompanies a breaching pod on
+		   its mission ... The pod receives +1 thrust and ignores any loss of thrust due to damage" - the FLIGHT's thrust (applyBreachingExpert;
+		   a flight moves as one), and FV takes no thrust from a flight for damage, so the second half has nothing to ignore. "The pod's Marines
+		   receive benefits as if they were Elite" - his own pod's only (user ruling: "single pod"), asked by Marines::isElite (eliteMarines);
+		   on a pod already Elite - the Narn and Gaim pods, or Elite Marines bought - that half adds nothing (user ruling), the rest still
+		   applies. "If attempting to capture a ship, the pod's contingent gets three attack rolls on the first turn of combat. It is still
+		   destroyed by a single hit ... only once per scenario": spendCaptureAssault marks the party at delivery, captureRolls rolls three.
+		   "25% of the cost of the breaching pod" - of his ONE pod, not scaled by the flight's size (`unscaled`, user ruling); 50% for races
+		   other than the Balosians, Yolu, Narn and Gaim ($factionRules). Breaching pods only (`needs`). "No more than 20% of a fleets
+		   breaching pods" is the lobby's Fleet Correctness Report (user ruling), as every fleet-composition rule is.
+		   Stage 27 (user request 2026-10-23): as many as the flight has pods, one in each (`multi` - maxCount holds it to maxFlightSize),
+		   each priced at his one pod; each pod of his Elite and its own capture assault; the flight's +1 thrust once, however many. He may
+		   share a pod flight with Expert Troop Leaders, one officer to a pod (`mixesWith`), and takes the first pods. */
+		'OFF_BRCH' => array('label' => 'Breaching Expert', 'post' => 'craft', 'flight' => true, 'pct' => 50, 'unscaled' => true, 'multi' => 6,
+			'mixesWith' => array('OFF_TRPOD'), 'apply' => 'applyBreachingExpert', 'publish' => array('freethrust'), 'needs' => 'isBreachingPod'),
+		/* Expert Troop Leader in a breaching pod (Stage 27; user notes 2026-10-23: no officer can move from a ship to a docked pod, so he is
+		   bought for the pod "at the cost of 50% the price of a pod", and "the Troop leader accompanies any Marine that attacks from that
+		   pod"). "He gives a further -2 bonus (a total of -3 for Gaim) to any rolls" - -3 on every roll of every party from his pod (user
+		   ruling: his ship's 1 among them, so a Troop Leader ship's 1 never adds to it): troopDeliveryMod, troopPartyRollMod. "If any
+		   result appears that 'kills' one of his contingents, roll a d6, and on a roll of 1-4 he manages to escape with his pod ... This is
+		   not available on Wreak Havoc missions" - troopPartyLost; on Wreak Havoc he dies with them (user ruling). Lost with his pod as
+		   every fighter officer, and no kill roll of his own. One to a pod, as many as the flight has (`multi`), beside Breaching Experts
+		   (`mixesWith` - user ruling 2026-10-23); priced at his one pod (`unscaled`). Gaim breaching pods only ($factionRules, `needs`). */
+		'OFF_TRPOD' => array('label' => 'Expert Troop Leader', 'post' => 'craft', 'flight' => true, 'pct' => 50, 'unscaled' => true, 'multi' => 6,
+			'mixesWith' => array('OFF_BRCH'), 'apply' => null, 'needs' => 'isBreachingPod'),
+		/* Redline Pilot (Stage 32; rules text, user 2026-10-25) - "nothing less than fanatical", in the flight's first craft. "A fight with a
+		   Redline Pilot cannot contain any other officers": D9's one officer to a flight already. (1) He skin dances over an Enormous unit moving
+		   at speed 8 or less, not 5, at +1 for each point of its speed over 5 (skinDanceSpeedLimit - RammingAttack::getSkinDancingResult), and his
+		   craft is the one that crashes when a dance fails (redlineCrashCraft). (2) A combat pivot the flight lacks the thrust for (the client's,
+		   movement.js canPivot / doPivot - the row records what it lacked), its fire that turn at -3 instead of -1 (combatPivotPenalty). (3)
+		   Afterburners, the flight's FIRST Movement-phase order of a turn (the user's note): its thrust +50%, rounded down, that turn - a 'redline'
+		   row (redlineBurnThrust, validateRedline) - and the next turn straight ahead at its speed, no manoeuvre of any kind (isCoolingDown). (4) A
+		   landing beyond the thrust tolerance: a d20 at or under the excess and his craft rams the carrier while the rest break off, never on a
+		   turn the flight burned (rollRedlineLandings, redlineLandingHolds). Rulings (user 2026-10-25): Enormous units only; the flight's own +1
+		   per 2 points of speed over 5 is FV's existing modifier, counted once; the cooling turn forbids every manoeuvre, the Firing phase's
+		   included; an afterburner's thrust counts for a landing. "Equal to the 100% cost of a fighter" for the Cascor, 50% more for everyone
+		   else ($factionRules) - of a craft, scaled by the flight's size (§9.9). No stat moves at load. Last in the list, as the newest. */
+		'OFF_REDL' => array('label' => 'Redline Pilot', 'post' => 'craft', 'flight' => true, 'pct' => 150, 'apply' => null),
 	);
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV) - so the
@@ -544,12 +793,14 @@ class Officers{
 		return true;
 	}
 
-	//His price in percent for this unit's faction: $factionRules' when it names one, else the registry's
+	/* His price in percent for this unit's faction: $factionRules' when it names one, else the registry's - and for an officer with
+	   `perPick` (Stage 29), that much more again for each free pick the hull gives him (5% -> 15% on a Solyrn's 10 racks). */
 	public static function pctFor($ship, $id){
 		$faction = (string)$ship->faction;
 		$rules = self::rulesId($id);
-		if (isset(self::$factionRules[$rules]['pct'][$faction])) return self::$factionRules[$rules]['pct'][$faction];
-		return self::$registry[$id]['pct'];
+		$pct = isset(self::$factionRules[$rules]['pct'][$faction]) ? self::$factionRules[$rules]['pct'][$faction] : self::$registry[$id]['pct'];
+		if (!empty(self::$registry[$id]['perPick'])) $pct = $pct * (100 + self::$registry[$id]['perPick'] * self::ballisticPicks($ship)) / 100;
+		return $pct;
 	}
 
 	/* D9: never on Ancient hulls, OSATs (mines extend OSAT) or terrain - one shared test in front of
@@ -651,9 +902,11 @@ class Officers{
 	   price and a 12-craft flight twice it. $count (Stage 18): an officer bought as a count is $count
 	   times the listed price, scaled and rounded up ONCE for the row - the lobby's own sum (enhCost is
 	   price x count): 2 Expert Pilots on a 3-craft Aurora are ceil(114 x 3/6) = 57.
+	   Stage 24: an `unscaled` officer is his listed price, whatever the size (a Breaching Expert in his one pod).
 	   ⚠️ MIRROR PAIR with officers.flightCost. */
 	public static function flightPrice($flight, $id, $crafts, $count = 1){
 		$officer = self::$registry[$id];
+		if (!empty($officer['unscaled'])) return self::craftPrice($flight, self::pctFor($flight, $id)) * max(1, (int)$count);
 		$crafts = max(1, (int)$crafts);
 		$standard = self::standardFlight($flight);
 		$price = intdiv(self::craftPrice($flight, self::pctFor($flight, $id)) * max(1, (int)$count) * $crafts + $standard - 1, $standard);
@@ -696,6 +949,9 @@ class Officers{
 	              gate's. Through getUnitJumpEngines, never a sweep of $ship->systems ([[project_jump_points]]).
 	              No officer-eligible hull carries two (measured 2026-10-15), so "his ship's drive" and "the
 	              drive he sits in" cannot disagree.
+	     computer the Hyach Computer (Stage 26): no hull carries two.
+	     hangar   the largest Hangar by boxes (Stage 27, the Expert Troop Leader), the first on a tie - a plain hangar bay, never a
+	              catapult, a fighter rail, a docking collar or a docking bay (Hangar subclasses with jobs of their own).
 	     craft    a flight's first craft (Stage 4): the lobby's one fighter card, and the sample fighter
 	              getSampleFighter() answers - id 1, whether or not it is still flying. An officer bought as a
 	              count (Stage 18) takes the first craft, the next the second, and so on (nthCraft).
@@ -731,8 +987,26 @@ class Officers{
 					if (!$engine->isLegacyJump() && !$engine->isGateJump()) return $engine;
 				}
 				return null;
+			case 'computer':
+				foreach ($ship->systems as $system){
+					if ($system instanceof HyachComputer) return $system;
+				}
+				return null;
+			case 'hangar':
+				$best = null;
+				foreach ($ship->systems as $system){
+					if (!self::isHangarBay($system)) continue;
+					if ($best === null || $system->maxhealth > $best->maxhealth) $best = $system;
+				}
+				return $best;
 		}
 		return null;
+	}
+
+	//a plain hangar bay: a Hangar, but not one of the subclasses that are catapults, rails, collars or docking bays
+	private static function isHangarBay($system){
+		return $system instanceof Hangar && !($system instanceof Catapult) && !($system instanceof FighterRail)
+			&& !($system instanceof DockingCollar) && !($system instanceof DockingBay);
 	}
 
 	//Enhancements::strongestSystem's semantics: the first in construction order wins a tie
@@ -789,22 +1063,32 @@ class Officers{
 	   it) buys nothing - the server trusts the client's rows, so a doctored payload is answered here. So
 	   is a flight's second officer row (D9: one officer in total): only the first in registry order serves.
 	   An officer bought as a count (`multi`, Stage 18) is that many entries, one in each of the flight's
-	   first crafts, held to maxCount and to the craft it has. */
+	   first crafts, held to maxCount and to the craft it has. Stage 27: after one, an officer he `mixesWith`
+	   takes the crafts after his - one officer to a craft, never more than the flight has - and nobody else.
+	   An Expert Troop Leader aboard a ship carries his ship's Pod Allowance (`pods`), worked out here while
+	   $ship->fighters is still the blueprint's - Enhancements' hangar conversions rewrite it next. */
 	public static function pickPosts($ship){
 		$list = array();
 		if (self::hasOfficerRow($ship) && self::mayCarryOfficers($ship)){
+			$first = null; //a flight's first officer bought as a count, whose `mixesWith` may follow him
+			$craft = 0;    //...and the crafts taken so far
 			foreach (self::$registry as $id => $officer){
 				if (!self::isBought($ship, $id)) continue;
 				if (!self::isEligible($ship, $id)) continue;
+				if ($first !== null && !in_array($id, self::$registry[$first]['mixesWith'], true)) continue;
 				if (!empty($officer['multi']) && $ship instanceof FighterFlight){
-					$n = min(self::boughtCount($ship, $id), self::maxCount($ship, $id), self::craftCount($ship));
+					$n = min(self::boughtCount($ship, $id), self::maxCount($ship, $id), self::craftCount($ship) - $craft);
 					for ($k = 1; $k <= $n; $k++){
-						$list[] = array('id' => $id, 'post' => (int)self::nthCraft($ship, $k)->id, 'out' => null, 'how' => null);
+						$list[] = array('id' => $id, 'post' => (int)self::nthCraft($ship, ++$craft)->id, 'out' => null, 'how' => null);
 					}
-					break;
+					if ($first !== null || empty($officer['mixesWith'])) break;
+					$first = $id;
+					continue;
 				}
 				$post = self::findPost($ship, $officer['post']);
-				$list[] = array('id' => $id, 'post' => (int)$post->id, 'out' => null, 'how' => null);
+				$entry = array('id' => $id, 'post' => (int)$post->id, 'out' => null, 'how' => null);
+				if ($id === 'OFF_TROOP') $entry['pods'] = self::podAllowance($ship);
+				$list[] = $entry;
 				if ($ship instanceof FighterFlight) break;
 			}
 			if (!($ship instanceof FighterFlight)) self::pickPlacedPosts($ship, $list);
@@ -956,6 +1240,7 @@ class Officers{
 			list($list[$i]['out'], $list[$i]['how']) = self::outState($ship, $entry);
 		}
 		self::resolveUses($ship, $list);
+		self::resolveCharges($ship, $list); //Stage 28: an Expert Warrior's charge, off his movement
 		$ship->setOfficers($list);
 
 		foreach ($list as $i => $entry){
@@ -1675,7 +1960,12 @@ class Officers{
 	/* ------------------------------------------------------------------ once per battle, and faster reloads (Stage 10) */
 
 	//what a spent ability is called in its note and the tooltip
-	private static $abilityNames = array('reload' => 'faster reload', 'pierce' => 'Piercing shot', 'called' => 'called shot');
+	private static $abilityNames = array('reload' => 'faster reload', 'pierce' => 'Piercing shot', 'called' => 'called shot',
+		'capture' => 'capture assault', //Stage 24: the Breaching Expert's (spendCaptureAssault)
+		'speech' => 'speech',           //Stage 25: the Expert Political Officer's (saveSpeech)
+		'precision' => 'precision strike', 'anticipation' => 'anticipation', //Stage 28: the Expert Warrior's (precisionStrike, saveAnticipation)
+		'patch' => 'patch',             //Stage 30: the Expert Quartermaster's (patchCritical)
+		'rotate' => 'gravitic rotation'); //Stage 31: the Expert Graviton Controller's (rotateGravitic)
 
 	/* Is this ability still his on $turn? Spent ON $turn still counts: that turn's shot is the one that spent it
 	   (so every order his gun fires that turn, and a replay of it, reads the same). */
@@ -1690,7 +1980,8 @@ class Officers{
 		if (empty($uses)) return;
 		foreach ($list as $i => $entry){
 			foreach ($uses as $use){
-				if ($entry['out'] !== null && $entry['out'] < $use['turn']) continue; //a fallen officer left on that gun spent nothing
+				//a fallen officer left on that gun spent nothing - unless what he spends is the ship's stock (Stage 30, `stock`)
+				if ($entry['out'] !== null && $entry['out'] < $use['turn'] && empty(self::$registry[$entry['id']]['stock'])) continue;
 				foreach (self::staysOf($entry) as $stay){
 					if ($stay['id'] !== $use['id'] || (int)$stay['post'] !== (int)$use['post'] || !self::within($use['turn'], $stay)) continue;
 					$had = isset($list[$i]['abilities'][$use['ability']]) ? $list[$i]['abilities'][$use['ability']] : null;
@@ -1744,6 +2035,8 @@ class Officers{
 		//Stage 19 (user ruling 2026-10-20): on a gun a serving Expert Targeter covers, his +4 is the called shot's bonus - the
 		//Gunner's +3 is neither used nor spent, so it is still his if he moves or the Targeter falls
 		if (self::targeterFor($ship, $weapon, $turn) !== null) return 0;
+		//Stage 28: likewise on the gun making an Expert Warrior's precision strike this turn - the penalty waived is the shot's bonus
+		if (self::precisionWeapon($ship, $weapon, $gamedata, $turn)) return 0;
 		self::spend($ship, $i, 'called', $turn, $gamedata);
 		return self::GUNNER_CALLED_BONUS;
 	}
@@ -1778,7 +2071,7 @@ class Officers{
 				$data->loading += 1;
 			} else if (!empty($officer['abilities']) && self::abilityOpen($entry, 'reload', $fired)
 				&& !self::spentOn($entry, 'pierce', $fired) && !self::spentOn($entry, 'called', $fired)
-				&& !self::firingSpentAbility($weapon, $entry, $fired, $gamedata)){
+				&& !self::firingSpentAbility($ship, $weapon, $entry, $fired, $gamedata)){
 				self::spend($ship, $i, 'reload', $fired, $gamedata);
 				$data->loading += 1;
 			}
@@ -1795,8 +2088,10 @@ class Officers{
 	   called shot was), because the spend itself is not in this gamedata: Manager::advanceGameState runs the turn
 	   change on the gamedata it loaded BEFORE the firing, and FireGamePhase::advance resolved the shots on a
 	   gamedata of its own - so its OffUsed note and its in-memory spend are both invisible here (game 4484: the
-	   faster reload went with a Piercing shot on turns 1 and 6). Interceptions spend neither. */
-	private static function firingSpentAbility($weapon, array $entry, $fired, $gamedata){
+	   faster reload went with a Piercing shot on turns 1 and 6). Interceptions spend neither. Stage 28: nor the called shots of a gun that made
+	   an Expert Warrior's precision strike that turn (gunnerShotBonus). */
+	private static function firingSpentAbility($ship, $weapon, array $entry, $fired, $gamedata){
+		$precision = self::precisionWeapon($ship, $weapon, $gamedata, $fired);
 		foreach ($weapon->fireOrders as $order){
 			if ((int)$order->turn !== (int)$fired || (int)$order->weaponid !== (int)$weapon->id) continue;
 			if (strpos((string)$order->type, 'ntercept') !== false) continue;
@@ -1806,7 +2101,7 @@ class Officers{
 				if (self::abilityOpen($entry, 'pierce', $fired)) return true;
 				continue;
 			}
-			if ((int)$order->calledid < 1 || !self::bonusCall($weapon, true, $mode) || !self::abilityOpen($entry, 'called', $fired)) continue;
+			if ((int)$order->calledid < 1 || $precision || !self::bonusCall($weapon, true, $mode) || !self::abilityOpen($entry, 'called', $fired)) continue;
 			$target = $gamedata->getShipById($order->targetid);
 			$called = $target ? $target->getCalledSystemAsAimed($order) : null;
 			if ($called !== null && $called->getTargetProfileOverride() === null) return true;
@@ -2242,9 +2537,12 @@ class Officers{
 	   getDeliveryRollMod) and its missions (ShipSystem::getMarineRollMod: Wreak Havoc, Sabotage, Rescue and its Capture
 	   combat roll) - adds it; his ship's own defending marines, who need 5 or less in Capture combat, subtract it (user
 	   rulings 2026-10-17: every boarding party, the defenders' rolls too). Server only: the client previews only the
-	   attach chance, which no crew affects. */
+	   attach chance, which no crew affects.
+	   Stage 27: an Expert Troop Leader adds his own 2 ("a penalty of 2 on all enemy rolls and a bonus of 2 on all defense
+	   rolls"), on the same rolls - beside a Security Officer's, as two different officers. */
 	public static function boardingShift($ship){
-		return self::isActive($ship, 'OFF_SECU') ? self::SECURITY_BOARDING_SHIFT : 0;
+		$shift = self::isActive($ship, 'OFF_SECU') ? self::SECURITY_BOARDING_SHIFT : 0;
+		return $shift + (self::isActive($ship, 'OFF_TROOP') ? self::TROOP_BOARDING_SHIFT : 0);
 	}
 
 	/* ------------------------------------------------------------------ Expert Religious Leader (Stage 14) */
@@ -2625,6 +2923,261 @@ class Officers{
 		return !($ship instanceof FighterFlight) && empty($ship->hasAttached) && self::isActive($ship, 'OFF_ANTI');
 	}
 
+	/* ------------------------------------------------------------------ Expert Political Officer (Stage 25) */
+
+	//"Availability: Capital ships or larger units only" - size class 3, bases and enormous units included
+	private static function isCapitalOrLarger($ship){
+		return (int)$ship->shipSizeClass >= 3;
+	}
+
+	/* Is a Political Officer BOUGHT on this unit, as its rows say? For the rules that run before the officer list exists, or with
+	   none: the free expert's and the free armour's prices (at buy on a POST-side ship, and on a saved fleet), the picks made at the
+	   commit, and the hangar's armed shuttle (HangarOps runs from onIndividualNotesLoaded, before onConstructed). A row the hull
+	   would not be offered buys nothing, as in pickPosts. */
+	public static function politicalAboard($ship){
+		if (!is_object($ship) || empty($ship->enhancementOptions) || !is_array($ship->enhancementOptions)) return false;
+		if (!self::isBought($ship, 'OFF_POL') || !self::mayCarryOfficers($ship)) return false;
+		return self::isEligible($ship, 'OFF_POL');
+	}
+
+	/* "The ship possesses one armed shuttle. If this shuttle can use missiles, it comes loaded with one set of standard missiles at no
+	   cost": one more default shuttle retyped into the faction's armed shuttle, as Elite Crew's are (user note) and on top of them
+	   (user ruling 2026-10-21) - HangarOps::crewArmedShuttleUpgrades. None on a Poor Crew hull, which "cannot accommodate" armed
+	   shuttles (HangarOps::crewBlocksArmedShuttles - the caller's rule). Not lost with him: it is the ship's. */
+	public static function politicalArmedShuttles($ship){
+		return self::politicalAboard($ship) ? 1 : 0;
+	}
+
+	/* "Select either an expert navigator, expert helmsman, expert engineer, expert scanner and add him to the crew at no cost": of
+	   those four bought on a ship with a Political Officer, the DEAREST costs nothing (the user's note) - the first in registry order
+	   on a tie. null with no Political Officer, or none of the four. rowPrice prices a saved fleet's row by it; the lobby prices the
+	   buy dialog and the fleet list the same way. ⚠️ MIRROR PAIR with officers.freeExpertId (JS). */
+	public static function freeExpertId($ship){
+		if (!self::politicalAboard($ship)) return null;
+		$best = null;
+		$bestPrice = -1;
+		foreach (self::$politicalExperts as $id){
+			if (!self::isBought($ship, $id) || !self::isEligible($ship, $id)) continue;
+			$price = self::shipPrice($ship, $id);
+			if ($price > $bestPrice){
+				$best = $id;
+				$bestPrice = $price;
+			}
+		}
+		return $best;
+	}
+
+	/* ⭐ WHICH HARDENED ARMOUR IS FREE - "ship systems (selected by the owner) receive +1 to their armor values. The owner must select 5
+	   different systems ... and cannot select structure blocks": with a Political Officer aboard, the POLITICAL_ARMOUR_SYSTEMS dearest
+	   SYS_HARM rows (a refit of +1 armour, one to a system) that are not on Structure, a tie to the lower system id. Any beyond them is
+	   paid as ever. Nothing while his C&C is in $destroyed (pre-battle damage refunds him - Stage 15). Returns $rows' keys.
+	   ⚠️ MIRROR PAIR with officers.freeArmourRows (JS). */
+	private static function freeArmourRows($ship, array $rows, array $destroyed = array()){
+		if (!self::politicalAboard($ship)) return array();
+		$cnc = self::findPost($ship, 'cnc');
+		if ($cnc === null || isset($destroyed[(int)$cnc->id])) return array();
+		$candidates = array();
+		foreach ($rows as $i => $row){
+			if (!is_array($row) || !isset($row[0], $row[2], $row[6]) || (string)$row[0] !== 'SYS_HARM' || (int)$row[2] < 1) continue;
+			$system = $ship->getSystemById((int)$row[6]);
+			if (!$system || $system instanceof Structure) continue;
+			$candidates[] = array($i, Enhancements::systemEnhancementTotalPrice($ship, $system, 'SYS_HARM', (int)$row[2]), (int)$row[6]);
+		}
+		usort($candidates, function ($a, $b){
+			if ($a[1] !== $b[1]) return $b[1] - $a[1];
+			return $a[2] - $b[2];
+		});
+		$free = array();
+		foreach (array_slice($candidates, 0, self::POLITICAL_ARMOUR_SYSTEMS) as $candidate) $free[$candidate[0]] = true;
+		return $free;
+	}
+
+	/* As the fleet is COMMITTED (BuyingGamePhase, once per unit, right after its system enhancements are sanitised), whatever the player
+	   left unchosen is chosen at random, ONCE, and stored as ordinary rows (user ruling 2026-10-21: the server's pick) - so it is fixed
+	   for the whole game, no opponent can work it out, and every load reads it as it reads a purchase:
+	     - none of the four experts bought: one of those this hull is offered, his row bought (free - freeExpertId);
+	     - fewer than POLITICAL_ARMOUR_SYSTEMS free Hardened Armour: one on each of as many random systems as are missing - a system
+	       offered it, not Structure, not destroyed by pre-battle damage and not refitted with it already.
+	   Never on a saved fleet: only a game's commit rolls. Dice::d, which a harness can force. $out: sanitiseSystemEnhancements'
+	   result, returned with the rows added and every Hardened Armour priced again. */
+	public static function placePoliticalPicks($ship, array $out, $cleanPreBattle = null){
+		if (!self::politicalAboard($ship)) return $out;
+		$destroyed = Enhancements::sysEnhDestroyedSystemIds($ship, $cleanPreBattle);
+		$cnc = self::findPost($ship, 'cnc');
+		if ($cnc === null || isset($destroyed[(int)$cnc->id])) return $out;
+
+		if (self::freeExpertId($ship) === null){
+			$choices = array();
+			foreach (self::$politicalExperts as $id) if (self::isEligible($ship, $id)) $choices[] = $id;
+			if ($choices) self::buyShipLevelRow($ship, $choices[Dice::d(count($choices)) - 1]);
+		}
+
+		//Stage 30: never counting a Hardened Armour an Expert Quartermaster's free refit already spares - his come first (priceFreeRefits)
+		$refit = self::quartermasterRefit($ship, $out['rows'], $destroyed);
+		$spared = ($refit !== null) ? $refit['free'] : array();
+		$missing = self::POLITICAL_ARMOUR_SYSTEMS - count(self::freeArmourRows($ship, array_diff_key($out['rows'], $spared), $destroyed));
+		if ($missing > 0){
+			$refitted = array();
+			foreach ($out['rows'] as $row) if ((string)$row[0] === 'SYS_HARM') $refitted[(int)$row[6]] = true;
+			$candidates = array();
+			foreach ($ship->systems as $system){
+				$id = (int)$system->id;
+				if ($system instanceof Structure || isset($destroyed[$id]) || isset($refitted[$id])) continue;
+				if (Enhancements::systemEnhancementOffered($ship, $system, 'SYS_HARM')) $candidates[] = $system;
+			}
+			for (; $missing > 0 && $candidates; $missing--){
+				$k = Dice::d(count($candidates)) - 1;
+				$system = $candidates[$k];
+				array_splice($candidates, $k, 1);
+				$out['rows'][] = array('SYS_HARM', Enhancements::systemEnhancementLabel('SYS_HARM'), 1,
+					Enhancements::systemEnhancementLimit($ship, $system, 'SYS_HARM'), 0,
+					Enhancements::systemEnhancementPriceStep($ship, $system, 'SYS_HARM'), (int)$system->id, (string)$system->name);
+			}
+		}
+		return self::priceFreeRefits($ship, $out, $destroyed);
+	}
+
+	//buy a ship-level officer row the hull offers: its count 1, as the buy dialog writes it (or the offer appended, on a list without it)
+	private static function buyShipLevelRow($ship, $id){
+		foreach ($ship->enhancementOptions as $i => $entry){
+			if (isset($entry[0]) && $entry[0] === $id){
+				$ship->enhancementOptions[$i][2] = 1;
+				return;
+			}
+		}
+		$ship->enhancementOptions[] = array($id, self::getLabel($id), 1, 1, self::shipPrice($ship, $id), 0, false);
+	}
+
+	/* "Once during each scenario, the political officer can give a stirring speech ... This provides the ship with +30 to its
+	   initiative on that turn. The speech must be announced before initiative rolls are made on that turn": ordered in the Firing
+	   phase (the C&C's Speech! button), so it is announced before the NEXT turn's roll, which is where the +30 lands. That turn he must
+	   still serve (user ruling 2026-10-21) - this runs only while he does. Published: iniativebonus is public. */
+	private static function applyPoliticalOfficer($ship, $entry, $turn){
+		if (isset($entry['abilities']['speech']) && (int)$entry['abilities']['speech'] === (int)$turn - 1) $ship->iniativebonus += self::SPEECH_INITIATIVE;
+	}
+
+	/* The index of this ship's Political Officer if he may give his speech on $turn from the C&C $systemid - posted there, serving, and
+	   with it still his - or null. ⚠️ MIRROR PAIR with officers.canSpeak (JS). */
+	private static function speakerIndex($ship, $systemid, $turn){
+		foreach ($ship->getOfficers() as $i => $entry){
+			if ($entry['id'] !== 'OFF_POL' || (int)$entry['post'] !== (int)$systemid || !self::serves($entry, $turn)) continue;
+			return isset($entry['abilities']['speech']) ? null : $i;
+		}
+		return null;
+	}
+
+	/* FireGamePhase::process, through CnC::saveFirePhaseDeclaration: the speech a POST asked for on the C&C $cnc of a POST-side ship,
+	   checked on the LOADED ship (the POST-side copy has no officers) and spent - one OffUsed note on his post, read back at every
+	   later load (takeNote, resolveUses). A second order, from a re-commit or a doctored POST, finds it spent and writes nothing. */
+	public static function saveSpeech($cnc, $gamedata){
+		if (!TacGamedata::$officersPresent || !is_object($cnc)) return;
+		$postShip = $cnc->getUnit();
+		if (!$postShip) return;
+		$ship = $gamedata->getShipById((int)$postShip->id);
+		if (!$ship || $ship instanceof FighterFlight || (int)$ship->userid !== (int)$gamedata->forPlayer) return;
+		$turn = (int)$gamedata->turn;
+		$i = self::speakerIndex($ship, (int)$cnc->id, $turn);
+		if ($i !== null) self::spend($ship, $i, 'speech', $turn, $gamedata);
+	}
+
+	/* FireGamePhase::advance, after firing: every speech given this turn told in the combat log, to every player - "The Political
+	   Officer on-board <ship> begins a stirring speech about <a topic of the rules' mumbo-jumbo>". A log line wearing a fire order's
+	   clothes ([[howto_create_fire_orders]]): on the ship's own RammingAttack, at itself, rolled 1 so the printed log keeps it, no shot.
+	   The ship's name is a bare shiplink, coloured for each reader by the client. Behind $officersPresent. */
+	public static function speechLog($gamedata){
+		if (!TacGamedata::$officersPresent) return;
+		$turn = (int)$gamedata->turn;
+		foreach ($gamedata->ships as $ship){
+			foreach ($ship->getOfficers() as $entry){
+				if ($entry['id'] !== 'OFF_POL' || !isset($entry['abilities']['speech']) || (int)$entry['abilities']['speech'] !== $turn) continue;
+				$ram = $ship->getSystemByName('RammingAttack');
+				if (!$ram) continue;
+				$order = new FireOrder(-1, 'normal', $ship->id, $ship->id, $ram->id, -1, $turn, 1, 0, 1, 0, 0, 0, 0, 0, self::SPEECH_DAMAGE_CLASS, 10000);
+				$order->pubnotes = 'The Political Officer on-board <span class="shiplink" data-id="' . (int)$ship->id . '">' . $ship->name
+					. '</span> begins a stirring speech about ' . self::$speechTopics[Dice::d(count(self::$speechTopics)) - 1] . '.';
+				$order->addToDB = true;
+				$ram->fireOrders[] = $order;
+			}
+		}
+	}
+
+	/* ------------------------------------------------------------------ Expert Software Engineer (Stage 26) */
+
+	/* "The Hyach computer provides one extra bonus fire control point (BFCP). This is lost only if the computer is completely destroyed":
+	   one more point on his Computer, which its damage loss (1 per 5 boxes - HyachComputer::getBFCPAvailable) never takes; he is out of
+	   action with the Computer anyway (D3). Public: the Computer's output reaches every viewer, as a Technician's reactor does. */
+	private static function applySoftwareEngineer($ship, $entry, $turn){
+		$computer = $ship->getSystemById((int)$entry['post']);
+		if ($computer instanceof HyachComputer) $computer->addOfficerBFCP(self::SOFTWARE_BFCP);
+	}
+
+	/* May the player hold one of $computer's points back to the Firing phase on $turn - its Expert Software Engineer serving in it ("The
+	   player can leave this extra BFCP point unallocated until the Weapons Fire Step ..., recording it along with his weapons fire
+	   orders")? HyachComputer::settleFiringBFCP asks it. ⚠️ MIRROR PAIR with officers.holdsFiringBFCP (JS). */
+	public static function holdsFiringBFCP($ship, $computer, $turn){
+		if (!TacGamedata::$officersPresent || !is_object($ship) || !is_object($computer)) return false;
+		return self::servesOn($ship, 'OFF_SOFT', $computer, (int)$turn);
+	}
+
+	/* "The Hyach Computer ignores the first point of damage in any volley (essentially, it can be treated as having an extra point of armor
+	   that cannot be damaged, destroyed or bypassed by weapons that affect or ignore armor)": SOFTWARE_ARMOUR on top of the armour every hit
+	   on his Computer meets, added in ShipSystem::assignDamageReturnOverkill AFTER the weapon has worked out that armour - so a weapon that
+	   ignores armour, or wears it down, still meets this point. Per hit, as armour is: each rake and each pulse. Behind $officersPresent. */
+	public static function computerArmour($ship, $system, $gamedata){
+		if (!($system instanceof HyachComputer)) return 0;
+		return self::servesOn($ship, 'OFF_SOFT', $system, (int)$gamedata->turn) ? self::SOFTWARE_ARMOUR : 0;
+	}
+
+	/* "If aboard a stealth unit, advanced electronic signature masking software makes the ship appear as though it were five hexes further
+	   away for detection purposes (but not for weapons fire or other reasons), except for fighters, which halve their detection range
+	   (round fractions up)": Stealth::isDetectedMovement - FV's one range test for detecting a stealth ship - hands over a detector's range
+	   and its distance and gets them back: a ship's distance SIGNATURE_MASK_HEXES longer, a flight's range halved, rounded up. Server only
+	   (the client's own range forecast is commented out). Behind $officersPresent. */
+	public static function maskSignature($ship, $detector, $detection, $distance, $turn){
+		if (!self::isActive($ship, 'OFF_SOFT', $turn)) return array($detection, $distance);
+		if ($detector instanceof FighterFlight) return array((int)ceil($detection / 2), $distance);
+		return array($detection, $distance + self::SIGNATURE_MASK_HEXES);
+	}
+
+	/* "Working as a team, the Expert Software Engineer permits a specialist to use his abilities a second time during the scenario. The
+	   specialist must be of the software category, and must wait at least a full turn after using his special function before he can use it
+	   again. This only works for one specialist per scenario": the software Specialists ($softwareSpecialists) this ship may use again on
+	   $turn - used once, on an EARLIER turn (user ruling 2026-10-22: from the next turn on), while he serves and before any software
+	   Specialist has been used twice. Every use is one of the Specialists' own 'allocated' notes, read back at each load
+	   (HyachSpecialists::getUseTurns), so nothing new is stored. His team's payload carries the list (addForJson), which the client offers
+	   (officers.specialistReusable). ⚠️ The Specialists write their notes as the client sends them, unchecked - every use always has. */
+	public static function specialistReuse($ship, $turn){
+		if (!self::isActive($ship, 'OFF_SOFT', $turn)) return array();
+		$uses = self::softwareUses($ship);
+		if (self::reuseSpentTurn($uses) !== null) return array();
+		$open = array();
+		foreach ($uses as $type => $turns){
+			if (count($turns) === 1 && $turns[0] < (int)$turn) $open[] = $type;
+		}
+		return $open;
+	}
+
+	//the turn the one reuse was spent: the second use of a software Specialist used twice (the earliest, were there two), or null
+	private static function reuseSpentTurn(array $uses){
+		$spent = null;
+		foreach ($uses as $turns){
+			if (count($turns) >= 2) $spent = ($spent === null) ? $turns[1] : min($spent, $turns[1]);
+		}
+		return $spent;
+	}
+
+	//each software Specialist this ship has used: type => its use turns, distinct and ascending
+	private static function softwareUses($ship){
+		$uses = array();
+		foreach ($ship->systems as $system){
+			if (!($system instanceof HyachSpecialists)) continue;
+			foreach ($system->getUseTurns() as $type => $turns){
+				if (in_array($type, self::$softwareSpecialists, true)) $uses[$type] = $turns;
+			}
+		}
+		return $uses;
+	}
+
 	/* ------------------------------------------------------------------ fighter officers (Stage 4) */
 
 	//Expert Dogfighter: +5 initiative, ELITE_SW's line
@@ -2737,6 +3290,560 @@ class Officers{
 	//Does an Expert Tailgunner serve this flight on $turn - Weapon::getTailGunMod, behind $officersPresent. ⚠️ MIRROR PAIR with officers.hasTailgunner (JS).
 	public static function hasTailgunner($flight, $turn){
 		return self::isActive($flight, 'OFF_TAIL', $turn);
+	}
+
+	/* ------------------------------------------------------------------ Breaching Expert (Stage 24) */
+
+	/* A BREACHING POD, the units he may serve in: a flight whose craft carries Marines and that FV names a breaching pod - in the
+	   'Breaching Pods' hangar class (40 flights, the Chariot Breaching Sleds among them) or by its class name (the Minbari Protectorate's
+	   Ronati and the Nausicaan pods, which ride shuttle hangars). Never a superheavy that carries Marines (the Dalithorn Assault Pinnace and
+	   Customs Vessel, the Nausicaan Gliders). Also what the Fleet Correctness Report counts for his 20%.
+	   ⚠️ MIRROR PAIR with officers.isBreachingPod (JS). */
+	public static function isBreachingPod($ship){
+		if (!($ship instanceof FighterFlight)) return false;
+		if ($ship->hangarRequired !== 'Breaching Pods' && stripos((string)$ship->shipClass, 'Breaching Pod') === false) return false;
+		$craft = self::firstCraft($ship);
+		if ($craft === null) return false;
+		foreach ($craft->systems as $system){
+			if ($system instanceof Marines) return true;
+		}
+		return false;
+	}
+
+	/* "The pod receives +1 thrust" - the flight's, as it moves as one. Published: the boarding hit chance reads the shooter's thrust on
+	   both ends (Marines::calculateHitBase, weaponManager.calculateBoardingAction), and so does the flight's movement. "...and ignores any
+	   loss of thrust due to damage": FV takes no thrust from a flight for damage, so there is nothing to ignore - an Energy Draining
+	   Field's drain (FighterFlight::getEffectiveFreeThrust) is a field's effect, not damage, and still applies. */
+	private static function applyBreachingExpert($ship, $entry, $turn){
+		//Stage 27: the flight's +1 once, however many Breaching Experts serve in it - the first one serving adds it
+		foreach ($ship->getOfficers() as $other){
+			if ($other['id'] !== 'OFF_BRCH' || !self::serves($other, $turn)) continue;
+			if ((int)$other['post'] === (int)$entry['post']) $ship->freethrust += self::BREACH_THRUST;
+			return;
+		}
+	}
+
+	/* "The pod's Marines receive benefits as if they were Elite" - the Marines of HIS pod (user ruling 2026-10-21: "single pod"), on
+	   $turn: the delivery roll's -1 and the Elite mission classes, whose rolls are -1 (Marines::isElite, behind $officersPresent). Asked
+	   at delivery and never written into Marines::$eliteMarines, whose "Elite" tooltip line is sent to every viewer - so it stays the
+	   hull's own, and only his team's client adds him to it (officers.marinesEliteLine). Marines Elite already (the Narn and Gaim pods,
+	   or Elite Marines bought) gain nothing more (user ruling) - the caller asks eliteMarines first. */
+	public static function eliteMarines($flight, $weapon, $turn){
+		return self::breachingExpertIndex($flight, $weapon, $turn) !== null;
+	}
+
+	//the index of the Breaching Expert serving on $turn in the craft that carries $weapon, or null
+	private static function breachingExpertIndex($flight, $weapon, $turn){
+		if (!($flight instanceof FighterFlight)) return null;
+		$craft = $flight->getFighterBySystem($weapon->id);
+		if (!$craft) return null;
+		return self::servingIndex($flight, 'OFF_BRCH', $craft, $turn);
+	}
+
+	/* "If attempting to capture a ship, the pod's contingent gets three attack rolls on the first turn of combat. It is still destroyed
+	   by a single hit from the enemy ... This benefit can be received only once per scenario." Marines::onDamagedSystem, as a capture
+	   party from his pod is DELIVERED (its CaptureShip critical made) while he serves and has sent none before: spent then - one OffUsed
+	   note - and true, so the caller marks the party (BREACH_PARTY_KEY in its critical's param) and it rolls three on its first turn
+	   aboard (captureRolls), whatever becomes of him meanwhile. A delivery that fails spends nothing; nor does a Sabotage or a Rescue
+	   party. Behind $officersPresent. */
+	public static function spendCaptureAssault($flight, $weapon, $gamedata){
+		$turn = (int)$gamedata->turn;
+		$i = self::breachingExpertIndex($flight, $weapon, $turn);
+		if ($i === null) return false;
+		$entry = $flight->getOfficers()[$i];
+		if (isset($entry['abilities']['capture'])) return false;
+		self::spend($flight, $i, 'capture', $turn, $gamedata);
+		return true;
+	}
+
+	/* How many attack rolls a capture party makes this turn (ShipSystem::doCaptureMission): BREACH_CAPTURE_ROLLS on its first turn
+	   aboard - the turn its critical starts - when his (spendCaptureAssault), else one. The attack only: to the defenders it is still
+	   one attacker, eliminated by a single hit. */
+	public static function captureRolls($critical, $gamedata){
+		if (!is_array($critical->param) || empty($critical->param[self::BREACH_PARTY_KEY])) return 1;
+		return ((int)$critical->turn === (int)$gamedata->turn) ? self::BREACH_CAPTURE_ROLLS : 1;
+	}
+
+	/* ------------------------------------------------------------------ Expert Troop Leader (Stage 27) */
+
+	/* A ship's POD ALLOWANCE - the breaching pods it may carry as the lobby's Fleet Correctness Report counts them (gamelobby.js
+	   checkChoices, its per-ship profile): its dedicated "Breaching Pods" racks (HANG_BP's conversions included, as the report adds them),
+	   plus 1 - 2 on a capital ship, 4 on a base or an enormous unit, doubled on an Assault hull - held to the assault shuttle, heavy (or
+	   "normal") and medium slots it has to host them (so none from a hull without). "His own ship's breaching pods" are as many as this (user ruling
+	   2026-10-23). Off the BLUEPRINT's slots: pickPosts asks before Enhancements converts any. ⚠️ MIRROR PAIR with officers.podAllowance (JS). */
+	public static function podAllowance($ship){
+		$fighters = is_array($ship->fighters) ? $ship->fighters : array();
+		$racks = (int)($fighters['Breaching Pods'] ?? 0) + self::boughtCount($ship, 'HANG_BP');
+		$slots = (int)(($fighters['heavy'] ?? 0) ?: ($fighters['normal'] ?? 0)) + (int)($fighters['medium'] ?? 0) + (int)($fighters['assault shuttles'] ?? 0);
+		$cap = 1;
+		if (!empty($ship->Enormous) || !empty($ship->base) || !empty($ship->smallBase)) $cap = 4;
+		else if ((int)$ship->shipSizeClass >= 3) $cap = 2;
+		if (stripos((string)$ship->shipClass, 'assault') !== false) $cap *= 2;
+		return $racks + min($cap, $slots);
+	}
+
+	/* "All bulkheads on the ship are considered to have 1 extra box. This benefit remains even if the troop leader is killed in combat" -
+	   so `lost` runs this too: every turn of the battle. A displayed stat, so every viewer is sent it (Bulkhead::stripForJson). Never while
+	   pre-battle damage on his Hangar leaves him not aboard at all (the lobby refunds him). */
+	private static function applyTroopLeader($ship, $entry, $turn){
+		foreach ($ship->systems as $system){
+			if ($system instanceof Bulkhead) $system->addBoxes(self::TROOP_BULKHEAD_BOXES);
+		}
+	}
+
+	/* What his officers give a party from this pod's $craft on its d10s (lower is better for a boarder): -3 while an Expert Troop Leader
+	   serves in that very pod (his ship's 1 among it - user ruling 2026-10-23), else -1 while a Troop Leader aboard a ship counts the craft
+	   among his ship's pods (troopAidedCraft), else 0. */
+	private static function troopBonus($flight, $craft, $gamedata, $turn){
+		if (self::servingIndex($flight, 'OFF_TRPOD', $craft, $turn) !== null) return -self::TROOP_POD_BONUS;
+		return self::troopAidedCraft($flight, $craft, $gamedata, $turn) ? -self::TROOP_SHIP_POD_BONUS : 0;
+	}
+
+	//Marines::getDeliveryRollMod, behind $officersPresent: the delivery roll of a party from the pod carrying $weapon
+	public static function troopDeliveryMod($flight, $weapon, $gamedata){
+		if (!self::isBreachingPod($flight)) return 0;
+		$craft = $flight->getFighterBySystem($weapon->id);
+		return $craft ? self::troopBonus($flight, $craft, $gamedata, (int)$gamedata->turn) : 0;
+	}
+
+	/* Marines::onDamagedSystem, as a party is DELIVERED, behind $officersPresent: the craft it left, in its critical's param
+	   (TROOP_PARTY_KEY) - the only field a party carries from turn to turn - so its mission rolls and its end find that pod's officer, or
+	   its place among a Troop Leader ship's pods, again. Only where it could matter: a breaching pod of a player with a Troop Leader aboard
+	   any unit. Never sent (ShipSystem::stripForJson). */
+	public static function markTroopParty($critical, $flight, $weapon, $gamedata){
+		if (!self::isBreachingPod($flight) || !is_array($critical->param) || !self::playerHasTroopLeader($gamedata, $flight->userid)) return;
+		$craft = $flight->getFighterBySystem($weapon->id);
+		if ($craft) $critical->param[self::TROOP_PARTY_KEY] = (int)$craft->id;
+	}
+
+	//does this player have an Expert Troop Leader aboard any unit of the game - whatever has become of him since
+	private static function playerHasTroopLeader($gamedata, $userid){
+		foreach ($gamedata->ships as $ship){
+			if ($ship->userid != $userid) continue;
+			foreach ($ship->getOfficers() as $entry){
+				if ($entry['id'] === 'OFF_TROOP' || $entry['id'] === 'OFF_TRPOD') return true;
+			}
+		}
+		return false;
+	}
+
+	/* ShipSystem::getMarineRollMod - a Sabotage, Wreak Havoc or Rescue roll and every capture attack - behind $officersPresent: a marked
+	   party's bonus on this turn, from the pod it left. A pod's officer is lost with his pod; the party still finds its flight. */
+	public static function troopPartyRollMod($critical, $gamedata){
+		$party = self::troopParty($critical, $gamedata);
+		return ($party === null) ? 0 : self::troopBonus($party[0], $party[1], $gamedata, (int)$gamedata->turn);
+	}
+
+	//a marked party's array(its flight, the craft it left), or null
+	private static function troopParty($critical, $gamedata){
+		if (!is_array($critical->param) || empty($critical->param[self::TROOP_PARTY_KEY]) || !isset($critical->param['id'])) return null;
+		$flight = $gamedata->getShipById((int)$critical->param['id']);
+		if (!($flight instanceof FighterFlight)) return null;
+		$craft = $flight->getSystemById((int)$critical->param[self::TROOP_PARTY_KEY]);
+		return ($craft instanceof Fighter) ? array($flight, $craft) : null;
+	}
+
+	//Marines::onDamagedSystem, behind $officersPresent: a party from the pod carrying $weapon eliminated boarding (a delivery roll of 9+)
+	public static function troopDeliveryLost($flight, $weapon, $gamedata){
+		if (!($flight instanceof FighterFlight)) return;
+		$craft = $flight->getFighterBySystem($weapon->id);
+		if ($craft) self::troopEscape($flight, $craft, $gamedata, false);
+	}
+
+	/* ShipSystem's missions, behind $officersPresent: a marked party eliminated - by the defenders in capture combat, or on a Sabotage (4-5,
+	   9+), Rescue (3-4, "heavy casualties", its unit never back in a pod; 7+) or Wreak Havoc (9+) roll; $wreakHavoc for the last. */
+	public static function troopPartyLost($critical, $gamedata, $wreakHavoc = false){
+		$party = self::troopParty($critical, $gamedata);
+		if ($party !== null) self::troopEscape($party[0], $party[1], $gamedata, $wreakHavoc);
+	}
+
+	/* "If any result appears that 'kills' one of his contingents, roll a d6, and on a roll of 1-4 he manages to escape with his pod (but not
+	   the rest of his team ...). This is not available on Wreak Havoc missions" - there he dies with them, no roll (user ruling 2026-10-23).
+	   The pod's serving Expert Troop Leader; killed is the kill rule's own record, one OffKilled note on his pod, written straight through
+	   (the delivery and the missions run inside advance()). He serves the rest of the turn he dies (D3), so a second party lost that turn
+	   finds him killed already and rolls nothing. No combat log line names him (D4). */
+	private static function troopEscape($flight, $craft, $gamedata, $wreakHavoc){
+		$turn = (int)$gamedata->turn;
+		$i = self::servingIndex($flight, 'OFF_TRPOD', $craft, $turn);
+		if ($i === null) return;
+		$list = $flight->getOfficers();
+		if ($list[$i]['how'] === 'killed') return;
+		if (!$wreakHavoc && Dice::d(6) <= self::TROOP_ESCAPE_MAX) return;
+		$list[$i]['out'] = $turn;
+		$list[$i]['how'] = 'killed';
+		$flight->setOfficers($list);
+		Manager::insertIndividualNote(new IndividualNote(-1, $gamedata->id, $turn, $gamedata->phase, $flight->id, (int)$craft->id,
+			self::KILL_NOTE, substr(self::getLabel('OFF_TRPOD') . ' killed', 0, 40), 'OFF_TRPOD'));
+	}
+
+	/* "If any of his own ship's breaching pods attack an opponent, they gain a +1 bonus on any attack table": "his own ship's" are as many
+	   pods as his ship's Pod Allowance (podAllowance), given to his player's breaching pods in FLEET order - unit id, the order the fleet was
+	   bought in and the lobby lists it - craft by craft, on the map, in a hangar or lost: FIXED, so a lost pod's share passes to nobody
+	   (user rulings 2026-10-23). Several Troop Leader ships of one player add their allowances; one out of action takes his away.
+	   ⚠️ MIRROR PAIR with officers.troopAidedCraft (JS). */
+	public static function troopAidedCraft($flight, $craft, $gamedata, $turn){
+		$allowance = 0;
+		foreach ($gamedata->ships as $ship){
+			if ($ship->userid != $flight->userid || $ship instanceof FighterFlight) continue;
+			foreach ($ship->getOfficers() as $entry){
+				if ($entry['id'] === 'OFF_TROOP' && self::serves($entry, $turn)) $allowance += (int)($entry['pods'] ?? 0);
+			}
+		}
+		if ($allowance < 1) return false;
+		$pods = array();
+		foreach ($gamedata->ships as $ship){
+			if ($ship->userid == $flight->userid && self::isBreachingPod($ship)) $pods[(int)$ship->id] = $ship;
+		}
+		ksort($pods);
+		$n = 0;
+		foreach ($pods as $pod){
+			foreach ($pod->systems as $c){
+				if (!($c instanceof Fighter)) continue;
+				if (++$n > $allowance) return false;
+				if ((int)$pod->id === (int)$flight->id && (int)$c->id === (int)$craft->id) return true;
+			}
+		}
+		return false;
+	}
+
+	/* ------------------------------------------------------------------ Expert Warrior (Stage 28) */
+
+	//the index of this ship's Expert Warrior if he serves on $turn, or null
+	private static function warriorIndex($ship, $turn){
+		foreach ($ship->getOfficers() as $i => $entry){
+			if ($entry['id'] === 'OFF_WARR' && self::serves($entry, $turn)) return $i;
+		}
+		return null;
+	}
+
+	/* +10 initiative (published to every viewer: `publish`); -1 on EVERY critical roll his ship makes - the ship's critRollMod, which
+	   ShipSystem::testCritical adds for each system and the kill roll of every officer aboard reads too ("including any modifications",
+	   D3); and his Supreme Anticipation: +50 on the turn after he ordered it, -50 on the turn after that (anticipationShift).
+	   "+ 1 to hit with all weapons": +1 on every non-null fire control of every mode of every weapon (raiseEveryMode - the Gunner's rule, and
+	   the C&C Matter Weapons Expert's way of reaching a whole ship, so it shows in each weapon's fire control as theirs do: user request after
+	   play test 4509). Not the ram - ramming is not one of the ship's weapons (the Religious Leader's exclusion) - nor a jump drive (JumpEngine
+	   extends Weapon), nor a serving Expert Gunner's weapon, whose +1 replaces his ("does not combine any to-hit or damage bonuses with those
+	   of other elite officers" - user ruling 2026-10-23). ⚠️ MIRROR PAIR with officers.fireControlRaise (JS). */
+	private static function applyWarrior($ship, $entry, $turn){
+		$ship->iniativebonus += self::WARRIOR_INI + self::anticipationShift($entry, $turn, true);
+		$ship->critRollMod += self::WARRIOR_CRIT_MOD;
+		foreach ($ship->systems as $system){
+			if (!($system instanceof Weapon) || $system instanceof RammingAttack || $system instanceof JumpEngine) continue;
+			if (!self::servesOn($ship, 'OFF_GUN', $system, $turn)) self::raiseEveryMode($system);
+		}
+	}
+
+	/* `lost`: once he is out of action in battle, only the -50 his anticipation still owes - "on the turn after that one, his ship suffers
+	   a -50 penalty" - whether or not he lived to give the +50 (which, like the Political Officer's +30, needs him serving: user ruling
+	   2026-10-21). */
+	private static function applyWarriorLost($ship, $entry, $turn){
+		$ship->iniativebonus += self::anticipationShift($entry, $turn, false);
+	}
+
+	//what his Supreme Anticipation, ordered in the Firing phase of turn N, does to the initiative of $turn: +50 on N+1 (while he serves), -50 on N+2
+	private static function anticipationShift($entry, $turn, $serving){
+		if (!isset($entry['abilities']['anticipation'])) return 0;
+		$ordered = (int)$entry['abilities']['anticipation'];
+		if ($ordered === (int)$turn - 1) return $serving ? self::SUPREME_INITIATIVE : 0;
+		if ($ordered === (int)$turn - 2) return self::SUPREME_PENALTY;
+		return 0;
+	}
+
+	/* On the turn of a CHARGE that holds (chargeTarget), "a further + 2 to hit that unit with all his ship's weapons" - Weapon::calculateHitBase,
+	   behind $officersPresent, in d20 units: a shot modifier, as it is for one unit only (his standing +1 is fire control - applyWarrior). The
+	   charge's own, so on a Gunner's weapon too. Never the ram - ramming is not one of the ship's weapons (the Religious Leader's exclusion).
+	   ⚠️ MIRROR PAIR with officers.chargeHitBonus (JS). */
+	public static function chargeHitBonus($ship, $weapon, $target, $gamedata){
+		if (!$target || $ship instanceof FighterFlight || $weapon instanceof RammingAttack) return 0;
+		$charged = self::chargeTarget($ship, $gamedata);
+		return ($charged !== null && (int)$charged->id === (int)$target->id) ? self::CHARGE_HIT : 0;
+	}
+
+	/* "All weapons cause +1 extra damage per die" - Weapon::getFinalDamage adds it to Elite Crew's Dice::$perDieBonus, each die capped at its
+	   face, as the Gunner's; a weapon whose damage is not rolled gains nothing. Not on a serving Gunner's weapon, whose +1 replaces his (user
+	   ruling), nor the ram. */
+	public static function warriorDieBonus($ship, $weapon){
+		if ($weapon instanceof RammingAttack || !self::isActive($ship, 'OFF_WARR')) return 0;
+		return self::servesOn($ship, 'OFF_GUN', $weapon, TacGamedata::$currentTurn) ? 0 : self::WARRIOR_DIE_BONUS;
+	}
+
+	/* The turn of each Expert Warrior's charge, as abilities['charge'] (the payload's "used" list): the CHARGE row itself is the record - every
+	   turn's movement loads, so nothing else is stored. Before apply, so his `apply` and the payload see it. */
+	private static function resolveCharges($ship, array &$list){
+		foreach ($list as $i => $entry){
+			if ($entry['id'] !== 'OFF_WARR') continue;
+			foreach ((array)$ship->movement as $move){
+				if ($move->type == Movement::CHARGE){
+					$list[$i]['abilities']['charge'] = (int)$move->turn;
+					break;
+				}
+			}
+		}
+	}
+
+	/* ⭐ THE CHARGE - "He can 'charge' an opponent by pointing his ship at the target and moving directly towards it for his full movement.
+	   The 'charge' is declared as this maneuver is performed. He must move at least 4 hexes towards the enemy and must have beaten him in
+	   initiative": the unit his charge row names (the player picks it - user ruling 2026-10-23), if he closed 4 hexes (chargeRunHolds) and his
+	   ship beat it on initiative (chargeBeaten - so the target had moved when he did). null otherwise. A charge that does
+	   not hold is still spent: its row is the record (resolveCharges). */
+	public static function chargeTarget($ship, $gamedata, $turn = null){
+		if ($turn === null) $turn = (int)$gamedata->turn;
+		if ($ship instanceof FighterFlight || self::warriorIndex($ship, $turn) === null) return null;
+		$row = Movement::getChargeRow($ship, $turn);
+		if ($row === null) return null;
+		$target = $gamedata->getShipById((int)$row->value);
+		if (!self::chargeable($ship, $target) || !self::chargeBeaten($ship, $target, $gamedata)) return null;
+		return self::chargeRunHolds($ship, $target, $turn) ? $target : null;
+	}
+
+	/* "Must have beaten him in initiative" = the target moved before him. Standard movement: one unit at a time, in BaseShip::hasBetterIniative's
+	   order (ties to the bonus, then the id). Simultaneous Movement: a whole bracket moves together (`iniative` IS the bracket), so only a unit
+	   of a LOWER bracket has moved - never one of his own, whatever a tie-break says (user, 2026-10-24).
+	   ⚠️ MIRROR PAIR with shipManager.movement.chargeBeaten (JS). */
+	private static function chargeBeaten($ship, $target, $gamedata){
+		if ($gamedata->rules && $gamedata->rules->hasRuleName('initiativeCategories')) return $ship->iniative > $target->iniative;
+		return BaseShip::hasBetterIniative($ship, $target);
+	}
+
+	//an enemy unit on the board - not his own team, not terrain
+	private static function chargeable($ship, $target){
+		return $target && (int)$target->id !== (int)$ship->id && (int)$target->team !== (int)$ship->team && !$target->isTerrain();
+	}
+
+	/* "He must move at least 4 hexes towards the enemy": from the hex he declared in to the hex his movement ends in this turn, at least
+	   CHARGE_MIN_HEXES nearer the target where it ended its own move (it moved first). That and the initiative are the whole test (user
+	   ruling 2026-10-24, play test 4509): the ship may turn, pivot and slip as it needs to close, so the path is not judged - nor where his
+	   bow points. The charge row comes before his first step into a hex (validateCharge); one after it does not hold. */
+	private static function chargeRunHolds($ship, $target, $turn){
+		$goal = self::positionOn($target, $turn);
+		if ($goal === null) return false;
+		$from = null;
+		$last = null;
+		foreach ((array)$ship->movement as $move){
+			if ((int)$move->turn > (int)$turn) continue;
+			if ((int)$move->turn === (int)$turn){
+				if ($move->type == Movement::CHARGE){
+					if ($last === null) return false;
+					$from = $last->position;
+				} else if ($from === null && Movement::isHexStep($move)){
+					return false;
+				}
+			}
+			$last = $move;
+		}
+		if ($from === null) return false;
+		return $from->distanceTo($goal) - $last->position->distanceTo($goal) >= self::CHARGE_MIN_HEXES;
+	}
+
+	//where a unit stood at the end of $turn's movement so far: its last row of that turn or before
+	private static function positionOn($unit, $turn){
+		$position = null;
+		foreach ((array)$unit->movement as $move){
+			if ((int)$move->turn <= (int)$turn) $position = $move->position;
+		}
+		return $position;
+	}
+
+	/* MovementGamePhase::process, on the movement a POST submits for $loaded (the authoritative load - the POST-side ship has no officers):
+	   ONE charge row is kept, and only while his Warrior serves and has not charged on an earlier turn, before the ship's first step into a
+	   hex, at an enemy unit deployed and still in the fight. Every other charge row is dropped; the rest of the movement passes untouched
+	   (his snap turn's cheaper thrust is the client's, as every turn cost is). */
+	public static function validateCharge($loaded, array $movement, $gamedata){
+		$turn = (int)$gamedata->turn;
+		$may = false;
+		if (!($loaded instanceof FighterFlight)){
+			$i = self::warriorIndex($loaded, $turn);
+			$may = ($i !== null) && self::abilityOpen($loaded->getOfficers()[$i], 'charge', $turn);
+		}
+		$kept = false;
+		$stepped = false;
+		$out = array();
+		foreach ($movement as $move){
+			if ((int)$move->turn === $turn && $move->type == Movement::CHARGE){
+				$target = $gamedata->getShipById((int)$move->value);
+				if ($may && !$kept && !$stepped && self::chargeable($loaded, $target) && !$target->isDestroyed()
+					&& $target->getTurnDeployed($gamedata) <= $turn){
+					$kept = true;
+					$out[] = $move;
+				}
+				continue;
+			}
+			if ((int)$move->turn === $turn && Movement::isHexStep($move)) $stepped = true;
+			$out[] = $move;
+		}
+		return $out;
+	}
+
+	/* ⭐ THE PRECISION STRIKE - "a single 'called shot', with only one weapon, without the usual called shot penalty", once per scenario:
+	   automatically his ship's FIRST called shot (the user's note) - of a turn's called shots, the one by his lowest-numbered weapon, the
+	   first it declared - never on a turn he charged or ordered his Supreme Anticipation ("cannot do more than one of them in a given turn").
+	   A standard called shot only, not one in a mode with a hit calculation of its own (bonusCall). The order, or null. ⚠️ MIRROR PAIR with
+	   officers.precisionWeapon (JS). */
+	private static function precisionShot($ship, $gamedata, $turn){
+		if ($ship instanceof FighterFlight) return null;
+		$i = self::warriorIndex($ship, $turn);
+		if ($i === null) return null;
+		$entry = $ship->getOfficers()[$i];
+		if (!self::abilityOpen($entry, 'precision', $turn) || self::spentOn($entry, 'anticipation', $turn)) return null;
+		if (Movement::getChargeRow($ship, $turn) !== null) return null;
+		$best = null;
+		$bestId = null;
+		foreach ($ship->systems as $weapon){
+			if (!($weapon instanceof Weapon) || $weapon instanceof RammingAttack) continue;
+			if ($bestId !== null && (int)$weapon->id >= $bestId) continue;
+			foreach ($weapon->fireOrders as $order){
+				if ((int)$order->turn !== (int)$turn || (int)$order->calledid < 1 || strpos((string)$order->type, 'ntercept') !== false) continue;
+				if (!self::bonusCall($weapon, true, (int)$order->firingMode)) continue;
+				$target = $gamedata->getShipById($order->targetid);
+				$called = $target ? $target->getCalledSystemAsAimed($order) : null;
+				if ($called === null || $called->getTargetProfileOverride() !== null) continue;
+				$best = $order;
+				$bestId = (int)$weapon->id;
+				break;
+			}
+		}
+		return $best;
+	}
+
+	/* Weapon::calculateHitBase, behind $officersPresent: on the precision strike's shot, the called shot penalty it has just added taken off
+	   again (doubled against a base, as the penalty is), and the strike spent - once per scenario, in memory and as an OffUsed note. */
+	public static function precisionStrike($ship, $weapon, $target, $fireOrder, $called, $gamedata){
+		if (!$called || !$fireOrder) return 0;
+		$turn = (int)$gamedata->turn;
+		$shot = self::precisionShot($ship, $gamedata, $turn);
+		if ($shot === null || !self::sameOrder($shot, $fireOrder)) return 0;
+		self::spend($ship, self::warriorIndex($ship, $turn), 'precision', $turn, $gamedata);
+		$waived = -(int)$weapon->getCalledShotMod();
+		return ($target && $target->base) ? 2 * $waived : $waived;
+	}
+
+	private static function sameOrder($a, $b){
+		return $a === $b || ((int)$a->id > 0 && (int)$a->id === (int)$b->id);
+	}
+
+	/* Is $weapon the one making his precision strike on $turn? An Expert Gunner's called-shot +3 is neither used nor spent on its called
+	   shots then (the Targeter's precedent - gunnerShotBonus, firingSpentAbility). */
+	private static function precisionWeapon($ship, $weapon, $gamedata, $turn){
+		$shot = self::precisionShot($ship, $gamedata, $turn);
+		return $shot !== null && (int)$shot->weaponid === (int)$weapon->id;
+	}
+
+	/* "He can make a 'supreme anticipation,' earning his ship a + 50 initiative bonus ... on the next turn": ordered in the Firing phase from
+	   his C&C's menu, as the Political Officer's speech (the user's note) - FireGamePhase::process, through CnC::saveFirePhaseDeclaration,
+	   checked on the LOADED ship and spent: one OffUsed note, read back at every later load. A second order, a doctored POST, another
+	   player's ship or a turn he charged writes nothing. */
+	public static function saveAnticipation($cnc, $gamedata){
+		if (!TacGamedata::$officersPresent || !is_object($cnc)) return;
+		$postShip = $cnc->getUnit();
+		if (!$postShip) return;
+		$ship = $gamedata->getShipById((int)$postShip->id);
+		if (!$ship || $ship instanceof FighterFlight || (int)$ship->userid !== (int)$gamedata->forPlayer) return;
+		$turn = (int)$gamedata->turn;
+		$i = self::anticipatorIndex($ship, (int)$cnc->id, $turn);
+		if ($i !== null) self::spend($ship, $i, 'anticipation', $turn, $gamedata);
+	}
+
+	/* The index of this ship's Expert Warrior if he may order his Supreme Anticipation on $turn from the C&C $systemid - posted there, serving,
+	   not yet spent, and not on a turn he charged - or null. ⚠️ MIRROR PAIR with officers.canAnticipateSupreme (JS). */
+	private static function anticipatorIndex($ship, $systemid, $turn){
+		foreach ($ship->getOfficers() as $i => $entry){
+			if ($entry['id'] !== 'OFF_WARR' || (int)$entry['post'] !== (int)$systemid || !self::serves($entry, $turn)) continue;
+			if (isset($entry['abilities']['anticipation']) || Movement::getChargeRow($ship, $turn) !== null) return null;
+			return $i;
+		}
+		return null;
+	}
+
+	/* "Any critical hits caused by the expert warrior's ship gain +1 on their dice": Criticals::setCriticals, before Pass 1, behind
+	   $officersPresent - every system of another ship that took damage through its armour this turn from a ship whose Warrior serves
+	   (Pass 1's own trigger, isDamagedOnTurn) has its critRollMod raised by 1 for this pass, once however many hits, so its critical roll
+	   and the kill roll of any officer posted there include it. Not a flight's craft - a fighter rolls for dropout, not a critical
+	   (default, stated in the plan). clearCausedCriticals takes it back after the kill rolls. */
+	private static $causedMarks = array();
+	public static function markCausedCriticals($ships, $gamedata){
+		self::$causedMarks = array();
+		$turn = (int)$gamedata->turn;
+		$warriors = array();
+		foreach ($gamedata->ships as $ship){
+			if (!($ship instanceof FighterFlight) && self::warriorIndex($ship, $turn) !== null) $warriors[(int)$ship->id] = true;
+		}
+		if (empty($warriors)) return;
+		$shooters = null; //fire order id => its shooter, built only when a damage row does not carry its shooter
+		foreach ($ships as $ship){
+			if ($ship instanceof FighterFlight) continue;
+			foreach ($ship->systems as $system){
+				foreach ($system->damage as $damage){
+					if (((int)$damage->turn !== $turn && (int)$damage->turn !== -1) || $damage->damage <= $damage->armour) continue;
+					$shooter = $damage->shooterid;
+					if ($shooter === null){
+						if ($shooters === null) $shooters = self::fireOrderShooters($gamedata, $turn);
+						$shooter = $shooters[(int)$damage->fireorderid] ?? null;
+					}
+					if ($shooter === null || !isset($warriors[(int)$shooter]) || (int)$shooter === (int)$ship->id) continue;
+					$system->critRollMod += self::WARRIOR_CAUSED_CRIT;
+					self::$causedMarks[] = $system;
+					break;
+				}
+			}
+		}
+	}
+
+	public static function clearCausedCriticals(){
+		foreach (self::$causedMarks as $system) $system->critRollMod -= self::WARRIOR_CAUSED_CRIT;
+		self::$causedMarks = array();
+	}
+
+	//this turn's fire orders, by id => shooter id - for a damage row loaded from the database, which carries its fire order but not its shooter
+	private static function fireOrderShooters($gamedata, $turn){
+		$out = array();
+		foreach ($gamedata->ships as $ship){
+			foreach ($ship->getAllFireOrders($turn) as $order) $out[(int)$order->id] = (int)$order->shooterid;
+		}
+		return $out;
+	}
+
+	/* "Any fighters or shuttles it launches receive the same initiative (but not to-hit or damage) benefit": every FLIGHT launched from a
+	   hangar of his ship in battle (user ruling 2026-10-23 - the hangars' launch notes, Hangar::getLaunchedUnits), from the turn after its
+	   launch, +10 while he serves - however many Warrior ships launched it, once. TacGamedata::onConstructed, after every ship is constructed
+	   (the carrier's officers and the flight's own iniativebonus are both settled by then), behind $officersPresent. Published to every
+	   viewer (addForJson), as his own ship's is. */
+	public static function afterShipsConstructed($gamedata){
+		self::applyLaunchedFlights($gamedata);
+		self::settleCharges($gamedata);
+	}
+
+	/* The unit each serving Expert Warrior's charge this turn holds against (chargeTarget), on his entry as `charged` - for his team's hit-chance
+	   preview (the payload, officers.chargeHitBonus) and the reticle on that unit (shipManager.movement.getChargeMarked), which have no gamedata
+	   to judge the run with. Judged once per load. */
+	private static function settleCharges($gamedata){
+		$turn = (int)$gamedata->turn;
+		foreach ($gamedata->ships as $ship){
+			if ($ship instanceof FighterFlight) continue;
+			$i = self::warriorIndex($ship, $turn);
+			if ($i === null || Movement::getChargeRow($ship, $turn) === null) continue;
+			$target = self::chargeTarget($ship, $gamedata, $turn);
+			if ($target === null) continue;
+			$list = $ship->getOfficers();
+			$list[$i]['charged'] = (int)$target->id;
+			$ship->setOfficers($list);
+		}
+	}
+
+	private static function applyLaunchedFlights($gamedata){
+		$turn = (int)$gamedata->turn;
+		foreach ($gamedata->ships as $carrier){
+			if ($carrier instanceof FighterFlight || self::warriorIndex($carrier, $turn) === null) continue;
+			foreach ($carrier->systems as $system){
+				if (!($system instanceof Hangar)) continue;
+				foreach ($system->getLaunchedUnits() as $unitId => $launchTurn){
+					if ((int)$launchTurn >= $turn) continue;
+					$flight = $gamedata->getShipById((int)$unitId);
+					if (!($flight instanceof FighterFlight) || $flight->getOfficerLaunchIni() > 0) continue;
+					$flight->iniativebonus += self::WARRIOR_INI;
+					$flight->setOfficerLaunchIni(self::WARRIOR_INI);
+				}
+			}
+		}
 	}
 
 	/* ------------------------------------------------------------------ repairs (Stage 5) */
@@ -2883,10 +3990,11 @@ class Officers{
 	   Stored with a saved fleet's row (Manager::submitSavedFleet), and used to keep an officer's cost
 	   with him when HangarOps splits a flight. $count (Stage 18): an officer bought as a count costs the
 	   row's count - read off the unit's bought row when null, or the count about to be written back
-	   (Manager::loadSavedFleet re-prices before it restores the counts). */
+	   (Manager::loadSavedFleet re-prices before it restores the counts). Stage 25: the expert a Political Officer brings costs
+	   nothing (freeExpertId - so the unit's other officer rows must already be bought on it: loadSavedFleet writes their counts first). */
 	public static function rowPrice($ship, $id, $count = null){
 		if (!isset(self::$registry[$id])) return 0;
-		if (empty(self::$registry[$id]['flight'])) return self::shipPrice($ship, $id);
+		if (empty(self::$registry[$id]['flight'])) return ($id === self::freeExpertId($ship)) ? 0 : self::shipPrice($ship, $id);
 		if (empty(self::$registry[$id]['multi'])) $count = 1;
 		else if ($count === null) $count = self::boughtCount($ship, $id);
 		return self::flightPrice($ship, $id, $ship->flightSize, max(1, (int)$count));
@@ -3020,6 +4128,853 @@ class Officers{
 		return true;
 	}
 
+	/* ------------------------------------------------------------------ Expert Ballistic Officer (Stage 29) */
+
+	/* "Ballistic devices with limited ammunition" - only hulls carrying one are offered him (user ruling 2026-10-24): a ballistic weapon
+	   keeping its own count (keepsOwnCount), or a magazine-fed launcher (a missile rack, a Bomb Rack, a mine launcher) whose magazine has
+	   ordnance to buy - never one with none, whose slots could hold nothing (user ruling after play test 4512: the Hyperion Aegis, the fast
+	   Hermes, three Chouka hulls, the Dag'Kur, the Shlassan Triumvirate). Not the old MissileLauncher racks, whose missiles FV does not count. */
+	private static function hasCountedBallisticAmmo($ship){
+		$launcher = false;
+		foreach ($ship->systems as $system){
+			if (self::keepsOwnCount($system)) return true;
+			if ($system instanceof AmmoMissileRackS) $launcher = true;
+		}
+		return $launcher && self::hasMagazineOrdnance($ship);
+	}
+
+	//has this hull ordnance for its magazine - a magazine, and an ammunition id enabled for setEnhancementOptionsShip to offer?
+	private static function hasMagazineOrdnance($ship){
+		if (self::magazineCapacity($ship) <= 0 || empty($ship->enhancementOptionsEnabled)) return false;
+		foreach ($ship->enhancementOptionsEnabled as $id){
+			if (Enhancements::isAmmoEnhancement($id)) return true;
+		}
+		return false;
+	}
+
+	/* A ballistic weapon keeping its own count of rounds (`ammunition`, persisted as it fires - a Proximity Laser, a Limpet Bore, the Nexus
+	   launchers, the Custom Ships' light racks): his extra round goes there. Asked of the CLASS's count, not what is left - a hull that has
+	   fired its last round is still offered him and still keeps him at the next load. */
+	private static function keepsOwnCount($system){
+		if (!($system instanceof Weapon) || !$system->ballistic || $system instanceof JumpEngine || $system instanceof AmmoMissileRackS) return false;
+		if (!property_exists($system, 'ammunition')) return false;
+		$defaults = (new ReflectionClass($system))->getDefaultProperties();
+		return isset($defaults['ammunition']) && (int)$defaults['ammunition'] > 0;
+	}
+
+	/* Is a Ballistic Officer BOUGHT on this unit, as its rows say? For what runs without the officer list: the commit's picks on a POST-side
+	   ship. A row the hull would not be offered buys nothing, as in pickPosts. */
+	public static function ballisticAboard($ship){
+		if (!is_object($ship) || empty($ship->enhancementOptions) || !is_array($ship->enhancementOptions)) return false;
+		if (!self::isBought($ship, 'OFF_BALL') || !self::mayCarryOfficers($ship)) return false;
+		return self::isEligible($ship, 'OFF_BALL');
+	}
+
+	//the capacity of the magazine the ammunition offers are made for - the first, as Enhancements::setEnhancementOptionsShip reads it
+	private static function magazineCapacity($ship){
+		foreach ($ship->systems as $system){
+			if ($system instanceof AmmoMagazine) return (int)$system->capacity;
+		}
+		return 0;
+	}
+
+	/* The rounds this hull may take as free picks: every AMMO_ type it is enabled for ($ballisticAmmo - never Basic) that fills ONE slot and
+	   has a price on it - a round costing nothing gains nothing from a swap (the Kor-Lyans' Interceptors) - and none at all without a
+	   magazine to offer them from. id => the round. */
+	private static function paidPickTypes($ship){
+		$types = array();
+		if (self::magazineCapacity($ship) <= 0 || empty($ship->enhancementOptionsEnabled)) return $types;
+		foreach (self::$ballisticAmmo as $id => $class){
+			if (!in_array($id, $ship->enhancementOptionsEnabled, true)) continue;
+			$round = new $class();
+			if ((int)$round->size === 1 && $round->getPrice($ship) > 0) $types[$id] = $round;
+		}
+		return $types;
+	}
+
+	/* N - his free picks, and the racks his price counts (`perPick`): the hull's missile racks and Bomb Racks (user ruling 2026-10-24), never
+	   a Reload Rack or a mine launcher; 0 on a hull with no round to pick (paidPickTypes), where no rack can receive one. From the hull's
+	   systems, so every copy of a hull reads the same. The lobby prices by the static blueprint's copy (blueprintAnnotations). */
+	public static function ballisticPicks($ship){
+		if (empty(self::paidPickTypes($ship))) return 0;
+		$racks = 0;
+		foreach ($ship->systems as $system){
+			if ($system instanceof AmmoMissileRackS && !($system instanceof BallisticMineLauncher)) $racks++;
+		}
+		return $racks;
+	}
+
+	//the picks the rows have used: every round bought of a type that may be picked, at most N
+	private static function ballisticPicksUsed($ship){
+		$types = self::paidPickTypes($ship);
+		$used = 0;
+		foreach ($ship->enhancementOptions as $entry){
+			if (isset($entry[0], $types[$entry[0]])) $used += max(0, (int)$entry[2]);
+		}
+		return min($used, self::ballisticPicks($ship));
+	}
+
+	/* "For missiles, this would be an extra missile slot": every magazine his launchers draw on, each with how many of them - its missile
+	   racks, Bomb Racks and mine launchers (user note and ruling 2026-10-24) - as array(array(magazine, count), ...). */
+	public static function ballisticSlots($ship){
+		$out = array();
+		foreach ($ship->systems as $system){
+			if (!($system instanceof AmmoMissileRackS)) continue;
+			$magazine = $system->getAmmoMagazine();
+			if (!($magazine instanceof AmmoMagazine)) continue;
+			$key = spl_object_id($magazine);
+			if (!isset($out[$key])) $out[$key] = array($magazine, 0);
+			$out[$key][1]++;
+		}
+		return array_values($out);
+	}
+
+	/* BaseShip::onConstructed, right after pickPosts and BEFORE the ammunition rows load: each magazine one slot more a launcher, so a bought
+	   round fills an empty slot before it swaps out one of the hull's standard rounds - which is how the N free picks land in the new slots,
+	   the magazine the tabletop gives. While he is aboard: the slots were filled before the battle, so losing him takes nothing away (user
+	   ruling 2026-10-24). */
+	public static function raiseMagazines($ship){
+		$aboard = false;
+		foreach ($ship->getOfficers() as $entry) if ($entry['id'] === 'OFF_BALL') $aboard = true;
+		if (!$aboard) return;
+		foreach (self::ballisticSlots($ship) as $pair) $pair[0]->addCapacity($pair[1]);
+	}
+
+	/* As the fleet is COMMITTED (BuyingGamePhase, after placePoliticalPicks), on the POST-side ship: the free picks the player left unused are
+	   rolled ONCE - each a round of one of the hull's pickable types still under its offer's limit, added to that type's row, at no cost (user
+	   ruling 2026-10-24, the Political Officer's way) - and every ballistic weapon keeping its own count is given his extra round, which the
+	   commit's turn-0 ammunition row then writes as its starting count: no load adds it again, and losing him takes nothing away. Nothing
+	   while his C&C is destroyed by pre-battle damage (the lobby refunds him then - Stage 15). Never on a saved fleet. Dice::d. */
+	public static function placeBallisticPicks($ship, $cleanPreBattle = null){
+		if (!self::ballisticAboard($ship)) return;
+		$destroyed = Enhancements::sysEnhDestroyedSystemIds($ship, $cleanPreBattle);
+		$cnc = self::findPost($ship, 'cnc');
+		if ($cnc === null || isset($destroyed[(int)$cnc->id])) return;
+
+		$missing = self::ballisticPicks($ship) - self::ballisticPicksUsed($ship);
+		if ($missing > 0){
+			$class = get_class($ship);
+			$blueprint = new $class(-1, -1, 'offers', -1);
+			/* the server's own offers - labels, limits and prices - made for the magazine HIS slots enlarge: "the per-type limit is simply derived
+			   from the magazine total" (user ruling 2026-10-24, after play test 4512), so a Solyrn's Heavy may reach 290 and its Stealth 29 */
+			foreach (self::ballisticSlots($blueprint) as $pair) $pair[0]->addCapacity($pair[1]);
+			Enhancements::setEnhancementOptions($blueprint);
+			$offers = array();
+			foreach ($blueprint->enhancementOptions as $offer) $offers[$offer[0]] = $offer;
+			$types = array_intersect_key(self::paidPickTypes($ship), $offers);
+			for (; $missing > 0; $missing--){
+				$open = array();
+				foreach ($types as $id => $round) if (self::boughtCount($ship, $id) < (int)floor($offers[$id][3])) $open[] = $id;
+				if (!$open) break;
+				self::addAmmoRound($ship, $offers[$open[Dice::d(count($open)) - 1]]);
+			}
+		}
+		foreach ($ship->systems as $system){
+			if (self::keepsOwnCount($system)) $system->ammunition += self::BALLISTIC_EXTRA_ROUND;
+		}
+	}
+
+	//one more round on the unit's row for this offer - or the offer appended with a count of 1, on a list without it
+	private static function addAmmoRound($ship, array $offer){
+		foreach ($ship->enhancementOptions as $i => $entry){
+			if (isset($entry[0]) && $entry[0] === $offer[0]){
+				$ship->enhancementOptions[$i][2] = max(0, (int)$entry[2]) + 1;
+				return;
+			}
+		}
+		$offer[2] = 1;
+		$ship->enhancementOptions[] = $offer;
+	}
+
+	/* ⭐ HIS +5 - "All ballistic weapons receive +5 to their distance range (but not their launch range). This does not apply to proximity
+	   weapons": what a ballistic weapon of his ship adds to how far its target may have gone from the launch hex (Weapon::isInDistanceRange,
+	   and a Homing Missile's fuel - MultiBombRack and MultiDefenseLauncher keep their own test, but no hull mounts either) while he
+	   serves; never a Proximity Laser, the jump drive or the ram. Behind
+	   $officersPresent. ⚠️ MIRROR PAIR with officers.distanceRangeBonus (JS), which reads the `distanceRangeBonus` addForJson publishes. */
+	public static function distanceRangeBonus($weapon){
+		if (!TacGamedata::$officersPresent || !($weapon instanceof Weapon) || !$weapon->ballistic) return 0;
+		if ($weapon instanceof ProximityLaserNew || $weapon instanceof JumpEngine || $weapon instanceof RammingAttack) return 0;
+		$ship = $weapon->getUnit();
+		if (!$ship || !self::isActive($ship, 'OFF_BALL')) return 0;
+		return self::BALLISTIC_RANGE;
+	}
+
+	/* The static blueprint's share (ShipCompactor::compactShipObject), on a hull offered him and no other: his free picks (`ballisticPicks`)
+	   and the magazine slots he adds (`ballisticSlots`) - the lobby prices the free rounds and lets the buy dialog fill the slots by them
+	   (officers.ballisticFreeRounds, confirm.getMaxAmmoFit). Stage 30: an Expert Quartermaster's free missiles (`quartermasterPicks`), on a
+	   hull offered him that has any - officers.quartermasterFreeRounds. */
+	public static function blueprintAnnotations($ship){
+		$offered = array();
+		foreach ((array)$ship->enhancementOptions as $offer) if (isset($offer[0])) $offered[$offer[0]] = true;
+		$out = array();
+		if (isset($offered['OFF_BALL'])){
+			$slots = 0;
+			foreach (self::ballisticSlots($ship) as $pair) $slots += $pair[1];
+			$out['ballisticPicks'] = self::ballisticPicks($ship);
+			$out['ballisticSlots'] = $slots;
+		}
+		if (isset($offered['OFF_QM'])){
+			$picks = self::quartermasterPicks($ship);
+			if ($picks > 0) $out['quartermasterPicks'] = $picks;
+		}
+		return $out;
+	}
+
+	/* ------------------------------------------------------------------ Expert Quartermaster (Stage 30) */
+
+	/* Is a Quartermaster BOUGHT on this unit, as its rows say? For what runs without the officer list: his free refit's price (the sanitiser,
+	   at buy, save and reload) and the commit's picks. A row the hull would not be offered buys nothing, as in pickPosts. */
+	public static function quartermasterAboard($ship){
+		if (!is_object($ship) || empty($ship->enhancementOptions) || !is_array($ship->enhancementOptions)) return false;
+		if (!self::isBought($ship, 'OFF_QM') || !self::mayCarryOfficers($ship)) return false;
+		return self::isEligible($ship, 'OFF_QM');
+	}
+
+	/* The index of this ship's Quartermaster in its officer list while he is aboard for this battle - serving, or lost in it, as everything he
+	   brings stays (user ruling 2026-10-24) - or null: never one whose post pre-battle damage destroyed (out 0: he never came aboard). */
+	private static function quartermasterIndex($ship){
+		if (!($ship instanceof BaseShip) || $ship instanceof FighterFlight) return null;
+		foreach ($ship->getOfficers() as $i => $entry){
+			if ($entry['id'] === 'OFF_QM' && ($entry['out'] === null || (int)$entry['out'] >= 1)) return $i;
+		}
+		return null;
+	}
+
+	/* "A permanent -6 to its initiative roll" (FV's -30, QX1 - published to every viewer: `publish` / `lostPublish`) and "a +2 penalty on all
+	   critical hits against the C&C" - the critRollMod of the C&C he sits in, which ShipSystem::testCritical reads, so his own kill roll there
+	   too ("including any modifications", D3). His `apply` and his `lost` alike: both stay when he is lost (user ruling 2026-10-24). The lobby
+	   previews the initiative (officers.js `stats`); nothing displays a critical modifier. */
+	private static function applyQuartermaster($ship, $entry, $turn){
+		$ship->iniativebonus += self::QM_INITIATIVE;
+		$cnc = $ship->getSystemById($entry['post']);
+		if ($cnc !== null) $cnc->critRollMod += self::QM_CNC_CRIT_MOD;
+	}
+
+	/* "The navigation crew's response times are slowed, resulting in a +10% penalty (round fractions up) to its Turn Delay": what one turn's
+	   delay $delay (speed x rate, rounded up) gains on his ship - a tenth, rounded up: +1 on a delay of 1-10, +2 on 11-20 (user ruling
+	   2026-10-24) - before overthrust shortens it and Elite or Poor Crew move it (Movement::calculateTurndelay). Lost or serving. Published to
+	   every viewer as `turnDelayPenalty` (addForJson). ⚠️ MIRROR PAIR with shipManager.movement.getQuartermasterTurnDelay (JS). */
+	public static function turnDelayPenalty($ship, $delay){
+		if (!TacGamedata::$officersPresent || $delay <= 0 || self::quartermasterIndex($ship) === null) return 0;
+		return intdiv((int)$delay * self::QM_TURN_DELAY_PCT + 99, 100);
+	}
+
+	/* "Due to the availability of repair parts and system patches, the ship may ignore one critical hit it receives during a scenario": the
+	   FIRST one its critical rolls give it, automatically (the user's note: "first crit ship suffers is fine"), whatever system it is on - every
+	   critical that one roll gives (a reactor's 27 is two). ShipSystem::testCritical asks here before it adds a roll's result; true = ignore it.
+	   Spent as one OffUsed note on his C&C ('OFF_QM:patch'), once per battle. The ship's stock, not his: there after he is lost (`stock`).
+	   Not what a weapon does directly (an EM shutdown) or a magazine's explosion: those are no critical roll. */
+	public static function patchCritical($ship, $gamedata){
+		if (!TacGamedata::$officersPresent) return false;
+		$i = self::quartermasterIndex($ship);
+		if ($i === null) return false;
+		$list = $ship->getOfficers();
+		if (isset($list[$i]['abilities']['patch'])) return false;
+		self::spend($ship, $i, 'patch', (int)$gamedata->turn, $gamedata);
+		return true;
+	}
+
+	/* The Improved Reactor he brought: "if the reactor is in danger of exploding, triple its chance" - a containment breach's chance on the
+	   reactor that refit improves (the biggest: his `reactor` post is IMPR_REA's pick), at most 100, while the Improved Reactor IS his free refit
+	   (Reactor::executeContainmentBreach). One the player paid for while another refit was free keeps its chance. Lost or serving: the refit
+	   stays. Judged on a fresh blueprint's prices, as the commit judged it - a loaded ship's systems carry their refits (a Hardened Armour has
+	   raised the armour its price reads). Only a breach on such a ship builds one. */
+	public static function breachChance($ship, $reactor, $chance){
+		if (!TacGamedata::$officersPresent || self::quartermasterIndex($ship) === null || !self::isBought($ship, 'IMPR_REA')) return $chance;
+		$improved = self::findPost($ship, 'reactor');
+		if ($improved === null || (int)$improved->id !== (int)$reactor->id) return $chance;
+		$class = get_class($ship);
+		$choice = self::quartermasterRefit($ship, (array)$ship->systemEnhancements, array(), new $class(-1, -1, 'blueprint', -1));
+		if ($choice === null || $choice['option'] !== 'IMPR_REA') return $chance;
+		return min(100, $chance * self::QM_BREACH_FACTOR);
+	}
+
+	/* ⭐ HIS FREE REFIT - "ONE of the following ship enhancements (player's choice) will be present on his ship at no extra cost": of the six, the
+	   DEAREST the player bought (the user's note), a tie to the first in the rules' order ($quartermasterRefits). What each is worth:
+	     Gunsights, Advanced Defensive Targeting, Improved Thrust ("any two weapons", "any two thrusters"): the two dearest systems bought it,
+	       each at its dearest level - one level on each of two systems is his, a second level on one system is paid as usual;
+	     Hardened Armour ("any two non-structure and non-primary systems on the same shipside"): the dearest two on one side, a tie to the
+	       lower location - never Structure, never a Primary system;
+	     the Improved Reactor, the Jump Accelerator: the row, at the hull's own offer.
+	   A tie between systems goes to the lower id. $rows: purchase tuples (systemid at [6]) - the sanitiser's, or a loaded ship's; $priced: the
+	   unit whose systems price them (by default $ship - a blueprint, for a loaded ship). null without him bought, with his C&C in $destroyed or
+	   with none of the six bought; else array('option' => id, 'free' => array(row key => the points it is spared), 'placed' => the systems it
+	   covers, 'location' => a Hardened Armour's side, 'points' => its worth). ⚠️ MIRROR PAIR with officers.quartermasterRefit (JS). */
+	public static function quartermasterRefit($ship, array $rows, array $destroyed = array(), $priced = null){
+		if (!self::quartermasterAboard($ship)) return null;
+		$cnc = self::findPost($ship, 'cnc');
+		if ($cnc === null || isset($destroyed[(int)$cnc->id])) return null;
+		if ($priced === null) $priced = $ship;
+		$candidates = array();
+		foreach ($rows as $i => $row){
+			if (!is_array($row) || !isset($row[0], $row[2], $row[6]) || (int)$row[2] < 1) continue;
+			$id = (string)$row[0];
+			if (!in_array($id, self::$quartermasterRefits, true)) continue;
+			$system = $priced->getSystemById((int)$row[6]);
+			if (!$system || isset($destroyed[(int)$system->id])) continue;
+			if ($id === 'SYS_HARM' && !self::isQuartermasterArmour($system)) continue;
+			$candidates[$id][] = array('key' => $i, 'points' => Enhancements::systemEnhancementPrice($priced, $system, $id, (int)$row[2] - 1),
+				'system' => (int)$system->id, 'location' => (int)$system->location);
+		}
+		$best = null;
+		foreach (self::$quartermasterRefits as $id){
+			if ($id === 'IMPR_REA' || $id === 'JUMP_ACC'){
+				$points = self::isBought($ship, $id) ? self::quartermasterOfferPrice($ship, $id) : 0;
+				$choice = ($points > 0) ? array('option' => $id, 'free' => array(), 'placed' => 0, 'location' => null, 'points' => $points) : null;
+			} else {
+				$choice = self::quartermasterPair($id, isset($candidates[$id]) ? $candidates[$id] : array());
+			}
+			if ($choice !== null && ($best === null || $choice['points'] > $best['points'])) $best = $choice;
+		}
+		return $best;
+	}
+
+	//the systems that make $id's share of his free refit worth most - Hardened Armour's on one side (quartermasterRefit) - or null with none
+	private static function quartermasterPair($id, array $list){
+		$sides = array();
+		foreach ($list as $candidate) $sides[($id === 'SYS_HARM') ? $candidate['location'] : 0][] = $candidate;
+		ksort($sides);
+		$best = null;
+		foreach ($sides as $location => $side){
+			usort($side, function ($a, $b){
+				if ($a['points'] !== $b['points']) return $b['points'] - $a['points'];
+				return $a['system'] - $b['system'];
+			});
+			$free = array();
+			$points = 0;
+			foreach (array_slice($side, 0, self::QM_REFIT_SYSTEMS) as $candidate){
+				$free[$candidate['key']] = $candidate['points'];
+				$points += $candidate['points'];
+			}
+			if ($best === null || $points > $best['points']){
+				$best = array('option' => $id, 'free' => $free, 'placed' => count($free), 'location' => ($id === 'SYS_HARM') ? $location : null,
+					'points' => $points);
+			}
+		}
+		return $best;
+	}
+
+	//may his free Hardened Armour go on this system? "Non-structure and non-primary"
+	private static function isQuartermasterArmour($system){
+		return !($system instanceof Structure) && (int)$system->location !== 0;
+	}
+
+	/* What the hull's own offer of a ship-level row costs (the Improved Reactor, the Jump Accelerator) - off a fresh blueprint, never the
+	   client's row, whose price a POST-side ship carries as sent. One per class and request. */
+	private static $quartermasterOffers = array();
+	private static function quartermasterOfferPrice($ship, $id){
+		$class = get_class($ship);
+		if (!isset(self::$quartermasterOffers[$class])){
+			$blueprint = new $class(-1, -1, 'offers', -1);
+			Enhancements::setEnhancementOptions($blueprint);
+			self::$quartermasterOffers[$class] = array();
+			foreach ($blueprint->enhancementOptions as $offer) self::$quartermasterOffers[$class][$offer[0]] = (int)$offer[4];
+		}
+		return isset(self::$quartermasterOffers[$class][$id]) ? self::$quartermasterOffers[$class][$id] : 0;
+	}
+
+	/* ⭐ The FREE REFITS priced - the last step of Enhancements::sanitiseSystemEnhancements (at buy, save and reload alike) and of the commit's
+	   picks: an Expert Quartermaster's free refit first (quartermasterRefit), then an Expert Political Officer's five free Hardened Armour among
+	   the rest (freeArmourRows); every other row of those kinds at its full price, and the total summed again. A row the Quartermaster frees
+	   costs its other levels only. $out is the sanitiser's result. */
+	public static function priceFreeRefits($ship, array $out, array $destroyed = array()){
+		$refit = self::quartermasterRefit($ship, $out['rows'], $destroyed);
+		$spared = ($refit !== null) ? $refit['free'] : array();
+		$free = self::freeArmourRows($ship, array_diff_key($out['rows'], $spared), $destroyed);
+		$out['total'] = 0;
+		foreach ($out['rows'] as $i => $row){
+			if (isset($spared[$i]) || (string)$row[0] === 'SYS_HARM'){
+				$system = $ship->getSystemById((int)$row[6]);
+				$full = $system ? Enhancements::systemEnhancementTotalPrice($ship, $system, (string)$row[0], (int)$row[2]) : 0;
+				$out['rows'][$i][4] = isset($free[$i]) ? 0 : $full - (isset($spared[$i]) ? $spared[$i] : 0);
+			}
+			$out['total'] += $out['rows'][$i][4];
+		}
+		return $out;
+	}
+
+	/* As the fleet is COMMITTED (BuyingGamePhase, after the refits are sanitised, before placePoliticalPicks), what the player left of his free
+	   refit is rolled ONCE and stored as ordinary rows, free (the user's note: "If the player forgets, then randomly allocate", the Political
+	   Officer's way): with none of the six bought, one of the four with no drawback the hull can take ($quartermasterRandom - user ruling
+	   2026-10-24), on two random systems - a Hardened Armour's on one random side with room for both; with his refit on one system only, a second
+	   at random (a Hardened Armour's on that side). Always a system offered it, not destroyed by pre-battle damage and without it already. A
+	   bought Improved Reactor or Jump Accelerator is whole. Nothing while his C&C is destroyed (the lobby refunds him then - Stage 15). Never on
+	   a saved fleet: only a game's commit rolls. Dice::d. $out: sanitiseSystemEnhancements' result, returned with the rows added and priced. */
+	public static function placeQuartermasterPicks($ship, array $out, $cleanPreBattle = null){
+		if (!self::quartermasterAboard($ship)) return $out;
+		$destroyed = Enhancements::sysEnhDestroyedSystemIds($ship, $cleanPreBattle);
+		$cnc = self::findPost($ship, 'cnc');
+		if ($cnc === null || isset($destroyed[(int)$cnc->id])) return $out;
+		$choice = self::quartermasterRefit($ship, $out['rows'], $destroyed);
+		if ($choice === null){
+			$options = array();
+			foreach (self::$quartermasterRandom as $id) if (self::quartermasterSites($ship, $id, $out['rows'], $destroyed)) $options[] = $id;
+			if (!$options) return self::priceFreeRefits($ship, $out, $destroyed);
+			$choice = array('option' => $options[Dice::d(count($options)) - 1], 'placed' => 0, 'location' => null);
+		}
+		$id = $choice['option'];
+		if ($id === 'IMPR_REA' || $id === 'JUMP_ACC') return self::priceFreeRefits($ship, $out, $destroyed);
+		$sites = self::quartermasterSites($ship, $id, $out['rows'], $destroyed);
+		if ($id === 'SYS_HARM' && $sites){
+			$location = ($choice['location'] !== null) ? (int)$choice['location'] : self::quartermasterSide($sites);
+			$sites = array_values(array_filter($sites, function ($system) use ($location){ return (int)$system->location === $location; }));
+		}
+		for ($missing = self::QM_REFIT_SYSTEMS - $choice['placed']; $missing > 0 && $sites; $missing--){
+			$k = Dice::d(count($sites)) - 1;
+			$system = $sites[$k];
+			array_splice($sites, $k, 1);
+			$out['rows'][] = array($id, Enhancements::systemEnhancementLabel($id), 1, Enhancements::systemEnhancementLimit($ship, $system, $id), 0,
+				Enhancements::systemEnhancementPriceStep($ship, $system, $id), (int)$system->id, (string)$system->name);
+		}
+		return self::priceFreeRefits($ship, $out, $destroyed);
+	}
+
+	//the systems that could take $id as his free refit at the commit: offered it, not destroyed, without it already (Hardened Armour: his kind)
+	private static function quartermasterSites($ship, $id, array $rows, array $destroyed){
+		$taken = array();
+		foreach ($rows as $row) if ((string)$row[0] === $id) $taken[(int)$row[6]] = true;
+		$sites = array();
+		foreach ($ship->systems as $system){
+			$sid = (int)$system->id;
+			if (isset($destroyed[$sid]) || isset($taken[$sid])) continue;
+			if ($id === 'SYS_HARM' && !self::isQuartermasterArmour($system)) continue;
+			if (Enhancements::systemEnhancementOffered($ship, $system, $id)) $sites[] = $system;
+		}
+		return $sites;
+	}
+
+	//the side a random Hardened Armour pair goes on: one at random of the sides with room for both, else of those with room for one
+	private static function quartermasterSide(array $sites){
+		$room = array();
+		foreach ($sites as $system) $room[(int)$system->location] = (isset($room[(int)$system->location]) ? $room[(int)$system->location] : 0) + 1;
+		ksort($room);
+		$sides = array_keys(array_filter($room, function ($n){ return $n >= self::QM_REFIT_SYSTEMS; }));
+		if (!$sides) $sides = array_keys($room);
+		return $sides[Dice::d(count($sides)) - 1];
+	}
+
+	/* The rounds that may be his free missiles - "two special missiles of any type normally available": every AMMO_ type this hull is enabled
+	   for ($ballisticAmmo - never Basic) that costs something on it, whatever its size (user ruling 2026-10-24: a two-slot round counts as one
+	   missile); none without a magazine to offer them from. id => the round. */
+	private static function quartermasterPickTypes($ship){
+		$types = array();
+		if (self::magazineCapacity($ship) <= 0 || empty($ship->enhancementOptionsEnabled)) return $types;
+		foreach (self::$ballisticAmmo as $id => $class){
+			if (!in_array($id, $ship->enhancementOptionsEnabled, true)) continue;
+			$round = new $class();
+			if ($round->getPrice($ship) > 0) $types[$id] = $round;
+		}
+		return $types;
+	}
+
+	/* His free missiles: two for every missile rack and Bomb Rack, one for a Class-SO ("the class-SO or an older class" - FV's older racks keep
+	   no count and carry none), never a Reload Rack or a mine launcher; 0 on a hull with no round to pick. From the hull's systems; the lobby
+	   prices by the static blueprint's copy (blueprintAnnotations: `quartermasterPicks`). */
+	public static function quartermasterPicks($ship){
+		if (empty(self::quartermasterPickTypes($ship))) return 0;
+		$picks = 0;
+		foreach ($ship->systems as $system){
+			if (!($system instanceof AmmoMissileRackS) || $system instanceof BallisticMineLauncher) continue;
+			$picks += ($system instanceof AmmoMissileRackSO) ? self::QM_OLD_RACK_MISSILES : self::QM_RACK_MISSILES;
+		}
+		return $picks;
+	}
+
+	/* As the fleet is COMMITTED (BuyingGamePhase, after placeBallisticPicks), on the POST-side ship: the free missiles the player left unused are
+	   rolled ONCE - each a round of a pickable type still under its offer's limit, added to that type's row, at no cost (the user's note: "or
+	   randomly allocate"). An Expert Ballistic Officer aboard takes his picks first (officers.quartermasterFreeRounds), so the rounds counted
+	   here are the ones past his. Nothing while the C&C is destroyed by pre-battle damage. Never on a saved fleet. Dice::d. */
+	public static function placeQuartermasterMissiles($ship, $cleanPreBattle = null){
+		if (!self::quartermasterAboard($ship)) return;
+		$destroyed = Enhancements::sysEnhDestroyedSystemIds($ship, $cleanPreBattle);
+		$cnc = self::findPost($ship, 'cnc');
+		if ($cnc === null || isset($destroyed[(int)$cnc->id])) return;
+		$types = self::quartermasterPickTypes($ship);
+		$bought = 0;
+		foreach ($types as $id => $round) $bought += self::boughtCount($ship, $id);
+		$ballistic = self::ballisticAboard($ship);
+		$missing = self::quartermasterPicks($ship) - max(0, $bought - ($ballistic ? self::ballisticPicksUsed($ship) : 0));
+		if ($missing <= 0) return;
+		$class = get_class($ship);
+		$blueprint = new $class(-1, -1, 'offers', -1);
+		//the server's own offers - an Expert Ballistic Officer's enlarged magazine's limits, with him aboard (placeBallisticPicks)
+		if ($ballistic) foreach (self::ballisticSlots($blueprint) as $pair) $pair[0]->addCapacity($pair[1]);
+		Enhancements::setEnhancementOptions($blueprint);
+		$offers = array();
+		foreach ($blueprint->enhancementOptions as $offer) $offers[$offer[0]] = $offer;
+		$types = array_intersect_key($types, $offers);
+		for (; $missing > 0; $missing--){
+			$open = array();
+			foreach ($types as $id => $round) if (self::boughtCount($ship, $id) < (int)floor($offers[$id][3])) $open[] = $id;
+			if (!$open) break;
+			self::addAmmoRound($ship, $offers[$open[Dice::d(count($open)) - 1]]);
+		}
+	}
+
+	/* ------------------------------------------------------------------ Expert Graviton Controller (Stage 31) */
+
+	/* A faction outside the Babylon 5 settings: one Fleet Selection files under its custom sub-groups Nexus, Escalation Wars or
+	   Other Universe (Star Trek, BSG, Star Wars...). The Expert Graviton Controller's "races which use gravitic drives or weapons"
+	   are B5 races only (user ruling 2026-10-25) - FV flags Star Trek hulls gravitic too. ⚠️ MIRROR of the tests in gamelobby.js
+	   `customSubgroups`: a sub-group added there belongs here. No client mirror is needed - the offers decide. */
+	private static $otherSettings = '/^(Nexus|Escalation Wars|BSG|12 Colonies of Kobol|Star Trek|Star Wars|StarTrek|StarWars|Trek)\b|^The System$/';
+	public static function isOtherSetting($faction){
+		return preg_match(self::$otherSettings, (string)$faction) === 1;
+	}
+
+	/* His `needs`: a hull with a gravitic drive (FV's $gravitic) or a gravitic weapon - "races which use gravitic drives or weapons",
+	   per hull (user ruling 2026-10-25) - in a B5 setting. Every Brakiri hull with an Engine passes. */
+	private static function usesGravitics($ship){
+		if (self::isOtherSetting($ship->faction)) return false;
+		if (!empty($ship->gravitic)) return true;
+		foreach ($ship->systems as $system){
+			if (self::isGraviticWeapon($system)) return true;
+		}
+		return false;
+	}
+
+	//a weapon with a Gravitic mode - its class, or any mode's in weaponClassArray. ⚠️ MIRROR PAIR with officers.isGraviticWeapon (JS)
+	private static function isGraviticWeapon($system){
+		if (!($system instanceof Weapon)) return false;
+		if ($system->weaponClass === 'Gravitic') return true;
+		return is_array($system->weaponClassArray) && in_array('Gravitic', $system->weaponClassArray, true);
+	}
+
+	/* "Tweaking of the Engine improved its thrust output by 1. Increase the thrust rating of the largest aft thruster by 1 as well":
+	   his Engine (his post) and gravitonThruster's - while he serves, and after he is lost (user ruling 2026-10-25: a tweak made
+	   before battle stays - `lost`). Both outputs reach every viewer, as every system's does. */
+	private static function applyGravitonTweaks($ship, $entry, $turn){
+		$engine = $ship->getSystemById($entry['post']);
+		$thruster = self::gravitonThruster($ship);
+		if ($engine !== null) $engine->output += self::GRAV_ENGINE_THRUST;
+		if ($thruster !== null) $thruster->output += self::GRAV_THRUSTER;
+	}
+
+	/* "The largest aft thruster ... (if equal ratings pick a random one)": the main thruster (direction 2) with the highest rating as
+	   the ship stands at the load - refits and crew quality included -, the FIRST of equal ones (user ruling 2026-10-25), or null.
+	   ⚠️ MIRROR PAIR with officers.gravitonThruster (JS). */
+	public static function gravitonThruster($ship){
+		$best = null;
+		foreach ($ship->systems as $system){
+			if (!($system instanceof Thruster) || (int)$system->direction !== 2) continue;
+			if ($best === null || (int)$system->output > (int)$best->output) $best = $system;
+		}
+		return $best;
+	}
+
+	/* ⭐ His +1 damage: Weapon::getFinalDamage, once per HIT, for a shot in a Raking Gravitic mode - the Graviton Beam, every mode of
+	   the Gravitic Lance (a Beams shot +1 on each beam) and the Gravitic Cutter (user ruling 2026-10-25: "gravitic beam weapons" are
+	   every Raking gravitic weapon). The fired mode's class and damage type are the weapon's own once changeFiringMode has run. Never
+	   on a hit whose roll is 0 (the Religious Leader's rule). Behind $officersPresent.
+	   ⚠️ MIRROR PAIR with officers.gravitonBeamBonus (JS), which raises the owner's Damage lines. */
+	public static function gravitonBeamBonus($ship, $weapon, $rolled){
+		if ($rolled <= 0 || $weapon->weaponClass !== 'Gravitic' || $weapon->damageType !== 'Raking') return 0;
+		return self::isActive($ship, 'OFF_GRAV') ? self::GRAV_BEAM_DAMAGE : 0;
+	}
+
+	/* "Graviton pulsars or gravitic bolts roll to hit normally, but after they hit, they determine their result as though the to-hit
+	   die roll was 5% lower": the d100 taken GRAV_PULSE_SHIFT lower for Weapon::fire's pulse count (Pulse::rollPulses), on a shot that
+	   has already hit, for a gravitic weapon firing pulses - the Graviton Pulsar. A Gravitic Bolt's damage is fixed and nothing reads
+	   how far under it hit, so it has no result to change. Behind $officersPresent. */
+	public static function gravitonPulseShift($ship, $weapon){
+		if ($weapon->damageType !== 'Pulse' || $weapon->weaponClass !== 'Gravitic') return 0;
+		return self::isActive($ship, 'OFF_GRAV') ? self::GRAV_PULSE_SHIFT : 0;
+	}
+
+	/* "On the turn a rotation is done, the ship's weapons suffer a -3 penalty to all weapons fire, even if the ship winds up facing the
+	   same way it was originally heading": GRAV_ROTATION_PENALTY (d20 units, -15%) on every shot of a ship with a rotate row this turn -
+	   ballistics included, stacking with the pivot's and the roll's -3 as they stack. Only the server writes the row (MoveLock drops
+	   any other), so he need not still serve. Behind $officersPresent. ⚠️ MIRROR PAIR with the "Gravitic Rotation" line of
+	   weaponManager.computeShotModifiers (JS). */
+	public static function rotationPenalty($ship, $turn){
+		return Movement::hasGravRotated($ship, $turn) ? self::GRAV_ROTATION_PENALTY : 0;
+	}
+
+	//the index of the Expert Graviton Controller serving on $turn, or null
+	private static function gravitonIndex($ship, $turn){
+		foreach ($ship->getOfficers() as $i => $entry){
+			if ($entry['id'] === 'OFF_GRAV' && self::serves($entry, $turn)) return $i;
+		}
+		return null;
+	}
+
+	/* ⭐ THE ROTATION (Manager::rotateGraviticDrive, from gravRotate.php): the player clicked his Rotate icon in the Movement phase, with
+	   $rows plotted - this turn's, as the client holds them (decoded as objects). Judged on the LOADED ship: he serves, the drive is
+	   gravitic, he has not rotated before ("once during the scenario"), the ship rides no other unit and has ordered no jump-out, and
+	   $rows make a path from where it began the turn. Then the SERVER rolls the d6 ("completely uncontrollable") and the ship faces
+	   die - 1 ("1" = facing 0, east; clockwise): one Movement::GRAV_ROTATE row after $rows - no thrust; hex, heading and speed kept; value the
+	   die -, the ability spent (one OffUsed note on his Engine), and every row up to it LOCKED (MoveLock - the user's note: "it cannot be
+	   cancelled and re-done ... and should be saved so that on page reload it remains"). Returns array('rows' => the lock, 'die' => n)
+	   or a string saying why not. Asked again on the turn it was rolled (a lost reply, a second tab), the stored lock is the answer:
+	   never a second die. */
+	public static function rotateGravitic($ship, $gamedata, array $rows, DBManager $dbManager){
+		$turn = (int)$gamedata->turn;
+		$stored = MoveLock::get($dbManager, $gamedata->id, $turn, $ship->id);
+		if ($stored !== null){
+			foreach ($stored as $row){
+				if (Movement::rowField($row, 'type') === Movement::GRAV_ROTATE) return array('rows' => $stored, 'die' => (int)Movement::rowField($row, 'value'));
+			}
+		}
+
+		$i = self::gravitonIndex($ship, $turn);
+		if ($i === null) return 'There is no Expert Graviton Controller serving on this unit.';
+		if (isset($ship->getOfficers()[$i]['abilities']['rotate'])) return 'The gravitic drive has already been rotated in this battle.';
+		if (empty($ship->gravitic)) return 'This unit has no gravitic drive.';
+		if (!empty($ship->attached)) return 'A unit attached to another cannot rotate.';
+
+		$own = array();
+		foreach ($rows as $row){
+			if (Movement::rowField($row, 'turn') != $turn) continue;
+			if (Movement::rowField($row, 'type') === 'jumpout') return 'A unit that has ordered a jump-out has finished manoeuvring.';
+			if (MoveLock::isLockType(Movement::rowField($row, 'type'))) return 'The plotted movement could not be read.';
+			if (Movement::rowField($row, 'commit') === false) return 'Confirm or cancel the thrust being assigned first.';
+			$own[] = $row;
+		}
+		$start = $ship->getLastTurnMovement($turn);
+		if (!$start || Movement::readSweepPath(Movement::toOffset($start->position), $own, $turn) === null)
+			return 'The plotted movement does not make a path from where the unit started.';
+
+		$last = empty($own) ? $start : end($own);
+		$position = Movement::toOffset(Movement::rowField($last, 'position'));
+		$die = Dice::d(6);
+		$own[] = (object)array(
+			'id' => -1, 'type' => Movement::GRAV_ROTATE,
+			'position' => (object)array('q' => $position->q, 'r' => $position->r),
+			'xOffset' => Movement::rowField($last, 'xOffset') ?? 0, 'yOffset' => Movement::rowField($last, 'yOffset') ?? 0,
+			'facing' => $die - 1, 'heading' => (int)Movement::rowField($last, 'heading'), 'speed' => (int)Movement::rowField($last, 'speed'),
+			'animating' => false, 'animated' => false, 'animationtics' => 0,
+			'requiredThrust' => array(0, 0, 0, 0, 0), 'assignedThrust' => array(),
+			'commit' => true, 'preturn' => false, 'at_initiative' => Movement::rowField($last, 'at_initiative'),
+			'turn' => $turn, 'forced' => false, 'value' => $die
+		);
+		self::spend($ship, $i, 'rotate', $turn, $gamedata);
+		MoveLock::save($dbManager, $gamedata->id, $turn, $ship->id, $own);
+		return array('rows' => $own, 'die' => $die);
+	}
+
+	/* ------------------------------------------------------------------ Redline Pilot (Stage 32) */
+
+	//the index of a flight's Redline Pilot in its list while he serves on $turn, or null
+	private static function redlineIndex($flight, $turn){
+		if (!($flight instanceof FighterFlight)) return null;
+		foreach ($flight->getOfficers() as $i => $entry){
+			if ($entry['id'] === 'OFF_REDL' && self::serves($entry, $turn)) return $i;
+		}
+		return null;
+	}
+
+	/* (1) How fast an Enormous unit may move for this unit to skin dance over it: FV's 5 - or 8 while a Redline Pilot serves its flight, "may
+	   perform skin dancing on capital ships moving at speeds of 8 or less" (Enormous units, as FV dances over no other - user ruling 2026-10-25).
+	   RammingAttack::getSkinDancingResult, which adds his "+1 for every point of speed over 5 (for the target unit)" beside FV's own modifiers -
+	   the flight's "+1 for every 2 points over 5" is FV's own already, counted once (user ruling). */
+	public static function skinDanceSpeedLimit($shooter, $turn){
+		if (TacGamedata::$officersPresent && self::redlineIndex($shooter, $turn) !== null) return self::REDLINE_DANCE_SPEED;
+		return self::SKIN_DANCE_SPEED;
+	}
+
+	/* "The Redline Pilot must always be picked as the fighter destroyed (at which time the fight loses its benefits)": his craft, while he serves
+	   and it still flies - the one a failed skin dance crashes into the hull (RammingAttack::beforePreFiringOrderResolution) and a failed landing
+	   rams the carrier with (rollRedlineLandings). null otherwise. */
+	public static function redlineCrashCraft($flight, $turn){
+		if (!TacGamedata::$officersPresent) return null;
+		$i = self::redlineIndex($flight, $turn);
+		if ($i === null) return null;
+		$craft = $flight->getSystemById($flight->getOfficers()[$i]['post']);
+		return ($craft instanceof Fighter && !$craft->isDestroyed()) ? $craft : null;
+	}
+
+	/* (2) The combat pivot penalty of a flight's fire this turn, in d20 points: 1 - or REDLINE_PIVOT_FACTOR when one of this turn's combat pivots
+	   was made without the thrust for it: "Redline Pilots may combat pivot their fight even if they do not have enough thrust left. If this is
+	   done, however, the firing penalty for a combat pivot is tripled" - once, however many such pivots, as the -1 is once. The row is the record
+	   (Movement::isRedlinePivot - the full cost asked, less paid), whatever becomes of him later in the turn. Weapon::calculateHitBase's fighter
+	   branch, behind $officersPresent. ⚠️ MIRROR PAIR with shipManager.movement.combatPivotPenalty (JS). */
+	public static function combatPivotPenalty($flight, $turn){
+		foreach ((array)$flight->movement as $move){
+			if ((int)$move->turn === (int)$turn && Movement::isRedlinePivot($move)) return self::REDLINE_PIVOT_FACTOR;
+		}
+		return 1;
+	}
+
+	/* (3) AFTERBURNERS - "the fight increases its thrust by 50% on the current turn (round any fractions down)": what this turn's 'redline' row
+	   (Movement::REDLINE, the flight's first order - validateRedline) adds to its thrust. The row is the record: once kept, the burn stands
+	   whatever becomes of him. HangarOps::canShipReceive adds it to the landing tolerance (user ruling 2026-10-25: it counts); the plot's thrust
+	   is the client's (movement.js getRemainingEngineThrust - movement.php checks no flight's thrust). ⚠️ MIRROR PAIR with
+	   officers.redlineThrustBonus (JS). */
+	public static function redlineBurnThrust($flight, $turn){
+		if (!($flight instanceof FighterFlight) || !Movement::hasRedlined($flight, $turn)) return 0;
+		return intdiv(max(0, (int)$flight->freethrust) * self::REDLINE_BURN_PCT, 100);
+	}
+
+	/* "...the flight is not permitted to maneuver on the following turn (it must proceed straight ahead at its current speed) while the engines
+	   cool off": the turn after a burn, whatever becomes of him - no turn, slip, pivot, speed change, jink or burn in the Movement phase
+	   (validateRedline), no combat pivot or Evade in the Firing phase (Movement::validateMovement) - user ruling 2026-10-25: everything.
+	   ⚠️ MIRROR PAIR with shipManager.movement.isRedlineCooling (JS). */
+	public static function isCoolingDown($flight, $turn){
+		return ($flight instanceof FighterFlight) && Movement::hasRedlined($flight, (int)$turn - 1);
+	}
+
+	//the Movement-phase orders a cooling flight may not give: every manoeuvre a flight has, a burn included (Movement::REDLINE)
+	private static $coolingForbids = array('turnleft', 'turnright', 'slipleft', 'slipright', 'pivotleft', 'pivotright', 'speedchange', 'jink', 'roll', 'redline');
+
+	/* MovementGamePhase::process, on the movement a POST submits for $loaded (the authoritative load - the POST-side flight has no officers).
+	   ONE 'redline' row is kept, only while his Redline Pilot serves and the flight is not cooling off, and only as the flight's first order of
+	   the turn - nothing it ordered before it, the turn's own rows aside (the user's note: no thrust to give back). Every other 'redline' row is
+	   dropped. A cooling flight's commit holding a manoeuvre is REFUSED: the client never lets one be plotted, and dropping a turn would break the
+	   path plotted after it. */
+	public static function validateRedline($loaded, array $movement, $gamedata){
+		$turn = (int)$gamedata->turn;
+		$cooling = self::isCoolingDown($loaded, $turn);
+		$may = !$cooling && self::redlineIndex($loaded, $turn) !== null;
+		$kept = false;
+		$ordered = false;
+		$out = array();
+		foreach ($movement as $move){
+			if ((int)$move->turn !== $turn){
+				$out[] = $move;
+				continue;
+			}
+			if ($move->type == Movement::REDLINE){
+				if ($may && !$kept && !$ordered){
+					$kept = true;
+					$out[] = $move;
+				}
+				continue;
+			}
+			if (Movement::isOrderedRow($move)){
+				if ($cooling && in_array($move->type, self::$coolingForbids, true)){
+					throw new Exception("A flight cooling its engines after its Redline Pilot's afterburners must fly straight ahead this turn. Reload the game and plot it again.");
+				}
+				$ordered = true;
+			}
+			$out[] = $move;
+		}
+		return $out;
+	}
+
+	/* (4) A LANDING BEYOND THE THRUST TOLERANCE - "Redline Pilots may attempt to land his flight on its carrier beyond the usual thrust tolerances.
+	   If this is attempted, roll a d20. If the result is less than or equal to the amount of thrust by which the tolerance is exceeded, the
+	   Redline Pilot's fighter crashes into the carrier (treat this as a 100% successful ramming attempt) and all other fighters in the fight break
+	   off. The fight cannot use the afterburners during this attempt." Rolled once firing has resolved (Firing::fireWeapons, beside the failed
+	   attachments' rams - a ram ordered any later would never resolve), for each flight a hangar's dock order names this turn whose Redline Pilot
+	   serves in a craft that still flies, that did not burn this turn, and whose speed is further from the carrier's than its thrust - its every
+	   other dock test passing (HangarOps::canShipReceive, the excess let through while the roll is pending). The roll rides his entry (`landing`)
+	   for the dock at the end of the turn (redlineLandingHolds). A crash is his craft's own Ramming Attack at the carrier, an automatic hit whose
+	   return damage lands on his craft (RammingAttack::fire); a landing that holds is a line of its own in the combat log. */
+	public static function rollRedlineLandings($gamedata, $dbManager = null){
+		if (!TacGamedata::$officersPresent) return;
+		$turn = (int)$gamedata->turn;
+		foreach ($gamedata->ships as $carrier){
+			if ($carrier instanceof FighterFlight) continue;
+			foreach ($carrier->systems as $hangar){
+				if (!($hangar instanceof Hangar) || empty($hangar->pendingDockOrder)) continue;
+				foreach ($hangar->pendingDockOrder as $order){
+					$flight = $gamedata->getShipById((int)($order['flightId'] ?? 0));
+					if (!($flight instanceof FighterFlight) || $flight->isDestroyed()) continue;
+					$i = self::redlineIndex($flight, $turn);
+					if ($i === null || self::redlineCrashCraft($flight, $turn) === null || Movement::hasRedlined($flight, $turn)) continue;
+					$list = $flight->getOfficers();
+					if (isset($list[$i]['landing']) && (int)$list[$i]['landing']['turn'] === $turn) continue; //rolled for another bay's order
+					$excess = self::landingExcess($carrier, $flight, $turn);
+					if ($excess <= 0) continue;
+					$list[$i]['landing'] = array('turn' => $turn, 'excess' => $excess, 'roll' => null);
+					$flight->setOfficers($list);
+					if (!HangarOps::canShipReceive($hangar, $carrier, $flight, 1, $gamedata)){
+						unset($list[$i]['landing']); //a dock that fails for another reason rolls nothing
+						$flight->setOfficers($list);
+						continue;
+					}
+					$roll = Dice::d(self::REDLINE_LANDING_DIE);
+					$list[$i]['landing']['roll'] = $roll;
+					$flight->setOfficers($list);
+					if ($roll <= $excess){
+						self::redlineCrash($carrier, $flight, $roll, $excess, $gamedata, $dbManager);
+						self::breakOffDocks($flight, $gamedata);
+					} else {
+						self::redlineLandingLog($carrier, $flight, $roll, $excess, $gamedata);
+					}
+				}
+			}
+		}
+	}
+
+	//how far the flight's speed is from the carrier's beyond its thrust this turn, an afterburner's included (0 within it)
+	private static function landingExcess($carrier, $flight, $turn){
+		$carrierMove = $carrier->getLastMovement();
+		$flightMove = $flight->getLastMovement();
+		if (!$carrierMove || !$flightMove) return 0;
+		$thrust = (int)$flight->freethrust + self::redlineBurnThrust($flight, $turn);
+		return max(0, abs((int)$carrierMove->speed - (int)$flightMove->speed) - $thrust);
+	}
+
+	/* HangarOps::canShipReceive, for a flight further from the carrier's speed than its thrust: does a Redline Pilot's landing hold this turn - his
+	   roll above the excess (null: rollRedlineLandings is still asking the dock's other tests). No roll this turn, no landing. */
+	public static function redlineLandingHolds($flight, $gamedata){
+		if (!TacGamedata::$officersPresent || !($flight instanceof FighterFlight)) return false;
+		$turn = (int)$gamedata->turn;
+		foreach ($flight->getOfficers() as $entry){
+			if ($entry['id'] !== 'OFF_REDL' || !isset($entry['landing']) || (int)$entry['landing']['turn'] !== $turn) continue;
+			return $entry['landing']['roll'] === null || (int)$entry['landing']['roll'] > (int)$entry['landing']['excess'];
+		}
+		return false;
+	}
+
+	/* "...the Redline Pilot's fighter crashes into the carrier (treat this as a 100% successful ramming attempt)": his craft's own Ramming Attack at
+	   the carrier, an automatic hit ('TerrainCrash', as the failed attachments' rams - Firing::createFailedAttachRamOrders) whose return damage
+	   lands on his craft, persisted before it resolves so its damage links to it, and resolved now. The rest of the flight breaks off: the dock
+	   then finds no landing (redlineLandingHolds). */
+	private static function redlineCrash($carrier, $flight, $roll, $excess, $gamedata, $dbManager){
+		$craft = self::redlineCrashCraft($flight, (int)$gamedata->turn);
+		if ($craft === null) return;
+		$ram = null;
+		foreach ($craft->systems as $sub) if (!empty($sub->isRammingAttack)) $ram = $sub;
+		$move = $flight->getLastMovement();
+		if (!$ram || !$move) return;
+		$fire = new FireOrder(-1, 'normal', $flight->id, $carrier->id, $ram->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0,
+			$move->position->q, $move->position->r, 'TerrainCrash', 10000);
+		$fire->pubnotes = '<br>REDLINE CRASH! The Redline Pilot tried to land ' . $excess . ' beyond his flight\'s thrust and rolled ' . $roll
+			. ' (1-' . $excess . ' crashes): his fighter rams the carrier, and the rest of the flight breaks off.';
+		$fire->addToDB = true;
+		if ($dbManager){
+			$fire->id = (int)$dbManager->submitSingleFireorder($gamedata->id, $fire);
+			$fire->addToDB = false;
+		}
+		$ram->fireOrders[] = $fire;
+		$ram->calculateHitBase($gamedata, $fire);
+		$ram->fire($gamedata, $fire);
+	}
+
+	/* "...and all other fighters in the fight break off": every dock order this turn naming the flight is withdrawn, from every hangar of every
+	   ship. ⚠️ Not left to canShipReceive: the end-of-turn whole-flight dock (HangarOps::buildDockBays) asks it and goes on whatever it answers,
+	   so on that path a refusal would not stop the dock. */
+	private static function breakOffDocks($flight, $gamedata){
+		foreach ($gamedata->ships as $ship){
+			if ($ship instanceof FighterFlight) continue;
+			foreach ($ship->systems as $hangar){
+				if (!($hangar instanceof Hangar) || empty($hangar->pendingDockOrder)) continue;
+				$kept = array_values(array_filter($hangar->pendingDockOrder, function ($order) use ($flight){
+					return (int)($order['flightId'] ?? 0) !== (int)$flight->id;
+				}));
+				$hangar->pendingDockOrder = empty($kept) ? null : $kept;
+			}
+		}
+	}
+
+	/* A landing beyond the tolerance that holds: its roll in the combat log - a log line wearing a fire order's clothes ([[howto_create_fire_orders]]),
+	   HangarEscape's shape: on his craft's Ramming Attack, at its own flight, rolled = the d20, no shot, so no damage links to it. In
+	   weaponManager.doShortLogText, its sentence continues the "FIRE: <flight>" header with "'s"; in combatLog.STANDALONE_LOG_KINDS. */
+	private static function redlineLandingLog($carrier, $flight, $roll, $excess, $gamedata){
+		$craft = self::redlineCrashCraft($flight, (int)$gamedata->turn);
+		if ($craft === null) return;
+		$ram = null;
+		foreach ($craft->systems as $sub) if (!empty($sub->isRammingAttack)) $ram = $sub;
+		if (!$ram) return;
+		$order = new FireOrder(-1, 'normal', $flight->id, $flight->id, $ram->id, -1, $gamedata->turn, 1, 0, (int)$roll, 0, 0, 0, 0, 0, self::REDLINE_LANDING_CLASS, 10000);
+		$order->pubnotes = '\'s Redline Pilot brings it in to land ' . $excess . ' beyond its thrust: rolled ' . $roll . ' on a d20 (1-' . $excess
+			. ' would crash) - down safely aboard <span class="shiplink" data-id="' . (int)$carrier->id . '">' . $carrier->name . '</span>.';
+		$order->addToDB = true;
+		$ram->fireOrders[] = $order;
+	}
+
 	/* ------------------------------------------------------------------ payload */
 
 	/* BaseShip::stripForJson, after the enhancement fields.
@@ -3033,6 +4988,8 @@ class Officers{
 	     an isModified weapon's fire control are sent by the systems themselves.
 	   ⚠️ Cosmetic secrecy, like the refit star - §4.6 lists the numbers that reach the enemy. */
 	public static function addForJson($ship, $strippedShip){
+		//Stage 28: a flight an Expert Warrior's ship launched - its +10, to every viewer, as his own ship's (applyLaunchedFlights)
+		if ($ship->getOfficerLaunchIni() > 0) $strippedShip->iniativebonus = $ship->iniativebonus;
 		$list = $ship->getOfficers();
 		if (empty($list)) return;
 		foreach ($list as $entry){
@@ -3051,6 +5008,10 @@ class Officers{
 			$strippedShip->elintRangeBonus = self::ELINT_RANGE_PCT;
 			$strippedShip->blanketBallistic = self::ELINT_BLANKET_BALLISTIC;
 		}
+		//Stage 29: an Expert Ballistic Officer's longer distance range, to every viewer - a weapon's Range line and its hit-chance preview
+		if (self::isActive($ship, 'OFF_BALL')) $strippedShip->distanceRangeBonus = self::BALLISTIC_RANGE;
+		//Stage 30: an Expert Quartermaster's longer turn delay, to every viewer, lost or serving - the movement plot and the turn delay readouts
+		if (self::quartermasterIndex($ship) !== null) $strippedShip->turnDelayPenalty = self::QM_TURN_DELAY_PCT;
 		if (!TacGamedata::$currentGameFinished && !$ship->isRevealedToCurrentViewer()) return;
 		$out = array();
 		$saves = $ship->getOfficerSaves();
@@ -3068,6 +5029,18 @@ class Officers{
 			if (isset($entry['mode'])) $row['mode'] = $entry['mode'];
 			//Stage 19: the weapons an Expert Targeter covers, by id - the client's hit-chance preview reads them (officers.targeterShotBonus)
 			if (self::rulesId($entry['id']) === 'OFF_TARG') $row['covers'] = self::coveredWeapons($ship, $entry);
+			/* Stage 26: the software Specialists an Expert Software Engineer lets this ship use again now (officers.specialistReusable),
+			   and the turn the one reuse was spent (officers.stateText words it, as a Gunner's spent abilities) */
+			if ($entry['id'] === 'OFF_SOFT'){
+				$reuse = self::specialistReuse($ship, $turn);
+				if (!empty($reuse)) $row['reuse'] = $reuse;
+				$spent = self::reuseSpentTurn(self::softwareUses($ship));
+				if ($spent !== null) $row['abilities']['reuse'] = $spent;
+			}
+			//Stage 27: an Expert Troop Leader's Pod Allowance - his team's client counts the pods he aids (officers.troopAidedCraft)
+			if ($entry['id'] === 'OFF_TROOP') $row['pods'] = (int)($entry['pods'] ?? 0);
+			//Stage 28: the unit an Expert Warrior's charge holds against this turn - his team's hit-chance preview (officers.chargeHitBonus) and reticle
+			if (isset($entry['charged'])) $row['charged'] = (int)$entry['charged'];
 			if (!empty(self::$registry[$entry['id']]['movable']) && (int)TacGamedata::$currentPhase === 1 && !TacGamedata::$currentGameFinished){
 				$targets = self::moveTargets($ship, $list, $i, $turn);
 				if (!empty($targets)) $row['targets'] = $targets;

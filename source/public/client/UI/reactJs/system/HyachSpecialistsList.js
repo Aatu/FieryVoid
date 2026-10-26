@@ -147,6 +147,7 @@ class HyachSpecialistsList extends Component {
 
         // Items to display
         let displayClasses = [];
+        const again = (!isDeploy && window.officers) ? window.officers.specialistReuseList(ship) : []; //Stage 26: used, and usable again
 
         if (isDeploy) {
             // In Deployment: Show ALL available classes (keys of allSpec)
@@ -156,9 +157,10 @@ class HyachSpecialistsList extends Component {
                 displayClasses = Object.keys(system.allSpec);
             }
         } else {
-            // In Game: Show ONLY selected classes (keys of availableSpec where val > 0)
+            // In Game: Show ONLY selected classes (keys of availableSpec where val > 0) - and (OFFICERS_PLAN.md Stage 26) a used one an
+            // Expert Software Engineer lets this ship use a second time
             if (system.availableSpec) {
-                displayClasses = Object.keys(system.availableSpec).filter(key => system.availableSpec[key] > 0);
+                displayClasses = Object.keys(system.availableSpec).filter(key => system.availableSpec[key] > 0 || again.indexOf(key) !== -1);
             }
         }
 
@@ -199,7 +201,7 @@ class HyachSpecialistsList extends Component {
                         return (
                             <ListItem key={className}>
                                 <Icon src={iconSrc} alt={className} />
-                                <ItemName>{className}</ItemName>
+                                <ItemName>{className}{again.indexOf(className) !== -1 && <span style={{ fontWeight: 'normal' }}> (repeat)</span>}</ItemName>
                                 <ActionButtons>
                                     {isDeploy ? (
                                         <>

@@ -1003,6 +1003,40 @@
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
+      <h3>Expert Ballistic Officer</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>C&amp;C</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>Every ballistic weapon on the ship has +5 distance range: the target may move 5 hexes further from the launch
+            hex before the shot is lost. Launch range does not change. A torpedo's distance range is its launch range,
+            so a 30-hex torpedo becomes 30/35. Proximity Lasers get nothing.</li>
+          <li>The magazine gets one extra slot for every missile rack, Bomb Rack and mine launcher it feeds (a Solyrn's 280
+            becomes 290). The ammunition you buy fills these slots before it replaces any of the ship's standard missiles,
+            and each type may be bought up to the larger magazine (290 Heavy Missiles on a Solyrn).</li>
+          <li>Every other ballistic weapon with a limited number of shots, such as the Proximity Laser and the Limpet Bore
+            Torpedo, gets one extra round.</li>
+          <li>Free missiles: one per missile rack and Bomb Rack. Whatever single-slot missiles you buy, the most expensive
+            ones up to that number cost nothing. Basic missiles, missiles that are free anyway (the Kor-Lyans' Interceptors)
+            and two-slot missiles (Starburst, Multiwarhead) do not count. Any free missiles you leave unpicked are chosen
+            at random when the fleet is committed.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>5% of the ship's base cost, plus 1% for each missile rack and Bomb Rack, for the Kor-Lyans (a Solyrn: 15%).
+          Everyone else pays double (10%, plus 2% a rack).</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship. Only offered on ships with limited ballistic ammunition: missile racks or mine launchers whose
+          magazine has ordnance to buy, Proximity Lasers, Limpet Bores and similar.</dd>
+        <dt>Notes</dt>
+        <dd>If he is disabled or killed, the extra slots, rounds and free missiles stay, because they were loaded before
+          the battle. The +5 distance range is lost from the next turn. Remove him in Fleet Selection and the missiles go
+          back to their normal prices. Everyone sees the longer Range on the weapon and the larger magazine; nobody but
+          your own team sees the officer. Reload Racks add no slot and no free missile; old-style missile racks that do not
+          track ammunition get only the range bonus.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
       <h3>Expert ELINT Officer</h3>
       <dl class="fvd-spec">
         <dt>Post</dt>
@@ -1072,6 +1106,34 @@
         <dt>Notes</dt>
         <dd>Intended for scenarios - agree with your opponent before using one. Fiery Void leaves ramming to the players, so
           the ramming rule is not enforced by the game.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h3>Expert Graviton Controller</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The ship's strongest Engine.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>+1 damage on every hit by a gravitic beam weapon: the Graviton Beam, the Gravitic Lance (all modes - each of its
+            two Beams) and the Gravitic Cutter.</li>
+          <li>A Graviton Pulsar that hits counts its pulses as though it had rolled 5% lower. Needing 50 and rolling 35, it
+            counts as 30: one pulse more.</li>
+          <li>The Engine +1 thrust, and the largest aft thruster +1 rating (the first of them, if several are equal).</li>
+          <li>Once per battle, on a ship with a gravitic drive, during the Movement phase: click the yellow Rotate icon to
+            rotate the gravitic drive. A d6 picks the new facing - 1 faces east (heading 0), and each number after it one
+            hex side further clockwise. Heading, speed and turn delay do not change. That turn every weapon of the ship is
+            at -15% to hit, even if the ship ends up facing the way it was.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>10% of the ship's base cost for the Brakiri Syndicracy; 15% for everyone else.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship, on a ship with an Engine and a gravitic drive or a gravitic weapon (Babylon 5 factions only).</dd>
+        <dt>Notes</dt>
+        <dd>The die is rolled by the server the moment you click, and the rotation cannot be cancelled. The moves you
+          plotted before it are locked with it: Cancel no longer takes them back, a page reload puts them back, and you
+          plot the rest of the move from there. The rotation is part of the ship's movement, so every player sees it. The
+          Engine's and the thruster's +1 stay if he is disabled or killed; the rest needs him.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
@@ -1270,6 +1332,68 @@
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
+      <h3>Expert Political Officer</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>C&amp;C</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>One of the ship's default shuttles becomes the faction's armed shuttle, as with Elite Crew. Elite Crew still gives
+            its own, so the two add up. Not on a ship with Poor Crew, which cannot carry armed shuttles.</li>
+          <li>One Expert Navigator, Expert Helmsman, Expert Engineer or Expert Scanner costs nothing. Buy him in the same window:
+            if you buy more than one of the four, the most expensive is the free one. If you buy none, one of the four joins
+            the crew at random when the fleet is committed.</li>
+          <li>Five free Hardened Armour (+1 armour), on five different systems that are not Structure. Buy them in each
+            system's menu, where the price shows as 0; a sixth or more is paid for as usual (the five most expensive are the
+            free ones). Any of the five you leave unplaced go on random systems when the fleet is committed.</li>
+          <li>Once per battle, a stirring speech. In the Firing phase, open his C&amp;C's menu and press <b>Speech!</b>
+            (<b>Cancel speech</b> takes it back before you commit). Once firing resolves, every player reads it in the
+            combat log, and next turn the ship gets +30 initiative, provided he is still serving.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>40% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship. Centauri Republic and Centauri Republic (WotCR) only, on capital ships and larger (bases included).</dd>
+        <dt>Notes</dt>
+        <dd>The armed shuttle, the free officer and the armour stay with the ship if he is disabled or killed. Your opponent
+          cannot see him until he speaks, and the +30 initiative shows to everyone as the ship's initiative bonus.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h3>Expert Quartermaster</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>C&amp;C</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>One free refit, from this list: Gunsights on two weapons, Advanced Defensive Targeting on two weapons (one
+            level each), Improved Reactor, Improved Thrust Rating on two thrusters (one level each), Hardened Armour on two
+            systems on the same side of the ship (not Structure, not Primary), or Jump Accelerator. Buy them as usual: the
+            most expensive of the six you bought is the free one, and its price shows as 0. Anything else you buy is paid
+            for as usual.</li>
+          <li>If you buy none of the six, one of Gunsights, Advanced Defensive Targeting, Improved Thrust Rating or Hardened
+            Armour goes on two random systems when the fleet is committed. If your free refit is on only one system, a
+            second is added at random then.</li>
+          <li>A free Improved Reactor comes with a risk: a containment breach on that reactor is three times as likely to
+            explode.</li>
+          <li>Two free special missiles for every missile rack and Bomb Rack (one for a Class-SO rack), of any type the ship
+            can buy. The most expensive missiles you buy are the free ones. Any you leave unbought are picked at random when
+            the fleet is committed. With an Expert Ballistic Officer aboard, his free missiles are counted first.</li>
+          <li>The first critical hit the ship suffers is ignored.</li>
+          <li>The drawbacks: -30 initiative, turn delay +10% (rounded up: +1 on a delay of 1 to 10, +2 on 11 to 20), and +2 on
+            the C&amp;C's critical rolls.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>10% of the ship's base cost for the Hurr Republic; 20% for everyone else.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship, on any ship with a C&amp;C.</dd>
+        <dt>Notes</dt>
+        <dd>Everything he brings stays if he is disabled or killed: the free refit, the missiles, an unused patch for the
+          first critical hit, and the drawbacks too. The initiative and the turn delay show to everyone as the ship's own
+          numbers; he himself stays hidden. His tooltip says when the patch was used.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
       <h3>Expert Religious Leader</h3>
       <dl class="fvd-spec">
         <dt>Post</dt>
@@ -1367,6 +1491,35 @@
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
+      <h3>Expert Software Engineer</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The ship's Hyach Computer.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>+1 Bonus Fire Control Point (BFCP). Damage to the Computer never takes this point away; only losing the Computer
+            does.</li>
+          <li>You may leave one point unassigned in Initial Orders and assign it in the Firing phase instead, as you target your
+            weapons: open the Computer's menu there and press <b>+</b> on the category you want. Points assigned in Initial
+            Orders stay where they are, and no category can hold more than two.</li>
+          <li>The Computer ignores the first point of damage of every hit on it - like an extra point of armour that no weapon
+            can pierce, ignore or wear down.</li>
+          <li>On a stealth ship (the Alichi Kav and Tal), enemy ships detect it as if it were 5 hexes further away. Enemy
+            fighters detect it at half their usual range, rounded up. Weapons fire is not affected.</li>
+          <li>Once per battle, one Defence, Sensor, Targeting or Weapon Specialist can be used a second time, on any turn after
+            its first use. It shows in the Specialists menu again, marked "(again)".</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>15% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship. Hyach Gerontocracy only.</dd>
+        <dt>Notes</dt>
+        <dd>A held point that you do not assign in the Firing phase is simply unused; the Initial Orders warning about
+          unassigned BFCP ignores it. Your opponent does not see where the point went until firing resolves. A Computer
+          Specialist used in the same Firing phase lets you move every point anyway.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
       <h3>Expert Surge Officer</h3>
       <dl class="fvd-spec">
         <dt>Post</dt>
@@ -1449,6 +1602,33 @@
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
+      <h3>Expert Troop Leader</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The ship's Hangar (the largest, if it has more than one) - never a catapult, a fighter rail or a docking system.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>Every boarding roll against the ship is 2 worse for the boarders - their delivery roll and every roll of their
+            mission aboard - and the ship's own defending marines roll 2 better in Capture combat. Grappling Claws and
+            transporters count too, and an Expert Security Officer on the same ship adds his 2.</li>
+          <li>-1 (better) on every roll - the delivery and every mission roll - of as many of your breaching pods as the ship can
+            carry: its <b>Pod Allowance</b>, as the Fleet Correctness Report counts it - 1 for a ship, 2 for a capital ship, 4 for
+            a base, doubled on an Assault ship, never more than its assault shuttle, heavy and medium hangar slots, plus any
+            Breaching Pod racks. The pods are your fleet's in the order you bought them, pod by pod, wherever they are. A pod
+            that is lost keeps its share. Several Troop Leaders add their allowances.</li>
+          <li>Every Bulkhead on the ship has 1 extra box, for the whole battle - even after he is disabled or killed.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>5% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship. Gaim Intelligence only.</dd>
+        <dt>Notes</dt>
+        <dd>He can be bought for a Gaim breaching pod instead (see the Expert Troop Leader under Fighter Officers): a pod with
+          one of its own gets his -3, never -4. Your pods' Marines tooltips say which of them he helps. The extra Bulkhead boxes
+          show to your opponent; the officer himself stays hidden.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
       <h3>Expert Turret Officer</h3>
       <dl class="fvd-spec">
         <dt>Post</dt>
@@ -1476,6 +1656,49 @@
           other Turret Officer holds (see Moving an officer). On a weapon an Expert Gunner serves in, the Gunner's +1 fire control
           applies instead of his; the -1, the -2 and the shelter still do. Shelter is decided as the turn's fire is resolved;
           ramming is not fire, and damage before the Firing phase (such as meteors) is not affected.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h3>Expert Warrior</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>C&amp;C</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>+1 fire control (+5%) on every weapon, and +1 damage per die rolled (no die above its highest face). Not the ram.</li>
+          <li>+10 initiative - and +10 for every fighter flight or shuttle the ship launches from its hangars during the battle,
+            from the turn after it launches, while he serves.</li>
+          <li>-1 on every critical roll the ship makes, and +1 on the critical roll of any enemy system the ship's weapons damage
+            (once a turn, however many hits). Fighters' dropout rolls are not affected.</li>
+          <li>Once per battle each, and never two of them in the same turn:
+            <ul>
+              <li><b>Charge</b> - in the Movement phase, before the ship moves into a hex, click the <b>Charge</b> icon (its
+                glow pulses while it waits), then the enemy unit to charge: the icon turns red with a crosshair, and while the ship
+                is selected the unit charged wears one too - in the Firing phase only if the charge held. Then move in on it: by
+                the end of the ship's move it must be at least 4 hexes nearer the target than where it declared the charge. Only
+                an enemy that moved before him (lower initiative) can be charged - in Simultaneous Movement, one in a lower
+                bracket, never his own - and at least 4 hexes away when he declares (exactly 4 is fine: he can end in its hex);
+                with none, the icon does not appear. The route is up to you - turns, pivots and slips are
+                all fine. One <b>snap turn</b>, at any point in the move - a second turn straight after another in the same hex,
+                as if the ship were agile - costs 1 less thrust, or half the thrust if it is agile; the turn arrows turn red and
+                read "Snap Turn" when it is on offer. If the charge holds, his ship's
+                weapons get +2 to hit (+10%) against that unit this turn. Declaring the charge uses it, even if it does not
+                hold. Click the icon again (or Cancel) to take it back before the first move.</li>
+              <li><b>Precision strike</b> - automatic: the ship's first called shot has no called-shot penalty. On a turn
+                with several called shots, the ship's lowest-numbered weapon gets it.</li>
+              <li><b>Supreme Anticipation</b> - in the Firing phase, open his C&amp;C's menu and press <b>Supreme
+                Anticipation!</b> (<b>No anticipation</b> takes it back before you commit). Next turn the ship gets +50
+                initiative, provided he is still serving; the turn after that, -50 - even if he has been lost.</li>
+            </ul></li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>50% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship. Drazi Freehold and Drazi Freehold (WotCR) only.</dd>
+        <dt>Notes</dt>
+        <dd>On a weapon an Expert Gunner serves in, the Gunner's +1 fire control and +1 per die apply instead of his, and his precision
+          strike takes the Gunner's called shot without using it up. The charge row is part of the ship's movement, so your
+          opponent can see the charge; the initiative changes show to everyone as the ship's initiative bonus.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
@@ -1512,12 +1735,42 @@
 <section data-key="fighterofficers" data-title="Fighter Officers" data-group="Officers">
   <p class="fvd-lede">Officers for fighter flights. A flight may carry only one of them, and he flies in its first
     fighter: he is lost if that fighter is destroyed or drops out, and goes with it if it is split off from the flight
-    (see <a href="#losingofficers">Losing an officer</a>). The one exception is the Expert Pilot: a flight may carry
-    up to four of them (in place of any other officer), one in each of its first fighters.</p>
+    (see <a href="#losingofficers">Losing an officer</a>). The exceptions: a flight may carry up to four Expert Pilots (in
+    place of any other officer), one in each of its first fighters; and a breaching pod flight may carry a Breaching Expert
+    or an Expert Troop Leader in each of its pods, the two together if you like.</p>
   <p>Each officer's cost is for a standard flight of six fighters. A flight of another size pays it in proportion,
     rounded up: three fighters pay half, nine one and a half times, twelve double. A single superheavy fighter pays it
-    in full.</p>
+    in full. The Breaching Expert and the Expert Troop Leader are the exceptions: each serves in one pod, so each costs the
+    same whatever the size of his flight.</p>
   <div class="fvd-cards">
+    <article class="fvd-card fvd-card--wide">
+      <h3>Breaching Expert</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>One in each of the flight's breaching pods, from the first.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>+1 Thrust for the flight, however many Breaching Experts it carries - which also helps its pods match a faster
+            target's speed to attach.</li>
+          <li>The Marines in his own pod count as Elite: -1 on their delivery roll, and on the rolls of every mission they
+            carry out. Marines that are Elite already (the Narn and Gaim pods, or Elite Marines bought) gain nothing more.</li>
+          <li>Once per battle: the first marine unit his pod delivers on a <b>Capture Ship</b> mission makes three attack
+            rolls instead of one on its first turn aboard. It is still one unit to the defenders, eliminated by a single
+            hit.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>50% of one pod's cost each; 25% for the Balosians, Yolu, Narn and Gaim. The same whatever the size of the flight.</dd>
+        <dt>Limit</dt>
+        <dd>One per pod. A Gaim pod flight may carry Breaching Experts and Expert Troop Leaders together, one officer to a pod -
+          the Breaching Experts take the first pods. Only offered to breaching pods. No more than 20% of a fleet's breaching pods may carry
+          one (fractions of 0.5 or more rounded up), counted pod by pod: a fleet needs 3 pods for one, 8 for two, 13 for
+          three. The Fleet Correctness Report checks this.</dd>
+        <dt>Notes</dt>
+        <dd>Fiery Void takes no thrust from a flight for damage, so his rule that the pod ignores such losses needs nothing
+          here. His capture rolls are used up when that unit is delivered, whatever happens to him afterwards; a delivery
+          that fails uses nothing, and nor do Sabotage and Rescue missions.</dd>
+      </dl>
+    </article>
     <article class="fvd-card fvd-card--wide">
       <h3>Expert Coordinator</h3>
       <dl class="fvd-spec">
@@ -1646,6 +1899,61 @@
           Alliance Badger; its tooltip has a <b>Tail Gun</b> line. Fired in the same Firing Phase as any of its fighter's
           other direct-fire weapons, it takes -10% to hit, unless the flight has a navigator to work it. Missiles and
           torpedoes launched in Initial Orders, intercepting and ramming do not count.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h3>Expert Troop Leader</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>One in each of the flight's pods not taken by a Breaching Expert, from the first.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>-3 (better) on every roll of the marine units his pod sends: their delivery roll, and every roll of their mission
+            aboard - on top of the Gaim pods' own Elite -1. A Troop Leader ship's -1 does not add to it.</li>
+          <li>He goes with every unit his pod sends. Whenever one of them is eliminated - boarding, by the defenders in Capture
+            combat, or on a Sabotage or Rescue roll (a Rescue completed "with heavy casualties" included) - roll a d6: on 1-4 he
+            escapes back to his pod, on 5 or 6 he is killed. On a <b>Wreak Havoc</b> mission (a Sabotage with no called shot, or
+            one whose system is destroyed with no pod to return to) there is no escape: he dies with them.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>50% of one pod's cost each (20 points on the Ech'Akki). The same whatever the size of the flight.</dd>
+        <dt>Limit</dt>
+        <dd>One per pod, beside any Breaching Experts - one officer to a pod. Gaim breaching pods only.</dd>
+        <dt>Notes</dt>
+        <dd>The Expert Troop Leader can also serve aboard a ship (see Ship Officers). Like every fighter officer, he is lost with
+          his pod. He serves out the turn he is killed. His pod's Marines tooltip names him to you; your opponent never learns he
+          was there.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h3>Redline Pilot</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The flight's first fighter.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li><b>Skin dancing</b> over an Enormous unit moving at speed 8 or less, not 5 (see <a href="faq.php#skindancing">Skin
+            Dancing</a>), at +1 on the roll for every point of its speed over 5. If the dance fails and a fighter crashes into the
+            hull, it is always his.</li>
+          <li><b>Combat pivots without the thrust</b>: in the Firing Phase the flight may combat pivot even with too little thrust
+            left (paying what it has). Its fire that turn is then at -15% instead of the usual -5% for a combat pivot.</li>
+          <li><b>Afterburners</b>: the Redline icon behind the flight in the Movement Phase, as its <b>first</b> order of the turn,
+            gives it +50% thrust that turn (rounded down: 10 becomes 15) - it may still change speed after it. The next turn its engines cool: it flies straight ahead at
+            its speed - no turns, slides, pivots, speed changes or jinking, and no combat pivots or Evade in the Firing Phase. Until
+            the flight moves, the icon (or Cancel) takes the burn back.</li>
+          <li><b>Landing beyond the thrust tolerance</b>: the flight may dock with a carrier whose speed differs from its own by more
+            than its thrust. As firing resolves a d20 is rolled: at or under the excess, his fighter rams the carrier (an automatic
+            hit, as a ram) and the rest of the flight breaks off; above it, the flight lands. A flight of thrust 10 at speed 24
+            docking with a carrier at speed 10 is 4 over, so a roll of 1-4 crashes. Not on a turn the flight used its afterburners
+            (which otherwise count towards the thrust for landing).</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>100% of one fighter's cost for the Cascor, 150% for everyone else, for a flight of six.</dd>
+        <dt>Limit</dt>
+        <dd>1 officer per flight: a flight with a Redline Pilot carries no other officer.</dd>
+        <dt>Notes</dt>
+        <dd>Like every fighter officer he is lost with his fighter. The afterburners, the cooling turn and a landing's roll are
+          seen by your opponent; the combat log tells the roll.</dd>
       </dl>
     </article>
   </div>

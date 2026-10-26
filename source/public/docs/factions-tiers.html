@@ -11,7 +11,7 @@
   Inside an entry: <h3> sub-headings (a faction's systems) are listed under the entry while it is
   open; data-anchor="x" on any element makes factions-tiers.php#x land on it. Never use id= (the
   window is dropped into other pages, whose ids it must not collide with).
-  Links: to another document href="faq.php#stealth"; within this one href="#shadows".
+  Links: to another document href="faq.php#terrain"; within this one href="#shadows".
   A faction's picture is its own game art, on a scope:
     <figure class="fvd-ship"><img src="img/ships/gquan.png" alt=""><figcaption>G'Quan Heavy Cruiser</figcaption></figure>
   Swap the src for any other ship image (or better artwork) to change it.
@@ -779,11 +779,12 @@
       phase, use its 'Specialists' system to select them, up to its allowance. Only one of each type can be picked per
       ship. Then use a Specialist with the + button on the Specialist system, in the phase you want it.</li>
     <li>Different Specialists work at different times: Power and Sensor Specialists only in Initial Orders; Thruster and
-      Engine Specialists in the Movement Phase as well; and Targeting and Weapon Specialists in any phase up to
-      Firing.</li>
+      Engine Specialists in the Movement Phase as well; Targeting and Weapon Specialists in any phase up to Firing; and
+      the Computer Specialist only in the Firing Phase.</li>
   </ul>
   <dl class="fvd-defs">
-    <dt>Computer</dt><dd>Two extra Bonus Fire Control Points (BFCP) this turn.</dd>
+    <dt>Computer</dt><dd>In the Firing Phase: one extra Bonus Fire Control Point (BFCP) this turn, and every BFCP may be
+      moved to another category, as fire is targeted. No category may still hold more than two.</dd>
     <dt>Defence</dt><dd>Ship profiles lowered by 5%, intercept ratings increased by 10.</dd>
     <dt>Engine</dt><dd>+25% thrust this turn (rounded down). Removes an Engine critical, if there is one.</dd>
     <dt>Manoeuvring</dt><dd>Turn Cost one level lower (the same steps an Expert Navigator uses: 1 becomes 0.83, 0.5
@@ -812,9 +813,39 @@
   <p>Hyach sensors resist damage and shrug off critical hits more easily: instead of +1 to the sensor critical roll for
     every point of damage, they add +1 only for every two boxes of damage (rounded down).</p>
 
-  <h3>Stealth Ships</h3>
-  <p>The Hyach are the only race to operate stealth ships - the space-going equivalent of submarines. The full stealth
-    rules are in the <a href="faq.php#stealth">FAQ</a>.</p>
+  <h3 data-anchor="stealth">Stealth Ships</h3>
+  <p>Stealth ships are invisible at long range until they reveal themselves or are detected.</p>
+  <ul>
+    <li>They reveal themselves automatically by using any EW ability except Defensive EW (DEW), or by firing their
+      weapons.</li>
+    <li>They can also be detected once they get close to an enemy vessel, if there is line of sight. Detection happens at
+      the start of the Firing Phase and depends on both ship type and sensor rating: an undetected stealth ship within
+      detection range at that point becomes detected.</li>
+  </ul>
+  <table>
+    <thead><tr><th>Detecting unit</th><th>Detection range</th></tr></thead>
+    <tbody>
+      <tr><td>Base</td><td>5 &times; Sensor Rating</td></tr>
+      <tr><td>ELINT ship</td><td>3 &times; Sensor Rating</td></tr>
+      <tr><td>Other ship</td><td>2 &times; Sensor Rating</td></tr>
+      <tr><td>Fighter</td><td>Offensive Bonus</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>When an opponent has stealth ships, ELINT ships can spend EW on <b>Detect Stealth</b> to add 2 hexes of detection
+      range per point.</li>
+    <li>A detected stealth ship can become undetected again by breaking line of sight with ALL enemy vessels at the end of
+      a turn, and not firing any weapons.</li>
+    <li>If its scanner or computer system is destroyed, its defence increases by 15% for the rest of the battle.</li>
+    <li>Stealth ships also get the same benefits as Minbari Jammer-equipped ships beyond a certain distance: for ships, a
+      double range penalty beyond 12 hexes (4 for fighters, 24 for bases); for stealth fighters, a double range penalty
+      beyond 5 hexes, and ballistic launches restricted beyond 5 hexes.</li>
+    <li>Stealth fighters cannot become fully invisible - they only get the jammer / no-lock effects.</li>
+  </ul>
+  <div class="fvd-note">
+    <p>These rules cover stealth for the younger Babylon 5 races, such as the Hyach. For other factions' stealth
+      mechanics, see their own faction notes - the <a href="#torvalus">Torvalus</a>, for example.</p>
+  </div>
 </section>
 
 <section data-key="ipsha" data-title="Ipsha Baronies" data-group="League of Non-Aligned Worlds">

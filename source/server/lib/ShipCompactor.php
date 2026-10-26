@@ -381,6 +381,8 @@ class ShipCompactor
         if (!is_array($arr)) return $ship;
 
         self::annotateSystems($ship->systems, $arr['systems']);
+        //OFFICERS_PLAN.md Stage 29: an Expert Ballistic Officer's free picks and magazine slots, on the hulls offered him only
+        foreach (Officers::blueprintAnnotations($ship) as $key => $value) $arr[$key] = $value;
         return self::compactShip($arr);
     }
 

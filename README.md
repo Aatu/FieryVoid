@@ -417,6 +417,13 @@ Each entry is keyed by the officer's id (the ids are listed in `Officers::$regis
 
 and to give it a cheaper Expert Scavenger, add `'My Custom Faction' => 20` to the Scavenger's `pct` list. An officer with no entry at all is offered to every faction at his normal price.
 
+**To give one officer several rules**, put the keys side by side in the same entry. Each is checked on its own, so they combine freely. For example, to keep the Expert Religious Officer to four factions *and* make him cheaper for one of them:
+
+    'OFF_RELI' => array('only' => array('Minbari Federation', 'Markab Theocracy', 'Corillani Theocracy', 'Yolu Confederation'),
+        'pct'  => array('Minbari Federation' => 10)),
+
+The Markab, Corillani and Yolu pay his normal price, and the Minbari pay 10%. (`OFF_TARG` and `OFF_ELINT` in the table already work this way.) Each key can appear **only once** per officer. A second `'pct'` silently replaces the first, so list every faction in one `pct` array. A `pct` or `max` for a faction that `only` leaves out (or `never` names) does nothing, because that faction is never offered the officer.
+
 Things to know:
 
 - **The name must be the faction string exactly as your ship files set it** (`$this->faction = "My Custom Faction";`) — the same name the faction has in Fleet Selection. It is case-sensitive, and a name that matches no faction silently does nothing; `tests/replay/officersHarness.php` (if you run it) checks every name in the table against the factions that exist.

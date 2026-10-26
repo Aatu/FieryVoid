@@ -783,6 +783,7 @@ window.gamedata = {
 			var cost = window.officers
 				? officers.flightCost(entry[0], entry[2], gamedata.enhancementOptionCost(entry), crafts, officers.perCraftExtra(ship, entry[0]), officers.standardFlight(ship))
 				: gamedata.enhancementOptionCost(entry) * crafts;
+			if (window.officers) cost = officers.shipRowCost(ship, entry, cost); //an Expert Political Officer's free expert (Stage 25)
 			lines.unshift({ text: name, cost: cost * units }); //reverse order
 		}
 
@@ -2241,6 +2242,28 @@ window.gamedata = {
 			checkResult += R_OK;
 		}
 		checkResult += "<br>";
+
+		/* OFFICERS_PLAN.md Stage 24 - the Breaching Expert: "No more than 20% of a fleets breaching pods (round fractions of 0.5 or more
+		   up) can use these experts" (officers.breachingFleetCheck counts both). Reported, as every fleet-composition rule is, and only
+		   while the fleet carries one. */
+		if (window.officers) {
+			var fleetUnits = [];
+			for (var b in gamedata.ships) {
+				if (gamedata.ships[b].slot == slotid) fleetUnits.push(gamedata.ships[b]);
+			}
+			var breaching = officers.breachingFleetCheck(fleetUnits);
+			if (breaching.experts > 0) {
+				checkResult += " Breaching Experts: " + breaching.experts + " (allowed up to " + breaching.allowed
+					+ ": " + officers.BREACH_FLEET_PCT + "% of " + breaching.pods + " breaching pod" + (breaching.pods === 1 ? "" : "s") + ")";
+				if (breaching.experts > breaching.allowed) {
+					checkResult += R_FAILURE;
+					problemFound = true;
+				} else {
+					checkResult += R_OK;
+				}
+				checkResult += "<br>";
+			}
+		}
 
 		checkResult += " Total Assault Shuttles: " + totalFtrAS;
 		checkResult += " (allowed up to " + totalHangarAS + ")";
@@ -4206,7 +4229,7 @@ window.gamedata = {
 					if (ship.flight) {
 						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a fighter officer scaled by the flight's size (D8)
 					} else {
-						ship.pointCostEnh += target.data("enhCost");
+						ship.pointCostEnh += confirm.enhRowCost(target, 1); //its enhCost - but nothing for an Expert Political Officer's free expert (OFFICERS_PLAN.md Stage 25)
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
@@ -4417,7 +4440,7 @@ window.gamedata = {
 					if (ship.flight) {
 						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a fighter officer scaled by the flight's size (D8)
 					} else {
-						ship.pointCostEnh += target.data("enhCost");
+						ship.pointCostEnh += confirm.enhRowCost(target, 1); //its enhCost - but nothing for an Expert Political Officer's free expert (OFFICERS_PLAN.md Stage 25)
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
@@ -4637,7 +4660,7 @@ window.gamedata = {
 					if (ship.flight) {
 						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a fighter officer scaled by the flight's size (D8)
 					} else {
-						ship.pointCostEnh += target.data("enhCost");
+						ship.pointCostEnh += confirm.enhRowCost(target, 1); //its enhCost - but nothing for an Expert Political Officer's free expert (OFFICERS_PLAN.md Stage 25)
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
@@ -4727,9 +4750,11 @@ window.gamedata = {
 		if (window.systemEnhancements) {
 			systemEnhancements.apply(ship);
 			var sysEnhBefore = ship.pointCostSysEnh || 0;
+			//OFFICERS_PLAN.md Stage 25: an Expert Political Officer bought or dropped in this edit re-prices his free Hardened Armour
+			systemEnhancements.totalCost(ship);
 			refitsDropped = systemEnhancements.dropDestroyed(ship);
-			//pointCost had the OLD refit total folded in; take the refunded difference back off.
-			if (refitsDropped.length) ship.pointCost -= (sysEnhBefore - (ship.pointCostSysEnh || 0));
+			//pointCost had the OLD refit total folded in; take the difference back off.
+			ship.pointCost -= (sysEnhBefore - (ship.pointCostSysEnh || 0));
 		}
 		//OFFICERS_PLAN.md Stage 15 (user ruling 2026-10-17): a ship officer bought in this edit for a post the pre-battle
 		//damage destroys is refunded at once, as the placed ones above are (it moves pointCostEnh and pointCost itself)
