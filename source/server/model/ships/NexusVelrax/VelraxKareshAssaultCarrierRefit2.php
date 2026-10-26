@@ -29,7 +29,7 @@ class VelraxKareshAssaultCarrierRefit2 extends HeavyCombatVesselLeftRight{
 
         $this->addPrimarySystem(new Reactor(4, 14, 0, 0));
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 16, 5, 7));
+        $this->addPrimarySystem(new Scanner(4, 16, 5, 6));
         $this->addPrimarySystem(new Engine(4, 15, 0, 8, 4));
         $this->addAftSystem(new Thruster(3, 15, 0, 4, 1));
         $this->addAftSystem(new Thruster(4, 20, 0, 8, 2));

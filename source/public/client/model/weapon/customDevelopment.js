@@ -213,3 +213,9 @@ var HvySeekerTorp = function  HvySeekerTorp(json, ship) {
 };
 HvySeekerTorp.prototype = Object.create(Weapon.prototype);
 HvySeekerTorp.prototype.constructor =  HvySeekerTorp;
+
+var PlasmaBolt = function PlasmaBolt(json, ship) {
+    Plasma.call(this, json, ship);
+};
+PlasmaBolt.prototype = Object.create(Laser.prototype);
+PlasmaBolt.prototype.constructor = PlasmaBolt;
