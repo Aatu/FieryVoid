@@ -1536,11 +1536,26 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     white-space: nowrap;   
 }
 
-/* The rules are STATUS, not chrome: --fv-warn is the same amber the fleet header uses for
-   "waiting", and an optional rule being switched on is the same kind of fact - something
-   about this game that is not the default. */
+/* The rules take the lobby's Game Rules colours (user, 2026-10-27): the .fv-rule-chip kinds
+   in scenarioCard.css - Mines purple, Reinforcements cyan, every other rule the page's blue -
+   text, tint and line as there, so a rule reads the same colour before the game and in it.
+   #00b8e6 is the same untokened cyan as .fv-tag--deploys above. */
 .fv-tag--rule {
-    color: var(--fv-warn);
+    color: var(--fv-text-accent);
+    background: rgba(139, 202, 242, 0.1);
+    border-color: var(--fv-line-scs);
+}
+
+.fv-tag--mines {
+    color: var(--fv-purple);
+    background: rgba(178, 140, 240, 0.1);
+    border-color: rgba(178, 140, 240, 0.6);
+}
+
+.fv-tag--reinforcements {
+    color: #00b8e6;
+    background: rgba(0, 184, 230, 0.1);
+    border-color: rgba(0, 184, 230, 0.6);
 }
 
 .decl-briefing-text {
