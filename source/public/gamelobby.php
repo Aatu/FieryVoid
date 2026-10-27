@@ -549,7 +549,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		   structured facts once, on load (gamedata.renderScenarioPanel).
 		   A Fleet Builder lobby has no teams, no map and no scenario - only the reference links. */
 
-		/* The reference pages - the same three as game.php's USEFUL LINKS. A plain click opens them in
+		/* The reference pages - game.php's USEFUL LINKS, less Ship Options (now in the buy dialog). A plain click opens them in
 		   the DATA ARCHIVE window over the lobby (client/UI/docViewer.js matches the href); the
 		   target=_blank is only the fallback for a middle-click, or if the script is missing. (The
 		   three off-site random-faction wheels that sat under them are gone: the Faction Picker has
@@ -562,8 +562,10 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		       title="Aide-memoire of specific rules and differences from Babylon 5 Wars">FAQ</a>
 		    <a class="lb-link" href="./factions-tiers.php" target="_blank" rel="noopener noreferrer"
 		       title="Overview of Fiery Void factions and their approximate strengths">Factions &amp; Tiers</a>
+		    <!-- Ship Options moved to the buy dialog, bottom left (confirm.buyDialogShell), 2026-10-27.
 		    <a class="lb-link" href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer"
 		       title="Details of all the extras available to Fiery Void units, e.g. missiles">Ship Options</a>
+		    -->
 		  </div>
 		</div>';
 
