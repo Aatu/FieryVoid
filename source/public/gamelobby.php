@@ -746,11 +746,11 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 								<span class="lb-bar-label">Show:</span>
 								<button type="button" class="lb-chip lb-cat-chip" data-cat="" aria-pressed="true">All</button>
 								<button type="button" class="lb-chip lb-cat-chip" data-cat="6" aria-pressed="false">Mines</button>
-								<button type="button" class="lb-chip lb-cat-chip" data-cat="5" aria-pressed="false">Structures</button>
+								<button type="button" class="lb-chip lb-cat-chip" data-cat="5" aria-pressed="false">Immobile</button>
 								<button type="button" class="lb-chip lb-cat-chip" data-cat="4" aria-pressed="false">Capital</button>
 								<button type="button" class="lb-chip lb-cat-chip" data-cat="3" aria-pressed="false">Heavy</button>
 								<button type="button" class="lb-chip lb-cat-chip" data-cat="2" aria-pressed="false">Medium</button>
-								<button type="button" class="lb-chip lb-cat-chip" data-cat="1" aria-pressed="false">Light Combat</button>
+								<button type="button" class="lb-chip lb-cat-chip" data-cat="1" aria-pressed="false">Light</button>
 								<button type="button" class="lb-chip lb-cat-chip" data-cat="0" aria-pressed="false">Fighters</button>
 							</div>
 						</div>
