@@ -559,7 +559,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		  <div class="lb-links-row">
 		    <span class="lb-links-label">Useful links</span>
 		    <a class="lb-link" href="./faq.php" target="_blank" rel="noopener noreferrer"
-		       title="Aide-memoire of specific rules and differences from Babylon 5 Wars">FAQ</a>
+		       title="Aide-memoire of specific rules and differences from Babylon 5 Wars">Fiery Void FAQ</a>
 		    <a class="lb-link" href="./factions-tiers.php" target="_blank" rel="noopener noreferrer"
 		       title="Overview of Fiery Void factions and their approximate strengths">Factions &amp; Tiers</a>
 		    <!-- Ship Options moved to the buy dialog, bottom left (confirm.buyDialogShell), 2026-10-27.
