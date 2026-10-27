@@ -1,6 +1,6 @@
 
 import React from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { ContainerShadowed, Clickable } from "../styled";
 import theme from "../styled/theme";
 
@@ -145,7 +145,7 @@ class EwButtons extends React.Component {
         this.setBackground(!this.state.bgToggled);
     }
 
-    // `off` true = background disabled (button lit). Setting the state it is already in is
+    // `off` true = background disabled (button faded). Setting the state it is already in is
     // a no-op, so the OPTIONS checkbox can ask for either state without knowing the current one.
     setBackground(off) {
         const bodyBg = document.getElementById("background");
@@ -185,23 +185,23 @@ class EwButtons extends React.Component {
                     onTouchEnd={this.showEnemyEW.bind(this, true)}
                 />
                 <FBButton
-                    $toggled={this.state.fbToggled}
+                    $showing={this.state.fbToggled}
                     onMouseDown={this.toggleFriendlyBallisticLines.bind(this, false)}
                 />
                 <EBButton
-                    $toggled={this.state.ebToggled}
+                    $showing={this.state.ebToggled}
                     onMouseDown={this.toggleEnemyBallisticLines.bind(this, false)}
                 />
                 <LoSButton
-                    $toggled={this.state.losToggled}
+                    $showing={this.state.losToggled}
                     onMouseDown={this.toggleLoS.bind(this, false)}
                 />
                 <HexButton
-                    $toggled={this.state.hexToggled}
+                    $showing={this.state.hexToggled}
                     onMouseDown={this.toggleHexNumbers.bind(this, false)}
                 />
                 <BgButton
-                    $toggled={this.state.bgToggled}
+                    $showing={!this.state.bgToggled}
                     onMouseDown={this.toggleBackground}
                     title={this.state.bgToggled ? "Enable Background" : "Disable Background"}
                 />
@@ -268,54 +268,72 @@ const EEWButton = styled(MainButton)`
 const FEWButton = styled(MainButton)`
     background-image: url("./img/FEW.png");
 `;
-/* The untoggled branch of each button below repeats its own base fill and border. That
-   is not decoration - these are styled(MainButton) and MainButton is a Container variant,
-   so an untoggled branch left on the old teal would fight the shell it sits in. They
-   track the Container: theme.colors.windowBg / theme.colors.line (roadmap item 6, Stage 4).
-   The TOGGLED values are signals, not chrome - limegreen means "this is on" - so they are
-   deliberately left alone by the reskin. */
-const EBButton = styled(MainButton)`
-    background-image: url("./img/ballisticTarget2.png");
-    box-shadow: ${props => (props.$toggled ? "inset 0 0 15px 5px rgba(50, 205, 50, 0.4)" : "none")};
-    background-color: ${props => (props.$toggled ? "#1b533d" : theme.colors.windowBg)};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : theme.colors.line)};
-    border-right: none;
-`;
-const FBButton = styled(MainButton)`
-    background-image: url("./img/ballisticLaunch2.png");
-    box-shadow: ${props => (props.$toggled ? "inset 0 0 15px 5px rgba(50, 205, 50, 0.4)" : "none")};
-    background-color: ${props => (props.$toggled ? "#1b533d" : theme.colors.windowBg)};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : theme.colors.line)};
-    border-right: none;
-`;
-const LoSButton = styled(MainButton)`
-    background-image: url("./img/los1.png");
-    filter: ${props =>
-        props.$toggled
-            ? "brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)"
-            : "none"};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : theme.colors.line)};
-    border-right: none;
-`;
-const HexButton = styled(MainButton)`
-    background-image: url("./img/hexNumber.png");
-    filter: ${props =>
-        props.$toggled
-            ? "brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)"
-            : "none"};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : theme.colors.line)};
-    border-right: none;
-`;
+/* On/off look for the toggle buttons. `$showing` = the thing the button controls is
+   currently on the map. It is NOT the same as the component's *Toggled state for the
+   background button, which is lit by default because the background shows by default.
 
-const BgButton = styled(MainButton)`
-    filter: ${props =>
-        props.$toggled
-            ? "brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)"
-            : "none"};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : theme.colors.line)};
-    border-right: none;
+   Off reads by FADING THE ICON, not by colour: the icon sits on its own pseudo-element
+   layer so it can be dimmed without dimming the frame. Element opacity or filter on the
+   button itself would fade the border and the windowBg fill too, and that fill already
+   carries its own alpha (alpha compounding - see theme.js). On restores the icon and adds
+   a quiet highlight from the chrome palette: the primary-section border, a faint
+   linePrimary wash and a thin textAccent bar on the inner edge. This replaced the
+   limegreen border/glow and the hue-rotate filter that turned the icons green
+   (user request 2026-10-27). */
+const toggleFrame = css`
     position: relative;
+    border: 1px solid ${props => (props.$showing ? theme.colors.linePrimary : theme.colors.line)};
+    border-right: none;
+    background-image: ${props =>
+        props.$showing
+            ? "linear-gradient(90deg, rgba(96, 137, 193, 0.32), rgba(96, 137, 193, 0.08))"
+            : "none"};
+    box-shadow: ${props => (props.$showing ? `inset 2px 0 0 ${theme.colors.textAccent}, ` : "")}5px 5px 10px ${theme.colors.overlayBg};
+`;
+const toggleIcon = css`
+    opacity: ${props => (props.$showing ? 1 : 0.45)};
+    //Only half grey: fully desaturated, the faded friendly (yellow) and enemy (orange)
+    //ballistic icons become indistinguishable.
+    filter: ${props => (props.$showing ? "none" : "grayscale(0.5)")};
+    transition: opacity 0.15s ease, filter 0.15s ease;
+`;
+//A faded icon brightens a little under the pointer, so it still reads as a live control.
+const toggleIconHover = css`
+    opacity: ${props => (props.$showing ? 1 : 0.7)};
+`;
 
+const IconToggleButton = styled(MainButton)`
+    ${toggleFrame}
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-repeat: no-repeat;
+        background-size: cover;
+        ${toggleIcon}
+    }
+    &:hover::before {
+        ${toggleIconHover}
+    }
+`;
+
+const EBButton = styled(IconToggleButton)`
+    &::before { background-image: url("./img/ballisticTarget2.png"); }
+`;
+const FBButton = styled(IconToggleButton)`
+    &::before { background-image: url("./img/ballisticLaunch2.png"); }
+`;
+const LoSButton = styled(IconToggleButton)`
+    &::before { background-image: url("./img/los1.png"); }
+`;
+const HexButton = styled(IconToggleButton)`
+    &::before { background-image: url("./img/hexNumber.png"); }
+`;
+
+//No PNG for this one - its icon is the little drawn picture in ::after, so that is what fades.
+const BgButton = styled(MainButton)`
+    ${toggleFrame}
 
     &::after {
         content: '';
@@ -326,7 +344,11 @@ const BgButton = styled(MainButton)`
         border: 2px solid #fdfdfdb4;
         border-radius: 4px;
         box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-    margin-left: 4px;           
+        margin-left: 4px;
+        ${toggleIcon}
+    }
+    &:hover::after {
+        ${toggleIconHover}
     }
 `;
 
