@@ -2760,6 +2760,8 @@ spl_autoload_register(
                 'romak' => '/server/model/ships/markab/romak.php',
                 'rongoth' => '/server/model/ships/narn/rongoth.php',
                 'roshanthi' => '/server/model/ships/drazi_old/Roshanthi.php',
+                'roskatur' => '/server/model/ships/dilgar/roskatur.php',
+                'roskatur2211' => '/server/model/ships/dilgar/roskatur2211.php',
                 'roskorbase2215am' => '/server/model/ships/hurr/Roskorbase2215AM.php',
                 'roskorbase2240am' => '/server/model/ships/hurr/Roskorbase2240AM.php',
                 'rotas' => '/server/model/ships/HouseValheru/Rotas.php',
