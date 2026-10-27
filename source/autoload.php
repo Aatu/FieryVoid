@@ -1504,6 +1504,7 @@ spl_autoload_register(
                 'helpmanager' => '/server/controller/HelpManager.php',
                 'hemrosam' => '/server/model/ships/descari/HemrosAM.php',
                 'hemsar' => '/server/model/ships/descari/Hemsar.php',
+                'hephaestus' => '/server/model/ships/EA/hephaestus.php',
                 'hephaestusam' => '/server/model/ships/EA/hephaestusAM.php',
                 'hermesam' => '/server/model/ships/EA/hermesAM.php',
                 'hermesfastalphaam' => '/server/model/ships/EA/hermesFastAlphaAM.php',
