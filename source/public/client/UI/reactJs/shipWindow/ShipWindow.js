@@ -2450,6 +2450,15 @@ const getStatusBanners = (ship) => {
         });
     }
 
+    /*FIGHTER_MISSIONS_PLAN.md §3.10: a flight's fighter mission - the map tooltip's line (fighterMissions.tooltipLine).
+      Cyan while it flies or waits on one, the --fv-warn yellow on the turn it changes (the -60 Ini).*/
+    const mission = (ship.flight && window.fighterMissions) ? window.fighterMissions.bannerText(ship) : null;
+    if (mission) {
+        banners.push(mission.tone === 'warning'
+            ? { key: 'fighterMission', color: theme.colors.warning, bg: 'rgba(225, 176, 0, 0.10)', text: mission.text }
+            : { key: 'fighterMission', color: theme.colors.statusPending, bg: 'rgba(0, 184, 230, 0.10)', text: mission.text });
+    }
+
     /*EXTENDED_TURNS_PLAN.md Stage 5 (§6): the map tooltip's green "Making Extended Turn (side)" while
       the turn is in progress (D8), and - here only - an amber note for the rest of the turn an owed
       turn was cancelled in, since that happens automatically with no pop-up (D5).

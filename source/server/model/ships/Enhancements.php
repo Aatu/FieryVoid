@@ -2121,7 +2121,7 @@ class Enhancements{
 	  (MINE_ACC/ARM/DMG/...), which are NOT ammo, so they are listed explicitly.
 	  To restore ammo in the list, drop the isAmmoEnhancement() guards in
 	  setEnhancementsFighter / setEnhancementsShip.*/
-	private static function isAmmoEnhancement($enhID){
+	public static function isAmmoEnhancement($enhID){ //public since OFFICERS_PLAN.md Stage 29: Officers::hasMagazineOrdnance
 		if(strpos($enhID, 'AMMO_') === 0) return true;   //ship + fighter missiles
 		if(strpos($enhID, 'SHELL_') === 0) return true;  //direct-fire railgun shells
 		static $launcherMines = array('MINE_BLB','MINE_BLH','MINE_BLW','MINE_MLB','MINE_MLW','MINE_AML','MINE_BML','MINE_CML');
@@ -4819,7 +4819,9 @@ class Enhancements{
 			);
 			$out['total'] += $total;
 		}
-		return self::sanitisePlacedOfficers($ship, self::sanitiseSystemEnhancementGroups($out));
+		/* OFFICERS_PLAN.md Stage 25: an Expert Political Officer makes up to five Hardened Armour free, and (Stage 30) an Expert
+		   Quartermaster one refit of his kinds - priced last, on the rows that stand, so a dropped row never takes a free slot. */
+		return Officers::priceFreeRefits($ship, self::sanitisePlacedOfficers($ship, self::sanitiseSystemEnhancementGroups($out)), $destroyed);
 	}
 
 	/* PLACED OFFICERS (Stage 8): a system hosts one, and no officer passes his ship cap - Officers::
@@ -4903,8 +4905,9 @@ class Enhancements{
 	   from ShipSystem::isDestroyed(): isDestroyed() reads ->structureSystem, which is populated in
 	   onConstructed, and a POST-side reconstructed ship is exactly the kind of thing that may not
 	   have been through it ([[arch_post_side_ship_reconstruction]]). ->location and
-	   getStructureLocation() are set in the constructor and are always there. */
-	private static function sysEnhDestroyedSystemIds($ship, $cleanPreBattle){
+	   getStructureLocation() are set in the constructor and are always there.
+	   Public for Officers::placePoliticalPicks (OFFICERS_PLAN.md Stage 25), which places armour only where a refit could go. */
+	public static function sysEnhDestroyedSystemIds($ship, $cleanPreBattle){
 		$destroyed = array();
 		if(empty($cleanPreBattle['sys']) || !is_array($cleanPreBattle['sys'])) return $destroyed;
 

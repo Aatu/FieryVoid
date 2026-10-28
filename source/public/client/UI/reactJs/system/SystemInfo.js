@@ -81,7 +81,7 @@ export const OfficerHeading = styled(Header)`
 class SystemInfo extends React.Component {
 
     render() {
-        const { ship, selectedShip, system, boundingBox, officersOnly } = this.props;
+        const { ship, selectedShip, system, boundingBox, officersOnly, craft } = this.props;
 
         /* OFFICERS_PLAN.md Stage 19 (user request 2026-10-20): a section's Structure health bar has no tooltip of its own - the
            bar shows its boxes and armour already - but the Expert Targeter lives in one, so hovering a bar that holds an officer
@@ -116,7 +116,7 @@ class SystemInfo extends React.Component {
             return (
                 <SystemInfoTooltip ship position={getPosition(boundingBox)}>
                     <InfoHeader><ShipNameHeader>{shipName}</ShipNameHeader> - {unitName}</InfoHeader>
-                    <ShipInfo ship={ship} />
+                    <ShipInfo ship={ship} craft={craft} />
                 </SystemInfoTooltip>
             );
         }

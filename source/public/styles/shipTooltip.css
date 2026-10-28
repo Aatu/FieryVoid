@@ -475,6 +475,12 @@
     background-image: url("../img/swapInitiative.png");
 }
 
+/* FIGHTER_MISSIONS_PLAN.md §3.10 - opens the mission dropdown (client/UI/fighterMissionPicker.js). ⚠️ The file is
+   FighterMissions.png, plural - exact case on live. */
+.fighterMission {
+    background-image: url("../img/FighterMissions.png");
+}
+
 .cancelSwapInitiative {
     background-image: url("../img/cancelSwapInitiative.png");
 }

@@ -1147,6 +1147,13 @@ window.ajaxInterface = {
                     if (officerTransfers.length > 0) newShip.officerTransfers = officerTransfers;
                 }
 
+                //a flight's fighter mission pick (FIGHTER_MISSIONS_PLAN.md §3.7) - a claim the server checks; read only
+                //in Initial Orders, and sent only when it differs from the mission already selected
+                if (ship.flight && window.fighterMissions) {
+                    var missionClaim = fighterMissions.claim(ship);
+                    if (missionClaim) newShip.fighterMission = missionClaim;
+                }
+
                 //Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §6). Read ONLY by
                 //BuyingGamePhase::process, so this is inert in every other phase.
                 //preBattleAvailable is deliberately NOT sent: it records what a saved fleet

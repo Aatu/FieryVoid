@@ -69,6 +69,9 @@ class FireGamePhase implements Phase
 
 
 
+        //OFFICERS_PLAN.md Stage 25: every Expert Political Officer's speech this turn, told in the combat log once firing has resolved
+        Officers::speechLog($servergamedata);
+
         $newFireOrders = $servergamedata->getNewFireOrders();
         $dbManager->submitFireorders($servergamedata->id, $newFireOrders, $servergamedata->turn, 3);
         $dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());

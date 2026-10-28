@@ -1184,7 +1184,9 @@ window.gamedata = {
                                 notSetAA.push(myShips[ship]);
                             }
                         } else if (myShips[ship].systems[syst].name == "hyachComputer") {
-                            if (myShips[ship].systems[syst].canIncreaseAnything()) {
+                            //OFFICERS_PLAN.md Stage 26: the one point an Expert Software Engineer lets the player hold to the Firing phase is no oversight
+                            if (myShips[ship].systems[syst].canIncreaseAnything()
+                                && !(window.officers && officers.bfcpHeldBack(myShips[ship], myShips[ship].systems[syst]))) {
                                 notSetFC.push(myShips[ship]);
                             }
                         }
@@ -1519,6 +1521,16 @@ window.gamedata = {
                 for (var j in zeroSpeedShips) {
                     var movingShip = zeroSpeedShips[j];
                     html += gamedata.shipNameSpan(movingShip, movingShip.name) + '<br>';
+                }
+            }
+
+            /* FIGHTER_MISSIONS_PLAN.md R3 - a Combat Space Patrol may leave its zone, it only loses next turn's
+               initiative bonus for it: a passive notice, never a confirm (the move is legal). */
+            if (window.fighterMissions && window.savedOrders) {
+                var outsideZone = fighterMissions.outsideZone(activeShips);
+                if (outsideZone.length > 0) {
+                    savedOrders.showNotice(outsideZone.map(function (s) { return s.name; }).join(', ')
+                        + (outsideZone.length > 1 ? ' end' : ' ends') + ' outside the Combat Space Patrol zone: no initiative bonus next turn (-15 to hit ships still applies)', 8000);
                 }
             }
 

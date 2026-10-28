@@ -230,6 +230,9 @@ window.systemEnhancements = {
 	   REFUNDS every refit while leaving it applied. */
 	totalCost: function totalCost(ship) {
 		var total = 0;
+		//OFFICERS_PLAN.md Stage 25: up to five Hardened Armour are free with an Expert Political Officer, and (Stage 30) one refit
+		//of his kinds with an Expert Quartermaster - priced again before the sum
+		if (window.officers) officers.priceFreeRefits(ship);
 		this.rows(ship).forEach(function (row) {
 			if ((parseInt(row[2], 10) || 0) > 0) total += parseFloat(row[4]) || 0;
 		});
@@ -329,6 +332,8 @@ window.systemEnhancements = {
 
 		var rows = this.rows(ship);
 		var id = parseInt(systemid, 10);
+		//OFFICERS_PLAN.md Stage 30: what an Expert Quartermaster's free refit spared the ship-level rows, before this write (settleQuartermaster)
+		var shipSaving = window.officers ? officers.quartermasterShipSaving(ship) : 0;
 
 		//a placed officer past his ship cap, onto a weapon that already hosts one, or already posted at the C&C:
 		//refused, the count left as it was (the menu row says why - officers.placedBlock)
@@ -357,6 +362,7 @@ window.systemEnhancements = {
 		if (n === 0) {
 			if (index !== -1) rows.splice(index, 1);
 			this.totalCost(ship);
+			if (window.officers) officers.settleQuartermaster(ship, shipSaving);
 			this.syncTooltip(ship);
 			return 0;
 		}
@@ -375,6 +381,8 @@ window.systemEnhancements = {
 		if (index === -1) rows.push(row); else rows[index] = row;
 
 		this.totalCost(ship);
+		//Stage 30: two Gunsights that outbid his free Improved Reactor make the reactor paid again - the ship-level rows' points move too
+		if (window.officers) officers.settleQuartermaster(ship, shipSaving);
 		this.syncTooltip(ship);
 		return n;
 	},
@@ -846,8 +854,10 @@ window.systemEnhancements = {
 
 		if (!removed.length) return [];
 
+		var shipSaving = window.officers ? officers.quartermasterShipSaving(ship) : 0; //OFFICERS_PLAN.md Stage 30, as in set()
 		ship.systemEnhancements = kept;
 		this.totalCost(ship);
+		if (window.officers) officers.settleQuartermaster(ship, shipSaving);
 		this.syncTooltip(ship);
 		this.apply(ship);   //re-apply from blueprint so the removed rows stop being applied
 		return removed;

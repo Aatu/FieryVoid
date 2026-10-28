@@ -179,11 +179,13 @@ class FighterIcon extends React.Component {
             return;
         }
 
-        let { ship } = this.props;
+        let { ship, fighter } = this.props;
 
+        //`craft`: the card hovered, so ShipInfo shows only the officers aboard THIS craft of a pod flight
         window.uiEvents.relay('SystemMouseOver', {
             ship: ship,
             system: ship,
+            craft: fighter,
             element: event.target
         });
     }
@@ -219,12 +221,13 @@ class FighterIcon extends React.Component {
 
         this.longPressTimer = setTimeout(() => {
             this.ignoreNextClick = true; // Prevent click from firing after long press
-            let { ship } = this.props;
+            let { ship, fighter } = this.props;
 
             // Long Press -> generic tooltip
             window.uiEvents.relay('SystemMouseOver', {
                 ship: ship,
                 system: ship,
+                craft: fighter,
                 element: target,
                 showInfo: true
             });

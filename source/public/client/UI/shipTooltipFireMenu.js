@@ -434,6 +434,10 @@ window.findEligibleCarriersForDock = function (flight) {
     // for the speed-delta check. flight.freethrust is set in ship file
     // constructors and serialized via stripForJson on FighterFlight.
     var thrust = parseInt(flight.freethrust || 0, 10);
+    /* OFFICERS_PLAN.md Stage 32: a Redline Pilot's afterburners count this turn, and beyond the thrust he may still try to land - the
+       carrier carries its excess (redlineExcess), the d20 at or under which his fighter crashes (the server rolls it as firing resolves). */
+    if (window.officers) thrust += officers.redlineThrustBonus(flight);
+    var redlineLands = !!(window.officers && officers.mayRedlineLand(flight));
 
     var category = categoryForFlight(flight);
 
@@ -449,7 +453,8 @@ window.findEligibleCarriersForDock = function (flight) {
         if (!sMove) continue;
         if (!fPos || !sMove.position) continue;
         if (sMove.position.q !== fPos.q || sMove.position.r !== fPos.r) continue;
-        if (Math.abs(parseInt(sMove.speed, 10) - fSpeed) > thrust) continue;
+        var redlineExcess = Math.max(0, Math.abs(parseInt(sMove.speed, 10) - fSpeed) - thrust);
+        if (redlineExcess > 0 && !redlineLands) continue;
         if (shipManager.movement.isRolling(ship)) continue;
         if (shipManager.movement.isPivoting && shipManager.movement.isPivoting(ship) !== "no") continue;
 
@@ -471,7 +476,7 @@ window.findEligibleCarriersForDock = function (flight) {
         if (window.flightRegeneratesWhileDocked(flight)) {
             if (total < window.flightFullRosterCount(flight)) continue;
         }
-        out.push({ ship: ship, hangars: hangarsOnShip, totalCapacity: total });
+        out.push({ ship: ship, hangars: hangarsOnShip, totalCapacity: total, redlineExcess: redlineExcess });
     }
 
     return out;
@@ -732,6 +737,7 @@ window.findEligibleFlightsForDocking = function (carrier) {
         if (fMove.position.q !== cPos.q || fMove.position.r !== cPos.r) continue;
 
         var thrust = parseInt(flight.freethrust || 0, 10);
+        if (window.officers) thrust += officers.redlineThrustBonus(flight); //a Redline Pilot's afterburners count (OFFICERS_PLAN.md Stage 32)
         if (Math.abs(parseInt(fMove.speed, 10) - cSpeed) > thrust) continue;
 
         // Heading is gated per-hangar inside collectReceivingHangarsForRecover:

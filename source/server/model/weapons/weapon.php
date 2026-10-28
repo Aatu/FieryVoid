@@ -1949,6 +1949,8 @@ public function getFullStartLoading()
             if (Movement::hasPivoted($shooter, $gamedata->turn, $gamedata) /*&& !$this->ballistic*/) {
                 $mod -= 3;
             }
+            //an Expert Graviton Controller's rotation of the gravitic drive this turn (OFFICERS_PLAN.md Stage 31): -3, stacking as the pivot's does
+            if (TacGamedata::$officersPresent) $mod -= Officers::rotationPenalty($shooter, $gamedata->turn);
         }
 
         $calledProfileOverride = null; //flat fighter-style profile of the called system (Kirishiac Orbitals - "targeted as if they were fighters")
@@ -1974,8 +1976,13 @@ public function getFullStartLoading()
            Stage 19: and an Expert Targeter's +4 on a standard called shot by a weapon he covers (officers.targeterShotBonus). */
         if (TacGamedata::$officersPresent) {
             $standardCalledShot = ($calledSystem !== null && $calledProfileOverride === null);
+            /* Stage 28: an Expert Warrior's once-per-battle precision strike - his ship's first called shot, the penalty above taken off
+               again (before the Gunner's, whose +3 gives way to it) - and +2 at the unit his charge holds against (his +1 is fire control).
+               ⚠️ MIRROR PAIR with officers.precisionStrike / chargeHitBonus. */
+            $mod += Officers::precisionStrike($shooter, $this, $target, $fireOrder, $standardCalledShot, $gamedata);
             $mod += Officers::gunnerShotBonus($shooter, $this, $standardCalledShot, $gamedata);
             $mod += Officers::targeterShotBonus($shooter, $this, $standardCalledShot, $gamedata);
+            $mod += Officers::chargeHitBonus($shooter, $this, $target, $gamedata);
         }
 
         if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)) { //leaving instanceof OSAT here - assuming MicroSATs will not suffer this penalty (Dovarum seems to be able to turn/pivot like a superheavy fighter it's based on)
@@ -2002,15 +2009,19 @@ public function getFullStartLoading()
             if (Movement::getCombatPivots($shooter, $gamedata->turn) > 0) {
                 //an Expert Coordinator waives it short of a full 180 (OFFICERS_PLAN.md Stage 9)
                 $coordinated = TacGamedata::$officersPresent && Officers::waivesCombatPivotPenalty($shooter, $gamedata->turn);
-            	 if(!$shooter->ignoreManoeuvreMods && !$coordinated) $mod -= 1;
+                //tripled after a Redline Pilot's pivot made without the thrust for it (Stage 32)
+            	 if(!$shooter->ignoreManoeuvreMods && !$coordinated) $mod -= TacGamedata::$officersPresent ? Officers::combatPivotPenalty($shooter, $gamedata->turn) : 1;
             }
             $mod += $this->getTailGunMod($shooter, $gamedata->turn); //a tail gun fired with its craft's other direct-fire weapons (Stage 21)
 
             $effectiveOB = $shooter->offensivebonus;
+            /* FIGHTER MISSIONS (FIGHTER_MISSIONS_PLAN.md D5): the mission's term goes on the bonus BEFORE the crit and
+               mine-detection deductions, for the turn the shot belongs to. ⚠️ MIRROR PAIR with weaponManager.computeOEW. */
+            if (TacGamedata::$fighterMissionsPresent) $effectiveOB = FighterMissions::adjustOffensiveBonus($shooter, $target, $this, $fireOrder->turn, $effectiveOB);
             $firstFighter = $shooter->getSampleFighter();
             $OBcrit = $firstFighter->hasCritical("tmpsensordown");
             $mdew = $shooter->getEWByType("Detect Mines", $gamedata->turn); //-1 OB for each point of Mine Detect
-            $effectiveOB = $shooter->offensivebonus - $OBcrit - ($mdew * 2); //Every point of mdew costs 2 OB
+            $effectiveOB = $effectiveOB - $OBcrit - ($mdew * 2); //Every point of mdew costs 2 OB
             
             //if ($OBcrit > 0) {
             $effectiveOB = max(0, $effectiveOB); //cannot bring OB below 0!
@@ -2319,6 +2330,13 @@ public function getFullStartLoading()
 	                $defenceFake += 1;
                 }
             }
+            //a flight on Scout Penetration: both profiles -1 (FIGHTER_MISSIONS_PLAN.md §3.5). ⚠️ MIRROR PAIR with the
+            //'Fighter Mission' row in weaponManager.calculateHitChange. A flat called-shot profile below replaces it.
+            if (TacGamedata::$fighterMissionsPresent){
+                $scoutMod = FighterMissions::profileModifier($target, $fireOrder->turn);
+                $defence += $scoutMod;
+                $defenceFake += $scoutMod;
+            }
         }
 
         //called shot at a system with a flat target profile ("targeted as if they were fighters" -
@@ -2547,6 +2565,9 @@ public function getFullStartLoading()
             $shotsFired = 1;
 			$fireOrder->shots = $this->maxpulses;
         }
+        /* An Expert Graviton Controller (OFFICERS_PLAN.md Stage 31): a gravitic weapon's pulses, once it has hit, are counted as though
+           the roll were 5 lower ("after they hit, they determine their result as though the to-hit die roll was 5% lower"). Behind the static. */
+        $pulseShift = (TacGamedata::$officersPresent && $shooter instanceof BaseShip) ? Officers::gravitonPulseShift($shooter, $this) : 0;
         for ($i = 0; $i < $shotsFired; $i++) {
             $needed = $fireOrder->needed;
             $neededFake = ($fireOrder->chameleonFake !== null) ? $fireOrder->chameleonFake['needed'] : null;
@@ -2604,7 +2625,7 @@ public function getFullStartLoading()
                 $hitsRemaining = 1;
 
                 if ($this->damageType == 'Pulse') { //possibly more than 1 hit from a shot
-                    $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled); //this takes care of all details
+                    $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled - $pulseShift); //this takes care of all details
                 }
 
                 while ($hitsRemaining > 0) {
@@ -2626,7 +2647,7 @@ public function getFullStartLoading()
                 //land on a ship that is not there. Resolved entirely on the phantom sheet.
                 $hitsRemaining = 1;
                 if ($this->damageType == 'Pulse') {
-                    $hitsRemaining = $this->rollPulses($gamedata->turn, $neededFake, $rolled);
+                    $hitsRemaining = $this->rollPulses($gamedata->turn, $neededFake, $rolled - $pulseShift);
                 }
                 while ($hitsRemaining > 0) {
                     $hitsRemaining--;
@@ -3276,8 +3297,10 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         $dieBonus = ($shooter instanceof BaseShip) ? $shooter->getCrewDieDamageBonus() : 0;
         /* An Expert Gunner in THIS weapon (OFFICERS_PLAN.md Stage 8): +1 per die more, on top of Elite Crew's
            (not an officer, so they stack) - each die still capped at its face. An Expert Ion Technician's +1 per die on an
-           ion weapon's dice (Stage 17), likewise - but not on a Gunner's weapon, whose +1 replaces his. Behind the static. */
-        if (TacGamedata::$officersPresent && $shooter instanceof BaseShip) $dieBonus += Officers::gunnerDieBonus($shooter, $this) + Officers::ionDieBonus($shooter, $this);
+           ion weapon's dice (Stage 17), likewise - but not on a Gunner's weapon, whose +1 replaces his. An Expert Warrior's +1 per die on
+           every weapon (Stage 28), likewise not on a Gunner's weapon. Behind the static. */
+        if (TacGamedata::$officersPresent && $shooter instanceof BaseShip) $dieBonus += Officers::gunnerDieBonus($shooter, $this) + Officers::ionDieBonus($shooter, $this)
+            + Officers::warriorDieBonus($shooter, $this);
         /* An Expert Anticipator (Stage 23): a damage roll of two or more dice rolls one more and drops the lowest (Dice::$extraDie) -
            on a Gunner's weapon too, with his +1 on every die (user ruling 2026-10-21). Set and restored with the per-die bonus. */
         $extraDie = (TacGamedata::$officersPresent && $shooter instanceof BaseShip) ? Officers::extraDamageDie($shooter, $this) : 0;
@@ -3307,6 +3330,7 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
             $damage += Officers::surgeDamageBonus($shooter, $this, $rolled);
             $damage += Officers::ionFlatBonus($shooter, $this, $rolled);
             $damage += Officers::ionBoostDamage($shooter, $this, $target, $fireOrder);
+            $damage += Officers::gravitonBeamBonus($shooter, $this, $rolled); //an Expert Graviton Controller's +1 on a Raking gravitic hit (Stage 31)
         }
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		
@@ -3478,6 +3502,7 @@ full Advanced Armor effects (by rules) for reference:
 			if(!$this->ballistic) return true; //non-ballistic weapons don't risk target moving out of range
             $distanceRange = max($this->range, $this->distanceRange); //just in case distanceRange is not filled! Then it's assumed to be the same as launch range
             if($distanceRange <=0 ) return true; //0 means unlimited range
+            $distanceRange += Officers::distanceRangeBonus($this); //OFFICERS_PLAN.md Stage 29: an Expert Ballistic Officer's +5 (never the launch range)
 
 
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);

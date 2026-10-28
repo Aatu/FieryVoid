@@ -125,6 +125,14 @@ window.ShipTooltip = function () {
             this.menu.currentInfo = "";
         }
 
+        //The INCOMING list's interceptor is the selected unit as well, so it has to follow the selection too. Without
+        //this, selecting a flight's guns while a ship's tooltip stayed open left that SHIP as the interceptor, and the
+        //flight's guns were offered against shots at the ship as the ship's own - no Defensive Intercept check at all
+        //(game 4507: the orders were written as the ship's systems of the same ids, and the server dropped them).
+        if (selectedShip && this.ballisticsMenu) {
+            this.ballisticsMenu.selectedShip = selectedShip;
+        }
+
         jQuery(".buttons", this.element).html("");
         jQuery(".namecontainer", this.element).html("");
         //⚠️ `.fire.targeting`, NOT `.fire`. The TARGETING heading and the rows beneath it are two
@@ -517,7 +525,7 @@ window.ShipTooltip = function () {
             if (commandNodeLine !== '') toDisplay += '<span style="color:#e1b000;">' + commandNodeLine + '</span>; ';
         }
         if (ship.flight === true) {
-            if (shipManager.movement.hasCombatPivotPenalty(ship)) rollPivotModifier -= 5;
+            rollPivotModifier -= 5 * shipManager.movement.combatPivotPenalty(ship); //-15 after a Redline Pilot's pivot without the thrust (OFFICERS_PLAN.md Stage 32)
         } else if (ship.osat) {
             if (shipManager.movement.hasTurned(ship)) rollPivotModifier -= 5;
         } else {
@@ -535,12 +543,18 @@ window.ShipTooltip = function () {
         */
         toDisplay = '';
         if (ship.hasNavigator === true) toDisplay += 'Navigator; ';
+        /* ESCORTING RETIRED 2026-10-22 (FIGHTER_MISSIONS_PLAN.md): the Defensive Intercept mission replaced the escort
+           rule, so a flight's ballistic cover now reads in the mission line below ("Defensive Intercept: covering ...").
         var listEscorting = shipManager.listEscorting(ship);
         if (listEscorting != '') {
             toDisplay += '<span class="escorting">Escorting: </span>';
             //list of unit names
             toDisplay += listEscorting;
         }
+        */
+        //a flight's fighter mission, for every viewer (missions are always known; the CSP key ship is own team only)
+        var missionLine = (ship.flight && window.fighterMissions) ? fighterMissions.tooltipLine(ship) : null;
+        if (missionLine) toDisplay += '<span style="color:' + missionLine.color + ';">' + missionLine.text + '</span>';
         this.addEntryElement(toDisplay, toDisplay != '');
 
         if (ship.mine) {
@@ -561,7 +575,9 @@ window.ShipTooltip = function () {
             if (iniProjection && !iniProjection[ship.id]) iniProjection = null;
             var iniOrder = iniProjection ? CnC.getProjectedIniativeOrder(ship, iniProjection) : shipManager.getIniativeOrder(ship);
             var iniTotal = iniProjection ? iniProjection[ship.id].iniative : ship.iniative;
-            this.addEntryElement("Ini Order: " + iniOrder + " (total " + iniTotal + "): base " + ship.iniativebonus + "; mod " + ship.iniativeadded);
+            //a fighter mission's -60 / CSP +5 is applied when Initial Orders close, on top of the loaded modifiers (FIGHTER_MISSIONS_PLAN.md §3.6)
+            var iniMod = Number(ship.iniativeadded) + ((ship.flight && window.fighterMissions) ? fighterMissions.iniativeModifier(ship) : 0);
+            this.addEntryElement("Ini Order: " + iniOrder + " (total " + iniTotal + "): base " + ship.iniativebonus + "; mod " + iniMod);
 
             /*miscellanous info - once inserted, now disappeared; if it's needed, look for source code in Abbai branch!
             toDisplay = shipManager.systems.getMisc(ship);
@@ -587,8 +603,9 @@ window.ShipTooltip = function () {
             //level, floored at 1; +1 per Poor level), on the DELAY only - a crew's training does
             //not change what a turn costs in thrust. Applied before the LCV surcharge, matching
             //movement.js calculateTurndelayAtMove.
-            var turnDelayCost = shipManager.movement.applyCrewTurnDelay(ship,
-                Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship))) + lcvTurnSurcharge;
+            //OFFICERS_PLAN.md Stage 30: an Expert Quartermaster's +10% on the raw delay first, as the movement engine
+            var turnDelayCost = shipManager.movement.applyCrewTurnDelay(ship, shipManager.movement.getQuartermasterTurnDelay(ship,
+                Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship)))) + lcvTurnSurcharge;
 
             this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
             this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + shipManager.movement.getCombatPivotCost(ship), ship.flight === true);
@@ -642,10 +659,12 @@ window.ShipTooltip = function () {
 
             this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);
         }
+        //Scout Penetration: both profiles -1 against every shot (FIGHTER_MISSIONS_PLAN.md §3.5); the printed profile stays in brackets
+        var missionProfile = (ship.flight && window.fighterMissions) ? fighterMissions.profileModifier(ship) : 0;
         //Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24
-        var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
+        var fDef = weaponManager.calculateBaseHitChange(ship, Number(ship.forwardDefense) + missionProfile) * 5;
         fDef = parseFloat(fDef.toFixed(2));
-        var sDef = weaponManager.calculateBaseHitChange(ship, ship.sideDefense) * 5;
+        var sDef = weaponManager.calculateBaseHitChange(ship, Number(ship.sideDefense) + missionProfile) * 5;
         sDef = parseFloat(sDef.toFixed(2));
 
         this.addEntryElement("Defence (F/S): " + fDef + "(" + ship.forwardDefense * 5 + ") / " + sDef + "(" + ship.sideDefense * 5 + ")%");

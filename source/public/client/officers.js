@@ -18,7 +18,7 @@ window.officers = {
 
 	ID_PREFIX: 'OFF_',
 
-	/* ⚠️ MIRROR of Officers::$registry (PHP): ids, labels, posts, `needs`, `flight`, `perMissile` and the placed
+	/* ⚠️ MIRROR of Officers::$registry (PHP): ids, labels, posts, `needs`, `flight`, `perMissile`, `multi`, `mixesWith` and the placed
 	   officers' `placed`, `sameAs` and `anyDamage`, in the SAME order - the order every list here is shown in. `summary` is the effect line the System
 	   Info tooltip prints (D12). `stats` is what the officer adds to ship fields while he serves
 	   (Officers::apply), which the lobby adds at READ time (displayStat); `adjust` names a method that
@@ -85,6 +85,51 @@ window.officers = {
 		   movement.js's (canAnticipate - the turn arrows in the Firing phase). */
 		{ id: 'OFF_ANTI', label: 'Expert Anticipator', post: 'cnc',
 			summary: 'Initiative rolled twice, best kept; one turn in the Firing Phase; damage rolls of 2+ dice roll one extra die and drop the lowest' },
+		/* Stage 25: Centauri capital ships and larger (`needs`; the faction is the offers'). No stat moves in the lobby: his free expert and
+		   free Hardened Armour are PRICES (freeExpertId - the buy dialog and the fleet list; freeArmourRows - systemEnhancements.totalCost),
+		   his armed shuttle is the server's hangars', and his speech is his C&C's Activate box in the Firing phase (canSpeak). */
+		{ id: 'OFF_POL', label: 'Expert Political Officer', post: 'cnc', needs: 'capital',
+			summary: 'An armed shuttle, one free Officer, and 5 free Armourupgrades; once per battle make a speech in Firing Phase for +30 initiative next turn' },
+		/* Stage 26: Hyach only (the offers' - his post, the Hyach Computer, is Hyach-only too). His +1 BFCP is previewed in the lobby (computerBonus -
+			in game the server raised `output`); the point he lets the player hold to the Firing phase is the Computer's own menu (HyachComputer
+			.firingMode); his armour point and signature masking are the server's; his Specialist reuse comes in his payload (`reuse` -
+			specialistReusable). */
+		{ id: 'OFF_SOFT', label: 'Expert Software Engineer', post: 'computer',
+			summary: '+1 BFCP, which may be held back to the Firing Phase; the Computer ignores 1 damage on hit; Increased stealth detection range; use a software Specialist a second time' },
+		/* Stage 27: Gaim only (the offers'), in the largest Hangar. His boarding shift is the server's. The pods he aids - as many of his player's
+		   pods, in fleet order, as his ship's Pod Allowance - are named in their Marines' "Elite" line to his team (marinesEliteLine, through
+		   troopAidedCraft). The Bulkheads' extra box is previewed in the lobby (troopBulkheads, from lobbyEnhancements - in game the server
+		   sends the boxes). */
+		{ id: 'OFF_TROOP', label: 'Expert Troop Leader', post: 'hangar',
+			summary: '-2 to enemy boarding rolls, +2 to defenders; +1 to fleet Marine rolls; every Bulkhead +1 box' },
+		/* Stage 28: Drazi only (the offers'), in the C&C. The lobby previews his +10 initiative (stats - in game the server applied and published it,
+		   and gives it to the flights his ship launches) and his +1 fire control on every weapon (displayFireControl - in game the server raised it).
+		   The +2 at a unit his charge holds against and his precision strike are the hit-chance preview's (chargeHitBonus, precisionStrike); his +1
+		   per die and both critical modifiers are the server's. The Charge is movement.js's (its icon - canCharge - and the reticle on the unit
+		   charged, getChargeMarked), his Supreme Anticipation his C&C's Activate box in the Firing Phase (canAnticipateSupreme). */
+		{ id: 'OFF_WARR', label: 'Expert Warrior', post: 'cnc', stats: { iniativebonus: 10, critRollMod: -1 },
+			summary: '+1 fire control and damage on all weapons; +10 initiative, also on launched flights; -1 on crit rolls, +1 on crits caused. Once per battle / turn: Charge, Precision strike, Supreme Anticipation' },
+		/* Stage 29: in the C&C, on hulls with counted ballistic ammunition (`needs`; the offers' too). No stat moves. His +5 distance range is the
+		   hit-chance preview's and the Range line's (distanceRangeBonus - in game the number the server publishes to every viewer); his magazine
+		   slots and free missiles are the buy dialog's and the fleet list's (getMaxAmmoFit, ballisticFreeRounds - off the static blueprint's
+		   ballisticPicks / ballisticSlots), and the server's at the commit, which also gives each counted weapon its extra round. */
+		{ id: 'OFF_BALL', label: 'Expert Ballistic Officer', post: 'cnc', needs: 'countedBallistic',
+			summary: '+5 distance range for missiles; +1 round per launcher; free missile per launcher' },
+		/* Stage 30: in the C&C, on every hull with one (10% Hurr, 20% elsewhere - the offers'). The lobby previews his -30 initiative (stats - in
+		   game the server applied and published it, and keeps it once he is lost). His free refit and free missiles are PRICES (quartermasterRefit
+		   - systemEnhancements.totalCost, the buy dialog and the fleet list; quartermasterFreeRounds - off the static blueprint's
+		   quartermasterPicks); the server rolls what is left at the commit. His turn delay is movement.js's (getQuartermasterTurnDelay, off the
+		   published turnDelayPenalty); the patch, the C&C's +2 and the Improved Reactor's tripled breach are the server's. `stock`: everything he
+		   brings stays when he is lost (user ruling 2026-10-24), so a patch used after it still shows. */
+		{ id: 'OFF_QM', label: 'Expert Quartermaster', post: 'cnc', stats: { iniativebonus: -30 }, stock: true,
+			summary: 'One free refit; Free missiles; first crit ignored. -30 initiative, +10% turn delay, +2 C&C criticals' },
+		/* Stage 31: in the Engine, on hulls with a gravitic drive or a gravitic weapon (`needs`; the offers decide the setting and the price). The
+		   lobby previews the Engine's and the largest aft thruster's +1 (gravitonThrustBonus - in game the server raised both outputs, and keeps
+		   them once he is lost); his +1 on Raking gravitic hits raises the owner's Damage lines (gravitonDamageLine); the pulse count is the server's.
+		   The rotation is movement.js's (its Gravitic Rotate icon - canGravRotate; the server rolls the die, client/moveLock.js locks the moves), and its -3 the
+		   hit-chance preview's ("Gravitic Rotation"). */
+		{ id: 'OFF_GRAV', label: 'Expert Graviton Controller', post: 'engine', needs: 'gravitics',
+			summary: 'Gravitic beams +1 damage; Graviton Pulsars count pulses 5% better; Engine and largest aft thruster +1. Once per battle rotate to a random facing' },
 		/* PLACED officers (Stage 8): posted in the weapon the player buys him on, from that system's own menu
 		   (a per-system row - systemEnhancements.js), so they have no `post`. `sameAs`: the ship-level officer he
 		   IS at another post (one or the other); `anyDamage`: disabled by any damage to his weapon.
@@ -92,7 +137,7 @@ window.officers = {
 		   the C&C and his Matter weapons, as one man); `abilities` - the Gunner's once-per-battle three;
 		   `reload` - his weapon reloads a turn faster. */
 		{ id: 'OFF_GUN', label: 'Expert Gunner', placed: true, movable: true, abilities: true,
-			summary: '+1 fire control and +1 damage per die. Once per battle each:  +1 turn towards reload, Piercing shot (or ignore Piercing FC penalty), +15% on called shot' },
+			summary: '+1 fire control and +1 damage per die. Once per battle each:  +1 turn towards reload, Piercing shot (or ignore Piercing penalty), +15% called shot' },
 		{ id: 'OFF_MWEW', label: 'Matter Weapons Expert', placed: true, sameAs: 'OFF_MWE', anyDamage: true, movable: true, reload: true,
 			summary: '+1 fire control and +1 damage for this Matter weapon, which reloads a turn faster;' },
 		/* Stage 15: the Expert Religious Leader away from his C&C - in any other primary non-weapon system (the server's
@@ -134,7 +179,28 @@ window.officers = {
 		/* Stage 21: only for a flight with a tail gun (`needs`). No stat moves - his effect is the hit-chance preview's
 		   (weaponManager.getTailGunMod) and the tail gun's tooltip line (tailGunLine). */
 		{ id: 'OFF_TAIL', label: 'Expert Tailgunner', post: 'craft', flight: true, needs: 'tailGun',
-			summary: 'No penalty for firing the tail gun with the other guns; +5% with a tail gun that has no penalty' }
+			summary: 'No penalty for firing the tail gun with the other guns; +5% with a tail gun that has no penalty' },
+		/* Stage 24: only for a breaching pod (`needs`), in its first pod. `unscaled`: his price is his ONE pod's, whatever the flight's
+		   size (flightCost). The flight's +1 thrust is previewed (stats - in game the server raised and published it); his pod's Elite
+		   Marines are the server's at delivery, and its Marines' "Elite" line says so to his own team (marinesEliteLine); his capture
+		   assault is the server's alone. The fleet's 20% is the Fleet Correctness Report's (breachingFleetCheck).
+		   Stage 27: one to a pod, as many as the flight has (`multi`), beside Expert Troop Leaders (`mixesWith`: one officer to a pod, the
+		   Breaching Experts first); the flight's thrust +1 however many (`statsOnce`). */
+		{ id: 'OFF_BRCH', label: 'Breaching Expert', post: 'craft', flight: true, unscaled: true, multi: true, mixesWith: ['OFF_TRPOD'], statsOnce: true,
+			needs: 'breachingPod', stats: { freethrust: 1 },
+			summary: '+1 thrust; his pod\'s Marines are Elite; his pod\'s first capture mission makes three attack rolls on first attempt' },
+		/* Stage 27: the Expert Troop Leader in a Gaim breaching pod (the offers' - `needs` the pod), one to a pod (`multi`, `mixesWith`), priced
+		   at his own pod (`unscaled`). His -3 and his escape roll are the server's; his pod's Marines' "Elite" line names him to his team
+		   (marinesEliteLine). */
+		{ id: 'OFF_TRPOD', label: 'Expert Troop Leader', post: 'craft', flight: true, unscaled: true, multi: true, mixesWith: ['OFF_BRCH'],
+			needs: 'breachingPod',
+			summary: '+3 on every roll of his pod\'s marine; when eliminated escapes on a d6 of 1-4' },
+		/* Stage 32: the Redline Pilot, in the flight's first craft (the offers decide the price - the Cascor's 100%, everyone else's 150%). No stat
+		   moves. His afterburners are movement.js's (the Redline icon - canRedline - and the next turn's cooling, isRedlineCooling); his combat pivot
+		   without the thrust is canPivot's and doPivot's, its tripled penalty the hit-chance preview's (combatPivotPenalty); his landing beyond the
+		   tolerance is the Dock dialog's offer (mayRedlineLand) and the server's roll; his skin dancing the server's alone. */
+		{ id: 'OFF_REDL', label: 'Redline Pilot', post: 'craft', flight: true,
+			summary: 'Skin dances ships up to speed 8; combat pivots without thrust; afterburners +50% thrust; lands beyond thrust tolerance' }
 	],
 
 	/* An OFF_ id, or an officer kept under the id he had before officers existed (EXP_MOTIV, the Expert
@@ -174,6 +240,9 @@ window.officers = {
 	     jump     the first jump drive that opens jump points: a legacy drive's range is 0 (markLegacy), the
 	              lobby JUMP_ACC case's own test. The one gate drive (JumpgateCapital) is on terrain, which
 	              carries no officers.
+	     computer the Hyach Computer (Stage 26)
+	     hangar   the largest plain hangar bay by boxes (Stage 27), the first on a tie: a "hangar" that is not a docking bay - catapults,
+	              fighter rails and docking collars have names of their own
 	     craft    a flight's first craft - the lobby's one fighter card, id 1
 	   ⚠️ D2: the server picks from BLUEPRINT values, before any enhancement moves an output, but a lobby
 	   fleet ship has already had lobbyEnhancements.apply - Poor Crew has taken a point off its strongest
@@ -223,6 +292,15 @@ window.officers = {
 				if (systems[j] && systems[j].name === 'jumpEngine' && Number(systems[j].range) > 0) return systems[j];
 			}
 			return null;
+		}
+		if (post === 'computer') {
+			for (var c = 0; c < systems.length; c++) {
+				if (systems[c] && systems[c].name === 'hyachComputer') return systems[c];
+			}
+			return null;
+		}
+		if (post === 'hangar') {
+			return this.strongest(ship, systems.filter(function (s) { return s && s.name === 'hangar' && !s.isDockingBay; }), 'maxhealth', -1);
 		}
 		return null;
 	},
@@ -298,10 +376,16 @@ window.officers = {
 	     plasmaWeapon  the hull carries a weapon with a Plasma mode (the Expert Plasma Scientist)
 	     ionWeapon     the hull carries a weapon with an Ion mode, or an Ion Torpedo (the Expert Ion Technician)
 	     missiles      the flight carries missiles (the Expert Missileer)
-	     tailGun       the flight's craft has a tail gun - a weapon the blueprint flags `tailGun` (the Expert Tailgunner) */
+	     tailGun       the flight's craft has a tail gun - a weapon the blueprint flags `tailGun` (the Expert Tailgunner)
+	     breachingPod  the flight is a breaching pod (isBreachingPod - the Breaching Expert)
+	     capital       a capital ship or larger, size class 3 (the Expert Political Officer)
+	     countedBallistic  a magazine-fed ballistic launcher, or a ballistic weapon keeping a count of rounds (the Expert Ballistic Officer)
+	     gravitics     a gravitic drive or a gravitic weapon (the Expert Graviton Controller) - his B5-settings-only rule is a faction's, so the
+	                   offers' alone */
 	passesNeeds: function passesNeeds(ship, officer) {
 		if (!officer.needs) return true;
 		var self = this;
+		if (officer.needs === 'capital') return (parseInt(ship.shipSizeClass, 10) || 0) >= 3;
 		if (officer.needs === 'matterWeapon') {
 			return this.systemsOf(ship).some(function (s) { return self.isMatterWeapon(s); });
 		}
@@ -319,7 +403,26 @@ window.officers = {
 			var craft = ship.flight ? this.firstCraft(ship) : null;
 			return !!craft && this.systemsOf(craft).some(function (s) { return s && s.tailGun === true; });
 		}
+		if (officer.needs === 'breachingPod') return this.isBreachingPod(ship);
+		if (officer.needs === 'gravitics') {
+			return Boolean(ship.gravitic) || this.systemsOf(ship).some(function (s) { return self.isGraviticWeapon(s); });
+		}
+		if (officer.needs === 'countedBallistic') {
+			var systems = this.systemsOf(ship);
+			if (systems.some(function (s) { return self.isCountedBallistic(s) && s.checkAmmoMagazine !== true; })) return true;
+			return systems.some(function (s) { return self.isCountedBallistic(s); }) && this.hasMagazineOrdnance(ship);
+		}
 		return false;
+	},
+
+	/* A BREACHING POD: a flight whose craft carries Marines and that FV names a breaching pod - the 'Breaching Pods' hangar class, or
+	   "Breaching Pod" in its class name (the Minbari Protectorate's and the Nausicaan pods ride shuttle hangars). Never a superheavy
+	   carrying Marines. ⚠️ MIRROR PAIR with Officers::isBreachingPod (PHP). */
+	isBreachingPod: function isBreachingPod(ship) {
+		if (!ship || !ship.flight) return false;
+		if (ship.hangarRequired !== 'Breaching Pods' && String(ship.shipClass || '').toLowerCase().indexOf('breaching pod') === -1) return false;
+		var craft = this.firstCraft(ship);
+		return !!craft && this.systemsOf(craft).some(function (s) { return s && (s.name === 'Marines' || s.name === 'ExtraMarines'); });
 	},
 
 	//⚠️ MIRROR PAIR with Officers::isLaserWeapon (PHP)
@@ -357,13 +460,16 @@ window.officers = {
 	   which of the two sources answers. A flight's derived list holds ONE officer at most (D9), the
 	   first bought in registry order, as Officers::pickPosts serves - or, for an officer bought as a
 	   count (`multi`, Stage 18), that many entries: one in each of its first crafts, held to the row's
-	   limit and the flight's size. A lobby flight holds a single craft card, so there they share it. */
+	   limit and the flight's size; then (Stage 27) an officer he `mixesWith` in the crafts after his, and
+	   nobody else. A lobby flight holds a single craft card, so there they share it. */
 	listFor: function listFor(ship) {
 		if (!ship) return [];
 		if (Array.isArray(ship.officers)) return ship.officers;
 		if (!Array.isArray(ship.enhancementOptions)) return [];
 
 		var list = [];
+		var first = null; //a flight's first officer bought as a count, whose `mixesWith` may follow him
+		var crafts = 0;   //...and the crafts taken so far
 		for (var i = 0; i < this.REGISTRY.length; i++) {
 			var officer = this.REGISTRY[i];
 			if (officer.placed) continue; //track 2: placedEntries below
@@ -371,10 +477,13 @@ window.officers = {
 			if (!this.isBought(ship, officer.id)) continue;
 			var post = this.findPost(ship, officer.post);
 			if (!post || !this.passesNeeds(ship, officer)) continue;
+			if (first !== null && first.mixesWith.indexOf(officer.id) === -1) continue;
 			if (officer.multi && ship.flight) {
-				var n = Math.min(this.boughtCount(ship, officer.id), this.rowLimit(ship, officer.id), parseInt(ship.flightSize, 10) || 1);
-				for (var k = 1; k <= n; k++) list.push(this.derivedEntry(ship, officer.id, this.nthCraft(ship, k) || post));
-				break;
+				var n = Math.min(this.boughtCount(ship, officer.id), this.rowLimit(ship, officer.id), (parseInt(ship.flightSize, 10) || 1) - crafts);
+				for (var k = 1; k <= n; k++) list.push(this.derivedEntry(ship, officer.id, this.nthCraft(ship, ++crafts) || post));
+				if (first !== null || !officer.mixesWith) break;
+				first = officer;
+				continue;
 			}
 			list.push(this.derivedEntry(ship, officer.id, post));
 			if (ship.flight) break;
@@ -408,12 +517,19 @@ window.officers = {
 	},
 
 	/* The most of this row the buy dialog lets a flight of `size` take: its limit, and for an officer bought as a count
-	   (Stage 18) never more than the flight's craft ("not more than the flightSize" - user notes 2026-10-19). */
-	rowMax: function rowMax(enhID, limit, size) {
+	   (Stage 18) never more than the flight's craft ("not more than the flightSize" - user notes 2026-10-19) - less the
+	   craft `taken` by the officers he shares a flight with (Stage 27, `mixesWith`: one officer to a pod). */
+	rowMax: function rowMax(enhID, limit, size, taken) {
 		var officer = this.get(enhID);
 		var max = parseInt(limit, 10) || 0;
-		if (officer && officer.multi) max = Math.min(max, Math.max(1, parseInt(size, 10) || 1));
-		return max;
+		if (officer && officer.multi) max = Math.min(max, Math.max(1, parseInt(size, 10) || 1) - (parseInt(taken, 10) || 0));
+		return Math.max(0, max);
+	},
+
+	//Stage 27: may these two officers share one flight, one to a craft (`mixesWith`)?
+	mixes: function mixes(enhID, otherID) {
+		var officer = this.get(enhID);
+		return Boolean(officer && officer.mixesWith && officer.mixesWith.indexOf(otherID) !== -1);
 	},
 
 	/* ------------------------------------------------------------------ placed officers (Stage 8) */
@@ -640,11 +756,18 @@ window.officers = {
 			return officer && officer.anyDamage ? '(his weapon is damaged before battle - he will not serve)'
 				: '(post destroyed before battle - he will not serve)';
 		}
-		return '(' + (entry.how === 'killed' ? 'killed' : 'disabled') + ', turn ' + entry.out + ')';
+		var lost = '(' + (entry.how === 'killed' ? 'killed' : 'disabled') + ', turn ' + entry.out + ')';
+		//Stage 30: an officer whose abilities are the ship's stock (`stock`) may have one spent after he is lost
+		var stock = this.get(entry.id) && this.get(entry.id).stock ? this.abilitiesText(entry) : '';
+		return stock ? lost + ' ' + stock : lost;
 	},
 
 	//"(used: called shot, turn 3; Piercing shot, turn 4)" - the Gunner's spent once-per-battle abilities, or ''
-	ABILITY_NAMES: { reload: 'faster reload', pierce: 'Piercing shot', called: 'called shot' },
+	//capture: the Breaching Expert's (Stage 24); speech: the Expert Political Officer's (Stage 25); reuse: the Expert Software Engineer's (Stage 26)
+	//charge, precision, anticipation: the Expert Warrior's (Stage 28); patch: the Expert Quartermaster's (Stage 30)
+	ABILITY_NAMES: { reload: 'faster reload', pierce: 'Piercing shot', called: 'called shot', capture: 'capture assault', speech: 'speech',
+		reuse: 'Specialist reuse', charge: 'charge', precision: 'precision strike', anticipation: 'Supreme Anticipation', patch: 'critical patch',
+		rotate: 'gravitic rotation' },
 	abilitiesText: function abilitiesText(entry) {
 		var spent = entry && entry.abilities ? entry.abilities : null;
 		if (!spent) return '';
@@ -708,7 +831,9 @@ window.officers = {
 			return (entry.mode !== undefined && parseInt(weapon.firingMode, 10) === parseInt(entry.mode, 10)) ? 0 : this.PIERCE_PENALTY;
 		}
 		//Stage 19: on a gun a serving Expert Targeter covers, his +4 is the called shot's - the Gunner's +3 neither used nor spent
-		return (this.bonusCall(weapon, called) && open('called') && !this.targeterCovering(ship, weapon)) ? this.GUNNER_CALLED_BONUS : 0;
+		//Stage 28: likewise on the gun making an Expert Warrior's precision strike
+		return (this.bonusCall(weapon, called) && open('called') && !this.targeterCovering(ship, weapon) && !this.precisionWeapon(ship, weapon, called))
+			? this.GUNNER_CALLED_BONUS : 0;
 	},
 
 	/* Is this a called shot an officer's called-shot bonus reaches (the Gunner's +3, the Targeter's +4)? Never in a mode whose hit calculation
@@ -815,10 +940,13 @@ window.officers = {
 	/* ------------------------------------------------------------------ the Expert Targeter (Stage 19) */
 
 	/* His effect line, with the weapons he covers: "... - Aft weapons" (his block's section), or a Medium ship's side - "Front
-	   weapons". What those weapons are is the server's (`covers`). Every other officer: his registry summary. */
+	   weapons". What those weapons are is the server's (`covers`). Stage 25: an Expert Political Officer's in the lobby says what he has
+	   brought so far (politicalStatus). Every other officer: his registry summary. */
 	summaryOf: function summaryOf(ship, entry) {
 		var officer = this.get(entry.id);
 		if (!officer) return '';
+		if (officer.id === 'OFF_POL' && this.isDerived(ship)) return officer.summary + '. ' + this.politicalStatus(ship);
+		if (officer.id === 'OFF_QM' && this.isDerived(ship)) return officer.summary + '. ' + this.quartermasterStatus(ship); //Stage 30
 		if ((officer.sameAs || officer.id) !== 'OFF_TARG') return officer.summary;
 		return officer.summary + ' - ' + this.coverName(ship, entry) + ' weapons';
 	},
@@ -1069,14 +1197,26 @@ window.officers = {
 	/* Buy (n 1) or un-buy (n 0) a ship-level officer's row from outside the buy dialog, moving pointCostEnh and pointCost by
 	   the same amount - the lobby's invariant pointCost = hull + pointCostEnh + pointCostEnh2 + pointCostSysEnh. An Edit
 	   later rebuilds pointCostEnh from the rows' counts (gamelobby doEditShip), so it agrees with what is written here.
+	   Stage 25: the expert an Expert Political Officer brings costs nothing (politicalDiscount, before and after), and buying or
+	   un-buying the Political Officer himself re-prices his free Hardened Armour - the refit bucket, pointCost with it.
+	   Stage 29: buying or un-buying an Expert Ballistic Officer re-prices the ammunition rounds he makes free (ballisticDiscount).
+	   Stage 30: an Expert Quartermaster's - his free reactor or accelerator and rounds (quartermasterDiscount), and his free refit.
 	   false when the hull does not offer him. */
 	setShipLevelRow: function setShipLevelRow(ship, id, n) {
 		var row = this.shipLevelRow(ship, id);
 		if (!row) return false;
+		var discount = this.politicalDiscount(ship) + this.ballisticDiscount(ship) + this.quartermasterDiscount(ship);
 		var delta = (n - (parseInt(row[2], 10) || 0)) * (parseFloat(row[4]) || 0);
 		row[2] = n;
+		delta -= this.politicalDiscount(ship) + this.ballisticDiscount(ship) + this.quartermasterDiscount(ship) - discount;
 		ship.pointCostEnh = (parseFloat(ship.pointCostEnh) || 0) + delta;
 		ship.pointCost = (parseFloat(ship.pointCost) || 0) + delta;
+		//Stage 30: an Expert Quartermaster coming or going re-prices his free refit, as the Political Officer does his armour
+		if ((id === 'OFF_POL' || id === 'OFF_QM') && window.systemEnhancements) {
+			var refitsBefore = parseFloat(ship.pointCostSysEnh) || 0;
+			systemEnhancements.totalCost(ship);
+			ship.pointCost += (parseFloat(ship.pointCostSysEnh) || 0) - refitsBefore;
+		}
 		return true;
 	},
 
@@ -1118,7 +1258,8 @@ window.officers = {
 	   ship-level half: each bought ship officer whose post (findPost) is destroyed loses his row, and pointCostEnh and
 	   pointCost give back what he cost. One-way, as D11: repairing the post does not bring him back. Flights are not swept:
 	   pre-battle damage never destroys a fighter (a lost fighter is a smaller flight). Returns dropDestroyed's shape, for
-	   systemEnhancements.describeRemoved. */
+	   systemEnhancements.describeRemoved. Stage 25: what each one gave back is what the unit's points moved by - an Expert Political
+	   Officer's free expert and free armour priced again (setShipLevelRow). */
 	dropDestroyedPosts: function dropDestroyedPosts(ship) {
 		if (!ship || ship.flight || !ship.systems || !Array.isArray(ship.enhancementOptions)) return [];
 		var self = this;
@@ -1130,8 +1271,11 @@ window.officers = {
 			if (count < 1) return;
 			var post = self.findPost(ship, officer.post);
 			if (!post || !self.isPostDestroyed(ship, post)) return;
-			var points = count * (parseFloat(row[4]) || 0);
+			var pointsBefore = parseFloat(ship.pointCost) || 0;
 			self.setShipLevelRow(ship, officer.id, 0);
+			//Stage 27: an Expert Troop Leader refunded takes the Bulkheads' box lobbyEnhancements gave them
+			if (officer.id === 'OFF_TROOP' && ship.troopEnh) { self.troopBulkheads(ship, -1); ship.troopEnh = false; }
+			var points = pointsBefore - (parseFloat(ship.pointCost) || 0);
 			removed.push({ enhID: officer.id, label: officer.label, points: points, systemid: parseInt(post.id, 10),
 				systemName: post.displayName || post.name });
 		});
@@ -1147,6 +1291,8 @@ window.officers = {
 		if (!ship || !system || ship.flight || !this.isDerived(ship)) return rows;
 		var self = this;
 		var entries = this.onPost(ship, system.id);
+		rows.forEach(function (row) { self.decorateArmourRow(ship, system, row); }); //Stage 25: an Expert Political Officer's free armour
+		rows.forEach(function (row) { self.decorateQuartermasterRow(ship, system, row); }); //Stage 30: an Expert Quartermaster's free refit (after: his prices are the whole sum)
 		/* Stage 19: a Medium ship's block is offered the Expert Targeter twice, once per side (OFF_TARG, OFF_TARG2) - one officer,
 		   so one row: the side bought, or his first side while neither is. The footer's side selector trades one for the other. */
 		rows = rows.filter(function (row) {
@@ -1248,6 +1394,140 @@ window.officers = {
 		return penalised ? value : 'No penalty (navigator)';
 	},
 
+	/* ------------------------------------------------------------------ Breaching Expert (Stage 24) */
+
+	/* A pod's Marines' "Elite" tooltip line: the server writes the hull's ("Yes" for the Narn's and Gaim's own Elite Marines, or bought ones -
+	   lobbyEnhancements writes those in the lobby), and this adds a serving Breaching Expert in the craft that carries them - for his own team
+	   only, as his list is theirs alone. Marines Elite already keep their "Yes": he adds nothing there (user ruling 2026-10-21).
+	   ⚠️ MIRROR PAIR with Officers::eliteMarines (PHP). */
+	marinesEliteLine: function marinesEliteLine(ship, system, value) {
+		if (!ship || !ship.flight) return value;
+		var craft = this.craftHolding(ship, system);
+		if (!craft) return value;
+		var turn = this.currentTurn();
+		var self = this;
+		var line = value;
+		if (value !== 'Yes' && this.onPost(ship, craft.id).some(function (entry) { return entry.id === 'OFF_BRCH' && self.serves(entry, turn); })) {
+			line = 'Yes (Breaching Expert)';
+		}
+		//Stage 27: an Expert Troop Leader's -3 in this pod, or his ship's -1 (troopBonus) - to his team only, as his list is theirs alone
+		var troop = this.troopBonus(ship, craft, turn);
+		if (troop === -this.TROOP_POD_BONUS) return line + '; Expert Troop Leader: ' + troop + ' on its rolls';
+		if (troop) return line + '; a Troop Leader\'s ship: ' + troop + ' on its rolls';
+		return line;
+	},
+
+	//the craft of a flight whose systems include `system` (by id), or null
+	craftHolding: function craftHolding(ship, system) {
+		var self = this;
+		return this.systemsOf(ship).filter(function (craft) {
+			return craft && self.systemsOf(craft).some(function (s) { return s && String(s.id) === String(system.id); });
+		})[0] || null;
+	},
+
+	/* "No more than 20% of a fleets breaching pods (round fractions of 0.5 or more up) can use these experts" - the Fleet Correctness
+	   Report's line (gamelobby.js checkChoices; user ruling 2026-10-21: reported, as every fleet-composition rule is, not enforced). Pods
+	   are counted CRAFT by craft (a flight's size) over every breaching pod in `ships`; experts are the Breaching Experts that would serve
+	   (listFor - since Stage 27 one to a pod). With pods in flights of two at most, a fleet needs three pods for its first expert. */
+	BREACH_FLEET_PCT: 20,
+	breachingFleetCheck: function breachingFleetCheck(ships) {
+		var pods = 0;
+		var experts = 0;
+		var self = this;
+		(ships || []).forEach(function (ship) {
+			if (!self.isBreachingPod(ship)) return;
+			pods += parseInt(ship.flightSize, 10) || 1;
+			experts += self.listFor(ship).filter(function (entry) { return entry.id === 'OFF_BRCH'; }).length;
+		});
+		//pods x 20% rounded half up, in whole numbers: floor((pods x 20 + 50) / 100)
+		return { pods: pods, experts: experts, allowed: Math.floor((pods * this.BREACH_FLEET_PCT + 50) / 100) };
+	},
+
+	/* ------------------------------------------------------------------ Expert Troop Leader (Stage 27) */
+
+	TROOP_POD_BONUS: 3,      //in his pod: -3 on every roll of its parties - Officers::TROOP_POD_BONUS (PHP)
+	TROOP_SHIP_POD_BONUS: 1, //aboard a ship: -1 on every roll of "his own ship's" pods - Officers::TROOP_SHIP_POD_BONUS (PHP)
+	TROOP_BULKHEAD_BOXES: 1, //every Bulkhead of his ship - Officers::TROOP_BULKHEAD_BOXES (PHP)
+
+	/* A ship's POD ALLOWANCE - the breaching pods it may carry as the Fleet Correctness Report counts them (gamelobby.js checkChoices, its
+	   per-ship profile): its "Breaching Pods" racks and HANG_BP's conversions, plus 1 - 2 on a capital, 4 on a base or an enormous unit,
+	   doubled on an Assault hull - held to its assault shuttle, heavy (or "normal") and medium slots. Off the hull's own slots: the fleet
+	   check rewrites `fighters` with the racks (and keeps the original as _originalFighters). In game the server sends his entry's
+	   (`pods`). ⚠️ MIRROR PAIR with Officers::podAllowance (PHP). */
+	podAllowance: function podAllowance(ship) {
+		if (!ship || ship.flight) return 0;
+		var fighters = ship._originalFighters || ship.fighters || {};
+		var racks = (parseInt(fighters['Breaching Pods'], 10) || 0) + (Array.isArray(ship.enhancementOptions) ? this.boughtCount(ship, 'HANG_BP') : 0);
+		var slots = (parseInt(fighters.heavy || fighters.normal, 10) || 0) + (parseInt(fighters.medium, 10) || 0) + (parseInt(fighters['assault shuttles'], 10) || 0);
+		var cap = 1;
+		if (ship.Enormous || ship.base || ship.smallBase) cap = 4;
+		else if ((parseInt(ship.shipSizeClass, 10) || 0) >= 3) cap = 2;
+		if (String(ship.shipClass || '').toLowerCase().indexOf('assault') !== -1) cap *= 2;
+		return racks + Math.min(cap, slots);
+	},
+
+	/* A unit's player's units in FLEET order - the order the fleet was bought in: in game by unit id (the server inserts them in order), in
+	   the lobby as Fleet Selection lists them (gamedata.ships' own order; its ids are strings). */
+	fleetOf: function fleetOf(unit) {
+		var all = (window.gamedata && gamedata.ships) ? Object.keys(gamedata.ships).map(function (k) { return gamedata.ships[k]; }) : [];
+		var mine = all.filter(function (u) {
+			return u && String(u.userid) === String(unit.userid) && (u.slot === undefined || unit.slot === undefined || String(u.slot) === String(unit.slot));
+		});
+		if (mine.every(function (u) { return /^\d+$/.test(String(u.id)); })) mine.sort(function (a, b) { return Number(a.id) - Number(b.id); });
+		return mine;
+	},
+
+	//a flight's crafts: every craft in game, the one card of a lobby flight standing for flightSize
+	podCraftCount: function podCraftCount(flight) {
+		return Math.max(this.systemsOf(flight).filter(Boolean).length, parseInt(flight.flightSize, 10) || 1);
+	},
+
+	/* "If any of his own ship's breaching pods attack an opponent, they gain a +1 bonus on any attack table": as many of his player's
+	   breaching pods as his ship's Pod Allowance, in fleet order, craft by craft - fixed, a lost pod's share passing to nobody (user rulings
+	   2026-10-23); several Troop Leader ships of one player add up. Own team only (his list is theirs alone). ⚠️ MIRROR PAIR with
+	   Officers::troopAidedCraft (PHP). */
+	troopAidedCraft: function troopAidedCraft(flight, craft, turn) {
+		var self = this;
+		var fleet = this.fleetOf(flight);
+		var allowance = 0;
+		fleet.forEach(function (unit) {
+			if (unit.flight) return;
+			self.listFor(unit).forEach(function (entry) {
+				if (entry.id !== 'OFF_TROOP' || !self.serves(entry, turn)) return;
+				allowance += (entry.pods !== undefined) ? (parseInt(entry.pods, 10) || 0) : self.podAllowance(unit);
+			});
+		});
+		if (allowance < 1) return false;
+		var index = this.systemsOf(flight).filter(Boolean).indexOf(craft) + 1;
+		var n = 0;
+		var pods = fleet.filter(function (unit) { return self.isBreachingPod(unit); });
+		for (var i = 0; i < pods.length; i++) {
+			for (var k = 1; k <= this.podCraftCount(pods[i]); k++) {
+				if (++n > allowance) return false;
+				if (String(pods[i].id) === String(flight.id) && k === index) return true; //by id: a lobby window may hold a copy
+			}
+		}
+		return false;
+	},
+
+	/* What his officers give a party from this pod's craft on its d10s: -3 while an Expert Troop Leader serves in it (his ship's 1 among
+	   it - user ruling), else -1 while a Troop Leader ship counts it among its pods, else 0. ⚠️ MIRROR PAIR with Officers::troopBonus (PHP). */
+	troopBonus: function troopBonus(flight, craft, turn) {
+		var self = this;
+		if (this.onPost(flight, craft.id).some(function (entry) { return entry.id === 'OFF_TRPOD' && self.serves(entry, turn); })) return -this.TROOP_POD_BONUS;
+		return this.troopAidedCraft(flight, craft, turn) ? -this.TROOP_SHIP_POD_BONUS : 0;
+	},
+
+	/* The lobby's preview of "all bulkheads on the ship are considered to have 1 extra box": lobbyEnhancements.apply adds it once per build
+	   (its maxhealth is read in too many places for a read-time preview), and dropDestroyedPosts takes it back with a refunded officer. In
+	   game the server sends each Bulkhead's boxes. `sign` +1 or -1. */
+	troopBulkheads: function troopBulkheads(ship, sign) {
+		var boxes = sign * this.TROOP_BULKHEAD_BOXES;
+		this.systemsOf(ship).forEach(function (s) {
+			if (s && s.name === 'Bulkhead') s.maxhealth = (parseInt(s.maxhealth, 10) || 0) + boxes;
+		});
+	},
+
 	/* Expert Evader (user request 2026-10-20): may this flight order an Evade - the Firing-phase movement order
 	   (movement.js canEvade / doEvade) without which he does nothing. Own team only, through his list.
 	   ⚠️ MIRROR PAIR with Officers::mayEvade (PHP). */
@@ -1276,6 +1556,318 @@ window.officers = {
 		return this.isActive(ship, 'OFF_ANTI');
 	},
 
+	/* ------------------------------------------------------------------ Expert Political Officer (Stage 25) */
+
+	/* The four experts one of whom he brings at no cost, in registry order - which a tie for the dearest goes by.
+	   ⚠️ MIRROR PAIR with Officers::$politicalExperts (PHP). */
+	POLITICAL_EXPERTS: ['OFF_HELM', 'OFF_SCAN', 'OFF_ENG', 'OFF_NAV'],
+	POLITICAL_ARMOUR_SYSTEMS: 5, //⚠️ MIRROR of Officers::POLITICAL_ARMOUR_SYSTEMS (PHP)
+
+	/* Which of the four costs nothing: with a Political Officer bought, the DEAREST of them bought - the first on a tie; null with no
+	   Political Officer or none of them. `rows`: [{id, count, price}] - a ship's own rows (shipRows), or a buy dialog's spinners
+	   (confirm.isFreeExpert). ⚠️ MIRROR PAIR with Officers::freeExpertId (PHP). */
+	freeExpertId: function freeExpertId(rows) {
+		var bought = function (id) {
+			return rows.filter(function (row) { return row.id === id && row.count > 0; })[0] || null;
+		};
+		if (!bought('OFF_POL')) return null;
+		var best = null;
+		var bestPrice = -1;
+		this.POLITICAL_EXPERTS.forEach(function (id) {
+			var row = bought(id);
+			if (row && row.price > bestPrice) {
+				best = id;
+				bestPrice = row.price;
+			}
+		});
+		return best;
+	},
+
+	//a ship's rows as freeExpertId and (Stage 29, with each level's price step) ballisticFreeRounds read them
+	shipRows: function shipRows(ship) {
+		var rows = (ship && Array.isArray(ship.enhancementOptions)) ? ship.enhancementOptions : [];
+		return rows.filter(function (row) { return row && typeof row[0] === 'string'; }).map(function (row) {
+			return { id: row[0], count: parseInt(row[2], 10) || 0, price: parseFloat(row[4]) || 0, step: parseFloat(row[5]) || 0 };
+		});
+	},
+
+	//what the free expert would have cost this ship - the points it is spared (0 without one)
+	politicalDiscount: function politicalDiscount(ship) {
+		var rows = this.shipRows(ship);
+		var free = this.freeExpertId(rows);
+		return free ? rows.filter(function (row) { return row.id === free; })[0].price : 0;
+	},
+
+	/* One bought ship-level row's points for the fleet list (gamelobby enhancementLines): 0 for the free expert, else `cost` - less, on an
+	   ammunition row, the rounds an Expert Ballistic Officer makes free (Stage 29, ballisticFreeRounds). Stage 30: 0 for an Expert
+	   Quartermaster's free Improved Reactor or Jump Accelerator, and less his free rounds on an ammunition row (quartermasterFreeRounds). */
+	shipRowCost: function shipRowCost(ship, entry, cost) {
+		var rows = this.shipRows(ship);
+		if (entry && entry[0] === this.freeExpertId(rows)) return 0;
+		if (entry && this.QM_SHIP_REFITS.indexOf(entry[0]) !== -1) {
+			var refit = this.quartermasterRefit(ship, rows);
+			if (refit && refit.option === entry[0]) return 0;
+		}
+		var free = entry ? (this.ballisticFreeRounds(rows, ship && ship.ballisticPicks).saved[entry[0]] || 0)
+			+ (this.quartermasterFreeRounds(rows, ship && ship.quartermasterPicks, ship && ship.ballisticPicks).saved[entry[0]] || 0) : 0;
+		return free ? cost - free : cost;
+	},
+
+	/* ⭐ Which Hardened Armour is free, as the indexes of ship.systemEnhancements: with a Political Officer bought and his C&C standing,
+	   the POLITICAL_ARMOUR_SYSTEMS dearest SYS_HARM rows that are not on Structure, a tie to the lower system id. Priced by the offer
+	   (the blueprint, D10). ⚠️ MIRROR PAIR with Officers::freeArmourRows (PHP). */
+	freeArmourRows: function freeArmourRows(ship) {
+		var free = {};
+		if (!this.armourFreeOpen(ship)) return free;
+		this.armourCandidates(ship).slice(0, this.POLITICAL_ARMOUR_SYSTEMS).forEach(function (c) { free[c.index] = true; });
+		return free;
+	},
+
+	/* his armour's candidates - every bought Hardened Armour not on Structure, dearest first ({index, price, id}) - but one an Expert
+	   Quartermaster's free refit already spares (Stage 30: his comes first, as on the server - Officers::priceFreeRefits) */
+	armourCandidates: function armourCandidates(ship) {
+		var list = [];
+		var spared = this.quartermasterSpared(ship);
+		systemEnhancements.rows(ship).forEach(function (row, i) {
+			if (!row || row[0] !== 'SYS_HARM' || (parseInt(row[2], 10) || 0) < 1 || spared[i] !== undefined) return;
+			var system = systemEnhancements.systemById(ship, row[6]);
+			if (!system || system.name === 'structure') return;
+			var offer = systemEnhancements.offerFor(ship, row[6], 'SYS_HARM');
+			list.push({ index: i, price: systemEnhancements.priceFor(offer, row[2]), id: parseInt(row[6], 10) });
+		});
+		return list.sort(function (a, b) { return (b.price - a.price) || (a.id - b.id); });
+	},
+
+	/* The free refits priced again - an Expert Quartermaster's free refit (its levels spared taken off), then a Political Officer's free
+	   Hardened Armour among the rest (0), every other row of those kinds its offer's price - so a row that WAS free and is no longer (a dearer
+	   reactor bought since) is paid again. systemEnhancements.totalCost runs it before it sums the bucket, so every write prices them as the
+	   server's sanitiser will (Officers::priceFreeRefits). A row no longer offered keeps what it was priced at. */
+	priceFreeRefits: function priceFreeRefits(ship) {
+		if (!ship || !window.systemEnhancements || !Array.isArray(ship.systemEnhancements)) return;
+		var self = this;
+		var spared = this.quartermasterSpared(ship);
+		var free = this.freeArmourRows(ship);
+		ship.systemEnhancements.forEach(function (row, i) {
+			if (!row || self.QM_REFITS.indexOf(row[0]) === -1) return; //his four per-system kinds - Hardened Armour among them
+			var offer = systemEnhancements.offerFor(ship, row[6], row[0]);
+			if (offer) row[4] = free[i] ? 0 : systemEnhancements.priceFor(offer, row[2]) - (spared[i] || 0);
+		});
+	},
+
+	/* What buying a Hardened Armour on `system` would add to the ship (the system menu's price): its offer's price, less what his five
+	   free ones absorb - free while fewer than five are placed, and past that the cheapest of them goes back to full price. */
+	armourNextCost: function armourNextCost(ship, system, price) {
+		if (!this.armourFreeOpen(ship) || !system || system.name === 'structure') return price;
+		var max = this.POLITICAL_ARMOUR_SYSTEMS;
+		var top = function (prices) {
+			return prices.slice().sort(function (a, b) { return b - a; }).slice(0, max)
+				.reduce(function (sum, p) { return sum + p; }, 0);
+		};
+		var prices = this.armourCandidates(ship).map(function (c) { return c.price; });
+		return price - (top(prices.concat([price])) - top(prices));
+	},
+
+	//does this ship have a Political Officer whose free armour applies (bought, his C&C standing)?
+	armourFreeOpen: function armourFreeOpen(ship) {
+		if (!ship || ship.flight || !window.systemEnhancements || !Array.isArray(ship.enhancementOptions) || !this.isBought(ship, 'OFF_POL')) return false;
+		var cnc = this.findPost(ship, 'cnc');
+		return Boolean(cnc) && !this.isPostDestroyed(ship, cnc);
+	},
+
+	/* The lobby's line on what he has brought so far - his SystemInfo summary (summaryOf): "Free expert: Expert Navigator. Free
+	   Hardened Armour: 3 of 5 placed - the rest go on random systems when the fleet is committed." */
+	politicalStatus: function politicalStatus(ship) {
+		var free = this.freeExpertId(this.shipRows(ship));
+		var placed = this.armourFreeOpen(ship) ? Object.keys(this.freeArmourRows(ship)).length : 0;
+		var text = 'Free expert: ' + (free ? this.label(free) : 'none bought - one is picked at random when the fleet is committed') + '. ';
+		text += 'Free Hardened Armour: ' + placed + ' of ' + this.POLITICAL_ARMOUR_SYSTEMS + ' placed';
+		return text + (placed < this.POLITICAL_ARMOUR_SYSTEMS ? ' - the rest go on random systems when the fleet is committed.' : '.');
+	},
+
+	/* The system menu's Hardened Armour row on his ship (decorateMenuRows): what it costs now (the price it is charged - 0 when free),
+	   what buying it would add (armourNextCost), and a note saying so. */
+	decorateArmourRow: function decorateArmourRow(ship, system, row) {
+		if (row.enhID !== 'SYS_HARM' || !this.armourFreeOpen(ship)) return;
+		if (system.name === 'structure') {
+			row.note = 'The Expert Political Officer\'s free Hardened Armour cannot go on Structure.';
+			return;
+		}
+		var bought = systemEnhancements.rowFor(ship, system.id, 'SYS_HARM');
+		if (bought) row.price = parseFloat(bought[4]) || 0;
+		else row.nextPrice = this.armourNextCost(ship, system, row.nextPrice);
+		var placed = Object.keys(this.freeArmourRows(ship)).length;
+		row.note = 'Expert Political Officer: ' + this.POLITICAL_ARMOUR_SYSTEMS + ' Hardened Armour free (the dearest, not on Structure) - '
+			+ placed + ' placed; any left are placed at random when the fleet is committed.';
+	},
+
+	/* May this ship's Expert Political Officer give his speech now, from `system` - the Speech! button of the C&C he is posted in
+	   (CnC.canActivate; a hull with two C&Cs shows it on his alone): the Firing phase, his own team's ship, he serves and has not spoken
+	   yet (`abilities`, the server's). Through his list, so never an enemy's. ⚠️ MIRROR PAIR with Officers::speakerIndex (PHP). */
+	canSpeak: function canSpeak(ship, system) {
+		if (!ship || ship.flight || !system || !window.gamedata || gamedata.gamephase != 3) return false;
+		if (typeof gamedata.isMyShip === 'function' && !gamedata.isMyShip(ship)) return false;
+		var turn = this.currentTurn();
+		var self = this;
+		return this.listFor(ship).some(function (entry) {
+			return entry.id === 'OFF_POL' && String(entry.post) === String(system.id) && self.serves(entry, turn)
+				&& !(entry.abilities && entry.abilities.speech);
+		});
+	},
+
+	/* ------------------------------------------------------------------ Expert Warrior (Stage 28) */
+
+	CHARGE_HIT: 2,  //⚠️ MIRROR of Officers::CHARGE_HIT (PHP)
+	CHARGE_MIN_HEXES: 4,  //⚠️ MIRROR of Officers::CHARGE_MIN_HEXES (PHP) - "at least 4 hexes towards the enemy"
+
+	//this ship's Expert Warrior entry if he serves now, or null - through his list, so never an enemy's
+	warriorEntry: function warriorEntry(ship) {
+		if (!ship || ship.flight) return null;
+		var turn = this.currentTurn();
+		var self = this;
+		return this.listFor(ship).filter(function (entry) { return entry.id === 'OFF_WARR' && self.serves(entry, turn); })[0] || null;
+	},
+
+	//Is this C&C an Expert Warrior's post? Its Activate box is then his Supreme Anticipation's - blue, with his labels (CnC, model/system/baseSystems.js)
+	isWarriorPost: function isWarriorPost(ship, system) {
+		if (!ship || !system) return false;
+		return this.listFor(ship).some(function (entry) { return entry.id === 'OFF_WARR' && String(entry.post) === String(system.id); });
+	},
+
+	/* What his charge adds to the hit chance of one of his ship's shots, in d20 units: +2 at the unit it holds against this turn (`charged`,
+	   judged by the server), with every weapon but the ram. His standing +1 is fire control (fireControlRaise; in game the server's).
+	   ⚠️ MIRROR PAIR with Officers::chargeHitBonus (PHP). */
+	chargeHitBonus: function chargeHitBonus(ship, weapon, target) {
+		var entry = this.warriorEntry(ship);
+		if (!entry || !target || !weapon || weapon.isRammingAttack) return 0;
+		return (entry.charged !== undefined && entry.charged !== null && String(entry.charged) === String(target.id)) ? this.CHARGE_HIT : 0;
+	},
+
+	/* May his precision strike still be made this turn: not spent on an earlier turn, and no other of his abilities this turn - not a charge
+	   (its movement row), not his Supreme Anticipation (spent, or ordered now on his C&C's Activate box). */
+	precisionOpen: function precisionOpen(ship) {
+		var entry = this.warriorEntry(ship);
+		if (!entry) return false;
+		var turn = this.currentTurn();
+		var spent = entry.abilities || {};
+		var on = function (key) { return spent[key] !== undefined && spent[key] !== null ? (parseInt(spent[key], 10) || 0) : null; };
+		if (on('precision') !== null && on('precision') < turn) return false;
+		if (on('anticipation') === turn) return false;
+		var cnc = this.systemById(ship, entry.post);
+		if (cnc && cnc.active && window.gamedata && gamedata.gamephase == 3) return false;
+		return !(window.shipManager && shipManager.movement && typeof shipManager.movement.getChargeRow === 'function'
+			&& shipManager.movement.getChargeRow(ship));
+	},
+
+	/* Is this weapon's called shot his precision strike - "a single 'called shot', with only one weapon": his ship's first called shot, so of this
+	   turn's the one by his lowest-numbered weapon (the server prices them in that order). `called`: the shot asked about is a standard called
+	   shot. ⚠️ MIRROR PAIR with Officers::precisionShot (PHP). */
+	precisionWeapon: function precisionWeapon(ship, weapon, called) {
+		if (!ship || !weapon || ship.flight || weapon.isRammingAttack || !this.bonusCall(weapon, called) || !this.precisionOpen(ship)) return false;
+		var mine = parseInt(weapon.id, 10);
+		var turn = this.currentTurn();
+		var self = this;
+		return !this.systemsOf(ship).some(function (other) {
+			if (!other || !other.weapon || other.isRammingAttack || parseInt(other.id, 10) >= mine) return false;
+			return (other.fireOrders || []).some(function (order) {
+				if (!order || order.turn != turn || !(parseInt(order.calledid, 10) > 0) || String(order.type).indexOf('ntercept') !== -1) return false;
+				if (self.hasFixedFireControl(other, order.firingMode)) return false;
+				var target = window.gamedata && typeof gamedata.getShip === 'function' ? gamedata.getShip(order.targetid) : null;
+				var calledSystem = (target && window.shipManager) ? shipManager.systems.getSystem(target, order.calledid) : null;
+				return Boolean(calledSystem) && calledSystem.targetProfile == null;
+			});
+		});
+	},
+
+	//...and what it adds to that shot: the called shot penalty taken off again, doubled against a base as the penalty is (Officers::precisionStrike)
+	precisionStrike: function precisionStrike(ship, weapon, target, called) {
+		if (!this.precisionWeapon(ship, weapon, called)) return 0;
+		var waived = -(Number(weapon.calledShotMod) || 0);
+		return (target && target.base) ? 2 * waived : waived;
+	},
+
+	/* May this ship declare a charge now (movement.js canCharge, its Charge icon): his own team's, he serves, and he has not charged on an earlier
+	   turn. Through his list, so never an enemy's. ⚠️ MIRROR PAIR with Officers::validateCharge's test (PHP). */
+	canCharge: function canCharge(ship) {
+		var entry = this.warriorEntry(ship);
+		if (!entry || (window.gamedata && typeof gamedata.isMyShip === 'function' && !gamedata.isMyShip(ship))) return false;
+		var spent = entry.abilities ? entry.abilities.charge : undefined;
+		return spent === undefined || spent === null || (parseInt(spent, 10) || 0) >= this.currentTurn();
+	},
+
+	/* May he order his Supreme Anticipation now, from `system` - the Activate box of the C&C he is posted in: the Firing Phase, his own team's ship,
+	   he serves, it is unspent, and his ship did not charge this turn ("cannot do more than one of them in a given turn").
+	   ⚠️ MIRROR PAIR with Officers::anticipatorIndex (PHP). */
+	canAnticipateSupreme: function canAnticipateSupreme(ship, system) {
+		if (!system || !window.gamedata || gamedata.gamephase != 3) return false;
+		if (typeof gamedata.isMyShip === 'function' && !gamedata.isMyShip(ship)) return false;
+		var entry = this.warriorEntry(ship);
+		if (!entry || String(entry.post) !== String(system.id)) return false;
+		if (entry.abilities && entry.abilities.anticipation !== undefined && entry.abilities.anticipation !== null) return false;
+		return !(window.shipManager && shipManager.movement && typeof shipManager.movement.getChargeRow === 'function'
+			&& shipManager.movement.getChargeRow(ship));
+	},
+
+	/* ------------------------------------------------------------------ Expert Software Engineer (Stage 26) */
+
+	//"The specialist must be of the software category" - the Hyach Specialists the user named. ⚠️ MIRROR PAIR with Officers::$softwareSpecialists (PHP).
+	SOFTWARE_SPECIALISTS: ['Defence', 'Sensor', 'Targeting', 'Weapon'],
+	SOFTWARE_BFCP: 1, //Officers::SOFTWARE_BFCP
+
+	/* May the player hold one of `computer`'s points back to the Firing phase - its Expert Software Engineer serving in it? The Computer's
+	   Firing-phase menu (HyachComputer.firingMode) and the Initial Orders commit's unassigned-BFCP warning (bfcpHeldBack) ask it. Through his
+	   list, so never an enemy's. ⚠️ MIRROR PAIR with Officers::holdsFiringBFCP (PHP). */
+	holdsFiringBFCP: function holdsFiringBFCP(ship, computer) {
+		if (!ship || !computer) return false;
+		var turn = this.currentTurn();
+		var self = this;
+		return this.listFor(ship).some(function (entry) {
+			return entry.id === 'OFF_SOFT' && String(entry.post) === String(computer.id) && self.serves(entry, turn);
+		});
+	},
+
+	//Is what Initial Orders leaves unassigned no more than the point he may hold to the Firing phase? Then the commit does not warn about it.
+	bfcpHeldBack: function bfcpHeldBack(ship, computer) {
+		if (!this.holdsFiringBFCP(ship, computer)) return false;
+		return (Number(computer.output) || 0) - (Number(computer.BFCPtotal_used) || 0) <= this.SOFTWARE_BFCP;
+	},
+
+	/* In the lobby: his +1 BFCP on his Computer, 0 anywhere else - in game the server raised `output`. The tooltip's BFCP line shows it
+	   (bfcpLine). ⚠️ MIRROR PAIR with Officers::applySoftwareEngineer (PHP). */
+	computerBonus: function computerBonus(ship, system) {
+		if (!system) return 0;
+		var serving = this.servingDerived(ship);
+		for (var i = 0; i < serving.length; i++) {
+			if (serving[i].id === 'OFF_SOFT' && String(serving[i].post) === String(system.id)) return this.SOFTWARE_BFCP;
+		}
+		return 0;
+	},
+
+	//the Computer's "Bonus Fire Control Points (BFCP)" line, "used/total", with the lobby's preview of his point
+	bfcpLine: function bfcpLine(ship, system, value) {
+		var bonus = this.computerBonus(ship, system);
+		var parts = String(value).split('/');
+		if (!bonus || parts.length !== 2) return value;
+		return parts[0] + '/' + ((parseFloat(parts[1]) || 0) + bonus);
+	},
+
+	/* The software Specialists his ship may use a second time now: the server's list (Officers::specialistReuse - each used once, on an
+	   earlier turn; none once one has been used twice), sent to his own team while he serves. [] without him. */
+	specialistReuseList: function specialistReuseList(ship) {
+		var turn = this.currentTurn();
+		var self = this;
+		var entry = this.listFor(ship).filter(function (e) { return e.id === 'OFF_SOFT' && self.serves(e, turn); })[0];
+		return (entry && Array.isArray(entry.reuse)) ? entry.reuse : [];
+	},
+
+	/* May `type` be used again this turn, through him: on the server's list, and no OTHER Specialist of that list already being used again
+	   this turn ("This only works for one specialist per scenario")? HyachSpecialists canUse / canDecrease and the Specialists menu ask it. */
+	specialistReusable: function specialistReusable(ship, specialists, type) {
+		var list = this.specialistReuseList(ship);
+		if (list.indexOf(type) === -1) return false;
+		var used = (specialists && specialists.specAllocatedCount) ? specialists.specAllocatedCount : {};
+		return !list.some(function (other) { return other !== type && used[other] > 0; });
+	},
+
 	/* "Officers (2)" - the one line the ship window's gold Enhancements block shows for them (user request
 	   2026-10-11: a count, like "System Enhancements (n)", the detail living on each post's tooltip). Own
 	   team only, through listFor; null with none aboard.
@@ -1290,6 +1882,519 @@ window.officers = {
 			return this.label(list[0].id) + (same > 1 ? ' (' + same + ')' : '');
 		}
 		return 'Officers (' + list.length + ')';
+	},
+
+	/* ------------------------------------------------------------------ Expert Ballistic Officer (Stage 29) */
+
+	BALLISTIC_RANGE: 5, //⚠️ MIRROR of Officers::BALLISTIC_RANGE (PHP) - the lobby's own figure; in game the server publishes it (distanceRangeBonus)
+	BALLISTIC_EXTRA_ROUND: 1, //...BALLISTIC_EXTRA_ROUND - the lobby's preview of what the commit writes
+	/* The magazine rounds that take two slots, never a free pick ("single-space (1 slot, e.g. not ammo like Starburst missiles which take 2
+	   slots)"). ⚠️ MIRROR PAIR with the server's round sizes (Officers::paidPickTypes reads AmmoMissileK / AmmoMissileM's `size`). */
+	BALLISTIC_TWO_SLOT: ['AMMO_K', 'AMMO_M'],
+
+	/* A system his `needs` counts: a magazine-fed ballistic launcher (a missile rack, a Bomb Rack, a mine launcher - checkAmmoMagazine), or a
+	   ballistic weapon keeping its own count of rounds (a Proximity Laser, a Limpet Bore). Never the jump drive. A launcher counts only where its
+	   magazine has ordnance to buy (hasMagazineOrdnance - user ruling after play test 4512). ⚠️ MIRROR PAIR with Officers::hasCountedBallisticAmmo (PHP). */
+	isCountedBallistic: function isCountedBallistic(system) {
+		if (!system || !system.weapon || !system.ballistic || system.name === 'jumpEngine') return false;
+		return system.checkAmmoMagazine === true || (parseInt(system.ammunition, 10) || 0) > 0;
+	},
+
+	//has this hull ordnance for its magazine - an ammunition offer in its blueprint? ⚠️ MIRROR PAIR with Officers::hasMagazineOrdnance (PHP)
+	hasMagazineOrdnance: function hasMagazineOrdnance(ship) {
+		return (ship && Array.isArray(ship.enhancementOptions) ? ship.enhancementOptions : []).some(function (row) {
+			return row && typeof row[0] === 'string' && /^(AMMO_|MINE_|SHELL_)/.test(row[0]);
+		});
+	},
+
+	/* An ordnance row's limit with him bought, in the buy dialog: the offer's own rule on the magazine his slots enlarge - "the per-type limit is
+	   simply derived from the magazine total" (user ruling after play test 4512): as many rounds of its size as fit (Starburst and Multiwarhead
+	   two slots), a tenth of them for Stealth and Homing missiles. A Solyrn's Heavy 280 -> 290, its Stealth 28 -> 29. `max` (the offer's) for
+	   anything else. ⚠️ MIRROR PAIR with Enhancements::setEnhancementOptionsShip's ammunition limits - officersHarness writes
+	   ballisticLimitsFixture.json from the server's own offers on an enlarged magazine, and the client harness compares every row. */
+	BALLISTIC_TENTH: ['AMMO_S', 'AMMO_HM'],
+	ballisticRowLimit: function ballisticRowLimit(ship, id, max) {
+		var slots = ship ? (parseInt(ship.ballisticSlots, 10) || 0) : 0;
+		if (!slots || typeof id !== 'string' || !/^(AMMO_|MINE_)/.test(id)) return max;
+		var magazine = this.systemsOf(ship).filter(function (s) { return s && s.name === 'ammoMagazine'; })[0];
+		if (!magazine) return max;
+		var fit = Math.floor(((parseInt(magazine.capacity, 10) || 0) + slots) / (this.BALLISTIC_TWO_SLOT.indexOf(id) !== -1 ? 2 : 1));
+		return this.BALLISTIC_TENTH.indexOf(id) !== -1 ? fit / 10 : fit;
+	},
+
+	/* A row whose rounds may be his free picks: an AMMO_ row with a price on this hull, never Basic, never a two-slot round (user ruling
+	   2026-10-24). ⚠️ MIRROR PAIR with Officers::paidPickTypes (PHP), which the commit's fill uses. */
+	isBallisticPick: function isBallisticPick(id, price) {
+		return typeof id === 'string' && id.indexOf('AMMO_') === 0 && id !== 'AMMO_B' && this.BALLISTIC_TWO_SLOT.indexOf(id) === -1 && (Number(price) || 0) > 0;
+	},
+
+	/* ⭐ HIS FREE MISSILES - "any missiles the player buys are free up to the number of missile racks on the ship ... the most expensive
+	   missile ammos are free" (the user's note): with him bought, the `picks` DEAREST rounds of the pickable rows (isBallisticPick) cost
+	   nothing - each round at its own level's price (price + level x step, as the buy dialog charges it), a tie to the lower id (the dialog
+	   and the fleet list hold their rows in different orders; only the split of a tie between rows depends on it, never the total).
+	   `rows`: [{id, count, price, step}] - a ship's own (shipRows) or a buy dialog's spinners (confirm.dialogRows);
+	   `picks`: the static blueprint's ballisticPicks. Returns {free: {id: rounds}, saved: {id: points}, discount: points}. The commit rolls
+	   whatever is left unpicked (Officers::placeBallisticPicks), so a player who buys none still gets them. */
+	ballisticFreeRounds: function ballisticFreeRounds(rows, picks) {
+		var out = { free: {}, saved: {}, discount: 0 };
+		picks = parseInt(picks, 10) || 0;
+		if (picks <= 0 || !rows.some(function (row) { return row.id === 'OFF_BALL' && row.count > 0; })) return out;
+		var self = this;
+		var rounds = [];
+		rows.forEach(function (row) {
+			if (!self.isBallisticPick(row.id, row.price)) return;
+			for (var level = 0; level < row.count; level++) rounds.push({ id: row.id, price: row.price + level * (row.step || 0) });
+		});
+		rounds.sort(function (a, b) { return (b.price - a.price) || (a.id < b.id ? -1 : (a.id > b.id ? 1 : 0)); });
+		rounds.slice(0, picks).forEach(function (round) {
+			out.free[round.id] = (out.free[round.id] || 0) + 1;
+			out.saved[round.id] = (out.saved[round.id] || 0) + round.price;
+			out.discount += round.price;
+		});
+		return out;
+	},
+
+	//what his free rounds spare this ship, in points (0 without him) - setShipLevelRow moves pointCost by it when he comes or goes
+	ballisticDiscount: function ballisticDiscount(ship) {
+		return ship ? this.ballisticFreeRounds(this.shipRows(ship), ship.ballisticPicks).discount : 0;
+	},
+
+	//is he bought on this LOBBY ship (its rows, as the server's raiseMagazines reads them)? false in game, where the server applied him
+	ballisticAboard: function ballisticAboard(ship) {
+		return this.isDerived(ship) && this.listFor(ship).some(function (entry) { return entry.id === 'OFF_BALL'; });
+	},
+
+	//the magazine slots he adds (the static blueprint's ballisticSlots) - in the lobby, while he is bought; in game the payload's capacity has them
+	ballisticSlots: function ballisticSlots(ship) {
+		return this.ballisticAboard(ship) ? (parseInt(ship.ballisticSlots, 10) || 0) : 0;
+	},
+
+	/* ⭐ HIS +5 - what a ballistic weapon of this ship adds to its distance range (never its launch range), never a Proximity Laser: in game
+	   the number the server published to every viewer while he serves (Officers::addForJson), in the lobby his own while he would serve.
+	   ⚠️ MIRROR PAIR with Officers::distanceRangeBonus (PHP). */
+	distanceRangeBonus: function distanceRangeBonus(ship, weapon) {
+		if (!ship || !weapon || !weapon.ballistic || weapon.name === 'ProximityLaserNew' || weapon.name === 'jumpEngine') return 0;
+		if (ship.distanceRangeBonus !== undefined) return parseInt(ship.distanceRangeBonus, 10) || 0;
+		return this.servingDerived(ship).some(function (entry) { return entry.id === 'OFF_BALL'; }) ? this.BALLISTIC_RANGE : 0;
+	},
+
+	/* A ballistic weapon's Range line ("30/70", or "30" where the distance range is the launch range) with his +5 on the distance part:
+	   "30/75", "30/35". Anything not in that shape, or a range of 0 (unlimited), is left as it is. */
+	ballisticRangeLine: function ballisticRangeLine(ship, system, value) {
+		var bonus = this.distanceRangeBonus(ship, system);
+		var parts = bonus ? /^\s*(\d+)\s*(?:\/\s*(\d+))?\s*$/.exec(String(value)) : null;
+		if (!parts) return value;
+		var launch = parseInt(parts[1], 10);
+		var distance = Math.max(launch, parts[2] !== undefined ? parseInt(parts[2], 10) : 0);
+		if (distance <= 0) return value;
+		return launch + '/' + (distance + bonus);
+	},
+
+	//in the lobby: a counted weapon's Ammunition line with the round the commit will give it (in game the server's count has it)
+	ballisticAmmunitionLine: function ballisticAmmunitionLine(ship, system, value) {
+		if (!this.ballisticAboard(ship) || system.checkAmmoMagazine === true || !this.isCountedBallistic(system)) return value;
+		var n = parseInt(value, 10);
+		return isNaN(n) ? value : n + this.BALLISTIC_EXTRA_ROUND;
+	},
+
+	//in the lobby: the magazine's "Total rounds: 280/280" with his slots - 280/290 (in game the server's capacity has them)
+	ballisticMagazineSpecial: function ballisticMagazineSpecial(ship, value) {
+		var slots = this.ballisticSlots(ship);
+		if (!slots) return value;
+		return String(value).replace(/Total rounds: (\d+)\/(\d+)/, function (all, rounds, capacity) {
+			return 'Total rounds: ' + rounds + '/' + ((parseInt(capacity, 10) || 0) + slots);
+		});
+	},
+
+	/* ------------------------------------------------------------------ Expert Quartermaster (Stage 30) */
+
+	/* The six refits one of which he brings at no cost, in the rules' order - which a tie for the dearest goes by - and the two of them that are
+	   ship-level rows (the rest are bought per system). ⚠️ MIRROR PAIR with Officers::$quartermasterRefits (PHP). */
+	QM_REFITS: ['SYS_GSGT', 'SYS_ADT', 'IMPR_REA', 'SYS_THR', 'SYS_HARM', 'JUMP_ACC'],
+	QM_SHIP_REFITS: ['IMPR_REA', 'JUMP_ACC'],
+	QM_REFIT_LABELS: { SYS_GSGT: 'Gunsights', SYS_ADT: 'Advanced Defensive Targeting', IMPR_REA: 'Improved Reactor', SYS_THR: 'Improved Thrust Rating',
+		SYS_HARM: 'Hardened Armour', JUMP_ACC: 'Jump Accelerator' },
+	QM_REFIT_SYSTEMS: 2, //⚠️ MIRROR of Officers::QM_REFIT_SYSTEMS (PHP) - "any two weapons", "any two thrusters", two armoured systems
+
+	/* ⭐ HIS FREE REFIT - of the six, the DEAREST bought, as the server rules it: Gunsights, Advanced Defensive Targeting, Improved Thrust - the
+	   two dearest systems bought it, each at its dearest level; Hardened Armour - the dearest two on one side (a tie to the lower location),
+	   never Structure or a Primary system; the Improved Reactor or the Jump Accelerator - its row. A tie to the first in QM_REFITS, a tie between
+	   systems to the lower id. `rows`: the ship-level rows [{id, count, price}] - the ship's own (shipRows) or a buy dialog's (confirm.dialogRows);
+	   the refits are ship.systemEnhancements, priced by their offers (the blueprint, D10). null without him bought, with his C&C destroyed before
+	   battle or with none of the six; else {option, free: {row index: points spared}, placed, location, points}. `anyPost`: never mind his
+	   C&C (the ship-level saving - quartermasterShipSaving: the refund of an officer on a destroyed post is dropDestroyedPosts' business,
+	   which reads the saving AFTER the editor has marked the post destroyed).
+	   ⚠️ MIRROR PAIR with Officers::quartermasterRefit (PHP). */
+	quartermasterRefit: function quartermasterRefit(ship, rows, anyPost) {
+		if (!ship || ship.flight || !rows.some(function (row) { return row.id === 'OFF_QM' && row.count > 0; })) return null;
+		var cnc = this.findPost(ship, 'cnc');
+		if (!cnc || (!anyPost && this.isPostDestroyed(ship, cnc))) return null;
+		var self = this;
+		var candidates = {};
+		//read, never created: a static blueprint in a buy dialog has no refits, and must not be given an array
+		(window.systemEnhancements && Array.isArray(ship.systemEnhancements) ? ship.systemEnhancements : []).forEach(function (row, i) {
+			var count = row ? (parseInt(row[2], 10) || 0) : 0;
+			if (count < 1 || self.QM_REFITS.indexOf(row[0]) === -1) return;
+			var system = systemEnhancements.systemById(ship, row[6]);
+			var offer = systemEnhancements.offerFor(ship, row[6], row[0]);
+			if (!system || !offer || self.isPostDestroyed(ship, system)) return;
+			if (row[0] === 'SYS_HARM' && !self.isQuartermasterArmour(system)) return;
+			(candidates[row[0]] = candidates[row[0]] || []).push({ index: i, points: systemEnhancements.priceForLevel(offer, count - 1),
+				id: parseInt(system.id, 10), location: parseInt(system.location, 10) || 0 });
+		});
+		var best = null;
+		this.QM_REFITS.forEach(function (id) {
+			var choice = null;
+			if (self.QM_SHIP_REFITS.indexOf(id) !== -1) {
+				var row = rows.filter(function (r) { return r.id === id && r.count > 0; })[0];
+				if (row && row.price > 0) choice = { option: id, free: {}, placed: 0, location: null, points: row.price };
+			} else {
+				choice = self.quartermasterPair(id, candidates[id] || []);
+			}
+			if (choice && (!best || choice.points > best.points)) best = choice;
+		});
+		return best;
+	},
+
+	//the systems that make one per-system refit's share of his worth most - Hardened Armour's on one side. ⚠️ MIRROR PAIR with Officers::quartermasterPair (PHP)
+	quartermasterPair: function quartermasterPair(id, list) {
+		var self = this;
+		var sides = {};
+		list.forEach(function (candidate) {
+			var key = (id === 'SYS_HARM') ? candidate.location : 0;
+			(sides[key] = sides[key] || []).push(candidate);
+		});
+		var best = null;
+		Object.keys(sides).map(Number).sort(function (a, b) { return a - b; }).forEach(function (location) {
+			var pair = sides[location].slice().sort(function (a, b) { return (b.points - a.points) || (a.id - b.id); }).slice(0, self.QM_REFIT_SYSTEMS);
+			var free = {};
+			var points = 0;
+			pair.forEach(function (candidate) { free[candidate.index] = candidate.points; points += candidate.points; });
+			if (!best || points > best.points) {
+				best = { option: id, free: free, placed: pair.length, location: (id === 'SYS_HARM') ? location : null, points: points };
+			}
+		});
+		return best;
+	},
+
+	//may his free Hardened Armour go on this system? "Non-structure and non-primary" - ⚠️ MIRROR PAIR with Officers::isQuartermasterArmour (PHP)
+	isQuartermasterArmour: function isQuartermasterArmour(system) {
+		return Boolean(system) && system.name !== 'structure' && (parseInt(system.location, 10) || 0) !== 0;
+	},
+
+	//the rows his free refit spares on this ship's refits ({row index: points}) - what priceFreeRefits takes off, and the Political Officer's armour never counts
+	quartermasterSpared: function quartermasterSpared(ship) {
+		var refit = this.quartermasterRefit(ship, this.shipRows(ship));
+		return refit ? refit.free : {};
+	},
+
+	/* what his free Improved Reactor or Jump Accelerator spares the SHIP-LEVEL bucket (pointCostEnh): 0 when his refit is a system's, or none.
+	   Whatever his C&C's state, as the Political Officer's free expert (politicalDiscount) - see quartermasterRefit's `anyPost`. */
+	quartermasterShipSaving: function quartermasterShipSaving(ship, rows) {
+		var refit = ship ? this.quartermasterRefit(ship, rows || this.shipRows(ship), true) : null;
+		return (refit && this.QM_SHIP_REFITS.indexOf(refit.option) !== -1) ? refit.points : 0;
+	},
+
+	/* After a refit write (systemEnhancements.set, dropDestroyed): his free refit may have moved between a system and a ship-level row - two
+	   Gunsights that outbid his free Improved Reactor make the reactor paid again - so pointCostEnh and pointCost move by what the ship-level
+	   saving changed by. `before`: quartermasterShipSaving read before the write. The refit bucket the caller settles itself. */
+	settleQuartermaster: function settleQuartermaster(ship, before) {
+		var delta = before - this.quartermasterShipSaving(ship);
+		if (!delta) return;
+		ship.pointCostEnh = (parseFloat(ship.pointCostEnh) || 0) + delta;
+		ship.pointCost = (parseFloat(ship.pointCost) || 0) + delta;
+	},
+
+	/* A row whose rounds may be his free missiles: an AMMO_ row with a price on this hull, never Basic - any size (user ruling 2026-10-24: a
+	   two-slot round counts as one missile). ⚠️ MIRROR PAIR with Officers::quartermasterPickTypes (PHP). */
+	isQuartermasterPick: function isQuartermasterPick(id, price) {
+		return typeof id === 'string' && id.indexOf('AMMO_') === 0 && id !== 'AMMO_B' && (Number(price) || 0) > 0;
+	},
+
+	/* ⭐ HIS FREE MISSILES - "two special missiles of any type" for each rack, one for a Class-SO: with him bought, the `picks` DEAREST rounds of the
+	   pickable rows (isQuartermasterPick) cost nothing, each at its own level's price, a tie to the lower id - after an Expert Ballistic Officer
+	   bought in the same rows has taken his (ballisticFreeRounds): those rounds are not his. `picks` / `ballisticPicks`: the static blueprint's
+	   quartermasterPicks / ballisticPicks. Returns ballisticFreeRounds' shape. The commit rolls whatever is left unpicked
+	   (Officers::placeQuartermasterMissiles), which counts the rounds past the Ballistic Officer's as these do. */
+	quartermasterFreeRounds: function quartermasterFreeRounds(rows, picks, ballisticPicks) {
+		var out = { free: {}, saved: {}, discount: 0 };
+		picks = parseInt(picks, 10) || 0;
+		if (picks <= 0 || !rows.some(function (row) { return row.id === 'OFF_QM' && row.count > 0; })) return out;
+		var self = this;
+		var taken = this.ballisticFreeRounds(rows, ballisticPicks).free;
+		var rounds = [];
+		rows.forEach(function (row) {
+			if (!self.isQuartermasterPick(row.id, row.price)) return;
+			for (var level = 0; level < row.count; level++) rounds.push({ id: row.id, price: row.price + level * (row.step || 0) });
+		});
+		rounds.sort(function (a, b) { return (b.price - a.price) || (a.id < b.id ? -1 : (a.id > b.id ? 1 : 0)); });
+		var passed = {}; //the Ballistic Officer's are each row's dearest rounds - the first of that id in this order
+		rounds.filter(function (round) {
+			if ((passed[round.id] || 0) >= (taken[round.id] || 0)) return true;
+			passed[round.id] = (passed[round.id] || 0) + 1;
+			return false;
+		}).slice(0, picks).forEach(function (round) {
+			out.free[round.id] = (out.free[round.id] || 0) + 1;
+			out.saved[round.id] = (out.saved[round.id] || 0) + round.price;
+			out.discount += round.price;
+		});
+		return out;
+	},
+
+	//what he spares this ship's ship-level bucket in points - his free reactor or accelerator, and his free rounds - setShipLevelRow moves pointCost by it
+	quartermasterDiscount: function quartermasterDiscount(ship) {
+		if (!ship) return 0;
+		var rows = this.shipRows(ship);
+		return this.quartermasterShipSaving(ship, rows) + this.quartermasterFreeRounds(rows, ship.quartermasterPicks, ship.ballisticPicks).discount;
+	},
+
+	//does this LOBBY ship have a Quartermaster whose free refit applies (bought, his C&C standing)?
+	quartermasterOpen: function quartermasterOpen(ship) {
+		if (!ship || ship.flight || !window.systemEnhancements || !this.isDerived(ship) || !this.isBought(ship, 'OFF_QM')) return false;
+		var cnc = this.findPost(ship, 'cnc');
+		return Boolean(cnc) && !this.isPostDestroyed(ship, cnc);
+	},
+
+	/* What setting a refit on `system` to `n` levels would move this ship's points by, his free refit (and a Political Officer's armour) included
+	   - tried on the ship through the real write (systemEnhancements.set, which re-prices both buckets) and put back exactly as it was. */
+	refitTryCost: function refitTryCost(ship, system, enhID, n) {
+		var saved = { rows: systemEnhancements.clone(systemEnhancements.rows(ship)), sysEnh: ship.pointCostSysEnh, enh: ship.pointCostEnh, cost: ship.pointCost };
+		var before = (parseFloat(ship.pointCostSysEnh) || 0) + (parseFloat(ship.pointCostEnh) || 0);
+		systemEnhancements.set(ship, system.id, enhID, n);
+		var after = (parseFloat(ship.pointCostSysEnh) || 0) + (parseFloat(ship.pointCostEnh) || 0);
+		ship.systemEnhancements = saved.rows;
+		ship.pointCostSysEnh = saved.sysEnh;
+		ship.pointCostEnh = saved.enh;
+		ship.pointCost = saved.cost;
+		systemEnhancements.syncTooltip(ship);
+		return after - before;
+	},
+
+	/* The system menu's row of one of his refits (decorateMenuRows): what it costs now (the price it is charged, his part taken off), what one
+	   more level would add (refitTryCost - it may outbid his free reactor, or take a free Gunsight's place), and a note saying which is free. */
+	decorateQuartermasterRow: function decorateQuartermasterRow(ship, system, row) {
+		if (this.QM_REFITS.indexOf(row.enhID) === -1 || !this.quartermasterOpen(ship)) return;
+		var bought = systemEnhancements.rowFor(ship, system.id, row.enhID);
+		if (bought) row.price = parseFloat(bought[4]) || 0;
+		if (row.count < row.max) row.nextPrice = this.refitTryCost(ship, system, row.enhID, row.count + 1);
+		row.note = (row.note ? row.note + ' ' : '') + 'Expert Quartermaster: the dearest of his six refits is free. ' + this.quartermasterRefitText(ship) + '.';
+	},
+
+	//"Free refit: Gunsights (2 of 2)" - or what the commit will do with what is missing
+	quartermasterRefitText: function quartermasterRefitText(ship) {
+		var refit = this.quartermasterRefit(ship, this.shipRows(ship));
+		if (!refit) return 'Free refit: none bought - one is picked at random when the fleet is committed';
+		var text = 'Free refit: ' + this.QM_REFIT_LABELS[refit.option];
+		if (this.QM_SHIP_REFITS.indexOf(refit.option) !== -1) return text;
+		text += ' (' + refit.placed + ' of ' + this.QM_REFIT_SYSTEMS + ')';
+		return refit.placed < this.QM_REFIT_SYSTEMS ? text + ' - the other is placed at random when the fleet is committed' : text;
+	},
+
+	/* The lobby's line on what he has brought so far - his SystemInfo summary (summaryOf): the free refit, and his free missiles "3 of 4 bought -
+	   the rest are picked at random when the fleet is committed". */
+	quartermasterStatus: function quartermasterStatus(ship) {
+		var text = this.quartermasterRefitText(ship) + '.';
+		var picks = parseInt(ship.quartermasterPicks, 10) || 0;
+		if (!picks) return text;
+		var free = this.quartermasterFreeRounds(this.shipRows(ship), picks, ship.ballisticPicks).free;
+		var used = Object.keys(free).reduce(function (sum, id) { return sum + free[id]; }, 0);
+		text += ' Free missiles: ' + used + ' of ' + picks + ' bought';
+		return text + (used < picks ? ' - the rest are picked at random when the fleet is committed.' : '.');
+	},
+
+	/* ------------------------------------------------------------------ Expert Graviton Controller (Stage 31) */
+
+	GRAV_BEAM_DAMAGE: 1,      //⚠️ MIRROR of Officers::GRAV_BEAM_DAMAGE (PHP)
+	GRAV_ENGINE_THRUST: 1,    //...GRAV_ENGINE_THRUST
+	GRAV_THRUSTER: 1,         //...GRAV_THRUSTER
+	GRAV_ROTATION_PENALTY: 3, //...GRAV_ROTATION_PENALTY - d20 units, the hit-chance preview's "Gravitic Rotation"
+
+	//a weapon with a Gravitic mode - its class, or any mode's. ⚠️ MIRROR PAIR with Officers::isGraviticWeapon (PHP)
+	isGraviticWeapon: function isGraviticWeapon(system) {
+		if (!system || !system.weapon) return false;
+		if (system.weaponClass === 'Gravitic') return true;
+		var classes = system.weaponClassArray;
+		if (!classes || typeof classes !== 'object') return false;
+		return Object.keys(classes).some(function (mode) { return classes[mode] === 'Gravitic'; });
+	},
+
+	/* "The largest aft thruster": the main thruster (direction 2) with the highest rating, the FIRST of equal ones (user ruling 2026-10-25), or
+	   null. ⚠️ MIRROR PAIR with Officers::gravitonThruster (PHP). */
+	gravitonThruster: function gravitonThruster(ship) {
+		var best = null;
+		this.systemsOf(ship).forEach(function (system) {
+			if (!system || system.name !== 'thruster' || parseInt(system.direction, 10) !== 2) return;
+			if (best === null || (parseInt(system.output, 10) || 0) > (parseInt(best.output, 10) || 0)) best = system;
+		});
+		return best;
+	},
+
+	/* In the lobby: what he adds to THIS system's output - +1 on his Engine (his post) and +1 on the largest aft thruster, 0 anywhere else.
+	   shipManager.systems.getOutput adds it, so the icons and the thrust readouts show it. In game the server raised both outputs (servingDerived
+	   is empty there). ⚠️ MIRROR PAIR with Officers::applyGravitonTweaks (PHP). */
+	gravitonThrustBonus: function gravitonThrustBonus(ship, system) {
+		if (!system || !ship || ship.flight) return 0;
+		var serving = this.servingDerived(ship);
+		for (var i = 0; i < serving.length; i++) {
+			if (serving[i].id !== 'OFF_GRAV') continue;
+			if (String(serving[i].post) === String(system.id)) return this.GRAV_ENGINE_THRUST;
+			var thruster = this.gravitonThruster(ship);
+			return (thruster && String(thruster.id) === String(system.id)) ? this.GRAV_THRUSTER : 0;
+		}
+		return 0;
+	},
+
+	/* What he adds to a hit from this weapon in mode 1 (the mode its Damage line describes): +1 for a Raking Gravitic mode while he serves - the
+	   Graviton Beam, the Gravitic Lance, the Gravitic Cutter. The lobby's derived list and the owner's server list both answer; an enemy's is empty.
+	   ⚠️ MIRROR PAIR with Officers::gravitonBeamBonus (PHP). */
+	gravitonBeamBonus: function gravitonBeamBonus(ship, system) {
+		if (!ship || ship.flight || !system || !system.weapon) return 0;
+		var classes = system.weaponClassArray, types = system.damageTypeArray;
+		var cls = (classes && typeof classes === 'object' && classes[1] !== undefined) ? classes[1] : system.weaponClass;
+		var type = (types && typeof types === 'object' && types[1] !== undefined) ? types[1] : system.damageType;
+		if (cls !== 'Gravitic' || type !== 'Raking') return 0;
+		if (!(parseInt(this.modeOneDamage(system.maxDamageArray, system.maxDamage), 10) > 0)) return 0;
+		return this.isActive(ship, 'OFF_GRAV') ? this.GRAV_BEAM_DAMAGE : 0;
+	},
+
+	gravitonDamageLine: function gravitonDamageLine(ship, system, value) {
+		return this.hitBonusLine(system, value, this.gravitonBeamBonus(ship, system));
+	},
+
+	/* May his ship rotate its gravitic drive (movement.js canGravRotate asks the rest): his own team's ship, he serves, and he has not rotated in this
+	   battle (`abilities.rotate`, the server's - spent the moment the die is rolled). ⚠️ MIRROR of Officers::rotateGravitic's checks (PHP). */
+	canGravRotate: function canGravRotate(ship) {
+		if (!ship || ship.flight || (window.gamedata && typeof gamedata.isMyShip === 'function' && !gamedata.isMyShip(ship))) return false;
+		var turn = this.currentTurn();
+		var self = this;
+		var entry = this.listFor(ship).filter(function (e) { return e.id === 'OFF_GRAV' && self.serves(e, turn); })[0];
+		if (!entry) return false;
+		return !(entry.abilities && entry.abilities.rotate !== undefined && entry.abilities.rotate !== null);
+	},
+
+	/* ------------------------------------------------------------------ Redline Pilot (Stage 32) */
+
+	REDLINE_DANCE_SPEED: 8,  //⚠️ MIRROR of Officers::REDLINE_DANCE_SPEED (PHP) - the summary's figure; the skin dance itself is the server's
+	REDLINE_PIVOT_FACTOR: 3, //...REDLINE_PIVOT_FACTOR - the combat pivot penalty tripled (shipManager.movement.combatPivotPenalty)
+	REDLINE_BURN_PCT: 50,    //...REDLINE_BURN_PCT - the afterburners' thrust (redlineThrustBonus)
+	REDLINE_LANDING_DIE: 20, //...REDLINE_LANDING_DIE - the Dock dialog's risk line
+
+	//his entry on this flight while he serves now, through his list - so never an enemy's
+	redlineEntry: function redlineEntry(ship) {
+		if (!ship || !ship.flight) return null;
+		var turn = this.currentTurn();
+		var self = this;
+		return this.listFor(ship).filter(function (e) { return e.id === 'OFF_REDL' && self.serves(e, turn); })[0] || null;
+	},
+
+	/* May this flight burn its afterburners now (movement.js canRedline asks the rest - its first order, not cooling): the player's own flight, and
+	   he serves. And, in the Firing phase, pivot without the thrust (movement.js canPivot). ⚠️ MIRROR of Officers::validateRedline's test (PHP). */
+	canRedline: function canRedline(ship) {
+		if (window.gamedata && typeof gamedata.isMyShip === 'function' && !gamedata.isMyShip(ship)) return false;
+		return this.redlineEntry(ship) !== null;
+	},
+
+	mayRedlinePivot: function mayRedlinePivot(ship) {
+		return this.canRedline(ship);
+	},
+
+	/* What this turn's 'redline' row adds to a flight's thrust: half its thrust, rounded down (movement.js getRemainingEngineThrust and
+	   getFullEngineThrust). The row is the record, whatever became of him - an enemy's too, as its movement is public.
+	   ⚠️ MIRROR PAIR with Officers::redlineBurnThrust (PHP). */
+	redlineThrustBonus: function redlineThrustBonus(ship) {
+		if (!ship || !ship.flight || !window.shipManager || !shipManager.movement || typeof shipManager.movement.getRedlineRow !== 'function') return 0;
+		if (!shipManager.movement.getRedlineRow(ship)) return 0;
+		return Math.floor(Math.max(0, Number(ship.freethrust) || 0) * this.REDLINE_BURN_PCT / 100);
+	},
+
+	/* May this flight land beyond its thrust tolerance this turn - the Dock dialog offers such a carrier (findEligibleCarriersForDock): he serves,
+	   his craft still flies, and it did not burn ("The fight cannot use the afterburners during this attempt"). The server rolls the d20 as
+	   firing resolves. ⚠️ MIRROR of Officers::rollRedlineLandings' test (PHP). */
+	mayRedlineLand: function mayRedlineLand(ship) {
+		var entry = this.redlineEntry(ship);
+		if (!entry || shipManager.movement.getRedlineRow(ship)) return false;
+		var craft = this.systemById(ship, entry.post);
+		return !!craft && !shipManager.systems.isDestroyed(ship, craft);
+	},
+
+	/* A burn's feedback (movement.js toggleRedline): a passive notice of what it gives and what it costs, and - on the first burn of a Movement
+	   phase, whichever flight - the clip under it (the user's "fun thing"). */
+	redlineBurnFeedback: function redlineBurnFeedback(ship) {
+		this.notice('Afterburners! ' + ship.name + ' has +' + this.redlineThrustBonus(ship) + ' thrust this turn - next turn it must fly straight ahead while its engines cool.');
+		if (this.redlineClipShown === gamedata.turn) return;
+		this.redlineClipShown = gamedata.turn;
+		this.playRedlineClip();
+	},
+
+	/* THE CLIP: one of five short MP4s (img/redline1-5.mp4 - the user's GIFs re-encoded, 30-290 KB, muted and looping). Nothing is fetched at
+	   page load. When a Movement phase opens for a player with a flight that may burn (PhaseDirector -> prefetchRedlineClip), ONE is picked at
+	   random and fetched in idle time, so the first burn plays it at once; a burn before it arrives streams it. Shown centred under the passive
+	   notice, click-through, for its REDLINE_CLIP_MS, then faded out. */
+	REDLINE_CLIPS: 5,
+	REDLINE_CLIP_MS: { 1: 2200, 2: 2200, 3: 2200, 4: 2200, 5: 2200 }, //by clip number, ms before the fade - each a second less than at first (user, play test 4515)
+	redlineClip: null,       //{ turn, src, url } - this turn's pick, and its blob URL once fetched
+	redlineClipShown: null,  //the turn whose Movement phase has played it
+	redlineClipTimer: null,
+
+	redlineClipSource: function redlineClipSource() {
+		return 'img/redline' + (1 + Math.floor(Math.random() * this.REDLINE_CLIPS)) + '.mp4';
+	},
+
+	prefetchRedlineClip: function prefetchRedlineClip() {
+		if (!window.gamedata || gamedata.gamephase != 2 || !window.shipManager) return;
+		if (this.redlineClip && this.redlineClip.turn === gamedata.turn) return;
+		var self = this;
+		var any = (gamedata.ships || []).some(function (ship) {
+			return ship && ship.flight && self.canRedline(ship) && !shipManager.movement.isRedlineCooling(ship);
+		});
+		if (!any) return;
+		if (this.redlineClip && this.redlineClip.url) URL.revokeObjectURL(this.redlineClip.url);
+		var clip = this.redlineClip = { turn: gamedata.turn, src: this.redlineClipSource(), url: null };
+		var load = function () {
+			if (typeof fetch !== 'function' || self.redlineClip !== clip) return;
+			fetch(clip.src).then(function (response) { return response.ok ? response.blob() : null; }).then(function (blob) {
+				if (blob && self.redlineClip === clip) clip.url = URL.createObjectURL(blob);
+			}).catch(function () {});
+		};
+		if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(load, { timeout: 4000 });
+		else setTimeout(load, 1500);
+	},
+
+	playRedlineClip: function playRedlineClip() {
+		var clip = (this.redlineClip && this.redlineClip.turn === gamedata.turn) ? this.redlineClip : { src: this.redlineClipSource(), url: null };
+		var video = document.getElementById('redlineClip');
+		if (!video) {
+			video = document.createElement('video');
+			video.id = 'redlineClip';
+			video.className = 'redlineClip';
+			video.muted = true;
+			video.loop = true;
+			video.playsInline = true;
+			video.setAttribute('muted', '');
+			video.setAttribute('playsinline', '');
+			document.body.appendChild(video);
+		}
+		//under the passive notice the burn has just raised (savedOrders.showNotice places it below the phase banner)
+		var notice = $('#savedOrdersNotice');
+		var top = (notice.length && notice.css('display') !== 'none') ? (parseFloat(notice.css('top')) || 130) + notice.outerHeight() + 8 : 170;
+		clearTimeout(this.redlineClipTimer);
+		$(video).stop(true, true).css({ top: top + 'px', display: 'block', opacity: 0 });
+		video.src = clip.url || clip.src;
+		var playing = video.play();
+		if (playing && typeof playing.catch === 'function') playing.catch(function () {});
+		$(video).fadeTo(400, 1);
+		this.redlineClipTimer = setTimeout(function () {
+			$(video).fadeTo(600, 0, function () {
+				video.pause();
+				$(video).hide();
+			});
+		}, this.redlineClipTime(clip.src));
+	},
+
+	//how long a clip stays up before it fades: its REDLINE_CLIP_MS, by the number in its name
+	redlineClipTime: function redlineClipTime(src) {
+		var n = (String(src).match(/redline(\d+)\.mp4$/) || [])[1];
+		return this.REDLINE_CLIP_MS[n] || 3200;
 	},
 
 	/* ------------------------------------------------------------------ what a flight's officer costs */
@@ -1318,12 +2423,14 @@ window.officers = {
 	   up, plus his perCraftExtra per craft (user ruling 2026-10-15). enhCost is the row's own sum (price x
 	   count) - so officers bought as a count (Stage 18, Expert Pilots) are scaled and rounded up ONCE for
 	   the row, as Officers::flightPrice's $count; `extra` is perCraftExtra(ship, enhID), worked out once by the caller.
+	   Stage 24: an `unscaled` officer costs his listed price at any size (a Breaching Expert serves in his one pod).
 	   ⚠️ MIRROR PAIR with Officers::flightPrice (PHP). */
 	flightCost: function flightCost(enhID, count, enhCost, size, extra, standard) {
 		var cost = Number(enhCost) || 0;
 		size = Number(size) || 1;
 		if (!this.isFighterOfficer(enhID)) return cost * size;
 		if ((parseInt(count, 10) || 0) < 1) return 0;
+		if (this.get(enhID).unscaled) return cost;
 		standard = Number(standard) || 6;
 		return Math.ceil(cost * size / standard) + (Number(extra) || 0) * size;
 	},
@@ -1335,9 +2442,11 @@ window.officers = {
 		if (!this.isFighterOfficer(enhancement[0])) return null;
 		var standard = this.standardFlight(ship);
 		var officer = this.get(enhancement[0]);
+		if (officer && officer.multi && officer.unscaled) return enhancement[4] + 'pts each, one per pod'; //Stage 27: each his own pod's price
 		if (officer && officer.multi) {
 			return enhancement[4] + 'pts each' + (standard > 1 ? ' per ' + standard + ' craft' : '') + ', one per craft';
 		}
+		if (officer && officer.unscaled) return enhancement[4] + 'pts, in one craft'; //Stage 24: the same at any flight size
 		var note = enhancement[4] + 'pts' + (standard > 1 ? ' per ' + standard + ' craft' : '');
 		var extra = this.perCraftExtra(ship, enhancement[0]);
 		if (extra > 0) note += ' + ' + extra + 'pts per craft';
@@ -1359,15 +2468,18 @@ window.officers = {
 	},
 
 	/* A ship field as a window should show it: iniativebonus, forwardDefense, sideDefense, toHitBonus, a
-	   flight's offensivebonus, and the Navigator's turncost, pivotcost, rollcost and accelcost. ⚠️ MIRROR
+	   flight's offensivebonus and (Stage 24) freethrust, and the Navigator's turncost, pivotcost, rollcost and accelcost. ⚠️ MIRROR
 	   PAIR with Officers::apply's stat changes (PHP) - enhancementsDifferential.js compares the two through
 	   this function. */
 	displayStat: function displayStat(ship, field) {
 		var value = Number(ship && ship[field]) || 0;
 		var serving = this.servingDerived(ship);
+		var counted = {}; //Stage 27: an officer whose stats count once however many serve (`statsOnce` - the Breaching Experts' thrust)
 		for (var i = 0; i < serving.length; i++) {
 			var officer = this.get(serving[i].id);
 			if (!officer) continue;
+			if (officer.statsOnce && counted[officer.id]) continue;
+			counted[officer.id] = true;
 			if (officer.stats && officer.stats[field]) value += officer.stats[field];
 			if (officer.adjust) value = this[officer.adjust](field, value);
 		}
@@ -1482,10 +2594,12 @@ window.officers = {
 	   cannot target that size, and stays so) when:
 	     - an Expert Gunner serves IN it - every mode;
 	     - otherwise, in a Matter mode, the C&C Matter Weapons Expert serves, or the weapon-mounted one serves in
-	       it; and, every mode, an Expert Turret Officer serves on its turret (Stage 22). A Gunner's +1 replaces the
-	       Matter expert's and the Turret Officer's on his own weapon (user rulings 2026-10-16, 2026-10-21), never adds.
+	       it; and, every mode, an Expert Turret Officer serves on its turret (Stage 22); and, every mode of every
+	       weapon but the ram and a jump drive, an Expert Warrior serves in the C&C (Stage 28). A Gunner's +1 replaces
+	       the Matter expert's, the Turret Officer's and the Warrior's on his own weapon (user rulings 2026-10-16,
+	       2026-10-21, 2026-10-23), never adds.
 	   Gunsights is already in system.fireControl (systemEnhancements.apply), so the two show stacked.
-	   ⚠️ MIRROR PAIR with Officers::applyGunner / applyMatterExpert / applyWeaponMatterExpert / applyTurretOfficer (PHP). */
+	   ⚠️ MIRROR PAIR with Officers::applyGunner / applyMatterExpert / applyWeaponMatterExpert / applyTurretOfficer / applyWarrior (PHP). */
 	displayFireControl: function displayFireControl(ship, system) {
 		var fc = system ? system.fireControl : null;
 		if (!Array.isArray(fc)) return fc;
@@ -1506,7 +2620,9 @@ window.officers = {
 		var turret = serving.some(function (entry) {
 			return entry.id === 'OFF_TURR' && self.turretKey(self.systemById(ship, entry.post)) === self.turretKey(system);
 		}) ? 1 : 0;
-		return turret + ((this.isMatterWeapon(system) && this.isMatterMode(system, system.firingMode)
+		var warrior = (!system.isRammingAttack && system.name !== 'jumpEngine'
+			&& serving.some(function (entry) { return entry.id === 'OFF_WARR'; })) ? 1 : 0;
+		return turret + warrior + ((this.isMatterWeapon(system) && this.isMatterMode(system, system.firingMode)
 			&& (on('OFF_MWEW') || serving.some(function (entry) { return entry.id === 'OFF_MWE'; }))) ? 1 : 0);
 	},
 
@@ -1910,7 +3026,9 @@ window.officers = {
 	   weapon's, with an Expert Ion Technician's +1 and thrust boost (ionDamageLine), and the Rad Cannon's Special text. Stage 20: an
 	   ELINT array's Special text, with an Expert ELINT Officer's ranges and blanket (elintSpecial) - to every viewer, in game too.
 	   Stage 21: a fighter's tail gun's "Tail Gun" line (tailGunLine). Stage 22: a turret-mounted weapon's "Turret Mount" line, under an
-	   Expert Turret Officer (turretMountLine), and his +1 in its fire control (displayFireControl). */
+	   Expert Turret Officer (turretMountLine), and his +1 in its fire control (displayFireControl). Stage 24: a pod's Marines' "Elite"
+	   line, under a Breaching Expert (marinesEliteLine). Stage 26: the Hyach Computer's BFCP line in the lobby, with an Expert Software
+	   Engineer's point (bfcpLine). */
 	DATA_KEY_FIRECONTROL: 'Fire control (fighter/med/cap)',
 	adjustDataDisplay: function adjustDataDisplay(ship, system, key, value) {
 		if (!system) return value;
@@ -1919,12 +3037,18 @@ window.officers = {
 			if (this.isLaserWeapon(system)) line = this.laserDamageLine(ship, system, line);
 			else if (this.isPlasmaWeapon(system)) line = this.plasmaDamageLine(ship, system, line);
 			else if (this.isIonWeapon(system)) line = this.ionDamageLine(ship, system, line);
-			return this.surgeDamageLine(ship, system, this.religiousDamageLine(ship, system, line));
+			return this.gravitonDamageLine(ship, system, this.surgeDamageLine(ship, system, this.religiousDamageLine(ship, system, line)));
 		}
 		if (system.name === 'RadCannon' && key === 'Special') return this.radCannonSpecial(ship, value);
 		if ((system.name === 'elintScanner' || system.name === 'chameleonSensors') && key === 'Special') return this.elintSpecial(ship, value);
 		if (system.tailGun && key === 'Tail Gun') return this.tailGunLine(ship, value);
+		if (key === 'Elite' && (system.name === 'Marines' || system.name === 'ExtraMarines')) return this.marinesEliteLine(ship, system, value);
 		if (key === 'Turret Mount') return this.turretMountLine(ship, system, value);
+		if (system.name === 'hyachComputer' && key === 'Bonus Fire Control Points (BFCP)') return this.bfcpLine(ship, system, value);
+		//Stage 29: an Expert Ballistic Officer's distance range (every viewer); in the lobby his magazine slots and a counted weapon's round
+		if (key === 'Range' && system.ballistic && system.name !== 'jumpEngine') return this.ballisticRangeLine(ship, system, value);
+		if (key === 'Ammunition') return this.ballisticAmmunitionLine(ship, system, value);
+		if (system.name === 'ammoMagazine' && key === 'Special') return this.ballisticMagazineSpecial(ship, value);
 		if (system.name === 'jumpEngine' && (key === 'Range' || key === 'Special')) {
 			var bonus = this.jumpRangeBonus(ship, system);
 			if (!bonus) return value;

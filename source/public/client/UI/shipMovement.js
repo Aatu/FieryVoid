@@ -24,6 +24,40 @@ window.UI = {
         //...and the space in px between it and the roll icon / jink + astern of it.
         minesweepGap: 12,
 
+        /* ⭐ THE CHARGE ICON (OFFICERS_PLAN.md Stage 28, an Expert Warrior's; user requests after play test 4509): the art - in the
+           movement icons' green until a unit is locked -, the colour it is painted in once one is (red; the turn arrows offering the
+           charge's snap turn and the crosshair on the unit charged wear it too - ShipIcon.setChargeMarked), how faint it is while a charge
+           may be declared but is not, the glow while it waits for the enemy unit to be clicked (pulsing - tactical.css) or holds one
+           (steady), the crosshair laid over the art once it holds one, and how see-through the crosshair on the unit charged is (0
+           invisible - 1 solid). Change them here. */
+        chargeIcon: "img/chargeIcon.png",
+        chargeColour: "#e8432e",
+        chargeOffOpacity: 0.85,
+        chargeGlowColour: "#ffb347",
+        chargeReticleColour: "#fff4dc",
+        chargeTargetOpacity: 0.6,
+        //...and fainter once the run has begun, when it can no longer be taken back
+        chargeLockedOpacity: 0.75,
+
+        /* ⭐ THE GRAVITIC ROTATE ICON (OFFICERS_PLAN.md Stage 31, an Expert Graviton Controller's gravitic drive rotation): the art - in the gravitic
+           turn arrows' yellow -, how faint it is while the rotation may be made (a click rolls the die), and the glow it wears once the drive
+           has been rotated this turn (when it is no longer clickable). Change them here. */
+        gravRotateIcon: "img/rotateIcon.png",
+        gravRotateReadyOpacity: 0.85,
+        gravRotateGlowColour: "#f2d27a",
+
+        /* ⭐ THE REDLINE ICON (OFFICERS_PLAN.md Stage 32, a Redline Pilot's afterburners): the art (the user's), how far astern of the flight's
+           centre it stands in px (before the jink stack - user, play test 4515), how faint it is while the flight may burn, the glow it wears while
+           burning, how it looks on the turn after, while the engines cool (not clickable), and the red the pivot arrows wear in the Firing phase
+           while a pivot would be his, made without the thrust (pivotArrowTint - the Charge's snap-turn red). Change them here. */
+        redlineIcon: "img/redlineIcon.png",
+        redlineFlightDistance: 61,
+        redlineReadyOpacity: 0.85,
+        redlineGlowColour: "#ff7a1a",
+        redlineCoolingOpacity: 0.8,
+        redlineCoolingFilter: "grayscale(1) brightness(1.5)",
+        redlinePivotColour: "#e8432e",
+
         iniated: false,
         moveElement: null,
         turnleftElement: null,
@@ -94,6 +128,9 @@ window.UI = {
             UI.shipMovement.minesweepElement = $("#minesweep", ui);
 
             UI.shipMovement.halfphaseElement = $("#halfphase", ui);
+            UI.shipMovement.chargeElement = $("#charge", ui);
+            UI.shipMovement.gravRotateElement = $("#gravRotate", ui);
+            UI.shipMovement.redlineElement = $("#redline", ui);
 
             UI.shipMovement.contractionElement = $("#contraction", ui);
             UI.shipMovement.morecontractionElement = $("#morecontraction", ui);
@@ -135,6 +172,9 @@ window.UI = {
             UI.shipMovement.evadeElement.on("click touchstart", UI.shipMovement.evadeCallback);
 
             UI.shipMovement.halfphaseElement.on("click touchstart", UI.shipMovement.halfphaseCallback);
+            UI.shipMovement.chargeElement.on("click touchstart", UI.shipMovement.chargeCallback);
+            UI.shipMovement.gravRotateElement.on("click touchstart", UI.shipMovement.gravRotateCallback);
+            UI.shipMovement.redlineElement.on("click touchstart", UI.shipMovement.redlineCallback);
 
             UI.shipMovement.morecontractionElement.on("click touchstart", UI.shipMovement.morecontractionCallback);
             UI.shipMovement.lesscontractionElement.on("click touchstart", UI.shipMovement.lesscontractionCallback);
@@ -206,6 +246,24 @@ window.UI = {
 
         halfphaseCallback: function halfphaseCallback(e) {
             UI.shipMovement.callbackHandler.halfphaseCallback(e);
+        },
+
+        chargeCallback: function chargeCallback(e) {
+            //A tap can arrive as touchstart AND click: one toggle, not two that cancel out.
+            if (UI.shipMovement.checkUITimeout()) return false;
+            UI.shipMovement.callbackHandler.chargeCallback(e);
+        },
+
+        gravRotateCallback: function gravRotateCallback(e) {
+            //A tap can arrive as touchstart AND click: one roll asked for, not two (the server would answer the second with the first anyway).
+            if (UI.shipMovement.checkUITimeout()) return false;
+            UI.shipMovement.callbackHandler.gravRotateCallback(e);
+        },
+
+        redlineCallback: function redlineCallback(e) {
+            //A tap can arrive as touchstart AND click: one toggle, not two that cancel out.
+            if (UI.shipMovement.checkUITimeout()) return false;
+            UI.shipMovement.callbackHandler.redlineCallback(e);
         },
 
         morecontractionCallback: function morecontractionCallback(e) {
@@ -420,10 +478,12 @@ window.UI = {
                 completeExtendSide = shipManager.movement.getOwedExtendedTurn(ship).type === 'extendTurnRight';
             }
 
-            //TURN LEFT
+            //TURN LEFT - in the Charge red while it is an Expert Warrior's charge snap turn (turnArrowTint)
+            var chargeSnap = shipManager.movement.isChargeSnap(ship);
             var turnleft = UI.shipMovement.turnleftElement;
             if (shipManager.movement.canTurn(ship, false)) {
-                UI.shipMovement.drawUIElement(turnleft, pos.x, pos.y, s, dis * 1.4, angle, "img/turnleft.png", "turnleftcanvas", shipHeading);
+                UI.shipMovement.drawUIElement(turnleft, pos.x, pos.y, s, dis * 1.4, angle, "img/turnleft.png", "turnleftcanvas", shipHeading, undefined,
+                    UI.shipMovement.turnArrowTint(turnleft, chargeSnap, "Turn Left"));
             } else {
                 turnleft.hide();
             }
@@ -463,7 +523,8 @@ window.UI = {
             //TURN RIGHT
             var turnright = UI.shipMovement.turnrightElement;
             if (shipManager.movement.canTurn(ship, true)) {
-                UI.shipMovement.drawUIElement(turnright, pos.x, pos.y, s, dis * 1.4, angle, "img/turnright.png", "turnrightcanvas", shipHeading);
+                UI.shipMovement.drawUIElement(turnright, pos.x, pos.y, s, dis * 1.4, angle, "img/turnright.png", "turnrightcanvas", shipHeading, undefined,
+                    UI.shipMovement.turnArrowTint(turnright, chargeSnap, "Turn Right"));
             } else {
                 turnright.hide();
             }
@@ -498,6 +559,9 @@ window.UI = {
             }   
 
             dis = 60;
+
+            //A Redline Pilot's combat pivot without the thrust (OFFICERS_PLAN.md Stage 32): both pivot arrows in the Redline red (pivotArrowTint)
+            var redlinePivot = shipManager.movement.isRedlinePivotNext(ship);
 
             //PIVOT LEFT
             angle = mathlib.addToDirection(shipHeading, -90);
@@ -535,7 +599,9 @@ window.UI = {
                         angle,
                         "img/pivotleft.png",
                         "pivotleftcanvas",
-                        shipHeading
+                        shipHeading,
+                        undefined,
+                        UI.shipMovement.pivotArrowTint(pivotleft, redlinePivot, "Pivot Left")
                     );
                     pivotleft.show();
                 }
@@ -580,7 +646,9 @@ window.UI = {
                         angle,
                         "img/pivotright.png",
                         "pivotrightcanvas",
-                        shipHeading
+                        shipHeading,
+                        undefined,
+                        UI.shipMovement.pivotArrowTint(pivotright, redlinePivot, "Pivot Right")
                     );
                     pivotright.show();
                 }
@@ -622,6 +690,13 @@ window.UI = {
                40 is its hit box: the roll icon's centre moves out by that, and a flight's jink + by
                just enough to clear it, since that stack already starts further out - each plus
                minesweepGap. (dis is in units of 1/1.4 px.) */
+            /* AFTERBURNERS (OFFICERS_PLAN.md Stage 32) - a Redline Pilot's flight: astern, between the flight and its jink stack, redlineFlightDistance
+               px out (user, play test 4515); a Minesweeping Mode icon steps back behind it, and the stack behind that one. */
+            var redlineAt = UI.shipMovement.redlineFlightDistance;
+            if (UI.shipMovement.drawRedlineIcon(ship, pos, redlineAt, angle) && window.mineSweep && mineSweep.getModeState(ship)) {
+                dis = Math.max(dis, (redlineAt + 40 + UI.shipMovement.minesweepGap) / 1.4); //both hit boxes are 40
+            }
+
             if (UI.shipMovement.drawMinesweepIcon(ship, pos, dis * 1.4, angle)) {
                 var gap = UI.shipMovement.minesweepGap / 1.4;
                 dis += ship.flight ? 10 + gap : 40 / 1.4 + gap;
@@ -723,6 +798,11 @@ window.UI = {
                 cancel.hide();
             }
 
+            //CHARGE - an Expert Warrior's (OFFICERS_PLAN.md Stage 28), in the Contraction / Half-Phase spot, which no Drazi ship uses
+            UI.shipMovement.drawChargeIcon(ship, pos, angle);
+            //ROTATE - an Expert Graviton Controller's (OFFICERS_PLAN.md Stage 31), in the same spot: only Drazi carry a Warrior, and no Drazi hull a gravitic drive
+            UI.shipMovement.drawGravRotateIcon(ship, pos, angle);
+
             //CONTRACTION
             var contraction = UI.shipMovement.contractionElement;
             if (shipManager.movement.canContract(ship, 0)) {
@@ -823,6 +903,150 @@ window.UI = {
             return true;
         },
 
+        /* The Charge icon (OFFICERS_PLAN.md Stage 28) for an Expert Warrior's ship, in shipManager.movement.getChargeState's state: green and
+           faint while a charge may be declared, pulsing while it waits for an enemy to be clicked, red, crosshaired and glowing once declared
+           (its label names the unit), a little fainter once the run has begun. The art points the way the ship moves, so it turns with the
+           movement UI. */
+        drawChargeIcon: function drawChargeIcon(ship, pos, angle) {
+            var icon = UI.shipMovement.chargeElement;
+            var state = shipManager.movement.getChargeState(ship);
+            if (!state) {
+                icon.hide();
+                return false;
+            }
+            var row = shipManager.movement.getChargeRow(ship);
+            var target = row ? gamedata.getShip(row.value) : null;
+            var name = target ? target.name : "the unit charged";
+            var labels = {
+                off: "Charge - click here, then the enemy unit to charge",
+                picking: "Charge - click the enemy unit to charge (click here to stop)",
+                on: "Charging " + name + " (click here to cancel)",
+                locked: "Charging " + name
+            };
+            //Both: moveTooltip reads the label with .data(), which caches the attribute on its first read.
+            icon.attr("data-movement-type", labels[state]).data("movement-type", labels[state]);
+            if (icon.is(":hover")) $("#movetooltip .movementType").text(labels[state]);
+            icon.css({
+                opacity: state === 'off' ? UI.shipMovement.chargeOffOpacity : (state === 'locked' ? UI.shipMovement.chargeLockedOpacity : 1),
+                cursor: state === 'locked' ? "default" : "pointer"
+            });
+            var held = state === 'on' || state === 'locked';
+            var glow = UI.shipMovement.chargeGlowColour;
+            var canvas = $("#chargecanvas");
+            canvas.css("--charge-glow", glow).toggleClass("charge-picking", state === 'picking');
+            canvas.css("filter", held ? "drop-shadow(0 0 3px " + glow + ") drop-shadow(0 0 2px " + glow + ")" : "none");
+            UI.shipMovement.drawUIElement(icon, pos.x, pos.y, 34, 30 * 1.4, angle, UI.shipMovement.chargeIcon, "chargecanvas", 0, 40,
+                held ? UI.shipMovement.chargeColour : null, held ? UI.shipMovement.drawChargeReticle : null);
+            return true;
+        },
+
+        /* The Gravitic Rotate icon (OFFICERS_PLAN.md Stage 31) for an Expert Graviton Controller's ship, in shipManager.movement.getGravRotateState's state:
+           faint while the drive may be rotated - a click asks the server to roll the die -, glowing once it has been this turn (its label says
+           the die; the rotation and every move before it are locked). */
+        drawGravRotateIcon: function drawGravRotateIcon(ship, pos, angle) {
+            var icon = UI.shipMovement.gravRotateElement;
+            var state = shipManager.movement.getGravRotateState(ship);
+            if (!state) {
+                icon.hide();
+                return false;
+            }
+            var row = shipManager.movement.getGravRotateRow(ship);
+            var labels = {
+                ready: "Rotate Gravitic Drive - once per battle: a d6 picks the new facing, and this turn's fire is at -15%",
+                done: "Gravitic drive rotated (the die rolled " + (row ? row.value : "?") + ") - fire at -15% this turn"
+            };
+            //Both: moveTooltip reads the label with .data(), which caches the attribute on its first read.
+            icon.attr("data-movement-type", labels[state]).data("movement-type", labels[state]);
+            if (icon.is(":hover")) $("#movetooltip .movementType").text(labels[state]);
+            icon.css({
+                opacity: state === 'ready' ? UI.shipMovement.gravRotateReadyOpacity : 1,
+                cursor: state === 'ready' ? "pointer" : "default"
+            });
+            var glow = UI.shipMovement.gravRotateGlowColour;
+            $("#gravRotatecanvas").css("filter", state === 'done' ? "drop-shadow(0 0 3px " + glow + ") drop-shadow(0 0 2px " + glow + ")" : "none");
+            UI.shipMovement.drawUIElement(icon, pos.x, pos.y, 34, 30 * 1.4, angle, UI.shipMovement.gravRotateIcon, "gravRotatecanvas", 0, 40);
+            return true;
+        },
+
+        /* The Redline icon (OFFICERS_PLAN.md Stage 32) for a Redline Pilot's flight, `dis` px astern, in shipManager.movement.getRedlineState's state:
+           faint while it may burn (its first order of the turn), glowing while it burns (a click takes it back while it is still the last order), and
+           grey on the turn after, while the engines cool - its label then says why the flight cannot manoeuvre. Returns whether it was drawn. */
+        drawRedlineIcon: function drawRedlineIcon(ship, pos, dis, angle) {
+            var icon = UI.shipMovement.redlineElement;
+            var state = shipManager.movement.getRedlineState(ship);
+            if (!state) {
+                icon.hide();
+                return false;
+            }
+            var bonus = window.officers ? officers.redlineThrustBonus(ship) : 0;
+            var labels = {
+                ready: "Afterburners - +50% thrust, no manoeuvres next turn",
+                on: "Afterburners: +" + bonus + " thrust this turn",
+                locked: "Afterburners: +" + bonus + " thrust this turn",
+                cooling: "Engines cooling after the afterburners"
+            };
+            //Both: moveTooltip reads the label with .data(), which caches the attribute on its first read.
+            icon.attr("data-movement-type", labels[state]).data("movement-type", labels[state]);
+            if (icon.is(":hover")) $("#movetooltip .movementType").text(labels[state]);
+            var opacities = { ready: UI.shipMovement.redlineReadyOpacity, cooling: UI.shipMovement.redlineCoolingOpacity };
+            icon.css({
+                opacity: opacities[state] || 1,
+                cursor: state === 'ready' || state === 'on' ? "pointer" : "default"
+            });
+            var glow = UI.shipMovement.redlineGlowColour;
+            var burning = state === 'on' || state === 'locked';
+            $("#redlinecanvas").css("filter", burning ? "drop-shadow(0 0 3px " + glow + ") drop-shadow(0 0 2px " + glow + ")"
+                : (state === 'cooling' ? UI.shipMovement.redlineCoolingFilter : "none"));
+            UI.shipMovement.drawUIElement(icon, pos.x, pos.y, 34, dis, angle, UI.shipMovement.redlineIcon, "redlinecanvas", 0, 40);
+            return true;
+        },
+
+        /* A pivot arrow's label, and its tint for drawUIElement: in the Firing phase, while a Redline Pilot's flight lacks the thrust for a combat pivot
+           (OFFICERS_PLAN.md Stage 32, shipManager.movement.isRedlinePivotNext) it reads "... (Redline: ...)" with what that costs and is drawn in
+           the Redline red - the Charge's snap-turn arrows' way (turnArrowTint; user, play test 4515); otherwise as ever. */
+        pivotArrowTint: function pivotArrowTint(element, redline, plain) {
+            var label = redline ? plain + " (Redline: without the thrust - this turn's fire at -15%)" : plain;
+            //Both: moveTooltip reads the label with .data(), which caches the attribute on its first read.
+            element.attr("data-movement-type", label).data("movement-type", label);
+            if (element.is(":hover")) $("#movetooltip .movementType").text(label);
+            return redline ? UI.shipMovement.redlinePivotColour : undefined;
+        },
+
+        /* A turn arrow's label, and its tint for drawUIElement: while its turn would be an Expert Warrior's charge snap turn (OFFICERS_PLAN.md
+           Stage 28, shipManager.movement.isChargeSnap) it reads "Snap Turn ... (Charge)" and is drawn in the Charge red; otherwise as ever. */
+        turnArrowTint: function turnArrowTint(element, snap, plain) {
+            var label = snap ? "Snap " + plain + " (Charge)" : plain;
+            //Both: moveTooltip reads the label with .data(), which caches the attribute on its first read.
+            element.attr("data-movement-type", label).data("movement-type", label);
+            if (element.is(":hover")) $("#movetooltip .movementType").text(label);
+            return snap ? UI.shipMovement.chargeColour : undefined;
+        },
+
+        //The crosshair over the Charge icon's art once it holds a unit: a ring, four ticks across it and a centre dot, dark-edged so it reads over the red.
+        drawChargeReticle: function drawChargeReticle(canvas, box) {
+            var c = box / 2;
+            var r = box * 0.28;
+            var tick = box * 0.11;
+            canvas.save();
+            canvas.lineCap = "round";
+            [["rgba(0, 0, 0, 0.8)", 4], [UI.shipMovement.chargeReticleColour, 2]].forEach(function (pass) {
+                canvas.strokeStyle = pass[0];
+                canvas.lineWidth = pass[1];
+                canvas.beginPath();
+                canvas.arc(c, c, r, 0, Math.PI * 2);
+                [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) {
+                    canvas.moveTo(c + d[0] * (r - tick), c + d[1] * (r - tick));
+                    canvas.lineTo(c + d[0] * (r + tick), c + d[1] * (r + tick));
+                });
+                canvas.stroke();
+                canvas.fillStyle = pass[0];
+                canvas.beginPath();
+                canvas.arc(c, c, pass[1] === 4 ? 2.5 : 1.5, 0, Math.PI * 2);
+                canvas.fill();
+            });
+            canvas.restore();
+        },
+
         reposition: function reposition(position, heading) {
             var element = UI.shipMovement.uiElement;
 
@@ -853,7 +1077,8 @@ window.UI = {
         // icon is centred in the larger box rather than sitting in its corner.
         // tint (optional): a CSS colour the drawn art is painted in, keeping its shape and
         // its own transparency (the extended-turn arrows; see extendedTurnColour).
-        drawUIimage: function drawUIimage(canvas, path, s, angle, box, tint) {
+        // after (optional): function (canvas, box) drawing over the finished art (the Charge icon's crosshair).
+        drawUIimage: function drawUIimage(canvas, path, s, angle, box, tint, after) {
             var img = new Image();
             img.src = path;
 
@@ -867,10 +1092,11 @@ window.UI = {
                     canvas.fillRect(0, 0, canvas.canvas.width, canvas.canvas.height);
                     canvas.restore();
                 }
+                if (after) after(canvas, box);
             });
         },
 
-        drawUIElement: function drawUIElement(e, x, y, s, dis, angle, path, canvasid, shipHeading, hit, tint) {
+        drawUIElement: function drawUIElement(e, x, y, s, dis, angle, path, canvasid, shipHeading, hit, tint, after) {
             var box = hit || s;
             var UIpos = mathlib.getPointInDirection(dis, -angle, x, y);
             e.css("top", UIpos.y - y - box * 0.5 + "px").css("left", UIpos.x - x - box * 0.5 + "px");
@@ -879,7 +1105,7 @@ window.UI = {
             //$("#"+canvaid).css("top", "px").css("left", "px");
 
             var canvas = window.graphics.getCanvas(canvasid);
-            UI.shipMovement.drawUIimage(canvas, path, s, shipHeading, box, tint);
+            UI.shipMovement.drawUIimage(canvas, path, s, shipHeading, box, tint, after);
         },
 
         hide: function hide() {

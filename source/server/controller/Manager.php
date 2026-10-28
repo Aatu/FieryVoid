@@ -1243,6 +1243,16 @@ class Manager{
                 // Add enhancements
                 Enhancements::setEnhancementOptions($ship);
                 $shipEnh = $enhancementsByShip[$ship->id] ?? [];
+                /* OFFICERS_PLAN.md Stage 25: what one officer row costs can depend on the OTHERS - the expert an Expert Political
+                   Officer brings is free (Officers::freeExpertId) - so every saved officer count goes onto the unit before any row
+                   is re-priced below, which writes the same counts again. */
+                foreach ($shipEnh as $enhEntry) {
+                    if ((int)$enhEntry[1] < 1 || !Officers::isOfficerId($enhEntry[0])) continue;
+                    foreach ($ship->enhancementOptions as &$option) {
+                        if ($option[0] === $enhEntry[0]) $option[2] = $enhEntry[1];
+                    }
+                    unset($option);
+                }
                 foreach ($shipEnh as $enhEntry) {
                     $enhID       = $enhEntry[0];
                     $numberTaken = $enhEntry[1];
@@ -2008,6 +2018,96 @@ class Manager{
         }
 
         return array("final" => count($finalHexes), "found" => MineSweep::describeFound($context, $foundHere));
+    }
+
+    /* ======================================================================================
+       AN EXPERT GRAVITON CONTROLLER'S ROTATION (OFFICERS_PLAN.md Stage 31) - gravRotate.php.
+
+       The player clicked the Rotate icon of a unit moving now. The client posts this turn's plotted
+       rows; the server checks what sweepMines checks (the game, the phase, the unit, its owner, no
+       commit yet, the player's commit lock), then loads the game and lets Officers::rotateGravitic
+       roll the d6 - "completely uncontrollable", so never the client's - and LOCK the rows up to the
+       new `rotate` row (MoveLock). Asked again on the same turn, the stored lock is the answer.
+
+       Reply: {"rows": [...], "die": n} - this turn's rows up to and including the rotation, which the
+       client puts in place of its own - or {"error": ...}, with "stale" when the client should stop.
+       ====================================================================================== */
+    public static function rotateGraviticDrive($gameid, $userid, $turn, $shipid, $moves) {
+        $locked = false;
+        try {
+            if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($shipid))
+                throw new Exception("Omitting required data");
+            $gameid = (int)$gameid;
+            $userid = (int)$userid;
+            $turn = (int)$turn;
+            $shipid = (int)$shipid;
+            if ($gameid <= 0 || $userid <= 0 || $shipid <= 0)
+                throw new Exception("Omitting required data");
+
+            //The rows travel as a JSON STRING inside the body (sweepMines' T12) and are decoded as OBJECTS, so what is locked re-encodes as written.
+            if (!is_string($moves) || $moves === '' || strlen($moves) > MoveLock::MAX_BYTES)
+                return json_encode(array("error" => "The plotted movement is missing or too large."));
+            $rows = json_decode($moves);
+            if (!is_array($rows) || count($rows) > MoveLock::MAX_ROWS)
+                return json_encode(array("error" => "The plotted movement could not be read."));
+
+            self::initDBManager();
+
+            $game = self::$dbManager->getTacGame($gameid, $userid);
+            if (!$game || $game->status !== "ACTIVE" || (int)$game->turn !== $turn || (int)$game->phase !== 2)
+                return json_encode(array("error" => "The game has moved on since this move was plotted.", "stale" => true));
+            $active = is_array($game->activeship) ? $game->activeship : array($game->activeship);
+            if (!in_array($shipid, array_map('intval', $active), true))
+                return json_encode(array("error" => "This unit is not moving now.", "stale" => true));
+            if (self::$dbManager->getShipOwner($gameid, $shipid) !== $userid)
+                return json_encode(array("error" => "This unit is not yours.", "stale" => true));
+            if (self::$dbManager->isMovementAlreadySubmitted($gameid, $shipid, $turn))
+                return json_encode(array("error" => "This unit has already moved.", "stale" => true));
+
+            if (!self::$dbManager->getPlayerSubmitLock($gameid, $userid))
+                return json_encode(array("error" => "The server is busy with your orders. Try again."));
+            $locked = true;
+
+            self::$dbManager->startTransaction();
+            $gamedata = self::$dbManager->getTacGamedata($userid, $gameid);
+            $ship = $gamedata ? $gamedata->getShipById($shipid) : null;
+            $result = $ship ? Officers::rotateGravitic($ship, $gamedata, $rows, self::$dbManager) : "This unit is not in the game.";
+            self::$dbManager->endTransaction(false);
+
+            self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+            $locked = false;
+
+            if (is_string($result)) return json_encode(array("error" => $result));
+            return json_encode(array("rows" => $result['rows'], "die" => $result['die']));
+        } catch (Throwable $e) {
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
+            if ($locked && self::$dbManager !== null) self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+            $logid = Debug::error($e);
+            return json_encode(array("error" => "The rotation failed.", "code" => $e->getCode(), "logid" => $logid));
+        }
+    }
+
+    /* game.php's inline `window.fvMoveLocks` (MoveLock, OFFICERS_PLAN.md Stage 31): this player's locked units this turn, so a reload
+       mid-move puts their locked rows back - {"turn": T, "ships": {"<id>": [rows...]}} - or the literal 'null'. Movement only.
+       Script-safe text. ⚠️ NEVER THROWS, like getMineSweepJSON: a bad row costs the player the restore, never the game screen. */
+    public static function getMoveLocksJSON($gameid, $userid, $turn, $phase) {
+        try {
+            if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase)) return 'null';
+            if ((int)$gameid <= 0 || (int)$userid <= 0 || (int)$phase !== 2) return 'null';
+
+            self::initDBManager();
+            $ships = MoveLock::forTurn(self::$dbManager, (int)$gameid, (int)$turn, (int)$userid);
+            if (empty($ships)) return 'null';
+
+            $out = array();
+            foreach ($ships as $shipid => $rows) $out[(string)$shipid] = $rows;
+            $json = json_encode(array("turn" => (int)$turn, "ships" => (object)$out), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+
+            return ($json === false) ? 'null' : $json;
+        } catch (Throwable $e) {
+            Debug::error($e);
+            return 'null';
+        }
     }
 
     /* game.php's inline `window.fvMineSweep` (§1.4.6): this player's swept units this turn, so a
@@ -2805,6 +2905,11 @@ class Manager{
                carried raw: InitialOrdersGamePhase::process checks each against the loaded ship
                (Officers::saveTransfers) before writing it, and every other phase ignores the field. */
             $ship->setOfficerTransferClaims($value["officerTransfers"] ?? array());
+
+            /* FIGHTER_MISSIONS_PLAN.md §3.7 - the mission the player picked for a flight this turn, {m, k}. A CLAIM,
+               carried raw: InitialOrdersGamePhase::process checks it against the loaded flight (FighterMissions::
+               saveClaim) before writing it, and every other phase ignores the field. */
+            if ($ship instanceof FighterFlight) $ship->setFighterMissionClaim($value["fighterMission"] ?? null);
 
             $systems = $value["systems"] ?? [];
             foreach ($systems as $i => $system) {

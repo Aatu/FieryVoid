@@ -1273,6 +1273,8 @@ window.shipManager = {
     },
 
 
+    //⚠️ ESCORTING RETIRED 2026-10-22 for the Defensive Intercept mission (FIGHTER_MISSIONS_PLAN.md). This and
+    //listEscorting are kept for a revert; their one caller, ShipTooltip's "Escorting:" line, is commented out.
     isEscorting: function isEscorting(ship, target) {
         if (!ship.flight) return false;
         //var ships = shipManager.getShipsInSameHex(ship);

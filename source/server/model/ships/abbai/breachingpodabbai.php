@@ -23,7 +23,7 @@ class breachingpodabbai extends FighterFlight{
         $this->hangarRequired = 'Breaching Pods'; //for fleet check   
 		$this->unitSize = 1;        
         
-        $this->iniativebonus = 90;
+        $this->iniativebonus = 7 * 5;
         $this->populate();
         
 		$this->enhancementOptionsEnabled[] = 'ELT_MAR'; //To enable Elite Marines enhancement

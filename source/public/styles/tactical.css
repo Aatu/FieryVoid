@@ -134,6 +134,18 @@ body {
     position: relative;
 }
 
+/* An Expert Warrior's Charge icon while it waits for the enemy unit to be clicked (OFFICERS_PLAN.md Stage 28): its glow pulses.
+   UI/shipMovement.js drawChargeIcon sets the class and --charge-glow (its chargeGlowColour knob); an animation outranks the
+   inline filter it sets. Kept within the icon's box - #shipMovementUI div clips its overflow. */
+#chargecanvas.charge-picking {
+    animation: fvChargePicking 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes fvChargePicking {
+    from { filter: drop-shadow(0 0 1px var(--charge-glow, #ffb347)); }
+    to { filter: drop-shadow(0 0 3px var(--charge-glow, #ffb347)) drop-shadow(0 0 2px var(--charge-glow, #ffb347)); }
+}
+
 /* The hover label over a movement icon ("Turn Right", "Stop Pivoting", ...), built by
    UI/moveTooltip.js and appended to <body>. EXTENDED_TURNS_PLAN.md §4.6: it used to be styled
    twice over in inline styles that disagreed (a #2c3e50 16px-bold template that .css() then
@@ -697,6 +709,21 @@ body {
     line-height: 1.35;
     text-align: center;
     z-index: 10000;
+    pointer-events: none;
+}
+
+/* A Redline Pilot's afterburner clip (OFFICERS_PLAN.md Stage 32, officers.playRedlineClip): centred under the passive notice above, click-through
+   like it; officers.playRedlineClip sets its top and fades it in and out. */
+.redlineClip {
+    display: none;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(500px, calc(100vw - 32px));
+    height: auto;
+    border-radius: 7px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+    z-index: 9999;
     pointer-events: none;
 }
 

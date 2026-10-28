@@ -65,6 +65,8 @@ window.ShipIcon = function () {
         //each poll and leak the old mesh while a duplicate was drawn over it.
         this.declaredAreas = new Map();
         this.NotMovedSprite = null;
+        //The crosshair on a unit an Expert Warrior's charge names (setChargeMarked) - built on first use, as most units never wear it.
+        this.chargeMarkSprite = null;
 
         this.selected = false;
         /* A JUMP VORTEX SITS A PLANE BELOW EVEN THE OTHER TERRAIN (user request 2026-08-23).
@@ -115,6 +117,50 @@ window.ShipIcon = function () {
        is ORTHOGRAPHIC (webglScene, near/far +/-1000) - z here buys draw order only, with no
        parallax shift and no change of size. */
     ShipIcon.INI_BADGE_Z = 120;
+
+    /* THE CHARGE CROSSHAIR (OFFICERS_PLAN.md Stage 28; user request after play test 4509), laid over the unit an Expert Warrior's charge
+       names while his ship is the selected one (PhaseStrategy.syncChargeMarker). It frames the hull - SCALE of the unit's canvasSize (the
+       hull art is half of it; the ring is 72% of the sprite), but never less than MIN_HEX of a hex height, or a fighter flight's would
+       vanish inside its own art.
+       z 115: clear of the +100 a moving or selected unit in the same hex is lifted by, under the movement-group badge (120) it may share a
+       hull with. It rides its own icon's lifts on purpose - a mark ON the unit, as that badge is. The colour is the Charge icon's
+       (UI.shipMovement.chargeColour), and so is the knob for how see-through it is (UI.shipMovement.chargeTargetOpacity, user request). */
+    ShipIcon.CHARGE_MARK_SCALE = 0.85;
+    ShipIcon.CHARGE_MARK_MIN_HEX = 0.9;
+    ShipIcon.CHARGE_MARK_Z = 115;
+    var chargeMarkTexture = null; //one for every icon, built on first use
+
+    function getChargeMarkTexture() {
+        if (chargeMarkTexture) return chargeMarkTexture;
+        var S = 256;
+        var colour = (window.UI && UI.shipMovement && UI.shipMovement.chargeColour) || "#e8432e";
+        var canvas = window.AbstractCanvas.create(S, S);
+        var context = canvas.getContext("2d");
+        var c = S / 2;
+        var r = S * 0.36;
+        var tick = S * 0.1;
+        context.lineCap = "round";
+        //a dark halo under the colour, so it reads over bright hull art and black space alike; the centre stays open over the hull
+        [["rgba(0, 0, 0, 0.6)", S * 0.065], [colour, S * 0.032]].forEach(function (pass) {
+            context.strokeStyle = pass[0];
+            context.lineWidth = pass[1];
+            context.beginPath();
+            context.arc(c, c, r, 0, Math.PI * 2);
+            [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) {
+                context.moveTo(c + d[0] * (r - tick), c + d[1] * (r - tick));
+                context.lineTo(c + d[0] * (r + tick), c + d[1] * (r + tick));
+            });
+            context.stroke();
+        });
+        var tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.generateMipmaps = true;
+        tex.minFilter = THREE.LinearMipmapLinearFilter;
+        tex.magFilter = THREE.LinearFilter;
+        tex.needsUpdate = true;
+        chargeMarkTexture = tex;
+        return tex;
+    }
 
     /* Is this unit a jump vortex? Delegates to the ONE place that holds the class names
        (shipManager.movement) rather than repeating them here - the same discipline
@@ -396,6 +442,28 @@ window.ShipIcon = function () {
         if (this.iniOrderSprite) {
             this.iniOrderSprite.setZoom(zoom);
         }
+    };
+
+    /* Put the charge crosshair on this unit, or take it off (ShipIcon.CHARGE_MARK_*). Driven ONLY from PhaseStrategy.syncChargeMarker,
+       which knows the selected ship. Returns whether anything changed, so the caller knows to kick a render. */
+    ShipIcon.prototype.setChargeMarked = function (value) {
+        if (!this.chargeMarkSprite) {
+            if (!value) return false;
+            var size = Math.max(window.HexagonMath.getHexHeight() * ShipIcon.CHARGE_MARK_MIN_HEX, this.size * ShipIcon.CHARGE_MARK_SCALE);
+            this.chargeMarkSprite = new window.webglSprite(null, { width: size, height: size }, ShipIcon.CHARGE_MARK_Z).hide();
+            this.chargeMarkSprite.uniforms.spriteTexture.value = getChargeMarkTexture();
+            this.mesh.add(this.chargeMarkSprite.mesh);
+        }
+        if (this.chargeMarkSprite.mesh.visible === Boolean(value)) return false;
+        if (value) {
+            //read each time it is put on, so a changed knob shows at the next mark
+            var opacity = Number(window.UI && UI.shipMovement ? UI.shipMovement.chargeTargetOpacity : NaN);
+            this.chargeMarkSprite.setOpacity(isFinite(opacity) ? opacity : 0.6);
+            this.chargeMarkSprite.show();
+        } else {
+            this.chargeMarkSprite.hide();
+        }
+        return true;
     };
 
     // Selection/side circle args, matching getShipOverlayColor. 2-team
