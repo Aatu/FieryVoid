@@ -51,7 +51,7 @@ window.UI = {
            burning, how it looks on the turn after, while the engines cool (not clickable), and the red the pivot arrows wear in the Firing phase
            while a pivot would be his, made without the thrust (pivotArrowTint - the Charge's snap-turn red). Change them here. */
         redlineIcon: "img/redlineIcon.png",
-        redlineFlightDistance: 64,
+        redlineFlightDistance: 61,
         redlineReadyOpacity: 0.85,
         redlineGlowColour: "#ff7a1a",
         redlineCoolingOpacity: 0.8,

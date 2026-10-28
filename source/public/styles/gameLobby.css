@@ -365,7 +365,8 @@
    so it stays as dark under the buttons as any other taken slot. */
 .lb-slot.selected {
   background: color-mix(in srgb, var(--rail) 14%, #081420);
-  border-color: var(--rail);
+  border: 2px solid;  
+  border-color: var(--greenBorder);
 }
 
 .lb-slot span {
@@ -409,7 +410,7 @@
   margin-top: 2px;
   font-family: var(--fv-mono);
   font-size: 10.5px;
-  color: var(--fv-text-dim);
+    color: var(--fv-text-accent);
   overflow-wrap: anywhere;
 }
 

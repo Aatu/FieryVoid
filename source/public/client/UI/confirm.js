@@ -1125,6 +1125,9 @@ window.confirm = {
             + '<div class="buyDialogFoot">'
             + '<div class="buyDialogTotals">' + totals + '</div>'
             + '<div class="ui">'
+            //Bottom left (user, 2026-10-27 - it was a lobby link). docViewer.js opens the DATA ARCHIVE from
+            //data-fvdoc, OVER this dialog: nothing here closes, so the purchase carries on once it is shut.
+            + '<button type="button" class="buyDialogDocs" data-fvdoc="ammo" title="Ship Options: ammo, enhancements and officers">Ship Options</button>'
             + '<button type="button" class="confirmok">' + opts.okLabel + '</button>'
             + '<button type="button" class="confirmcancel">Cancel</button>'
             + '</div>'

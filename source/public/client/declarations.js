@@ -568,15 +568,18 @@ window.declarations = {
      rules read better as chips: a player wants to know at a glance WHICH of the optional
      rules are on, and a few short tags answer that in one scan.
      The chip list is one-sided by design, exactly as the old list was: only a rule that IS
-     in play gets a tag, and a rule that is off is simply absent. */
+     in play gets a tag, and a rule that is off is simply absent.
+     Each tag's `kind` is its colour, the lobby's Game Rules kinds (scenarioCard.ruleChips):
+     mines purple, reinforcements cyan, any other rule the page's blue. */
   callGameDescriptionActual: function callGameDescriptionActual() {
     var tags = [];
+    var add = function (kind, text) { tags.push({ kind: kind, text: text }); };
 
     //Preserved verbatim from the old version, including the quirk that the friendlyFire
     //branch is keyed on 'friendlyFire' being PRESENT rather than on its value.
-    if (gamedata.rules && 'friendlyFire' in gamedata.rules) tags.push('Friendly fire');
-    if (gamedata.rules && 'allowMines' in gamedata.rules) tags.push('Mines');
-    if (gamedata.rules && 'allowReinforcements' in gamedata.rules) tags.push('Reinforcements');
+    if (gamedata.rules && 'friendlyFire' in gamedata.rules) add('rule', 'Friendly fire');
+    if (gamedata.rules && 'allowMines' in gamedata.rules) add('mines', 'Mines');
+    if (gamedata.rules && 'allowReinforcements' in gamedata.rules) add('reinforcements', 'Reinforcements');
 
     //Desperate is the one rule with a SIDE to it, so it gets a worded tag of its own.
     var desperate = '';
@@ -588,7 +591,7 @@ window.declarations = {
         default: break;   //normal engagement - nothing worth a tag
       }
     }
-    if (desperate) tags.push(desperate);
+    if (desperate) add('rule', desperate);
 
     var html = '<div class="decl-briefing">';
     if (gamedata.name) {
@@ -599,7 +602,7 @@ window.declarations = {
       + '<span class="fv-decl-rules">Rules of engagement:</span>';
     if (tags.length) {
       for (var i = 0; i < tags.length; i++) {
-        html += '<span class="fv-tag fv-tag--rule">' + tags[i] + '</span>';
+        html += '<span class="fv-tag fv-tag--' + tags[i].kind + '">' + tags[i].text + '</span>';
       }
     } else {
       html += '<span class="fv-tag">Standard</span>';
