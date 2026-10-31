@@ -9,7 +9,7 @@ class VelraxGunboatRefit extends LCV{
         $this->phpclass = "VelraxGunboatRefit";
         $this->imagePath = "img/ships/Nexus/velraxArcGunboat.png";
 			$this->canvasSize = 70; //img has 200px per side
-        $this->shipClass = "Nashran Gunboat (2061)";
+        $this->shipClass = "Nashran Gunboat (2059)";
 			$this->variantOf = "Nashran Gunboat";
 			$this->occurence = "common";
 		$this->unofficial = true;
@@ -45,7 +45,7 @@ class VelraxGunboatRefit extends LCV{
 		$this->addPrimarySystem(new Engine(3, 15, 0, 6, 2));
 
 		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 240, 60));
-		$this->addFrontSystem(new EWPlasmaArc(2, 5, 4, 300, 60));
+		$this->addFrontSystem(new DualIonBolter(2, 4, 4, 300, 60));
 		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 300, 120));
 	    
         $this->addPrimarySystem(new Structure(3, 32));
@@ -53,7 +53,7 @@ class VelraxGunboatRefit extends LCV{
         $this->hitChart = array(
         		0=> array( 
         				10 => "Structure",
-        				13 => "1:Plasma Arc",
+        				13 => "1:Dual Ion Bolter",
         				15 => "1:Ion Gun",
 						17 => "0:Engine",
         				19 => "0:Reactor",
@@ -61,7 +61,7 @@ class VelraxGunboatRefit extends LCV{
         		),
         		1=> array( //redirect to PRIMARY
         				10 => "Structure",
-        				13 => "1:Plasma Arc",
+        				13 => "1:Dual Ion Bolter",
         				15 => "1:Ion Gun",
 						17 => "0:Engine",
         				19 => "0:Reactor",
@@ -69,7 +69,7 @@ class VelraxGunboatRefit extends LCV{
         		),
         		2=> array( //redirect to PRIMARY
         				10 => "Structure",
-        				13 => "1:Plasma Arc",
+        				13 => "1:Dual Ion Bolter",
         				15 => "1:Ion Gun",
 						17 => "0:Engine",
         				19 => "0:Reactor",

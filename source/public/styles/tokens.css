@@ -48,6 +48,7 @@
   --fv-panel: rgba(23, 39, 54, 0.92); /* base.css .panel — the site-wide page panel */
   --fv-chrome-scs: #152029de;         /* theme.colors.windowBg                   */
   --fv-overlay: black;                /* map tooltips + shadows                  */
+  --greenBorder: #2e7d32;    
 
   /* The SAME overlay, see-through as a FILL rather than via element `opacity`.
      Element opacity fades a surface's TEXT along with its panel, so the hover tooltips

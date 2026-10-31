@@ -2305,12 +2305,15 @@
     color: var(--fv-text);
     background: transparent;
     border: 0;
+    text-align: center;
+    text-align-last: center; /* Chrome/Edge align a closed select's text by this, not text-align */
 }
 
 /* The open list is drawn by the OS on a white background, so its text has to be dark. */
 .confirm.buyDialog .enhChoiceSelect option {
     color: #000;
     background: #fff;
+    text-align: center;
 }
 
 /* ── The foot: the total on a row of its own over the buttons, right-aligned (user, Stage 9) ── */
@@ -2374,7 +2377,8 @@
 }
 
 .confirm.buyDialog .ui .confirmok,
-.confirm.buyDialog .ui .confirmcancel {
+.confirm.buyDialog .ui .confirmcancel,
+.confirm.buyDialog .ui .buyDialogDocs {
     position: static;
     display: inline-flex;
     align-items: center;
@@ -2395,16 +2399,29 @@
     cursor: pointer;
 }
 
-.confirm.buyDialog .ui .confirmcancel {
+.confirm.buyDialog .ui .confirmcancel,
+.confirm.buyDialog .ui .buyDialogDocs {
     color: var(--fv-text-dim);
     background-color: transparent;
     border: 1px solid var(--fv-line-soft);
 }
 
-.confirm.buyDialog .ui .confirmcancel:hover {
+/* Ship Options: Cancel's quiet outline, pushed to the bottom left by the auto margin - the other two
+   stay where flex-end puts them. */
+.confirm.buyDialog .ui .buyDialogDocs {
+    margin-right: auto;
+    background: rgba(139, 202, 242, 0.14);
+    border: 1px solid rgba(139, 202, 242, 0.55);
+    border-radius: 2px; 
+    color: var(--fv-accent);         
+}
+
+.confirm.buyDialog .ui .confirmcancel:hover,
+.confirm.buyDialog .ui .buyDialogDocs:hover {
     color: var(--fv-text-bright);
     background-color: rgba(198, 226, 255, 0.08);
     border-color: var(--fv-accent);
+    background: rgba(139, 202, 242, 0.26);  
 }
 
 .confirm.buyDialog .ui .confirmok {
@@ -2425,7 +2442,7 @@
     outline-offset: -2px;
 }
 
-/* A phone: the window takes nearly the whole screen and the two buttons share the row. */
+/* A phone: the window takes nearly the whole screen and the three buttons share the row. */
 @media (max-width: 600px) {
     .confirm.buyDialog {
         width: calc(100vw - 16px);
@@ -2471,7 +2488,8 @@
     }
 
     .confirm.buyDialog .ui .confirmok,
-    .confirm.buyDialog .ui .confirmcancel {
+    .confirm.buyDialog .ui .confirmcancel,
+    .confirm.buyDialog .ui .buyDialogDocs {
         flex: 1 1 0;
         min-width: 0;
     }
@@ -2531,7 +2549,8 @@
     }
 
     .confirm.buyDialog .ui .confirmok,
-    .confirm.buyDialog .ui .confirmcancel {
-        min-height: 40px;
+    .confirm.buyDialog .ui .confirmcancel,
+    .confirm.buyDialog .ui .buyDialogDocs {
+        min-height: 40px;        
     }
 }

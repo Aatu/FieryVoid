@@ -581,6 +581,19 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                        Every price here is the SERVER's (D4) - the client's claim is discarded. */
                     $cleanSysEnh = Enhancements::sanitiseSystemEnhancements(
                         $ship, $ship->systemEnhancements ?? array(), $cleanPreBattle);
+                    /* OFFICERS_PLAN.md Stage 25: an Expert Political Officer's free expert and free Hardened Armour that the
+                       player left unchosen are picked at random HERE, once, as the fleet is committed - stored below as the rows
+                       they become (the ship-level row with the rest, the armour with $cleanSysEnh), free of charge. */
+                    /* Stage 30: an Expert Quartermaster's free refit, first - a random one when none of his six was bought, the second
+                       system of a half-bought one - so the Political Officer's armour below goes on the systems left. */
+                    $cleanSysEnh = Officers::placeQuartermasterPicks($ship, $cleanSysEnh, $cleanPreBattle);
+                    $cleanSysEnh = Officers::placePoliticalPicks($ship, $cleanSysEnh, $cleanPreBattle);
+                    /* OFFICERS_PLAN.md Stage 29: an Expert Ballistic Officer's free missiles left unpicked are rolled HERE, once, onto the
+                       unit's ammunition rows (free), and his extra round given to every weapon keeping its own count - written below as its
+                       turn-0 starting count. */
+                    Officers::placeBallisticPicks($ship, $cleanPreBattle);
+                    //Stage 30: an Expert Quartermaster's free missiles left unpicked, rolled after the Ballistic Officer's (his come first)
+                    Officers::placeQuartermasterMissiles($ship, $cleanPreBattle);
                     //Fold the authoritative total in BEFORE submitShip, which writes it into
                     //tac_ship.enhvalue alongside the other two buckets.
                     $ship->pointCostSysEnh = $cleanSysEnh['total'];

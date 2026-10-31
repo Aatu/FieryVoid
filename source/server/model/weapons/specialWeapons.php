@@ -2669,6 +2669,9 @@ $newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
 							$calledid = $fighter->id;
 						}
 					}			
+					//...but a Redline Pilot's own, whenever he flies with them: "must always be picked as the fighter destroyed" (OFFICERS_PLAN.md Stage 32)
+					$redline = Officers::redlineCrashCraft($shooter, $gamedata->turn);
+					if($redline) $calledid = $redline->id;
 				}
 		
 				//don’t repeat manual ramming order
@@ -2724,7 +2727,7 @@ $newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
         //Speed checks
         $targetSpeed = $target->getSpeed(); 
 		//Debug::log("before target speed check. Target Speed: " . $targetSpeed);			       
-        if($targetSpeed > 5) return 'Invalid';
+        if($targetSpeed > Officers::skinDanceSpeedLimit($shooter, $gamedata->turn)) return 'Invalid'; //5 - or 8 for a Redline Pilot's flight (OFFICERS_PLAN.md Stage 32)
         if($targetSpeed > 0){
 			$shooterLastMove = $shooter->getLastMovement();
 			$shooterHeading = $shooterLastMove->heading;
@@ -2743,6 +2746,7 @@ $newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
 		//Debug::log("roll " . $roll);			
 		$mod = 0;
 		if($shipSpeed > 5) $mod += ceil(($shipSpeed - 5)/2);
+		if($targetSpeed > Officers::SKIN_DANCE_SPEED) $mod += $targetSpeed - Officers::SKIN_DANCE_SPEED; //a Redline Pilot's flight over a unit faster than 5: +1 a point (Stage 32)
 		//Debug::log("speed mod " . $mod);			
 		if(Movement::isPivoting($shooter, $gamedata->turn) || Movement::isPivoting($target, $gamedata->turn)) $mod += 5; //Shooter or target is pivoting
 		//Debug::log("pivoting mod " . $mod);			
@@ -9587,10 +9591,16 @@ class Marines extends Weapon implements SpecialAbility{
 	}
 
 
+	/* Are these Marines Elite: the hull's or bought (eliteMarines), or - OFFICERS_PLAN.md Stage 24 - those of a pod a serving Breaching
+	   Expert is in (Officers::eliteMarines). Asked, never written into eliteMarines: its "Elite" tooltip line goes to every viewer. */
+	private function isElite($shooter, $gamedata){
+		if ($this->eliteMarines) return true;
+		return TacGamedata::$officersPresent && Officers::eliteMarines($shooter, $this, $gamedata->turn);
+	}
 
 	private function getDeliveryRollMod($shooter, $target, $gamedata, $fireOrder){
 		$rollMod = 0;
-		if($this->eliteMarines) $rollMod -= 1; //Elite Marines board more easily.
+		if($this->isElite($shooter, $gamedata)) $rollMod -= 1; //Elite Marines board more easily.
 
 		if($target->faction == "Narn Regime" || $target->faction == "Gaim Intelligence" || $target->faction == "Escalation Wars Sshel'ath Alliance")	$rollMod += 1; //Certain factions defend harder! 
 
@@ -9611,6 +9621,8 @@ class Marines extends Weapon implements SpecialAbility{
 			}
 		}
 		$rollMod += Officers::boardingShift($target); //An Expert Security Officer moves every boarding roll 2 in the defender's favour.
+		//An Expert Troop Leader in this pod, or aboard a ship counting it among his pods (OFFICERS_PLAN.md Stage 27)
+		if (TacGamedata::$officersPresent) $rollMod += Officers::troopDeliveryMod($shooter, $this, $gamedata);
 
         return $rollMod;
         		
@@ -9660,6 +9672,8 @@ class Marines extends Weapon implements SpecialAbility{
 		}
 
 		if($deliveryRoll <= 5){ //successful delivery, continue with applying critical effects.
+			$elite = $this->isElite($shooter, $gamedata); //Elite Marines, or a serving Breaching Expert's pod (OFFICERS_PLAN.md Stage 24)
+			$crit = null; //the party's critical, whichever mission made it
 
 
 
@@ -9669,9 +9683,11 @@ class Marines extends Weapon implements SpecialAbility{
 
 					$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt to capture enemy ship next turn.";			
 						if($cnc){
-								if($this->eliteMarines){//Are Marines Elite?
+								if($elite){//Are Marines Elite?
 									$crit = new CaptureShipElite(-1, $ship->id, $cnc->id, 'CaptureShipElite', $gamedata->turn+1); //Takes effect next turn.
 									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
+									//A Breaching Expert's capture party: three attacks on its first turn aboard (Officers::captureRolls), once per scenario
+									if(TacGamedata::$officersPresent && Officers::spendCaptureAssault($shooter, $this, $gamedata)) $crit->param[Officers::BREACH_PARTY_KEY] = 1;
 									$crit->updated = true;
 									$cnc->criticals[] =  $crit;
 									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
@@ -9690,7 +9706,7 @@ class Marines extends Weapon implements SpecialAbility{
 
 					if($fireOrder->calledid != -1 && !($system instanceof Structure) && $system->location != 0){//Is a called shot, and not somehow attacking structure, place crit on system.
 							$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt to sabotage " . $system->displayName ." system next turn.";
-						if($this->eliteMarines){//Are Marines Elite?
+						if($elite){//Are Marines Elite?
 							$crit = new SabotageElite(-1, $ship->id, $system->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
 							$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 							$crit->updated = true;
@@ -9706,7 +9722,7 @@ class Marines extends Weapon implements SpecialAbility{
 					}else{ //Has targeted ship generally, not a specific system (or somehow retargeted to structure).  Apply crit to CnC.
 						$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt sabotage operations on enemy ship next turn.";								
 							if($cnc){
-									if($this->eliteMarines){//Are Marines Elite?
+									if($elite){//Are Marines Elite?
 										$crit = new SabotageElite(-1, $ship->id, $cnc->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
 										$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 										$crit->updated = true;
@@ -9728,7 +9744,7 @@ class Marines extends Weapon implements SpecialAbility{
 
 					$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt their rescue mission next turn.";			
 						if($cnc){
-								if($this->eliteMarines){//Are Marines Elite?
+								if($elite){//Are Marines Elite?
 									$crit = new RescueMissionElite(-1, $ship->id, $cnc->id, 'RescueMissionElite', $gamedata->turn+1); //Takes effect next turn.
 									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 									$crit->updated = true;
@@ -9746,6 +9762,8 @@ class Marines extends Weapon implements SpecialAbility{
 					break;			
 				
 			}
+			//the pod it left, for an Expert Troop Leader's bonuses and escape roll on its missions (OFFICERS_PLAN.md Stage 27)
+			if($crit !== null && TacGamedata::$officersPresent) Officers::markTroopParty($crit, $shooter, $this, $gamedata);
 		}elseif($deliveryRoll >= 6 && $deliveryRoll <=8){//Unsuccessful delivery
 			$this->ammunition++;//Marines weren't eliminated, they just weren't delivered.  Give ammunition back to weapon.
 			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
@@ -9755,6 +9773,7 @@ class Marines extends Weapon implements SpecialAbility{
 		}else{//Roll result is 9 or over
 			$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit was eliminated whilst trying to board the enemy ship.";
 			Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.								
+			if(TacGamedata::$officersPresent) Officers::troopDeliveryLost($shooter, $this, $gamedata); //his pod's Expert Troop Leader's escape roll (Stage 27)
 			return;
 		}			
 	}//endof onDamagedSystem() 	

@@ -337,6 +337,9 @@ public function setParentFighter($fighter) {
             $strippedSystem->criticals = array_map(function($crit) {
                 $c = clone $crit;
                 if ($c->param === null || $c->param === '') unset($c->param);
+                //OFFICERS_PLAN.md Stage 24: which capture party a Breaching Expert sent is never sent (D4 - the officer stays hidden) - nor
+                //(Stage 27) the pod a party left, which only an Expert Troop Leader's rules read
+                else if (is_array($c->param)) unset($c->param[Officers::BREACH_PARTY_KEY], $c->param[Officers::TROOP_PARTY_KEY]);
                 return $c;
             }, $this->criticals);
         }
@@ -532,7 +535,10 @@ public function setParentFighter($fighter) {
 	
 	public function criticalPhaseEffects($ship, $gamedata){
 	    	    
-	    if ($this->isDestroyed()) return; // no point if the system is actually destroyed already
+	    if ($this->isDestroyed()){ // no point if the system is actually destroyed already - but a Sabotage party aboard it has to go somewhere
+	    	$this->sabotageTargetsLost($ship, $gamedata);
+	    	return;
+	    }
 	    			
 	    foreach ($this->criticals as $critical) {
 	    	  	
@@ -549,39 +555,8 @@ public function setParentFighter($fighter) {
 				}else{//Not CnC, so marines have been targeted by Called Shot at a specific system.
 					if(!$this->isDestroyed()){//Only continue sabotage if system is not destroyed by other sabotages.
 						$this->doSabotageMission($critical, $ship, $gamedata);					
-					}else{//System has sabotage mission AND system is now destroyed.  Move to CnC for Wreak Havoc next turn.
-						//Create a fireOrder to update player essentially.					
-						$rammingSystem = $ship->getSystemByName("RammingAttack");
-						$newFireOrder = null;
-
-						if ($rammingSystem) { // actually exists! - it should on every ship!
-							$shotsHit = 1; //Marines always attempt their mission.
-									
-							$newFireOrder = new FireOrder(
-								-1, "normal", $ship->id, $ship->id,
-								$rammingSystem->id, -1, $gamedata->turn, 1,
-								100, 100, 1, $shotsHit, 0,
-								0, 0, 'Sabotage', 10000
-							);
-									
-							$newFireOrder->addToDB = true;
-							$rammingSystem->fireOrders[] = $newFireOrder;
-						}
-
-					$newFireOrder->pubnotes = "<br>SABOTAGE - Marine attempted to damage " . $this->displayName .", but it was already destroyed.  Sabotage operations continue.";	
-												
-						$cnc = $ship->getSystemByName("CnC");				
-						if($cnc){
-							if($critical->phpclass == "SabotageElite"){//Are Marines Elite?
-								$wreackCrit = new SabotageElite(-1, $ship->id, $cnc->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
-								$wreackCrit->updated = true;
-								$cnc->criticals[] =  $wreackCrit;					
-							}else{//Not Elite Marines					
-								$wreackCrit = new Sabotage(-1, $ship->id, $cnc->id, 'Sabotage', $gamedata->turn+1);  //Takes effect next turn.
-								$wreackCrit->updated = true;
-								$cnc->criticals[] =  $wreackCrit;
-							}	
-						}						
+					}else{//System has sabotage mission AND system is now destroyed (by another party this phase): back to a pod, else on to Wreak Havoc.
+						$this->sabotageTargetLost($critical, $ship, $gamedata);
 					}
 				}
 			}				
@@ -679,6 +654,7 @@ public function setParentFighter($fighter) {
 				}
 		}
 		$rollMod += Officers::boardingShift($ship); //An Expert Security Officer moves every boarding roll 2 in the defender's favour.
+		if (TacGamedata::$officersPresent) $rollMod += Officers::troopPartyRollMod($critical, $gamedata); //an Expert Troop Leader's pod, or his ship's (OFFICERS_PLAN.md Stage 27)
 		
 		//Capture Ship missions chances of getting 'caught' doesn't increase every two turns, they are in open battle from the start!
 		if(!($critical->phpclass == "CaptureShip" || $critical->phpclass == "CaptureShipElite") && $critical->turn <= $gamedata->turn){
@@ -898,6 +874,7 @@ public function setParentFighter($fighter) {
 
 			case ($wreakHavocRoll >= 9): //Eliminated
 				$this->endMarineMission($critical, $gamedata, $newFireOrder, "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines eliminated whilst attempting to sabotage enemy ship.");
+				if (TacGamedata::$officersPresent) Officers::troopPartyLost($critical, $gamedata, true); //no escape on Wreak Havoc (Stage 27)
 				break;
 		}
 	}
@@ -972,10 +949,46 @@ public function setParentFighter($fighter) {
 
 		if ($eliminated) {
 			$this->endMarineMission($critical, $gamedata);
+			if (TacGamedata::$officersPresent) Officers::troopPartyLost($critical, $gamedata); //his pod's Expert Troop Leader's escape roll (Stage 27)
 		}
 	}
 	
 		
+
+	/* A Sabotage party aboard a system that is already destroyed - by other fire before its roll, or by another party earlier this phase - has
+	   nothing left to sabotage (user request 2026-10-23, OFFICERS_PLAN.md §9.34): back to an attached pod that can take it (returnMarines - its own
+	   pod first, then its player's, then its team's), and only with none on to the C&C, Wreak Havoc from the next turn, its pod's info passed on - as
+	   doSabotageMission does when a party destroys its own target. Either way its sabotage critical ends here. A destroyed C&C's own Wreak Havoc
+	   parties are not this. */
+	public function sabotageTargetsLost($ship, $gamedata){
+		if ($this instanceof CnC) return;
+		foreach ($this->criticals as $critical){
+			if (($critical->phpclass == "Sabotage" || $critical->phpclass == "SabotageElite") && $critical->turn <= $gamedata->turn
+				&& ($critical->turnend == 0 || $critical->turnend > $gamedata->turn)) {
+				$this->sabotageTargetLost($critical, $ship, $gamedata);
+			}
+		}
+	}
+
+	public function sabotageTargetLost($critical, $ship, $gamedata){
+		$newFireOrder = $this->initMarineMission($critical, $ship, $gamedata, 'Sabotage');
+		if (!$newFireOrder) return; //the ship is captured already
+		$this->endMarineMission($critical, $gamedata);
+		$newFireOrder->pubnotes .= "<br>SABOTAGE - Marine attempted to damage " . $this->displayName . ", but it was already destroyed.";
+		if ($this->returnMarines($gamedata, $ship, $critical->param)) {
+			$newFireOrder->pubnotes .= " The marine unit returns to a friendly pod.";
+			return;
+		}
+		$cnc = $ship->getSystemByName("CnC");
+		if (!$cnc) return;
+		$critClass = ($critical->phpclass == "SabotageElite") ? 'SabotageElite' : 'Sabotage';
+		$wreackCrit = new $critClass(-1, $ship->id, $cnc->id, $critClass, $gamedata->turn+1); //Takes effect next turn.
+		$wreackCrit->param = $critical->param; // Pass on the pod info!
+		$wreackCrit->updated = true;
+		$cnc->criticals[] = $wreackCrit;
+		$newFireOrder->pubnotes .= " No pods available, the marine unit switches to Wreak Havoc.";
+	}
+
 
 	public function doCaptureMission($critical, $ship, $gamedata){ 
 		$rammingSystem = $ship->getSystemByName("RammingAttack");
@@ -1007,10 +1020,13 @@ public function setParentFighter($fighter) {
 		$attackerHits = 0;
 		foreach ($attackers as $attacker) {
 			$rollMod = $this->getMarineRollMod($attacker, $ship, $gamedata);
-			$roll = Dice::d(10);
-			$modifiedRoll = $roll + $rollMod;
-			if ($modifiedRoll <= 5) {
-				$attackerHits++;
+			//A Breaching Expert's capture party attacks three times on its first turn aboard - still one attacker to the defenders (OFFICERS_PLAN.md Stage 24)
+			for ($attack = Officers::captureRolls($attacker, $gamedata); $attack > 0; $attack--) {
+				$roll = Dice::d(10);
+				$modifiedRoll = $roll + $rollMod;
+				if ($modifiedRoll <= 5) {
+					$attackerHits++;
+				}
 			}
 		}
 
@@ -1054,6 +1070,7 @@ public function setParentFighter($fighter) {
 			if (count($attackers) > 0) {
 				$killedAttacker = array_pop($attackers);
 				$this->endMarineMission($killedAttacker, $gamedata);
+				if (TacGamedata::$officersPresent) Officers::troopPartyLost($killedAttacker, $gamedata); //his pod's Expert Troop Leader's escape roll (Stage 27)
 			}
 		}
 			
@@ -1179,12 +1196,14 @@ public function setParentFighter($fighter) {
 				break;
 			case ($rescueRoll <= 4):
 				$this->endMarineMission($critical, $gamedata, $newFireOrder, "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines complete their rescue mission, but take heavy causalties.");
+				if (TacGamedata::$officersPresent) Officers::troopPartyLost($critical, $gamedata); //not back in a pod: his escape roll (Stage 27)
 				break;
 			case ($rescueRoll <= 6):
 				$newFireOrder->pubnotes .= "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines fail to complete a rescue mission. They will try again next turn.";
 				break;
 			default:
 				$this->endMarineMission($critical, $gamedata, $newFireOrder, "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines are eliminated attempting a rescue mission.");
+				if (TacGamedata::$officersPresent) Officers::troopPartyLost($critical, $gamedata); //his pod's Expert Troop Leader's escape roll (Stage 27)
 				break;
 		}
 	}
@@ -1456,7 +1475,9 @@ public function setParentFighter($fighter) {
             if ($roll >= $i){
                 $criticalTypes = $value;
             }
-        }            
+        }
+        //OFFICERS_PLAN.md Stage 30: the first critical an Expert Quartermaster's ship receives is patched - none of this roll's is added
+        if ($criticalTypes != -1 && Officers::patchCritical($ship, $gamedata)) return $crits;
         if ($criticalTypes != -1){
             if (is_array($criticalTypes)){
                 foreach ($criticalTypes as $phpclass){
@@ -1809,6 +1830,8 @@ public function setParentFighter($fighter) {
 
 			}        
 		}
+		//OFFICERS_PLAN.md Stage 26: an Expert Software Engineer's Hyach Computer ignores the first point of every hit - armour nothing pierces or wears
+		if(TacGamedata::$officersPresent) $effectiveArmor += Officers::computerArmour($target, $this, $gamedata);
 
 		if($weapon->damageType =='Flash'){//treat only enough damage to destroy system as entire shot! the rest is only overkill 
 			$maxDamageToDeal = $systemHealth +$effectiveArmor;

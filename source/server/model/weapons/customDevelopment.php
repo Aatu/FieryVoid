@@ -1869,7 +1869,43 @@ class PlasmaArray extends Plasma{
 
 
 
+class PlasmaBolt extends Plasma{
+    	public $name = "PlasmaBolt";
+        public $displayName = "Plasma Bolt";
+		public $iconPath = "PlasmaBolt.png";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+    	public $trailColor = array(75, 250, 90);
+    	public $projectilespeed = 15;
+        public $animationWidth = 5;
+    	public $animationExplosionScale = 0.30;
+    	public $trailLength = 20;
+        public $priority = 5;		
+    	public $rangeDamagePenalty = 1;
 
+        public $intercept = 1;
+    		        
+        public $loadingtime = 1;
+			
+        public $rangePenalty = 1;
+        public $fireControl = array(3, 3, 3); // fighters, <=mediums, <=capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 5;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 2;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+    	public function getDamage($fireOrder){        return Dice::d(10, 1) + 9;   }
+        public function setMinDamage(){     $this->minDamage = 10 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 19 ;      }
+
+}  // endof PlasmaBolt
 
 
 

@@ -48,6 +48,9 @@
                 $mayTurn = !$isFlight && TacGamedata::$officersPresent
                     && Officers::mayAnticipate($loaded) && !self::hasAnticipated($loaded, $gamedata->turn);
                 $turnKept = false;
+                /* A flight cooling its engines after a Redline Pilot's afterburners (OFFICERS_PLAN.md Stage 32) keeps nothing: no combat
+                   pivot, no Evade - the row decides, on the authoritative load. */
+                $cooling = $isFlight && $loaded && Officers::isCoolingDown($loaded, $gamedata->turn);
 
                 for ($i=count($ship->movement)-1;$i>=0;$i--){
                     $move = $ship->movement[$i];
@@ -56,6 +59,7 @@
                     $isTurn = self::isAnticipatedTurn($move);
                     if (($isFlight ? ($move->type != "pivotright" && $move->type != "pivotleft" && !$isEvade) : !$isTurn)
 						||( $move->turn != $gamedata->turn )
+						||$cooling
 						||(!self::checkIsNewMove($gamedata, $ship, $move))
 						||($isEvade && (!$mayEvade || $evadeKept))
 						||($isTurn && (!$mayTurn || $turnKept))){
@@ -1275,6 +1279,72 @@
 			return false;
 		}
 
+		/* An Expert Warrior's CHARGE (OFFICERS_PLAN.md Stage 28): a Movement-phase row of its own, at the ship's hex, no thrust, its
+		   `value` the unit charged - declared before the ship's first step into a hex (Officers::validateCharge keeps one only for a ship
+		   whose Warrior may charge). Its snap turn is an ordinary turn row marked CHARGE_SNAP_TURN, whose cheaper thrust is the client's
+		   alone (movement.php recomputes no turn cost). ⚠️ MIRROR PAIR with shipManager.movement.CHARGE / CHARGE_SNAP_TURN (client movement.js). */
+		const CHARGE = 'charge';
+		const CHARGE_SNAP_TURN = 'chargesnap';
+
+		//this turn's charge row of the ship, or null
+		public static function getChargeRow($ship, $turn){
+			if (!$ship || !is_array($ship->movement)) return null;
+			foreach ($ship->movement as $move){
+				if ($move->type == self::CHARGE && $move->turn == $turn) return $move;
+			}
+			return null;
+		}
+
+		//a row that takes the unit into another hex - a move or a slip
+		public static function isHexStep($move){
+			return $move->type == "move" || $move->type == "slipleft" || $move->type == "slipright";
+		}
+
+		/* An Expert Graviton Controller's ROTATION of the gravitic drive (OFFICERS_PLAN.md Stage 31): a Movement-phase row at the ship's hex,
+		   no thrust, its `facing` the one the server's d6 gave (die - 1) and its `value` the die; heading and speed unchanged. Only the server
+		   writes one (Officers::rotateGravitic), as the last row of a movement lock - MoveLock drops any other.
+		   ⚠️ MIRROR PAIR with shipManager.movement.GRAV_ROTATE (client movement.js) and MoveLock's LOCK_TYPES. */
+		const GRAV_ROTATE = 'gravRotate';
+
+		//Did the ship rotate its gravitic drive this turn - the -3 to hit (Officers::rotationPenalty)
+		public static function hasGravRotated($ship, $turn){
+			if (!$ship || !is_array($ship->movement)) return false;
+			foreach ($ship->movement as $move){
+				if ($move->turn == $turn && $move->type == self::GRAV_ROTATE) return true;
+			}
+			return false;
+		}
+
+		/* A Redline Pilot's AFTERBURNERS (OFFICERS_PLAN.md Stage 32): a Movement-phase row of its own at the flight's hex, no thrust - the flight's
+		   first order of the turn (Officers::validateRedline keeps one only for a flight whose Redline Pilot serves and which is not cooling off).
+		   It raises the flight's thrust that turn (Officers::redlineBurnThrust) and forbids every manoeuvre the next (Officers::isCoolingDown).
+		   ⚠️ MIRROR PAIR with shipManager.movement.REDLINE (client movement.js). */
+		const REDLINE = 'redline';
+
+		//Did the flight burn its afterburners on $turn
+		public static function hasRedlined($ship, $turn){
+			if (!$ship || !is_array($ship->movement)) return false;
+			foreach ($ship->movement as $move){
+				if ($move->turn == $turn && $move->type == self::REDLINE) return true;
+			}
+			return false;
+		}
+
+		/* A combat pivot made without the thrust for it - a Redline Pilot's (OFFICERS_PLAN.md Stage 32): the row asks the pivot's full cost in
+		   requiredThrust and pays what the flight had left in assignedThrust (client movement.js doPivot). Officers::combatPivotPenalty triples
+		   the turn's penalty for it. ⚠️ MIRROR PAIR with shipManager.movement.isRedlinePivot (JS). */
+		public static function isRedlinePivot($move){
+			if ($move->value != "combatpivot" || ($move->type != "pivotleft" && $move->type != "pivotright")) return false;
+			$required = is_array($move->requiredThrust) ? array_sum($move->requiredThrust) : 0;
+			$assigned = is_array($move->assignedThrust) ? array_sum($move->assignedThrust) : 0;
+			return $assigned < $required;
+		}
+
+		//a row the player ordered - not one the turn makes itself: a preturn or forced row, its start, a deployment, a mirrored host move
+		public static function isOrderedRow($move){
+			return !$move->preturn && empty($move->forced) && $move->type != "start" && $move->type != "deploy" && $move->type != "attached";
+		}
+
 		/* How far this turn's combat pivots turned the flight, in hex sides, rights against lefts: right-left-right
 		   is 1, three to one side 3 (180 degrees), four to one side 4. Every flight is agile, so each combat pivot
 		   row is one 60-degree step in the direction it names (client doPivot). The Expert Coordinator's "full 180"
@@ -1330,7 +1400,12 @@
             
             if ($ship instanceof FighterFlight)
 				return $turndelay;
-            
+
+            /* OFFICERS_PLAN.md Stage 30 - an Expert Quartermaster's "+10% penalty (round fractions up) to its Turn Delay": on the
+               delay speed and rate give, before overthrust shortens it (user ruling 2026-10-24). 0 for every other ship.
+               ⚠ MIRROR PAIR with movement.js getQuartermasterTurnDelay(). */
+            $turndelay += Officers::turnDelayPenalty($ship, $turndelay);
+
             $turndelay -= self::calculateExtraThrustSpent($ship, $move);
 
             /* ELITE / POOR CREW - a FLAT modifier on the delay this turn costs, never on

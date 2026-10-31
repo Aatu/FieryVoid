@@ -193,6 +193,13 @@ window.MovementPhaseStrategy = function () {
     };
 
     MovementPhaseStrategy.prototype.targetShip = function (ship, payload) {
+        /* An Expert Warrior's Charge waiting for its target (OFFICERS_PLAN.md Stage 28): the enemy unit clicked - or picked from a stacked
+           hex - is the one charged. Anything else clicked leaves it waiting. */
+        if (this.selectedShip && shipManager.movement.chargePickingFor(this.selectedShip)
+            && shipManager.movement.doCharge(this.selectedShip, ship)) {
+            this.onShipMovementChanged({ ship: this.selectedShip }); //redraws the movement UI, the icon in its new state
+            return;
+        }
         var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
         this.showShipTooltip(ship, payload, menu, false);
     };

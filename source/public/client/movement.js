@@ -78,6 +78,18 @@ shipManager.movement = {
     //
     // Server twin: Movement::calculateTurndelay, where the floor is that function's own
     // pre-existing clamp to 1.
+    // OFFICERS_PLAN.md Stage 30 - an Expert Quartermaster's "+10% penalty (round fractions up) to its Turn Delay":
+    // one turn's delay (speed x rate, rounded up) with a tenth of it added, rounded up - +1 on a delay of 1-10, +2
+    // on 11-20 (user ruling 2026-10-24) - BEFORE overthrust shortens it and Elite / Poor Crew move it, so every
+    // caller applies it to the raw delay first. The server publishes the percent while he is aboard, lost or
+    // serving (Officers::addForJson -> ship.turnDelayPenalty), to every viewer; any other unit is unchanged.
+    // ⚠ MIRROR PAIR with Officers::turnDelayPenalty (PHP), which Movement::calculateTurndelay adds.
+    getQuartermasterTurnDelay: function getQuartermasterTurnDelay(ship, turndelay) {
+        var pct = (ship && !ship.flight && ship.turnDelayPenalty) ? (parseInt(ship.turnDelayPenalty, 10) || 0) : 0;
+        if (!pct || !(turndelay > 0)) return turndelay;
+        return turndelay + Math.floor((turndelay * pct + 99) / 100);
+    },
+
     applyCrewTurnDelay: function applyCrewTurnDelay(ship, turndelay) {
         var mod = shipManager.movement.getCrewTurnDelayModifier(ship);
         if (mod === 0) return turndelay;
@@ -259,7 +271,8 @@ shipManager.movement = {
        the unit's committed path must pass through it. The lock is a PREFIX of the turn's rows
        (client/mineSweep.js, T13), so testing the LAST row is the whole test. */
     isLastMoveFinal: function isLastMoveFinal(ship) {
-        return !!(window.mineSweep && mineSweep.isLastRowLocked(ship));
+        return !!(window.mineSweep && mineSweep.isLastRowLocked(ship))
+            || !!(window.moveLock && moveLock.isLastRowLocked(ship)); //a movement lock too (OFFICERS_PLAN.md Stage 31, client/moveLock.js)
     },
 
     /* The Cancel button and its right-click "undo all" loop. NOT folded into hasDeletableMovements,
@@ -327,6 +340,7 @@ shipManager.movement = {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.isRedlineCooling(ship)) return false; //cooling after a Redline Pilot's afterburners: straight ahead (OFFICERS_PLAN.md Stage 32)
         if (shipManager.movement.extendedTurnForbids(ship, 'jink')) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!
         if (!ship.flight && ship.jinkinglimit <= 0) return false;
@@ -339,6 +353,8 @@ shipManager.movement = {
         var floor = shipManager.movement.getForcedJinking(ship);
         //Expert Pilots' levels do not count against the jinking limit - a separate term, never ship.jinkinglimit (the fighter's weight class)
         var limit = ship.jinkinglimit + (window.officers ? officers.freeJinks(ship) : 0);
+        //...and nor does Scout Penetration's extra level, which is paid for as usual (FIGHTER_MISSIONS_PLAN.md D10)
+        if (window.fighterMissions) limit += fighterMissions.extraJinkLevels(ship);
         if (jinking + accel > limit || jinking + accel < floor) return false;
         return true;
     },
@@ -417,6 +433,7 @@ shipManager.movement = {
                 if (!ship.flight) break;
                 if (shipManager.movement.jinkThrust(move) > 0) { remove = i; break; }
             }
+            if (remove !== -1 && window.moveLock && moveLock.protects(ship, remove)) return; //a locked row stays (OFFICERS_PLAN.md Stage 31)
             if (remove !== -1) ship.movement.splice(remove, 1);
         } else {
             var lm = shipManager.movement.getLastCommitedMove(ship);
@@ -1220,6 +1237,7 @@ shipManager.movement = {
 
     canSlip: function canSlip(ship, right) {
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.isRedlineCooling(ship)) return false; //cooling after a Redline Pilot's afterburners: straight ahead (OFFICERS_PLAN.md Stage 32)
         if (shipManager.movement.extendedTurnForbids(ship, right ? 'slipright' : 'slipleft')) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
@@ -1397,6 +1415,7 @@ shipManager.movement = {
     canPivot: function canPivot(ship, right) {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
+        if (shipManager.movement.isRedlineCooling(ship)) return false; //cooling after a Redline Pilot's afterburners: straight ahead (OFFICERS_PLAN.md Stage 32)
         if (shipManager.movement.extendedTurnForbids(ship, right ? 'pivotright' : 'pivotleft')) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
@@ -1421,7 +1440,9 @@ shipManager.movement = {
         //		}
         if (ship.flight && gamedata.gamephase == 3) {
             if (!weaponManager.canCombatTurn(ship)) return false;
-            if (shipManager.movement.getCombatPivotCost(ship) > shipManager.movement.getRemainingEngineThrust(ship)) return false;
+            //a Redline Pilot's flight pivots without the thrust for it - its fire then at the tripled penalty (OFFICERS_PLAN.md Stage 32)
+            if (shipManager.movement.getCombatPivotCost(ship) > shipManager.movement.getRemainingEngineThrust(ship)
+                && !(window.officers && officers.mayRedlinePivot(ship))) return false;
         } else if (gamedata.gamephase != 2) return false;
 
         return true;
@@ -1518,6 +1539,7 @@ shipManager.movement = {
 
     canEvade: function canEvade(ship) {
         if (gamedata.gamephase != 3 || !ship.flight) return false;
+        if (shipManager.movement.isRedlineCooling(ship)) return false; //cooling after a Redline Pilot's afterburners (OFFICERS_PLAN.md Stage 32)
         if (!(window.officers && officers.canEvade(ship))) return false;
         if (shipManager.movement.hasEvaded(ship)) return false;
         if (shipManager.movement.hasJumpedOut(ship)) return false;
@@ -1544,6 +1566,337 @@ shipManager.movement = {
             animationtics: 0,
             requiredThrust: [0],
             assignedThrust: [0],
+            commit: true,
+            preturn: false,
+            at_initiative: shipManager.getIniativeOrder(ship),
+            turn: gamedata.turn,
+            forced: false,
+            value: 0
+        };
+        return true;
+    },
+
+    /* EXPERT GRAVITON CONTROLLER'S ROTATION (OFFICERS_PLAN.md Stage 31): "Once during the scenario, during the Movement Step, the gravitic drive
+       can be 'rotated.' ... Roll 1 d6 and rotate the ship to face the resulting direction ... Heading, turn status, and the like are unaffected."
+       The Gravitic Rotate icon (UI/shipMovement.js) asks the SERVER (gravRotate.php through moveLock.ask), which rolls the die and answers with a 'gravRotate'
+       row - facing die - 1, no thrust, hex, heading and speed kept, value the die - after the rows already plotted, every one of them then
+       LOCKED (client/moveLock.js: never cancelled and rolled again, kept on a reload - the user's note). At any point of the move (user ruling
+       2026-10-25). That turn every shot of the ship is at -3 (weaponManager.computeShotModifiers, "Gravitic Rotation").
+       ⚠️ MIRROR PAIR with Movement::GRAV_ROTATE / hasGravRotated (PHP). */
+    GRAV_ROTATE: 'gravRotate',
+
+    //this turn's rotate row, or null
+    getGravRotateRow: function getGravRotateRow(ship) {
+        if (!ship || !ship.movement || !window.gamedata) return null;
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move && move.type === shipManager.movement.GRAV_ROTATE && move.turn == gamedata.turn) return move;
+        }
+        return null;
+    },
+
+    hasGravRotated: function hasGravRotated(ship) {
+        return shipManager.movement.getGravRotateRow(ship) !== null;
+    },
+
+    canGravRotate: function canGravRotate(ship) {
+        if (!ship || ship.flight || gamedata.gamephase != 2 || !ship.gravitic) return false;
+        if (!(window.officers && officers.canGravRotate(ship))) return false;
+        if (shipManager.movement.getGravRotateRow(ship)) return false;
+        if (shipManager.movement.hasJumpedOut(ship) || shipManager.isDestroyed(ship)) return false;
+        if (Object.keys(ship.attached || {}).length !== 0 && !ship.detached) return false; //riding another unit
+        if (gamedata.getMyActiveShips().indexOf(ship) === -1) return false;
+        if (shipManager.movement.checkHasUncommitted(ship)) return false;
+        return !(window.moveLock && moveLock.inFlight);
+    },
+
+    //What the Rotate icon shows: null (none), 'ready' (a click rolls the die) or 'done' (rotated this turn - its label says the die).
+    getGravRotateState: function getGravRotateState(ship) {
+        if (!ship || gamedata.gamephase != 2) return null;
+        if (shipManager.movement.getGravRotateRow(ship)) return 'done';
+        return shipManager.movement.canGravRotate(ship) ? 'ready' : null;
+    },
+
+    //The icon's click: the server rolls, and its rows come back in place of the unit's (the redraw follows their ShipMovementChanged).
+    doGravRotate: function doGravRotate(ship) {
+        if (!shipManager.movement.canGravRotate(ship) || !window.moveLock) return false;
+        return moveLock.ask("gravRotate.php", ship, "ROTATING THE GRAVITIC DRIVE...", function (reply) {
+            if (window.savedOrders && typeof savedOrders.showNotice === "function") {
+                savedOrders.showNotice("Gravitic drive rotated - the die rolled " + reply.die + ". This turn's fire is at -15%.");
+            }
+        });
+    },
+
+    /* EXPERT WARRIOR'S CHARGE (OFFICERS_PLAN.md Stage 28): "He can 'charge' an opponent by pointing his ship at the target and moving directly
+       towards it for his full movement. The 'charge' is declared as this maneuver is performed." Declared with the Charge icon before the
+       ship's first step into a hex this turn: click it, then click the enemy unit to charge, one it beat on initiative (the player picks - user ruling 2026-10-23;
+       MovementPhaseStrategy.targetShip asks chargePickingFor). That adds a 'charge' row - no thrust, its value the unit's id - which Cancel
+       takes back while it is the last row. The server keeps it (Officers::validateCharge) and judges the run when the ship fires
+       (Officers::chargeTarget: 4 hexes nearer the target by the end of the move, and beaten on initiative - the path is free, user ruling
+       2026-10-24): +2 to hit it. Declaring spends it, whether the run holds or not.
+       "His ship can execute one snap turn as though it were agile, at a cost of 1 point less thrust than it should. If the ship is already
+       agile, the thrust cost is halved instead": while charging, anywhere in the move, one turn made straight after another turn in the
+       same hex - the charge row between them aside - (isChargeSnap) costs 1 less (minimum 1), or half rounded up on an agile ship; its row is
+       marked CHARGE_SNAP_TURN, and the turn arrows offering it are drawn in the Charge red (UI/shipMovement.js). CLIENT ONLY, as every turn cost
+       is (movement.php recomputes none).
+       ⚠️ MIRROR PAIR with Movement::CHARGE / CHARGE_SNAP_TURN (PHP). */
+    CHARGE: 'charge',
+    CHARGE_SNAP_TURN: 'chargesnap',
+    chargePicking: null, //the id of the unit whose Charge icon waits for an enemy to be clicked
+
+    //this turn's charge row, or null
+    getChargeRow: function getChargeRow(ship) {
+        if (!ship || !ship.movement || !window.gamedata) return null;
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move && move.type === shipManager.movement.CHARGE && move.turn == gamedata.turn) return move;
+        }
+        return null;
+    },
+
+    //has the unit stepped into a hex this turn - a move or a slip, plotted or committed
+    hasSteppedThisTurn: function hasSteppedThisTurn(ship) {
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move && move.turn == gamedata.turn && (move.type === "move" || move.type === "slipleft" || move.type === "slipright")) return true;
+        }
+        return false;
+    },
+
+    canCharge: function canCharge(ship) {
+        if (!ship || ship.flight || gamedata.gamephase != 2) return false;
+        if (!(window.officers && officers.canCharge(ship))) return false;
+        if (shipManager.movement.getChargeRow(ship)) return false;
+        if (shipManager.movement.hasJumpedOut(ship) || shipManager.isDestroyed(ship)) return false;
+        if (gamedata.getMyActiveShips().indexOf(ship) === -1) return false;
+        if (shipManager.movement.checkHasUncommitted(ship)) return false;
+        if (shipManager.movement.hasSteppedThisTurn(ship)) return false;
+        return shipManager.movement.hasChargeTarget(ship);
+    },
+
+    /* What the Charge icon shows: null (none), 'off' (may charge), 'picking' (click an enemy unit), 'on' (charging - Cancel or the icon takes it
+       back while it is the last row) or 'locked' (charging, the run begun). */
+    getChargeState: function getChargeState(ship) {
+        if (!ship || gamedata.gamephase != 2) return null;
+        if (shipManager.movement.getChargeRow(ship)) return shipManager.movement.hasSteppedThisTurn(ship) ? 'locked' : 'on';
+        if (!shipManager.movement.canCharge(ship)) {
+            if (shipManager.movement.chargePicking === ship.id) shipManager.movement.chargePicking = null;
+            return null;
+        }
+        return shipManager.movement.chargePicking === ship.id ? 'picking' : 'off';
+    },
+
+    //The icon's click. Returns whether anything changed.
+    toggleCharge: function toggleCharge(ship) {
+        var state = shipManager.movement.getChargeState(ship);
+        if (state === 'off') {
+            shipManager.movement.chargePicking = ship.id;
+            return true;
+        }
+        if (state === 'picking') {
+            shipManager.movement.chargePicking = null;
+            return true;
+        }
+        if (state === 'on' && ship.movement[ship.movement.length - 1] === shipManager.movement.getChargeRow(ship)) {
+            shipManager.movement.deleteMove(ship);
+            return true;
+        }
+        return false;
+    },
+
+    //the unit whose Charge icon waits for a target, if it is this one (MovementPhaseStrategy.targetShip)
+    chargePickingFor: function chargePickingFor(ship) {
+        return !!ship && shipManager.movement.getChargeState(ship) === 'picking';
+    },
+
+    /* The unit wearing the charge crosshair while this ship is the selected one (PhaseStrategy.syncChargeMarker; user request after play test
+       4509): in the Movement phase the unit its charge row names - declared, the run not judged yet; in the Firing phase the unit the server
+       says the charge holds against (`charged`, his team's) - a charge that broke marks nothing, as it gives nothing. Else null. */
+    getChargeMarked: function getChargeMarked(ship) {
+        if (!ship || ship.flight || !window.gamedata) return null;
+        var id = null;
+        if (gamedata.gamephase == 2) {
+            var row = shipManager.movement.getChargeRow(ship);
+            if (row) id = row.value;
+        } else if (gamedata.gamephase == 3) {
+            var entry = window.officers ? officers.warriorEntry(ship) : null;
+            if (entry && entry.charged !== undefined && entry.charged !== null) id = entry.charged;
+        }
+        var target = (id !== null && id !== undefined) ? gamedata.getShip(id) : null;
+        return (target && !shipManager.isDestroyed(target)) ? target : null;
+    },
+
+    /* an enemy unit he may charge: on the board, seen, not terrain, one he beat on initiative (chargeBeaten) and at least CHARGE_MIN_HEXES
+       away - it has moved, so where it stands is where the run is judged, and from nearer he could never close 4 (exactly 4 holds: he may
+       end in its hex - user, 2026-10-24). Never offered otherwise (user, game 4511), so no charge - and no snap turn - the server would not
+       let hold. */
+    isChargeTarget: function isChargeTarget(ship, target) {
+        if (!ship || !target || target === ship || target.team == ship.team) return false; //loose: team ids drift string/int
+        if (gamedata.isTerrain(target.shipSizeClass, target.userid)) return false;
+        if (shipManager.isDestroyed(target) || shipManager.getTurnDeployed(target) > gamedata.turn) return false;
+        if (!shipManager.movement.chargeBeaten(ship, target)) return false;
+        if (shipManager.shouldBeHidden(target)) return false;
+        return shipManager.getShipPosition(ship).distanceTo(shipManager.getShipPosition(target)) >= officers.CHARGE_MIN_HEXES;
+    },
+
+    /* "Must have beaten him in initiative" = the target moved before him. Standard movement: one unit at a time, in hasBetterInitive's order
+       (ties to the bonus, then the id). Simultaneous Movement: a whole bracket moves together (`iniative` IS the bracket), so only a unit of a
+       LOWER bracket has moved - never one of his own (user, 2026-10-24). ⚠️ MIRROR PAIR with Officers::chargeBeaten (PHP). */
+    chargeBeaten: function chargeBeaten(ship, target) {
+        if (gamedata.rules && gamedata.rules.initiativeCategories) return ship.iniative > target.iniative;
+        return shipManager.hasBetterInitive(ship, target);
+    },
+
+    //is there a unit he may charge - no Charge icon without one
+    hasChargeTarget: function hasChargeTarget(ship) {
+        return gamedata.ships.some(function (target) {
+            return shipManager.movement.isChargeTarget(ship, target);
+        });
+    },
+
+    doCharge: function doCharge(ship, target) {
+        if (!shipManager.movement.canCharge(ship) || !shipManager.movement.isChargeTarget(ship, target)) return false;
+        var lm = ship.movement[ship.movement.length - 1];
+        ship.movement[ship.movement.length] = {
+            id: -1,
+            type: shipManager.movement.CHARGE,
+            position: lm.position,
+            xOffset: lm.xOffset,
+            yOffset: lm.yOffset,
+            facing: lm.facing,
+            heading: lm.heading,
+            speed: lm.speed,
+            animating: false,
+            animated: true,
+            animationtics: 0,
+            requiredThrust: [0],
+            assignedThrust: [], //by thruster id - none (Cancel's revertAutoThrust walks it)
+            commit: true,
+            preturn: false,
+            at_initiative: shipManager.getIniativeOrder(ship),
+            turn: gamedata.turn,
+            forced: false,
+            value: target.id
+        };
+        shipManager.movement.chargePicking = null;
+        return true;
+    },
+
+    /* Is the next turn this ship makes its charge's snap turn: it charges this turn, has not used the snap turn yet, its last order was a turn
+       of this turn and the turn delay is not satisfied (on an agile ship, the snap turn it may always make). "As though it were agile" (user,
+       play test 4509): the ship turns twice in one hex, the second turn the snap - anywhere in its move (user, 2026-10-24: the charge only has
+       to close 4 hexes, so a turn later on is no break). The charge row, which is no move, is passed over: a turn, the charge, then a turn is
+       a snap turn as much as the charge, a turn, then a turn is. */
+    isChargeSnap: function isChargeSnap(ship) {
+        if (!ship || ship.flight || gamedata.gamephase != 2 || !shipManager.movement.getChargeRow(ship)) return false;
+        var previous = null;
+        for (var i = 0; i < ship.movement.length; i++) {
+            var move = ship.movement[i];
+            if (!move) continue;
+            if (move.turn == gamedata.turn && shipManager.movement.isTurn(move) && move.value === shipManager.movement.CHARGE_SNAP_TURN) return false;
+            if (move.commit == true && move.type !== shipManager.movement.CHARGE) previous = move;
+        }
+        if (!(previous && previous.turn == gamedata.turn && shipManager.movement.isTurn(previous))) return false;
+        if (shipManager.movement.isExtendedTurnCompletion(previous)) return false;
+        return shipManager.movement.calculateCurrentTurndelay(ship) > 0;
+    },
+
+    //...and what it costs: 1 thrust less (never below 1), or half rounded up on an agile ship
+    chargeSnapCost: function chargeSnapCost(ship, cost) {
+        return ship.agile ? Math.max(1, Math.ceil(cost / 2)) : Math.max(1, cost - 1);
+    },
+
+    /* REDLINE PILOT'S AFTERBURNERS (OFFICERS_PLAN.md Stage 32): "Redline Pilots may use their afterburners above and beyond their usual tolerances.
+       If this is done, the fight increases its thrust by 50% on the current turn (round any fractions down). However, the flight is not permitted
+       to maneuver on the following turn (it must proceed straight ahead at its current speed) while the engines cool off." Ordered with the Redline
+       icon (UI/shipMovement.js) as the flight's FIRST order of the Movement phase (the user's note: then there is no thrust to give back): a
+       'redline' row - no thrust, at the flight's hex - that getRemainingEngineThrust adds officers.redlineThrustBonus for, and that Cancel or the
+       icon takes back while it is still the last row. The next turn the flight is COOLING (isRedlineCooling): every manoeuvre gate refuses it -
+       turn, slip, pivot, speed change and jink, and in the Firing phase the combat pivot and Evade (user ruling 2026-10-25). The server keeps
+       the row (Officers::validateRedline) and refuses a cooling commit that manoeuvres.
+       ⚠️ MIRROR PAIR with Movement::REDLINE / hasRedlined (PHP). */
+    REDLINE: 'redline',
+
+    //the flight's 'redline' row on `turn` (default: this one), or null
+    getRedlineRow: function getRedlineRow(ship, turn) {
+        if (!ship || !ship.movement || !window.gamedata) return null;
+        if (turn === undefined) turn = gamedata.turn;
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move && move.type === shipManager.movement.REDLINE && move.turn == turn) return move;
+        }
+        return null;
+    },
+
+    //it burned last turn, so this turn it flies straight ahead at its speed - whatever became of him. ⚠️ MIRROR PAIR with Officers::isCoolingDown (PHP).
+    isRedlineCooling: function isRedlineCooling(ship) {
+        return !!(ship && ship.flight && window.gamedata && shipManager.movement.getRedlineRow(ship, gamedata.turn - 1));
+    },
+
+    /* Has the unit ordered anything this turn - a row of its own, not one the turn made itself (preturn, forced, its start, a deployment, a host's
+       mirrored move). ⚠️ MIRROR PAIR with Movement::isOrderedRow (PHP). */
+    hasOrderedThisTurn: function hasOrderedThisTurn(ship) {
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (!move || move.turn != gamedata.turn || move.preturn || move.forced) continue;
+            if (move.type !== 'start' && move.type !== 'deploy' && move.type !== 'attached') return true;
+        }
+        return false;
+    },
+
+    canRedline: function canRedline(ship) {
+        if (!ship || !ship.flight || gamedata.gamephase != 2) return false;
+        if (!(window.officers && officers.canRedline(ship))) return false;
+        if (shipManager.movement.getRedlineRow(ship) || shipManager.movement.isRedlineCooling(ship)) return false;
+        if (shipManager.movement.hasJumpedOut(ship) || shipManager.isDestroyed(ship)) return false;
+        if (Object.keys(ship.attached || {}).length !== 0 && !ship.detached) return false; //riding another unit
+        if (gamedata.getMyActiveShips().indexOf(ship) === -1) return false;
+        if (shipManager.movement.checkHasUncommitted(ship)) return false;
+        return !shipManager.movement.hasOrderedThisTurn(ship);
+    },
+
+    /* What the Redline icon shows: null (none), 'ready' (may burn - its first order), 'on' (burning: the icon or Cancel takes it back while it is
+       the last row), 'locked' (burning, moves plotted after it) or 'cooling' (burned last turn: straight ahead this turn - the owner's only). */
+    getRedlineState: function getRedlineState(ship) {
+        if (!ship || !ship.flight || gamedata.gamephase != 2) return null;
+        var row = shipManager.movement.getRedlineRow(ship);
+        if (row) return ship.movement[ship.movement.length - 1] === row ? 'on' : 'locked';
+        if (shipManager.movement.isRedlineCooling(ship)) return (typeof gamedata.isMyShip === 'function' && gamedata.isMyShip(ship)) ? 'cooling' : null;
+        return shipManager.movement.canRedline(ship) ? 'ready' : null;
+    },
+
+    //The icon's click: burn (with its notice, and on the phase's first burn the clip), or take the burn back while it is the last row. Returns whether anything changed.
+    toggleRedline: function toggleRedline(ship) {
+        var state = shipManager.movement.getRedlineState(ship);
+        if (state === 'ready') {
+            if (!shipManager.movement.doRedline(ship)) return false;
+            if (window.officers) officers.redlineBurnFeedback(ship);
+            return true;
+        }
+        if (state === 'on') {
+            shipManager.movement.deleteMove(ship);
+            return true;
+        }
+        return false;
+    },
+
+    doRedline: function doRedline(ship) {
+        if (!shipManager.movement.canRedline(ship)) return false;
+        var lm = ship.movement[ship.movement.length - 1];
+        ship.movement[ship.movement.length] = {
+            id: -1,
+            type: shipManager.movement.REDLINE,
+            position: lm.position,
+            xOffset: lm.xOffset,
+            yOffset: lm.yOffset,
+            facing: lm.facing,
+            heading: lm.heading,
+            speed: lm.speed,
+            animating: false,
+            animated: true,
+            animationtics: 0,
+            requiredThrust: [0],
+            assignedThrust: [], //by thruster id - none (Cancel's revertAutoThrust walks it)
             commit: true,
             preturn: false,
             at_initiative: shipManager.getIniativeOrder(ship),
@@ -1610,7 +1963,10 @@ shipManager.movement = {
         if (ship.flight) {
             commit = true;
             requiredThrust[0] = pivotcost;
-            assignedThrust[0] = pivotcost;
+            /* A Redline Pilot's combat pivot without the thrust for it pays what is left, and the row keeps the full cost asked - which is
+               how isRedlinePivot (and Movement::isRedlinePivot) know its fire takes the tripled penalty (OFFICERS_PLAN.md Stage 32). */
+            assignedThrust[0] = gamedata.gamephase == 3
+                ? Math.min(pivotcost, Math.max(0, shipManager.movement.getRemainingEngineThrust(ship))) : pivotcost;
         } else {
             var side = Math.floor(pivotcost / 2);
             var rear = Math.floor(pivotcost / 2);
@@ -1909,6 +2265,7 @@ shipManager.movement = {
                 if (move.turn != gamedata.turn) continue;
 
                 if (move.type == "contract") {
+                    if (window.moveLock && moveLock.protects(ship, i)) return; //a locked row stays (OFFICERS_PLAN.md Stage 31)
                     ship.movement.splice(i, 1);
                     shipManager.movement.amendContractValue(ship, value);
                     break;
@@ -2147,6 +2504,38 @@ shipManager.movement = {
         return !(window.officers && officers.waivesCombatPivotPenalty(ship));
     },
 
+    /* Would this flight's next combat pivot be a Redline Pilot's made without the thrust for it (OFFICERS_PLAN.md Stage 32) - the pivot arrows are
+       then drawn red (UI/shipMovement.js pivotArrowTint). */
+    isRedlinePivotNext: function isRedlinePivotNext(ship) {
+        if (!ship || !ship.flight || gamedata.gamephase != 3) return false;
+        if (shipManager.movement.getCombatPivotCost(ship) <= shipManager.movement.getRemainingEngineThrust(ship)) return false;
+        return !!(window.officers && officers.mayRedlinePivot(ship));
+    },
+
+    /* ...and how big it is, in d20 points: 0 (none), 1 - or 3 once one of this turn's pivots was a Redline Pilot's made without the thrust for
+       it, "the firing penalty for a combat pivot is tripled" (OFFICERS_PLAN.md Stage 32), however many. The hit chance and the map tooltip read
+       it. ⚠️ MIRROR PAIR with Officers::combatPivotPenalty (PHP). */
+    combatPivotPenalty: function combatPivotPenalty(ship) {
+        if (!shipManager.movement.hasCombatPivotPenalty(ship)) return 0;
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move && move.turn == gamedata.turn && shipManager.movement.isRedlinePivot(move)) return window.officers ? officers.REDLINE_PIVOT_FACTOR : 3;
+        }
+        return 1;
+    },
+
+    /* A combat pivot made without the thrust for it: the row asks the pivot's full cost and pays what the flight had left (doPivot).
+       ⚠️ MIRROR PAIR with Movement::isRedlinePivot (PHP). */
+    isRedlinePivot: function isRedlinePivot(move) {
+        if (!move || move.value != "combatpivot" || (move.type != "pivotleft" && move.type != "pivotright")) return false;
+        var sum = function (thrust) {
+            var total = 0;
+            for (var k in thrust || {}) total += Number(thrust[k]) || 0;
+            return total;
+        };
+        return sum(move.assignedThrust) < sum(move.requiredThrust);
+    },
+
     hasPivotedForShooting: function hasPivotedForShooting(ship) {
         for (var i in ship.movement) {
             var movement = ship.movement[i];
@@ -2176,6 +2565,7 @@ shipManager.movement = {
     canChangeSpeed: function canChangeSpeed(ship, accel) {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
+        if (shipManager.movement.isRedlineCooling(ship)) return false; //cooling after a Redline Pilot's afterburners: its current speed (OFFICERS_PLAN.md Stage 32)
         if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return false;
         }
@@ -2203,13 +2593,14 @@ shipManager.movement = {
             return false;
         }
 
-        //acceleration must be the first thing in a turn...
+        //acceleration must be the first thing in a turn... (a Redline Pilot's afterburners aside, which are ordered first of all - OFFICERS_PLAN.md Stage 32)
         for (var i in ship.movement) {
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn) continue;
             if (movement.preturn == false &&
                 movement.forced == false &&
                 movement.type != "speedchange" &&
+                movement.type != shipManager.movement.REDLINE &&
                 movement.type != "deploy" &&
                 movement.type != "sync" &&
                 movement.type != "attached" &&
@@ -2351,7 +2742,7 @@ shipManager.movement = {
     getRemainingEngineThrust: function getRemainingEngineThrust(ship) {
         var rem = 0;
         if (ship.flight) {
-            rem = ship.freethrust;
+            rem = ship.freethrust + (window.officers ? officers.redlineThrustBonus(ship) : 0); //+ a Redline Pilot's afterburners this turn (OFFICERS_PLAN.md Stage 32)
         } else {
             for (var i in ship.systems) {
                 var system = ship.systems[i];
@@ -2487,7 +2878,7 @@ shipManager.movement = {
     getFullEngineThrust: function getRemainingEngineThrust(ship) {
         var rem = 0;
         if (ship.flight) {
-            rem = ship.freethrust;
+            rem = ship.freethrust + (window.officers ? officers.redlineThrustBonus(ship) : 0); //+ a Redline Pilot's afterburners this turn (OFFICERS_PLAN.md Stage 32)
         } else {
             for (var i in ship.systems) {
                 var system = ship.systems[i];
@@ -2962,6 +3353,7 @@ shipManager.movement = {
     canTurn: function canTurn(ship, right, ignoreThrustCost = false) {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
+        if (shipManager.movement.isRedlineCooling(ship)) return false; //cooling after a Redline Pilot's afterburners: straight ahead (OFFICERS_PLAN.md Stage 32)
         if (ship.mine) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
@@ -3006,8 +3398,9 @@ shipManager.movement = {
             if (gamedata.gamephase == 3) return false;
             //An agile ship's snap turn may follow straight on from a turn - but not from the
             //completion of an extended turn, which is a single 60° turn (D7).
+            //An Expert Warrior's charge gives any ship one snap turn (OFFICERS_PLAN.md Stage 28, isChargeSnap).
             if (!(ship.agile && previous && previous.turn == gamedata.turn && shipManager.movement.isTurn(previous)
-                && !shipManager.movement.isExtendedTurnCompletion(previous))) {
+                && !shipManager.movement.isExtendedTurnCompletion(previous)) && !shipManager.movement.isChargeSnap(ship)) {
                 return false;
             }
         }
@@ -3017,6 +3410,7 @@ shipManager.movement = {
         if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1, turncost);//turn cost may never be less than 1!
+        if (shipManager.movement.isChargeSnap(ship)) turncost = shipManager.movement.chargeSnapCost(ship, turncost); //Stage 28: the charge's snap turn
         turncost += shipManager.movement.getDockedLcvTurnSurcharge(ship);//LCV Rails: +1 thrust/turn per docked LCV
 
         if (!ignoreThrustCost && shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
@@ -3054,6 +3448,7 @@ shipManager.movement = {
     },
 
     doNormalTurn: function doNormalTurn(ship, right, gravitic = false) {
+        var chargeSnap = shipManager.movement.isChargeSnap(ship); //asked before the row is added (Stage 28)
         var requiredThrust = shipManager.movement.calculateRequiredThrust(ship, right);
         if (ship.osat && (!ship.flight)) {
             requiredThrust = 0;
@@ -3105,8 +3500,9 @@ shipManager.movement = {
             at_initiative: shipManager.getIniativeOrder(ship),
             turn: gamedata.turn,
             forced: false,
-            //a turn given in the Firing phase is an Expert Anticipator's (canTurn) - marked, as a combat pivot is
-            value: gamedata.gamephase == 3 ? shipManager.movement.ANTICIPATED_TURN : 0
+            //a turn given in the Firing phase is an Expert Anticipator's (canTurn) - marked, as a combat pivot is; an Expert Warrior's
+            //charge snap turn is marked too (Stage 28), so it is the only one
+            value: gamedata.gamephase == 3 ? shipManager.movement.ANTICIPATED_TURN : (chargeSnap ? shipManager.movement.CHARGE_SNAP_TURN : 0)
         };
 
         if (!ship.flight) {
@@ -3818,6 +4214,8 @@ shipManager.movement = {
         var baseTurnCost = shipManager.movement.getTurnCost(ship);
         if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
+        //An Expert Warrior's charge snap turn (OFFICERS_PLAN.md Stage 28) - canTurn's cost, the same way
+        if (speed !== 0 && shipManager.movement.isChargeSnap(ship)) turncost = shipManager.movement.chargeSnapCost(ship, Math.max(1, turncost));
         //LCV Rails: each docked LCV adds +1 thrust to this turn's cost (flat, on top
         //of the maneuver cost). Flights never carry LCV rails, so 0 for them.
         var lcvSurcharge = shipManager.movement.getDockedLcvTurnSurcharge(ship);
@@ -3952,6 +4350,7 @@ shipManager.movement = {
         var turndelay = 0;
         if (setMoveNo >= 0) {
             turndelay = Math.ceil(ship.movement[setMoveNo].speed * shipManager.movement.getTurnDelayCost(ship)); //delay at current speed - at least as many moves are required for turn delay to be satisfied
+            turndelay = shipManager.movement.getQuartermasterTurnDelay(ship, turndelay); //Stage 30: an Expert Quartermaster's +10%, first
             //ELITE / POOR CREW: the flat crew modifier moves the REQUIRED delay, before the
             //moves already made (and the overthrust credited as moves, below) are subtracted
             //from it. Ahead of the LCV surcharge so an Elite Crew can never eat a docked LCV's
@@ -4043,6 +4442,7 @@ shipManager.movement = {
         if (shipManager.movement.getTurnDelayCost(ship) == 0) return 0;
         var turndelay = Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship));
         if (ship.flight) return turndelay; //Marcin Sawicki: fighters are NOT exception to delay rules! But so far fighters cannot overthrust...
+        turndelay = shipManager.movement.getQuartermasterTurnDelay(ship, turndelay); //Stage 30: before the overthrust below
         //agile snap turn: shortening already paid on earlier turns of the same sequence counts here too
         var moveNo = ship.movement.lastIndexOf(movement);
         if (moveNo >= 0 && shipManager.movement.isTurn(movement)) {

@@ -1,8 +1,8 @@
 # Fighter Missions — Kitchen Sink §6.12 for fighter flights
 
-Status: **PLANNED 2026-10-20 — nothing built.** Rulings R1-R4 (§0.1) are the user's; D1-D14 (§0.2) are
-defaults taken without asking — say the word to change any. Build the stages of §5 one at a time; §6 lists
-the gates, §7 the play test, §9 is the build record.
+Status: **Stages 0-5 BUILT 2026-10-22, uncommitted — awaiting the §7 play test.** Rulings R1-R5 (§0.1) are the
+user's; D1-D14 (§0.2) are defaults taken without asking — say the word to change any. §6 lists the gates, §7 the
+play test, §9 is the build record.
 
 Sources: the user's brief (2026-10-20); *AoG Kitchen Sink* §6.12 *Optional Fighter Missions* (pp. 61-62), the
 combat sequence (fighter missions are set and announced with EW, **after** initiative is rolled), and §11.5.1
@@ -20,6 +20,8 @@ combat sequence (fighter missions are set and announced with EW, **after** initi
 | R2 | When is a pick free of the −60? | **At every arrival on the map**: the first Initial Orders after deployment, a reinforcement arrival, or any hangar launch — a re-launch after docking, a partial-launch Split and a carrier escape included (KS: "defined when the fighters launch"). A re-launched flight keeps its old mission unless it changes it; a new Split starts on No Mission |
 | R3 | CSP "cannot intentionally leave" its zone | **Advisory.** Movement is never blocked. A CSP flight outside its zone gets **no initiative bonus**, and its **−15 OB against ships still applies** (it applies inside the zone too). A passive notice warns when a move ends outside |
 | R4 | Who may not take a mission? | **Shuttle-type craft, Breaching Pods and unmanned craft**: every shuttle category (default, armed, assault, minesweeping, cargo/medical/presidential shuttles, Shuttlecraft, Flyers), lifeboats and yachts, the Orieni Hunter-Killers, Mapmaker probes, drones and weapon platforms (the officers' "no pilots" ruling) |
+| R4b | (user, 2026-10-22, after the Stage 0 review) Marines and drones? | **Every Marines-carrying craft is excluded** (the Dalithorn Assault Pinnace / Customs Vessel and both Nausicaan Gliders were the ones left eligible), and the two drone categories the audit found stay excluded |
+| R5 | (user, 2026-10-22, at build start) Escorting? | **Defensive Intercept REPLACES the fighter-escort rule.** A flight intercepts ballistics aimed at a friendly ship only while flying Defensive Intercept and in its hex when fire resolves; with no mission it no longer escorts. The old escort code is **commented out, not deleted**, in case it is wanted back (`Firing::isLegalIntercept`, `weaponManager.canInterceptBallistic`, ShipTooltip's "Escorting:" line). Supersedes D6's "minus its start-of-turn half" wording |
 
 ### 0.2 Defaults (ask before changing)
 
@@ -33,7 +35,7 @@ combat sequence (fighter missions are set and announced with EW, **after** initi
 | D6 | **Defensive Intercept** = the existing fighter-escort intercept rule minus its "same hex at the end of last turn" half: the flight intercepts ballistics aimed at a friendly non-flight unit sharing its hex when fire resolves. Everything else is the escort rule unchanged (the weapon's arc toward the launch hex is "face its guns towards the launch hex"; ballistics only; never fire aimed at another flight) |
 | D7 | **CSP key ship** = any unit of the flight's team that is on the board, not destroyed, not a flight, not terrain, not a mine. A destroyed or departed key ship ends the zone (no bonus), not the mission; re-designating is a change (D2) |
 | D8 | **Who sees what.** Every viewer sees a flight's mission; a choice made in the current Initial Orders reaches opponents only once the phase closes (the EW rule — so an opponent's same-turn ballistic preview cannot know about a free pick, exactly as it cannot know DEW). The CSP **key ship is own-team only**: publishing it would point at a shaded or cloaked ship's whereabouts |
-| D9 | **No initiative projection** during Initial Orders (the Triad has one, its C3). The tooltip says "−60 Ini when Initial Orders close" instead |
+| D9 | ~~**No initiative projection** during Initial Orders~~ — **overridden by the user after the play test (2026-10-22, §9.7)**: the −60 / CSP +5 show at once, in the tooltip's Ini "mod" and in the Triad's Initial Orders projection |
 | D10 | **Scout's extra jink level is client-only**, beside the Expert Pilot's free levels — `movement.php` neither prices nor caps jinking. `jinkinglimit` is never raised: the lobby weight class, hangar boxes and flight-size cap all read it |
 | D11 | Missions are picked in **Initial Orders only** (KS: "at the same time EW is announced") |
 | D12 | **UI**: the tooltip icon opens an anchored dropdown (not a native `<select>`); choosing CSP opens a second list of key ships sorted by distance (after a launch the carrier is normally first — no carrier detection is built) |
@@ -123,8 +125,8 @@ arrival is free (R2).
   ([:279-296](source/public/client/savedOrders.js#L279)), so a flight-level choice cannot ride `draftStateKeys`.
 - **Static gates**: `TacGamedata::$officersPresent` and friends ([TacGamedata.php:20-88](source/server/model/TacGamedata.php#L20)),
   reset inside the note sweep ([DBManager.php:3793-3799](source/server/controller/DBManager.php#L3793)).
-- **The icon exists**: `source/public/img/FighterMission.png` (40×40, tracked). Singular — the CSS must use this exact name (live is
-  case-sensitive).
+- **The icon exists**: `source/public/img/FighterMissions.png` (40×40, tracked) — **plural** since the user's commits 2a60edeb2 /
+  07c29b647 replaced the singular file. The CSS uses this exact name (live is case-sensitive).
 
 ---
 
@@ -208,7 +210,7 @@ to** (`$fireOrder->turn`), never the load turn (D14).
 |---|---|---|
 | OB | `calculateHitBase`: build `$effectiveOB` from `adjustOffensiveBonus(…, $shooter->offensivebonus)` before the crit / mine deductions ([weapon.php:1935-1942](source/server/model/weapons/weapon.php#L1935)). Direct fire and the ballistic grant both read it unchanged | `computeOEW`: `adjustOffensiveBonus(shooter, target, weapon, shooter.offensivebonus - pendingEvadeOb)` before its deductions ([weaponManager.js:2087](source/public/client/weaponManager.js#L2087)) — both sides feed the same base |
 | Profile (Scout) | the flight branch beside Petals ([weapon.php:2240-2248](source/server/model/weapons/weapon.php#L2240)): `$defence` and `$defenceFake` both | `calculateHitChange`: a term in the goal and a `Fighter Mission` row via `pushIfNonZero`, so the breakdown invariant holds; none under a flat called-shot profile |
-| Defensive Intercept | [firing.php:1599](source/server/handlers/firing.php#L1599): `same hex now && (same hex last turn \|\| isDefensiveIntercept)` | [weaponManager.js:3257](source/public/client/weaponManager.js#L3257): the same OR, with `sharesHexNow` split out of `sharesHexNowAndAtStartOfTurn` |
+| Defensive Intercept | firing.php `isLegalIntercept`: `same hex now && isDefensiveIntercept` — **R5: replaces** the escort rule (`same hex last turn` too), which is commented out | weaponManager.js `canInterceptBallistic`: `sharesHexNow && isDefensiveIntercept`; `sharesHexNowAndAtStartOfTurn` kept, its call commented out |
 | Jink (Scout) | none (D10) | `canJink`'s limit gains `+ fighterMissions.extraJinkLevels(ship)` ([movement.js:341](source/public/client/movement.js#L341)) |
 | Initiative | §3.6 | none — the server writes `tac_iniative`; the tooltip explains |
 
@@ -271,7 +273,7 @@ API: `REGISTRY` (labels and summaries), `isEligible`, `missionOn`, `selected`, `
 1. **Tooltip icon** — one entry in `ShipTooltipInitialOrdersMenu.buttons` after the Triad entries:
    `{ className: "fighterMission", condition: [isSelf, canChooseFighterMission], action: openFighterMissionPicker, info: fighterMissionInfo }`.
    `canChooseFighterMission` tests `this.selectedShip` for null first — one throwing condition deletes the whole tooltip
-   ([[arch_tooltip_menu_null_selection]]). CSS `.fighterMission { background-image: url("../img/FighterMission.png"); }` beside
+   ([[arch_tooltip_menu_null_selection]]). CSS `.fighterMission { background-image: url("../img/FighterMissions.png"); }` beside
    `.setCommandNode` in `styles/shipTooltip.css`. Hover line, e.g. "Fighter Mission: Anti-Ship → Scout (free this turn)" or
    "… (−60 Ini when Initial Orders close)" — short, it must not widen the tooltip.
 2. **Dropdown** — `client/UI/fighterMissionPicker.js` (`window.FighterMissionPicker`): a body-level popover anchored to the clicked
@@ -312,10 +314,12 @@ Intercept. `data-anchor`, never `id=` ([[project_document_viewer]]).
 
 ### 3.14 What must not move
 
-- A game with no `FtrMission` note: bit-identical hit chances, interceptions and initiative. The only payload change is the new key on
+- A game with no `FtrMission` note: bit-identical hit chances and initiative; interceptions too, except that fighter escorting is gone
+  (R5). The only payload change is the new key on
   eligible flights. The replay corpus holds no mission notes, so any harness diff other than that key is a bug.
 - The Triad Command Node: unchanged — default `$step`; regression cases in the new harness.
-- Escort interception without Defensive Intercept: unchanged — the new clause is OR-ed behind the gate.
+- ~~Escort interception without Defensive Intercept: unchanged~~ — **R5 retired it**: with no Defensive Intercept flight a game has
+  no fighter escort interception at all (the one intended behaviour change outside a mission game).
 - Expert Pilot free jinks and the Evader's −1: unchanged; the mission term composes after them.
 
 ---
@@ -330,7 +334,10 @@ isEligible(flight):
   and its hangar category, lowercased:
       contains no "shuttle"                     (armed, assault, minesweeping, cargo, medical, presidential, Shuttlecraft)
       and is not in $excludedHangarTypes        ('breaching pods', 'lifeboats', 'yacht', 'flyers', 'hunter-killers',
-                                                 'mapmaker probes', 'weapon platforms', + drone categories Stage 0 finds)
+                                                 'mapmaker probes', 'weapon platforms', 'system drone', 'stilettos')
+  and not $osat / $mine                         (MicroSATs, mines)
+  and "breaching pod" not in its class name     (pods riding shuttle hangars)
+  and its craft carry no Marines system         (R4b - pods under any name, assault/boarding craft)
 ```
 
 One table: excluding another category is one line. Stage 0 prints every `FighterFlight` class with its category and verdict for
@@ -373,6 +380,8 @@ review before anything is built.
    its own shots are −15% (never under 5).
 4. Defensive Intercept: the flight ends movement in a friendly ship's hex it did NOT start in; an enemy ballistic at that ship can be
    hand-intercepted from the INCOMING list, and the automation uses the flight when left to it.
+   4b. (R5) A flight with NO mission that starts AND ends in a ship's hex no longer intercepts for it, by hand or by the automation;
+   its tooltip no longer says "Escorting:".
 5. CSP: end a move more than 10 hexes from the key ship → passive notice; next turn no +5; shots at ships still −15%.
 6. Launch a flight from a hangar on turn N: its pick on N+1 is free. Dock it, re-launch it: free again, old mission kept if unchanged. A
    partial launch makes a Split that starts on No Mission with a free pick.
@@ -396,7 +405,147 @@ DB check after each: `tac_individual_notes` rows with `notekey = 'FtrMission'`; 
 
 ## 9. Build record
 
-*(one subsection per stage, as built)*
+### 9.1 Stage 0 — audit (2026-10-22)
+
+**(a) Eligibility** — `tests/replay/fighterMissionsAudit.php [--all]` (one line per class with `--all`; its verdict is the real
+`FighterMissions::isEligible`). 508 `FighterFlight` classes: **258 eligible, 250 not** (after R4b).
+
+| Hangar category | Eligible | Not | Why not |
+|---|---|---|---|
+| light / medium / heavy / superheavy / ultralight | 64 / 85 / 57 / 24 / 1 | – / 17 / 2 / 2 / – | medium: 7 MicroSATs (`osat`), 9 mines (`mine`), `hkBlazingStarGC` (`remoteControl`); heavy / superheavy: Marines aboard (R4b) - the two Nausicaan Gliders, the Dalithorn Assault Pinnace and Customs Vessel |
+| fighter squadrons, assault squadrons, vipers, raiders, triad fighter | 19, 1, 2, 2, 3 | – | |
+| shuttles, assault / minesweeping / cargo / medical / presidential shuttles, shuttlecraft | – | 74, 36, 55, 1, 1, 1, 8 | "shuttle" in the category (and `Shuttle` for the defaults) |
+| breaching pods, flyers, lifeboats, yacht, hunter-killers, mapmaker probes | – | 41, 4, 1, 2, 2, 1 | `$excludedHangarTypes` |
+| system drone (The System's Drones), stilettos (Torvalus Stiletto Drones) | – | 1, 1 | **found by the audit** - drones (R4), added to `$excludedHangarTypes` |
+
+Reviewed by the user (R4b): the four Marines-carrying combat craft first left eligible (`DalithornAssaultPinnace`,
+`DalithornCustomsVessel`, `TrekNausicaanGliderSHF`, `TrekNausicaanGliderEarlySHF`) are now excluded by a Marines test on the craft;
+the drone exclusions stand. Cylon raiders (`CylonHeavyRaider`, `CylonTurkeyRaider`) remain eligible.
+
+**(b) Arrival paths** — `tests/replay/fighterMissionsArrivalAudit.php <gameids>` over corpus games 4353, 4151, 4237, 4239, 4172, 4302,
+4367, 4247 (4350/4351 hold only Docking Bay SHIP launches; 4177 is gone from the DB). Every path stamps an arrival:
+
+| Path | Seen in | arrivalTurn |
+|---|---|---|
+| deployment on turn 1 | every game | 1 (`getTurnDeployed`) |
+| late slot | 4302 (depavailable 2, 4), 4247 (2) | the slot's turn |
+| hyperspace reinforcement | 4367 (arrivals 2, 3, 6, 7) | `arrivalTurn` |
+| hangar launch | 4353 (#876948 / #876933 launched T2 -> 3) | launch + 1 |
+| partial-launch Split | 4151 #876154, 4353 #876950 | launch + 1 |
+| re-launch of a docked flight | 4151 #876155 ('resurrected') | launch + 1 |
+| Shadow Fighter Bomb | 4172 #873416 | launch + 1 |
+| carrier escape / rail escape | no corpus game | `writeEscapeEventNote` writes `hangarEscapeEvent`, which stamps `hangarLaunchTurn` exactly as a launch (read, not observed) |
+
+No path needed a Stage 1 fix. Quirk: a flight row created at the end of turn N reads "on the board" in a replay load of an earlier
+turn (nothing tells that load it does not exist yet) - harmless, it has no mission history before it exists.
+
+### 9.2 Stages 1-3 — server (2026-10-22)
+
+New `model/ships/FighterMissions.php` (autoload +1 line). `FighterFlight`: protected `$fighterMissions` / `$fighterMissionClaim`,
+`getFighterMissions`, `recordFighterMission` (sets the gate), `dropFighterMissionsOn`, claim accessors, `addForJson` from `stripForJson`.
+`TacGamedata::$fighterMissionsPresent` + the phase-1 mask. `DBManager`: the gate reset beside `$abductionPresent`, `takeNote` after
+`Officers::takeNote`. `Manager::getShipsFromJSON`: the claim, flights only. `InitialOrdersGamePhase`: `saveClaim` on the reloaded `$gd`
+beside the officer transfers; `applyInitiative` straight after `CnC::applyTriadCommandNodes`. `CnC::shiftIniative` /
+`breakCommandNodeTies` public, the latter with `$step = 1`. `weapon.php`: the OB term before the crit / mine deductions, the Scout
+profile beside Petals - both for `$fireOrder->turn`. `firing.php`: **R5** - `same hex now && isDefensiveIntercept`, the escort rule
+commented out below it.
+
+Small additions to §3.4: `entryOn`, `isOnBoard`; `isDefensiveIntercept` opens with the gate itself; `takeNote` swallows (never records) a
+note on an ineligible unit or with an unknown mission id.
+
+### 9.3 Stage 4 — client (2026-10-22)
+
+`client/fighterMissions.js`, `client/UI/fighterMissionPicker.js` (both in game.php's debug block); `shipTooltipMenu.js` passes the click
+event; the tooltip entry + `.fighterMission` CSS; `.fv-missionpicker` in hexPicker.css; ShipTooltip's mission line (the "Escorting:"
+list commented out, R5; `shipManager.isEscorting` / `listEscorting` kept, marked retired); ShipWindow banner; weaponManager
+(`computeOEW`, the 'Fighter Mission' breakdown row, `canInterceptBallistic` + new `sharesHexNow`, the escort helper kept); movement.js
+`canJink`; ajaxInterface's claim; Save Orders `rec.mission`; the Movement commit's CSP notice. ⭐ `fighterMissions.claim` asks `mayPick`,
+never `waiting` (the commit could set it first); `canChoose` = `!waiting && mayPick`.
+
+### 9.4 Stage 5 — docs (2026-10-22)
+
+`docs/faq.html`: new **Fighter Missions** entry (`data-key="fightermissions"`) after Fighter Escorts, which is rewritten for R5; the
+quick-reference "Fighter escorts" line and the Interception entry's fighter bullet updated.
+
+### 9.5 Gates (2026-10-22)
+
+- `fighterMissionsHarness.php` **168/0** with the DB (158 `--no-db`; 164 before R4b); it writes `fighterMissionsFixture.json`.
+- `fighterMissionsClientHarness.js` **57/0** - against that fixture: REGISTRY, constants, 140 OB cases, 30 `missionOn` cases and the 12
+  real-`calculateHitBase` hit-chance deltas, all equal on the client.
+- `initialOrdersTooltipHarness.js` **23/0** - it was a stale 4/10 on a clean tree (its stub world lacked `shipManager.isTargetable` and
+  `ew.isEwSuspended` / `isFlightEwPool` / `elintRange`); fixed, + 9 Fighter Mission button cases.
+- `fighterMissionsE2E/picker.mjs` **25/25** - standalone headless Chrome, the real tooltip menu, desktop and 390px, the icon on hover.
+- `officersHarness.php` 1800/0 (DB); `officersClientHarness.js` 702/1 - its one failure is the user's own later label change
+  ("(again)" -> "(repeat)" in the Hyach Specialists menu), not this work.
+- Replay corpus: 68 of 162 games differed ONLY by `fighterMission: added` on eligible flights; re-recorded, **162/0**. (A full record
+  also picked up 11 newer local games, 4494-4505, never in the manifest - taken out again so the corpus is unchanged. Backup:
+  `C:\FV_env\db_backups\replay_baseline_before_fightermissions_2026-10-22`.) The masking fingerprint gains ` fm=<turn><id>,...` per flight
+  only when it has history.
+- Mutation pass **91/95** (`mutateFM.cjs`, scratchpad; R4b added the Marines test, caught, and its one-craft `break`, equivalent): 4
+  equivalent in all - the `break`, and with today's data - the `instanceof Shuttle` and "breaching pod"
+  class-name tests (every such craft is excluded by its category too; kept as belt-and-braces) and Scout's `$defenceFake` line (no
+  disguised target in the harness). The first pass found 2 real gaps (a vacuous re-sort check, client `selected()`'s strictness) - fixed.
+- Not harness-covered: the two InitialOrdersGamePhase hooks, ajaxInterface's claim line, the ShipTooltip / ShipWindow / gamedata glue.
+- Builds: `fvbuild -Autoload`, `-Client -Sync`. No statics change (the new fields are protected).
+
+### 9.6 Follow-ups (user, 2026-10-22)
+
+- **R4b** (above): `isEligible` refuses any flight whose craft carry a `Marines` system (`ExtraMarines` extends it). Harness +4 cases.
+- **Icon recoloured**: `FighterMissions.png` was a white glyph on transparency and vanished on the tooltip's white hover fill. Every
+  pixel is now teal `#0096BC` with its alpha kept (the fighter-operations family: Dock / Recover Flights use ~`#0090B0`); the user's
+  white original is in git history (2a60edeb2). Overwritten in place safely: no page had referenced the file before this feature, so
+  no browser holds a cached copy. `picker.mjs` now checks the glyph on a white fill (25/25).
+
+### 9.7 Play-test feedback, game 4506 (user, 2026-10-22)
+
+1. **CSP's +5 not on the tooltip.** The server had applied it every turn (4506: flight #2, CSP 2 hexes from the Omega, in zone
+   on turns 1-3 — a 1-category simultaneous game, so only the raw total moved); the tooltip never showed a mission's initiative.
+   New `fighterMissions.iniativeModifier(ship)` — ⚠️ MIRROR of `applyInitiative`: −60 when changing, +5 for CSP within 10 hexes
+   measured at the START of the turn (`getPositionAtStartOfTurn`, where both stood when the phase closed), the owner's pending pick
+   counted — is added to the Ini line's "mod" (every phase of the turn), and `CnC.getIniativeProjection` applies it after the
+   Triad's step during Initial Orders (shared `shift` / `breakTies` helpers; −60 nudged down, +5 up, as the server). Overrides D9.
+   (An opponent's CSP first read 0 there - superseded by §9.8.)
+2. **Scout's profiles not on the tooltip.** The Defence (F/S) effective figures now take `profileModifier`; the printed profile in
+   brackets is unchanged (as DEW shows). The ship window's flight profile rows (ShipNotesPanel, ShipInfo) still show the printed
+   profile — not changed.
+3. **Picker "selected" chip**: solid own-ship green (`--fv-own-signal`, dark text).
+4. **Picker header**: a filled chrome bar (`--fv-chrome`, accent rail), bold uppercase title with the flight's name beneath
+   (`header(title, subtitle, onBack)`; `.fv-missionpicker__heading` / `__subtitle`).
+
+Gates: `fighterMissionsClientHarness.js` 74/1 (+18 initiative cases, incl. the Triad's own projection classic + simultaneous; the 1 =
+the REGISTRY mirror: `FighterMissions::$registry` summaries were edited by hand at 20:10 and `fighterMissions.REGISTRY` — which the
+dropdown shows — was not); `picker.mjs` 27/27 (+chip colour, header fill/weight); `initialOrdersTooltipHarness.js` 23/0;
+`officersClientHarness.js` 702/1 (the known label). Legacy bundle rebuilt (`bundle-legacy.js`, the watcher had missed it) + `-Sync`.
+
+### 9.8 Opponents see the CSP +5 (user, 2026-10-22)
+
+"Opponents should see it, to prevent any confusion." The key ship stays own team only (D8); the server now publishes the
+yes/no instead: `FighterMissions::addZoneForJson` (called from `TacGamedata::stripForJson`'s per-ship loop beside
+`arrivalIniPenalty`, behind `$fighterMissionsPresent`) sets `fighterMission.z = 1` on a payload WITHOUT the key ship when this turn's
+CSP is in zone at the start of the turn (`getLastTurnMovement($turn)`, else the current hex). It reads the history as that viewer
+has it, so in Initial Orders an opponent's still-hidden change shows the old CSP's +5 until the phase closes - consistent with the
+mission line they see. `fighterMissions.iniativeModifier` uses `z` when it has no `k`. Not sent to the owner's team or in a
+finished game (the key ship is in the payload; the client measures).
+
+Gates: `fighterMissionsHarness.php` 178/0 (+10 z cases incl. the real `TacGamedata::stripForJson` and the gate off; its DB round trip
+now skips games that already hold FtrMission notes - it had picked play-test game 4506); client 76/1 (REGISTRY, §9.7);
+`fvbuild -Check` all green, replay 162/0 (the corpus has no mission notes, so no `z`).
+
+### 9.9 Play-test feedback, game 4507 (user, 2026-10-23)
+
+**A no-mission flight in a ship's hex could "intercept" for it on the client; the server never applied it.** Not the mission
+mirror - `canInterceptBallistic`'s flight branch was right. The INCOMING list's interceptor (`ShipTooltipBallisticsMenu.selectedShip`)
+was fixed when the tooltip was built, and `ShipTooltip.update` re-pointed only the button menu: open G'Quan #1's tooltip, select
+Frazi #6's guns (the selection moves to the flight, the tooltip stays), and the list went on asking `canInterceptBallistic(G'Quan,
+Frazi gun, shot at G'Quan)` - the "fire aimed at itself" case, so no mission or hex test ran. The orders were stamped with the
+G'Quan's id and the guns' ids: 4507 holds intercepts 877800/weapon 11 (the G'Quan's Energy Mine) and 14 (a Light Pulse), both with
+the Paired Particle Gun's `shots: 2`; the server dropped both (497980 credits 6 sources of 8).
+Fixes: `ShipTooltip.update` also sets `ballisticsMenu.selectedShip`; `canInterceptBallistic` refuses a weapon that is not on `ship`
+(`shipManager.systems.getSystem(ship, weapon.id) !== weapon`) - the server cannot catch this, as the posted order names a real
+system of the wrong unit.
+
+Gates: `fighterMissionsClientHarness.js` 78/1 (+2: a ship's own gun yes; a flight's gun as the ship's interceptor no - fails with the
+guard removed; the 1 = REGISTRY, §9.7). Legacy bundle rebuilt (`bundle-legacy.js`, the watcher had missed it) + `-Sync`.
 
 ---
 
@@ -411,4 +560,4 @@ DB check after each: `tac_individual_notes` rows with `notekey = 'FtrMission'`; 
 - weaponManager.js's second `calculateHitChange` (~2600-2800) is commented-out code — do not edit it.
 - A new legacy JS file needs its `<script>` tag in game.php's debug block and a bundle rebuild; a React change needs `fvbuild -Client`.
 - The static gate is reset inside the note sweep, not in `markUnavailableSetMarkers` (which runs after it) ([[arch_defensive_mod_aggregation]]).
-- The image is `FighterMission.png` — exact case on live ([[arch_dockingcollar_icon_case]]).
+- The image is `FighterMissions.png` (plural, since 2a60edeb2) — exact case on live ([[arch_dockingcollar_icon_case]]).

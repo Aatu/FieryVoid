@@ -549,7 +549,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		   structured facts once, on load (gamedata.renderScenarioPanel).
 		   A Fleet Builder lobby has no teams, no map and no scenario - only the reference links. */
 
-		/* The reference pages - the same three as game.php's USEFUL LINKS. A plain click opens them in
+		/* The reference pages - game.php's USEFUL LINKS, less Ship Options (now in the buy dialog). A plain click opens them in
 		   the DATA ARCHIVE window over the lobby (client/UI/docViewer.js matches the href); the
 		   target=_blank is only the fallback for a middle-click, or if the script is missing. (The
 		   three off-site random-faction wheels that sat under them are gone: the Faction Picker has
@@ -559,11 +559,13 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		  <div class="lb-links-row">
 		    <span class="lb-links-label">Useful links</span>
 		    <a class="lb-link" href="./faq.php" target="_blank" rel="noopener noreferrer"
-		       title="Aide-memoire of specific rules and differences from Babylon 5 Wars">FAQ</a>
+		       title="Aide-memoire of specific rules and differences from Babylon 5 Wars">Fiery Void FAQ</a>
 		    <a class="lb-link" href="./factions-tiers.php" target="_blank" rel="noopener noreferrer"
 		       title="Overview of Fiery Void factions and their approximate strengths">Factions &amp; Tiers</a>
+		    <!-- Ship Options moved to the buy dialog, bottom left (confirm.buyDialogShell), 2026-10-27.
 		    <a class="lb-link" href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer"
 		       title="Details of all the extras available to Fiery Void units, e.g. missiles">Ship Options</a>
+		    -->
 		  </div>
 		</div>';
 
@@ -746,11 +748,11 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 								<span class="lb-bar-label">Show:</span>
 								<button type="button" class="lb-chip lb-cat-chip" data-cat="" aria-pressed="true">All</button>
 								<button type="button" class="lb-chip lb-cat-chip" data-cat="6" aria-pressed="false">Mines</button>
-								<button type="button" class="lb-chip lb-cat-chip" data-cat="5" aria-pressed="false">Structures</button>
+								<button type="button" class="lb-chip lb-cat-chip" data-cat="5" aria-pressed="false">Immobile</button>
 								<button type="button" class="lb-chip lb-cat-chip" data-cat="4" aria-pressed="false">Capital</button>
 								<button type="button" class="lb-chip lb-cat-chip" data-cat="3" aria-pressed="false">Heavy</button>
 								<button type="button" class="lb-chip lb-cat-chip" data-cat="2" aria-pressed="false">Medium</button>
-								<button type="button" class="lb-chip lb-cat-chip" data-cat="1" aria-pressed="false">Light Combat</button>
+								<button type="button" class="lb-chip lb-cat-chip" data-cat="1" aria-pressed="false">Light</button>
 								<button type="button" class="lb-chip lb-cat-chip" data-cat="0" aria-pressed="false">Fighters</button>
 							</div>
 						</div>

@@ -1093,6 +1093,13 @@ class ReplayHarness {
      * there, a count that should be 0 is not) and over-masking (the viewer's own data went
      * missing) equally well, at half the loads.
      */
+    private function missionTurns($ship) {
+        if (!($ship instanceof FighterFlight) || !method_exists($ship, 'getFighterMissions')) return '';
+        $turns = array();
+        foreach ($ship->getFighterMissions() as $entry) $turns[] = $entry['t'] . $entry['m'];
+        return empty($turns) ? '' : ' fm=' . implode(',', $turns);
+    }
+
     private function maskingFingerprint($gd, $prefix) {
         $lines = array();
         $lines[] = $prefix . ' waiting=' . ($gd->waiting ? 1 : 0)
@@ -1128,7 +1135,10 @@ class ReplayHarness {
                 . ' stealthHidden=' . $hidden
                 . ' ew=' . (is_array($ship->EW) ? count($ship->EW) : 0)
                 . ' cham=' . (!empty($ship->chameleonDisguisedForViewer) ? 1 : 0)
-                . ' removed=' . (!empty($ship->removed) ? 1 : 0);
+                . ' removed=' . (!empty($ship->removed) ? 1 : 0)
+                // FIGHTER_MISSIONS_PLAN.md §3.8 - the mission turns left after the phase-1 mask; only when there are
+                // any, so a game with no mission note fingerprints exactly as it did before
+                . $this->missionTurns($ship);
 
             foreach ($this->maskedSystems($ship) as $system) {
                 $parts = array();

@@ -67,6 +67,9 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "cancelCommandNode", condition: [isSelf, isCommandNode], action: cancelCommandNode, info: "Remove Command Node" },
         { className: "swapInitiative", condition: [notSelf, canSwapInitiativeWithTarget], action: swapInitiative, info: "Swap Initiative" },
         { className: "cancelSwapInitiative", condition: [notSelf, isSwappingInitiativeWithTarget], action: cancelSwapInitiative, info: "Cancel Initiative swap" },
+        /* FIGHTER MISSIONS (FIGHTER_MISSIONS_PLAN.md §3.10) - an Initial Orders choice, like the Triad's, so not in
+           ewButtons either. The predicate fails closed on a null selection. */
+        { className: "fighterMission", condition: [isSelf, canChooseFighterMission], action: openFighterMissionPicker, info: fighterMissionInfo },
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" },
         { className: "targetWeaponsHex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
         { className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
@@ -385,6 +388,27 @@ window.ShipTooltipInitialOrdersMenu = function () {
     function cancelSwapInitiative() {
         CnC.clearSwap(this.selectedShip);
         redrawAfterTriadChoice.call(this);
+    }
+
+    /* ---- FIGHTER MISSIONS (FIGHTER_MISSIONS_PLAN.md §3.10). The rules live in fighterMissions.js; the dropdown in
+       UI/fighterMissionPicker.js. ⚠️ The null test first - one throwing condition takes the whole tooltip down. */
+    function canChooseFighterMission() {
+        return !!this.selectedShip && !!window.fighterMissions && fighterMissions.canChoose(this.selectedShip);
+    }
+
+    function fighterMissionInfo() {
+        return fighterMissions.buttonInfo(this.selectedShip);
+    }
+
+    //Anchored to the clicked button (shipTooltipMenu passes the click event); the tooltip redraws after a choice so
+    //its status line shows the pending pick.
+    function openFighterMissionPicker(isMaxClick, event) {
+        var menu = this;
+        var anchor = (event && event.currentTarget) ? event.currentTarget : null;
+        if (!window.FighterMissionPicker) return;
+        FighterMissionPicker.open(this.selectedShip, anchor, function () {
+            redrawAfterTriadChoice.call(menu);
+        });
     }
 
     function isSelf() {

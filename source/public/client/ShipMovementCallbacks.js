@@ -66,6 +66,28 @@ window.ShipMovementCallbacks = function () {
         this.updateCallback({ ship: this.ship });
     };
 
+    //An Expert Warrior's Charge (OFFICERS_PLAN.md Stage 28): wait for a target, stop waiting, or take a declared charge back. The update redraws the icon.
+    ShipMovementCallbacks.prototype.chargeCallback = function (e) {
+        e.stopPropagation();
+        shipManager.movement.toggleCharge(this.ship);
+        this.updateCallback({ ship: this.ship });
+    };
+
+    /* An Expert Graviton Controller's rotation (OFFICERS_PLAN.md Stage 31): the server rolls the die (shipManager.movement.doGravRotate), and the
+       rows it answers redraw the unit when they land. No confirm - a click rolls (the user's note). */
+    ShipMovementCallbacks.prototype.gravRotateCallback = function (e) {
+        e.stopPropagation();
+        shipManager.movement.doGravRotate(this.ship);
+        this.updateCallback({ ship: this.ship });
+    };
+
+    //A Redline Pilot's afterburners (OFFICERS_PLAN.md Stage 32): burn, or take the burn back while it is the last order. The update redraws the icon.
+    ShipMovementCallbacks.prototype.redlineCallback = function (e) {
+        e.stopPropagation();
+        shipManager.movement.toggleRedline(this.ship);
+        this.updateCallback({ ship: this.ship });
+    };
+
     ShipMovementCallbacks.prototype.morecontractionCallback = function (e) {
         e.stopPropagation();
         shipManager.movement.doContraction(this.ship, 1);

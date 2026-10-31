@@ -19,6 +19,7 @@ window.PhaseStrategy = function () {
 
         this.selectedShip = null;
         this.targetedShip = null;
+        this.chargeMarkedIcon = null; //the icon wearing the charge crosshair (syncChargeMarker)
         this.animationStrategy = null;
         this.replayUI = null;
 
@@ -134,7 +135,8 @@ window.PhaseStrategy = function () {
     };
 
     //officersOnly (OFFICERS_PLAN.md Stage 19): a Structure bar's tooltip, which names the block's officers and nothing else
-    PhaseStrategy.prototype.showSystemInfo = function (ship, system, element, menu, officersOnly) {
+    //craft: the flight craft card hovered (FighterIcon), so a flight's tooltip lists only the officers one-to-a-craft aboard it
+    PhaseStrategy.prototype.showSystemInfo = function (ship, system, element, menu, officersOnly, craft) {
         if (this.systemInfoState && this.systemInfoState.menu && !menu) {
             return;
         }
@@ -148,9 +150,9 @@ window.PhaseStrategy = function () {
             }
             this.uiManager.showSystemInfoMenu({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox });
         } else {
-            this.uiManager.showSystemInfo({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox, officersOnly: Boolean(officersOnly) });
+            this.uiManager.showSystemInfo({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox, officersOnly: Boolean(officersOnly), craft: craft || null });
         }
-        this.systemInfoState = { menu: menu, element: element, system: system, officersOnly: Boolean(officersOnly) && !menu }
+        this.systemInfoState = { menu: menu, element: element, system: system, officersOnly: Boolean(officersOnly) && !menu, craft: craft || null }
     }
 
     PhaseStrategy.prototype.consumeGamedata = function () {
@@ -180,6 +182,7 @@ window.PhaseStrategy = function () {
         this.syncAllDeclaredAreas(); //a poll rebuilds every ship, so re-read what each weapon has declared
         this.syncAllEdfFields();     //standing overlay, same reason
         this.syncEdfNetPreview();    //and the Net field, which a poll may have moved under us
+        this.syncChargeMarker();     //and the charge crosshair, whose `charged` the poll may have brought
     };
 
     /*// A same-phase poll (this.update, as opposed to a phase-change activate()) refreshes ship
@@ -218,6 +221,7 @@ window.PhaseStrategy = function () {
         this.syncAllDeclaredAreas();
         this.syncAllEdfFields();
         this.syncEdfNetPreview();
+        this.syncChargeMarker();
         return this;
     };
 
@@ -888,6 +892,8 @@ window.PhaseStrategy = function () {
         //(LOG_PANEL_REDESIGN_PLAN.md Stage 3). Guarded because the fleet list is a
         //game.php-only surface and this file is shared; it no-ops when the tab is hidden.
         if (window.fleetListManager) fleetListManager.revealShipRow(ship);
+
+        this.syncChargeMarker();
     };
 
     /* keepWeapons: leave gamedata.selectedSystems alone. Passed ONLY by setSelectedShip when the
@@ -905,6 +911,25 @@ window.PhaseStrategy = function () {
         this.selectedShip = null;
         this.uiManager.hideWeaponList();
         if (gamedata.showLoS) mathlib.clearLosSprite();
+        this.syncChargeMarker();
+    };
+
+    /* THE CHARGE CROSSHAIR (OFFICERS_PLAN.md Stage 28; user request after play test 4509): while an Expert Warrior's ship is the selected
+       ship, the unit its charge names wears a crosshair (ShipIcon.setChargeMarked) - which unit, and in which phases, is
+       shipManager.movement.getChargeMarked's rule (Movement: the unit declared; Firing: the unit the charge holds against). One icon at a
+       time, and nothing touched when nothing changed, so a selection change, a poll and every plotted step may all ask. A replay selects
+       nothing; a strategy being deactivated takes it off through its deselect. */
+    PhaseStrategy.prototype.syncChargeMarker = function () {
+        if (!this.shipIconContainer) return;
+        var target = (!this.inactive && this.selectedShip && window.shipManager && shipManager.movement.getChargeMarked)
+            ? shipManager.movement.getChargeMarked(this.selectedShip) : null;
+        var icon = target ? this.shipIconContainer.getById(target.id) : null;
+        if (icon === this.chargeMarkedIcon) return;
+        var changed = false;
+        if (this.chargeMarkedIcon) changed = this.chargeMarkedIcon.setChargeMarked(false);
+        if (icon) changed = icon.setChargeMarked(true) || changed;
+        this.chargeMarkedIcon = icon || null;
+        if (changed && window.webglScene && window.webglScene.requestRender) window.webglScene.requestRender();
     };
 
     PhaseStrategy.prototype.targetShip = function (ship, payload) {
@@ -1344,7 +1369,7 @@ window.PhaseStrategy = function () {
         var showInfo = payload.showInfo !== false;
 
         if (showInfo) {
-            this.showSystemInfo(ship, system, element, false);
+            this.showSystemInfo(ship, system, element, false, false, payload.craft);
         } else {
             this.hideSystemInfo();
         }
@@ -1573,6 +1598,8 @@ window.PhaseStrategy = function () {
             }
         }
 
+        this.syncChargeMarker(); //an Expert Warrior's charge declared or taken back (OFFICERS_PLAN.md Stage 28)
+
         // Idle render-loop gating (perf #2): consumeMovement above mutates the icon's
         // facing/position in the THREE scene outside the animation list, so we must kick
         // the render budget or it won't paint until the next input. Surfaced by combat
@@ -1691,7 +1718,7 @@ window.PhaseStrategy = function () {
         }
 
         if (this.systemInfoState) {
-            this.showSystemInfo(ship, this.systemInfoState.system, this.systemInfoState.element, this.systemInfoState.menu);
+            this.showSystemInfo(ship, this.systemInfoState.system, this.systemInfoState.element, this.systemInfoState.menu, false, this.systemInfoState.craft);
         }
 
         //Keep an open tooltip in step, the way onShipEwChanged does: toggling a Shading Field /

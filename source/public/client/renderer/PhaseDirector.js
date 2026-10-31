@@ -109,6 +109,14 @@ window.phaseDirector = function () {
         /* Live sweeping (MINE_DETECTION_PLAN.md §1.4.6): the steps this player's units have already
            swept come back, locked - AFTER the draft above, which replaces this turn's rows (T14). */
         if (window.mineSweep) mineSweep.onStrategyActivated(gamedata, this.phaseStrategy);
+
+        /* Movement locks (OFFICERS_PLAN.md Stage 31, client/moveLock.js): a unit's moves up to an order it can no longer take back
+           (an Expert Graviton Controller's rotation) come back, locked - after both restores above, which replace this turn's rows. */
+        if (window.moveLock) moveLock.onStrategyActivated(gamedata, this.phaseStrategy);
+
+        /* A Redline Pilot's afterburner clip (OFFICERS_PLAN.md Stage 32): picked and fetched in idle time when a Movement phase opens for a player
+           with a flight that may burn - never at page load, never for anyone else. */
+        if (window.officers && typeof officers.prefetchRedlineClip === 'function') officers.prefetchRedlineClip();
     }
 
     return phaseDirector;
