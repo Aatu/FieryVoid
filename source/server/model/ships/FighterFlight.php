@@ -852,6 +852,13 @@ class FighterFlight extends BaseShip
                     $systems[] = $system;
                 }
             }
+            /* RAMMING PROW (user ruling 2026-11-01): a ram through the flight's front strikes a craft with a prow while one
+               flies - the craft its owner would put in the way, whose +50% is then the return damage (RammingAttack::getReturnDamage).
+               A ram by a unit, not a terrain collision, which no prow makes a ram. */
+            if ($weapon && $weapon->isRammingAttack && $shooter && !$shooter->isTerrain()) {
+                $prowed = array_values(array_filter($systems, function ($craft) { return $craft->hasRamProw(); }));
+                if (!empty($prowed) && Fighter::isRammedHeadOn($this, $shooter)) $systems = $prowed;
+            }
         }
 
         if (sizeof($systems) == 0) return null;

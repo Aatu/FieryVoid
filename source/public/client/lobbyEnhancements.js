@@ -79,6 +79,40 @@ window.lobbyEnhancements = {
 		return entry[1] + (count > 1 ? " (" + count + ")" : ""); //count in plain brackets, no "x"
 	},
 
+	/* An enhancement a flight buys CRAFT BY CRAFT: its count is how many craft carry it, so it costs price x count, is never
+	   scaled by the flight's size, and never counts more craft than the size bought (confirm.enhRowCost, enhRowMax and
+	   clampEnhRowsToSize; gamedata.enhancementLines). The Ramming Prow, fitted from the first craft on
+	   (Enhancements::setEnhancementsFighter). */
+	CRAFT_COUNTED: ['RAM_PROW'],
+	isCraftCounted: function isCraftCounted(enhID) {
+		return this.CRAFT_COUNTED.indexOf(enhID) !== -1;
+	},
+
+	/* A flight's ballistic ordnance (its ammunition rows and missile rows) is bought for every craft but those with a Ramming Prow,
+	   whose ballistic weapons cannot be used (user, 2026-11-01) - so it is priced per craft x ordnanceCraft, not x the flight's size.
+	   ⚠️ MIRROR PAIR with Enhancements::ordnanceCraft (PHP), which loads only those craft (and BuyingGamePhase, their racks). */
+	isOrdnance: function isOrdnance(enhID) {
+		return /^(AMMO_|MINE_)/.test(String(enhID));
+	},
+	prowCount: function prowCount(ship) {
+		for (let entry of ((ship && ship.enhancementOptions) || [])) {
+			if (entry[0] === 'RAM_PROW') return Math.max(0, parseInt(entry[2], 10) || 0);
+		}
+		return 0;
+	},
+	ordnanceCraft: function ordnanceCraft(size, prows) {
+		return Math.max(0, (parseInt(size, 10) || 0) - (parseInt(prows, 10) || 0));
+	},
+
+	/* The Ramming Prow is only for "scenarios where ramming is specifically allowed" - offered when the game's Desperate rules
+	   cover this team (rules.desperate: -1 both teams, else the team's number - the reading weaponManager's ramming warning uses). */
+	ramProwAllowed: function ramProwAllowed(team) {
+		var desperate = (window.gamedata && gamedata.rules) ? gamedata.rules.desperate : undefined;
+		if (desperate === undefined || desperate === null) return false;
+		desperate = parseInt(desperate, 10);
+		return desperate === -1 || desperate === parseInt(team, 10);
+	},
+
 	/* ---------------------------------------------------------------- EDF tooltip mirror */
 
 	/* "5 hexes (91 hexes covered)".

@@ -777,15 +777,18 @@ window.gamedata = {
 		var lines = [];
 		var units = gamedata.bulkCount(ship);
 		var crafts = ship.flight ? (parseInt(ship.flightSize, 10) || 1) : 1;
+		var ordnanceCrafts = lobbyEnhancements.ordnanceCraft(crafts, lobbyEnhancements.prowCount(ship)); //ordnance: never for a craft with a Ramming Prow
 
 		for (var enhId in (ship.enhancementOptions || {})) {
 			var entry = ship.enhancementOptions[enhId];
 			var name = lobbyEnhancements.describeTaken(entry); //null when not taken
 			if (name === null) continue;
 			name = name.replace(/^(\(AMMO\)|\(LIGHT AMMO\)|\(MEDIUM AMMO\)|\(HEAVY AMMO\)|\(Option\))\s*/, '');
-			var cost = window.officers
-				? officers.flightCost(entry[0], entry[2], gamedata.enhancementOptionCost(entry), crafts, officers.perCraftExtra(ship, entry[0]), officers.standardFlight(ship))
-				: gamedata.enhancementOptionCost(entry) * crafts;
+			var rowCrafts = lobbyEnhancements.isOrdnance(entry[0]) ? ordnanceCrafts : crafts;
+			var cost = lobbyEnhancements.isCraftCounted(entry[0]) ? gamedata.enhancementOptionCost(entry) //bought craft by craft (the Ramming Prow)
+				: window.officers
+				? officers.flightCost(entry[0], entry[2], gamedata.enhancementOptionCost(entry), rowCrafts, officers.perCraftExtra(ship, entry[0]), officers.standardFlight(ship))
+				: gamedata.enhancementOptionCost(entry) * rowCrafts;
 			if (window.officers) cost = officers.shipRowCost(ship, entry, cost); //an Expert Political Officer's free expert (Stage 25)
 			lines.unshift({ text: name, cost: cost * units }); //reverse order
 		}

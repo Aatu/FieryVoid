@@ -601,6 +601,13 @@ window.ajaxInterface = {
                             "save temporary critical effects" checkbox, off by default).
        An options object rather than a positional flag, matching loadSavedFleet, so a
        future third choice does not re-sign this at every call site. */
+    /* The craft a flight's rack missiles are paid for: in the lobby, where a flight is one blueprint craft loaded for all, every craft
+       but those with a Ramming Prow (lobbyEnhancements.ordnanceCraft - BuyingGamePhase gives those none). game.php has no
+       lobbyEnhancements, and there each craft's racks hold what they hold, so the size is as it was. */
+    missileCraft: function missileCraft(ship, size) {
+        return window.lobbyEnhancements ? lobbyEnhancements.ordnanceCraft(size, lobbyEnhancements.prowCount(ship)) : size;
+    },
+
     constructSavedShips: function constructSavedShips(fleetname, isPublic, opts) {
 
         var saveships = Array();
@@ -692,7 +699,7 @@ window.ajaxInterface = {
                                 for (var index in fightersystem.missileArray) {
                                     var amount = fightersystem.missileArray[index].amount;
                                     ammoArray[index] = amount;
-                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * saveFlightSize;
+                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * ajaxInterface.missileCraft(ship, saveFlightSize);
                                 }
                             }
 
@@ -1082,7 +1089,7 @@ window.ajaxInterface = {
                                 for (var index in fightersystem.missileArray) {
                                     var amount = fightersystem.missileArray[index].amount;
                                     ammoArray[index] = amount;
-                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * ship.flightSize;
+                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * ajaxInterface.missileCraft(ship, ship.flightSize);
                                 }
                             }
 

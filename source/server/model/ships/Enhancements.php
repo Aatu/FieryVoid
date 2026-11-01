@@ -61,6 +61,7 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'IMPR_OB'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_THR'; 
 		$unit->enhancementOptionsDisabled[] = 'POOR_TRAIN'; 
+		$unit->enhancementOptionsDisabled[] = 'RAM_PROW'; //the Kirishiac Warrior's set gives it back (user, 2026-11-01)
 		$unit->enhancementOptionsDisabled[] = 'STEALTH_CT'; //fighters and shuttles may buy it too (user, 2026-10-04)
 	  }else{ //enhancements for ships
 		$unit->enhancementOptionsDisabled[] = 'ADV_ENG';
@@ -90,6 +91,8 @@ class Enhancements{
 
 		case 'KirshiacFighter':
 			Enhancements::blockStandardEnhancements($unit);
+				//Ramming Prow: "Kirishiac Warrior Projectiles can also purchase this enhancement" (user, 2026-11-01)
+				$unit->enhancementOptionsDisabled = array_values(array_diff($unit->enhancementOptionsDisabled, array('RAM_PROW')));
 			break;	
 	
 		case 'KirshiacShip':
@@ -1821,6 +1824,25 @@ class Enhancements{
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
 	  
+	  /* Ramming Prow (KS rules; user, 2026-11-01): +2 front armour, weapons fire straight ahead only and at -2, no ballistic
+	     weapons, and +50% ramming factor (round up, the prow's armour included) when the craft rams or is rammed head-on.
+	     Bought craft by craft, not for the whole flight: the count is how many craft carry one, from the first craft on
+	     (setEnhancementsFighter), so it is priced per prow - 10% of one craft, rounded up - and the lobby never scales it by the
+	     flight's size (lobbyEnhancements.isCraftCounted). The limit is the largest flight; the buy dialog holds it to the size
+	     bought. Only where ramming is allowed: the lobby shows the row when Desperate rules cover the player's team. */
+	  $enhID = 'RAM_PROW';
+	  if(!in_array($enhID, $flight->enhancementOptionsDisabled) && self::mayTakeRamProw($flight)){ //option is not disabled
+		  $enhName = 'Ramming Prow';
+		  $enhLimit = ($flight->maxFlightSize > 0) ? $flight->maxFlightSize : 12;
+		  if($flight instanceof SuperHeavyFighter){//single-craft flight!
+			$enhPrice = ceil($flight->pointCost/10);
+		  }else{
+		  	$enhPrice = ceil($flight->pointCost/60); //price per craft, while flight price is per 6-craft flight
+		  }
+		  $enhPriceStep = 0;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+	  }
+
 	  /* Stealth Coating for fighters and shuttles (user ruling 2026-10-04, replacing D11's "fighters no"):
 	     "This improvement can be added to fighters or shuttles, using the same cost schedule". Priced PER
 	     CRAFT off one craft's cost, like every other fighter enhancement: a flight's pointCost is for six
@@ -2002,6 +2024,45 @@ class Enhancements{
 	  //Fighter officers (OFFICERS_PLAN.md Stage 4): availability, posts and prices live in the Officers registry
 	  Officers::addOffers($flight);
   } //endof function setEnhancementOptionsFighter
+
+  /* Ramming Prow is "Fighters Only": not the shuttles, yachts, breaching pods and assault shuttles that take the standard
+     fighter set too, nor mines or remotely-controlled Hunter-Killers. The Ancient sets block it (blockStandardEnhancements). */
+  private static function mayTakeRamProw($flight){
+	  if (!empty($flight->mine) || !empty($flight->remoteControl) || $flight instanceof Shuttle) return false;
+	  $hangar = (string)$flight->hangarRequired;
+	  if ($hangar === 'Breaching Pods' || stripos($hangar, 'shuttle') !== false || stripos($hangar, 'yacht') !== false) return false;
+	  return true;
+  }
+
+  //how many Ramming Prows the flight bought - read off its rows, so it is right before setEnhancements too (BuyingGamePhase's commit)
+  public static function ramProwCount($flight){
+	  foreach ($flight->enhancementOptions as $entry){
+		  if ($entry[0] === 'RAM_PROW') return max(0, (int)$entry[2]);
+	  }
+	  return 0;
+  }
+
+  //the craft that carry a Ramming Prow: one per prow, from the first craft on
+  public static function ramProwCraft($flight){
+	  $n = self::ramProwCount($flight);
+	  $prowed = array();
+	  foreach ($flight->systems as $craft){
+		  if (count($prowed) >= $n) break;
+		  if ($craft instanceof Fighter) $prowed[] = $craft;
+	  }
+	  return $prowed;
+  }
+
+  /* The craft that take the flight's bought ordnance (user, 2026-11-01): every craft but those with a Ramming Prow, whose ballistic
+	 weapons cannot be used. The lobby prices a missile row for these alone (lobbyEnhancements.ordnanceCraft). */
+  public static function ordnanceCraft($flight){
+	  $prowed = self::ramProwCraft($flight);
+	  $craft = array();
+	  foreach ($flight->systems as $ftr){
+		  if ($ftr instanceof Fighter && !in_array($ftr, $prowed, true)) $craft[] = $ftr;
+	  }
+	  return $craft;
+  }
 	    
     
   
@@ -2241,6 +2302,8 @@ class Enhancements{
 	/*enhancements for fighters - actual applying of chosen enhancements
 	*/
 	private static function setEnhancementsFighter($flight){
+		//Ramming Prows first, whatever the row order: the ordnance rows load only the craft without one (ordnanceCraft)
+		foreach(self::ramProwCraft($flight) as $craft) $craft->fitRamProw();
 	   	foreach($flight->enhancementOptions as $entry){			
 			//ID,readableName,numberTaken,limit,price,priceStep
 			$enhID = $entry[0];
@@ -2333,6 +2396,8 @@ class Enhancements{
 						$flight->forwardDefense += $enhCount;
 						$flight->sideDefense += $enhCount;
 						break;
+					case 'RAM_PROW': //Ramming Prow: fitted before this loop, so the ordnance rows below know which craft take none
+						break;
 					case 'STEALTH_CT': //Stealth Coating on a fighter or shuttle flight - recorded exactly as on a ship
 						$coverage = self::resolveProfileCoating($entry);
 						if($coverage !== null && !$flight->mine && $flight->factionAge < 3){
@@ -2353,34 +2418,34 @@ class Enhancements{
 						break;
 						
 						
-					//consumable ammunition - add to ALL missile magazines on flight!
+					//consumable ammunition - add to ALL missile magazines on flight! (but a craft with a Ramming Prow's: ordnanceCraft)
 					case 'AMMO_FB': //Basic Fighter Missile
-						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+						foreach(self::ordnanceCraft($flight) as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
 							$ftrAM->addAmmoEntry(new AmmoMissileFB(), $enhCount, true); //do notify dependent weapons, too!
 						}
 						break;
 					case 'AMMO_FH': //Heavy Fighter Missile
-						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+						foreach(self::ordnanceCraft($flight) as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
 							$ftrAM->addAmmoEntry(new AmmoMissileFH(), $enhCount, true); //do notify dependent weapons, too!
 						}
 						break;
 					case 'AMMO_FL': //Long Range Fighter Missile
-						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+						foreach(self::ordnanceCraft($flight) as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
 							$ftrAM->addAmmoEntry(new AmmoMissileFL(), $enhCount, true); //do notify dependent weapons, too!
 						}
 						break;
 					case 'AMMO_FY': //Dogfight Fighter Missile
-						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+						foreach(self::ordnanceCraft($flight) as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
 							$ftrAM->addAmmoEntry(new AmmoMissileFY(), $enhCount, true); //do notify dependent weapons, too!
 						}
 						break;
 					case 'AMMO_FD': //Dropout Fighter Missile
-						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+						foreach(self::ordnanceCraft($flight) as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
 							$ftrAM->addAmmoEntry(new AmmoMissileFD(), $enhCount, true); //do notify dependent weapons, too!
 						}
 						break;
 					case 'AMMO_DUM': //Dummy Fighter Missile
-						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+						foreach(self::ordnanceCraft($flight) as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
 							$ftrAM->addAmmoEntry(new AmmoMissileFDum(), $enhCount, true); //do notify dependent weapons, too!
 						}
 						break;						

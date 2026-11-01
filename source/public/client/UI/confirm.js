@@ -173,6 +173,7 @@ window.confirm = {
         var totalCostSpan = $(".confirm .totalUnitCostAmount").first();
         var flightSize = parseInt($(".fighterAmount").html()) || 1;
         confirm.clampEnhRowsToSize(); //a smaller flight keeps no more Expert Pilots than craft
+        confirm.applyRamProwOrdnance(); //a flight with a Ramming Prow carries no ballistic ordnance - before the sums, so it is refunded
         confirm.clampGrantedRows(); //OFFICERS_PLAN.md Stage 38: an officer another one grants goes when that one is unticked
         confirm.refreshOfficerRows(); //...and an officer row nobody may take now is not shown
         //Per craft for a flight with a size selector; otherwise the whole unit's bare hull, which
@@ -201,7 +202,7 @@ window.confirm = {
                 var cost = $amt.data("cost") || 0;
                 var launchers = $amt.data("launchers") || 0;
 
-                totalMissileCost += (amount * cost * flightSize * launchers);
+                totalMissileCost += (amount * cost * confirm.ordnanceSize(flightSize) * launchers); //never for a craft with a Ramming Prow
             }
         });
 
@@ -231,6 +232,8 @@ window.confirm = {
        worked out when the row was built). gamelobby.js's doBuyShip / doCopyShip / doEditShip read rows
        back through this too, so the dialog and the fleet can never charge differently. */
     enhRowCost: function enhRowCost(target, flightSize) {
+        if (confirm.isCraftCountedRow(target)) return target.data("enhCost") || 0; //bought craft by craft (the Ramming Prow)
+        if (window.lobbyEnhancements && lobbyEnhancements.isOrdnance(target.data("enhID"))) flightSize = confirm.ordnanceSize(flightSize); //never for a prowed craft
         if (!window.officers) return (target.data("enhCost") || 0) * flightSize;
         if (confirm.isFreeExpert(target)) return 0; //OFFICERS_PLAN.md Stage 25: the expert an Expert Political Officer brings
         if (confirm.isFreeQuartermasterRow(target)) return 0; //Stage 30: an Expert Quartermaster's free Improved Reactor or Jump Accelerator
@@ -238,6 +241,18 @@ window.confirm = {
             flightSize, target.data("perCraftExtra"), target.data("standardFlight"))
             - confirm.ballisticSaved(target) //OFFICERS_PLAN.md Stage 29: the rounds an Expert Ballistic Officer makes free
             - confirm.quartermasterSaved(target); //Stage 30: and those an Expert Quartermaster makes free, past his
+    },
+
+    //a row a flight buys craft by craft (lobbyEnhancements.isCraftCounted - the Ramming Prow)
+    isCraftCountedRow: function isCraftCountedRow(target) {
+        return Boolean(window.lobbyEnhancements) && lobbyEnhancements.isCraftCounted(target.data("enhID"));
+    },
+
+    //the team of the slot the dialog's unit is (or is being) bought for, or null
+    dialogTeam: function dialogTeam(ship) {
+        if (!window.playerManager) return null;
+        var slot = playerManager.getSlotById((ship && ship.slot) || gamedata.selectedSlot);
+        return slot ? slot.team : null;
     },
 
     //the enhancement spinners of the dialog holding `target`, as officers.freeExpertId and officers.ballisticFreeRounds read rows
@@ -294,10 +309,11 @@ window.confirm = {
     },
 
     /* OFFICERS_PLAN.md Stage 29: an ordnance row's "up to N, Xpts each" follows its limit (enhRowMax) - an Expert Ballistic Officer ticked in
-       this dialog enlarges it (a Solyrn's Heavy: up to 290), unticking him puts the hull's own back. Repainted with every total (getTotalCost). */
+       this dialog enlarges it (a Solyrn's Heavy: up to 290), unticking him puts the hull's own back. Repainted with every total (getTotalCost).
+       So does a row bought craft by craft (the Ramming Prow): "up to 6 levels" for a flight of 6, whatever the blueprint's limit. */
     paintOrdnanceNote: function paintOrdnanceNote(target) {
         var args = target.data("noteArgs");
-        if (!args || !/^(AMMO_|MINE_)/.test(String(target.data("enhID")))) return;
+        if (!args || (!/^(AMMO_|MINE_)/.test(String(target.data("enhID"))) && !confirm.isCraftCountedRow(target))) return;
         var row = target.closest(".buyRow");
         if (!row || !row.length) return;
         $(".buyRowNote", row).html(confirm.enhancementPriceNote(confirm.enhRowMax(target), args[0], args[1], args[2], args[3]));
@@ -319,6 +335,8 @@ window.confirm = {
             && confirm.dialogRows(target).some(function (row) { return row.id === 'OFF_BALL' && row.count > 0; })) {
             max = officers.ballisticRowLimit(confirm.dialogBlueprint(), target.data("enhID"), max);
         }
+        //bought craft by craft (the Ramming Prow): never more than the flight's craft
+        if (confirm.isCraftCountedRow(target)) return Math.min(max, parseInt($(".fighterAmount").html(), 10) || 1);
         var officer = window.officers ? officers.get(target.data("enhID")) : null;
         if (!officer || !officer.multi) return max;
         if (taken === undefined) taken = confirm.mixedTaken(target);
@@ -374,6 +392,69 @@ window.confirm = {
         });
     },
 
+    //the open dialog's Ramming Prow row (empty for a unit that is offered none), and the prows bought on it
+    dialogProwRow: function dialogProwRow() {
+        return $(".confirm .selectAmount").filter(function () { return $(this).data("enhID") === 'RAM_PROW'; });
+    },
+    dialogProws: function dialogProws() {
+        var prow = confirm.dialogProwRow();
+        return prow.length ? (parseInt(prow.data("count"), 10) || 0) : 0;
+    },
+
+    //how many of `size` craft take the flight's ballistic ordnance - all but those with a Ramming Prow (lobbyEnhancements.ordnanceCraft)
+    ordnanceSize: function ordnanceSize(size) {
+        var prows = confirm.dialogProws();
+        if (!prows || !window.lobbyEnhancements) return size;
+        return lobbyEnhancements.ordnanceCraft(size, prows);
+    },
+
+    /* Ramming Prows bought in this dialog (user, 2026-11-01): a prowed craft's ballistic weapons cannot be used, so the flight's
+       ammunition rows and missile rows buy for the craft WITHOUT one - each row's count is per craft, priced x ordnanceSize, and the
+       server loads only those craft (Enhancements::ordnanceCraft, BuyingGamePhase for racks). A line says how many. With a prow on
+       every craft the rows are emptied, which refunds them (every total is summed from the rows, and gamelobby.js reads them back),
+       and hidden; fewer prows or a bigger flight give them back, empty. Run with every total, before the sums. The gun rounds
+       (EXT_AMMO) are direct fire and stay. */
+    RAM_PROW_ORDNANCE_NOTE: 'Every craft has a Ramming Prow: this flight carries no missiles or other ballistic ordnance.',
+    ramProwOrdnanceNote: function ramProwOrdnanceNote(carriers) {
+        return 'Ramming Prows fitted: missiles and ordnance are bought for the ' + carriers + ' craft without one.';
+    },
+    applyRamProwOrdnance: function applyRamProwOrdnance() {
+        if (!confirm.dialogProwRow().length) return; //a unit offered no prow
+        var dialog = $(".confirm.buyDialog");
+        var prows = confirm.dialogProws();
+        var carriers = confirm.ordnanceSize(parseInt($(".fighterAmount", dialog).html(), 10) || 1);
+        var fitted = prows > 0 && carriers === 0; //nothing left to carry ordnance
+        var rows = $(".selectAmount", dialog).filter(function () {
+            return /^(AMMO_|MINE_)/.test(String($(this).data("enhID"))) || $(this).closest(".buyMissileRow").length > 0;
+        });
+        if (!rows.length) return;
+        rows.each(function () {
+            var amount = $(this);
+            var row = amount.closest(".buyRow");
+            if (fitted) {
+                if (typeof amount.data("enhPrice") !== 'undefined') { //an ammunition enhancement row
+                    if ((amount.data("count") || 0) > 0) {
+                        amount.data("count", 0);
+                        amount.data("value", 0);
+                        amount.data("enhCost", 0);
+                        confirm.enhShowLevel(amount, 0);
+                    }
+                } else if ((amount.data("value") || 0) > 0) { //a missile row (addBuyMissileRows)
+                    amount.data("value", 0);
+                    amount.text(0);
+                }
+                if (!row.hasClass("is-unavailable")) row.addClass("is-unavailable").data("prowHidden", true);
+            } else if (row.data("prowHidden")) {
+                row.removeClass("is-unavailable").removeData("prowHidden");
+            }
+        });
+        var body = confirm.buySectionBody(dialog, 'ammo');
+        $(".buyMissileNote", body).prop("hidden", fitted);
+        var note = $(".buyProwNote", body);
+        if (!note.length) note = $('<p class="buySectionNote buyProwNote"></p>').prependTo(body);
+        note.text(fitted ? confirm.RAM_PROW_ORDNANCE_NOTE : confirm.ramProwOrdnanceNote(carriers)).prop("hidden", !prows);
+    },
+
     clampEnhRowsToSize: function clampEnhRowsToSize() {
         var enhNo = 0;
         var target = $(".selectAmount.shpenh" + enhNo);
@@ -383,8 +464,8 @@ window.confirm = {
             var count = target.data("count") || 0;
             var max = confirm.enhRowMax(target, (officer && officer.mixesWith) ? mixed : 0);
             if (officer && officer.mixesWith) mixed += Math.min(count, max);
-            if (officer && officer.multi && count > max) {
-                //an officer row: no price step and never an option, so its cost is price x count
+            if (count > max && ((officer && officer.multi) || confirm.isCraftCountedRow(target))) {
+                //an officer row or a Ramming Prow: no price step and never an option, so its cost is price x count
                 target.data("count", max);
                 target.data("value", max);
                 target.data("enhCost", target.data("enhPrice") * max);
@@ -1500,6 +1581,8 @@ window.confirm = {
             $(".minusButton", item).data("enhNo", i).on("click", confirm.doOnMinusEnhancement);
 
             item.appendTo(confirm.buySectionBody(e, section));
+            //the Ramming Prow, where ramming is not allowed: not shown - unless the unit already carries one, to be taken off
+            if (enhID === 'RAM_PROW' && !enhCount && window.lobbyEnhancements && !lobbyEnhancements.ramProwAllowed(confirm.dialogTeam(ship))) item.addClass("is-unavailable");
 
             //a choice-valued option (Chameleon disguise) swaps the spinner for a dropdown; no-op otherwise
             confirm.applyEnhancementChoiceWidget(item, enhancement);
@@ -1580,7 +1663,7 @@ window.confirm = {
         if (mathlib.arrayIsEmpty(missileOptions)) return;
 
         var body = confirm.buySectionBody(e, 'ammo');
-        $('<p class="buySectionNote">Missiles are bought <b>per missile launcher</b>.</p>').appendTo(body);
+        $('<p class="buySectionNote buyMissileNote">Missiles are bought <b>per missile launcher</b>.</p>').appendTo(body); //hidden under a Ramming Prow (applyRamProwOrdnance)
 
         //Alphabetical, like every other row (buyRowOrder); i is still the firing mode it buys for.
         var missileOrder = Object.keys(missileOptions).sort(function (a, b) {
@@ -1795,7 +1878,7 @@ window.confirm = {
                 } else if (typeof amount.data("firingMode") !== 'undefined') {
                     var value = amount.data("value") || 0;
                     isTaken = value > 0;
-                    cost = value * (amount.data("cost") || 0) * (amount.data("launchers") || 0) * each;
+                    cost = value * (amount.data("cost") || 0) * (amount.data("launchers") || 0) * confirm.ordnanceSize(each);
                 }
 
                 if (isTaken) {

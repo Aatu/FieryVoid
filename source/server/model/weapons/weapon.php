@@ -195,6 +195,10 @@ class Weapon extends ShipSystem
        the flight has a navigator, and an Expert Tailgunner trains it (getTailGunMod). PROTECTED, like $seedsBelowFullCharge:
        the client reads it off the static blueprint, where ShipCompactor::annotateSystems writes it (isTailGun). */
     protected $tailGun = false;
+    /* A weapon on a craft fitted with a RAMMING PROW (Fighter::fitRamProw, user rulings 2026-11-01): held to the row of hexes
+       straight ahead for the whole game, at -RAM_PROW_PENALTY to hit, and never fired at all if it is ballistic. PROTECTED, like
+       $tailGun - the static blueprint never has a prow, so the live payload carries it (stripForJson: `ramProw` and the arc). */
+    protected $ramProw = false;
     /* Firing modes whose fire control NOTHING may raise - no Gunsights, no Expert Gunner, Turret Officer or Matter Weapons Expert: a mode
        with a hit calculation of its own (the Antimatter Shredder's Shredder mode keeps its 0/0/0, user 2026-10-21). Asked through
        hasFixedFireControl by every fire control raiser; PROTECTED, like $tailGun - the lobby reads it off the static blueprint, where
@@ -315,7 +319,7 @@ class Weapon extends ShipSystem
     mount's original arcs and must be ignored (see Firing::isLegalIntercept). A method rather than a
     public property on purpose: methods aren't serialised into the static ship blueprint.*/
     public function isArcRestricted(){
-        return $this->arcRestricted;
+        return $this->arcRestricted || $this->ramProw;
     }
 
     /*is this weapon TURRET-MOUNTED - a mount that can jam (setArcRestriction)? Its turret is getTurretMates. The Expert Turret
@@ -580,9 +584,14 @@ class Weapon extends ShipSystem
         //Turret jam (ReducedArcs crit): the static blueprint still carries the mount's FULL arc, so
         //the live reduced arc has to travel with the payload - the client merges JSON over the
         //blueprint, and every arc consumer (targeting, "Not In Arc", the hover arc) reads these.
-        if ($this->arcRestricted) {
+        if ($this->arcRestricted || $this->ramProw) {
             $strippedSystem->startArc = $this->startArc;
             $strippedSystem->endArc = $this->endArc;
+        }
+        //Ramming Prow: the flag the client's hit chance and weapon selection read, and the tooltip's Arc and "Ramming Prow" lines
+        if ($this->ramProw) {
+            $strippedSystem->ramProw = true;
+            $strippedSystem->data = $this->data;
         }
 
 		}
@@ -1091,6 +1100,10 @@ class Weapon extends ShipSystem
 				? "JAMMED - locked to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
 				: "Whole turret may jam to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
 					. " on a " . $this->arcRestrictionThreshold . "+ (d20) whenever damaged";
+		}
+		if ($this->ramProw) {
+			$this->data["Ramming Prow"] = $this->ballistic ? "Cannot be fired"
+				: "Fires straight ahead only, -" . (self::RAM_PROW_PENALTY * 5) . "% to hit";
 		}
         $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' . $this->priorityAF;
 
@@ -1607,6 +1620,31 @@ public function getFullStartLoading()
         return $this->tailGun;
     }
 
+    /* RAMMING PROW (Fighter::fitRamProw): "its weapons firing arc is reduced to the row of hexes extending directly ahead of the
+       fighter. In addition, any weapons fire is at a -2 penalty" - and (user ruling 2026-11-01) no ballistic weapon may be used
+       at all, which the client refuses (weaponManager.selectWeapon), as it enforces every arc. The row ahead is 359..1, not
+       0..0 or 360..0: Mathlib::isInArc reads start == end as a full circle, and so does the client once mathlib.addToDirection
+       has turned 360..0 by the craft's facing. Bearings are whole degrees on both ends, so only the hexes dead ahead fall in it
+       until 33 hexes out. ⚠️ MIRROR PAIR with weaponManager.getRamProwMod (JS) for the to-hit. */
+    const RAM_PROW_PENALTY = 2; //-10%
+    const RAM_PROW_ARC_START = 359;
+    const RAM_PROW_ARC_END = 1;
+
+    public function fitRamProw(){
+        $this->ramProw = true;
+        $this->startArc = self::RAM_PROW_ARC_START;
+        $this->endArc = self::RAM_PROW_ARC_END;
+    }
+
+    public function hasRamProw(){
+        return $this->ramProw;
+    }
+
+    //in calculateHitBase's fighter branch
+    public function getRamProwMod(){
+        return $this->ramProw ? -self::RAM_PROW_PENALTY : 0;
+    }
+
     /* ⭐ A tail gun's to-hit modifier (OFFICERS_PLAN.md Stage 21), in calculateHitBase's fighter branch: -TAIL_GUN_PENALTY on a
        turn its craft also fires another DIRECT-FIRE weapon - "not ballistic weapons fired in Initial Orders phase like Torpedoes, only
        other direct fire weapons fired during Firing Phase" (user ruling 2026-10-21); an interception, a Meteor Defence declaration and
@@ -2045,6 +2083,7 @@ public function getFullStartLoading()
             	 if(!$shooter->ignoreManoeuvreMods && !$coordinated) $mod -= TacGamedata::$officersPresent ? Officers::combatPivotPenalty($shooter, $gamedata->turn) : 1;
             }
             $mod += $this->getTailGunMod($shooter, $gamedata->turn); //a tail gun fired with its craft's other direct-fire weapons (Stage 21)
+            $mod += $this->getRamProwMod(); //a weapon on a craft with a Ramming Prow
 
             $effectiveOB = $shooter->offensivebonus;
             /* FIGHTER MISSIONS (FIGHTER_MISSIONS_PLAN.md D5): the mission's term goes on the bonus BEFORE the crit and
@@ -3640,6 +3679,11 @@ full Advanced Armor effects (by rules) for reference:
 		if ($this->arcRestricted){
 			$this->startArc = $this->reducedArcStart;
 			$this->endArc = $this->reducedArcEnd;
+		}
+		//Ramming Prow - the same reason, for the whole game (fitRamProw)
+		if ($this->ramProw){
+			$this->startArc = self::RAM_PROW_ARC_START;
+			$this->endArc = self::RAM_PROW_ARC_END;
 		}
 
     }//endof function changeFiringMode

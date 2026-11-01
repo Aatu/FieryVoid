@@ -539,6 +539,9 @@ window.weaponManager = {
 
         if (weapon.autoFireOnly && !abductionSelect) return; //this is auto-fire only weapon, should not be fired manually!
 
+        //a ballistic weapon on a craft with a Ramming Prow may not be used (user ruling 2026-11-01; Weapon::fitRamProw)
+        if (weapon.ramProw && weapon.ballistic) return;
+
         //An Ancient ship jumping out this turn may not fire (JumpEngine::$ancientJump). Setting the
         //jump already withdrew its orders (JumpEngine.onBoostIncrease); this stops new ones, and the
         //server withdraws anything that gets past both (Firing::withdrawFireFromJumpingUnits). A ram
@@ -2320,6 +2323,14 @@ window.weaponManager = {
         return -weaponManager.TAIL_GUN_PENALTY;
     },
 
+    /* A weapon on a craft with a RAMMING PROW (`ramProw` from the live payload, Weapon::fitRamProw): -2 (-10%) to hit. Its arc
+       arrives with the payload too, and a ballistic one may not be fired at all (selectWeapon).
+       ⚠️ MIRROR PAIR with Weapon::getRamProwMod (PHP). */
+    RAM_PROW_PENALTY: 2,
+    getRamProwMod: function getRamProwMod(weapon) {
+        return (weapon && weapon.ramProw) ? -weaponManager.RAM_PROW_PENALTY : 0;
+    },
+
     //Weapon::firedOffensivelyOnTurn over the weapon's craft's OTHER direct-fire weapons, this turn
     craftFiresOtherWeapon: function craftFiresOtherWeapon(shooter, weapon) {
         var craft = shipManager.systems.getFighterBySystem(shooter, weapon.id);
@@ -2375,6 +2386,8 @@ window.weaponManager = {
             }
             var tailGun = weaponManager.getTailGunMod(shooter, weapon);
             if (tailGun !== 0) otherDetail.push({ label: tailGun > 0 ? 'Expert Tailgunner' : 'Tail Gun', value: tailGun });
+            var ramProw = weaponManager.getRamProwMod(weapon);
+            if (ramProw !== 0) otherDetail.push({ label: 'Ramming Prow', value: ramProw });
         } else {
             var rolling = (shooter.agile === true)
                 ? shipManager.movement.hasRolled(shooter)

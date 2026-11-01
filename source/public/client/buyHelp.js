@@ -119,6 +119,7 @@ window.buyHelp = {
         MAKE_MINE: 'Offensive Bonus 4, and the shuttle uses its full Offensive Bonus for mine detection.',
         NAVIGATOR: '360-degree missile guidance and +5 initiative.',
         POOR_TRAIN: '-5 initiative, -1 thrust, -1 Offensive Bonus, +5% to be hit, +2 on dropout rolls.',
+        RAM_PROW: 'One per craft, from the first craft on. +2 front armour; weapons fire straight ahead only, at -10%, and ballistic weapons cannot be used (missiles are bought only for the craft without one); ramming factor +50% when the craft rams or is rammed head-on. Only where Desperate rules apply.',
         SHAD_CTRL: 'Deployed without a carrier\'s control: -2 Offensive Bonus, -15 initiative.',
         VOR_AZURF: '+1 rating per level on every fighter shield.'
     },

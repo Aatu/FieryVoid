@@ -733,11 +733,13 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                             }
 
                             if ($ammo){
+                                $prowed = Enhancements::ramProwCraft($ship); //a craft with a Ramming Prow carries none (user, 2026-11-01)
                                 foreach($ship->systems as $fighter){
+                                    $carried = in_array($fighter, $prowed, true) ? 0 : $ammo;
                                     foreach ($fighter->systems as $weapon){
                                         if(isset($weapon->missileArray)){
-                                            $weapon->missileArray[1]->amount = $ammo;
-                                            $dbManager->submitAmmo($id, $weapon->id, $gameData->id, $weapon->firingMode, $ammo, 0);
+                                            $weapon->missileArray[1]->amount = $carried;
+                                            $dbManager->submitAmmo($id, $weapon->id, $gameData->id, $weapon->firingMode, $carried, 0);
                                         }
                                     }
                                 }
