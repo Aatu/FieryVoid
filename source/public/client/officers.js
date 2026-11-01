@@ -89,7 +89,7 @@ window.officers = {
 		   free Hardened Armour are PRICES (freeExpertId - the buy dialog and the fleet list; freeArmourRows - systemEnhancements.totalCost),
 		   his armed shuttle is the server's hangars', and his speech is a toggle on his own ship's Firing-phase tooltip (canSpeak, declarationCnc). */
 		{ id: 'OFF_POL', label: 'Expert Political Officer', post: 'cnc', needs: 'capital',
-			summary: 'An armed shuttle, one free Officer, and 5 free Armourupgrades; once per battle make a speech in Firing Phase for +30 initiative next turn' },
+			summary: 'An armed shuttle, one free Officer, and 5 free Armour upgrades; once per battle make a speech in Firing Phase for +30 initiative next turn' },
 		/* Stage 26: Hyach only (the offers' - his post, the Hyach Computer, is Hyach-only too). His +1 BFCP is previewed in the lobby (computerBonus -
 			in game the server raised `output`); the point he lets the player hold to the Firing phase is the Computer's own menu (HyachComputer
 			.firingMode); his armour point and signature masking are the server's; his Specialist reuse comes in his payload (`reuse` -
