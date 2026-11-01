@@ -80,6 +80,11 @@ window.ShipTooltipInitialOrdersMenu = function () {
         /* OFFICERS_PLAN.md Stage 37 - a Lucky Captain's Initial Orders feat (EW Last, Disengage, Best Initiative): on his own ship, his menu
            (LuckyPicker; the Firing-phase menu offers the same button for his Firing-phase feats). Not in ewButtons. Fails closed on a null selection. */
         { className: "luckyCaptain", condition: [isSelf, canLucky], action: openLuckyPicker, info: luckyInfo },
+        /* OFFICERS_PLAN.md Stage 34 - an Expert War Leader's Taunt or Anticipate (user request 2026-11-01 - it was his C&C's React menu): on his own
+           ship, his menu (WarLeaderPicker). Two entries for one button, as the Triad's pairs above: grey while no order is given, his yellow with a
+           glow once one is, its line naming it. Not in ewButtons. Fails closed on a null selection. */
+        { className: "warLeaderOrder", condition: [isSelf, canWarLeaderOrder, noWarLeaderOrder], action: openWarLeaderPicker, info: warLeaderInfo },
+        { className: "warLeaderOrderOn", condition: [isSelf, canWarLeaderOrder, hasWarLeaderOrder], action: openWarLeaderPicker, info: warLeaderInfo },
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" },
         { className: "targetWeaponsHex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
         { className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
@@ -471,6 +476,32 @@ window.ShipTooltipInitialOrdersMenu = function () {
         var anchor = (event && event.currentTarget) ? event.currentTarget : null;
         if (!window.LuckyPicker) return;
         LuckyPicker.open(this.selectedShip, anchor, function () {
+            redrawAfterTriadChoice.call(menu);
+        });
+    }
+
+    function canWarLeaderOrder() {
+        return !!this.selectedShip && !!window.officers && officers.canWarLeaderOrder(this.selectedShip);
+    }
+
+    function hasWarLeaderOrder() {
+        return !!officers.warLeaderOrder(this.selectedShip);
+    }
+
+    function noWarLeaderOrder() {
+        return !officers.warLeaderOrder(this.selectedShip);
+    }
+
+    function warLeaderInfo() {
+        return officers.warLeaderButtonInfo(this.selectedShip);
+    }
+
+    //Anchored to the clicked button, as the Lucky Captain's; the tooltip redraws after a pick, so the button lights up (or greys) and its line names it
+    function openWarLeaderPicker(isMaxClick, event) {
+        var menu = this;
+        var anchor = (event && event.currentTarget) ? event.currentTarget : null;
+        if (!window.WarLeaderPicker) return;
+        WarLeaderPicker.open(this.selectedShip, anchor, function () {
             redrawAfterTriadChoice.call(menu);
         });
     }

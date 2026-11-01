@@ -384,6 +384,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/UI/analystPicker.js"></script>
     <script defer src="client/UI/electricianPicker.js"></script>
     <script defer src="client/UI/luckyPicker.js"></script>
+    <script defer src="client/UI/warLeaderPicker.js"></script>
     <script defer src="client/UI/shipTooltipFireMenu.js"></script>
     <!-- MUST stay after shipTooltipMenu.js - it extends it at definition time (JUMP_POINTS_PLAN.md Stage 4). -->
     <script defer src="client/UI/shipTooltipMovementMenu.js"></script>

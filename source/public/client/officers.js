@@ -87,7 +87,7 @@ window.officers = {
 			summary: 'Initiative rolled twice, best kept; one turn in the Firing Phase; damage rolls of 2+ dice roll one extra die and drop the lowest' },
 		/* Stage 25: Centauri capital ships and larger (`needs`; the faction is the offers'). No stat moves in the lobby: his free expert and
 		   free Hardened Armour are PRICES (freeExpertId - the buy dialog and the fleet list; freeArmourRows - systemEnhancements.totalCost),
-		   his armed shuttle is the server's hangars', and his speech is his C&C's Activate box in the Firing phase (canSpeak). */
+		   his armed shuttle is the server's hangars', and his speech is a toggle on his own ship's Firing-phase tooltip (canSpeak, declarationCnc). */
 		{ id: 'OFF_POL', label: 'Expert Political Officer', post: 'cnc', needs: 'capital',
 			summary: 'An armed shuttle, one free Officer, and 5 free Armourupgrades; once per battle make a speech in Firing Phase for +30 initiative next turn' },
 		/* Stage 26: Hyach only (the offers' - his post, the Hyach Computer, is Hyach-only too). His +1 BFCP is previewed in the lobby (computerBonus -
@@ -106,7 +106,7 @@ window.officers = {
 		   and gives it to the flights his ship launches) and his +1 fire control on every weapon (displayFireControl - in game the server raised it).
 		   The +2 at a unit his charge holds against and his precision strike are the hit-chance preview's (chargeHitBonus, precisionStrike); his +1
 		   per die and both critical modifiers are the server's. The Charge is movement.js's (its icon - canCharge - and the reticle on the unit
-		   charged, getChargeMarked), his Supreme Anticipation his C&C's Activate box in the Firing Phase (canAnticipateSupreme). */
+		   charged, getChargeMarked), his Supreme Anticipation a toggle on his own ship's Firing-phase tooltip (canAnticipateSupreme, declarationCnc). */
 		{ id: 'OFF_WARR', label: 'Expert Warrior', post: 'cnc', stats: { iniativebonus: 10, critRollMod: -1 },
 			summary: '+1 fire control and damage on all weapons; +10 initiative; -1 on crit rolls, +1 on crits caused. Once per battle / turn: Charge, Precision strike, Supreme Anticipation' },
 		/* Stage 29: in the C&C, on hulls with counted ballistic ammunition (`needs`; the offers' too). No stat moves. His +5 distance range is the
@@ -140,7 +140,7 @@ window.officers = {
 		/* Stage 34: in the C&C, on every hull with one. `fleet`: priced off the FLEET and his ship, by the lobby alone (warLeaderPrice, through
 		   repriceFleet - the static offer is 0). His +5 reaches every ship of his player's fleet, so it has no `stats`: the lobby previews it in
 		   the Initiative value (leadershipBonus, in displayStat); in game the server applied and published it. His four abilities: Taunt and
-		   Anticipate in his C&C's War Leader menu in Initial Orders (WarLeaderMenu - canWarLeaderOrder), Wrath and Center of Glory from the War
+		   Anticipate from his own ship's Initial Orders tooltip (the War Leader button - canWarLeaderOrder, client/UI/warLeaderPicker.js), Wrath and Center of Glory from the War
 		   Leader icon in the Firing phase (warLeaderState); their hit chances are warLeaderShotBonus, the anticipation's EW hold savedEwBonus. */
 		{ id: 'OFF_WLEAD', label: 'Expert War Leader', post: 'cnc', fleet: true,
 			summary: 'Every ship of the fleet +5 initiative. Special abilities that can be used once per battle' },
@@ -1980,8 +1980,8 @@ window.officers = {
 			+ placed + ' placed; any left are placed at random when the fleet is committed.';
 	},
 
-	/* May this ship's Expert Political Officer give his speech now, from `system` - the Speech! button of the C&C he is posted in
-	   (CnC.canActivate; a hull with two C&Cs shows it on his alone): the Firing phase, his own team's ship, he serves and has not spoken
+	/* May this ship's Expert Political Officer give his speech now, from `system` - the C&C he is posted in (declarationCnc; a hull with two
+	   C&Cs orders it on his alone): the Firing phase, his own team's ship, he serves and has not spoken
 	   yet (`abilities`, the server's). Through his list, so never an enemy's. ⚠️ MIRROR PAIR with Officers::speakerIndex (PHP). */
 	canSpeak: function canSpeak(ship, system) {
 		if (!ship || ship.flight || !system || !window.gamedata || gamedata.gamephase != 3) return false;
@@ -2007,7 +2007,7 @@ window.officers = {
 		return this.listFor(ship).filter(function (entry) { return entry.id === 'OFF_WARR' && self.serves(entry, turn); })[0] || null;
 	},
 
-	//Is this C&C an Expert Warrior's post? Its Activate box is then his Supreme Anticipation's - blue, with his labels (CnC, model/system/baseSystems.js)
+	//Is this C&C an Expert Warrior's post? Its `active` is then his Supreme Anticipation, not a speech (CnC.doIndividualNotesTransfer, model/system/baseSystems.js)
 	isWarriorPost: function isWarriorPost(ship, system) {
 		if (!ship || !system) return false;
 		return this.listFor(ship).some(function (entry) { return entry.id === 'OFF_WARR' && String(entry.post) === String(system.id); });
@@ -2023,7 +2023,7 @@ window.officers = {
 	},
 
 	/* May his precision strike still be made this turn: not spent on an earlier turn, and no other of his abilities this turn - not a charge
-	   (its movement row), not his Supreme Anticipation (spent, or ordered now on his C&C's Activate box). */
+	   (its movement row), not his Supreme Anticipation (spent, or ordered now - his C&C's `active`). */
 	precisionOpen: function precisionOpen(ship) {
 		var entry = this.warriorEntry(ship);
 		if (!entry) return false;
@@ -2074,7 +2074,7 @@ window.officers = {
 		return spent === undefined || spent === null || (parseInt(spent, 10) || 0) >= this.currentTurn();
 	},
 
-	/* May he order his Supreme Anticipation now, from `system` - the Activate box of the C&C he is posted in: the Firing Phase, his own team's ship,
+	/* May he order his Supreme Anticipation now, from `system` - the C&C he is posted in (declarationCnc): the Firing Phase, his own team's ship,
 	   he serves, it is unspent, and his ship did not charge this turn ("cannot do more than one of them in a given turn").
 	   ⚠️ MIRROR PAIR with Officers::anticipatorIndex (PHP). */
 	canAnticipateSupreme: function canAnticipateSupreme(ship, system) {
@@ -2085,6 +2085,47 @@ window.officers = {
 		if (entry.abilities && entry.abilities.anticipation !== undefined && entry.abilities.anticipation !== null) return false;
 		return !(window.shipManager && shipManager.movement && typeof shipManager.movement.getChargeRow === 'function'
 			&& shipManager.movement.getChargeRow(ship));
+	},
+
+	/* --- The Firing-phase toggles on his own ship's tooltip (shipTooltipFireMenu.js; they replaced the C&C's Activate box, user request 2026-11-01):
+	   an Expert Political Officer's speech and an Expert Warrior's Supreme Anticipation, each offered while canSpeak / canAnticipateSupreme says he
+	   may - grey until ordered, then in his colour with a glow (styles/shipTooltip.css). The order is his C&C's `active`, posted at the commit
+	   (CnC.doIndividualNotesTransfer) and judged by the server (Officers::saveSpeech / anticipatorIndex). */
+	DECLARATION_OFFICERS: { speech: 'OFF_POL', anticipation: 'OFF_WARR' },
+
+	//the C&C `declaration`'s officer serves in on this ship while he may order it now, or null - through his list, so never an enemy's
+	declarationCnc: function declarationCnc(ship, declaration) {
+		var id = this.DECLARATION_OFFICERS[declaration];
+		if (!id || !ship || ship.flight) return null;
+		var turn = this.currentTurn();
+		var self = this;
+		var entry = this.listFor(ship).filter(function (e) { return e.id === id && self.serves(e, turn); })[0];
+		var cnc = entry ? this.systemById(ship, entry.post) : null;
+		if (!cnc) return null;
+		return (declaration === 'speech' ? this.canSpeak(ship, cnc) : this.canAnticipateSupreme(ship, cnc)) ? cnc : null;
+	},
+
+	//is `declaration` ordered for this Firing phase's commit?
+	declared: function declared(ship, declaration) {
+		var cnc = this.declarationCnc(ship, declaration);
+		return Boolean(cnc && cnc.active);
+	},
+
+	//the toggle: order it, or take it back - true when it changed
+	toggleDeclaration: function toggleDeclaration(ship, declaration) {
+		var cnc = this.declarationCnc(ship, declaration);
+		if (!cnc) return false;
+		cnc.active = !cnc.active;
+		return true;
+	},
+
+	//the toggle's line in the tooltip: what it gives, or that it is ordered
+	declarationInfo: function declarationInfo(ship, declaration) {
+		var on = this.declared(ship, declaration);
+		if (declaration === 'speech') {
+			return this.label('OFF_POL', ship) + (on ? ': Speech! ordered - click to cancel' : ': give a speech - +30 initiative next turn (once per battle)');
+		}
+		return this.label('OFF_WARR', ship) + (on ? ': Supreme Anticipation ordered - click to cancel' : ': Supreme Anticipation - +50 initiative next turn (once per battle)');
 	},
 
 	/* ------------------------------------------------------------------ Expert Software Engineer (Stage 26) */
@@ -2932,15 +2973,42 @@ window.officers = {
 		return typeof shipManager.getTurnDeployed !== 'function' || shipManager.getTurnDeployed(unit) <= this.currentTurn();
 	},
 
-	/* --- Initial Orders: Taunt and Anticipate, in his C&C's War Leader menu (WarLeaderMenu), one at most; posted at the commit from his C&C
-	   (CnC.doIndividualNotesTransfer) and judged by the server (Officers::saveWarLeaderOrder). */
+	/* --- Initial Orders: Taunt and Anticipate, from the War Leader button on his own ship's tooltip (UI/warLeaderPicker.js - it replaced the C&C's
+	   React menu, user request 2026-11-01), one at most; posted at the commit from his C&C (CnC.doIndividualNotesTransfer) and judged by the server
+	   (Officers::saveWarLeaderOrder). */
 
-	//Does `system` show the War Leader menu: Initial Orders, his own team's ship on the board, the C&C he serves in
-	canWarLeaderOrder: function canWarLeaderOrder(ship, system) {
-		if (!ship || !system || !window.gamedata || gamedata.gamephase != 1) return false;
+	//his four in his menu's order - its rows, each a name and what it does. `order`: given in Initial Orders (the other two from the War Leader icon)
+	WARLEADER_MENU: [
+		{ id: 'taunt', name: 'Taunt', order: true,
+			note: 'This turn every enemy gains +5% to hit his ship and -5% to hit the other ships of his fleet.' },
+		{ id: 'anticipate', name: 'Anticipate', order: true,
+			note: 'This turn his ship gains +60 initiative and may hold back all its EW to the Firing phase.' },
+		{ id: 'wrath', name: 'Wrath',
+			note: 'Firing phase (War Leader icon): one enemy unit - his fleet\'s ships +5% to hit it this turn.' },
+		{ id: 'glory', name: 'Center of Glory',
+			note: 'Firing phase (War Leader icon): one unit of his fleet - +10% to hit with all its weapons this turn.' }
+	],
+
+	warLeaderAbilityName: function warLeaderAbilityName(ability) {
+		var row = this.WARLEADER_MENU.filter(function (a) { return a.id === ability; })[0];
+		return row ? row.name : String(ability);
+	},
+
+	/* Does his own ship's Initial Orders tooltip offer the War Leader button: Initial Orders, the player's own ship on the board, he serves, and
+	   Taunt or Anticipate is still his to give - or one is given, to show. Grey until one is given (styles/shipTooltip.css). */
+	canWarLeaderOrder: function canWarLeaderOrder(ship) {
+		if (!ship || !window.gamedata || gamedata.gamephase != 1) return false;
 		if (typeof gamedata.isMyShip === 'function' && !gamedata.isMyShip(ship)) return false;
 		var entry = this.warLeaderEntry(ship);
-		return Boolean(entry) && String(entry.post) === String(system.id) && this.onBoardUnit(ship);
+		if (!entry || !this.onBoardUnit(ship) || !this.warLeaderCnc(ship)) return false;
+		return Boolean(this.warLeaderOrder(ship)) || this.warLeaderMay(entry, 'taunt') || this.warLeaderMay(entry, 'anticipate');
+	},
+
+	//the button's line in the tooltip: the order given, if any
+	warLeaderButtonInfo: function warLeaderButtonInfo(ship) {
+		var order = this.warLeaderOrder(ship);
+		var name = this.label('OFF_WLEAD', ship);
+		return order ? name + ': ' + this.warLeaderAbilityName(order) + ' ordered' : name;
 	},
 
 	//the order waiting on his C&C this Initial Orders: 'taunt', 'anticipate' or null

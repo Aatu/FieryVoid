@@ -19,7 +19,6 @@ import GraviticAugmenterMenu from "./GraviticAugmenterMenu";
 import MinorThoughtPulsarMenu from "./MinorThoughtPulsarMenu";
 import ApplyDamageMenu from "./ApplyDamageMenu";
 import OfficersMenu from "./OfficersMenu";
-import WarLeaderMenu from "./WarLeaderMenu";
 
 const Container = styled.div`
     display: flex;
@@ -718,8 +717,6 @@ class SystemInfoButtons extends React.Component {
 
 				{canOfficersMenu(ship, system) && <OfficersMenu ship={ship} system={system} />}
 
-				{canWarLeaderMenu(ship, system) && <WarLeaderMenu ship={ship} system={system} />}
-
 			</Container>
 		)
 	}
@@ -920,7 +917,7 @@ export const canDoAnything = (ship, system) => {
 		|| canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system)
 		|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system) || canJumpEngineMenu(ship, system) || canSystemActivation(ship, system) || canSelectAllWeapons(ship, system)
 		|| canMineSettings(ship, system) || canProxMineSettings(ship, system) || canGraviticAugmenter(ship, system) || canMinorThoughtPulsar(ship, system)
-		|| canOfficersMenu(ship, system) || canWarLeaderMenu(ship, system);
+		|| canOfficersMenu(ship, system);
 };
 
 //powerLocked: system may not be voluntarily powered down right now (Antigravity Beam while its Kirishiac Orbital is deployed)
@@ -1077,10 +1074,6 @@ const canJumpEngineMenu = (ship, system) => system.name === 'jumpEngine'
    who may be moved (or has just been ordered to). officers.canManage holds the whole rule. */
 const canOfficersMenu = (ship, system) => Boolean(window.officers) && officers.canManage(ship, system);
 
-/* OFFICERS_PLAN.md Stage 34 - the War Leader menu: Initial Orders, the player's own ship on the board, the C&C an Expert War Leader serves in.
-   officers.canWarLeaderOrder holds the whole rule. */
-const canWarLeaderMenu = (ship, system) => Boolean(window.officers) && officers.canWarLeaderOrder(ship, system);
-
 const canPowerCapacitor = (ship, system) => {
 	if (system.name === 'powerCapacitor' || system.name === 'PowerCapacitor') {
 		//console.log("canPowerCapacitor TRUE");
@@ -1137,8 +1130,7 @@ export const hasStyledMenu = (ship, system) => {
 		canSystemPowerSettings(ship, system) ||
 		canSystemActivation(ship, system) ||
 		canWeaponMenu(ship, system) ||
-		canOfficersMenu(ship, system) ||
-		canWarLeaderMenu(ship, system);
+		canOfficersMenu(ship, system);
 };
 
 

@@ -507,6 +507,106 @@
     background-position: center;
 }
 
+/* OFFICERS_PLAN.md Stages 34 / 25 / 28 - the officers' once-per-battle orders moved off their C&C's menus onto the ship's tooltip (user request
+   2026-11-01): an Expert War Leader's Taunt / Anticipate (Initial Orders, opening client/UI/warLeaderPicker.js), an Expert Political Officer's
+   speech and an Expert Warrior's Supreme Anticipation (Firing phase, plain toggles). Each is a PAIR of buttons on opposite conditions
+   (shipTooltip*Menu.js): the plain class GREY while nothing is ordered, the "On" class in its colour with a glow once it is - the War Leader
+   icon's yellow (UI.shipMovement.warLeaderColour / warLeaderGlowColour), a purple, the Charge icon's red (UI.shipMovement.chargeColour).
+   The user's art is white on transparent, 50x50, so it is painted through a CSS MASK (as confirm.css's buy-dialog section icons) on a
+   ::before, leaving the button's own white hover fill behind it; the glow is a drop-shadow on the button, which follows the masked art.
+   Without mask support the plain white art shows. Change the colours here - --officer-ink is the art, the drop-shadows the glow. */
+.warLeaderOrder,
+.warLeaderOrderOn {
+    background-image: url("../img/warLeader2.png");
+}
+
+.politicalSpeech,
+.politicalSpeechOn {
+    background-image: url("../img/speech.png");
+}
+
+.supremeAnticipation,
+.supremeAnticipationOn {
+    background-image: url("../img/supremeAnticipate.png");
+}
+
+.warLeaderOrder,
+.warLeaderOrderOn,
+.politicalSpeech,
+.politicalSpeechOn,
+.supremeAnticipation,
+.supremeAnticipationOn {
+    --officer-ink: #8c8c8c;
+    position: relative;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* The glow is ONE faint halo (user, 2026-11-01: the first, a bright double drop-shadow, filled the gaps in the art and hid its detail) */
+.warLeaderOrderOn {
+    --officer-ink: #f2c230;
+    filter: drop-shadow(0 0 2px rgba(242, 194, 48, 0.55));
+}
+
+.politicalSpeechOn {
+    --officer-ink: #b05ce6;
+    filter: drop-shadow(0 0 4px rgba(176, 92, 230, 0.55));
+}
+
+.supremeAnticipationOn {
+    --officer-ink: #b33727;
+    filter: drop-shadow(0 0 2px rgba(232, 67, 46, 0.55));
+}
+
+@supports (mask-image: url("")) or (-webkit-mask-image: url("")) {
+    .warLeaderOrder,
+    .warLeaderOrderOn,
+    .politicalSpeech,
+    .politicalSpeechOn,
+    .supremeAnticipation,
+    .supremeAnticipationOn {
+        background-image: none;
+    }
+
+    .warLeaderOrder::before,
+    .warLeaderOrderOn::before,
+    .politicalSpeech::before,
+    .politicalSpeechOn::before,
+    .supremeAnticipation::before,
+    .supremeAnticipationOn::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-color: var(--officer-ink);
+        -webkit-mask-position: center;
+        mask-position: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        pointer-events: none;
+    }
+
+    .warLeaderOrder::before,
+    .warLeaderOrderOn::before {
+        -webkit-mask-image: url("../img/warLeader2.png");
+        mask-image: url("../img/warLeader2.png");
+    }
+
+    .politicalSpeech::before,
+    .politicalSpeechOn::before {
+        -webkit-mask-image: url("../img/speech.png");
+        mask-image: url("../img/speech.png");
+    }
+
+    .supremeAnticipation::before,
+    .supremeAnticipationOn::before {
+        -webkit-mask-image: url("../img/supremeAnticipate.png");
+        mask-image: url("../img/supremeAnticipate.png");
+    }
+}
+
 /* == The INCOMING list (MANUAL_INTERCEPTION_PLAN.md §6) ======================================
    Rows used to be one run-on line - "Sharlin War Cruiser, 3x Heavy Missile (Normal) - Approx: 45%" -
    which wrapped onto a second line as soon as a ship or weapon had a long name, and read as a wall.

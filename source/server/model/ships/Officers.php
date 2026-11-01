@@ -612,7 +612,7 @@ class Officers{
 		   and +1 armour on 5 different systems, never Structure - five free Hardened Armour (freeArmourRows). What the player
 		   leaves unchosen, the server picks at random once, as the fleet is committed (placePoliticalPicks). None of it is lost with
 		   him. "Once during each scenario ... a stirring speech ... +30 to its initiative on that turn ... announced before initiative
-		   rolls are made": ordered in the Firing phase from his C&C's menu (saveSpeech), told in that turn's combat log (speechLog), and
+		   rolls are made": ordered in the Firing phase from his ship's tooltip (saveSpeech), told in that turn's combat log (speechLog), and
 		   +30 on the next turn's initiative (applyPoliticalOfficer). Rulings (user 2026-10-21): both Centauri factions; the random picks
 		   the server's, at the commit; his armed shuttle on top of Elite Crew's; no +30 unless he still serves on the turn it lands.
 		   40%. */
@@ -710,7 +710,7 @@ class Officers{
 		/* Expert War Leader (Stage 34; rules text, user 2026-10-29), in the C&C, on every hull with one. "Adds +1 to the initiative of every
 		   Narn ship present, so long as his ship is in command": +5 on every unit of his PLAYER's fleet that is not a flight, whatever its
 		   faction (user ruling: applyLeadership, once every ship is constructed - so `apply` is null). "Once only once during the scenario ...
-		   each of the following, but can only do one on any turn": in Initial Orders, from his C&C's menu (saveWarLeaderOrder) - TAUNT the
+		   each of the following, but can only do one on any turn": in Initial Orders, from his ship's tooltip (saveWarLeaderOrder) - TAUNT the
 		   enemy (+1 to hit his ship for every enemy unit, -1 at any other ship of his fleet - user ruling) or ANTICIPATE (+60 initiative that
 		   turn, applied as Initial Orders close and winning no ties - applyWarLeaderInitiative; all his ship's EW may be held to the late window -
 		   savedEwBonus); in the Firing phase, from the War Leader icon (saveWarLeaderPick) - his WRATH on an enemy unit (+1 to hit it for every
@@ -4272,7 +4272,7 @@ class Officers{
 	}
 
 	/* "He can make a 'supreme anticipation,' earning his ship a + 50 initiative bonus ... on the next turn": ordered in the Firing phase from
-	   his C&C's menu, as the Political Officer's speech (the user's note) - FireGamePhase::process, through CnC::saveFirePhaseDeclaration,
+	   his ship's tooltip, as the Political Officer's speech (the user's note) - FireGamePhase::process, through CnC::saveFirePhaseDeclaration,
 	   checked on the LOADED ship and spent: one OffUsed note, read back at every later load. A second order, a doctored POST, another
 	   player's ship or a turn he charged writes nothing. */
 	public static function saveAnticipation($cnc, $gamedata){

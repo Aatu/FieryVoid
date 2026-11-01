@@ -1002,7 +1002,7 @@
 
 /* ── The Expert Analyst's dropdown (client/UI/analystPicker.js) ──────────────
    OFFICERS_PLAN.md Stage 35, the play tests 4524/4525 follow-up: the picker above in the violet of his Initial Orders button
-   (img/analyst.png, #b48cff), as the War Leader's menu wears Narn red and gold (its own INK in WarLeaderMenu.js). Solid
+   (img/analyst.png, #b48cff), as the War Leader's menu wears Narn red and gold (.fv-missionpicker--warleader below). Solid
    colours, never alphas (the alpha-compounding trap). The palette is these local properties - change it here. */
 .fv-missionpicker--analyst {
     --an-panel: linear-gradient(180deg, #221539, #150c26);
@@ -1391,6 +1391,122 @@
 .fv-missionpicker--lucky .fv-missionpicker__close:focus-visible,
 .fv-missionpicker--lucky .fv-missionpicker__button:focus-visible {
     outline-color: var(--lk-green);
+}
+
+/* ── The Expert War Leader's menu (client/UI/warLeaderPicker.js) ─────────────
+   OFFICERS_PLAN.md Stage 34, user request 2026-11-01: the Lucky Captain's picker above in the Narn red and gold of the C&C React menu it replaced
+   (WarLeaderMenu.js's INK, user, game 4523: "less generic blue") - the gold is the War Leader icon's yellow (UI.shipMovement.warLeaderColour).
+   Taunt and Anticipate are picks, Wrath and Center of Glory listed for state with a muted chip. Solid colours, never alphas (the
+   alpha-compounding trap). The palette is these local properties - change it here. */
+.fv-missionpicker--warleader {
+    --wl-panel: linear-gradient(180deg, #3b0d13, #25070b);
+    --wl-frame: #8e2a31;          /* the border and the rules between rows - a dull blood red */
+    --wl-wash: linear-gradient(180deg, #701a22, #4b0f16);
+    --wl-gold: #e0b440;           /* the header's stripe, an order's rail and chip, a button on hover */
+    --wl-title: #f2c230;          /* UI.shipMovement.warLeaderColour */
+    --wl-light: #f5d77a;          /* the ship's name, the button's text */
+    --wl-text: #fff4ea;
+    --wl-note: #dcbcae;
+    --wl-state: #cfa65c;          /* a chip saying when an ability was used, or why it cannot be given now */
+    --wl-hover: #4c1118;
+    --wl-pending: #5a1820;
+    --wl-btn: #4c1118;
+    --wl-btn-line: #b8892f;       /* the gold, dimmed */
+    --wl-on-gold: #2a0709;        /* dark text on the gold */
+    --wl-muted: #3a0c12;
+    background: var(--wl-panel);
+    border: 1px solid;
+    border-color: var(--wl-frame);
+    color: var(--wl-note);
+    max-width: 340px;
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__header {
+    background: var(--wl-wash);
+    border-left-color: var(--wl-gold);
+    border-bottom-color: var(--wl-btn-line);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__title {
+    color: var(--wl-title);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__subtitle {
+    color: var(--wl-light);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__close {
+    color: var(--wl-note);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__close:hover {
+    color: var(--wl-text);
+    border-color: var(--wl-frame);
+    background: var(--wl-pending);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__cost {
+    color: var(--wl-note);
+    border-bottom-color: var(--wl-frame);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__row {
+    border-bottom-color: var(--wl-frame);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__row:hover {
+    background: var(--wl-hover);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__row--disabled:hover {
+    background: transparent;
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__row--pending {
+    border-left-color: var(--wl-gold);
+    background: var(--wl-pending);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__label {
+    color: var(--wl-text);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__note {
+    color: var(--wl-note);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__chip {
+    color: var(--wl-on-gold);
+    background: var(--wl-gold);
+    border-color: var(--wl-gold);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__chip--muted {
+    color: var(--wl-state);
+    background: var(--wl-muted);
+    border-color: var(--wl-frame);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__footer {
+    border-top-color: var(--wl-frame);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__button {
+    color: var(--wl-light);
+    background: var(--wl-btn);
+    border-color: var(--wl-btn-line);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__button:hover {
+    color: var(--wl-on-gold);
+    background: var(--wl-gold);
+    border-color: var(--wl-gold);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__row:focus-visible,
+.fv-missionpicker--warleader .fv-missionpicker__close:focus-visible,
+.fv-missionpicker--warleader .fv-missionpicker__button:focus-visible {
+    outline-color: var(--wl-gold);
 }
 
 /* ── Focus ───────────────────────────────────────────────────────────────── */

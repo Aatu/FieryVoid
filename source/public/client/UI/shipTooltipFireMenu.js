@@ -22,7 +22,15 @@ window.ShipTooltipFireMenu = function () {
         { className: "dockFlight", condition: [isMine, isFiringPhase, isDockableUnit, isLaunchEnabledGame, hasEligibleCarrierInHex], action: openHangarDock, info: "Enter Hangar" },
         /* OFFICERS_PLAN.md Stage 37 - a Lucky Captain's Firing-phase feat (Re-roll Volley, Sure Shot, Dodge, Lucky Escape), armed from his menu
            (LuckyPicker) on his own ship - the Initial Orders menu offers the same button for his Initial Orders feats. Firing phase only. */
-        { className: "luckyCaptain", condition: [isMine, isFiringPhase, canLucky], action: openLuckyPicker, info: luckyInfo }
+        { className: "luckyCaptain", condition: [isMine, isFiringPhase, canLucky], action: openLuckyPicker, info: luckyInfo },
+        /* OFFICERS_PLAN.md Stages 25 / 28 - an Expert Political Officer's speech and an Expert Warrior's Supreme Anticipation (user request 2026-11-01 -
+           they were his C&C's Activate box): plain on/off toggles on his own ship, offered while each is still his to give. Two entries per toggle,
+           as the Initial Orders menu's Triad pairs: grey while not ordered, purple (speech) / red (anticipation) with a glow once it is. Firing
+           phase only. */
+        { className: "politicalSpeech", condition: [isMine, isFiringPhase, canDeclare('speech'), notDeclared('speech')], action: getToggleDeclaration('speech'), info: getDeclarationInfo('speech') },
+        { className: "politicalSpeechOn", condition: [isMine, isFiringPhase, canDeclare('speech'), isDeclared('speech')], action: getToggleDeclaration('speech'), info: getDeclarationInfo('speech') },
+        { className: "supremeAnticipation", condition: [isMine, isFiringPhase, canDeclare('anticipation'), notDeclared('anticipation')], action: getToggleDeclaration('anticipation'), info: getDeclarationInfo('anticipation') },
+        { className: "supremeAnticipationOn", condition: [isMine, isFiringPhase, canDeclare('anticipation'), isDeclared('anticipation')], action: getToggleDeclaration('anticipation'), info: getDeclarationInfo('anticipation') }
 	];
 
     ShipTooltipFireMenu.prototype.getAllButtons = function () {
@@ -323,6 +331,43 @@ window.ShipTooltipFireMenu = function () {
                 menu.shipTooltip.update();
             }
         });
+    }
+
+    //the speech / anticipation toggles: `declaration` is officers.DECLARATION_OFFICERS' key
+    function canDeclare(declaration) {
+        return function () {
+            return !!window.officers && !!officers.declarationCnc(this.targetedShip, declaration);
+        };
+    }
+
+    function isDeclared(declaration) {
+        return function () {
+            return officers.declared(this.targetedShip, declaration);
+        };
+    }
+
+    function notDeclared(declaration) {
+        return function () {
+            return !officers.declared(this.targetedShip, declaration);
+        };
+    }
+
+    function getDeclarationInfo(declaration) {
+        return function () {
+            return officers.declarationInfo(this.targetedShip, declaration);
+        };
+    }
+
+    /* Flip it and redraw, so the button turns into the other half of its pair. The pointer has not moved, so no mouseover fires on the
+       replacement - its line is set by hand, as cancelJumpGateSignal's (shipTooltipInitialOrdersMenu.js). */
+    function getToggleDeclaration(declaration) {
+        return function () {
+            if (!officers.toggleDeclaration(this.targetedShip, declaration)) return;
+            if (this.shipTooltip) {
+                this.currentInfo = officers.declarationInfo(this.targetedShip, declaration);
+                this.shipTooltip.update();
+            }
+        };
     }
 
     function openHangarLaunch() {

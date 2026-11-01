@@ -427,8 +427,8 @@ CnC.prototype.doIndividualNotesTransfer = function () {
 	var leader = this.getWarLeaderTransfer();
 	if (gamedata.gamephase == 3) {
 		var declared = leader ? [leader] : [];
-		//OFFICERS_PLAN.md Stage 25: an Expert Political Officer's speech, ordered this Firing phase (CnC::saveFirePhaseDeclaration reads it)
-		//Stage 28: or, on an Expert Warrior's C&C, his Supreme Anticipation
+		//OFFICERS_PLAN.md Stage 25: an Expert Political Officer's speech, ordered this Firing phase from his ship's tooltip (CnC::saveFirePhaseDeclaration
+		//reads it). Stage 28: or, on an Expert Warrior's C&C, his Supreme Anticipation
 		if (this.active) declared.unshift(this.isWarriorPost() ? 'anticipation' : 'speech');
 		//OFFICERS_PLAN.md Stage 37: a Lucky Captain's Firing-phase feat, armed from his menu (CnC::saveFirePhaseDeclaration -> Officers::saveLuckyArm)
 		var luck = this.getLuckyTransfer();
@@ -469,52 +469,18 @@ CnC.prototype.getWarLeaderTransfer = function () {
 };
 
 /* ===== EXPERT POLITICAL OFFICER'S SPEECH (OFFICERS_PLAN.md Stage 25) ===================================
-   "Once during each scenario, the political officer can give a stirring speech to his ship's crew ... +30 to its initiative": the
-   generic Activate box (SystemActivation, which reads `active` and these labels) on his C&C, in the Firing phase only, while he serves
-   and has not spoken (officers.canSpeak). `active` is this turn's order alone - posted at the commit (doIndividualNotesTransfer), judged
-   and spent by the server (Officers::saveSpeech), told in the combat log as firing resolves; the +30 is the next turn's. It is no
-   power boost, so the icon does not glow as one (suppressActiveBoost). The box wears the Hyach Computer's purple (user request
-   2026-10-21) - the speech is the only thing a C&C's Activate box ever holds.
-   ===== EXPERT WARRIOR'S SUPREME ANTICIPATION (OFFICERS_PLAN.md Stage 28) - the same box on HIS C&C (the Drazi have no Political Officer), in
-   the default blue (user request) with his labels: "+ 50 initiative bonus ... on the next turn" (officers.canAnticipateSupreme). */
+   "Once during each scenario, the political officer can give a stirring speech to his ship's crew ... +30 to its initiative": a toggle on
+   his own ship's Firing-phase tooltip (shipTooltipFireMenu.js, officers.toggleDeclaration), offered while he serves and has not spoken
+   (officers.canSpeak). This C&C's `active` is this turn's order alone - posted at the commit (doIndividualNotesTransfer), judged and spent
+   by the server (Officers::saveSpeech), told in the combat log as firing resolves; the +30 is the next turn's. It is no power boost, so the
+   icon does not glow as one (suppressActiveBoost).
+   ===== EXPERT WARRIOR'S SUPREME ANTICIPATION (OFFICERS_PLAN.md Stage 28) - the same `active` on HIS C&C (the Drazi have no Political Officer),
+   its own toggle: "+ 50 initiative bonus ... on the next turn" (officers.canAnticipateSupreme). Both were this C&C's Activate box until
+   the user moved them to the tooltip (2026-11-01). */
 CnC.prototype.suppressActiveBoost = true;
-
-//The Warrior's C&C answers false - a getter, so the one prototype serves both officers (SystemActivation reads it as a property)
-Object.defineProperty(CnC.prototype, 'activationMenuPurple', {
-	get: function () { return !this.isWarriorPost(); },
-	configurable: true
-});
 
 CnC.prototype.isWarriorPost = function () {
 	return Boolean(window.officers) && officers.isWarriorPost(this.ship, this);
-};
-
-CnC.prototype.mayDeclare = function () {
-	return Boolean(window.officers) && (officers.canSpeak(this.ship, this) || officers.canAnticipateSupreme(this.ship, this));
-};
-
-CnC.prototype.canActivate = function () {
-	return !this.active && this.mayDeclare();
-};
-
-CnC.prototype.canDeactivate = function () {
-	return Boolean(this.active) && this.mayDeclare();
-};
-
-CnC.prototype.getActivateLabel = function () {
-	return this.isWarriorPost() ? 'Anticipation!' : '"Speech!"';
-};
-
-CnC.prototype.getDeactivateLabel = function () {
-	return this.isWarriorPost() ? 'No anticipation' : 'No speech';
-};
-
-CnC.prototype.doActivate = function () {
-	if (this.canActivate()) this.active = true;
-};
-
-CnC.prototype.doDeactivate = function () {
-	if (this.canDeactivate()) this.active = false;
 };
 
 //Save Orders (SAVE_ORDERS_PLAN.md §1.4): the Command Node's nomination and swap in Initial Orders, the speech in the Firing phase.

@@ -5453,6 +5453,32 @@ seventh check pins 100 / 1100 (103 / 1103 with the line reverted).
 Client run 1079/11, none from this: the 5 "buy dialog's note" checks are stale since 04bdcfc93 (notes shortened to "Npts"); Stage 28's section throws in
 PhaseStrategy.syncWarLeaderMarkers (its fake shipIconContainer has no getArray - since the 4523 follow-up); the known 4 statics + "the burn ordered".
 
+**Follow-up (user request 2026-11-01) - built, uncommitted: the officers' once-per-battle orders moved onto the ship tooltip.** Client only; the server,
+the C&C transfer and Save Orders are unchanged.
+1. **War Leader, Initial Orders:** Taunt / Anticipate left the C&C's React menu (`WarLeaderMenu.js` DELETED, unhooked from SystemInfoButtons) for a
+   tooltip button on his own ship, "in the same way as Lucky Captain": it opens `client/UI/warLeaderPicker.js` (plain DOM, the Lucky picker's shape, the
+   old menu's Narn red and gold as `.fv-missionpicker--warleader` in hexPicker.css) listing all four - Taunt / Anticipate picks, Wrath / Center of Glory
+   with a state chip. `officers.canWarLeaderOrder(ship)` (signature changed: no system) is the button's gate - his own ship on the board, he serves,
+   Taunt or Anticipate still his, or one given (both spent: no button). `warLeaderButtonInfo` is its line ("Expert War Leader: Taunt ordered").
+2. **Speech (§9.32) and Supreme Anticipation (§9.35), Firing phase:** the C&C's Activate box retired (CnC canActivate / canDeactivate / labels / doActivate /
+   doDeactivate / the activationMenuPurple getter / mayDeclare removed - ShipSystem's false answers now); plain on/off toggles on his own ship's
+   Firing tooltip instead, offered while canSpeak / canAnticipateSupreme says he may (so not once used). `officers.declarationCnc / declared /
+   toggleDeclaration / declarationInfo`; the order is still the C&C's `active` (suppressActiveBoost kept - the icon would glow as power-boosted).
+3. **The buttons:** each is a PAIR of entries on opposite conditions (the Triad pattern - a tooltip button's class is fixed): grey `#8c8c8c` until ordered,
+   then lit with a drop-shadow glow - War Leader yellow `#f2c230` (UI.shipMovement.warLeaderColour), speech purple `#b05ce6`, anticipation the Charge's
+   red `#e8432e`. The user's white art (`warLeader2.png`, `speech.png`, `supremeAnticipate.png`, 50x50) is tinted through a CSS MASK on a ::before (as
+   confirm.css's buy-dialog icons), so the PNGs are used as delivered and the button's white hover fill stays behind the art. Colours = `--officer-ink`
+   in shipTooltip.css. A toggle sets the tooltip's line by hand after its redraw (the pointer has not moved - cancelJumpGateSignal's pattern).
+- Gates: officersClientHarness **1251 / 0** (Stage 25 / 28 sections rewritten for the toggles; Stage 34's gate call; a new section drives the REAL tooltip
+  menus' pairs and toggle actions and the REAL WarLeaderPicker on a fake DOM). Mutation **19 / 19** (scratchpad `mutateTT.js`) - the first pass missed
+  canWarLeaderOrder's isMyShip test (every "not mine" fixture had no list); now pinned with a teammate's War Leader, whose list his team IS sent.
+  lateEwElint's crash is pre-existing (getProjectionOrigin); walkers 16 / 19 / 20 green. `fvbuild -Client` (all three bundles carry it), `-Sync` done.
+  Headless screenshot of the six buttons + the picker checked. Docs (ammo-options.html) updated. Not play-tested.
+- Second round (user, same day): with one order waiting, the other is still a pick and REPLACES it in one click (the menu closes on a pick - the React
+  menu's "one a turn" until it was taken back cost two clicks); a spent one still shows "used". The lit glow cut to ONE faint halo
+  (`drop-shadow(0 0 2px` the colour at 0.55 alpha) - the bright double drop-shadow filled the gaps in the art. Client 1254 / 0; the picker / CSS mutants
+  re-run 6 / 6 (M12 now "a swap refused").
+
 ### 9.42 Stage 35: Expert Analyst, with three things FV now hides first (2026-10-29)
 
 **Rules text (user, 2026-10-29) - one of the original 25, moved to the Hard tier 2026-10-16.** "Expert Analyst: This expert is adept at locating
