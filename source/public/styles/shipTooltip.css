@@ -497,21 +497,14 @@
     background-image: url("../img/electrician.png");
 }
 
-/* OFFICERS_PLAN.md Stage 37 - a Lucky Captain's feats, opening his menu (client/UI/luckyPicker.js) in Initial Orders and the Firing phase. The user's
-   d20 art, recoloured green (#5fd38d, the colour his menu wears - hexPicker.css .fv-missionpicker--lucky). It is 50x50, not 40x40, so it needs the
-   three lines the jump gate icons below explain. */
-.luckyCaptain {
-    background-image: url("../img/luckyCaptain.png");
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-}
-
-/* OFFICERS_PLAN.md Stages 34 / 25 / 28 - the officers' once-per-battle orders moved off their C&C's menus onto the ship's tooltip (user request
+/* OFFICERS_PLAN.md Stages 34 / 25 / 28 / 37 - the officers' once-per-battle orders moved off their C&C's menus onto the ship's tooltip (user request
    2026-11-01): an Expert War Leader's Taunt / Anticipate (Initial Orders, opening client/UI/warLeaderPicker.js), an Expert Political Officer's
-   speech and an Expert Warrior's Supreme Anticipation (Firing phase, plain toggles). Each is a PAIR of buttons on opposite conditions
+   speech and an Expert Warrior's Supreme Anticipation (Firing phase, plain toggles), and a Lucky Captain's feats (Initial Orders and the Firing
+   phase, opening client/UI/luckyPicker.js). Each is a PAIR of buttons on opposite conditions
    (shipTooltip*Menu.js): the plain class GREY while nothing is ordered, the "On" class in its colour with a glow once it is - the War Leader
-   icon's yellow (UI.shipMovement.warLeaderColour / warLeaderGlowColour), a purple, the Charge icon's red (UI.shipMovement.chargeColour).
+   icon's yellow (UI.shipMovement.warLeaderColour / warLeaderGlowColour), a purple, the Charge icon's red (UI.shipMovement.chargeColour), the
+   Lucky Captain's green (#5fd38d, the colour his menu wears - hexPicker.css .fv-missionpicker--lucky; his PNG is already green, which the mask
+   ignores - only its alpha counts).
    The user's art is white on transparent, 50x50, so it is painted through a CSS MASK (as confirm.css's buy-dialog section icons) on a
    ::before, leaving the button's own white hover fill behind it; the glow is a drop-shadow on the button, which follows the masked art.
    Without mask support the plain white art shows. Change the colours here - --officer-ink is the art, the drop-shadows the glow. */
@@ -530,12 +523,19 @@
     background-image: url("../img/supremeAnticipate.png");
 }
 
+.luckyCaptain,
+.luckyCaptainOn {
+    background-image: url("../img/luckyCaptain.png");
+}
+
 .warLeaderOrder,
 .warLeaderOrderOn,
 .politicalSpeech,
 .politicalSpeechOn,
 .supremeAnticipation,
-.supremeAnticipationOn {
+.supremeAnticipationOn,
+.luckyCaptain,
+.luckyCaptainOn {
     --officer-ink: #8c8c8c;
     position: relative;
     background-size: contain;
@@ -559,13 +559,20 @@
     filter: drop-shadow(0 0 2px rgba(232, 67, 46, 0.55));
 }
 
+.luckyCaptainOn {
+    --officer-ink: #5fd38d;
+    filter: drop-shadow(0 0 2px rgba(95, 211, 141, 0.55));
+}
+
 @supports (mask-image: url("")) or (-webkit-mask-image: url("")) {
     .warLeaderOrder,
     .warLeaderOrderOn,
     .politicalSpeech,
     .politicalSpeechOn,
     .supremeAnticipation,
-    .supremeAnticipationOn {
+    .supremeAnticipationOn,
+    .luckyCaptain,
+    .luckyCaptainOn {
         background-image: none;
     }
 
@@ -574,7 +581,9 @@
     .politicalSpeech::before,
     .politicalSpeechOn::before,
     .supremeAnticipation::before,
-    .supremeAnticipationOn::before {
+    .supremeAnticipationOn::before,
+    .luckyCaptain::before,
+    .luckyCaptainOn::before {
         content: "";
         position: absolute;
         inset: 0;
@@ -604,6 +613,12 @@
     .supremeAnticipationOn::before {
         -webkit-mask-image: url("../img/supremeAnticipate.png");
         mask-image: url("../img/supremeAnticipate.png");
+    }
+
+    .luckyCaptain::before,
+    .luckyCaptainOn::before {
+        -webkit-mask-image: url("../img/luckyCaptain.png");
+        mask-image: url("../img/luckyCaptain.png");
     }
 }
 

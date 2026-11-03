@@ -3621,10 +3621,15 @@ window.officers = {
 		return true;
 	},
 
+	//the feat picked or armed for this phase, or null - what lights his tooltip button (shipTooltip*Menu.js luckyCaptain / luckyCaptainOn)
+	luckyPick: function luckyPick(ship) {
+		return this.luckyArmed(ship) || this.luckyChoice(ship);
+	},
+
 	//the button's line in the tooltip: the feat picked or armed, if any
 	luckyButtonInfo: function luckyButtonInfo(ship) {
 		var armed = this.luckyArmed(ship);
-		var choice = armed || this.luckyChoice(ship);
+		var choice = this.luckyPick(ship);
 		if (!choice) return 'Lucky Captain';
 		return 'Lucky Captain: ' + this.luckyAbilityName(choice) + (armed ? ' (armed)' : '');
 	},

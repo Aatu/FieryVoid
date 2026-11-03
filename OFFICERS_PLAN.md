@@ -5867,6 +5867,9 @@ Leader's Anticipate EW hold. The icon: `img/luckyCaptain.png` (the user's d20, 5
   [isMine, isFiringPhase, canLucky]; `combatLog.js` "LUCKY CAPTAIN:" (standalone); `weaponManager.doShortLogText` LuckyCaptain; `game.php` script tag.
   `shipTooltip.css` `.luckyCaptain` (50x50, so `background-size: contain`); `hexPicker.css` `.fv-missionpicker--lucky` (local `--lk-*` palette).
   `img/luckyCaptain.png` recoloured `#5fd38d` (alpha kept; the white original in the session scratchpad).
+- 2026-11-03 (user request): the button is now a PAIR like the War Leader's / speech's - `luckyCaptain` grey while nothing is picked or armed,
+  `luckyCaptainOn` green `#5fd38d` with a glow once one is (`officers.luckyPick` = armed || choice; `noLuckyPick` / `hasLuckyPick` in both menus).
+  Painted through the shared `--officer-ink` CSS mask in `shipTooltip.css`, so the PNG's own green is ignored (only its alpha counts).
 - Docs (`ammo-options.html`): a Lucky Captain card between the Expert Warrior and the Matter Weapons Expert.
 
 **Files.** Server: `Officers.php`, `ShipClasses.php`, `systems/ShipSystem.php`, `systems/baseSystems.php` (CnC), `handlers/firing.php`,

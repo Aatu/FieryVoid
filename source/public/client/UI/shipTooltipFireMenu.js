@@ -21,8 +21,10 @@ window.ShipTooltipFireMenu = function () {
         //LCV, and openHangarDock routes an LCV through the LCV-rail dock dialog.
         { className: "dockFlight", condition: [isMine, isFiringPhase, isDockableUnit, isLaunchEnabledGame, hasEligibleCarrierInHex], action: openHangarDock, info: "Enter Hangar" },
         /* OFFICERS_PLAN.md Stage 37 - a Lucky Captain's Firing-phase feat (Re-roll Volley, Sure Shot, Dodge, Lucky Escape), armed from his menu
-           (LuckyPicker) on his own ship - the Initial Orders menu offers the same button for his Initial Orders feats. Firing phase only. */
-        { className: "luckyCaptain", condition: [isMine, isFiringPhase, canLucky], action: openLuckyPicker, info: luckyInfo },
+           (LuckyPicker) on his own ship - the Initial Orders menu offers the same button for his Initial Orders feats. A pair, as the toggles below:
+           grey while no feat is armed, his green with a glow once one is. Firing phase only. */
+        { className: "luckyCaptain", condition: [isMine, isFiringPhase, canLucky, noLuckyPick], action: openLuckyPicker, info: luckyInfo },
+        { className: "luckyCaptainOn", condition: [isMine, isFiringPhase, canLucky, hasLuckyPick], action: openLuckyPicker, info: luckyInfo },
         /* OFFICERS_PLAN.md Stages 25 / 28 - an Expert Political Officer's speech and an Expert Warrior's Supreme Anticipation (user request 2026-11-01 -
            they were his C&C's Activate box): plain on/off toggles on his own ship, offered while each is still his to give. Two entries per toggle,
            as the Initial Orders menu's Triad pairs: grey while not ordered, purple (speech) / red (anticipation) with a glow once it is. Firing
@@ -316,11 +318,19 @@ window.ShipTooltipFireMenu = function () {
         return !!window.officers && officers.canLucky(this.targetedShip);
     }
 
+    function hasLuckyPick() {
+        return !!officers.luckyPick(this.targetedShip);
+    }
+
+    function noLuckyPick() {
+        return !officers.luckyPick(this.targetedShip);
+    }
+
     function luckyInfo() {
         return officers.luckyButtonInfo(this.targetedShip);
     }
 
-    //Anchored to the clicked button; the tooltip redraws after a pick, so its line shows it
+    //Anchored to the clicked button; the tooltip redraws after a pick, so the button lights up (or greys) and its line shows it
     function openLuckyPicker(isMaxClick, event) {
         var menu = this;
         var anchor = (event && event.currentTarget) ? event.currentTarget : null;

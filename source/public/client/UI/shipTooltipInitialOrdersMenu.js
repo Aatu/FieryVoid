@@ -78,8 +78,10 @@ window.ShipTooltipInitialOrdersMenu = function () {
            on a null selection. */
         { className: "electricianShunt", condition: [isSelf, canElectrify], action: openElectricianPicker, info: electricianInfo },
         /* OFFICERS_PLAN.md Stage 37 - a Lucky Captain's Initial Orders feat (EW Last, Disengage, Best Initiative): on his own ship, his menu
-           (LuckyPicker; the Firing-phase menu offers the same button for his Firing-phase feats). Not in ewButtons. Fails closed on a null selection. */
-        { className: "luckyCaptain", condition: [isSelf, canLucky], action: openLuckyPicker, info: luckyInfo },
+           (LuckyPicker; the Firing-phase menu offers the same button for his Firing-phase feats). A pair, as the War Leader's below: grey while no
+           feat is picked, his green with a glow once one is. Not in ewButtons. Fails closed on a null selection. */
+        { className: "luckyCaptain", condition: [isSelf, canLucky, noLuckyPick], action: openLuckyPicker, info: luckyInfo },
+        { className: "luckyCaptainOn", condition: [isSelf, canLucky, hasLuckyPick], action: openLuckyPicker, info: luckyInfo },
         /* OFFICERS_PLAN.md Stage 34 - an Expert War Leader's Taunt or Anticipate (user request 2026-11-01 - it was his C&C's React menu): on his own
            ship, his menu (WarLeaderPicker). Two entries for one button, as the Triad's pairs above: grey while no order is given, his yellow with a
            glow once one is, its line naming it. Not in ewButtons. Fails closed on a null selection. */
@@ -466,11 +468,19 @@ window.ShipTooltipInitialOrdersMenu = function () {
         return !!this.selectedShip && !!window.officers && officers.canLucky(this.selectedShip);
     }
 
+    function hasLuckyPick() {
+        return !!officers.luckyPick(this.selectedShip);
+    }
+
+    function noLuckyPick() {
+        return !officers.luckyPick(this.selectedShip);
+    }
+
     function luckyInfo() {
         return officers.luckyButtonInfo(this.selectedShip);
     }
 
-    //Anchored to the clicked button, as the Analyst's; the tooltip redraws after a pick, so its line shows it
+    //Anchored to the clicked button, as the Analyst's; the tooltip redraws after a pick, so the button lights up (or greys) and its line shows it
     function openLuckyPicker(isMaxClick, event) {
         var menu = this;
         var anchor = (event && event.currentTarget) ? event.currentTarget : null;
