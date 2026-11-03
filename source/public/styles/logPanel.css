@@ -1890,3 +1890,24 @@ only screen and (max-height: 500px) and (orientation: landscape) {
         display: inline-block;
     }
 }
+
+/* ⭐ THE EMPTY STRIP IS CLICK-THROUGH ON PHONES (user report 2026-11-03: weapon list icons
+   "very inconsistent" to tap). Collapsed, the panel is a full-width ~24px row along the
+   bottom with nothing drawn in it but the chevron - and at z-index:10 that invisible box sat
+   over the bottom ~22px of every icon in the weapon list's first row (WeaponList.js, z-index:2,
+   bottom:0 from 1024px down), so only a tap on an icon's top edge got through. In landscape
+   that row is every icon. The shell and the row stop taking input; the parts actually drawn -
+   the tabs, the chevron and the body - take it back. */
+@media only screen and (max-width: 765px),
+only screen and (max-height: 500px) and (orientation: landscape) {
+
+    #logcontainer,
+    #logUI {
+        pointer-events: none;
+    }
+
+    #logUI > *,
+    #logBody {
+        pointer-events: auto;
+    }
+}
