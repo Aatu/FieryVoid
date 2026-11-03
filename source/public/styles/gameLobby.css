@@ -864,6 +864,13 @@
   border-bottom: 1px solid var(--fv-line-soft);
 }
 
+/* Both bars stay hidden until the Store has loaded a faction - there is nothing to filter yet (user).
+   Keyed on ANY faction loaded, not the one shown, so fetching a new faction later does not fold them
+   away and jump the Store under the pointer. */
+.lb-buy:not(:has(.lb-store-faction[data-state="loaded"])) > .lb-buy-bar {
+  display: none;
+}
+
 .lb-buy-filters {
   display: flex;
   flex-wrap: wrap;

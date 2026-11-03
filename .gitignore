@@ -15,7 +15,13 @@ nano*
 *.log
 /node_modules
 /source/public/static
-/tests
+/tests/*
+# ...except the ship-data validator's baseline: it is derived from the repo alone, so it is committed and
+# every clone gets the same checkShipData.php gate (a commit deleted it once, in 2026-09). Git cannot
+# re-include a file under an excluded directory, hence the three steps.
+!/tests/shipdata/
+/tests/shipdata/*
+!/tests/shipdata/baseline.txt
 .claude
 
 # Local-only Discord secrets for the docker dev container (never commit)

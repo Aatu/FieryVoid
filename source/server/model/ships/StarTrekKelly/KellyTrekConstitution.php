@@ -96,7 +96,7 @@ class KellyTrekConstitution extends HeavyCombatVessel{
             ),
             1=> array(
 				2 => "Shield Projector",
-				4 => "Photon Torpedo",
+				4 => "Photon Launcher",
 				7 => "Type 6 Phaser",
 				8 => "Tractor Beam",
 				18 => "Structure",

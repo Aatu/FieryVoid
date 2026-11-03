@@ -1266,16 +1266,26 @@ class Manager{
                         $paid = isset($enhEntry[3]) ? (float)$enhEntry[3] : (float)Officers::legacyPrice($ship, $enhID);
                         $offered = false;
                         foreach ($ship->enhancementOptions as $option) if ($option[0] === $enhID) $offered = true;
+                        //OFFICERS_PLAN.md Stage 38: an officer another one grants (the Expert Gambler's free expert) only while that one frees him
+                        if ($offered && !Officers::grantStands($ship, $enhID)) $offered = false;
                         if (!$offered) {
                             $ship->pointCostEnh = max(0, (float)$ship->pointCostEnh - $paid);
-                            $sysEnhNotices[] = $ship->name . ': ' . Officers::getLabel($enhID) . ' is no longer offered on this unit'
+                            $sysEnhNotices[] = $ship->name . ': ' . Officers::labelFor($ship, $enhID) . ' is no longer offered on this unit'
                                 . ' - removed, and its ' . $paid . ' points refunded.';
                             continue;
                         }
                         $now = (float)Officers::rowPrice($ship, $enhID, $numberTaken); //the counts are written back below
+                        /* OFFICERS_PLAN.md Stage 33: an Expert Evangelist costs "5% of the cost of the fleet" - the slot's or the fleet's,
+                           which no saved fleet knows. He keeps what he cost, on his row too, and the lobby re-prices him to the slot the
+                           fleet is loaded into (officers.repriceFleet, which moves the points by the difference from that row). */
+                        if (Officers::isFleetPriced($enhID)) {
+                            $now = $paid;
+                            foreach ($ship->enhancementOptions as &$option) if ($option[0] === $enhID) $option[4] = $paid;
+                            unset($option);
+                        }
                         if ($now != $paid) {
                             $ship->pointCostEnh = max(0, (float)$ship->pointCostEnh - $paid + $now);
-                            $sysEnhNotices[] = $ship->name . ': ' . Officers::getLabel($enhID) . ' now costs ' . $now
+                            $sysEnhNotices[] = $ship->name . ': ' . Officers::labelFor($ship, $enhID) . ' now costs ' . $now
                                 . ' points (was ' . $paid . ').';
                         }
                     }
@@ -2910,6 +2920,14 @@ class Manager{
                carried raw: InitialOrdersGamePhase::process checks it against the loaded flight (FighterMissions::
                saveClaim) before writing it, and every other phase ignores the field. */
             if ($ship instanceof FighterFlight) $ship->setFighterMissionClaim($value["fighterMission"] ?? null);
+
+            /* OFFICERS_PLAN.md Stage 36 - an Expert Electrician's split of this turn's shunted power, {ob, thrust}. A CLAIM, carried raw:
+               InitialOrdersGamePhase::process checks it against the loaded flight (Officers::saveElectricianShunt); every other phase ignores it. */
+            if ($ship instanceof FighterFlight) $ship->setElectricianClaim($value["electricianShunt"] ?? null);
+
+            /* OFFICERS_PLAN.md Stage 35 - an Expert Analyst's scan this turn, {a: ability, t: target id}. A CLAIM, carried raw:
+               InitialOrdersGamePhase::process checks it against the loaded ship (Officers::saveAnalystScan); every other phase ignores it. */
+            $ship->setAnalystScanClaim($value["analystScan"] ?? null);
 
             $systems = $value["systems"] ?? [];
             foreach ($systems as $i => $system) {

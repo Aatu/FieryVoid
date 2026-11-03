@@ -135,9 +135,11 @@ class SystemInfo extends React.Component {
 			if(ship.minesweeper){
 				displayOffensiveBonus -= window.ew.getDetectMEW(ship);
 			}else{
-				displayOffensiveBonus -= window.ew.getDetectMEW(ship) * 2;
+                displayOffensiveBonus -= window.ew.getDetectMEW(ship) * 2;
 			}
         }
+        //OFFICERS_PLAN.md Stage 36: an Expert Electrician's shunted power this turn - a direct-fire weapon's only (officers.shuntOb)
+        if (ship.flight && window.officers && !system.ballistic) displayOffensiveBonus += officers.shuntOb(ship);
 
         var systemDisplayName = system.displayName;
         var firingModeDisplay = system.firingModes ? system.firingModes[system.firingMode] : null;
@@ -318,13 +320,13 @@ const getOfficers = (ship, system, alone = false) => {
         const state = officers.moveText(ship, entry) || officers.stateText(entry);
         return (
             <OfficerEntry key={`officer-${entry.id}-${i}`} $out={!officers.serves(entry, turn) || officers.movingTo(ship, entry) !== null}>
-                <OfficerName>{officers.label(entry.id)}: </OfficerName>
+                <OfficerName>{officers.label(entry.id, ship)}: </OfficerName>
                 {officers.summaryOf(ship, entry)}{state ? ' ' + state : ''}
             </OfficerEntry>
         );
     }), arriving.map((arrival, i) => (
         <OfficerEntry key={`arriving-${arrival.entry.id}-${i}`} $out>
-            <OfficerName>{officers.label(arrival.entry.id)} </OfficerName>
+            <OfficerName>{officers.label(arrival.entry.id, ship)} </OfficerName>
             {officers.arrivalText(ship, arrival.entry)}
         </OfficerEntry>
     )));

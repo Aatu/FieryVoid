@@ -19,7 +19,20 @@ window.ShipTooltipFireMenu = function () {
         { className: "recoverFlights", condition: [isMine, isFiringPhase, hasReceivableFlights, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarRecover, info: "Hangars" },
         //"Enter Hangar" is reused for LCVs: isDockableUnit accepts a flight OR an
         //LCV, and openHangarDock routes an LCV through the LCV-rail dock dialog.
-        { className: "dockFlight", condition: [isMine, isFiringPhase, isDockableUnit, isLaunchEnabledGame, hasEligibleCarrierInHex], action: openHangarDock, info: "Enter Hangar" }
+        { className: "dockFlight", condition: [isMine, isFiringPhase, isDockableUnit, isLaunchEnabledGame, hasEligibleCarrierInHex], action: openHangarDock, info: "Enter Hangar" },
+        /* OFFICERS_PLAN.md Stage 37 - a Lucky Captain's Firing-phase feat (Re-roll Volley, Sure Shot, Dodge, Lucky Escape), armed from his menu
+           (LuckyPicker) on his own ship - the Initial Orders menu offers the same button for his Initial Orders feats. A pair, as the toggles below:
+           grey while no feat is armed, his green with a glow once one is. Firing phase only. */
+        { className: "luckyCaptain", condition: [isMine, isFiringPhase, canLucky, noLuckyPick], action: openLuckyPicker, info: luckyInfo },
+        { className: "luckyCaptainOn", condition: [isMine, isFiringPhase, canLucky, hasLuckyPick], action: openLuckyPicker, info: luckyInfo },
+        /* OFFICERS_PLAN.md Stages 25 / 28 - an Expert Political Officer's speech and an Expert Warrior's Supreme Anticipation (user request 2026-11-01 -
+           they were his C&C's Activate box): plain on/off toggles on his own ship, offered while each is still his to give. Two entries per toggle,
+           as the Initial Orders menu's Triad pairs: grey while not ordered, purple (speech) / red (anticipation) with a glow once it is. Firing
+           phase only. */
+        { className: "politicalSpeech", condition: [isMine, isFiringPhase, canDeclare('speech'), notDeclared('speech')], action: getToggleDeclaration('speech'), info: getDeclarationInfo('speech') },
+        { className: "politicalSpeechOn", condition: [isMine, isFiringPhase, canDeclare('speech'), isDeclared('speech')], action: getToggleDeclaration('speech'), info: getDeclarationInfo('speech') },
+        { className: "supremeAnticipation", condition: [isMine, isFiringPhase, canDeclare('anticipation'), notDeclared('anticipation')], action: getToggleDeclaration('anticipation'), info: getDeclarationInfo('anticipation') },
+        { className: "supremeAnticipationOn", condition: [isMine, isFiringPhase, canDeclare('anticipation'), isDeclared('anticipation')], action: getToggleDeclaration('anticipation'), info: getDeclarationInfo('anticipation') }
 	];
 
     ShipTooltipFireMenu.prototype.getAllButtons = function () {
@@ -299,6 +312,72 @@ window.ShipTooltipFireMenu = function () {
             if (shipManager.movement.isPivoting && shipManager.movement.isPivoting(ship) !== "no") return false;
         }
         return true;
+    }
+
+    function canLucky() {
+        return !!window.officers && officers.canLucky(this.targetedShip);
+    }
+
+    function hasLuckyPick() {
+        return !!officers.luckyPick(this.targetedShip);
+    }
+
+    function noLuckyPick() {
+        return !officers.luckyPick(this.targetedShip);
+    }
+
+    function luckyInfo() {
+        return officers.luckyButtonInfo(this.targetedShip);
+    }
+
+    //Anchored to the clicked button; the tooltip redraws after a pick, so the button lights up (or greys) and its line shows it
+    function openLuckyPicker(isMaxClick, event) {
+        var menu = this;
+        var anchor = (event && event.currentTarget) ? event.currentTarget : null;
+        if (!window.LuckyPicker) return;
+        LuckyPicker.open(this.targetedShip, anchor, function () {
+            if (menu.shipTooltip) {
+                menu.currentInfo = "";
+                menu.shipTooltip.update();
+            }
+        });
+    }
+
+    //the speech / anticipation toggles: `declaration` is officers.DECLARATION_OFFICERS' key
+    function canDeclare(declaration) {
+        return function () {
+            return !!window.officers && !!officers.declarationCnc(this.targetedShip, declaration);
+        };
+    }
+
+    function isDeclared(declaration) {
+        return function () {
+            return officers.declared(this.targetedShip, declaration);
+        };
+    }
+
+    function notDeclared(declaration) {
+        return function () {
+            return !officers.declared(this.targetedShip, declaration);
+        };
+    }
+
+    function getDeclarationInfo(declaration) {
+        return function () {
+            return officers.declarationInfo(this.targetedShip, declaration);
+        };
+    }
+
+    /* Flip it and redraw, so the button turns into the other half of its pair. The pointer has not moved, so no mouseover fires on the
+       replacement - its line is set by hand, as cancelJumpGateSignal's (shipTooltipInitialOrdersMenu.js). */
+    function getToggleDeclaration(declaration) {
+        return function () {
+            if (!officers.toggleDeclaration(this.targetedShip, declaration)) return;
+            if (this.shipTooltip) {
+                this.currentInfo = officers.declarationInfo(this.targetedShip, declaration);
+                this.shipTooltip.update();
+            }
+        };
     }
 
     function openHangarLaunch() {

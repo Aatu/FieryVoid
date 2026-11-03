@@ -210,23 +210,23 @@ class technicalTargetDrone extends VreeCapital
                     20 => "Structure",
            		 ),
             2=> array(
-                    15 => "TAG:Weapon",
+                    //15 => "TAG:Weapon",
                     20 => "Structure",
            		 ),
             31=> array(
-                    15 => "TAG:Weapon",
+                    //15 => "TAG:Weapon",
                     20 => "Structure",
            		 ),
             32=> array(
-                    15 => "TAG:Weapon",
+                    //15 => "TAG:Weapon",
                     20 => "Structure",
            		 ),
             41=> array(
-                    15 => "TAG:Weapon",
+                    //15 => "TAG:Weapon",
                     20 => "Structure",
            		 ),
        		42=> array(
-                    15 => "TAG:Weapon",
+                    //15 => "TAG:Weapon",
                     20 => "Structure",
            		 ),
            	);

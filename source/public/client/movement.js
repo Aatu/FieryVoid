@@ -2742,7 +2742,8 @@ shipManager.movement = {
     getRemainingEngineThrust: function getRemainingEngineThrust(ship) {
         var rem = 0;
         if (ship.flight) {
-            rem = ship.freethrust + (window.officers ? officers.redlineThrustBonus(ship) : 0); //+ a Redline Pilot's afterburners this turn (OFFICERS_PLAN.md Stage 32)
+            //+ a Redline Pilot's afterburners this turn (OFFICERS_PLAN.md Stage 32), an Expert Electrician's shunted thrust (Stage 36)
+            rem = ship.freethrust + (window.officers ? officers.redlineThrustBonus(ship) + officers.shuntThrust(ship) : 0);
         } else {
             for (var i in ship.systems) {
                 var system = ship.systems[i];
@@ -2878,7 +2879,8 @@ shipManager.movement = {
     getFullEngineThrust: function getRemainingEngineThrust(ship) {
         var rem = 0;
         if (ship.flight) {
-            rem = ship.freethrust + (window.officers ? officers.redlineThrustBonus(ship) : 0); //+ a Redline Pilot's afterburners this turn (OFFICERS_PLAN.md Stage 32)
+            //+ a Redline Pilot's afterburners this turn (OFFICERS_PLAN.md Stage 32), an Expert Electrician's shunted thrust (Stage 36)
+            rem = ship.freethrust + (window.officers ? officers.redlineThrustBonus(ship) + officers.shuntThrust(ship) : 0);
         } else {
             for (var i in ship.systems) {
                 var system = ship.systems[i];

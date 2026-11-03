@@ -2719,7 +2719,10 @@ if ($ship->Enormous && !($ship instanceof spawnMeteoroid) && !($ship instanceof 
                 continue;
             }
             if($ship->userid == -5) continue; //Skip generated terrain.
-            if ($this->phase == -1 && $ship->isTerrain()) return 1; //Player has bought terrain that needs manually placed.
+            if ($ship->isTerrain()) {
+                if ($this->phase == -1) return 1; //Player has bought terrain that needs manually placed.
+                continue; //Nothing to do after that. Every Terrain class sets base = true, so it must not reach the base check below.
+            }
             if ($ship->osat || $ship->base) return 1;
         }
 

@@ -1,0 +1,6 @@
+# Ship-data validator baseline - the ACCEPTED findings for this tree.
+# Regenerate with:  php checkShipData.php --record
+# A normal run fails only on findings that are NOT listed here, so this file
+# is the record of known ship-data debt. Adding a line to it in a PR means
+# that PR added a known-broken ship entry - review it, do not rubber-stamp it.
+# Format:  check<TAB>ship<TAB>where<TAB>message

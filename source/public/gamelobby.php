@@ -242,6 +242,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         <script src="client/battleDamage.js"></script>
         <script src="client/systemEnhancements.js"></script>
         <script src="client/officers.js"></script>
+        <script src="client/buyHelp.js"></script>
         <script src="client/savedFleets.js"></script>
         <script src="client/power.js"></script>
         <script src="client/movement.js"></script>

@@ -959,17 +959,554 @@
     border-radius: 3px;
 }
 
+/* A one-button footer under the list, the button centred in its row (the Analyst's Cancel scan - user, play tests 4524/4525). */
+.fv-missionpicker__footer {
+    display: flex;
+    justify-content: center;
+    padding: 7px 8px;
+    border-top: 1px solid var(--fv-rule);
+}
+
+.fv-missionpicker__button {
+    min-width: 120px;
+    padding: 5px 14px;
+    font-family: arial;
+    font-size: 12px;
+    line-height: 1.2;
+    color: var(--fv-text);
+    background: var(--fv-card);
+    border: 1px solid var(--fv-line-scs);
+    border-radius: var(--fv-radius-modal);
+    cursor: pointer;
+}
+
+.fv-missionpicker__button:hover {
+    color: var(--fv-text-bright);
+    background: var(--fv-card-hover);
+}
+
 .fv-missionpicker__row:focus,
 .fv-missionpicker__back:focus,
-.fv-missionpicker__close:focus {
+.fv-missionpicker__close:focus,
+.fv-missionpicker__button:focus {
     outline: none;
 }
 
 .fv-missionpicker__row:focus-visible,
 .fv-missionpicker__back:focus-visible,
-.fv-missionpicker__close:focus-visible {
+.fv-missionpicker__close:focus-visible,
+.fv-missionpicker__button:focus-visible {
     outline: 1px solid var(--fv-accent);
     outline-offset: -1px;
+}
+
+/* ── The Expert Analyst's dropdown (client/UI/analystPicker.js) ──────────────
+   OFFICERS_PLAN.md Stage 35, the play tests 4524/4525 follow-up: the picker above in the violet of his Initial Orders button
+   (img/analyst.png, #b48cff), as the War Leader's menu wears Narn red and gold (.fv-missionpicker--warleader below). Solid
+   colours, never alphas (the alpha-compounding trap). The palette is these local properties - change it here. */
+.fv-missionpicker--analyst {
+    --an-panel: linear-gradient(180deg, #221539, #150c26);
+    --an-frame: #5a3f8f;          /* the border, and the header's underline */
+    --an-rule: #33215a;           /* the rules between rows and around the footer */
+    --an-wash: linear-gradient(180deg, #3d2569, #2a1849);
+    --an-violet: #b48cffcb;         /* the icon: the title, the accent rail, the chip, a button on hover */
+    --an-light: #d9c8ff;          /* the unit's name, the button's text */
+    --an-text: #f1ebff;
+    --an-note: #a998c9;
+    --an-hover: #2d1b4f;
+    --an-pending: #36225f;
+    --an-btn: #2c1a4d;
+    --an-btn-line: #7a5cc0;
+    --an-on-violet: #1a0e2e;      /* dark text on the violet */
+    background: var(--an-panel);
+    border: 1px solid;
+    border-color: var(--an-frame);
+    color: var(--an-note);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__header {
+    background: var(--an-wash);
+    border-left-color: var(--an-violet);
+    border-bottom-color: var(--an-frame);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__title {
+    color: var(--an-violet);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__subtitle {
+    color: var(--an-light);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__close {
+    color: var(--an-note);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__close:hover {
+    color: var(--an-text);
+    border-color: var(--an-frame);
+    background: var(--an-pending);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__cost {
+    color: var(--an-note);
+    border-bottom-color: var(--an-rule);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__row {
+    border-bottom-color: var(--an-rule);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__row:hover {
+    background: var(--an-hover);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__row--pending {
+    border-left-color: var(--an-violet);
+    background: var(--an-pending);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__label {
+    color: var(--an-text);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__note {
+    color: var(--an-note);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__chip {
+    color: #e6f4e6;
+    background: rgba(60, 122, 60, 0.671);;
+    border-color: #66b266; 
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__footer {
+    border-top-color: var(--an-rule);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__button {
+    color: var(--an-light);
+    background: var(--an-btn);
+    border-color: var(--an-btn-line);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__button:hover {
+    color: var(--an-on-violet);
+    background: var(--an-violet);
+    border-color: var(--an-violet);
+}
+
+.fv-missionpicker--analyst .fv-missionpicker__row:focus-visible,
+.fv-missionpicker--analyst .fv-missionpicker__close:focus-visible,
+.fv-missionpicker--analyst .fv-missionpicker__button:focus-visible {
+    outline-color: var(--an-violet);
+}
+
+/* ── The Expert Electrician's menu (client/UI/electricianPicker.js) ──────────
+   OFFICERS_PLAN.md Stage 36: the picker above in the yellow of his Initial Orders button (img/electrician.png, #ffd23f), as the Analyst's wears
+   violet. Its rows are not picks but steppers - a label, - / value / + - so they keep the default cursor. Solid colours, never alphas (the
+   alpha-compounding trap). The palette is these local properties - change it here. */
+.fv-missionpicker--electrician {
+    --el-panel: linear-gradient(180deg, #2b2410, #1a1608);
+    --el-frame: #8a7425;          /* the border, and the header's underline */
+    --el-rule: #463a14;           /* the rules between rows and around the footer */
+    --el-wash: linear-gradient(180deg, #4d3f12, #33290b);
+    --el-yellow: #ffd23f;         /* the icon: the title, the accent rail, a button on hover */
+    --el-light: #ffe79a;          /* the flight's name, the values, the buttons' text */
+    --el-text: #fff6d8;
+    --el-note: #c9b98a;
+    --el-btn: #3a3010;
+    --el-btn-line: #b0912c;
+    --el-on-yellow: #2a2205;      /* dark text on the yellow */
+    --el-warn: #ff9f6b;           /* the frying warning */
+    background: var(--el-panel);
+    border: 1px solid;
+    border-color: var(--el-frame);
+    color: var(--el-note);
+}
+
+.fv-missionpicker--electrician .fv-missionpicker__header {
+    background: var(--el-wash);
+    border-left-color: var(--el-yellow);
+    border-bottom-color: var(--el-frame);
+}
+
+.fv-missionpicker--electrician .fv-missionpicker__title {
+    color: var(--el-yellow);
+}
+
+.fv-missionpicker--electrician .fv-missionpicker__subtitle {
+    color: var(--el-light);
+}
+
+.fv-missionpicker--electrician .fv-missionpicker__close {
+    color: var(--el-note);
+}
+
+.fv-missionpicker--electrician .fv-missionpicker__close:hover {
+    color: var(--el-text);
+    border-color: var(--el-frame);
+    background: var(--el-btn);
+}
+
+.fv-missionpicker--electrician .fv-missionpicker__cost {
+    color: var(--el-note);
+    border-bottom-color: var(--el-rule);
+}
+
+.fv-missionpicker--electrician .fv-missionpicker__row {
+    cursor: default;
+    gap: 6px;
+    border-bottom-color: var(--el-rule);
+    border-left-color: var(--el-yellow);
+}
+
+.fv-missionpicker--electrician .fv-missionpicker__row:hover {
+    background: transparent;
+}
+
+.fv-missionpicker--electrician .fv-missionpicker__label {
+    color: var(--el-text);
+}
+
+.fv-missionpicker--electrician .fv-missionpicker__note {
+    color: var(--el-note);
+}
+
+.fv-missionpicker__value {
+    flex: 0 0 auto;
+    min-width: 34px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--el-light);
+}
+
+.fv-missionpicker__step {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 20px;
+    padding: 0;
+    font-family: arial;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+    color: var(--el-light);
+    background: var(--el-btn);
+    border: 1px solid var(--el-btn-line);
+    border-radius: var(--fv-radius-modal);
+    cursor: pointer;
+}
+
+.fv-missionpicker__step:hover {
+    color: var(--el-on-yellow);
+    background: var(--el-yellow);
+    border-color: var(--el-yellow);
+}
+
+.fv-missionpicker__step:disabled,
+.fv-missionpicker__step:disabled:hover {
+    opacity: 0.35;
+    cursor: default;
+    color: var(--el-light);
+    background: var(--el-btn);
+    border-color: var(--el-btn-line);
+}
+
+.fv-missionpicker__warn {
+    padding: 5px 10px;
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--el-warn);
+}
+
+.fv-missionpicker--electrician .fv-missionpicker__footer {
+    gap: 8px;
+    border-top-color: var(--el-rule);
+}
+
+/* three to a row, and a little lower than the picker's own (play test 4526) */
+.fv-missionpicker--electrician .fv-missionpicker__button {
+    min-width: 0;
+    flex: 1 1 0;
+    padding: 3px 6px;
+    color: var(--el-light);
+    background: var(--el-btn);
+    border-color: var(--el-btn-line);
+}
+
+.fv-missionpicker--electrician .fv-missionpicker__button:hover {
+    color: var(--el-on-yellow);
+    background: var(--el-yellow);
+    border-color: var(--el-yellow);
+}
+
+.fv-missionpicker--electrician .fv-missionpicker__close:focus-visible,
+.fv-missionpicker--electrician .fv-missionpicker__button:focus-visible,
+.fv-missionpicker__step:focus-visible {
+    outline: 1px solid var(--el-yellow);
+    outline-offset: -1px;
+}
+
+/* ── The Lucky Captain's menu (client/UI/luckyPicker.js) ──────────────────────
+   OFFICERS_PLAN.md Stage 37: the picker above in the green of his tooltip button (img/luckyCaptain.png, #5fd38d), as the Analyst's wears violet. Its
+   rows are his feats - this phase's open ones are picks, the rest dimmed with a muted chip saying why. Solid colours, never alphas (the
+   alpha-compounding trap). The palette is these local properties - change it here. */
+.fv-missionpicker--lucky {
+    --lk-panel: linear-gradient(180deg, #10291b, #0a1a11);
+    --lk-frame: #2f7a4f;          /* the border, and the header's underline */
+    --lk-rule: #1c4630;           /* the rules between rows and around the footer */
+    --lk-wash: linear-gradient(180deg, #1d4d32, #133722);
+    --lk-green: #5fd38d;          /* the icon: the title, the accent rail, the chip, a button on hover */
+    --lk-light: #b8f0cf;          /* the ship's name, the button's text */
+    --lk-text: #ecfff3;
+    --lk-note: #96bfa6;
+    --lk-hover: #163a26;
+    --lk-pending: #1b4730;
+    --lk-btn: #153a26;
+    --lk-btn-line: #3f9a66;
+    --lk-on-green: #07190e;       /* dark text on the green */
+    --lk-muted: #2a3d32;          /* a chip saying why a feat cannot be picked */
+    --lk-group: #133322;          /* the band behind feat 2's four uses */
+    background: var(--lk-panel);
+    border: 1px solid;
+    border-color: var(--lk-frame);
+    color: var(--lk-note);
+    max-width: 340px;
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__header {
+    background: var(--lk-wash);
+    border-left-color: var(--lk-green);
+    border-bottom-color: var(--lk-frame);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__title {
+    color: var(--lk-green);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__subtitle {
+    color: var(--lk-light);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__close {
+    color: var(--lk-note);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__close:hover {
+    color: var(--lk-text);
+    border-color: var(--lk-frame);
+    background: var(--lk-pending);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__cost {
+    color: var(--lk-note);
+    border-bottom-color: var(--lk-rule);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__row {
+    border-bottom-color: var(--lk-rule);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__row:hover {
+    background: var(--lk-hover);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__row--disabled:hover {
+    background: transparent;
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__row--pending {
+    border-left-color: var(--lk-green);
+    background: var(--lk-pending);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__label {
+    color: var(--lk-text);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__note {
+    color: var(--lk-note);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__chip {
+    color: var(--lk-on-green);
+    background: var(--lk-green);
+    border-color: var(--lk-green);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__chip--muted {
+    color: var(--lk-note);
+    background: var(--lk-muted);
+    border-color: var(--lk-rule);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__footer {
+    border-top-color: var(--lk-rule);
+}
+
+/* Feat 2 - one feat, four uses (play test 4527, re-done after the user's review: the first take's inset frame, rail and indent put its rows out of
+   line with the rest). A full-width band in a lifted fill under a small heading - the heading's text on the rows' own 10px (3px rail + 7px padding),
+   the rows unchanged, so everything stays in one column and a picked row's rail is the same as anywhere else. One rule above the heading and one
+   below the band, as between any two rows. */
+.fv-missionpicker--lucky .fv-missionpicker__group {
+    background: var(--lk-group);
+    border-bottom: 1px solid var(--lk-rule);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__grouphead {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 5px 8px 4px 10px;
+    border-bottom: 1px solid var(--lk-rule);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__grouphead .fv-missionpicker__label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--lk-green);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__grouphead .fv-missionpicker__note {
+    font-size: 10.5px;
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__button {
+    color: var(--lk-light);
+    background: var(--lk-btn);
+    border-color: var(--lk-btn-line);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__button:hover {
+    color: var(--lk-on-green);
+    background: var(--lk-green);
+    border-color: var(--lk-green);
+}
+
+.fv-missionpicker--lucky .fv-missionpicker__row:focus-visible,
+.fv-missionpicker--lucky .fv-missionpicker__close:focus-visible,
+.fv-missionpicker--lucky .fv-missionpicker__button:focus-visible {
+    outline-color: var(--lk-green);
+}
+
+/* ── The Expert War Leader's menu (client/UI/warLeaderPicker.js) ─────────────
+   OFFICERS_PLAN.md Stage 34, user request 2026-11-01: the Lucky Captain's picker above in the Narn red and gold of the C&C React menu it replaced
+   (WarLeaderMenu.js's INK, user, game 4523: "less generic blue") - the gold is the War Leader icon's yellow (UI.shipMovement.warLeaderColour).
+   Taunt and Anticipate are picks, Wrath and Center of Glory listed for state with a muted chip. Solid colours, never alphas (the
+   alpha-compounding trap). The palette is these local properties - change it here. */
+.fv-missionpicker--warleader {
+    --wl-panel: linear-gradient(180deg, #3b0d13, #25070b);
+    --wl-frame: #8e2a31;          /* the border and the rules between rows - a dull blood red */
+    --wl-wash: linear-gradient(180deg, #701a22, #4b0f16);
+    --wl-gold: #e0b440;           /* the header's stripe, an order's rail and chip, a button on hover */
+    --wl-title: #f2c230;          /* UI.shipMovement.warLeaderColour */
+    --wl-light: #f5d77a;          /* the ship's name, the button's text */
+    --wl-text: #fff4ea;
+    --wl-note: #dcbcae;
+    --wl-state: #cfa65c;          /* a chip saying when an ability was used, or why it cannot be given now */
+    --wl-hover: #4c1118;
+    --wl-pending: #5a1820;
+    --wl-btn: #4c1118;
+    --wl-btn-line: #b8892f;       /* the gold, dimmed */
+    --wl-on-gold: #2a0709;        /* dark text on the gold */
+    --wl-muted: #3a0c12;
+    background: var(--wl-panel);
+    border: 1px solid;
+    border-color: var(--wl-frame);
+    color: var(--wl-note);
+    max-width: 340px;
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__header {
+    background: var(--wl-wash);
+    border-left-color: var(--wl-gold);
+    border-bottom-color: var(--wl-btn-line);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__title {
+    color: var(--wl-title);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__subtitle {
+    color: var(--wl-light);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__close {
+    color: var(--wl-note);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__close:hover {
+    color: var(--wl-text);
+    border-color: var(--wl-frame);
+    background: var(--wl-pending);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__cost {
+    color: var(--wl-note);
+    border-bottom-color: var(--wl-frame);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__row {
+    border-bottom-color: var(--wl-frame);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__row:hover {
+    background: var(--wl-hover);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__row--disabled:hover {
+    background: transparent;
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__row--pending {
+    border-left-color: var(--wl-gold);
+    background: var(--wl-pending);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__label {
+    color: var(--wl-text);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__note {
+    color: var(--wl-note);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__chip {
+    color: var(--wl-on-gold);
+    background: var(--wl-gold);
+    border-color: var(--wl-gold);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__chip--muted {
+    color: var(--wl-state);
+    background: var(--wl-muted);
+    border-color: var(--wl-frame);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__footer {
+    border-top-color: var(--wl-frame);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__button {
+    color: var(--wl-light);
+    background: var(--wl-btn);
+    border-color: var(--wl-btn-line);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__button:hover {
+    color: var(--wl-on-gold);
+    background: var(--wl-gold);
+    border-color: var(--wl-gold);
+}
+
+.fv-missionpicker--warleader .fv-missionpicker__row:focus-visible,
+.fv-missionpicker--warleader .fv-missionpicker__close:focus-visible,
+.fv-missionpicker--warleader .fv-missionpicker__button:focus-visible {
+    outline-color: var(--wl-gold);
 }
 
 /* ── Focus ───────────────────────────────────────────────────────────────── */

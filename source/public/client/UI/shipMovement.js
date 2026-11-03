@@ -39,6 +39,22 @@ window.UI = {
         //...and fainter once the run has begun, when it can no longer be taken back
         chargeLockedOpacity: 0.75,
 
+        /* ⭐ THE WAR LEADER ICON (OFFICERS_PLAN.md Stage 34, an Expert War Leader's Wrath and Center of Glory in the Firing phase; user request
+           2026-10-29): the art (white, painted in one of these), its yellow while nothing is picked, the red once an enemy unit is his wrath and
+           the green once a unit of his fleet is the center of glory - the crosshairs on those units wear the same two
+           (ShipIcon.setWarLeaderMarked; the wrath's a deeper red than the Charge's, as a Drazi ship may carry both) -, how faint it is while
+           nothing is picked, its glow while it waits for the unit to be clicked (pulsing - tactical.css), and how see-through the crosshairs
+           are (0 invisible - 1 solid). Change them here. */
+        warLeaderIcon: "img/warLeader.png",
+        //...and how far astern of the ship's centre it stands, in px (was 42 - user, game 4523: too close to the ship icon)
+        warLeaderDistance: 80,
+        warLeaderColour: "#f2c230",
+        warLeaderWrathColour: "#c8143c",
+        warLeaderGloryColour: "#3cc84e",
+        warLeaderOffOpacity: 0.85,
+        warLeaderGlowColour: "#ffe08a",
+        warLeaderTargetOpacity: 0.65,
+
         /* ⭐ THE GRAVITIC ROTATE ICON (OFFICERS_PLAN.md Stage 31, an Expert Graviton Controller's gravitic drive rotation): the art - in the gravitic
            turn arrows' yellow -, how faint it is while the rotation may be made (a click rolls the die), and the glow it wears once the drive
            has been rotated this turn (when it is no longer clickable). Change them here. */
@@ -129,6 +145,7 @@ window.UI = {
 
             UI.shipMovement.halfphaseElement = $("#halfphase", ui);
             UI.shipMovement.chargeElement = $("#charge", ui);
+            UI.shipMovement.warLeaderElement = $("#warLeader", ui);
             UI.shipMovement.gravRotateElement = $("#gravRotate", ui);
             UI.shipMovement.redlineElement = $("#redline", ui);
 
@@ -173,6 +190,7 @@ window.UI = {
 
             UI.shipMovement.halfphaseElement.on("click touchstart", UI.shipMovement.halfphaseCallback);
             UI.shipMovement.chargeElement.on("click touchstart", UI.shipMovement.chargeCallback);
+            UI.shipMovement.warLeaderElement.on("click touchstart", UI.shipMovement.warLeaderCallback);
             UI.shipMovement.gravRotateElement.on("click touchstart", UI.shipMovement.gravRotateCallback);
             UI.shipMovement.redlineElement.on("click touchstart", UI.shipMovement.redlineCallback);
 
@@ -252,6 +270,12 @@ window.UI = {
             //A tap can arrive as touchstart AND click: one toggle, not two that cancel out.
             if (UI.shipMovement.checkUITimeout()) return false;
             UI.shipMovement.callbackHandler.chargeCallback(e);
+        },
+
+        warLeaderCallback: function warLeaderCallback(e) {
+            //A tap can arrive as touchstart AND click: one toggle, not two that cancel out.
+            if (UI.shipMovement.checkUITimeout()) return false;
+            UI.shipMovement.callbackHandler.warLeaderCallback(e);
         },
 
         gravRotateCallback: function gravRotateCallback(e) {
@@ -802,6 +826,8 @@ window.UI = {
             UI.shipMovement.drawChargeIcon(ship, pos, angle);
             //ROTATE - an Expert Graviton Controller's (OFFICERS_PLAN.md Stage 31), in the same spot: only Drazi carry a Warrior, and no Drazi hull a gravitic drive
             UI.shipMovement.drawGravRotateIcon(ship, pos, angle);
+            //WAR LEADER - an Expert War Leader's Wrath / Center of Glory (OFFICERS_PLAN.md Stage 34), astern, warLeaderDistance px out: Firing phase only, where the other two never show
+            UI.shipMovement.drawWarLeaderIcon(ship, pos, angle);
 
             //CONTRACTION
             var contraction = UI.shipMovement.contractionElement;
@@ -937,6 +963,51 @@ window.UI = {
             canvas.css("filter", held ? "drop-shadow(0 0 3px " + glow + ") drop-shadow(0 0 2px " + glow + ")" : "none");
             UI.shipMovement.drawUIElement(icon, pos.x, pos.y, 34, 30 * 1.4, angle, UI.shipMovement.chargeIcon, "chargecanvas", 0, 40,
                 held ? UI.shipMovement.chargeColour : null, held ? UI.shipMovement.drawChargeReticle : null);
+            return true;
+        },
+
+        /* The War Leader icon (OFFICERS_PLAN.md Stage 34) for an Expert War Leader's ship in the Firing phase, in officers.warLeaderState's state:
+           yellow and faint while Wrath or Center of Glory may be given - a click, then an enemy unit (his wrath) or a unit of his fleet (the
+           center of glory) -, pulsing while it waits for that click, red (wrath) or green (glory) and crosshaired once a unit is picked (a
+           click takes it back; its label names the unit), and the same, no longer clickable, once committed this turn. */
+        drawWarLeaderIcon: function drawWarLeaderIcon(ship, pos, angle) {
+            var icon = UI.shipMovement.warLeaderElement;
+            var state = window.officers ? officers.warLeaderState(ship) : null;
+            if (!state) {
+                icon.hide();
+                return false;
+            }
+            var named = officers.warLeaderNamed(ship);
+            var nameOf = function (id) {
+                var unit = (id !== undefined) ? gamedata.getShip(id) : null;
+                return unit ? unit.name : "the unit";
+            };
+            var labels = {
+                off: "War Leader - click here, then an enemy unit (Wrath) or a unit of your fleet (Center of Glory)",
+                picking: "War Leader - click an enemy unit (Wrath) or a unit of your fleet (Center of Glory); click here to stop",
+                wrath: "Wrath on " + nameOf(named.wrath) + " (click here to cancel)",
+                glory: nameOf(named.glory) + " is the Center of Glory (click here to cancel)",
+                wrathDone: "Wrath on " + nameOf(named.wrath),
+                gloryDone: nameOf(named.glory) + " is the Center of Glory"
+            };
+            //Both: moveTooltip reads the label with .data(), which caches the attribute on its first read.
+            icon.attr("data-movement-type", labels[state]).data("movement-type", labels[state]);
+            if (icon.is(":hover")) $("#movetooltip .movementType").text(labels[state]);
+            var wrath = state === 'wrath' || state === 'wrathDone';
+            var glory = state === 'glory' || state === 'gloryDone';
+            var held = wrath || glory;
+            var done = state === 'wrathDone' || state === 'gloryDone';
+            icon.css({
+                opacity: state === 'off' ? UI.shipMovement.warLeaderOffOpacity : 1,
+                cursor: done ? "default" : "pointer"
+            });
+            var colour = wrath ? UI.shipMovement.warLeaderWrathColour : (glory ? UI.shipMovement.warLeaderGloryColour : UI.shipMovement.warLeaderColour);
+            var glow = held ? colour : UI.shipMovement.warLeaderGlowColour;
+            var canvas = $("#warLeadercanvas");
+            canvas.css("--charge-glow", glow).toggleClass("charge-picking", state === 'picking');
+            canvas.css("filter", held ? "drop-shadow(0 0 3px " + glow + ") drop-shadow(0 0 2px " + glow + ")" : "none");
+            UI.shipMovement.drawUIElement(icon, pos.x, pos.y, 34, UI.shipMovement.warLeaderDistance, angle, UI.shipMovement.warLeaderIcon, "warLeadercanvas", 0, 40,
+                colour, held ? UI.shipMovement.drawChargeReticle : null);
             return true;
         },
 

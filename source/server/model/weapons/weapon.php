@@ -195,6 +195,10 @@ class Weapon extends ShipSystem
        the flight has a navigator, and an Expert Tailgunner trains it (getTailGunMod). PROTECTED, like $seedsBelowFullCharge:
        the client reads it off the static blueprint, where ShipCompactor::annotateSystems writes it (isTailGun). */
     protected $tailGun = false;
+    /* A weapon on a craft fitted with a RAMMING PROW (Fighter::fitRamProw, user rulings 2026-11-01): held to the row of hexes
+       straight ahead for the whole game, at -RAM_PROW_PENALTY to hit, and never fired at all if it is ballistic. PROTECTED, like
+       $tailGun - the static blueprint never has a prow, so the live payload carries it (stripForJson: `ramProw` and the arc). */
+    protected $ramProw = false;
     /* Firing modes whose fire control NOTHING may raise - no Gunsights, no Expert Gunner, Turret Officer or Matter Weapons Expert: a mode
        with a hit calculation of its own (the Antimatter Shredder's Shredder mode keeps its 0/0/0, user 2026-10-21). Asked through
        hasFixedFireControl by every fire control raiser; PROTECTED, like $tailGun - the lobby reads it off the static blueprint, where
@@ -315,7 +319,7 @@ class Weapon extends ShipSystem
     mount's original arcs and must be ignored (see Firing::isLegalIntercept). A method rather than a
     public property on purpose: methods aren't serialised into the static ship blueprint.*/
     public function isArcRestricted(){
-        return $this->arcRestricted;
+        return $this->arcRestricted || $this->ramProw;
     }
 
     /*is this weapon TURRET-MOUNTED - a mount that can jam (setArcRestriction)? Its turret is getTurretMates. The Expert Turret
@@ -485,6 +489,7 @@ class Weapon extends ShipSystem
 			if ($this->overloadshots !== 0 || $this->alwaysoverloading) $strippedSystem->overloadshots = $this->overloadshots;
 			if ($this->extraoverloadshots !== 0) $strippedSystem->extraoverloadshots = $this->extraoverloadshots;
 			if (!empty($this->extraoverloadshotsArray)) $strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
+			if ($this->overloadHiddenFromViewer()) $this->maskOverload($strippedSystem); //OFFICERS_PLAN.md Stage 35
 			$strippedSystem->fireOrders = $this->fireOrders;         
 			
 			if(isset($this->ammunition)){
@@ -559,7 +564,8 @@ class Weapon extends ShipSystem
            log, which label the shot by it) or once the game is over. Until then a Piercing mode on a gun that has none
            would point at the Gunner, so anyone else gets the fire control list without it, too. */
         if ($this->addedMode !== null) {
-            if ($this->addedModePublic || TacGamedata::$currentGameFinished || $ship->isRevealedToCurrentViewer()) {
+            if ($this->addedModePublic || TacGamedata::$currentGameFinished || $ship->isRevealedToCurrentViewer()
+                || Officers::analystReveals($ship, 'arming')) { //Stage 35: an Expert Analyst's arming scan detects "piercing"
                 foreach ($this->addedModeFields as $field) {
                     $strippedSystem->$field = $this->$field;
                 }
@@ -578,14 +584,46 @@ class Weapon extends ShipSystem
         //Turret jam (ReducedArcs crit): the static blueprint still carries the mount's FULL arc, so
         //the live reduced arc has to travel with the payload - the client merges JSON over the
         //blueprint, and every arc consumer (targeting, "Not In Arc", the hover arc) reads these.
-        if ($this->arcRestricted) {
+        if ($this->arcRestricted || $this->ramProw) {
             $strippedSystem->startArc = $this->startArc;
             $strippedSystem->endArc = $this->endArc;
+        }
+        //Ramming Prow: the flag the client's hit chance and weapon selection read, and the tooltip's Arc and "Ramming Prow" lines
+        if ($this->ramProw) {
+            $strippedSystem->ramProw = true;
+            $strippedSystem->data = $this->data;
         }
 
 		}
         return $strippedSystem;
     }
+
+	/* OFFICERS_PLAN.md Stage 35 (user's note 2026-10-29: "hidden until the moment a sustained weapon fires") - is this weapon's overload charge
+	   hidden from the CURRENT VIEWER? An overloadable weapon charging an overload, or charged and not yet fired (overloadshots still the full
+	   extraoverloadshots - the "S2" before its first sustained shot), from anyone but its own team: until the game is over, or an Expert Analyst
+	   of the viewer's team scans its arming that turn ("Any special weapon arming modes (sustained, piercing, etc.) currently active are
+	   detected"). Once it has fired a sustained shot (0 < overloadshots < extraoverloadshots) the opponent watched it fire: public. The
+	   always-sustained classes are sustained by nature, not by an arming choice, and are never hidden. No viewer context: never hidden. */
+	private function overloadHiddenFromViewer(){
+		if (!$this->overloadable || $this->alwaysoverloading) return false;
+		if ($this->overloadshots > 0 && $this->overloadshots < $this->extraoverloadshots) return false;
+		$ship = $this->getUnit();
+		if (!($ship instanceof BaseShip) || TacGamedata::$currentGameFinished || $ship->isRevealedToCurrentViewer()) return false;
+		return !(TacGamedata::$officersPresent && Officers::analystReveals($ship, 'arming'));
+	}
+
+	/* ...and its payload without it: no overload counters (the static blueprint's 0 fills them, so the icon reads ordinary loading - turnsloaded
+	   climbs alike either way) and its power entries without the overload ones (type 3), every turn's - a past turn's would tell the same. */
+	private function maskOverload($strippedSystem){
+		unset($strippedSystem->overloadturns, $strippedSystem->overloadshots);
+		if (empty($strippedSystem->power)) return;
+		$kept = array();
+		foreach ($strippedSystem->power as $power){
+			if ((int)$power->type !== 3) $kept[] = $power;
+		}
+		if (empty($kept)) unset($strippedSystem->power);
+		else $strippedSystem->power = $kept;
+	}
 
 	//when intercepting shot directed at another ship - can the weapon do it? (called if $freeintercept == true && $freeinterceptspecial == true)
 	public function canFreeInterceptShot($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)
@@ -1062,6 +1100,10 @@ class Weapon extends ShipSystem
 				? "JAMMED - locked to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
 				: "Whole turret may jam to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
 					. " on a " . $this->arcRestrictionThreshold . "+ (d20) whenever damaged";
+		}
+		if ($this->ramProw) {
+			$this->data["Ramming Prow"] = $this->ballistic ? "Cannot be fired"
+				: "Fires straight ahead only, -" . (self::RAM_PROW_PENALTY * 5) . "% to hit";
 		}
         $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' . $this->priorityAF;
 
@@ -1578,6 +1620,31 @@ public function getFullStartLoading()
         return $this->tailGun;
     }
 
+    /* RAMMING PROW (Fighter::fitRamProw): "its weapons firing arc is reduced to the row of hexes extending directly ahead of the
+       fighter. In addition, any weapons fire is at a -2 penalty" - and (user ruling 2026-11-01) no ballistic weapon may be used
+       at all, which the client refuses (weaponManager.selectWeapon), as it enforces every arc. The row ahead is 359..1, not
+       0..0 or 360..0: Mathlib::isInArc reads start == end as a full circle, and so does the client once mathlib.addToDirection
+       has turned 360..0 by the craft's facing. Bearings are whole degrees on both ends, so only the hexes dead ahead fall in it
+       until 33 hexes out. ⚠️ MIRROR PAIR with weaponManager.getRamProwMod (JS) for the to-hit. */
+    const RAM_PROW_PENALTY = 2; //-10%
+    const RAM_PROW_ARC_START = 359;
+    const RAM_PROW_ARC_END = 1;
+
+    public function fitRamProw(){
+        $this->ramProw = true;
+        $this->startArc = self::RAM_PROW_ARC_START;
+        $this->endArc = self::RAM_PROW_ARC_END;
+    }
+
+    public function hasRamProw(){
+        return $this->ramProw;
+    }
+
+    //in calculateHitBase's fighter branch
+    public function getRamProwMod(){
+        return $this->ramProw ? -self::RAM_PROW_PENALTY : 0;
+    }
+
     /* ⭐ A tail gun's to-hit modifier (OFFICERS_PLAN.md Stage 21), in calculateHitBase's fighter branch: -TAIL_GUN_PENALTY on a
        turn its craft also fires another DIRECT-FIRE weapon - "not ballistic weapons fired in Initial Orders phase like Torpedoes, only
        other direct fire weapons fired during Firing Phase" (user ruling 2026-10-21); an interception, a Meteor Defence declaration and
@@ -1983,6 +2050,9 @@ public function getFullStartLoading()
             $mod += Officers::gunnerShotBonus($shooter, $this, $standardCalledShot, $gamedata);
             $mod += Officers::targeterShotBonus($shooter, $this, $standardCalledShot, $gamedata);
             $mod += Officers::chargeHitBonus($shooter, $this, $target, $gamedata);
+            /* Stage 34: this turn's Expert War Leader abilities - +1 at the unit of his wrath for his fleet's ships, +2 for the center of glory's
+               every shot, and his taunt's +1 at his ship / -1 at his fleet's other ships for the enemy. ⚠️ MIRROR PAIR with officers.warLeaderShotBonus. */
+            $mod += Officers::warLeaderShotBonus($shooter, $this, $target, $fireOrder, $gamedata);
         }
 
         if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)) { //leaving instanceof OSAT here - assuming MicroSATs will not suffer this penalty (Dovarum seems to be able to turn/pivot like a superheavy fighter it's based on)
@@ -2013,11 +2083,15 @@ public function getFullStartLoading()
             	 if(!$shooter->ignoreManoeuvreMods && !$coordinated) $mod -= TacGamedata::$officersPresent ? Officers::combatPivotPenalty($shooter, $gamedata->turn) : 1;
             }
             $mod += $this->getTailGunMod($shooter, $gamedata->turn); //a tail gun fired with its craft's other direct-fire weapons (Stage 21)
+            $mod += $this->getRamProwMod(); //a weapon on a craft with a Ramming Prow
 
             $effectiveOB = $shooter->offensivebonus;
             /* FIGHTER MISSIONS (FIGHTER_MISSIONS_PLAN.md D5): the mission's term goes on the bonus BEFORE the crit and
                mine-detection deductions, for the turn the shot belongs to. ⚠️ MIRROR PAIR with weaponManager.computeOEW. */
             if (TacGamedata::$fighterMissionsPresent) $effectiveOB = FighterMissions::adjustOffensiveBonus($shooter, $target, $this, $fireOrder->turn, $effectiveOB);
+            /* OFFICERS_PLAN.md Stage 36 - an Expert Electrician's shunted power: the OB his flight put into this turn's DIRECT fire ("not ballistic
+               weapons"), on the bonus before the crit and mine-detection deductions, as the mission's term. ⚠️ MIRROR PAIR with weaponManager.computeOEW. */
+            if (!$this->ballistic && TacGamedata::$officersPresent) $effectiveOB += Officers::shuntOb($shooter, $fireOrder->turn);
             $firstFighter = $shooter->getSampleFighter();
             $OBcrit = $firstFighter->hasCritical("tmpsensordown");
             $mdew = $shooter->getEWByType("Detect Mines", $gamedata->turn); //-1 OB for each point of Mine Detect
@@ -2580,7 +2654,8 @@ public function getFullStartLoading()
             if ($i == 0) { //clear variables that may be relevant for further shots in line
                 $fireOrder->linkedHit = null;
             }
-            $rolled = Dice::d(100);
+            //OFFICERS_PLAN.md Stage 37: the die a Lucky Captain's armed feat rolled ahead for this shot, if one did (Officers::toHitRoll)
+            $rolled = TacGamedata::$officersPresent ? Officers::toHitRoll($fireOrder, $i) : Dice::d(100);
             if ($this->isLinked && $i > 0) { //linked shot - number rolled (and effect) for furthr shots will be just the same as for first
                 $rolled = $fireOrder->rolled;
             }
@@ -3604,6 +3679,11 @@ full Advanced Armor effects (by rules) for reference:
 		if ($this->arcRestricted){
 			$this->startArc = $this->reducedArcStart;
 			$this->endArc = $this->reducedArcEnd;
+		}
+		//Ramming Prow - the same reason, for the whole game (fitRamProw)
+		if ($this->ramProw){
+			$this->startArc = self::RAM_PROW_ARC_START;
+			$this->endArc = self::RAM_PROW_ARC_END;
 		}
 
     }//endof function changeFiringMode

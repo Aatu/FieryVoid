@@ -18,7 +18,7 @@ Make sure you have the following installed on your machine:
 
 Docker runs the server (Nginx/PHP/MariaDB), but the client-side JS bundling (`yarn build` / `yarn watch:legacy`) runs on your host machine, so Node.js and Yarn need to be installed locally.
 
-1. Install Node.js (this also installs npm). Use an LTS release; the build was last verified on Node 24 LTS (2026-10-08).
+1. Install Node.js (this also installs npm). Use an LTS release, at least Node 20.19 or 22.12 (Vite 8's minimum - `yarn install` refuses anything older); the build was last verified on Node 24 LTS (2026-10-30).
    - Windows: download the LTS installer from https://nodejs.org/, or run `winget install OpenJS.NodeJS.LTS`
    - macOS: `brew install node`
    - Linux: use your distro's package manager (e.g. `sudo apt install nodejs npm`) or https://github.com/nvm-sh/nvm
@@ -28,6 +28,8 @@ Docker runs the server (Nginx/PHP/MariaDB), but the client-side JS bundling (`ya
    npm install -g yarn
 
    (Avoid `corepack prepare yarn@stable`, which activates Yarn 4 and rewrites yarn.lock. Node 25 and later don't include Corepack anyway.)
+
+   Install the project's packages with Yarn only. npm rewrites yarn.lock whenever it installs and drops the other platforms' binaries from it, so this repo makes `npm install` / `npm ci` / `npm update` fail on purpose (the error says `Required: {"npm":"please-use-yarn"}`). `npm run ...` and `npm install -g yarn` still work.
 
 3. Verify both are available by running `node -v` and `yarn -v` in a terminal. Once they report versions you're ready for the "Setup Client-Side Development (Yarn)" step below.
 
@@ -269,7 +271,7 @@ You'll need to run yarn watch:legacy in FV folder when editing client files now,
 When uploading your branch to gitHub it's best not to include these files, as they will need to be regenerated anyway for the branch being deployed live and it makes merging easier not to have several versions of the bundles.
 
 Minification (from 3.6.2026):
-The bundler now depends on esbuild to minify the legacy bundles, (already present via Vite, so a normal yarn install covers it), and yarn watch:legacy intentionally produces un-minified output for debuggability while yarn build minifies.
+The bundler now depends on esbuild to minify the legacy bundles (a devDependency in its own right since Vite 8, which no longer brings esbuild along - a normal yarn install covers it), and yarn watch:legacy intentionally produces un-minified output for debuggability while yarn build minifies.
 
 
 
@@ -375,15 +377,16 @@ It is deliberately a **runtime** validator, not a source parser. A static probe 
 - **dupkeys** — duplicate roll keys. This is the one check that *cannot* be done at runtime: PHP builds an array literal with the last value for a repeated key and says nothing, so by the time the ship exists the earlier entry is simply gone. It tokenises the file instead (`token_get_all`, not a regex — comments and nested arrays live inside these literals).
 - **image / sysimage** — `$imagePath` and per-system icons resolve to real files under `source/public/`, **case-exactly**. `file_exists()` is useless here: Windows dev is case-insensitive and live is not, so a case slip works on your machine and 404s only in production (see the `dockingCollar.webp` incident). Note the two icon conventions it honours — a ShipSystem's `$iconPath` is always resolved under `img/systemicons/` even when it contains slashes, while a Fighter's `$iconPath`/`$imagePath` are web-root relative.
 - **variantof** — `$variantOf` is empty, a known retirement sentinel (`NONE`/`OBSOLETE`/`OBSELETE`), or the `$shipClass` of a real ship. Anything else makes the ship invisible in the lobby: it is neither a base design nor nestable under one, which is exactly how a truncated sentinel silently retires a refit nobody meant to retire.
-- **hangar** — declared `$fighters[]` fit the hangar boxes, using `HangarOps::populateInitialHangarUsage`'s own arithmetic (capacity in BOXES, catapult/rail/LCV bays partitioned out on both sides, ultralights two to a box). An over-declaration is silently truncated at game start.
+- **hangar** — declared `$fighters[]` fit the hangar boxes, using `HangarOps::populateInitialHangarUsage`'s own arithmetic (capacity in BOXES, catapult/rail/LCV bays partitioned out on both sides, ultralights two to a box). An over-declaration is silently truncated at game start. Drakh Raiders and Weapon Platforms count as catapult-borne (`CATAPULT_CATEGORIES`), which HangarOps does not do yet.
 - **arcs** — `startArc`/`endArc` numeric and within 0..360.
 - **ids** — system ids are positional and unique: `id == array index` for top-level systems. Persisted thrust, fire-order, power and critical rows are keyed by these ids, so a collision misroutes real saved data. It also walks the `1000+(id*10)+i` sub-weapon ids of duo/dual weapons and missile racks, which collide once a parent carries more than 10 sub-weapons — though as of 18.8.2026 no ship blueprint actually reaches that arm (the one `DualWeapon` subclass is commented out and `FighterMissileRack` lives inside flights), so treat it as a guard for the future rather than as live coverage.
+- **setting** — every faction is placed alike by the lobby's custom sub-group tests (`gamelobby.js` `customSubgroups`: Nexus, Escalation Wars, Other Universe) and by their server twin `Officers::$otherSettings`, which keeps the Babylon 5-only officer rules (the Expert Graviton Controller) off other settings. A new non-B5 faction added to the lobby list alone, as Terran Federation was in October 2026, gets the wrong officer rules with no error anywhere; this check names the faction and the list to fix.
 
 ### The baseline
 
 The tree carries a large amount of pre-existing ship-data debt, so a plain "exit 1 on any violation" gate would be red forever and therefore ignored. The accepted state lives in **`tests/shipdata/baseline.txt`** and a normal run only fails on findings that are *not* in it. Fix something and it's reported as FIXED (never a failure); introduce something and the run fails naming it and only it.
 
-Unlike the replay harness's baseline, this one is derived purely from the repository — no database, no local games — so it is deterministic, portable and **committed**. Everyone gets the same gate on a fresh clone, and the baseline diff is itself reviewable: a PR that adds a line to `baseline.txt` is a PR that added a known-broken ship entry. Review it, don't rubber-stamp it.
+Unlike the replay harness's baseline, this one is derived purely from the repository — no database, no local games — so it is deterministic, portable and **committed**. Everyone gets the same gate on a fresh clone, and the baseline diff is itself reviewable: a PR that adds a line to `baseline.txt` is a PR that added a known-broken ship entry. Review it, don't rubber-stamp it. The rest of `tests/` is git-ignored, but `.gitignore` makes an exception for this one file, so it appears in `git status` like any other committed file. A commit that deletes it leaves every other checkout without a baseline (it happened once, in September 2026), so never commit its deletion.
 
     php checkShipData.php --record        # accept the current state (ALL of it) as the new baseline
     php checkShipData.php --no-baseline   # ignore the baseline; show the whole debt
@@ -424,10 +427,46 @@ and to give it a cheaper Expert Scavenger, add `'My Custom Faction' => 20` to th
 
 The Markab, Corillani and Yolu pay his normal price, and the Minbari pay 10%. (`OFF_TARG` and `OFF_ELINT` in the table already work this way.) Each key can appear **only once** per officer. A second `'pct'` silently replaces the first, so list every faction in one `pct` array. A `pct` or `max` for a faction that `only` leaves out (or `never` names) does nothing, because that faction is never offered the officer.
 
+### Narrower rules: Ancient factions, particular hulls, limits per fleet (10.2026)
+
+Six more keys go in the same entries. They exist for the Ancient exceptions below, but work for any faction:
+
+    'OFF_WLEAD' => array('ancients' => array('Kirishiac Lords'),                    // Ancient factions he is offered to
+        'hulls'    => array('Kirishiac Lords' => array('kirishiacKingship', 'kirishiacLordship')), // only on these hulls
+        'perFleet' => array('Kirishiac Lords' => 1),                                // at most 1 in one player's fleet
+        'notWith'  => array('Kirishiac Lords' => array('OFF_WARR'))),               // never in a fleet with these officers
+    'OFF_POL'  => array('only' => array('Centauri Republic', 'Centauri Republic (WotCR)'),
+        'ancients' => array('Torvalus Speculators'),
+        'label'    => array('Torvalus Speculators' => 'Expert Gambler'),           // his name for this faction
+        'grants'   => array('Torvalus Speculators' => array('OFF_HELM', 'OFF_SCAN', 'OFF_ENG', 'OFF_NAV', 'SYS_HARM'))),
+
+- **`ancients`** — Ancient and Primordial hulls (`factionAge` 3 or more) get no officers at all, unless the officer's `ancients` list names their faction. It covers every hull of the faction, Primordial ones included. `only` and `never` are never read for an Ancient hull: `ancients` is its whole faction test.
+- **`hulls`** — this faction is offered him only on these hulls. Each is the hull's **PHP class name**, as its ship file declares it (`class kirishiacKingship extends BaseShip`); case does not matter. A variant is a class of its own, so list it too if it should qualify.
+- **`perFleet`** — at most this many of him in one player's fleet, counting only that faction's units. An officer and his placed twin count as one (the Religious Leader at the C&C or moved into another system).
+- **`notWith`** — never in the same fleet as these officers, on that faction's units. One side's list is enough (`OFF_WARR`'s entry needn't repeat it), though the table lists both for clarity.
+- **`label`** — his name for this faction everywhere: the buy window, the fleet list, tooltips, notes and the combat log. Keep it short: "<name> killed" must fit 40 characters.
+- **`grants`** — for this faction, the things *his own rules make free* come with him and only with him: offered only where he is, bought only alongside him, and never more than he frees (here one of the four experts and five Hardened Armour). It can name only what an officer's rules already make free — today that is the Political Officer alone.
+
+How the rules are kept: an officer nobody may take right now is simply **not offered** — the buy window leaves out an officer the rest of the fleet has no room for, or one ruled out by what is ticked beside him (a `notWith` officer, a granted one before his grantor or once he has given what he frees), and the ship window's system menus leave out a placed twin or a granted refit the same way. A copied ship leaves such an officer behind, and the **Fleet Correctness Report** lists every officer with a fleet rule, with a FAILURE line when a fleet breaks one (a saved fleet, say). When the fleet is readied, the server keeps the first in fleet order and drops the rest — their points stay spent — so a doctored fleet gains nothing.
+
+`perFleet` is not only for Ancients: the Expert Evangelist is one to a Corillani fleet (`'OFF_EVAN' => array('only' => array('Corillani Theocracy'), 'perFleet' => array('Corillani Theocracy' => 1))`).
+
+The Ancient exceptions built this way (`$factionRules` in `Officers.php`):
+
+| Faction | Officer | Where | Fleet limit |
+|---|---|---|---|
+| Kirishiac Lords | Expert War Leader | Kingship or Lordship | one War Leader **or** one Expert Warrior |
+| Kirishiac Lords | Expert Warrior | any ship with a C&C | (as above) |
+| Walkers of Sigma-957 | Expert ELINT Officer | Pathfinder | one |
+| Mindriders | Expert Religious Leader | Consortium | one |
+| Torvalus Speculators | Expert Political Officer, named **Expert Gambler** | capital ships (as for the Centauri) | none; his free expert and five free Hardened Armour work too, and his speeches have Torvalus topics |
+| Torvalus Speculators | Lucky Captain, at the Dilgar price (25%) | any ship with a C&C | one |
+
 Things to know:
 
-- **The name must be the faction string exactly as your ship files set it** (`$this->faction = "My Custom Faction";`) — the same name the faction has in Fleet Selection. It is case-sensitive, and a name that matches no faction silently does nothing; `tests/replay/officersHarness.php` (if you run it) checks every name in the table against the factions that exist.
-- The table only narrows what the officer's own rules allow. A ship still needs his post (no Jump Engine, no Jump Officer), and Ancients, OSATs, mines, terrain and remotely controlled craft never get officers at all.
+- **The name must be the faction string exactly as your ship files set it** (`$this->faction = "My Custom Faction";`) — the same name the faction has in Fleet Selection. It is case-sensitive, and a name that matches no faction silently does nothing; `tests/replay/officersHarness.php` (if you run it) checks every name in the table against the factions that exist, and that every `hulls` class belongs to its faction.
+- The table only narrows what the officer's own rules allow. A ship still needs his post (no Jump Engine, no Jump Officer), and OSATs, mines, terrain and remotely controlled craft never get officers at all; Ancients only where `ancients` says so.
+- A faction speaking of its own topics in the Political Officer's speech is a separate list, `$speechTopicsByFaction` in `Officers.php`.
 - To take an officer away from **one hull** rather than a whole faction, use the usual `$this->enhancementOptionsDisabled[] = 'OFF_GENE';` in that ship's file.
 - Offers are baked into the static ship files, so **regenerate them after any change**: `scripts\fvbuild.ps1 -Statics` (or plain `fvbuild.ps1`).
 - A saved fleet that holds an officer its faction can no longer buy gets him removed and his points refunded when it is loaded; one whose price changed is re-priced, with a notice either way. A game already in progress simply loses the officer at its next load (the points stay spent), so avoid changing a rule mid-campaign.

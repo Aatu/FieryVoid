@@ -777,15 +777,18 @@ window.gamedata = {
 		var lines = [];
 		var units = gamedata.bulkCount(ship);
 		var crafts = ship.flight ? (parseInt(ship.flightSize, 10) || 1) : 1;
+		var ordnanceCrafts = lobbyEnhancements.ordnanceCraft(crafts, lobbyEnhancements.prowCount(ship)); //ordnance: never for a craft with a Ramming Prow
 
 		for (var enhId in (ship.enhancementOptions || {})) {
 			var entry = ship.enhancementOptions[enhId];
 			var name = lobbyEnhancements.describeTaken(entry); //null when not taken
 			if (name === null) continue;
 			name = name.replace(/^(\(AMMO\)|\(LIGHT AMMO\)|\(MEDIUM AMMO\)|\(HEAVY AMMO\)|\(Option\))\s*/, '');
-			var cost = window.officers
-				? officers.flightCost(entry[0], entry[2], gamedata.enhancementOptionCost(entry), crafts, officers.perCraftExtra(ship, entry[0]), officers.standardFlight(ship))
-				: gamedata.enhancementOptionCost(entry) * crafts;
+			var rowCrafts = lobbyEnhancements.isOrdnance(entry[0]) ? ordnanceCrafts : crafts;
+			var cost = lobbyEnhancements.isCraftCounted(entry[0]) ? gamedata.enhancementOptionCost(entry) //bought craft by craft (the Ramming Prow)
+				: window.officers
+				? officers.flightCost(entry[0], entry[2], gamedata.enhancementOptionCost(entry), rowCrafts, officers.perCraftExtra(ship, entry[0]), officers.standardFlight(ship))
+				: gamedata.enhancementOptionCost(entry) * rowCrafts;
 			if (window.officers) cost = officers.shipRowCost(ship, entry, cost); //an Expert Political Officer's free expert (Stage 25)
 			lines.unshift({ text: name, cost: cost * units }); //reverse order
 		}
@@ -2266,6 +2269,13 @@ window.gamedata = {
 				}
 				checkResult += "<br>";
 			}
+			/* OFFICERS_PLAN.md Stage 38 - the officer rules that span a fleet ($factionRules perFleet / notWith: one Kirishiac War Leader or
+			   Expert Warrior, one Pathfinder's ELINT officer, ...). Reported while the fleet carries such an officer; Officers::sanitiseFleet
+			   drops what breaks them as the fleet is committed. */
+			officers.fleetConflicts(fleetUnits).forEach(function (line) {
+				checkResult += " " + line.text + (line.ok ? R_OK : R_FAILURE) + "<br>";
+				if (!line.ok) problemFound = true;
+			});
 		}
 
 		checkResult += " Total Assault Shuttles: " + totalFtrAS;
@@ -2487,6 +2497,9 @@ window.gamedata = {
 		var slotid = gamedata.selectedSlot;
 		if (!slotid) return;
 
+		//OFFICERS_PLAN.md Stage 33: an Expert Evangelist costs 5% of the fleet - re-priced before the total, which then reads it
+		if (window.officers && typeof officers.repriceFleet === 'function') officers.repriceFleet();
+
 		var points = gamedata.fleetCost();
 		var maxPoints = gamedata.getMaxPoints();
 
@@ -2592,6 +2605,9 @@ window.gamedata = {
 	//lists them alphabetically. Babylon 5 Wars has no test - it takes every custom faction the others do not
 	//(user, Stage 5: What If, Great Crusade Orieni, House Valheru, Custom Ships, Drakh, Thirdspace,
 	//Barada Imperium, Ch'Lonas Cooperative).
+	//⚠️ MIRROR PAIR with Officers::$otherSettings (source/server/model/ships/Officers.php): a faction added to
+	//Nexus, Escalation Wars or Other Universe here must be added there too, or the B5-only officer rules keep
+	//treating it as Babylon 5. checkShipData.php's `setting` check (fvbuild -Check) fails until the two agree.
 	customSubgroups: [
 		{ name: "Babylon 5 Wars", test: null },
 		{ name: "Nexus", test: /^Nexus\b/ },
@@ -4228,6 +4244,9 @@ window.gamedata = {
 			noTaken = target.data("count");
 			if (noTaken > 0) { //enhancement picked - note!
 				ship.enhancementOptions[enhNo][2] = noTaken;
+				//OFFICERS_PLAN.md Stage 33/34: a fleet-priced officer keeps the price the dialog charged. This unit is a FRESH blueprint clone,
+				//whose offer still reads the static 0 - and repriceFleet moves the points by the difference from the row, so he was charged twice
+				if (window.officers && officers.isFleetPriced(ship.enhancementOptions[enhNo][0])) ship.enhancementOptions[enhNo][4] = target.data("enhPrice");
 				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight) {
 						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a fighter officer scaled by the flight's size (D8)
@@ -4336,6 +4355,10 @@ window.gamedata = {
 
 		newShip.name = copiedShip.name;
 		newShip.pointCost = copiedShip.pointCost;
+		//...and the two buckets folded into it, as copyBulk carries them, so pointCost = hull + buckets holds on the copy too: the dialog prices an
+		//Expert War Leader off officers.unitHullCost, which read the copied enhancements - his own price among them - as hull (OFFICERS_PLAN.md Stage 34)
+		newShip.pointCostEnh = copiedShip.pointCostEnh;
+		newShip.pointCostEnh2 = copiedShip.pointCostEnh2;
 		newShip.flightSize = copiedShip.flightSize;
 		//REINFORCEMENTS_PLAN.md §4 Stage 1: a copy starts in the same place as its original,
 		//front-line or hyperspace. newShip is a fresh blueprint clone and carries nothing.
@@ -4393,13 +4416,11 @@ window.gamedata = {
 		if ($(".confirm .totalUnitCostAmount").length > 0) {
 			ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");
 		}
-		var newPointCost = ship.pointCost;
-
-		if (!gamedata.canAfford(ship)) {
-			$(".confirm").remove();
-			window.confirm.error("You cannot afford this ship!", function () { });
-			return;
-		}
+		var newPointCost = ship.pointCost; //the dialog's total: the hull and the ship-level rows - the refits are added below
+		/* Per-system refits and placed officers (WEAPON_ENHANCEMENTS_PLAN.md §5.2 - user report 2026-10-31: a copy kept neither). copyShip put
+		   the original's rows on the dialog's unit, but the rebuild below starts again from the blueprint: carried across like the damage,
+		   DEEP-cloned so the copy never shares the original's rows. The affordability check moved below, to price them in. */
+		var copiedRefits = window.systemEnhancements ? systemEnhancements.clone(ship.systemEnhancements) : null;
 
 		//Pre-battle damage (§5.3): the line below rebuilds the ship from its blueprint, so
 		//carry the payload across the rebuild (deep-cloned by battleDamage.clone).
@@ -4439,6 +4460,9 @@ window.gamedata = {
 			noTaken = target.data("count");
 			if (noTaken > 0) { //enhancement picked - note!
 				ship.enhancementOptions[enhNo][2] = noTaken;
+				//OFFICERS_PLAN.md Stage 33/34: a fleet-priced officer keeps the price the dialog charged. This unit is a FRESH blueprint clone,
+				//whose offer still reads the static 0 - and repriceFleet moves the points by the difference from the row, so he was charged twice
+				if (window.officers && officers.isFleetPriced(ship.enhancementOptions[enhNo][0])) ship.enhancementOptions[enhNo][4] = target.data("enhPrice");
 				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight) {
 						ship.pointCostEnh += confirm.enhRowCost(target, flightSize); //per craft, but a fighter officer scaled by the flight's size (D8)
@@ -4511,12 +4535,44 @@ window.gamedata = {
 		var copyDamageDiscarded = window.battleDamage
 			&& battleDamage.onShipRebuilt(ship, copiedFlightSize);
 
+		/* The carried refits, as doEditShip paints them: after lobbyEnhancements.apply (a refit stacks ON TOP of ELITE_CREW's bump) and after
+		   the damage preview (the D11 sweep needs its structure cascade). Priced by what THIS copy bought - an Expert Political Officer's free
+		   armour or a Quartermaster's free refit is free only with him aboard (totalCost re-prices them) - and swept: a placed officer the
+		   fleet has no room for (OFFICERS_PLAN.md Stage 38 - the copy is not in the fleet yet, the original is), a refit or placed officer on
+		   a system the damage destroys (D11), and anything the officers unticked in the dialog granted or posted (dropDestroyedPosts). */
+		var refitsDropped = [];
+		var fleetDropped = [];
+		if (copiedRefits) {
+			//the copy's own rows, never a blueprint's (a loaded fleet registers its class off a bought unit - copyShip's stand-in)
+			ship.systemEnhancements = copiedRefits;
+			ship.pointCostSysEnh = 0;
+		}
+		if (copiedRefits && copiedRefits.length) {
+			lobbyEnhancements.apply(ship);
+			if (window.officers) fleetDropped = officers.dropFleetBlockedPlaced(ship);
+			systemEnhancements.apply(ship);
+			systemEnhancements.totalCost(ship);
+			refitsDropped = systemEnhancements.dropDestroyed(ship);
+		}
+		ship.pointCost = newPointCost + (parseFloat(ship.pointCostSysEnh) || 0);
+		if (window.officers && typeof officers.dropDestroyedPosts === 'function') {
+			refitsDropped = refitsDropped.concat(officers.dropDestroyedPosts(ship)); //moves pointCost itself
+		}
+
+		if (!gamedata.canAfford(ship)) {
+			$(".confirm").remove();
+			window.confirm.error("You cannot afford this ship!", function () { });
+			return;
+		}
+
 		$(".confirm").remove();
 		gamedata.updateFleet(ship);
 
 		if (copyDamageDiscarded) {
 			confirm.warning("Size reduced - pre-battle damage on the units above the new size was not copied.");
 		}
+		if (refitsDropped.length) confirm.warning(systemEnhancements.describeRemoved(refitsDropped));
+		if (fleetDropped.length) confirm.warning(fleetDropped.join(' '));
 		//gamedata.populateFleetDropdown();
 	},
 

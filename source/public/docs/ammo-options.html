@@ -46,6 +46,10 @@
     reload the missiles they started the game with, as long as the carrier has bought the Ordnance Reserve enhancement
     (see <a href="#shipenhancements">Ship Enhancements</a>) and there are enough ordnance points to pay for the
     replacements.</p>
+  <p>Your opponent cannot see a flight's missiles until one of their units comes within 16 hexes of it (12 hexes for a
+    fighter or shuttle): from then on they can count them, though not tell their types apart, and once a unit of theirs
+    has been within 4 hexes they can also tell Dummy Missiles from real ones. They keep that knowledge for the rest of the
+    battle. An Expert Analyst can identify a flight's missiles from 30 hexes. Fighter torpedoes are not hidden.</p>
   <p>Missiles do not use the firing ship's OEW: their built-in guidance is usually folded into the weapon's fire control
     rather than kept separate. Fighter missiles do benefit from the fighter's offensive bonus.</p>
   <p>Ammunition listings usually give the year each missile type became available (its ISD); where there are two dates,
@@ -422,6 +426,22 @@
         <dt>Effect</dt><dd>-5 Initiative, -1 thrust, -1 OB, +1 Defence Rating, +2 to dropout rolls</dd>
         <dt>Cost</dt><dd>-10% of the craft's price (rounded up)</dd>
         <dt>Limit</dt><dd>1</dd>
+      </dl>
+    </article>
+
+    <article class="fvd-card fvd-card--wide">
+      <h3>Ramming Prow</h3>
+      <dl class="fvd-spec">
+        <dt>Effect</dt><dd>A block of armour over the craft's nose: +2 front armour. Its weapons fire only at the row of
+          hexes straight ahead, at -10% to hit, and its ballistic weapons (missiles, torpedoes, bombs) cannot be used, so the
+          flight's missiles and other ordnance are bought only for its craft without a prow. Its
+          ramming factor rises by 50% (rounded up, the prow's armour included) when it rams, or when it is rammed through
+          its front - and a ram that comes through a flight's front strikes a craft with a prow while one is left.</dd>
+        <dt>Cost</dt><dd>10% of the craft's price (rounded up), per prow</dd>
+        <dt>Limit</dt><dd>One per craft, fitted from the first craft of the flight on</dd>
+        <dt>Notes</dt><dd>Fighters only (not shuttles, breaching pods or assault shuttles), and Kirishiac Warrior
+          Projectiles. Offered only when Desperate rules apply to your team. A Warrior's Glancing Ram and Warrior Ram
+          keep their arcs and aim; the Ramming Attack is never affected.</dd>
       </dl>
     </article>
   </div>
@@ -864,8 +884,8 @@
       it is designed <i>now</i> and re-priced, since ships are revised from time to time. If a refit has become more
       expensive, cheaper, or is no longer possible at all, you are told what changed rather than it happening
       silently.</li>
-    <li>Finally, be aware that the &#10022; star and the "System Enhancements (n)" line are hidden from your opponent, but
-      several of the improved values themselves are not: shield ratings, armour and thrust all have to reach the other
+    <li>Finally, be aware that the &#10022; star and the "System Enhancements (n)" line are hidden from your opponent (unless
+      an Expert Analyst of theirs scans the ship's arming), but several of the improved values themselves are not: shield ratings, armour and thrust all have to reach the other
       player for their own damage and movement displays to be correct. A careful opponent comparing a ship against its
       published control sheet can still work out that something has been refitted.</li>
   </ul>
@@ -884,7 +904,8 @@
       window.</li>
     <li>A few officers serve in a <b>system you choose</b> - the Expert Gunner in a weapon, the Matter Weapons Expert in a
       Matter weapon instead of the C&amp;C, the Expert Religious Leader in any Primary system that is not a weapon instead
-      of the C&amp;C, the Expert Targeter in a Structure block, and the Expert Turret Officer in a turret-mounted weapon. Buy one
+      of the C&amp;C, the Expert Evangelist in any system or Structure block instead of the C&amp;C, the Expert Targeter in a
+      Structure block, and the Expert Turret Officer in a turret-mounted weapon. Buy one
       there once the ship is in your fleet: click the
       system in the ship window (for a Structure block, its health bar) and add him under <b>Officers</b> in its Enhancements
       menu. A system holds one such officer.</li>
@@ -892,11 +913,15 @@
       officer.</li>
     <li>A ship may carry several officers, but only one of each type - except where a card gives a higher limit. A fighter
       flight may carry only <b>one officer in total</b>: once one is bought, the buy window refuses a second.</li>
-    <li>A ship officer's price is a percentage of the ship's base cost, rounded up. A fighter officer's is a percentage of
-      one fighter's cost - paid once for the whole flight, or for every fighter in it, as each card says.</li>
-    <li>A unit is only offered an officer whose post it has - no C&amp;C, no Helmsman. Ancient units, OSATs, MicroSATs,
-      mines, terrain and remotely controlled craft such as Orieni Hunter-Killers (they have no pilots) cannot carry officers
-      at all.</li>
+    <li>A ship officer's price is a percentage of the ship's base cost, rounded up - except the Expert Evangelist's, a
+      percentage of the fleet's. A fighter officer's is a percentage of one fighter's cost - paid once for the whole flight,
+      or for every fighter in it, as each card says.</li>
+    <li>A unit is only offered an officer whose post it has - no C&amp;C, no Helmsman. OSATs, MicroSATs, mines, terrain and
+      remotely controlled craft such as Orieni Hunter-Killers (they have no pilots) cannot carry officers at all.</li>
+    <li><b>Ancient units</b> carry none either, with a few exceptions, each named on its card: the Kirishiac Lords' Expert War
+      Leader or Expert Warrior, the Walkers' Pathfinder's Expert ELINT Officer, the Mindriders' Consortium's Expert Religious
+      Leader, and the Torvalus' Expert Gambler and Lucky Captain. Most are limited to one in a fleet: once your fleet has one, the
+      buy window no longer offers him, and the Fleet Check reports one too many.</li>
     <li>Some officers belong to particular factions, or are not available to some, and some factions pay less for one.
       Each card says so.</li>
   </ul>
@@ -909,6 +934,8 @@
     <li><b>Killed.</b> Whenever the post takes damage, its normal critical roll also decides the officer's fate: a roll of
       20 or more, modifiers included, kills them. The roll is made even when the damage destroys the system.</li>
     <li>Either way, the officer still serves for the rest of the turn it happens, and is gone from the next turn.</li>
+    <li>An officer whose ship <b>jumps out</b> of the battle through hyperspace is neither: he left with it, and his tooltip says
+      so.</li>
     <li>An officer whose post is destroyed by pre-battle damage is <b>removed and refunded</b> at once, and a message says so.
       Repairing the system afterwards does not bring him back - buy him again if you want him. (A Matter Weapons Expert
       whose weapon is only damaged before the battle stays aboard but will not serve: move him to an undamaged weapon.)</li>
@@ -923,7 +950,8 @@
   <ul>
     <li>Some officers can change posts: the Expert Gunner, between weapons; the Matter Weapons Expert, between the C&amp;C and
       the ship's Matter weapons; the Expert Religious Leader, between the systems of the ship's Primary section that are
-      not weapons; the Expert Turret Officer, between turret-mounted weapons; and the Expert Targeter, between the ship's outer
+      not weapons; the Expert Evangelist, between any of the ship's systems and Structure blocks; the Expert Turret Officer,
+      between turret-mounted weapons; and the Expert Targeter, between the ship's outer
       Structure blocks - or, on a medium ship, from one side to
       the other with the <b>Front</b> / <b>Aft</b> buttons that take Move's place. Click a block's health bar to reach his
       menu, and a highlighted health bar to move him there.</li>
@@ -958,23 +986,61 @@
       tooltip of his own when you hover over his block's health bar.</li>
     <li>The ship window's gold Enhancements box counts the officers aboard, as <b>Officers (2)</b>. In the lobby, a
       fighter flight's box names its one officer instead (<b>Expert Pilot (3)</b> for three pilots).</li>
-    <li>Your opponent sees none of these until the game is over. Some effects do show, though, because they change numbers
+    <li>Your opponent sees none of these until the game is over, unless an Expert Analyst of theirs scans the ship for its
+      officers. Some effects do show, though, because they change numbers
       everyone can read: a Helmsman's, a Security Officer's, a Religious Leader's or a Dogfighter's initiative (and the initiative,
-      profiles and sensors of a ship whose Religious Leader has been lost), a Geneticist's profiles, a Technician's reactor power,
+      profiles and sensors of a ship whose Religious Leader has been lost), an Evangelist's initiative and fire control across your
+      whole fleet (and the penalties once he is lost), a Geneticist's profiles, a Technician's reactor power,
       an ELINT Officer's sensor rating, ELINT ranges and Blanket Protection,
       a Matter Weapons Expert's, an Expert Gunner's or an Expert Turret Officer's fire control, a Plasma Scientist's battery capacity and Plasma Web range, a Navigator's turn, pivot, roll and accel/decel costs, a Jump Officer's jump
       range, how long his jump point stays open and his arrival initiative penalty, an Evader's or Expert Pilots' offensive bonus (and the jinking the pilots let a flight do), the
       criticals and damage an Engineer or Scavenger repairs, and a weapon's loading when an officer speeds up its reload.
       The opponent sees the number, not who is behind it. An Expert Gunner's added Piercing mode stays hidden from your
       opponent until he fires it: they see it only in the replay of that turn. Lasers boosted by an Expert Laser Technician,
-      and ion guns boosted with thrust by an Expert Ion Technician, do not show as boosted to your opponent, though the extra
-      damage shows once the shots land.</li>
+      and ion guns boosted with thrust by an Expert Ion Technician, do not show as boosted to your opponent (unless an Expert
+      Analyst scans that ship's arming), though the extra damage shows once the shots land.</li>
+    <li>The same goes for a few things that are not officers. A weapon charging an overload does not show it to your
+      opponent until it fires its first sustained shot, and a Hyach ship's Specialists are known only to its own fleet - your
+      opponent sees how many it has left, not which. An Expert Analyst can reveal both.</li>
   </ul>
 </section>
 
 <section data-key="shipofficers" data-title="Ship Officers" data-group="Officers">
   <p class="fvd-lede">The officers available so far. More will be added over time.</p>
   <div class="fvd-cards">
+    <article class="fvd-card fvd-card--wide">
+      <h3>Expert Analyst</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>Sensors</dd>
+        <dt>Effect</dt>
+        <dd>Once a turn, in Initial Orders, he can scan one enemy unit within 30 hexes that his ship has locked on to with at
+          least 1 point of OEW (CCEW does not count). Select his ship, click the enemy unit, press the <b>Expert Analyst</b>
+          button in its tooltip and pick a scan from the list. The result shows to you and your team once Initial Orders
+          close:<ul>
+          <li><b>Arming</b> - for that turn only: weapons charging an overload or ready to fire one, lasers and ion guns
+            boosted by an officer, and an Expert Gunner's Piercing mode. The scan also finds every refit (&#10022;) on the
+            ship, on its weapons and on every other system, and those stay known.</li>
+          <li><b>Officers &amp; Specialists</b> - its officers who are at their posts (not moving, disabled or killed),
+            marked on its system icons as on your own ships, and its Hyach Specialists.</li>
+          <li><b>Hangars</b> - the craft in its hangars and docking bays, but never their launch or dock orders.</li>
+          <li><b>Ammunition</b> - every magazine's ordnance, type by type. Against a flight, its missiles, counted and
+            identified.</li>
+          <li><b>Cargo</b> - a line in the combat log that both players see. It has no effect in Fiery Void; it is there
+            for scenarios.</li>
+        </ul>What the Officers, Hangars and Ammunition scans show, and the refits an Arming scan finds, stays known for the
+          rest of the battle.</dd>
+        <dt>Cost</dt>
+        <dd>10% of the ship's base cost.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship. Llort capital ships, and ships of any faction with an ELINT array - never bases.</dd>
+        <dt>Notes</dt>
+        <dd>Against a flight only the Officers and Ammunition scans are offered. A scan of a ship
+          disguised by a Chameleon Sensor Suite finds only what the disguise shows, and a working suite hides its ship's
+          arming anyway. What he has learned stays known if he is lost later. Your opponent is not told about a scan,
+          except Cargo.</dd>
+      </dl>
+    </article>
     <article class="fvd-card fvd-card--wide">
       <h3>Expert Anticipator</h3>
       <dl class="fvd-spec">
@@ -983,7 +1049,7 @@
         <dt>Effect</dt>
         <dd><ul>
           <li>The ship rolls its initiative die twice and keeps the higher roll.</li>
-          <li>One turn in the Firing phase. The ship must have completed its turn delay and have enough thrust left unused
+          <li>Can make a turn in the Firing phase. The ship must have completed its turn delay and have enough thrust left unused
             to pay for a turn. The turn arrows appear on the map in the Firing phase, and the thrust is assigned to the
             thrusters exactly as in the Movement phase. It works like a fighter's combat pivot, with no to-hit penalty: give
             it before the ship declares any direct fire (Cancel takes it back). This turn's fire, the ship's own and the fire
@@ -1057,7 +1123,8 @@
         <dt>Limit</dt>
         <dd>1 per ship, on ELINT ships only. Abbai, Brakiri, Centauri Republic, Corillani, Deneth, Dilgar, Drazi Freehold,
           Earth Alliance, Gaim, Hyach, Llort, Markab, Minbari Federation, Minbari Protectorate, Narn, Torata, Vree and Yolu only
-          - not the Centauri or Drazi of the Wars of the Centauri Republic, nor the Early Earth Alliance.</dd>
+          - not the Centauri or Drazi of the Wars of the Centauri Republic, nor the Early Earth Alliance. Of the Ancients, a single
+          Walkers of Sigma-957 Pathfinder in a fleet.</dd>
         <dt>Notes</dt>
         <dd>Detect Stealth and the ship's stealth detection range are unchanged. Blanket points that do not divide evenly
           keep their fraction, as they always do: 10 points give 2.5 against ordinary weapons and 3.33 against ballistic ones.
@@ -1086,6 +1153,37 @@
         <dd>He picks the most important critical first, in the same order a Self Repair system uses by default. He works
           after any Self Repair system the ship has, never on a destroyed system, and still makes his repair at the end of
           the turn he is lost.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h3>Expert Evangelist</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>C&amp;C when bought in the buy window - or any other system or Structure block of the ship, weapons included, bought
+          from that system's menu or moved there for free in Fleet Selection. He can move during a battle too (see Moving an
+          officer).</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>While he serves, <b>every unit of your fleet</b> - ships, bases, OSATs and fighter flights - gets +10 Initiative
+            and +1 fire control (+5% to hit) on every weapon.</li>
+          <li><b>If he is lost</b> - disabled or killed - the bonuses turn into penalties for the rest of the battle: -10
+            Initiative and -1 fire control (-5% to hit) on every unit of your fleet.</li>
+          <li>If his ship jumps out of the battle through hyperspace while he serves, the bonuses end and there is no
+            penalty.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>5% of the cost of the fleet: of your slot's points limit, rounded up (150 points in a 3,000-point game). With
+          Unlimited points it is 5% of everything else your fleet costs, and it is re-priced as you buy, edit or remove
+          units.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship. Corillani Theocracy ships of the Corillani People's Navy (CPN) and the Orillani Space Forces (OSF)
+          only - not those of the Defenders of Corillan. <b>One in a fleet.</b></dd>
+        <dt>Notes</dt>
+        <dd>Allies' fleets, mines and remotely controlled craft
+          are not affected. Interception is not affected - only weapons fire. On a weapon with an Expert Gunner the Gunner's
+          +1 takes the bonus's place, but the -1 penalty still applies. Ramming is not affected. The bonus starts once his ship
+          is on the map, and on the turn he moves he serves nowhere, so the bonus is lost for that turn. Everyone sees the
+          Initiative and fire control; nobody but your own team sees the officer.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
@@ -1346,14 +1444,17 @@
           <li>Five free Hardened Armour (+1 armour), on five different systems that are not Structure. Buy them in each
             system's menu, where the price shows as 0; a sixth or more is paid for as usual (the five most expensive are the
             free ones). Any of the five you leave unplaced go on random systems when the fleet is committed.</li>
-          <li>Once per battle, a stirring speech. In the Firing phase, open his C&amp;C's menu and press <b>Speech!</b>
-            (<b>Cancel speech</b> takes it back before you commit). Once firing resolves, every player reads it in the
+          <li>Once per battle, a stirring speech. In the Firing phase, click his ship and press the grey <b>Speech</b> button in
+            its tooltip: it turns purple and glows (press it again to take it back before you commit). Once firing resolves, every player reads it in the
             combat log, and next turn the ship gets +30 initiative, provided he is still serving.</li>
         </ul></dd>
         <dt>Cost</dt>
         <dd>40% of the ship's base cost.</dd>
         <dt>Limit</dt>
-        <dd>1 per ship. Centauri Republic and Centauri Republic (WotCR) only, on capital ships and larger (bases included).</dd>
+        <dd>1 per ship. Centauri Republic and Centauri Republic (WotCR) only, on capital ships and larger (bases included). The
+          Torvalus Speculators have him too, as the <b>Expert Gambler</b>: the same officer on their capital ships, his free expert
+          and five free Hardened Armour included (which the Torvalus can have only through him), his speeches on topics of their own.
+          Their ships have no hangars, so no armed shuttle.</dd>
         <dt>Notes</dt>
         <dd>The armed shuttle, the free officer and the armour stay with the ship if he is disabled or killed. Your opponent
           cannot see him until he speaks, and the +30 initiative shows to everyone as the ship's initiative bonus.</dd>
@@ -1412,7 +1513,8 @@
         <dt>Cost</dt>
         <dd>15% of the ship's base cost.</dd>
         <dt>Limit</dt>
-        <dd>1 per ship. Minbari Federation, Markab Theocracy, Corillani Theocracy and Yolu Confederation only.</dd>
+        <dd>1 per ship. Minbari Federation, Markab Theocracy, Corillani Theocracy and Yolu Confederation only - and of the Ancients,
+          a single Mindriders Consortium in a fleet.</dd>
         <dt>Notes</dt>
         <dd>Weapons that do no damage, such as the Electro-Pulse Gun, Stun Beam or Gravity Net, gain nothing, and neither does
           ramming. The frenzy starts the turn after he is lost, when a lost officer's bonuses would end. The +1 sensors goes
@@ -1659,6 +1761,49 @@
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
+      <h3>Expert War Leader</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>C&amp;C</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>+5 initiative for every ship of your fleet, his own included, whatever its faction - bases and OSATs too, but not
+            fighters or shuttles - while he serves. Several War Leaders in one fleet do not add up. Nothing happens when he is lost.</li>
+          <li>Once per battle each, and never two of them in the same turn:
+            <ul>
+              <li><b>Taunt</b> - in Initial Orders, click his ship, press the grey <b>War Leader</b> button in its tooltip and
+                pick <b>Taunt</b> in the menu it opens: the button turns yellow and glows. This turn every enemy unit
+                gets +5% to hit his ship, and -5% to hit any other ship of your fleet (not fighters or shuttles). Your
+                opponent sees it in their hit chances once Initial Orders close - a good turn for plenty of defensive EW.</li>
+              <li><b>Anticipate</b> - in Initial Orders, pick <b>Anticipate</b> in the same menu. When Initial Orders close his
+                ship gets +60 initiative for this turn (a tie it creates goes against him), and its EW may be held back: any EW
+                you leave unallocated becomes defensive EW as usual, and in the Pre-Firing or Firing phase you may move it to
+                any other EW, as an Expert Scanner's saved point. EW you allocated in Initial Orders stays where it is.
+                Ballistic weapons are still launched in Initial Orders.</li>
+              <li><b>Wrath</b> - in the Firing phase, click the yellow <b>War Leader</b> icon beside his ship (its glow pulses
+                while it waits), then an enemy unit: the icon turns red, and the unit wears a red crosshair. Every ship of your
+                fleet (not fighters or shuttles) gets +5% to hit that unit this turn.</li>
+              <li><b>Center of Glory</b> - the same icon, then a unit of your own fleet (his own ship and your fighters
+                included): the icon turns green, and so does the crosshair. That unit gets +10% to hit with all its weapons
+                this turn.</li>
+            </ul>
+            Taunt and Anticipate can be taken back in the menu until you commit Initial Orders; Wrath and Center of Glory by clicking the
+            icon again before you commit your fire. The icon does not appear on a turn he taunted or anticipated. Every one
+            is announced in the combat log.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>5% of your slot's points (in an Unlimited game, 5% of what your fleet's ships cost before refits), plus 25% of
+          his own ship's base cost - 50% more for any faction but the Narn Regime. Re-priced by the lobby as your fleet changes.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship. Every faction. Of the Ancients, a single Kirishiac Lords Kingship or Lordship in a fleet - and then no
+          Expert Warrior in it.</dd>
+        <dt>Notes</dt>
+        <dd>The +5% and +10% count for that turn's shots only, ballistic ones included, never interception or ramming, and they
+          add to an Expert Gunner's and a Charge's. The initiative changes show to everyone; Wrath and Center of Glory stay
+          hidden from your opponent until the combat log tells them.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
       <h3>Expert Warrior</h3>
       <dl class="fvd-spec">
         <dt>Post</dt>
@@ -1686,19 +1831,68 @@
                 hold. Click the icon again (or Cancel) to take it back before the first move.</li>
               <li><b>Precision strike</b> - automatic: the ship's first called shot has no called-shot penalty. On a turn
                 with several called shots, the ship's lowest-numbered weapon gets it.</li>
-              <li><b>Supreme Anticipation</b> - in the Firing phase, open his C&amp;C's menu and press <b>Supreme
-                Anticipation!</b> (<b>No anticipation</b> takes it back before you commit). Next turn the ship gets +50
+              <li><b>Supreme Anticipation</b> - in the Firing phase, click his ship and press the grey <b>Supreme
+                Anticipation</b> button in its tooltip: it turns red and glows (press it again to take it back before you commit). Next turn the ship gets +50
                 initiative, provided he is still serving; the turn after that, -50 - even if he has been lost.</li>
             </ul></li>
         </ul></dd>
         <dt>Cost</dt>
         <dd>50% of the ship's base cost.</dd>
         <dt>Limit</dt>
-        <dd>1 per ship. Drazi Freehold and Drazi Freehold (WotCR) only.</dd>
+        <dd>1 per ship. Drazi Freehold and Drazi Freehold (WotCR) only - and of the Ancients, a single Kirishiac Lords ship in a
+          fleet with no Expert War Leader.</dd>
         <dt>Notes</dt>
         <dd>On a weapon an Expert Gunner serves in, the Gunner's +1 fire control and +1 per die apply instead of his, and his precision
           strike takes the Gunner's called shot without using it up. The charge row is part of the ship's movement, so your
           opponent can see the charge; the initiative changes show to everyone as the ship's initiative bonus.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h3>Lucky Captain</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>C&amp;C</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li><b>Four feats</b>, each <b>once per battle</b>, and never two of them in the same turn. Pick one from the grey
+            <b>Lucky Captain</b> button in his own ship's menu (click the ship) - it turns green once a feat is picked; pick it again, or <b>Cancel</b>, to take it back
+            before you commit. The dice are the server's, so each feat plays by a fixed rule:
+            <ol>
+              <li><b>Re-roll Volley</b> (Firing phase, armed) - when his ship's to-hit rolls come in below what their odds expected
+                (each hit counted by the average damage of its weapon), all of them are rolled again before any damage, and the
+                second set stands. If the first set was good enough, nothing happens and the feat is still his.</li>
+              <li><b>Alter One Die</b> - <b>one feat that can be used in one of four ways.</b> Whichever you use, the other three are
+                gone with it for the rest of the battle:
+                <ul>
+                  <li><b>Sure Shot</b> (Firing phase, armed) - his ship's missed shot with the most damage expected becomes a hit
+                    (a Pulse weapon's best result). A called shot can be the one.</li>
+                  <li><b>Dodge</b> (Firing phase, armed) - the enemy hit on his ship with the most damage expected - a ram before
+                    anything else - misses instead. Not a shot that would hit whatever the roll.</li>
+                  <li><b>Lucky Escape</b> (Firing phase, armed) - the first critical roll on his ship that would give its C&amp;C or
+                    Reactor a critical, or kill one of its officers, gets a 1 on its d20 instead - when that makes it better.</li>
+                  <li><b>Best Initiative</b> (Initial Orders) - with this turn's initiative roll in front of you: when Initial
+                    Orders close, his ship's initiative die counts as 100. A tie it creates goes against him.</li>
+                </ul></li>
+              <li><b>EW Last</b> (Initial Orders) - his ship's EW may be held back: any EW you leave unallocated becomes defensive EW
+                as usual, and in the Pre-Firing or Firing phase, once everyone else's is set, you may move it to any other EW, as an
+                Expert Scanner's saved point.</li>
+              <li><b>Disengage</b> (Initial Orders) - his ship leaves the battle as Initial Orders close, on a d20 at or under the
+                range to the nearest enemy that is armed, not disabled, and can see him (an Enormous unit blocks the view); with no
+                such enemy, or one 20 or more hexes away, it succeeds. It can be picked only with no such enemy in the 120 degrees
+                ahead of his direction of motion - the menu says who is in the way, and the range. A failed roll changes nothing:
+                the ship plays its turn. A ship that disengages counts as having left, not as destroyed. Not on a base.</li>
+            </ol>
+            An armed Firing-phase feat is used up only if it comes into play that turn; if it does not, it is still his. No
+            Firing-phase feat on a turn he used one in Initial Orders. Every feat used is announced in the combat log.</li>
+          <li>Against an enemy Lucky Captain: the shooter's luck comes first - his re-roll or Sure Shot - and your Dodge then picks from the dice that
+            leaves. A die one Lucky Captain has changed is never changed again.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>25% of the ship's base cost for the Dilgar Imperium and the Torvalus Speculators, 50% for any other faction.</dd>
+        <dt>Limit</dt>
+        <dd>1 per ship. Every faction. Of the Ancients, a single Torvalus ship in a fleet.</dd>
+        <dt>Notes</dt>
+        <dd>Your opponent does not see an armed feat until the combat log tells it. Pre-Firing shots are not part of a volley.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
@@ -1803,6 +1997,36 @@
         <dd>50% of one fighter's cost, for a flight of six.</dd>
         <dt>Limit</dt>
         <dd>1 officer per flight.</dd>
+      </dl>
+    </article>
+    <article class="fvd-card fvd-card--wide">
+      <h3>Expert Electrician</h3>
+      <dl class="fvd-spec">
+        <dt>Post</dt>
+        <dd>The flight's first fighter.</dd>
+        <dt>Effect</dt>
+        <dd><ul>
+          <li>In Initial Orders the flight may switch off any of its weapons, in each weapon's Power settings (Off; right-click
+            Off switches off that weapon on every fighter). Only direct-fire weapons that deal damage can be switched off.</li>
+          <li>Add up the maximum damage of every gun switched off and divide by the number of guns in the flight, rounding
+            fractions of 0.5 or more up. A weapon that fires several linked shots counts as that many guns: six Narn Frazi
+            carry 12 guns of up to 11 damage, so switching off three of their Particle Guns (6 guns, 66 damage) gives 6 points.
+            A weapon is always switched off whole - half of a paired gun cannot be.</li>
+          <li>Split the points between the flight's <strong>Offensive Bonus</strong> (+5% to hit a point, direct fire only,
+            not ballistic weapons) and its <strong>Thrust</strong> (+1 a point) for that turn, with the Electrician button
+            in the flight's Initial Orders menu - it appears once a weapon is switched off. Points left unplaced are put down
+            at random when Initial Orders close.</li>
+          <li>At the end of each turn, roll a d6 for every weapon that was switched off: on a 1 it has fried and is lost for
+            the rest of the battle. Its power still counts on every later turn, as if switched off.</li>
+        </ul></dd>
+        <dt>Cost</dt>
+        <dd>100% of one fighter's cost, for a flight of six.</dd>
+        <dt>Limit</dt>
+        <dd>1 officer per flight. Not for flights with heavy weapons: any weapon that is not ballistic and takes more than one
+          turn to load (the Rutarian's Ion Bolt, say - a Thunderbolt's missiles do not count).</dd>
+        <dt>Notes</dt>
+        <dd>Once he is lost, the flight can switch no more weapons off and its weapons come back on - except any that have
+          fried.</dd>
       </dl>
     </article>
     <article class="fvd-card fvd-card--wide">
