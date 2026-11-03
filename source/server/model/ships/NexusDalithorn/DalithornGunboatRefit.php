@@ -10,7 +10,7 @@ class DalithornGunboatRefit extends LCV{
         $this->imagePath = "img/ships/Nexus/Dalithorn_Gunboat2.png";
 		$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Arenthal Gunboat (2150)";
-			$this->variantOf = "Arenthal Gunboat";
+			$this->variantOf = "NONE";
 			$this->occurence = "common";
 		$this->unofficial = true;
 			$this->isd = 2150;

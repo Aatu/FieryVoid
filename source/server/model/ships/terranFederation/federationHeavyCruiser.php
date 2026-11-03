@@ -13,6 +13,8 @@ class federationHeavyCruiser extends BaseShip{
 		$this->canvasSize = 160; 
 		$this->unofficial = true;
 
+        $this->fighters = array("normal"=>6);
+
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
         
