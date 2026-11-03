@@ -61,7 +61,8 @@ window.systemEnhancements = {
 		OFF_RELIP: 'Expert Religious Leader',
 		OFF_TARG: 'Expert Targeter',  //Stage 19: in a Structure block - and, on a Medium ship's one block, its second side:
 		OFF_TARG2: 'Expert Targeter',
-		OFF_TURR: 'Expert Turret Officer'  //Stage 22: in a turret-mounted weapon
+		OFF_TURR: 'Expert Turret Officer',  //Stage 22: in a turret-mounted weapon
+		OFF_EVANP: 'Expert Evangelist'      //Stage 33: in any system or Structure block but his C&C
 	},
 
 	/* A placed officer's row (OFFICERS_PLAN.md Stage 8), not a refit: the OFF_ prefix every officer id carries
@@ -146,7 +147,12 @@ window.systemEnhancements = {
 	   The section component is a RENDERER - it never asks "what may this system have". */
 	menuRowsFor: function menuRowsFor(ship, system) {
 		var self = this;
-		var offers = this.offersFor(ship, system);
+		/* OFFICERS_PLAN.md Stage 38 (user request 2026-10-31): an offer nobody may take now under the fleet rules or an officer's grants -
+		   the Gambler's Hardened Armour before him or past his five, a second fleet's-only Religious Leader - is not shown at all while
+		   untaken (officers.menuRowUnavailable). */
+		var offers = this.offersFor(ship, system).filter(function (offer) {
+			return !window.officers || self.taken(ship, offer[4], offer[0]) > 0 || !officers.menuRowUnavailable(ship, offer[4], offer[0]);
+		});
 		var rows = offers.map(function (offer) {
 			var count = self.taken(ship, offer[4], offer[0]);
 			var officer = self.isOfficer(offer[0]);
@@ -161,8 +167,10 @@ window.systemEnhancements = {
 				nextPrice: self.priceForLevel(offer, count),
 				note: self.groupNote(offers, offer[0]),
 				officer: officer,
-				//why a placed officer may not be bought here now (his ship cap, another officer on this weapon...)
-				blocked: (officer && count < 1 && window.officers) ? officers.placedBlock(ship, offer[4], offer[0]) : null
+				//why a placed officer may not be bought here now (his ship cap, another officer on this weapon...) - or (OFFICERS_PLAN.md
+				//Stage 38) a refit an officer grants this ship (the Expert Gambler's Hardened Armour) while it would not be free
+				blocked: (count < 1 && window.officers)
+					? (officer ? officers.placedBlock(ship, offer[4], offer[0]) : officers.refitBlock(ship, offer[4], offer[0])) : null
 			};
 		});
 		//OFFICERS_PLAN.md Stage 15: who may be moved from here (the Officers footer's Move), and the C&C officer's own row
@@ -339,6 +347,8 @@ window.systemEnhancements = {
 		//refused, the count left as it was (the menu row says why - officers.placedBlock)
 		var had = this.taken(ship, id, enhID);
 		if (n > had && this.isOfficer(enhID) && window.officers && officers.placedBlock(ship, id, enhID)) return had;
+		//Stage 38: ...and a refit an officer grants, while it would not be free (officers.refitBlock)
+		if (n > had && !this.isOfficer(enhID) && window.officers && officers.refitBlock(ship, id, enhID)) return had;
 
 		/* One RANK per (system, group) - §9.2. Buying a row removes the same group's rows of another
 		   rank on the same system (an ELINT module removes both generators, and the other way round),
@@ -868,6 +878,11 @@ window.systemEnhancements = {
 		if (!removed || !removed.length) return '';
 		var self = this;
 		return removed.map(function (r) {
+			//OFFICERS_PLAN.md Stage 38: what an officer granted the ship goes with him (officers.dropUngranted)
+			if (r.grantorLabel) {
+				return 'The ' + r.label + (r.systemName ? ' on ' + r.systemName + ' #' + r.systemid : '') + ' (' + r.points
+					+ ' pts) has been removed: this ship has it only free, with the ' + r.grantorLabel + '.';
+			}
 			return r.systemName + ' #' + r.systemid + ' was destroyed; its ' + r.label
 				+ (self.isOfficer(r.enhID) ? '' : ' refit') + ' (' + r.points + ' pts) has been removed.';
 		}).join(' ');

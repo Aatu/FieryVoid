@@ -2846,19 +2846,28 @@ class HangarOps {
 	 * size of fighter through hangarAcceptsCategory's 'fighters' shortcut.
 	 */
 	public static function inferHangarType($hangar, $ship){
+		$narrowed = self::narrowedHangarType($hangar, $ship);
+		if ($narrowed !== null) $hangar->hangarType = $narrowed;
+	}
+
+	/* The size category inferHangarType WOULD narrow this hangar to, or null when it
+	 * stays as it is. Changes nothing, so the class blueprint (which never runs the
+	 * load-time inferHangarType) can still show the narrowed size in its tooltip.
+	 */
+	public static function narrowedHangarType($hangar, $ship){
 		//Catapults are fixed at 'superheavy' by design — never narrow them from
 		//the ship's $fighters declaration (Stage 16). Fighter Rails carry an
 		//explicit category from the ship file (load-bearing for launch/dock
 		//eligibility) — leave them untouched too. LCV Rails are fixed at 'LCVs'
 		//(whole-ship dock, not a fighter category) — never narrow them either.
-		if (!empty($hangar->isCatapult) || !empty($hangar->isRail) || !empty($hangar->isLCVRail) || !empty($hangar->isShadowHangar)) return;
+		if (!empty($hangar->isCatapult) || !empty($hangar->isRail) || !empty($hangar->isLCVRail) || !empty($hangar->isShadowHangar)) return null;
 		$hType = strtolower(trim((string)$hangar->hangarType));
 		//Only narrow universal slots. Anything specific (medium, heavy, shuttles,
 		//assault shuttles, BPods, custom 'Raiders', etc.) was an intentional
 		//ship-file choice and stays.
-		if ($hType !== '' && $hType !== 'fighters' && $hType !== 'normal') return;
+		if ($hType !== '' && $hType !== 'fighters' && $hType !== 'normal') return null;
 
-		if (!isset($ship->fighters) || !is_array($ship->fighters) || empty($ship->fighters)) return;
+		if (!isset($ship->fighters) || !is_array($ship->fighters) || empty($ship->fighters)) return null;
 
 		$sizes = array('heavy', 'medium', 'light', 'ultralight');
 		//Categories a narrowed SIZE bay still accepts (shuttle family + BPs) via the
@@ -2899,11 +2908,11 @@ class HangarOps {
 		//combat category shares the bay, or when the declaration is ambiguous (0 or
 		//>1 specific sizes). Only narrow when the ship declares EXACTLY ONE specific
 		//size and no universal 'normal' / custom-combat slots.
-		if ($hasNormal) return;
-		if ($hasCustomCombat) return;
-		if (count($declared) !== 1) return;     //ambiguous — leave universal
+		if ($hasNormal) return null;
+		if ($hasCustomCombat) return null;
+		if (count($declared) !== 1) return null;     //ambiguous — leave universal
 
-		$hangar->hangarType = $declared[0];
+		return $declared[0];
 	}
 
 	/* Returns the size category a flight physically requires, independent of
@@ -5449,48 +5458,7 @@ class HangarOps {
 		$count = (int)$count;
 		if ($count <= 0) { $reason = 'invalid count'; return false; }
 
-		//Carrier may not land on a turn it pivoted or rolled
-		if (Movement::isPivoting($carrier, $gamedata->turn, $gamedata) || Movement::isRolling($carrier, $gamedata->turn, $gamedata)) {
-			$reason = 'carrier pivoting/rolling'; return false;
-		}
-
-		$carrierMove = $carrier->getLastMovement();
-		$flightMove  = $flight->getLastMovement();
-		if (!$carrierMove || !$flightMove) { $reason = 'movement missing'; return false; }
-
-		//Same hex
-		$carrierPos = $carrierMove->position;
-		$flightPos  = $flightMove->position;
-		if (!isset($carrierPos->q) || !isset($flightPos->q)
-			|| $carrierPos->q != $flightPos->q || $carrierPos->r != $flightPos->r) {
-			$reason = 'not in same hex'; return false;
-		}
-
-		//Heading. Ordinary hangars require the flight to match the carrier's
-		//heading (same velocity vector). A catapult (Stage 16) recovers a fighter
-		//only when it enters the carrier's hex from the REAR — i.e. the flight is
-		//travelling in the direction the carrier points (flight heading == carrier
-		//facing), so it overtakes the carrier from behind onto the launch rail.
-		if ($isCatapult) {
-			if ((int)$flightMove->heading !== (int)$carrierMove->facing) {
-				$reason = 'must approach catapult from rear'; return false;
-			}
-		} else {
-			if ((int)$carrierMove->heading !== (int)$flightMove->heading) {
-				$reason = 'heading mismatch'; return false;
-			}
-		}
-
-		//Speed gap must be within flight thrust budget. Fighters can decelerate
-		//up to their freethrust to match a slower carrier, or accelerate up to
-		//freethrust to match a faster one. Per the rules dive: |delta| <= thrust.
-		//A Redline Pilot's afterburners count this turn, and beyond it his landing
-		//holds on a d20 above the excess (OFFICERS_PLAN.md Stage 32).
-		$thrust = (int)($flight->freethrust ?? 0) + Officers::redlineBurnThrust($flight, $gamedata->turn);
-		$delta = abs((int)$carrierMove->speed - (int)$flightMove->speed);
-		if ($delta > $thrust && !Officers::redlineLandingHolds($flight, $gamedata)) {
-			$reason = 'speed delta exceeds flight thrust'; return false;
-		}
+		if (!self::canApproachCarrier($carrier, $flight, $isCatapult, $gamedata, $reason)) return false;
 
 		//Hangar must have a compatible category with room for the $count craft.
 		//A unitSize<1 craft (Vorlon Assault Fighter) needs >1 box each; a unitSize>1
@@ -5544,6 +5512,60 @@ class HangarOps {
 		//for size / shuttle-family categories, which share via the box hierarchy.
 		$catRemaining = self::categoryCapRemaining($carrier, $category);
 		if ($catRemaining < $count) { $reason = 'fighter category cap exceeded'; return false; }
+
+		return true;
+	}
+
+	/* The approach half of canShipReceive: what the carrier and the flight did
+	 * this turn, whichever bay takes the craft — the carrier did not pivot or
+	 * roll, and the flight shares its hex, its heading (a catapult: approaches
+	 * from the rear) and its speed within the flight's thrust. buildDockBays asks
+	 * it too, so the end-of-turn whole-flight dock re-checks the approach instead
+	 * of trusting the client's check when the order was made.
+	 */
+	private static function canApproachCarrier($carrier, $flight, $isCatapult, $gamedata, &$reason = null){
+		//Carrier may not land on a turn it pivoted or rolled
+		if (Movement::isPivoting($carrier, $gamedata->turn, $gamedata) || Movement::isRolling($carrier, $gamedata->turn, $gamedata)) {
+			$reason = 'carrier pivoting/rolling'; return false;
+		}
+
+		$carrierMove = $carrier->getLastMovement();
+		$flightMove  = $flight->getLastMovement();
+		if (!$carrierMove || !$flightMove) { $reason = 'movement missing'; return false; }
+
+		//Same hex
+		$carrierPos = $carrierMove->position;
+		$flightPos  = $flightMove->position;
+		if (!isset($carrierPos->q) || !isset($flightPos->q)
+			|| $carrierPos->q != $flightPos->q || $carrierPos->r != $flightPos->r) {
+			$reason = 'not in same hex'; return false;
+		}
+
+		//Heading. Ordinary hangars require the flight to match the carrier's
+		//heading (same velocity vector). A catapult (Stage 16) recovers a fighter
+		//only when it enters the carrier's hex from the REAR — i.e. the flight is
+		//travelling in the direction the carrier points (flight heading == carrier
+		//facing), so it overtakes the carrier from behind onto the launch rail.
+		if ($isCatapult) {
+			if ((int)$flightMove->heading !== (int)$carrierMove->facing) {
+				$reason = 'must approach catapult from rear'; return false;
+			}
+		} else {
+			if ((int)$carrierMove->heading !== (int)$flightMove->heading) {
+				$reason = 'heading mismatch'; return false;
+			}
+		}
+
+		//Speed gap must be within flight thrust budget. Fighters can decelerate
+		//up to their freethrust to match a slower carrier, or accelerate up to
+		//freethrust to match a faster one. Per the rules dive: |delta| <= thrust.
+		//A Redline Pilot's afterburners count this turn, and beyond it his landing
+		//holds on a d20 above the excess (OFFICERS_PLAN.md Stage 32).
+		$thrust = (int)($flight->freethrust ?? 0) + Officers::redlineBurnThrust($flight, $gamedata->turn);
+		$delta = abs((int)$carrierMove->speed - (int)$flightMove->speed);
+		if ($delta > $thrust && !Officers::redlineLandingHolds($flight, $gamedata)) {
+			$reason = 'speed delta exceeds flight thrust'; return false;
+		}
 
 		return true;
 	}
@@ -6262,7 +6284,8 @@ class HangarOps {
 	 * $count craft of $flight, starting from $preferredHangars (the bays the
 	 * player ordered) and topping up from any other eligible bay until the
 	 * flight's box requirement is met. Returns [] (and sets $reason) if the
-	 * carrier can't hold $count after all. */
+	 * flight's approach fails (canApproachCarrier) or the carrier can't hold
+	 * $count after all. */
 	public static function buildDockBays($carrier, $flight, $preferredHangars, $count, $gamedata, &$reason = null){
 		$category = self::trueSizeOf($flight);
 		//Fractional-safe per-craft box cost; don't clamp bpc to 1 or 24 Zorth (12
@@ -6277,13 +6300,16 @@ class HangarOps {
 		$reserveCraft = self::dockReservationCraft($flight, $count);
 		$boxesNeeded = max(1, (int)ceil($reserveCraft * $bpc));   //fractional for ultralights
 
-		//Validate basic eligibility (hex/heading/speed/pivot/customcap) once via
-		//canShipReceive against the carrier's best bay — it short-circuits the
-		//common rejects without per-bay noise.
-		if (!self::canShipReceive(self::primaryHangar($carrier), $carrier, $flight, 1, $gamedata, $reason)){
-			//primary bay may not accept this category; fall through to the
-			//eligible-bay scan which applies hangarAcceptsCategory per bay.
-		}
+		//The approach (pivot/roll, hex, heading, speed) is the carrier's and the
+		//flight's, not a bay's, so a dock that fails it fails outright. Catapults
+		//never come this way, so it is the heading rule, never the rear approach.
+		if (!self::canApproachCarrier($carrier, $flight, false, $gamedata, $reason)) return array();
+
+		//canShipReceive against the carrier's best bay only supplies the $reason a
+		//shortfall below reports: that one bay may not accept this category at all,
+		//so its refusal is not the carrier's - the eligible-bay scan applies
+		//hangarAcceptsCategory per bay.
+		self::canShipReceive(self::primaryHangar($carrier), $carrier, $flight, 1, $gamedata, $reason);
 
 		$seen = array();
 		$ordered = array();

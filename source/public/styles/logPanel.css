@@ -284,12 +284,13 @@
     border-top-color: var(--fv-accent);
 }
 
-/* On phones the tabs are display:none until the panel is expanded (see the media queries
-   at the foot of this file), so an unread chat tab would light up somewhere the player
-   cannot see. Carry the glow onto the expand chevron while the panel is collapsed — on
-   those viewports it is the only tab-strip element on screen. Desktop is excluded: there
-   the tab itself is always visible, so glowing both would just be noise. */
-@media only screen and (max-width: 765px),
+/* On phones and tablets the tabs are display:none until the panel is expanded (see the
+   media queries at the foot of this file), so an unread chat tab would light up somewhere
+   the player cannot see. Carry the glow onto the expand chevron while the panel is
+   collapsed — on those viewports it is the only tab-strip element on screen. Desktop is
+   excluded: there the tab itself is always visible, so glowing both would just be noise.
+   1024px, not 765px: tablets collapse too - see the TABLETS block in §8. */
+@media only screen and (max-width: 1024px),
 only screen and (max-height: 500px) and (orientation: landscape) {
     #logcontainer:not(.large):has(.logUiEntry.newMessage) #expandBotPanel {
         background-color: #5A2B0D;
@@ -1537,9 +1538,17 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 }
 
 /* The rules take the lobby's Game Rules colours (user, 2026-10-27): the .fv-rule-chip kinds
-   in scenarioCard.css - Mines purple, Reinforcements cyan, every other rule the page's blue -
-   text, tint and line as there, so a rule reads the same colour before the game and in it.
-   #00b8e6 is the same untokened cyan as .fv-tag--deploys above. */
+   in scenarioCard.css - Ladder gold, terrain white, Simultaneous Movement green, Mines purple,
+   Reinforcements cyan, every other rule the page's blue - text, tint and line as there, so a
+   rule reads the same colour before the game and in it. #00b8e6 is the same untokened cyan as
+   .fv-tag--deploys above. (No --private: Private Game never reaches the briefing.)
+   These tags may wrap, unlike the fleet header's: a Random Terrain chip can outrun a phone's
+   width, and ruleChips' no-break spaces keep it to breaking only between terrain types. */
+.decl-briefing-rules .fv-tag {
+    flex: 0 1 auto;
+    white-space: normal;
+}
+
 .fv-tag--rule {
     color: var(--fv-text-accent);
     background: rgba(139, 202, 242, 0.1);
@@ -1556,6 +1565,24 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     color: #00b8e6;
     background: rgba(0, 184, 230, 0.1);
     border-color: rgba(0, 184, 230, 0.6);
+}
+
+.fv-tag--ladder {
+    color: var(--fv-ladder);
+    background: rgba(230, 172, 0, 0.1);
+    border-color: rgba(230, 172, 0, 0.6);
+}
+
+.fv-tag--terrain {
+    color: var(--fv-text-bright);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.fv-tag--simmove {
+    color: var(--fv-mine-soft);
+    background: rgba(82, 179, 82, 0.12);
+    border-color: rgba(82, 179, 82, 0.75);
 }
 
 .decl-briefing-text {
@@ -1751,6 +1778,47 @@ only screen and (max-height: 500px) and (orientation: landscape) {
    beside it (75vh portrait, 65vh landscape) is what actually decides on a short screen,
    so raise the max-height, not the 300, to give a phone more log. */
 
+/* ⭐ TABLETS COLLAPSE TOO (user, 2026-11-03). Up to 1024px wide the panel shuts down to its
+   strip exactly as a phone's does. That is where the weapon list (WeaponList.js) and the ship
+   window (ShipWindow.js) switch to their small-screen layouts, and the weapon list's puts it at
+   left:0, bottom:0 - which is where this panel lives. This file's phone rules used to start at
+   1024px as well; commit 9821d9d50 (2026-02-19) moved tactical.css's mobile block down to 765px,
+   and the panel's collapse went with it. From then on, 766-1024px (a tablet in portrait, a
+   narrow desktop window) kept the full desktop panel, and the weapon list sat underneath it with
+   no way to reach it.
+
+   ONLY THE COLLAPSE, not the phone sizing. The blocks below still own the small tab type, the
+   sort <select> and the narrower fleet columns at 765px and down; a tablet keeps the desktop
+   tabs and chips, which fit at that width. The values here are the phone block's, restated so
+   a tablet behaves the same - change a height here and you will want it below as well. Kept
+   BEFORE the landscape block so that block's 65vh still wins on a short screen. */
+@media only screen and (max-width: 1024px) {
+
+    #logcontainer {
+        width: 100%;
+        max-width: none;
+    }
+
+    #logcontainer #logBody {
+        height: 0;
+        border-top-width: 0;
+    }
+
+    #logcontainer.large #logBody {
+        height: 300px;
+        max-height: 75vh;
+        border-top-width: 1px;
+    }
+
+    #logUI .logUiEntry {
+        display: none;
+    }
+
+    #logcontainer.large #logUI .logUiEntry {
+        display: block;
+    }
+}
+
 @media only screen and (max-width: 765px) {
 
     #logcontainer {
@@ -1862,5 +1930,26 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 
     .fv-log-narrow-only {
         display: inline-block;
+    }
+}
+
+/* ⭐ THE EMPTY STRIP IS CLICK-THROUGH ON PHONES AND TABLETS (user report 2026-11-03: weapon
+   list icons "very inconsistent" to tap). Collapsed, the panel is a full-width ~24px row along
+   the bottom with nothing drawn in it but the chevron - and at z-index:10 that invisible box sat
+   over the bottom ~22px of every icon in the weapon list's first row (WeaponList.js, z-index:2,
+   bottom:0 from 1024px down), so only a tap on an icon's top edge got through. In landscape
+   that row is every icon. The shell and the row stop taking input; the parts actually drawn -
+   the tabs, the chevron and the body - take it back. */
+@media only screen and (max-width: 1024px),
+only screen and (max-height: 500px) and (orientation: landscape) {
+
+    #logcontainer,
+    #logUI {
+        pointer-events: none;
+    }
+
+    #logUI > *,
+    #logBody {
+        pointer-events: auto;
     }
 }

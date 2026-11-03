@@ -98,6 +98,26 @@ class FighterFlight extends BaseShip
 	protected $fighterMissions = array();
 	protected $fighterMissionClaim = null;
 
+	/* OFFICERS_PLAN.md Stage 36 - an Expert Electrician's split of each turn's shunted power, turn => array('ob', 'thrust'), read off the OffShunt
+	   notes by DBManager's note loop (Officers::takeNote); and what a POST of Initial Orders asked for ({ob, thrust} - a claim, checked by
+	   Officers::saveElectricianShunt against the reloaded flight). PROTECTED for $crewQuality's reason. */
+	protected $electricianShunts = array();
+	protected $electricianClaim = null;
+
+	/* OFFICERS_PLAN.md Stage 35 (user's notes and ruling, 2026-10-29): a flight's missiles are hidden from the other teams until one of their
+	   units comes close enough - "An enemy unit can detect the presence of a missile on a fighter from a range of 16 hexes for ships or 12 hexes
+	   for fighters or shuttles. At these ranges, the number of missiles can be counted ... Dummy missiles ... are revealed as such If any unit
+	   reaches range 4 or less to the fighter." - and known to that team from then on: the COUNT (ruled - the types stay hidden, as a ship
+	   magazine's), and how many are Dummies. $missileSightings is kind ('count' / 'dummy') => team => the first turn, off the MslSeen notes
+	   (takeMissileNote), written as each Movement phase ends (detectMissiles). PROTECTED for $crewQuality's reason. */
+	protected $missileSightings = array();
+	const MISSILE_NOTE = 'MslSeen';       //tac_individual_notes.notekey: value "kind:team", on the flight's first craft
+	const MISSILE_SHIP_RANGE = 16;        //"from a range of 16 hexes for ships"
+	const MISSILE_FLIGHT_RANGE = 12;      //"or 12 hexes for fighters or shuttles"
+	const MISSILE_DUMMY_RANGE = 4;        //"revealed as such If any unit reaches range 4 or less to the fighter"
+	//the MISSILE racks of the fighter rack family, by exact class - never its torpedo launchers (user ruling 2026-10-29: missiles only)
+	private static $missileRacks = array('FighterMissileRack', 'SWFtrConcMissileLauncher');
+
     public $movement = array();
 
     function __construct($id, $userid, $name, $slot)
@@ -229,6 +249,113 @@ class FighterFlight extends BaseShip
     //what a POST of Initial Orders asks for (Manager::getShipsFromJSON) - RAW, a claim; nothing trusts it unchecked
     public function setFighterMissionClaim($claim){
         $this->fighterMissionClaim = is_array($claim) ? $claim : null;
+    }
+
+    //OFFICERS_PLAN.md Stage 36: an Expert Electrician's split of each turn's points (OffShunt notes, or one saved in this request)
+    public function getElectricianShunts(){
+        return $this->electricianShunts;
+    }
+
+    public function recordElectricianShunt($turn, $ob, $thrust){
+        $this->electricianShunts[(int)$turn] = array('ob' => (int)$ob, 'thrust' => (int)$thrust);
+    }
+
+    public function getElectricianClaim(){
+        return $this->electricianClaim;
+    }
+
+    //what a POST of Initial Orders asks for (Manager::getShipsFromJSON) - RAW, a claim; nothing trusts it unchecked
+    public function setElectricianClaim($claim){
+        $this->electricianClaim = is_array($claim) ? $claim : null;
+    }
+
+    /* ------------------------------------------------------------------ missile detection (OFFICERS_PLAN.md Stage 35) */
+
+    //is $system one of the fighter missile racks (a missileArray count) - never a torpedo launcher built on the same rack
+    public static function isMissileRack($system){
+        return is_object($system) && in_array(get_class($system), self::$missileRacks, true);
+    }
+
+    //does this flight carry missiles - a fighter magazine or a missile rack, read off its first craft (every craft is built alike)
+    public function carriesMissiles(){
+        foreach ($this->systems as $craft){
+            foreach ($craft->systems as $system){
+                if ($system instanceof AmmoMagazine || self::isMissileRack($system)) return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    //one MslSeen note (takeMissileNote), or a sighting written in this request: the earliest turn wins
+    public function recordMissileSighting($kind, $team, $turn){
+        $kind = (string)$kind;
+        $team = (int)$team;
+        if (!isset($this->missileSightings[$kind][$team]) || (int)$turn < $this->missileSightings[$kind][$team]) $this->missileSightings[$kind][$team] = (int)$turn;
+    }
+
+    public function getMissileSightings(){
+        return $this->missileSightings;
+    }
+
+    /* What the CURRENT VIEWER may learn of this flight's missiles: 'all' - its own team, anyone once the game is over (and no viewer context
+       at all), or a team whose Expert Analyst scanned it for its fighters or its ammunition; 'count' - a team that has detected them; null -
+       nothing, not even how many. */
+    public function missileKnowledge(){
+        if (TacGamedata::$currentGameFinished || $this->isRevealedToCurrentViewer()) return 'all';
+        if (TacGamedata::$officersPresent && (Officers::analystReveals($this, 'hangar') || Officers::analystReveals($this, 'ammo'))) return 'all';
+        $team = TacGamedata::$currentForPlayerTeam;
+        if ($team !== null && isset($this->missileSightings['count'][(int)$team])) return 'count';
+        return null;
+    }
+
+    //has the CURRENT VIEWER's team told this flight's Dummy Missiles from its real ones (a unit within 4 hexes)
+    public function dummiesSpottedByViewer(){
+        $team = TacGamedata::$currentForPlayerTeam;
+        return $team !== null && isset($this->missileSightings['dummy'][(int)$team]);
+    }
+
+    //DBManager's bulk note loop: a MslSeen note is recorded on the flight and never handed to its craft. true = taken.
+    public static function takeMissileNote($ship, $note){
+        if ($note->notekey !== self::MISSILE_NOTE) return false;
+        $parts = explode(':', (string)$note->notevalue, 2);
+        if ($ship instanceof FighterFlight && count($parts) === 2) $ship->recordMissileSighting($parts[0], (int)$parts[1], $note->turn);
+        return true;
+    }
+
+    /* MovementGamePhase::advance, once every unit has moved: every flight carrying missiles is counted by each other team with a unit on the
+       board within 16 hexes (a ship, a base or an OSAT) or 12 (a fighter or a shuttle), and its Dummy Missiles told apart by a team with one
+       within 4 - each written once, as one MslSeen note on its first craft, and known to that team for the rest of the game. Terrain and
+       mines detect nothing. */
+    public static function detectMissiles($gamedata){
+        $turn = (int)$gamedata->turn;
+        foreach ($gamedata->ships as $flight){
+            if (!($flight instanceof FighterFlight) || !self::onTheBoard($flight, $gamedata) || !$flight->carriesMissiles()) continue;
+            $found = array();
+            foreach ($gamedata->ships as $unit){
+                if ((int)$unit->team === (int)$flight->team || $unit->isTerrain() || !empty($unit->mine) || !self::onTheBoard($unit, $gamedata)) continue;
+                $distance = Mathlib::getDistanceHex($flight, $unit);
+                $range = ($unit instanceof FighterFlight) ? self::MISSILE_FLIGHT_RANGE : self::MISSILE_SHIP_RANGE;
+                if ($distance <= $range) $found['count'][(int)$unit->team] = true;
+                if ($distance <= self::MISSILE_DUMMY_RANGE) $found['dummy'][(int)$unit->team] = true;
+            }
+            $craftId = null;
+            foreach ($flight->systems as $craft){ $craftId = (int)$craft->id; break; }
+            foreach ($found as $kind => $teams){
+                foreach (array_keys($teams) as $team){
+                    if (isset($flight->missileSightings[$kind][$team])) continue;
+                    $flight->recordMissileSighting($kind, $team, $turn);
+                    $human = ($kind === 'dummy') ? 'Dummy missiles spotted by team ' : 'Missiles counted by team ';
+                    Manager::insertIndividualNote(new IndividualNote(-1, $gamedata->id, $turn, $gamedata->phase, $flight->id, $craftId,
+                        self::MISSILE_NOTE, $human . $team, $kind . ':' . $team));
+                }
+            }
+        }
+    }
+
+    //a unit on the board this turn: deployed, and neither destroyed nor docked (isDestroyed covers a flight in a hangar)
+    private static function onTheBoard($unit, $gamedata){
+        return !$unit->isDestroyed() && $unit->getTurnDeployed($gamedata) <= (int)$gamedata->turn;
     }
 
     private $autoid = 1;
@@ -724,6 +851,13 @@ class FighterFlight extends BaseShip
                 if (!$system->isDestroyed()) {
                     $systems[] = $system;
                 }
+            }
+            /* RAMMING PROW (user ruling 2026-11-01): a ram through the flight's front strikes a craft with a prow while one
+               flies - the craft its owner would put in the way, whose +50% is then the return damage (RammingAttack::getReturnDamage).
+               A ram by a unit, not a terrain collision, which no prow makes a ram. */
+            if ($weapon && $weapon->isRammingAttack && $shooter && !$shooter->isTerrain()) {
+                $prowed = array_values(array_filter($systems, function ($craft) { return $craft->hasRamProw(); }));
+                if (!empty($prowed) && Fighter::isRammedHeadOn($this, $shooter)) $systems = $prowed;
             }
         }
 

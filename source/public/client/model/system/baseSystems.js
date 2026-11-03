@@ -421,70 +421,70 @@ CnC.prototype.isCommandNodeThisTurn = function () {
 
 CnC.prototype.doIndividualNotesTransfer = function () {
 	this.individualNotesTransfer = "";
-	//OFFICERS_PLAN.md Stage 25: an Expert Political Officer's speech, ordered this Firing phase (CnC::saveFirePhaseDeclaration reads it)
-	//Stage 28: or, on an Expert Warrior's C&C, his Supreme Anticipation
-	if (gamedata.gamephase == 3 && this.active && gamedata.isMyShip(this.ship)) {
-		this.individualNotesTransfer = [this.isWarriorPost() ? 'anticipation' : 'speech'];
+	if (!gamedata.isMyShip(this.ship)) return false;
+	//OFFICERS_PLAN.md Stage 34: an Expert War Leader's order on this C&C - Taunt / Anticipate in Initial Orders, Wrath / Center of Glory (with
+	//the unit, "wrath:<id>") in the Firing phase. Beside whatever else the C&C posts (Officers::saveWarLeaderOrder / saveWarLeaderPick read it).
+	var leader = this.getWarLeaderTransfer();
+	if (gamedata.gamephase == 3) {
+		var declared = leader ? [leader] : [];
+		//OFFICERS_PLAN.md Stage 25: an Expert Political Officer's speech, ordered this Firing phase from his ship's tooltip (CnC::saveFirePhaseDeclaration
+		//reads it). Stage 28: or, on an Expert Warrior's C&C, his Supreme Anticipation
+		if (this.active) declared.unshift(this.isWarriorPost() ? 'anticipation' : 'speech');
+		//OFFICERS_PLAN.md Stage 37: a Lucky Captain's Firing-phase feat, armed from his menu (CnC::saveFirePhaseDeclaration -> Officers::saveLuckyArm)
+		var luck = this.getLuckyTransfer();
+		if (luck) declared.push(luck);
+		if (!declared.length) return false;
+		this.individualNotesTransfer = declared;
 		return true;
 	}
-	if (gamedata.gamephase != 1 || !this.isTriadNode() || !gamedata.isMyShip(this.ship)) return false;
-	if (!this.isCommandNodeThisTurn()) return false;
-	var swap = (this.commandNodeSwap !== undefined && this.commandNodeSwap !== null) ? this.commandNodeSwap : -1;
-	this.individualNotesTransfer = [1, swap];
+	if (gamedata.gamephase != 1) return false;
+	var transfer = [];
+	if (this.isTriadNode() && this.isCommandNodeThisTurn()) {
+		var swap = (this.commandNodeSwap !== undefined && this.commandNodeSwap !== null) ? this.commandNodeSwap : -1;
+		transfer = [1, swap]; //the Triad's reads its first two places only
+	}
+	if (leader) transfer.push(leader);
+	//Stage 37: a Lucky Captain's Initial Orders feat (Officers::saveLuckyOrder reads it)
+	var luck = this.getLuckyTransfer();
+	if (luck) transfer.push(luck);
+	if (!transfer.length) return false;
+	this.individualNotesTransfer = transfer;
 	return true;
 };
 
-/* ===== EXPERT POLITICAL OFFICER'S SPEECH (OFFICERS_PLAN.md Stage 25) ===================================
-   "Once during each scenario, the political officer can give a stirring speech to his ship's crew ... +30 to its initiative": the
-   generic Activate box (SystemActivation, which reads `active` and these labels) on his C&C, in the Firing phase only, while he serves
-   and has not spoken (officers.canSpeak). `active` is this turn's order alone - posted at the commit (doIndividualNotesTransfer), judged
-   and spent by the server (Officers::saveSpeech), told in the combat log as firing resolves; the +30 is the next turn's. It is no
-   power boost, so the icon does not glow as one (suppressActiveBoost). The box wears the Hyach Computer's purple (user request
-   2026-10-21) - the speech is the only thing a C&C's Activate box ever holds.
-   ===== EXPERT WARRIOR'S SUPREME ANTICIPATION (OFFICERS_PLAN.md Stage 28) - the same box on HIS C&C (the Drazi have no Political Officer), in
-   the default blue (user request) with his labels: "+ 50 initiative bonus ... on the next turn" (officers.canAnticipateSupreme). */
-CnC.prototype.suppressActiveBoost = true;
+//Stage 37: what this C&C's Lucky Captain picked for the commit - 'luck:<ability>' - or null. Only the C&C he is posted in carries it (officers.luckyCnc).
+CnC.prototype.getLuckyTransfer = function () {
+	if (!window.officers || officers.luckyCnc(this.ship) !== this) return null;
+	var choice = officers.luckyChoice(this.ship);
+	return choice ? 'luck:' + choice : null;
+};
 
-//The Warrior's C&C answers false - a getter, so the one prototype serves both officers (SystemActivation reads it as a property)
-Object.defineProperty(CnC.prototype, 'activationMenuPurple', {
-	get: function () { return !this.isWarriorPost(); },
-	configurable: true
-});
+//Stage 34: what this C&C's Expert War Leader has ordered for the commit - 'taunt' / 'anticipate' (Initial Orders), 'wrath:<id>' / 'glory:<id>'
+//(Firing phase) - or null. Only the C&C he is posted in carries it (officers.warLeaderCnc).
+CnC.prototype.getWarLeaderTransfer = function () {
+	if (!window.officers || officers.warLeaderCnc(this.ship) !== this) return null;
+	if (gamedata.gamephase == 1) return officers.warLeaderOrder(this.ship);
+	var pick = gamedata.gamephase == 3 ? officers.warLeaderPick(this.ship) : null;
+	return pick ? pick.ability + ':' + pick.unit : null;
+};
+
+/* ===== EXPERT POLITICAL OFFICER'S SPEECH (OFFICERS_PLAN.md Stage 25) ===================================
+   "Once during each scenario, the political officer can give a stirring speech to his ship's crew ... +30 to its initiative": a toggle on
+   his own ship's Firing-phase tooltip (shipTooltipFireMenu.js, officers.toggleDeclaration), offered while he serves and has not spoken
+   (officers.canSpeak). This C&C's `active` is this turn's order alone - posted at the commit (doIndividualNotesTransfer), judged and spent
+   by the server (Officers::saveSpeech), told in the combat log as firing resolves; the +30 is the next turn's. It is no power boost, so the
+   icon does not glow as one (suppressActiveBoost).
+   ===== EXPERT WARRIOR'S SUPREME ANTICIPATION (OFFICERS_PLAN.md Stage 28) - the same `active` on HIS C&C (the Drazi have no Political Officer),
+   its own toggle: "+ 50 initiative bonus ... on the next turn" (officers.canAnticipateSupreme). Both were this C&C's Activate box until
+   the user moved them to the tooltip (2026-11-01). */
+CnC.prototype.suppressActiveBoost = true;
 
 CnC.prototype.isWarriorPost = function () {
 	return Boolean(window.officers) && officers.isWarriorPost(this.ship, this);
 };
 
-CnC.prototype.mayDeclare = function () {
-	return Boolean(window.officers) && (officers.canSpeak(this.ship, this) || officers.canAnticipateSupreme(this.ship, this));
-};
-
-CnC.prototype.canActivate = function () {
-	return !this.active && this.mayDeclare();
-};
-
-CnC.prototype.canDeactivate = function () {
-	return Boolean(this.active) && this.mayDeclare();
-};
-
-CnC.prototype.getActivateLabel = function () {
-	return this.isWarriorPost() ? 'Anticipation!' : '"Speech!"';
-};
-
-CnC.prototype.getDeactivateLabel = function () {
-	return this.isWarriorPost() ? 'No anticipation' : 'No speech';
-};
-
-CnC.prototype.doActivate = function () {
-	if (this.canActivate()) this.active = true;
-};
-
-CnC.prototype.doDeactivate = function () {
-	if (this.canDeactivate()) this.active = false;
-};
-
 //Save Orders (SAVE_ORDERS_PLAN.md §1.4): the Command Node's nomination and swap in Initial Orders, the speech in the Firing phase.
-CnC.prototype.draftStateKeys = ['commandNodeTurn', 'commandNodeSwap', 'active'];
+CnC.prototype.draftStateKeys = ['commandNodeTurn', 'commandNodeSwap', 'active', 'warLeaderOrder', 'warLeaderPick', 'luckyOrder']; //Stage 34: the War Leader's; Stage 37: the Lucky Captain's
 CnC.prototype.draftStatePhases = [1, 3];
 
 //The ship's Triad C&C (in any state), or null.

@@ -97,6 +97,46 @@
 			return $this->preJumpValue;
 		}
 
+		/* RAMMING PROW (Enhancements RAM_PROW; KS rules, user rulings 2026-11-01) - fitted per craft, from the first craft
+		   on, by setEnhancementsFighter. "The armor rating of the fighter's front is increased by 2 points" (getArmourBase:
+		   a flight reads its armour off ONE craft, getLocations, so the bonus cannot go into $armour itself); every weapon is
+		   held straight ahead and fires at -2, and none of its ballistic weapons may be used (Weapon::fitRamProw) - but the
+		   Ramming Attack and the Kirishiac Warrior's own rams are rams, not weapons fire, and keep their arcs and their aim;
+		   and its ramming factor is +50%, round up, "this includes the extra points of armor" - when the craft rams, or is
+		   rammed through its front (ramProwFactor). PROTECTED for $crewQuality's reason: a public default would put a dead
+		   key on every craft of every static blueprint. */
+		const RAM_PROW_ARMOUR = 2;
+		protected $ramProw = false;
+
+		public function fitRamProw(){
+			$this->ramProw = true;
+			foreach ($this->systems as $system){
+				if (!($system instanceof Weapon)) continue;
+				if ($system->isRammingAttack || $system instanceof GlancingRam || $system instanceof WarriorRam) continue;
+				$system->fitRamProw();
+			}
+		}
+
+		public function hasRamProw(){
+			return $this->ramProw;
+		}
+
+		//a flight's FRONT hit section (FighterFlight::getLocations) - where the prow is
+		public static function isProwSection($loc){
+			return is_array($loc) && $loc["min"] == 330 && $loc["max"] == 30;
+		}
+
+		//"the fighter must be the one doing the ramming, or else be rammed through its forward section"
+		public static function isRammedHeadOn($flight, $rammer){
+			return ($flight instanceof FighterFlight) && ($rammer !== null) && self::isProwSection($flight->doGetHitSection($rammer));
+		}
+
+		//a prowed craft's ramming factor from its unprowed one: the prow's armour counts, and +50% (round up) when it rams or is rammed head-on
+		public static function ramProwFactor($factor, $headOn){
+			$factor += self::RAM_PROW_ARMOUR;
+			return $headOn ? (int)ceil($factor * 3 / 2) : $factor;
+		}
+
 		/* HK Jamming: read back this turn's persisted disruption roll (if any) so a
 		 * replay scrub reproduces the table result exactly — setCriticals re-runs and
 		 * Dice::d is non-deterministic. Mirrors HangarOps' railCritRoll/inadequateRoll
@@ -319,6 +359,8 @@ public function setSystemDataWindow($turn){
 				$loc["armour"] -= 2;
 			} 
 		}
+
+		if ($this->ramProw && self::isProwSection($loc)) $loc["armour"] += self::RAM_PROW_ARMOUR; //Ramming Prow: +2 front armour, this craft only
 
 		return $loc["armour"];
     }

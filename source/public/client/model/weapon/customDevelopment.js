@@ -219,3 +219,9 @@ var PlasmaBolt = function PlasmaBolt(json, ship) {
 };
 PlasmaBolt.prototype = Object.create(Laser.prototype);
 PlasmaBolt.prototype.constructor = PlasmaBolt;
+
+var LaserCannonLance = function  LaserCannonLance(json, ship) {
+    Laser.call(this, json, ship);
+};
+LaserCannonLance.prototype = Object.create(Weapon.prototype);
+LaserCannonLance.prototype.constructor =  LaserCannonLance;

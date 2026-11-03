@@ -39,6 +39,8 @@ class MeteorSwarm extends Terrain {
 
         $this->hitChart = array(
             0 => array(20 => "Structure"),
+            1 => array(20 => "0:Structure"),
+            2 => array(20 => "0:Structure"),   
         );
     }
 

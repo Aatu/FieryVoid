@@ -63,7 +63,9 @@
  *              HangarOps::populateInitialHangarUsage's own arithmetic
  *              (capacity in BOXES, catapult/rail/LCV bays partitioned out,
  *              ultralights two to a box). An over-declaration is silently
- *              truncated at game start.
+ *              truncated at game start. One deliberate difference: Drakh
+ *              Raiders and Weapon Platforms count as catapult-borne
+ *              (CATAPULT_CATEGORIES), which HangarOps does not do yet.
  *   arcs       startArc / endArc are numeric and within 0..360.
  *   ids        system ids are positional and unique - id == array index for
  *              top-level systems, and the 1000+(id*10)+i sub-weapon ids of
@@ -71,6 +73,13 @@
  *              colliding once a parent carries more than 10 sub-weapons).
  *              Persisted thrust / fire / power / crit rows are keyed by these
  *              ids, so a collision misroutes real saved data.
+ *   setting    every ship's faction is placed alike by the lobby's custom
+ *              sub-group tests (gamelobby.js customSubgroups: Nexus,
+ *              Escalation Wars, Other Universe) and by their server twin
+ *              Officers::$otherSettings, which keeps the B5-only officer
+ *              rules off other settings. A faction added to one list only
+ *              (Terran Federation, 2026-10) gets the wrong officer rules
+ *              with no error anywhere.
  *
  * ---------------------------------------------------------------------------
  * THE BASELINE
@@ -125,6 +134,14 @@ $BASELINE_FILE = __DIR__ . '/tests/shipdata/baseline.txt';
    containing it still open. All three spellings are in live use. */
 const RETIREMENT_SENTINELS = array('NONE', 'OBSOLETE', 'OBSELETE');
 
+/* $fighters categories (lowercased) that ride a ship's catapults, not its
+   hangar bays. 'superheavy' is HangarOps' own. Drakh 'Raiders' and their
+   'Weapon Platforms' (two Raider ports each) use the catapults by design: the
+   catapult count matches on every Drakh hull. HangarOps itself does not dock
+   them there yet, because a Catapult is typed 'superheavy' and
+   hangarAcceptsCategory('superheavy','Raiders') is false. */
+const CATAPULT_CATEGORIES = array('superheavy', 'raiders', 'weapon platforms');
+
 /* Severity per check. ERROR fails the build when new; WARN only under --strict. */
 $CHECK_SEVERITY = array(
     /* Always active regardless of --checks/--skip: nothing else can be
@@ -140,6 +157,7 @@ $CHECK_SEVERITY = array(
     'hangar'    => 'WARN',
     'arcs'      => 'ERROR',
     'ids'       => 'ERROR',
+    'setting'   => 'ERROR',
 );
 
 // ---------------------------------------------------------------- CLI parsing
@@ -517,8 +535,9 @@ function collectSystemIds($system, &$ids, $path)
    HangarOps::populateInitialHangarUsage. Catapults, fighter rails and LCV
    rails are partitioned out on both sides (their boxes are structural HP or a
    single dedicated slot, not shuttle-pool capacity), as are the categories
-   that ride them. Returns array(declared, capacity), or null when the ship has
-   no ordinary hangar at all. */
+   that ride them. Catapult categories are CATAPULT_CATEGORIES, a superset of
+   HangarOps' 'superheavy' alone. Returns array(declared, capacity), or null
+   when the ship has no ordinary hangar at all. */
 function hangarBudget($ship)
 {
     if (!class_exists('HangarOps')) return null;
@@ -543,7 +562,7 @@ function hangarBudget($ship)
     if (isset($ship->fighters) && is_array($ship->fighters)) {
         foreach ($ship->fighters as $category => $count) {
             $key = strtolower(trim((string)$category));
-            if ($hasCatapult && $key === 'superheavy') continue;
+            if ($hasCatapult && in_array($key, CATAPULT_CATEGORIES, true)) continue;
             if (isset($railCategories[$key]))          continue;
             if ($key === 'lcvs')                       continue;
             $declared += HangarOps::shuttlePoolBoxesFor($category, (int)$count);
@@ -556,11 +575,33 @@ function hangarBudget($ship)
     return array($declared, $capacity);
 }
 
+/* The regex tests of gamelobby.js `customSubgroups` (the lobby's Nexus /
+   Escalation Wars / Other Universe sub-groups) as PCRE, keyed by sub-group
+   name - read from the source text, the same extraction
+   tests/replay/officersHarness.php uses. The catch-all "Babylon 5 Wars"
+   (test: null) has no test. Returns an empty array when the block cannot be
+   read, or when one of its tests is in a shape this reader does not parse:
+   the `setting` check then reports that instead of passing on nothing. */
+function lobbySettingTests($file)
+{
+    $js = @file_get_contents($file);
+    if ($js === false || !preg_match('/customSubgroups:\s*\[(.*?)\n\s*\],/s', $js, $block)) return array();
+    preg_match_all('/\{\s*name:\s*"([^"]+)",\s*test:\s*\/(.+?)\/([a-z]*)\s*\}/', $block[1], $found, PREG_SET_ORDER);
+    $tests = array();
+    foreach ($found as $m) {
+        $flags = (strpos($m[3], 'i') !== false ? 'i' : '') . (strpos($m[3], 's') !== false ? 's' : '');
+        $tests[$m[1]] = '~' . str_replace('~', '\~', $m[2]) . '~' . $flags;
+    }
+    if (preg_match_all('/\btest:(?!\s*null\b)/', $block[1]) !== count($tests)) return array();
+    return $tests;
+}
+
 // ------------------------------------------------------------------ main scan
 
 $shipClassNames = array();   // $shipClass => first phpclass declaring it
 $variantRefs    = array();   // phpclass => array(variantOf, where)
 $assetRefs      = array();   // asset path => array(problem, referencing systems)
+$factionShips   = array();   // $faction => first ship file declaring it
 
 $subdirs = scandir($SHIPS_DIR);
 sort($subdirs);
@@ -610,6 +651,9 @@ foreach ($subdirs as $subdir) {
 
         $stats['ships']++;
         $label = $className;
+
+        $faction = (string)$ship->faction;
+        if (!isset($factionShips[$faction])) $factionShips[$faction] = $relFile;
 
         $shipClass = trim((string)$ship->shipClass);
         if ($shipClass !== '' && !isset($shipClassNames[$shipClass])) {
@@ -861,6 +905,39 @@ if (isset($active['variantof'])) {
         finding('variantof', $phpclass, $rec['where'],
             '$variantOf = "' . $v . '" matches no ship\'s $shipClass - the lobby shows it neither as'
             . ' a base design nor as a variant, so players never see it');
+    }
+}
+
+// ----- setting: the lobby's custom sub-groups and Officers::$otherSettings place every faction alike
+/* The lobby applies these tests to custom factions only, but the two lists are the
+   same patterns in two languages, so they are compared over every faction: any
+   faction they disagree on is a pattern one side is missing. */
+if (isset($active['setting'])) {
+    $lobbyFile  = 'source/public/client/gamelobby.js';
+    $lobbyTests = lobbySettingTests(__DIR__ . '/' . $lobbyFile);
+    if (empty($lobbyTests)) {
+        finding('setting', '(lobby)', $lobbyFile,
+            'could not read the regex tests of customSubgroups - update lobbySettingTests() in checkShipData.php to its new shape');
+    } else {
+        ksort($factionShips);
+        foreach ($factionShips as $faction => $where) {
+            $group = null;
+            foreach ($lobbyTests as $name => $pcre) {
+                if (preg_match($pcre, $faction) === 1) { $group = $name; break; }
+            }
+            $server = Officers::isOtherSetting($faction);
+            if ($group !== null && !$server) {
+                finding('setting', $faction, 'source/server/model/ships/Officers.php',
+                    'the lobby files this faction under "' . $group . '" (gamelobby.js customSubgroups), but Officers::$otherSettings'
+                    . ' does not match it, so the B5-only officer rules still treat it as Babylon 5 - add it to $otherSettings',
+                    'first ship: ' . $where);
+            } elseif ($group === null && $server) {
+                finding('setting', $faction, 'source/server/model/ships/Officers.php',
+                    'Officers::$otherSettings counts this faction as outside Babylon 5, but no gamelobby.js customSubgroups test'
+                    . ' matches it - give the lobby the same pattern, or drop it from $otherSettings',
+                    'first ship: ' . $where);
+            }
+        }
     }
 }
 

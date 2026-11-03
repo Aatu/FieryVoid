@@ -1908,7 +1908,77 @@ class PlasmaBolt extends Plasma{
 }  // endof PlasmaBolt
 
 
+class LaserCannonLance extends Raking{
+        public $name = "LaserCannonLance";
+        public $displayName = "Laser Cannon Lance";
+	    public $iconPath = "LaserCannonLance.png";
+	
+		public $animationArray = array(1=>'laser', 2=>'laser');
+        public $animationColor = array(230, 0, 0);
+   	    	      
+	//actual weapons data
+   		public $priorityArray = array(1=>8, 2=>8);
+    	public $gunsArray = array(1=>1, 2=>2); //one Lance, but two Beam shots!
+	
+        public $loadingtimeArray = array(1=>4, 2=>3); //mode 1 should be the one with longest loading time
+        public $rangePenaltyArray = array(1=>0.33, 2=>0.5);
+        public $fireControlArray = array( 1=>array(-4, 2, 3), 2=>array(-3, 2, 3) ); 
+	
+		public $weaponClassArray = array(1=>'Laser', 2=>'Laser');
+		public $firingModes = array(1=>'Heavy Laser', 2=>'Medium Laser');
+		public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
 
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 16;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 12;
+			}
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Can fire as either a Heavy Laser or two Medium Laser Cannons.';
+        }
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 4)+20; //Laser Cannon Lance
+				break;
+			case 2:
+				return Dice::d(10, 3)+12; //Medium Laser
+				break;	
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 24; //Laser Cannon Lance
+				break;
+			case 2:
+				$this->minDamage = 15; //Medium Laser
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 60; //Laser Cannon Lance
+				break;
+			case 2:
+				$this->maxDamage = 42; //Medium Laser
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}	
+	
+} //end of Laser Cannon Lance
 
 
 

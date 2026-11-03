@@ -69,6 +69,11 @@ shipManager.power = {
 				else if (power.type == 2 && system.weapon && Number(system.loadingtime) > 0 && !weaponManager.isLoaded(system)) {
 					continue;
 				}
+				/* OFFICERS_PLAN.md Stage 36: a flight's weapon switched off for an Expert Electrician's shunts stays off into the next turn only while he may
+				   still shunt it - "once he is lost, all shunting stops" (user ruling 2026-10-30), and it comes back on. A fried one is off by its critical. */
+				else if (power.type == 1 && ship.flight && system.weapon && window.officers && !officers.shuntAllowed(ship, system)) {
+					continue;
+				}
 				powers.push(newPower);
 			}
 		}
@@ -1382,6 +1387,10 @@ shipManager.power = {
 				//}
 			}
 		}
+		//OFFICERS_PLAN.md Stage 36: a flight's weapons sit in its craft - every craft's of that name an Expert Electrician may shunt
+		if (ship.flight) array = shipManager.power.flightSystemsNamed(ship, system).filter(function (sub) {
+			return window.officers && officers.mayShunt(ship, sub);
+		});
 
 		for (var i = 0; i < array.length; i++) {
 			if (gamedata.gamephase != 1) continue;
@@ -1407,6 +1416,19 @@ shipManager.power = {
 		}
 
 		webglScene.customEvent('SystemDataChanged', { ship: ship });
+	},
+
+	//every craft's system named as `system` - a flight's weapons sit in its craft, not in ship.systems (OFFICERS_PLAN.md Stage 36)
+	flightSystemsNamed: function flightSystemsNamed(ship, system) {
+		var out = [];
+		for (var c in ship.systems) {
+			var craft = ship.systems[c];
+			if (!craft || !craft.systems) continue;
+			for (var s in craft.systems) {
+				if (craft.systems[s] && craft.systems[s].name === system.name) out.push(craft.systems[s]);
+			}
+		}
+		return out;
 	},
 
 	onOfflineClicked: function onOfflineClicked(ship, system) {
@@ -1496,6 +1518,7 @@ shipManager.power = {
 				//}
 			}
 		}
+		if (ship.flight) array = shipManager.power.flightSystemsNamed(ship, system); //Stage 36: every craft's (a fried one is forced offline - skipped below)
 
 		for (var i = 0; i < array.length; i++) {
 

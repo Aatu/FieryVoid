@@ -601,6 +601,13 @@ window.ajaxInterface = {
                             "save temporary critical effects" checkbox, off by default).
        An options object rather than a positional flag, matching loadSavedFleet, so a
        future third choice does not re-sign this at every call site. */
+    /* The craft a flight's rack missiles are paid for: in the lobby, where a flight is one blueprint craft loaded for all, every craft
+       but those with a Ramming Prow (lobbyEnhancements.ordnanceCraft - BuyingGamePhase gives those none). game.php has no
+       lobbyEnhancements, and there each craft's racks hold what they hold, so the size is as it was. */
+    missileCraft: function missileCraft(ship, size) {
+        return window.lobbyEnhancements ? lobbyEnhancements.ordnanceCraft(size, lobbyEnhancements.prowCount(ship)) : size;
+    },
+
     constructSavedShips: function constructSavedShips(fleetname, isPublic, opts) {
 
         var saveships = Array();
@@ -692,7 +699,7 @@ window.ajaxInterface = {
                                 for (var index in fightersystem.missileArray) {
                                     var amount = fightersystem.missileArray[index].amount;
                                     ammoArray[index] = amount;
-                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * saveFlightSize;
+                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * ajaxInterface.missileCraft(ship, saveFlightSize);
                                 }
                             }
 
@@ -1082,7 +1089,7 @@ window.ajaxInterface = {
                                 for (var index in fightersystem.missileArray) {
                                     var amount = fightersystem.missileArray[index].amount;
                                     ammoArray[index] = amount;
-                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * ship.flightSize;
+                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * ajaxInterface.missileCraft(ship, ship.flightSize);
                                 }
                             }
 
@@ -1145,6 +1152,20 @@ window.ajaxInterface = {
                 if (window.officers) {
                     var officerTransfers = officers.transferClaims(ship);
                     if (officerTransfers.length > 0) newShip.officerTransfers = officerTransfers;
+                }
+
+                //an Expert Analyst's scan this turn (OFFICERS_PLAN.md Stage 35) - a claim the server checks; read only in Initial Orders,
+                //and sent only while it is still allowed (officers.analystClaim drops one whose OEW was taken off)
+                if (window.officers && !ship.flight) {
+                    var analystClaim = officers.analystClaim(ship);
+                    if (analystClaim) newShip.analystScan = analystClaim;
+                }
+
+                //an Expert Electrician's split of this turn's shunted power (OFFICERS_PLAN.md Stage 36) - a claim the server checks, putting down at
+                //random what is left unplaced; read only in Initial Orders, and sent only while his flight has points
+                if (window.officers && ship.flight && gamedata.gamephase == 1) {
+                    var shuntClaim = officers.shuntClaim(ship);
+                    if (shuntClaim) newShip.electricianShunt = shuntClaim;
                 }
 
                 //a flight's fighter mission pick (FIGHTER_MISSIONS_PLAN.md §3.7) - a claim the server checks; read only

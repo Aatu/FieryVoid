@@ -256,6 +256,8 @@ const fix2 = (value) => (typeof value === 'number' ? value.toFixed(2) : value);
 
 //a stat as the window shows it: a lobby officer's change is added at read time (officers.displayStat)
 const statOf = (ship, field) => (window.officers ? officers.displayStat(ship, field) : ship[field]);
+//OFFICERS_PLAN.md Stage 36: what an Expert Electrician's shunted power adds to a flight this turn - its direct fire's OB ('ob') or its thrust
+const shuntOf = (ship, field) => (window.officers && ship.flight ? (field === 'ob' ? officers.shuntOb(ship) : officers.shuntThrust(ship)) : 0);
 
 const profileText = (front, side) => (front * 5) + '/' + (side * 5);
 
@@ -443,13 +445,13 @@ class ShipNotesPanel extends React.Component {
                     <Block>
                         <BlockTitle>Flight Stats</BlockTitle>
                         <StatRow><StatLabel>Armor F/S/A</StatLabel><StatValue>{shipManager.systems.getFlightArmour(ship)}</StatValue></StatRow>
-                        <StatRow><StatLabel>Offensive bonus</StatLabel><StatValue>{statOf(ship, 'offensivebonus') * 5}</StatValue></StatRow>
+                        <StatRow><StatLabel>Offensive bonus</StatLabel><StatValue>{(statOf(ship, 'offensivebonus') + shuntOf(ship, 'ob')) * 5}</StatValue></StatRow>
                         {/*flights carry forwardDefense/sideDefense exactly like ships (the
                            lobby resets them from the blueprint on edit, and FtrPetals-style
                            systems mutate them live), so the profile reads the same way as
                            ManoeuvreStats' - user request 2026-07-23*/}
                         <StatRow><StatLabel>Profile - Front / Side</StatLabel><StatValue>{ship.forwardDefense * 5}/{ship.sideDefense * 5}</StatValue></StatRow>
-                        <StatRow><StatLabel>Thrust</StatLabel><StatValue>{statOf(ship, 'freethrust')}</StatValue></StatRow>
+                        <StatRow><StatLabel>Thrust</StatLabel><StatValue>{statOf(ship, 'freethrust') + shuntOf(ship, 'thrust')}</StatValue></StatRow>
                         <StatRow><StatLabel>Turn Cost / Delay</StatLabel><StatValue>{ship.turncost} / {ship.turndelaycost == 0 ? 0 : ship.turndelaycost}</StatValue></StatRow>
                         {<StatRow><StatLabel>Accel. / Pivot / Roll</StatLabel><StatValue>{ship.accelcost} / {ship.pivotcost} / {ship.rollcost}</StatValue></StatRow>}                                            
                         <StatRow><StatLabel>Initiative</StatLabel><StatValue>{statOf(ship, 'iniativebonus')}</StatValue></StatRow>

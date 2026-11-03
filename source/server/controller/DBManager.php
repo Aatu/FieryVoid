@@ -3815,6 +3815,8 @@ class DBManager
 				if (Officers::takeNote($ship, $currNote)) continue;
 				//...and a fighter flight's mission (FIGHTER_MISSIONS_PLAN.md §3.1), which sits on its sample fighter
 				if (FighterMissions::takeNote($ship, $currNote)) continue;
+				//...and a team's count of a flight's missiles (OFFICERS_PLAN.md Stage 35), which sits on its first craft
+				if (FighterFlight::takeMissileNote($ship, $currNote)) continue;
 				//...and so is a fighter officer's move with his fighter to another flight row (Stage 4)
 				if (Officers::isMoveNote($currNote)){
 					$ship->recordOfficerMove($currNote->notevalue, $currNote->turn, $currNote->systemid);

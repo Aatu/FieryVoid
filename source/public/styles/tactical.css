@@ -136,8 +136,10 @@ body {
 
 /* An Expert Warrior's Charge icon while it waits for the enemy unit to be clicked (OFFICERS_PLAN.md Stage 28): its glow pulses.
    UI/shipMovement.js drawChargeIcon sets the class and --charge-glow (its chargeGlowColour knob); an animation outranks the
-   inline filter it sets. Kept within the icon's box - #shipMovementUI div clips its overflow. */
-#chargecanvas.charge-picking {
+   inline filter it sets. Kept within the icon's box - #shipMovementUI div clips its overflow.
+   Stage 34: an Expert War Leader's icon while it waits for the unit to be clicked, the same way (drawWarLeaderIcon). */
+#chargecanvas.charge-picking,
+#warLeadercanvas.charge-picking {
     animation: fvChargePicking 0.8s ease-in-out infinite alternate;
 }
 

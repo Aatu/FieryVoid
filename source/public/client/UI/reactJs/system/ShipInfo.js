@@ -100,6 +100,9 @@ class ShipInfo extends React.Component {
 				displayOffensiveBonus -= window.ew.getDetectMEW(ship) * 2;
 			}	
 		}
+		//OFFICERS_PLAN.md Stage 36: an Expert Electrician's shunted power this turn - its OB is direct fire's only, its thrust the flight's
+		const shuntOb = (ship.flight && window.officers) ? officers.shuntOb(ship) : 0;
+		const shuntThrust = (ship.flight && window.officers) ? officers.shuntThrust(ship) : 0;
 
 		/* A FLIGHT's officer (OFFICERS_PLAN.md D12, Stage 4): his post is the first craft, and hovering a
 		   craft's card shows this block rather than a system tooltip - so his line lives here: name, effect
@@ -119,7 +122,7 @@ class ShipInfo extends React.Component {
 				if (craft && officer && officer.multi && String(entry.post) !== String(craft.id)) return;
 				const state = officers.stateText(entry);
 				const line = {
-					name: officers.label(entry.id),
+					name: officers.label(entry.id, ship),
 					text: (officer ? officer.summary : '') + (state ? ' ' + state : ''),
 					out: !officers.serves(entry, officerTurn),
 					count: 1
@@ -147,14 +150,14 @@ class ShipInfo extends React.Component {
 
 		return (
 			<InfoContainer $tightBottom={tightBottom} $compactText={compactText}>
-				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Offensive bonus: </Header>{displayOffensiveBonus * 5}</Entry>}
+				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Offensive bonus: </Header>{(displayOffensiveBonus + shuntOb) * 5}{shuntOb > 0 ? ' (+' + shuntOb * 5 + ' shunted, direct fire only)' : ''}</Entry>}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Armor (F/S/A): </Header>{shipManager.systems.getFlightArmour(ship)}</Entry>}
 				{/*profile, same base numbers the ship window's stat panels show (user request
 				   2026-07-23); the map tooltip's "Defence (F/S)" line adds the range/EW
 				   modified chance on top of these*/}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Profile - Front/Side: </Header>{ship.forwardDefense * 5}/{ship.sideDefense * 5}</Entry>}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Initiative: </Header>{window.officers ? officers.displayIniativeBonus(ship) : ship.iniativebonus}</Entry>}
-				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Thrust: </Header>{window.officers ? officers.displayStat(ship, 'freethrust') : ship.freethrust}</Entry>}
+				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Thrust: </Header>{(window.officers ? officers.displayStat(ship, 'freethrust') : ship.freethrust) + shuntThrust}{shuntThrust > 0 ? ' (+' + shuntThrust + ' shunted)' : ''}</Entry>}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Turn Cost: </Header>{ship.turncost}</Entry>}										
 				{ship.flight && isRevealed && ship.turndelay && <Entry key={reactKey++}><Header>Turn Delay: </Header>{ship.turndelaycost}</Entry>}											
 				{ship.flight && isRevealed && <Entry key={reactKey++}>&nbsp;</Entry>}

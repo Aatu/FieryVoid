@@ -307,7 +307,7 @@
             <div class="cg-card">
               <h3 class="cg-card-label">Terrain Features</h3>
               <div class="cg-caption">Placed at random when the game starts.</div>              
-              <div class="cg-terrain-row"><label for="dustSelect">Dust Field</label><?php print(cgCountCombo('dustSelect', 'Dust', DustAndMeteorsRule::$maxDust, $fieldPresets)); ?></div>
+              <div class="cg-terrain-row"><label for="dustSelect">Dust Fields</label><?php print(cgCountCombo('dustSelect', 'Dust', DustAndMeteorsRule::$maxDust, $fieldPresets)); ?></div>
               <div class="cg-terrain-row"><label for="meteorsSelect">Meteor Swarms</label><?php print(cgCountCombo('meteorsSelect', 'Meteor Swarms', DustAndMeteorsRule::$maxMeteors, $fieldPresets)); ?></div>              
               <div class="cg-terrain-row"><label for="asteroidsSelect">Asteroids</label><?php print(cgCountCombo('asteroidsSelect', 'Asteroids', 48, $fieldPresets)); ?></div>
               <div class="cg-terrain-row"><label for="moonsSmallSelect">Small Moons</label><?php print(cgCountCombo('moonsSmallSelect', 'Small Moons', 5, $moonPresets)); ?></div>

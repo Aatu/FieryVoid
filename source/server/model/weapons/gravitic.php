@@ -1806,7 +1806,8 @@ class HypergravitonBlaster extends Weapon {
 
             while ($damageRemaining > 0) {
                 $attempts++;
-                $rolled = Dice::d(100);
+                //OFFICERS_PLAN.md Stage 37: the shot's own first roll may be one a Lucky Captain's armed feat rolled ahead (Officers::toHitRoll) - never a re-roll
+                $rolled = ($attempts === 1 && $isFirstShot && TacGamedata::$officersPresent) ? Officers::toHitRoll($fireOrder, 0) : Dice::d(100);
                 $fireOrder->rolled = $rolled; //last roll wins, as in base fire()
 
                 $fireOrder->notes .= " FIRING SHOT (attempt $attempts): rolled: $rolled, needed: $needed, damage left: $damageRemaining\n";

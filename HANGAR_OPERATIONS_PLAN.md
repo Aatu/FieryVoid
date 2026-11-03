@@ -4166,3 +4166,38 @@ checkbox state.
 `yarn watch:legacy` (confirm.js) + Docker test: a carrier with 2+ default shuttles in a >1-box bay shows the Split
 box; splitting into e.g. 1+1 launches two separate 1-shuttle flights next turn; budget readout blocks over-launch;
 ✕ on the last split row unchecks Split. Real-fighter rows show no Split box.
+
+## Whole-flight dock re-checks the approach (2026-10-30)
+
+Found in OFFICERS_PLAN.md Stage 32: `buildDockBays` asked `canShipReceive` against the primary bay and ignored the
+answer ("fall through" - that bay may not take the category), so the end-of-turn whole-flight dock never re-checked
+the hex, heading, speed or the carrier's pivot/roll; only the client did, when the order was made. The catapult
+(`processDockOrders`) and jumping-carrier paths always honoured `canShipReceive`.
+
+Fix: the approach block moved byte-identical out of `canShipReceive` into `private static canApproachCarrier($carrier,
+$flight, $isCatapult, $gamedata, &$reason)`, called where the block stood (same order, same reason strings), so those
+two paths are unchanged. `buildDockBays` asks it first (`$isCatapult` false - catapults never get there) and returns
+`[]` on a refusal, so `processWholeFlightDocks` files its usual `'Hangar dock failed'` note `fail:<flight>:<count>:<reason>`.
+The primary-bay `canShipReceive` call stays, only for the `$reason` a box shortfall reports (same text as before).
+
+What can change in play - a dock whose approach no longer holds at the END of the turn, after the client allowed it:
+- the carrier's Expert Anticipator turn (Firing phase, OFFICERS_PLAN.md Stage 23) made after the dock order: new
+  heading, refused (turn-then-dock was already refused by the client; the catapult path already counted it);
+- a Redline Pilot's landing beyond the thrust with no roll made (his craft lost in firing): refused (it docked unrolled);
+- (theoretical) a carrier attached during this turn's resolution to a host that pivoted/rolled (inherited state).
+Otherwise every dock the client allows lands exactly as before. Left alone: the server reads raw `freethrust`, the
+client the EDF-drained `getEffectiveFreeThrust` - the server is never the stricter of the two.
+
+### Verified
+officersHarness: new `checkWholeFlightDockApproach` (the REAL `processWholeFlightDocks`: speed, heading, hex,
+pivot, roll, Anticipator turn, facing-off-heading still docks, Redline no-roll); mutation 7/7 (`mutateDock.js`,
+session scratchpad); the local DB's two real fighter docks (game 4239 turn 2) both pass `canApproachCarrier`.
+
+### Files
+- `systems/HangarOps.php` — `canApproachCarrier` (new, extracted), `canShipReceive`, `buildDockBays`.
+- `ships/Officers.php` — `breakOffDocks` comment only (it stays: a crash is a break-off, never a failed dock).
+- `tests/replay/officersHarness.php` (gitignored) — `checkWholeFlightDockApproach`.
+
+### Remaining (user)
+Play test: an ordinary dock still lands. With an Expert Anticipator carrier, order the dock, then make his Firing-phase
+turn: the flight stays in space and `tac_individual_notes` holds `fail:<flight>:<n>:heading mismatch`.

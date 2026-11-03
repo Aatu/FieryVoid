@@ -39,7 +39,7 @@ class mentabanvalkara extends FighterFlight{
             $fighter = new Fighter("mentabanvalkara", $armour, 7, $this->id);
             $fighter->displayName = "Valkara";
             $fighter->imagePath = "img/ships/mentabanDeltaV.png";
-            $fighter->iconPath = "img/ships/mentabanDeltaV_large.png";
+            $fighter->iconPath = "img/ships/mentabanDeltaV_Large.png";
 
             $fighter->addFrontSystem(new SlugCannon(330, 30));
 

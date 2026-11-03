@@ -921,6 +921,7 @@ window.PhaseStrategy = function () {
        nothing; a strategy being deactivated takes it off through its deselect. */
     PhaseStrategy.prototype.syncChargeMarker = function () {
         if (!this.shipIconContainer) return;
+        this.syncWarLeaderMarkers(); //Stage 34 - asked at every moment this is
         var target = (!this.inactive && this.selectedShip && window.shipManager && shipManager.movement.getChargeMarked)
             ? shipManager.movement.getChargeMarked(this.selectedShip) : null;
         var icon = target ? this.shipIconContainer.getById(target.id) : null;
@@ -929,6 +930,30 @@ window.PhaseStrategy = function () {
         if (this.chargeMarkedIcon) changed = this.chargeMarkedIcon.setChargeMarked(false);
         if (icon) changed = icon.setChargeMarked(true) || changed;
         this.chargeMarkedIcon = icon || null;
+        if (changed && window.webglScene && window.webglScene.requestRender) window.webglScene.requestRender();
+    };
+
+    /* THE WAR LEADER CROSSHAIRS (OFFICERS_PLAN.md Stage 34): every unit an Expert War Leader of the viewer's team named this Firing phase -
+       his wrath (red) or his center of glory (green), committed or waiting on his C&C - wears a crosshair (ShipIcon.setWarLeaderMarked) for
+       the whole phase, whatever is selected: the wrath is every ship of his fleet's to use. Which units is officers.warLeaderMarks' rule.
+       Never in a replay. Called from syncChargeMarker, so at every moment that is; nothing touched when nothing changed.
+       ⚠️ What is on show is read off the ICONS (warLeaderMarkColour), never kept on the strategy: the icons outlive it, and the crosshairs a
+       Waiting strategy put up after the Firing commit were left on into the next turn by the Initial Orders strategy that followed it, which
+       held none of them (user, game 4523). The Charge's one needs no such care - it is only ever up while a ship is selected, and every
+       strategy's deactivate deselects. */
+    PhaseStrategy.prototype.syncWarLeaderMarkers = function () {
+        if (!this.shipIconContainer) return;
+        var replay = typeof window.ReplayPhaseStrategy === 'function' && this instanceof window.ReplayPhaseStrategy;
+        var marks = (!this.inactive && !replay && window.officers) ? officers.warLeaderMarks() : [];
+        var wanted = {};
+        marks.forEach(function (mark) {
+            wanted[mark.unit] = mark.ability === 'wrath' ? UI.shipMovement.warLeaderWrathColour : UI.shipMovement.warLeaderGloryColour;
+        });
+        var changed = false;
+        this.shipIconContainer.getArray().forEach(function (icon) {
+            var colour = (icon.ship && wanted[icon.ship.id]) || null;
+            if ((icon.warLeaderMarkColour || null) !== colour) changed = icon.setWarLeaderMarked(colour) || changed;
+        });
         if (changed && window.webglScene && window.webglScene.requestRender) window.webglScene.requestRender();
     };
 

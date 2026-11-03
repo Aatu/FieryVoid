@@ -3804,8 +3804,6 @@ class TrekPhaserKelly extends TrekPhaserBase{
 		public $name = "TrekPhaserKelly";
         public $displayName = "Type 6 Phaser";
         public $iconPath = "TrekPhaserM.png"; 
-        //public $animationExplosionScale = 0.3;
-
         public $raking = 10;
         
         public $intercept = 2;
@@ -4282,6 +4280,94 @@ class TrekPhaserKellyType7 extends TrekPhaserBase{
 		}
 
 }
+
+
+class TrekPhaserKellyType4 extends LinkedWeapon{		
+		public $name = "TrekPhaserKellyType4";
+		public $displayName = "Type 4 Phaser";
+		public $iconPath = "TrekFtrPhaser2.png";
+		public $animation = "trail";
+		public $trailColor = array(255, 163, 26);	
+        public $loadingtime = 1;
+		public $normalload = 2;
+		
+        public $loadingtimeArray = array(1=>1, 2=>2);
+		public $shots = 2;
+		public $defaultShots = 2;
+		public $intercept = 2;
+		public $firingMode = 1;
+		public $firingModes = array(1 =>'Standard');
+		
+		public $priorityArray = array(1=>4, 2=>4); //standard shot is very light, but charged almost equals Gatling Pulse Cannon (and LPA is twin-linked...)
+	    public $rangePenalty = 1;
+        public $fireControl = array(0, 0, 0);
+		
+		public $damageType = "Raking";
+		public $weaponClass = "Particle";  
+
+		function __construct($startArc, $endArc, $nrOfShots = 2){
+			$this->defaultShots = $nrOfShots;
+			$this->shots = $nrOfShots;
+			$this->intercept = $nrOfShots;
+			parent::__construct(0, 1, 0, $startArc, $endArc);
+		}	
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			$this->data["Special"] = "Can fire accelerated after 1 turn of recharge";  
+			$this->data["Special"] .= "<br>REMINDER: as an accelerator weapon, it will not be used for interception unless specifically ordered to do so!"; 
+		}
+		
+	
+		public function getDamage($fireOrder){
+				switch($this->turnsloaded){
+				case 0:
+            	case 1:
+                	return Dice::d(6, 2);
+			    			break;
+            	case 2:
+            	   	return Dice::d(6, 4);
+			    			break;
+        	}
+		}
+
+		public function setMinDamage(){
+				switch($this->turnsloaded){
+						case 0:
+						case 1:
+								$this->minDamage = 2;
+								break;
+						case 2:
+								$this->minDamage = 4;
+								break;
+				}
+				$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}							
+		
+		public function setMaxDamage(){
+				switch($this->turnsloaded){
+						case 0:
+						case 1:
+								$this->maxDamage = 12;
+								break;
+						case 2:
+								$this->maxDamage = 24;
+								break;
+				}
+				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}
+		
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
+		}			
+}//end of class TrekPhaserKellytype4
+
 
 
 //New version of Photon Torp so it can be adjusteted in KellyTrek without affecting existing Trek units
