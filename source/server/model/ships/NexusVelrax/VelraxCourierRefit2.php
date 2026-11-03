@@ -9,8 +9,8 @@ class VelraxCourierRefit2 extends LCV{
         $this->phpclass = "VelraxCourierRefit2";
         $this->imagePath = "img/ships/Nexus/velraxGunboat.png";
 			$this->canvasSize = 70; //img has 200px per side
-        $this->shipClass = "Mossen Courier (2110)";
-			$this->variantOf = "Mossen Courier";
+        $this->shipClass = "Velrax Mossen Courier (2110)";
+			$this->variantOf = "Velrax Mossen Courier";
 			$this->occurence = "common";
 		$this->unofficial = true;
 			$this->isd = 2110;

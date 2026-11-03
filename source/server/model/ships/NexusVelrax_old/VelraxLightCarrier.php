@@ -50,7 +50,7 @@ class VelraxLightCarrier extends BaseShip{
 		$this->addLeftSystem(new Hangar(2, 7, 6, 3));
 
 		$this->addRightSystem(new PlasmaWaveTorpedo(3, 7, 4, 300, 60));
-        $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 300, 120));
+        $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 0, 180));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 		$this->addRightSystem(new Hangar(2, 7, 6, 3));
         
