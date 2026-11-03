@@ -14,6 +14,8 @@ class federationDreadnought extends BaseShip{
         $this->limited = 10;
 		$this->unofficial = true;
 
+        $this->fighters = array("normal"=>6);
+
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
         
