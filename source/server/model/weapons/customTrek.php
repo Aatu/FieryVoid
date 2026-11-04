@@ -3835,7 +3835,7 @@ class TrekPhaserKelly extends TrekPhaserBase{
 			if ( $powerReq == 0 ) $powerReq = 5;
 			$this->guns = $guns;
 			$this->boostEfficiency = $guns;			
-			$gunsAF = $guns * 3;
+			$gunsAF = $guns * 2;
 			$this->gunsArray = array(1=>$guns, 2=>$gunsAF);			
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -3915,16 +3915,16 @@ class TrekPhaserKelly extends TrekPhaserBase{
 					switch($this->turnsloaded){
 						case 0:
 						case 1:
-							$this->damageRolled = Dice::d(12, 3 + $add);;
+							$this->damageRolled = Dice::d(6, 6 + $add);;
 							break;
 
 						default:
-							$this->damageRolled = Dice::d(12, 6 + $add);
+							$this->damageRolled = Dice::d(6, 12 + $add);
 							break;
 					}
 				}
 
-				return round($this->damageRolled / 6);
+				return round($this->damageRolled / 4);
 
 			}else{
 				return 0; // Safety check.
