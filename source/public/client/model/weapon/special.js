@@ -69,16 +69,6 @@ SparkField.prototype.initBoostableInfo = function(){
     }
     return this;
 }
-SparkField.prototype.clearBoost = function(){
-        for (var i in system.power){
-                var power = system.power[i];
-                if (power.turn != gamedata.turn) continue;
-                if (power.type == 2){
-                    system.power.splice(i, 1);
-                    return;
-                }
-        }
-}
 SparkField.prototype.hasMaxBoost = function(){
     return true;
 }
@@ -944,19 +934,6 @@ var HeavyPsionicLance = function HeavyPsionicLance(json, ship) {
 HeavyPsionicLance.prototype = Object.create(Weapon.prototype);
 HeavyPsionicLance.prototype.constructor = HeavyPsionicLance;
 
-HeavyPsionicLance.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-
-            return;
-        }
-    }
-};
-
 HeavyPsionicLance.prototype.hasMaxBoost = function () {
     return true;
 };
@@ -1005,19 +982,6 @@ var PsionicLance = function PsionicLance(json, ship) {
 };
 PsionicLance.prototype = Object.create(Weapon.prototype);
 PsionicLance.prototype.constructor = PsionicLance;
-
-PsionicLance.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-
-            return;
-        }
-    }
-}; 
 
 PsionicLance.prototype.hasMaxBoost = function () {
     return true;
@@ -1096,16 +1060,6 @@ PsychicField.prototype.initBoostableInfo = function() {
     }
 
     return this;
-}
-PsychicField.prototype.clearBoost = function(){
-        for (var i in system.power){
-                var power = system.power[i];
-                if (power.turn != gamedata.turn) continue;
-                if (power.type == 2){
-                    system.power.splice(i, 1);
-                    return;
-                }
-        }
 }
 PsychicField.prototype.hasMaxBoost = function(){
     return true;

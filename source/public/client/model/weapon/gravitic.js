@@ -40,17 +40,6 @@ GravitonPulsar.prototype.getInterceptRating = function () {
     return 1 + shipManager.power.getBoost(this);
 };
 
-GravitonPulsar.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-            return;
-        }
-    }
-};
-
 GravitonPulsar.prototype.hasMaxBoost = function () {
     return true;
 };
@@ -91,17 +80,6 @@ GraviticBolt.prototype.initBoostableInfo = function () {
 
 GraviticBolt.prototype.getInterceptRating = function () {
     return 1 + shipManager.power.getBoost(this);
-};
-
-GraviticBolt.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-            return;
-        }
-    }
 };
 
 GraviticBolt.prototype.hasMaxBoost = function () {
@@ -451,18 +429,6 @@ GraviticCutter.prototype.initBoostableInfo = function () {
     return this;
 };
 
-GraviticCutter.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-
-            return;
-        }
-    }
-};
 GraviticCutter.prototype.hasMaxBoost = function () {
     return true;
 };
@@ -490,19 +456,6 @@ HypergravitonBeam.prototype.initBoostableInfo = function () {
         }
     }
     return this;
-};
-
-HypergravitonBeam.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-
-            return;
-        }
-    }
 };
 
 var HypergravitonBlaster = function HypergravitonBlaster(json, ship) {
@@ -853,19 +806,6 @@ HypergravitonBlaster.prototype.initializationUpdate = function () {
     }    
 
     return this;
-};
-
-HypergravitonBlaster.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-
-            return;
-        }
-    }
 };
 
 var MedAntigravityBeam = function MedAntigravityBeam(json, ship) {
