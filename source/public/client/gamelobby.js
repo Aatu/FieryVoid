@@ -1095,6 +1095,13 @@ window.gamedata = {
 		var points10 = 0;
 		var points33 = 0;
 		var points50 = 0;
+		/* Low Crew Training (Enhancements.php LOW_TRAIN): "no more than 10% of their battle force",
+		   measured on base cost exactly like the 10% bracket, and like it one single ship may break the
+		   limit (user ruling 2026-11-05). Very small races take them in unlimited numbers - their ships
+		   are left out of the count. */
+		var lowTrainExemptFactions = ['Alacan Republic', 'Small Races'];
+		var lowTrainPoints = 0;
+		var lowTrainUnits = 0;
 		var totalU = 0;
 		var totalR = 0;
 		var jumpDrivePresent = false;
@@ -1215,6 +1222,16 @@ window.gamedata = {
 			if (lship.limited == 50) {
 				points50 += bracketBaseCost;
 				units50 += 1;
+			}
+			if (!lship.flight && lowTrainExemptFactions.indexOf(lship.faction) === -1) {
+				for (var ltNo in lship.enhancementOptions) {
+					var ltEntry = lship.enhancementOptions[ltNo];
+					if (ltEntry[0] === 'LOW_TRAIN' && ltEntry[2] > 0) {
+						lowTrainPoints += bracketBaseCost;
+						lowTrainUnits += 1;
+						break;
+					}
+				}
 			}
 			totalEnhancementsValue += lship.pointCostEnh;
 			var vLetter = gamedata.variantLetter(lship);
@@ -1815,6 +1832,18 @@ window.gamedata = {
 				checkResult += "<span class='fc-ok'>OK</span> (one single ship is allowed to break limit)";
 			} else {
 				checkResult += "<span class='fc-bad'>FAILED!</span> (too many points in this deployment bracket)";
+				problemFound = true;
+			}
+		}
+		//Low Crew Training: shown only when the fleet carries any (outside the exempt factions)
+		if (lowTrainUnits > 0) {
+			checkResult += "<br> - Low Crew Training: " + lowTrainPoints + "/" + limit10 + ": ";
+			if (lowTrainPoints <= limit10) {
+				checkResult += R_OK;
+			} else if (lowTrainUnits == 1) { //only 1 unit - allowed to break limit
+				checkResult += "<span class='fc-ok'>OK</span> (one single ship is allowed to break limit)";
+			} else {
+				checkResult += "<span class='fc-bad'>FAILED!</span> (no more than 10% of the fleet may have Low Crew Training)";
 				problemFound = true;
 			}
 		}

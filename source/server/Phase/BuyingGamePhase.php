@@ -674,6 +674,11 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                             $enhName = Enhancements::getStoredEnhancementName($ship, $enhancementEntry); //choice-valued options store the PICK here, not the label
                             $enhNo = $enhancementEntry[2];
                             if ($enhNo > 0){ //actually taken
+                                /* Low Crew Training: the scenario's d6 is rolled HERE, once per ship (each
+                                   copy of a bulk its own), and stored as the row's enhname - the label
+                                   Enhancements::lowCrewTrainingLabel gives that result, read back on every load.
+                                   Never at getStoredEnhancementName: a saved fleet goes through that too. */
+                                if ($enhID === 'LOW_TRAIN') $enhName = Enhancements::rollLowCrewTraining($ship);
                                 $dbManager->submitEnhancement($gameData->id, $id, $enhID, $enhNo, $enhName);
                             }
                         }

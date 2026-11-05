@@ -85,6 +85,7 @@ window.buyHelp = {
         IPSH_EETH: 'Eethan Barony variant: +2 thrust, +25% power, +0.1 turn delay, -5 initiative, +4 on Reactor and Engine criticals.',
         IPSH_ESSAN: 'Essan Barony variant: Engine +1 thrust and +2 boxes, Scanner -1 output and -2 boxes, +1 armour on all Structure (to 5).',
         JUMP_ACC: 'Jump delay -33% and jump point range +2 hexes. The drive draws double power and drains the reactor even when off; opening a jump point on a damaged drive is twice as likely to destroy the ship.',
+        LOW_TRAIN: 'One penalty for the whole game, rolled on a d6 when the game starts: -1 Sensors, -1 free thrust, -20 initiative, +1 on critical rolls, -4 power (-2 for medium ships or smaller), or -1 to hit with all weapons. Up to 10% of the fleet; Alacans and Small Races have no limit.',
         MAR_CONT: 'A pool of marines restocking the Marines of Breaching Pods docked on this ship, 1 per pod per turn.',
         MARK_FERV: '+1 to hit with all weapons and +10 initiative, but +10% to be hit. Take it when Desperate rules apply to the Markab player.',
         POOR_CREW: '-1 to hit with all weapons, -5 initiative, -2 Engine, -1 Sensors, -2 power, -1 every Thruster, +5% to be hit, +2 on criticals, +1 turn delay, half hangar rate, +20% jump delay, no armed shuttles. Per level.',
