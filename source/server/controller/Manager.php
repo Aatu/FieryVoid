@@ -403,6 +403,7 @@ class Manager{
         $pointsA = $data["slots"][0]["points"];
         $poinstB = $data["slots"][1]["points"];
         $rules = new GameRules(isset($data["rules"]) ? $data["rules"] : []) ;
+        $rules->finaliseDustZone($gamespace); //the Dust Zone's hexes are settled here, once - the lobby shows them
 
         foreach ($data["slots"] as $slot){
             $slots[] = new PlayerSlotFromJSON($slot);

@@ -1521,6 +1521,8 @@ window.PhaseStrategy = function () {
                down and rebuild the tooltip - exactly the two symptoms described above, on the
                one hex where several units are guaranteed to be sharing space. */
             if (icon.ship && shipManager.movement.isAnyJumpVortex(icon.ship)) return false;
+            //The Dust Zone's unit: never in a hex anyone can click (shipManager.isHiddenUnit).
+            if (icon.ship && shipManager.isHiddenUnit(icon.ship)) return false;
             return true;
         });
     }

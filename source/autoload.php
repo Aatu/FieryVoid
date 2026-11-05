@@ -1128,6 +1128,8 @@ spl_autoload_register(
                 'dustcloudsevenhex' => '/server/model/ships/terrain/DustCloudSevenHex.php',
                 'dustcloudthreehex' => '/server/model/ships/terrain/DustCloudThreeHex.php',
                 'dustfield' => '/server/model/ships/terrain/DustField.php',
+                'dustzone' => '/server/model/ships/terrain/DustZone.php',
+                'dustzonerule' => '/server/model/DustZoneRule.php',
                 'dux' => '/server/model/ships/centauri_raiders/dux.php',
                 'duxraider' => '/server/model/ships/raiders/duxRaider.php',
                 'earlybattlewagon' => '/server/model/ships/raiders/earlybattlewagon.php',

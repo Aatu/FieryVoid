@@ -166,6 +166,7 @@ window.BallisticIconContainer = function () {
 
 		generateBallisticLines.call(this);
 		generateTerrainHexes.call(this, gamedata);
+		generateDustZone.call(this, gamedata);
 		generateEdfNetHexes.call(this, gamedata);
 		generateSensorChargeCourses.call(this, gamedata);
 		/* ONE BLUE MARKER PER HEX ACROSS BOTH SWEEPS (user report 2026-09-11, replay of game 4348).
@@ -408,6 +409,165 @@ window.BallisticIconContainer = function () {
 			this.sceneObjects.delete(key);
 		});
 	};
+
+	/* THE DUST ZONE (server: DustZoneRule) - gamedata.rules.dustZone, B5W's "Dust".
+
+	   NOT a terrain footprint: the zone's unit is hidden and parked off the map (shipManager.isHiddenUnit),
+	   and the dust is the rule's own hexes, drawn here as ONE mesh under a tiling dust texture - a single
+	   plane over the whole board at 100% coverage, one region over the clump's hexes (plus any map
+	   template's dust) otherwise. However much of the map it covers, it is that one shape.
+
+	   It is painted twice, as the mesh and one child sharing its outline, each with the same texture at its
+	   own scale and angle (DUST_LAYERS). A single tiling texture repeats in a grid the eye picks out at any
+	   distance; two whose repeats never line up do not repeat at all.
+
+	   The hexes are fixed when the game is created, so the signature never changes and syncSceneObject
+	   builds it once per container. Below the hex grid (-500), so the grid still reads crisply over it;
+	   the region's soft rim tells the edge of a clump. Tune the look with the constants. */
+	const DUST_ZONE_KEY = 'dustzone';
+	const DUST_ZONE_Z = -600;
+	const DUST_ZONE_RIM = 0xc8a46e;          //sand, a shade brighter than the dust itself
+	const DUST_ZONE_RIM_OPACITY = 0.25;
+	const DUST_TEXTURE_SIZE = 1024;
+	const DUST_GRID_HEXES = 199;             //webglHexGridRenderer's HEX_COUNT_WIDTH / HEIGHT: the whole board
+	//tile: hexes one texture tile spans. Incommensurate scales and angles, so the two repeats never coincide.
+	const DUST_LAYERS = [
+		{ tile: 12, rotation: 0, opacity: 0.25 },
+		{ tile: 19.3, rotation: 1.1, opacity: 0.2 }
+	];
+
+	let dustCanvas = null;
+	const dustTextures = []; //one per layer, shared by every container, never disposed - like the hex sprites' textures
+
+	/* Drifting haze and grit on a transparent tile that repeats seamlessly: each soft blob is drawn again
+	   one tile over in every direction, so whatever crosses an edge comes back in on the other side. */
+	function getDustCanvas() {
+		if (dustCanvas) return dustCanvas;
+
+		const size = DUST_TEXTURE_SIZE;
+		const canvas = window.AbstractCanvas.create(size, size);
+		const context = canvas.getContext('2d');
+		let seed = 9301;
+		const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647; //the same dust every load
+
+		//An even veil first, then gentle haze over it at every scale, wide banks to small knots: low contrast,
+		//so the tile's repeat gives the eye nothing to lock on to.
+		context.fillStyle = 'rgba(190,155,110,0.09)';
+		context.fillRect(0, 0, size, size);
+		for (let i = 0; i < 220; i++) {
+			const x = random() * size, y = random() * size;
+			const radius = 40 + Math.pow(random(), 1.6) * 300;
+			const alpha = 0.01 + random() * 0.03;
+			const warm = Math.round(random() * 30);
+			for (let dx = -size; dx <= size; dx += size) {
+				for (let dy = -size; dy <= size; dy += size) {
+					const gradient = context.createRadialGradient(x + dx, y + dy, 0, x + dx, y + dy, radius);
+					gradient.addColorStop(0, 'rgba(' + (190 + warm) + ',' + (155 + warm) + ',110,' + alpha + ')');
+					gradient.addColorStop(1, 'rgba(' + (190 + warm) + ',' + (155 + warm) + ',110,0)');
+					context.fillStyle = gradient;
+					context.fillRect(x + dx - radius, y + dy - radius, radius * 2, radius * 2);
+				}
+			}
+		}
+
+		for (let i = 0; i < 7000; i++) {
+			context.fillStyle = 'rgba(230,205,165,' + (0.08 + random() * 0.3) + ')';
+			context.fillRect(Math.floor(random() * size), Math.floor(random() * size), 1 + Math.round(random()), 1 + Math.round(random()));
+		}
+
+		dustCanvas = canvas;
+		return dustCanvas;
+	}
+
+	/* A layer's material. Both meshes carry UVs in GAME UNITS (ShapeGeometry's own; the plane's rewritten to
+	   match), so a texture's repeat - one tile per DUST_LAYERS[n].tile hexes - serves either. A layer's
+	   texture shares the one canvas; it is its own texture only for its repeat and angle. */
+	function buildDustMaterial(layer) {
+		const spec = DUST_LAYERS[layer];
+		let texture = dustTextures[layer];
+		if (!texture) {
+			texture = new THREE.CanvasTexture(getDustCanvas());
+			texture.colorSpace = THREE.SRGBColorSpace;
+			texture.wrapS = THREE.RepeatWrapping;
+			texture.wrapT = THREE.RepeatWrapping;
+			texture.rotation = spec.rotation;
+			texture.needsUpdate = true;
+			dustTextures[layer] = texture;
+		}
+		const tile = spec.tile * this.coordinateConverter.getHexDistance();
+		texture.repeat.set(1 / tile, 1 / tile);
+
+		return new THREE.MeshBasicMaterial({
+			map: texture,
+			transparent: true,
+			opacity: spec.opacity,
+			depthWrite: false,
+			side: THREE.DoubleSide
+		});
+	}
+
+	//The dust's shape, painted with every layer: the first on the mesh itself, the rest as children just above it.
+	function buildDustMesh(geometry) {
+		const mesh = new THREE.Mesh(geometry, buildDustMaterial.call(this, 0));
+		for (let layer = 1; layer < DUST_LAYERS.length; layer++) {
+			const overlay = new THREE.Mesh(geometry.clone(), buildDustMaterial.call(this, layer)); //its own copy: HexRegion.dispose frees each child's
+			overlay.position.z = 0.005 * layer;
+			mesh.add(overlay);
+		}
+		return mesh;
+	}
+
+	//Dust everywhere: one plane the size of the board's hex grid, centred where the grid is.
+	function buildFullDust() {
+		const width = window.HexagonMath.getGridWidth(DUST_GRID_HEXES);
+		const height = window.HexagonMath.getGridHeight(DUST_GRID_HEXES);
+		const geometry = new THREE.PlaneGeometry(width, height, 1, 1);
+		const positions = geometry.attributes.position;
+		const uvs = geometry.attributes.uv;
+		for (let i = 0; i < uvs.count; i++) uvs.setXY(i, positions.getX(i), positions.getY(i));
+		uvs.needsUpdate = true;
+
+		const mesh = buildDustMesh.call(this, geometry);
+		mesh.position.set(window.HexagonMath.getHexB() / 2, 0, DUST_ZONE_Z); //webglHexGridRenderer's own offset
+		return mesh;
+	}
+
+	//Dust in part of the map: the hexes as one region (HexRegion), filled with dust and edged with a faint rim.
+	function buildClumpDust(spans) {
+		const hexes = [];
+		spans.forEach(span => {
+			for (let q = span[1]; q <= span[2]; q++) hexes.push({ q: q, r: span[0] });
+		});
+		if (!hexes.length) return null;
+
+		const centre = hexes[Math.floor(hexes.length / 2)];
+		const loops = window.HexRegion.buildRegionFromHexes(centre, hexes, this.coordinateConverter.getHexDistance());
+		if (!loops.length) return null;
+
+		//HexRegion's fill is only borrowed for its geometry - holes and all - and painted with the dust instead.
+		const fill = window.HexRegion.buildFill(loops, 0xffffff, 1);
+		fill.material.dispose();
+		const mesh = buildDustMesh.call(this, fill.geometry);
+		mesh.add(window.HexRegion.buildOutline(loops, DUST_ZONE_RIM, DUST_ZONE_RIM_OPACITY, getHexSpriteStrokeWidth()));
+
+		const position = this.coordinateConverter.fromHexToGame(new hexagon.Offset(centre.q, centre.r));
+		mesh.position.set(position.x, position.y, DUST_ZONE_Z);
+		return mesh;
+	}
+
+	function generateDustZone(gamedata) {
+		const zone = gamedata.rules && gamedata.rules.dustZone;
+		if (!zone) return;
+
+		const full = parseInt(zone.coverage, 10) === 100;
+		const spans = Array.isArray(zone.spans) ? zone.spans : [];
+		if (!full && !spans.length) return;
+
+		syncSceneObject.call(this, DUST_ZONE_KEY, full ? 'full' : 'spans:' + spans.length, () => {
+			const mesh = full ? buildFullDust.call(this) : buildClumpDust.call(this, spans);
+			return mesh && { object: mesh, release: window.HexRegion.dispose }; //geometry and material only: the texture is shared
+		});
+	}
 
 	/* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.7, Stage 7) - the Energy Draining NET field.
 

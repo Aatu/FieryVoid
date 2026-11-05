@@ -1676,17 +1676,22 @@
     <dt>Moons / large asteroids</dt>
     <dd>Anything larger than an asteroid - occupying several hexes. Units moving into their area automatically crash into
       them, during the Pre-Firing Phase.</dd>
-    <dt>Dust fields and dust clouds</dt>
-    <dd>Added in Create Game with the <b>Dust</b> count, and placed at random: most are a single hex, but about one in
-      six is a Dust Cloud of 3, 5 or 7 hexes. Dust does not block line of sight. Every dust hex a unit enters damages
-      it, during the Pre-Firing Phase:
+    <dt>Dust</dt>
+    <dd>Chosen in Create Game with the <b>Dust</b> option: <b>Entire map</b>, as the tabletop rules have it, or
+      <b>50%</b> / <b>25% of map</b> - one clump of dust round the map's centre, its shape set when the game is created
+      and shown in the lobby's Map Preview. A map template's dust hexes become part of it. Dust does not block line of
+      sight. After movement, during the Pre-Firing Phase, every unit that moved through dust that turn takes damage
+      <b>once</b>:
       <ul>
-        <li>Ships take <b>speed / 2</b> (fractions dropped) to the Structure of the side that entered the hex - the
-          Primary Structure if that side has none.</li>
-        <li>Fighters and shuttles take <b>(speed - 10) / 3</b> (fractions dropped) on every craft, so a flight at speed
-          12 or less takes nothing.</li>
+        <li>Ships take <b>speed / 2</b> (fractions dropped) to the Structure of the side facing the direction of motion
+          for most of their movement through the dust - the Primary Structure if that side has none. If two sides tie,
+          it falls on the one with more armour (then more structure left).</li>
+        <li>Fighters and shuttles take <b>(speed - 10) / 3</b> (fractions dropped) on every craft, against the armour
+          facing the direction of motion, so a flight at speed 12 or less takes nothing.</li>
         <li>It is Standard damage with no hit chart roll: armour applies, shields do not.</li>
       </ul>
+      Dust Fields and Dust Clouds bought from the Terrain faction, and those in games created before the Dust option,
+      work as before: they damage a unit once for every dust hex it enters.
     </dd>
     <dt>Meteor Swarms</dt>
     <dd>Added in Create Game with the <b>Meteor Swarms</b> count, one hex each, placed at random (a swarm shows on the map

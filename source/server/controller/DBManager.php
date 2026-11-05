@@ -2577,7 +2577,8 @@ class DBManager
         $fields    = (isset($r['dustAndMeteors']) && is_array($r['dustAndMeteors'])) ? $r['dustAndMeteors'] : array();
         $fieldCount = (int)($fields['dust'] ?? 0) + (int)($fields['meteors'] ?? 0);
         $layoutCount = (isset($r['terrainLayout']['units']) && is_array($r['terrainLayout']['units'])) ? count($r['terrainLayout']['units']) : 0;
-        if ($asteroids > 0 || $moonCount > 0 || $fieldCount > 0 || $layoutCount > 0) $chips[] = 'TERRAIN';
+        $dustZone = !empty($r['dustZone']); //DustZoneRule: present only when it covers something
+        if ($asteroids > 0 || $moonCount > 0 || $fieldCount > 0 || $layoutCount > 0 || $dustZone) $chips[] = 'TERRAIN';
 
         if (!empty($r['allowMines']))   $chips[] = 'MINES';
         if (!empty($r['allowReinforcements'])) $chips[] = 'REINF';

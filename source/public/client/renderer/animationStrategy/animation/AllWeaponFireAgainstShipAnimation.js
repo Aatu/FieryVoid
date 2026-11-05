@@ -271,6 +271,10 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.fireOrders[0].x, weapon.fireOrders[0].y));//First fire order for Prox. laser is hextargeted, use this as origin.		
         } else if (weapon.specialPosNoLauncher && weapon.fireOrders.targetid != -1) { //BL Launcher - So that Mine comes from hex it lands in.
             weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.fireOrders[0].x, weapon.fireOrders[0].y));
+        } else if (shipManager.isHiddenUnit(incomingFire.shooter)) {
+            //The Dust Zone's unit is parked far off the map; the dust is all round the unit it struck. From the
+            //parking hex a trail ran ~23s (MissileEffect: distance / speed) - from here it is a brief impact.
+            weaponOrigin = getShipPositionAtTime.call(this, this.shipIcon, startTime);
         } else { //Everything else
             weaponOrigin = getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime);
         }

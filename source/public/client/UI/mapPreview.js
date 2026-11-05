@@ -25,8 +25,12 @@ window.mapPreview = {
         well: "#04161c",        //--fv-well
         hex: "#0f2c3a",         //the hex grid: a shade above --fv-card, under everything else
         rim: "#215a7a",         //--fv-line
-        terrain: "90, 106, 118" //#5a6a76, as rgb for the alpha
+        terrain: "90, 106, 118", //#5a6a76, as rgb for the alpha
+        dust: "196, 160, 112"   //sand - the game's dust texture (BallisticIconContainer), as rgb for the alpha
     },
+
+    //The Dust Zone's wash, under the zones and terrain.
+    DUST_ALPHA: 0.3,
 
     //Logical width of the drawing; its height follows the map. Drawn at PIXEL_RATIO times that,
     //so the thin lines stay sharp however CSS scales the canvas (width 100%, height auto).
@@ -82,14 +86,22 @@ window.mapPreview = {
     TERRAIN_ALPHA: 1,
     FIELD_TERRAIN_ALPHA: 0.55,
 
-    //Which kinds of marker a layout draws, for a legend: {solid, fields}.
+    /* Which kinds of marker a layout draws, for a legend: {solid, fields, dust}. A template's dust is drawn
+       as dust (paintDust) - it joins the Dust Zone when the game is created - so `fields` is the Meteor
+       Swarms alone. */
     terrainKinds: function terrainKinds(layout) {
         var units = (layout && layout.units) || [];
         var types = mapPreview.TERRAIN_TYPES;
         return {
             solid: units.some(function (unit) { return types[unit.type] && !types[unit.type].field; }),
-            fields: units.some(function (unit) { return types[unit.type] && types[unit.type].field; })
+            fields: units.some(function (unit) { return types[unit.type] && types[unit.type].field && unit.type !== 'dust'; }),
+            dust: units.some(function (unit) { return unit.type === 'dust'; })
         };
+    },
+
+    //A rules.dustZone's coverage: 100, 50, 25, or 0 for none (or only a template's dust hexes).
+    dustCoverage: function dustCoverage(zone) {
+        return zone ? (parseInt(zone.coverage, 10) || 0) : 0;
     },
 
     /* Mathlib::getRotatedHex (server), which BuyingGamePhase uses for the same footprint: hex ->
@@ -119,6 +131,7 @@ window.mapPreview = {
      *   map.zones   - [{x, y, w, h, rgb: [r, g, b], label}], (x, y) the zone's CENTRE in hexes, the
      *                 later ones drawn over the earlier; `label` optional ("TEAM 1")
      *   map.terrain - a rules.terrainLayout, or nothing
+     *   map.dust    - a rules.dustZone, or nothing
      * The canvas takes the map's own proportions (height/width clamped 0.45-1.0, letterboxed
      * beyond), so a caller sizes it with CSS width alone.
      */
@@ -167,6 +180,7 @@ window.mapPreview = {
         ctx.clip(); //zones and terrain past the rim are cut there, as the game cuts them
 
         mapPreview.paintHexGrid(ctx, scale, Math.ceil(mapW / 2 / scale) + 2, Math.ceil(mapH / 2 / (row * scale)) + 1, hexToCanvas);
+        mapPreview.paintDust(ctx, scale, map.dust, map.terrain, { x: centerX, y: centerY, w: mapW, h: mapH }, hexToCanvas);
 
         var labels = [];
         (map.zones || []).forEach(function (zone) {
@@ -295,9 +309,66 @@ window.mapPreview = {
         ctx.restore();
     },
 
+    /* The Dust Zone (server: DustZoneRule) as a sand wash, the game's dust colour: the whole map at
+       100%, otherwise its hexes - the clump's, which the server grows when the game is created, and a
+       map template's dust, which joins it then. Before that (Create Game) a 50% / 25% clump has no hexes
+       yet, so it is shown by its size and place alone: an ellipse of that share of the map round the
+       centre, dashed because the real edge will wander. `box` is the map's centre and size on the canvas. */
+    paintDust: function paintDust(ctx, scale, zone, layout, box, toCanvas) {
+        var coverage = mapPreview.dustCoverage(zone);
+        var fill = "rgba(" + mapPreview.COLORS.dust + ", " + mapPreview.DUST_ALPHA + ")";
+
+        ctx.save();
+        ctx.fillStyle = fill;
+        if (coverage === 100) {
+            ctx.fillRect(box.x - box.w / 2, box.y - box.h / 2, box.w, box.h);
+            ctx.restore();
+            return;
+        }
+
+        var hexes = [];
+        ((zone && zone.spans) || []).forEach(function (span) {
+            for (var q = span[1]; q <= span[2]; q++) hexes.push({ q: q, r: span[0] });
+        });
+        ((layout && layout.units) || []).forEach(function (unit) {
+            if (unit.type === 'dust') hexes.push({ q: unit.q, r: unit.r });
+        });
+
+        if (coverage > 0 && !(zone.spans && zone.spans.length)) {
+            var k = Math.sqrt(4 * (coverage / 100) / Math.PI); //an ellipse inscribed in the map has pi/4 of its area
+            ctx.beginPath();
+            ctx.ellipse(box.x, box.y, box.w / 2 * k, box.h / 2 * k, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "rgba(" + mapPreview.COLORS.dust + ", 0.8)";
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([6, 4]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        //Every hex in one path and one fill, so neighbours meet without a seam.
+        if (hexes.length) {
+            var radius = scale / Math.sqrt(3);
+            var corners = [];
+            for (var c = 0; c < 6; c++) {
+                var angle = (60 * c + 30) * Math.PI / 180;
+                corners.push({ x: radius * Math.cos(angle), y: radius * Math.sin(angle) });
+            }
+            ctx.beginPath();
+            hexes.forEach(function (hex) {
+                var p = toCanvas(hex.q, hex.r);
+                ctx.moveTo(p.x + corners[5].x, p.y + corners[5].y);
+                for (var i = 0; i < 6; i++) ctx.lineTo(p.x + corners[i].x, p.y + corners[i].y);
+            });
+            ctx.fill("nonzero");
+        }
+        ctx.restore();
+    },
+
     /* Grey markers of each unit's real size: a disc for a moon, a dot per hex for the rest. A
        marker big enough to carry one gets the mockup's halo - a fainter ring INSIDE the unit's
-       footprint, so a moon still reads at its true size. Dust / meteor fields: fainter, no halo. */
+       footprint, so a moon still reads at its true size. Meteor fields: fainter, no halo. A
+       template's dust is not a marker: paintDust draws it as dust. */
     paintTerrain: function paintTerrain(ctx, scale, layout, toCanvas) {
         if (!layout || !layout.units) return;
 
@@ -305,7 +376,7 @@ window.mapPreview = {
         ctx.save();
         layout.units.forEach(function (unit) {
             var type = mapPreview.TERRAIN_TYPES[unit.type];
-            if (!type) return;
+            if (!type || unit.type === 'dust') return;
 
             var alpha = type.field ? mapPreview.FIELD_TERRAIN_ALPHA : mapPreview.TERRAIN_ALPHA;
             var hexes = [{ q: unit.q, r: unit.r }];

@@ -59,6 +59,8 @@ jQuery(function ($) {
     // clamp-on-change FIRST, so readTerrain always sees a value already inside 0..max.
     createGame.initCountCombos();
     $(".cg-terrain-count").on("change", createGame.readTerrain);
+    //The map preview shows the dust - bound after readTerrain, so it draws the rules that just changed.
+    $("#dustCoverageSelect").on("change", function () { createGame.drawMapPreview(); });
     createGame.readTerrain();
 
     // In-Service Date: a year, so digits only and four at most (the lobby's own ISD box does the same).
@@ -280,7 +282,8 @@ window.createGame = {
                 rgb: mapPreview.teamColor(slot.team, teamCount),
                 label: "TEAM " + slot.team
             })),
-            terrain: createGame.rules.terrainLayout
+            terrain: createGame.rules.terrainLayout,
+            dust: createGame.rules.dustZone
         });
     },
 
@@ -322,7 +325,15 @@ window.createGame = {
 
         const kinds = mapPreview.terrainKinds(createGame.rules.terrainLayout);
         if (kinds.solid) html += '<span class="cg-legend-item"><span class="cg-swatch cg-swatch--terrain" style="opacity:' + mapPreview.TERRAIN_ALPHA + '"></span>Asteroids &amp; Moons</span>';
-        if (kinds.fields) html += '<span class="cg-legend-item"><span class="cg-swatch cg-swatch--terrain" style="opacity:' + mapPreview.FIELD_TERRAIN_ALPHA + '"></span>Dust &amp; Meteor Swarms</span>';
+        if (kinds.fields) html += '<span class="cg-legend-item"><span class="cg-swatch cg-swatch--terrain" style="opacity:' + mapPreview.FIELD_TERRAIN_ALPHA + '"></span>Meteor Swarms</span>';
+
+        //The Dust Zone: a 50% / 25% clump is grown when the game is created, so here it is only its size and place.
+        const coverage = mapPreview.dustCoverage(createGame.rules.dustZone);
+        if (coverage > 0 || kinds.dust) {
+            const dustText = coverage === 100 ? "Dust (entire map)"
+                : coverage > 0 ? "Dust (" + coverage + "% of map, shaped at creation)" : "Dust";
+            html += '<span class="cg-legend-item"><span class="cg-swatch" style="background:rgb(' + mapPreview.COLORS.dust + ')"></span>' + dustText + "</span>";
+        }
         $("#mapLegend").html(html);
     },
 
@@ -467,7 +478,8 @@ window.createGame = {
        so a game with no terrain carries no terrain keys at all (it used to carry a zero asteroid
        count and an all-zero moons object whenever "Add Terrain" had been ticked). Server-side,
        each key is a GameRules entry: asteroids -> AsteroidsRule, moons -> MoonsRule,
-       dustAndMeteors -> DustAndMeteorsRule. */
+       dustAndMeteors -> DustAndMeteorsRule (meteors only now), dustZone -> DustZoneRule. The Dust
+       Zone carries only its coverage from here: the server grows its hexes when the game is created. */
     readTerrain: function readTerrain() {
         const count = function (id) {
             const el = $("#" + id);
@@ -485,9 +497,13 @@ window.createGame = {
         if (moons.small + moons.medium + moons.large > 0) createGame.rules.moons = moons;
         else delete createGame.rules.moons;
 
-        const fields = { dust: count("dustSelect"), meteors: count("meteorsSelect") };
-        if (fields.dust + fields.meteors > 0) createGame.rules.dustAndMeteors = fields;
+        const meteors = count("meteorsSelect");
+        if (meteors > 0) createGame.rules.dustAndMeteors = { meteors: meteors };
         else delete createGame.rules.dustAndMeteors;
+
+        const dust = parseInt($("#dustCoverageSelect").val(), 10) || 0;
+        if (dust > 0) createGame.rules.dustZone = { coverage: dust };
+        else delete createGame.rules.dustZone;
     },
 
     doMovementCheck: function doMovementCheck(data) {
@@ -2033,6 +2049,12 @@ window.createGame = {
             const count = settings.terrain ? parseInt(settings.terrain[this.id], 10) : 0;
             $(this).val(count > 0 ? count : 0).trigger("change");
         });
+        //Dust is a coverage now, not a count: settings saved with any Dust Fields take the tabletop's whole-map
+        //dust, and a value the select does not offer falls back to None.
+        const dustSelect = $("#dustCoverageSelect");
+        const savedTerrain = settings.terrain || {};
+        if (!("dustCoverageSelect" in savedTerrain) && parseInt(savedTerrain.dustSelect, 10) > 0) dustSelect.val("100").trigger("change");
+        else if (dustSelect.val() == null) dustSelect.val("0").trigger("change");
 
         //Map: a template brings its size, teams and any pre-placed terrain; a Custom map - or a
         //template this page no longer has - takes the saved size.

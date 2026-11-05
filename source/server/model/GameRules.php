@@ -42,6 +42,10 @@ class GameRules implements JsonSerializable{
         if ($dustAndMeteorsRules !== null) {
             array_push($this->rules, $dustAndMeteorsRules);
         }
+        $dustZoneRules = $this->getDustZoneRules($rules);
+        if ($dustZoneRules !== null) {
+            array_push($this->rules, $dustZoneRules);
+        }
         $terrainLayoutRules = $this->getTerrainLayoutRules($rules);
         if ($terrainLayoutRules !== null) {
             array_push($this->rules, $terrainLayoutRules);
@@ -186,6 +190,49 @@ private function getMoonsRules($rules) {
         if ($counts['dust'] === 0 && $counts['meteors'] === 0) return null;
 
         return $rule;
+    }
+
+    //The Dust Zone (DustZoneRule). Absent unless it covers something.
+    private function getDustZoneRules($rules) {
+        if (!isset($rules['dustZone'])) return null;
+
+        $d = $rules['dustZone'];
+        if (is_object($d)) $d = (array)$d;
+        if (!is_array($d)) return null;
+
+        $rule = new DustZoneRule($d['coverage'] ?? 0, $d['spans'] ?? null);
+        return $rule->isEmpty() ? null : $rule;
+    }
+
+    /* Manager::createGame, ONCE, before the rules are first saved: settle where the dust is.
+       A map template's dust hexes stop being Dust Field units and join the Dust Zone (user, 2026-11-05),
+       so a game has one kind of dust and the client draws it as one mesh - and the 50% / 25% clump is
+       grown on this map. Whatever hexes the client posted are replaced. */
+    public function finaliseDustZone($gamespace) {
+        $space = DustZoneRule::parseDustGamespace($gamespace);
+
+        $layoutHexes = array();
+        $layout = $this->getRuleByName('terrainLayout');
+        if ($layout) {
+            $layoutHexes = $layout->takeDustHexes($space);
+            if ($layout->isEmpty()) $this->removeRuleByName('terrainLayout');
+        }
+
+        $zone = $this->getRuleByName('dustZone');
+        if (!$zone && count($layoutHexes) > 0) {
+            $zone = new DustZoneRule(0);
+            array_push($this->rules, $zone);
+        }
+        if (!$zone) return;
+
+        $zone->generateDustHexes($space, $layoutHexes);
+        if ($zone->isEmpty()) $this->removeRuleByName('dustZone');
+    }
+
+    private function removeRuleByName($name) {
+        $this->rules = array_values(array_filter($this->rules, function ($rule) use ($name) {
+            return $rule->getRuleName() != $name;
+        }));
     }
 
     //A map template's pre-placed terrain. Absent unless at least one unit survives the checks.

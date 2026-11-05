@@ -3293,7 +3293,8 @@ window.gamedata = {
 					label: labelSlot[slot.team] === slot ? "TEAM " + slot.team : null
 				};
 			}),
-			terrain: gamedata.rules ? gamedata.rules.terrainLayout : null
+			terrain: gamedata.rules ? gamedata.rules.terrainLayout : null,
+			dust: gamedata.rules ? gamedata.rules.dustZone : null //its hexes were settled when the game was created
 		});
 
 		gamedata.renderMapLegend();
@@ -3333,7 +3334,12 @@ window.gamedata = {
 
 		var kinds = mapPreview.terrainKinds(gamedata.rules ? gamedata.rules.terrainLayout : null);
 		if (kinds.solid) html += item(terrainSwatch(mapPreview.TERRAIN_ALPHA), "Asteroids &amp; Moons");
-		if (kinds.fields) html += item(terrainSwatch(mapPreview.FIELD_TERRAIN_ALPHA), "Dust &amp; Meteor Swarms");
+		if (kinds.fields) html += item(terrainSwatch(mapPreview.FIELD_TERRAIN_ALPHA), "Meteor Swarms");
+		var dustCoverage = mapPreview.dustCoverage(gamedata.rules ? gamedata.rules.dustZone : null);
+		if (dustCoverage > 0 || kinds.dust || (gamedata.rules && gamedata.rules.dustZone)) {
+			html += item('<span class="lb-swatch" style="background:rgb(' + mapPreview.COLORS.dust + ')"></span>',
+				dustCoverage === 100 ? "Dust (entire map)" : "Dust");
+		}
 
 		legend.html(html);
 	},

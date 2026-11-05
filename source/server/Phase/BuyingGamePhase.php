@@ -171,7 +171,10 @@ class BuyingGamePhase implements Phase
         }
 
         foreach ($servergamedata->ships as $ship) {
-            if ($randomTerrain && $ship->userid == -5 && !isset($placedByLayout[$ship->id])) {
+            if ($ship instanceof DustZone) {
+                //The Dust Zone's unit is no part of the map: parked off it, never in the random pass.
+                $ship->movement = array(new MovementOrder(-1, "start", DustZone::getParkingHex(), 0, 0, 0, 0, 0, true, 1, 0, 0));
+            } else if ($randomTerrain && $ship->userid == -5 && !isset($placedByLayout[$ship->id])) {
                 // It's an asteroid or moon, so assign a unique random position.
                 $deploymentZone = $this->getGamespace($gameData);
 
@@ -816,6 +819,11 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
             if ($gameData->rules->hasRuleName("dustAndMeteors") && $slot->slot == 1) {
                 $dmData = $gameData->rules->getRuleByName('dustAndMeteors')->jsonSerialize();
                 $this->addDustAndMeteors($gameData, $dbManager, (int)$dmData['dust'], (int)$dmData['meteors'], $slot->slot, $named['dust'], $named['meteors']);
+            }
+
+            //The Dust Zone (DustZoneRule): its dust is the rule's hexes, and this one hidden unit owns the damage.
+            if ($gameData->rules->hasRuleName("dustZone") && $slot->slot == 1) {
+                $dbManager->submitShip($gameData->id, new DustZone($gameData->id, -5, "Dust", $slot->slot), -5);
             }
 
         }

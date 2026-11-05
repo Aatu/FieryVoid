@@ -307,7 +307,16 @@
             <div class="cg-card">
               <h3 class="cg-card-label">Terrain Features</h3>
               <div class="cg-caption">Placed at random when the game starts.</div>              
-              <div class="cg-terrain-row"><label for="dustSelect">Dust Fields</label><?php print(cgCountCombo('dustSelect', 'Dust', DustAndMeteorsRule::$maxDust, $fieldPresets)); ?></div>
+              <!-- Dust (DustZoneRule): the tabletop's dust zone covers the whole map; 50% / 25% is one clump round
+                   the centre, grown when the game is created. A choice, not a count, so a plain select. -->
+              <div class="cg-terrain-row"><label for="dustCoverageSelect">Dust</label>
+                <select id="dustCoverageSelect" class="cg-input cg-terrain-count" name="dustCoverage">
+                  <option value="0">None</option>
+                  <option value="100">Entire map</option>
+                  <option value="50">50% of map</option>
+                  <option value="25">25% of map</option>
+                </select>
+              </div>
               <div class="cg-terrain-row"><label for="meteorsSelect">Meteor Swarms</label><?php print(cgCountCombo('meteorsSelect', 'Meteor Swarms', DustAndMeteorsRule::$maxMeteors, $fieldPresets)); ?></div>              
               <div class="cg-terrain-row"><label for="asteroidsSelect">Asteroids</label><?php print(cgCountCombo('asteroidsSelect', 'Asteroids', 48, $fieldPresets)); ?></div>
               <div class="cg-terrain-row"><label for="moonsSmallSelect">Small Moons</label><?php print(cgCountCombo('moonsSmallSelect', 'Small Moons', 5, $moonPresets)); ?></div>
