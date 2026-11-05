@@ -4341,7 +4341,6 @@ class TrekPhaserKellyType4 extends LinkedWeapon{
 								$this->minDamage = 4;
 								break;
 				}
-				$this->minDamageArray[$this->firingMode] = $this->minDamage;
 		}							
 		
 		public function setMaxDamage(){
@@ -4354,16 +4353,13 @@ class TrekPhaserKellyType4 extends LinkedWeapon{
 								$this->maxDamage = 24;
 								break;
 				}
-				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 		}
 		
 		public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
 			$strippedSystem->data = $this->data;
 			$strippedSystem->minDamage = $this->minDamage;
-			$strippedSystem->minDamageArray = $this->minDamageArray;
-			$strippedSystem->maxDamage = $this->maxDamage;
-			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			$strippedSystem->maxDamage = $this->maxDamage;				
 			return $strippedSystem;
 		}			
 }//end of class TrekPhaserKellytype4

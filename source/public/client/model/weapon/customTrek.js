@@ -677,6 +677,23 @@ var TrekPhaserKellyType4 = function TrekPhaserKellyType4(json, ship) {
 TrekPhaserKellyType4.prototype = Object.create(Weapon.prototype);
 TrekPhaserKellyType4.prototype.constructor = TrekPhaserKellyType4;
 
+TrekPhaserKellyType4.prototype.initializationUpdate = function () {
+	switch (this.turnsloaded) {
+		case 0:
+			this.data["Damage"] = '4 - 24';
+			break;
+		case 1:
+			this.data["Damage"] = '2 - 12';
+			break;
+		case 2:
+			this.data["Damage"] = '4 - 24';
+			break;          
+		default:
+			this.data["Damage"] = '4 - 24';
+			break;
+	}
+	return this;
+};
 
 var TrekShieldProjectionKelly = function TrekShieldProjectionKelly(json, ship) {
     ShipSystem.call(this, json, ship);
