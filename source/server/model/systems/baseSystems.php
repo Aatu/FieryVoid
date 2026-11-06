@@ -20,10 +20,16 @@ class Jammer extends ShipSystem implements SpecialAbility{
     {
         if (!isset($args["shooter"]) || !isset($args["target"]))
             throw new InvalidArgumentException("Missing arguments for Jammer getSpecialAbilityValue");
-        
+
+        /* NEBULA_PLAN.md #13 - "jammers won't function at all" in a nebula (KS 5.12). This system only (user
+           ruling D2): Stealth systems and Shading Fields answer the same ability with their own rules. One
+           method covers every reader - to-hit, SOEW/ELINT, mines and the missile-launch denial.
+           ⚠️ MIRROR PAIR with ew.getJammerValueFromTo (JS). */
+        if (TacGamedata::$nebulaPresent) return 0;
+
         $shooter = $args["shooter"];
         $target = $args["target"];
-        
+
         if ($shooter->faction === $target->faction) return 0; //same-faction units ignore Jammer
 		
         if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip)) 
@@ -9210,7 +9216,7 @@ class JumpEngine extends Weapon{
         return $result;
     }
 
-    /* THE MODIFIERS, all of them negative - a jump point exit is aimed by the fleet that is
+    /* THE MODIFIERS, all of them negative but a nebula's +3 - a jump point exit is aimed by the fleet that is
      * already here as much as by the drive that opens it (section 2.5). The fifth, an Expert Jump
      * Officer aboard the opener (-1), is OFFICERS_PLAN.md Stage 7's.
      *
@@ -9253,6 +9259,9 @@ class JumpEngine extends Weapon{
 
         //OFFICERS_PLAN.md Stage 7 - an Expert Jump Officer aboard the opener: "a -1 shift to the vortex scatter chart"
         if (TacGamedata::$officersPresent) $mod += Officers::exitScatterShift($opener, $turn);
+
+        //NEBULA_PLAN.md #16 - the one modifier that is not a help: "arriving in nebula +3" (KS jump arrival chart)
+        if (TacGamedata::$nebulaPresent) $mod += 3;
 
         return $mod;
     }

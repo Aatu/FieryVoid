@@ -194,6 +194,8 @@ class FighterFlight extends BaseShip
            getter with an explicit turn - which is the only way the two could disagree.) */
         if ($turn === null) $turn = TacGamedata::$currentTurn;
         $thrust = (int)$this->freethrust;
+        //NEBULA_PLAN.md #2 - a nebula takes 1 off a fighter's or shuttle's thrust rating (not an Ancient's). Published below like the drain.
+        if (TacGamedata::$nebulaPresent) $thrust = max(0, $thrust - Nebula::thrustPenalty($this));
         $sample = $this->getSampleFighter();
         if (!$sample || empty($sample->criticals)) return $thrust;
         return max(0, $thrust - (int)$sample->sumCriticalParam("EdfThrustDrain", $turn));

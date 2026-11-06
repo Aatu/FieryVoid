@@ -167,6 +167,7 @@ window.BallisticIconContainer = function () {
 		generateBallisticLines.call(this);
 		generateTerrainHexes.call(this, gamedata);
 		generateDustZone.call(this, gamedata);
+		generateNebula.call(this, gamedata);
 		generateEdfNetHexes.call(this, gamedata);
 		generateSensorChargeCourses.call(this, gamedata);
 		/* ONE BLUE MARKER PER HEX ACROSS BOTH SWEEPS (user report 2026-09-11, replay of game 4348).
@@ -205,7 +206,7 @@ window.BallisticIconContainer = function () {
 			return null;
 		}
 
-		built.object.visible = this.iconsVisible;
+		built.object.visible = isSceneObjectVisible.call(this, built.object);
 		this.scene.add(built.object);
 		this.sceneObjects.set(key, { object: built.object, release: built.release, signature: signature, used: true });
 
@@ -216,6 +217,29 @@ window.BallisticIconContainer = function () {
 		this.scene.remove(entry.object);
 		entry.release(entry.object);
 	}
+
+	/* WHOLE-BOARD TERRAIN FOLLOWS THE MAP BACKGROUND (user, play-test game 4545). A plane over the entire board - 100%
+	   dust, a nebula (buildBoardPlane tags it userData.fullBoard) - is part of the backdrop, so the EW strip's Disable
+	   Background button and the OPTIONS tab's "Never show map background" take it away with the image.
+	   ⛔ ONLY the whole-board planes: a 50% / 25% dust clump stays drawn whatever the background does - players must
+	   always see where it is (user ruling 2026-11-05, when tying ALL dust to the toggle was built and rolled back).
+	   The state is read off #background itself - EwButtons.setBackground sets its image to 'none' - so a plane built
+	   after the switch was thrown starts hidden, and the switch needs no copy of its own anywhere. */
+	function isMapBackgroundOff() {
+		const background = document.getElementById('background');
+		return !!background && background.style.backgroundImage === 'none';
+	}
+
+	function isSceneObjectVisible(object) {
+		return this.iconsVisible && !(object.userData.fullBoard && isMapBackgroundOff());
+	}
+
+	//EwButtons.setBackground, through webglScene.customEvent (which requests the frame).
+	BallisticIconContainer.prototype.onMapBackgroundSet = function () {
+		this.sceneObjects.forEach(entry => {
+			if (entry.object.userData.fullBoard) entry.object.visible = isSceneObjectVisible.call(this, entry.object);
+		});
+	};
 
 	//Whatever nothing claimed this pass has gone from the board.
 	function pruneSceneObjects() {
@@ -479,20 +503,26 @@ window.BallisticIconContainer = function () {
 		return dustCanvas;
 	}
 
+	/* A LOOK is a tiling canvas painted in layers: its layer table ({tile, rotation, opacity} each), the
+	   textures it has built so far (one per layer, shared by every container) and the function that paints
+	   its canvas. The dust has one and the nebula (generateNebula) has another; the three builders below
+	   serve both. */
+	const DUST_LOOK = { layers: DUST_LAYERS, textures: dustTextures, getCanvas: getDustCanvas };
+
 	/* A layer's material. Both meshes carry UVs in GAME UNITS (ShapeGeometry's own; the plane's rewritten to
-	   match), so a texture's repeat - one tile per DUST_LAYERS[n].tile hexes - serves either. A layer's
-	   texture shares the one canvas; it is its own texture only for its repeat and angle. */
-	function buildDustMaterial(layer) {
-		const spec = DUST_LAYERS[layer];
-		let texture = dustTextures[layer];
+	   match), so a texture's repeat - one tile per look.layers[n].tile hexes - serves either. A layer's
+	   texture shares the look's one canvas; it is its own texture only for its repeat and angle. */
+	function buildLayerMaterial(look, layer) {
+		const spec = look.layers[layer];
+		let texture = look.textures[layer];
 		if (!texture) {
-			texture = new THREE.CanvasTexture(getDustCanvas());
+			texture = new THREE.CanvasTexture(look.getCanvas());
 			texture.colorSpace = THREE.SRGBColorSpace;
 			texture.wrapS = THREE.RepeatWrapping;
 			texture.wrapT = THREE.RepeatWrapping;
 			texture.rotation = spec.rotation;
 			texture.needsUpdate = true;
-			dustTextures[layer] = texture;
+			look.textures[layer] = texture;
 		}
 		const tile = spec.tile * this.coordinateConverter.getHexDistance();
 		texture.repeat.set(1 / tile, 1 / tile);
@@ -506,19 +536,19 @@ window.BallisticIconContainer = function () {
 		});
 	}
 
-	//The dust's shape, painted with every layer: the first on the mesh itself, the rest as children just above it.
-	function buildDustMesh(geometry) {
-		const mesh = new THREE.Mesh(geometry, buildDustMaterial.call(this, 0));
-		for (let layer = 1; layer < DUST_LAYERS.length; layer++) {
-			const overlay = new THREE.Mesh(geometry.clone(), buildDustMaterial.call(this, layer)); //its own copy: HexRegion.dispose frees each child's
+	//A shape painted with every layer of a look: the first on the mesh itself, the rest as children just above it.
+	function buildLayeredMesh(look, geometry) {
+		const mesh = new THREE.Mesh(geometry, buildLayerMaterial.call(this, look, 0));
+		for (let layer = 1; layer < look.layers.length; layer++) {
+			const overlay = new THREE.Mesh(geometry.clone(), buildLayerMaterial.call(this, look, layer)); //its own copy: HexRegion.dispose frees each child's
 			overlay.position.z = 0.005 * layer;
 			mesh.add(overlay);
 		}
 		return mesh;
 	}
 
-	//Dust everywhere: one plane the size of the board's hex grid, centred where the grid is.
-	function buildFullDust() {
+	//A look over the whole board: one plane the size of the board's hex grid, centred where the grid is, at depth z.
+	function buildBoardPlane(look, z) {
 		const width = window.HexagonMath.getGridWidth(DUST_GRID_HEXES);
 		const height = window.HexagonMath.getGridHeight(DUST_GRID_HEXES);
 		const geometry = new THREE.PlaneGeometry(width, height, 1, 1);
@@ -527,8 +557,9 @@ window.BallisticIconContainer = function () {
 		for (let i = 0; i < uvs.count; i++) uvs.setXY(i, positions.getX(i), positions.getY(i));
 		uvs.needsUpdate = true;
 
-		const mesh = buildDustMesh.call(this, geometry);
-		mesh.position.set(window.HexagonMath.getHexB() / 2, 0, DUST_ZONE_Z); //webglHexGridRenderer's own offset
+		const mesh = buildLayeredMesh.call(this, look, geometry);
+		mesh.position.set(window.HexagonMath.getHexB() / 2, 0, z); //webglHexGridRenderer's own offset
+		mesh.userData.fullBoard = true; //goes with the map background (isSceneObjectVisible)
 		return mesh;
 	}
 
@@ -547,7 +578,7 @@ window.BallisticIconContainer = function () {
 		//HexRegion's fill is only borrowed for its geometry - holes and all - and painted with the dust instead.
 		const fill = window.HexRegion.buildFill(loops, 0xffffff, 1);
 		fill.material.dispose();
-		const mesh = buildDustMesh.call(this, fill.geometry);
+		const mesh = buildLayeredMesh.call(this, DUST_LOOK, fill.geometry);
 		mesh.add(window.HexRegion.buildOutline(loops, DUST_ZONE_RIM, DUST_ZONE_RIM_OPACITY, getHexSpriteStrokeWidth()));
 
 		const position = this.coordinateConverter.fromHexToGame(new hexagon.Offset(centre.q, centre.r));
@@ -564,8 +595,97 @@ window.BallisticIconContainer = function () {
 		if (!full && !spans.length) return;
 
 		syncSceneObject.call(this, DUST_ZONE_KEY, full ? 'full' : 'spans:' + spans.length, () => {
-			const mesh = full ? buildFullDust.call(this) : buildClumpDust.call(this, spans);
+			const mesh = full ? buildBoardPlane.call(this, DUST_LOOK, DUST_ZONE_Z) : buildClumpDust.call(this, spans);
 			return mesh && { object: mesh, release: window.HexRegion.dispose }; //geometry and material only: the texture is shared
+		});
+	}
+
+	/* THE NEBULA (server: NebulaRule, NEBULA_PLAN.md) - gamedata.rules.nebula. It fills the whole map, so it
+	   is one plane over the whole board like 100% dust, painted with its own look: banks of violet, magenta,
+	   teal and blue gas, darker lanes between them, bright filaments and a scatter of embedded stars. Two
+	   layers at incommensurate scales and angles, as the dust (DUST_LAYERS' note), so the repeat never shows.
+
+	   Below the dust, which lies IN it, and below the hex grid (-500). Static, so the render loop's idle
+	   gating is untouched. A whole-board plane, so it goes with the map background (isSceneObjectVisible), as
+	   100% dust does. Built once per container: the rule cannot change.
+	   Tune the look with the constants; mapPreview.NEBULA_BANKS is its flat stand-in in Create Game and the
+	   lobby, in the same colours. */
+	const NEBULA_KEY = 'nebula';
+	const NEBULA_Z = -650;
+	const NEBULA_TEXTURE_SIZE = 1024;
+	const NEBULA_LAYERS = [
+		{ tile: 26, rotation: 0.35, opacity: 0.7 },
+		{ tile: 41.3, rotation: 2.2, opacity: 0.5 }
+	];
+	const NEBULA_HUES = [[150, 90, 220], [205, 95, 200], [70, 175, 200], [95, 105, 235]]; //violet, magenta, teal, blue
+
+	let nebulaCanvas = null;
+	const nebulaTextures = [];
+	const NEBULA_LOOK = { layers: NEBULA_LAYERS, textures: nebulaTextures, getCanvas: getNebulaCanvas };
+
+	/* The gas, on a transparent tile that repeats seamlessly: every shape is drawn again one tile over in
+	   every direction, so whatever crosses an edge comes back in on the other side. A shape is a radial glow
+	   squashed to `stretch` of its width along its own angle - round for a bank, thin for a filament. */
+	function getNebulaCanvas() {
+		if (nebulaCanvas) return nebulaCanvas;
+
+		const size = NEBULA_TEXTURE_SIZE;
+		const canvas = window.AbstractCanvas.create(size, size);
+		const context = canvas.getContext('2d');
+		let seed = 52711;
+		const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647; //the same nebula every load
+
+		const glow = (x, y, radius, stretch, angle, rgb, alpha) => {
+			for (let dx = -size; dx <= size; dx += size) {
+				for (let dy = -size; dy <= size; dy += size) {
+					context.save();
+					context.translate(x + dx, y + dy);
+					context.rotate(angle);
+					context.scale(1, stretch);
+					const gradient = context.createRadialGradient(0, 0, 0, 0, 0, radius);
+					gradient.addColorStop(0, 'rgba(' + rgb.join(',') + ',' + alpha + ')');
+					gradient.addColorStop(1, 'rgba(' + rgb.join(',') + ',0)');
+					context.fillStyle = gradient;
+					context.fillRect(-radius, -radius, radius * 2, radius * 2);
+					context.restore();
+				}
+			}
+		};
+		const hue = () => NEBULA_HUES[Math.floor(random() * NEBULA_HUES.length)];
+
+		//A faint violet veil, so no part of the map is clear of it, then the banks at every scale.
+		context.fillStyle = 'rgba(110,80,180,0.07)';
+		context.fillRect(0, 0, size, size);
+		for (let i = 0; i < 90; i++) {
+			glow(random() * size, random() * size, 80 + Math.pow(random(), 1.4) * 360, 0.5 + random() * 0.5,
+				random() * Math.PI, hue(), 0.04 + random() * 0.09);
+		}
+		//Darker lanes between them, for structure.
+		for (let i = 0; i < 25; i++) {
+			glow(random() * size, random() * size, 60 + random() * 160, 0.3 + random() * 0.5,
+				random() * Math.PI, [12, 8, 28], 0.08 + random() * 0.08);
+		}
+		//Bright filaments.
+		for (let i = 0; i < 60; i++) {
+			const rgb = hue().map(c => Math.min(255, c + 40));
+			glow(random() * size, random() * size, 60 + random() * 160, 0.12 + random() * 0.18,
+				random() * Math.PI, rgb, 0.06 + random() * 0.08);
+		}
+		//Embedded stars.
+		for (let i = 0; i < 160; i++) {
+			context.fillStyle = 'rgba(255,240,255,' + (0.25 + random() * 0.5) + ')';
+			context.fillRect(Math.floor(random() * size), Math.floor(random() * size), 1 + Math.round(random()), 1 + Math.round(random()));
+		}
+
+		nebulaCanvas = canvas;
+		return nebulaCanvas;
+	}
+
+	function generateNebula(gamedata) {
+		if (!(gamedata.rules && gamedata.rules.nebula)) return;
+
+		syncSceneObject.call(this, NEBULA_KEY, 'full', () => {
+			return { object: buildBoardPlane.call(this, NEBULA_LOOK, NEBULA_Z), release: window.HexRegion.dispose }; //the texture is shared
 		});
 	}
 
@@ -1827,7 +1947,7 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 			icon.targetSprite?.show();
 		});
 		this.iconsVisible = true;
-		this.sceneObjects.forEach(entry => entry.object.visible = true);
+		this.sceneObjects.forEach(entry => entry.object.visible = isSceneObjectVisible.call(this, entry.object)); //a whole-board plane stays off with the background
 		return this;
 	};
 

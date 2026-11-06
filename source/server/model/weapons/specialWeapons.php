@@ -3644,6 +3644,7 @@ if($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass ==
 				$useSplitArcs ? ($weapon->startArcArray ?? []) : [], $useSplitArcs ? ($weapon->endArcArray ?? []) : [])) continue;
 
 			$rating = $weapon->getInterceptRating($gamedata->turn);
+			if (TacGamedata::$nebulaPresent) $rating = Nebula::interceptRating($rating); //defensive fire in a nebula: 1 less (NEBULA_PLAN.md #8)
 			if ($rating <= 0) continue;
 
 			for ($g = $declaration->shotshit; $g < $declaration->shots; $g++) {

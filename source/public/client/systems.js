@@ -206,7 +206,9 @@ shipManager.systems = {
         //Mode 1, flagged server-side via the generic isModified flag), the systemInfo tooltip
         //"Fire control" string is normally only rebuilt on a firing-mode change. Rebuild it here
         //on every load so the modified value shows. Server force-sends the modified fireControl.
-        if (system.isModified && system.weapon && typeof system.translateFCtoD100txt === 'function') {
+        //...and in a NEBULA, whose fire control translateFCtoD100txt shows halved / doubled (NEBULA_PLAN.md #5) - the
+        //blueprint's line was written without it.
+        if ((system.isModified || (window.nebula && nebula.isActive())) && system.weapon && typeof system.translateFCtoD100txt === 'function') {
             system.data["Fire control (fighter/med/cap)"] = system.translateFCtoD100txt(system.fireControl);
         }
 

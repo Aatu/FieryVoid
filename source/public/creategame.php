@@ -229,11 +229,13 @@
                 </div>
               </div>
 
-              <div class="cg-check-row">
-                <input id="allowMinesCheck" type="checkbox" name="allowMinesCheck">
+              <!-- Never with a Nebula (KS 9.9): createGame.syncNebulaMines greys out whichever of the two is not chosen. -->
+              <div class="cg-check-row" id="allowMinesRow">
+                <input id="allowMinesCheck" type="checkbox" name="allowMinesCheck" aria-describedby="allowMinesNebulaNote">
                 <div class="cg-check-body">
                   <label for="allowMinesCheck" class="cg-check-label">Mines Allowed</label>
                   <div class="cg-caption">Mine units may be bought in the lobby.</div>
+                  <div class="cg-caption cg-lock-note" id="allowMinesNebulaNote" hidden>Not available in a nebula.</div>
                 </div>
               </div>
 
@@ -317,6 +319,15 @@
                   <option value="25">25% of map</option>
                 </select>
               </div>
+              <!-- Nebula (NebulaRule, NEBULA_PLAN.md): it fills the whole map, so it is only No or Yes. Never with
+                   Mines Allowed - createGame.syncNebulaMines greys out whichever of the two is not chosen. -->
+              <div class="cg-terrain-row" id="nebulaRow"><label for="nebulaSelect">Nebula</label>
+                <select id="nebulaSelect" class="cg-input cg-terrain-count" name="nebula" aria-describedby="nebulaMinesNote">
+                  <option value="0">No</option>
+                  <option value="1">Yes</option>
+                </select>
+              </div>
+              <div class="cg-caption cg-lock-note" id="nebulaMinesNote" hidden>Not available while Mines Allowed is ticked.</div>
               <div class="cg-terrain-row"><label for="meteorsSelect">Meteor Swarms</label><?php print(cgCountCombo('meteorsSelect', 'Meteor Swarms', DustAndMeteorsRule::$maxMeteors, $fieldPresets)); ?></div>              
               <div class="cg-terrain-row"><label for="asteroidsSelect">Asteroids</label><?php print(cgCountCombo('asteroidsSelect', 'Asteroids', 48, $fieldPresets)); ?></div>
               <div class="cg-terrain-row"><label for="moonsSmallSelect">Small Moons</label><?php print(cgCountCombo('moonsSmallSelect', 'Small Moons', 5, $moonPresets)); ?></div>

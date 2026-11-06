@@ -410,6 +410,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/model/EdfNetLinks.js"></script>
     <script defer src="client/lib/seedRandom.js"></script>
     <script defer src="client/ajaxInterface.js"></script>
+    <!-- NEBULA_PLAN.md - window.nebula: the nebula rules the client applies itself (to-hit terms, jink price,
+         EW lock-out, EM weapons). Runtime-only calls, so its place in the list is free. -->
+    <script defer src="client/nebula.js"></script>
     <script defer src="client/ew.js"></script>
     <script defer src="client/weaponManager.js"></script>
     <script defer src="client/damage.js"></script>

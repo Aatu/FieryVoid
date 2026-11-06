@@ -2157,6 +2157,8 @@ spl_autoload_register(
                 'nathor' => '/server/model/ships/yolu/Nathor.php',
                 'navask' => '/server/model/ships/centauri_old/navask.php',
                 'navask2002' => '/server/model/ships/centauri_old/navask2002.php',
+                'nebula' => '/server/handlers/Nebula.php',
+                'nebularule' => '/server/model/NebulaRule.php',
                 'nergell' => '/server/model/ships/minbari/nergell.php',
                 'nesacc' => '/server/model/ships/cascor/nesacc.php',
                 'neshatan' => '/server/model/ships/minbari/neshatan.php',

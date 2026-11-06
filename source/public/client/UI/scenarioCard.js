@@ -225,6 +225,8 @@ window.scenarioCard = {
         //template's dust alone, which the Terrain Map chip already covers.
         var dustCoverage = r.dustZone ? count(r.dustZone.coverage) : 0;
         if (dustCoverage > 0) add("terrain", "Dust: " + (dustCoverage === 100 ? "Entire Map" : dustCoverage + "% of Map"));
+        //The Nebula (NebulaRule) - always the whole map, so the name says it all.
+        if (r.nebula) add("terrain", "Nebula");
         var layout = r.terrainLayout;
         if (layout && layout.units && layout.units.length) {
             var name = String(layout.name == null ? "" : layout.name).trim() || "Pre-placed";

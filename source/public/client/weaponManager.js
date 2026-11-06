@@ -557,6 +557,17 @@ window.weaponManager = {
            too, and a boarded ship is emphatically still allowed to shoot. */
         if (!weapon.isRammingAttack && shipManager.isDockingRider(ship)) return;
 
+        /* NEBULA_PLAN.md #14 - "Electromagnetic weapons do not function unless mounted on advanced race ships", in the
+           weapon's current mode (three BSG missiles mix EM and non-EM modes). `ship` is the unit - the flight, for a
+           fighter's weapon. Said with a passive notice, since nothing else shows why the click did nothing; the server
+           rejects anything that gets past (Firing::validateFireOrders). */
+        if (window.nebula && nebula.isActive() && nebula.isEmDisabled(ship, weapon, weapon.firingMode)) {
+            if (window.savedOrders && typeof savedOrders.showNotice === 'function') {
+                savedOrders.showNotice('Electromagnetic weapons do not function in a nebula.');
+            }
+            return;
+        }
+
         //Spent & locked Gravitic Augmenter: already committed its order for the turn and is outside
         //that order's declaration phase — block re-selection from every path (icon click, select-all,
         //right-click) at this single chokepoint.
@@ -2088,6 +2099,8 @@ window.weaponManager = {
             //used, so a crit-suppressed bonus must not eat into the flight's own OEW.
             //minus an Expert Evader's Evade not yet sent (officers.pendingEvadeOb; the server applies a sent one)
             var baseOB = shooter.offensivebonus - (window.officers ? officers.pendingEvadeOb(shooter) : 0);
+            //a nebula halves the offensive bonus, rounding up (NEBULA_PLAN.md #7) - ⚠️ MIRROR PAIR with Nebula::offensiveBonus in Weapon::calculateHitBase
+            if (window.nebula && nebula.isActive()) baseOB = nebula.offensiveBonus(baseOB);
             //a fighter mission's term goes on the bonus BEFORE the crit / mine deductions (FIGHTER_MISSIONS_PLAN.md D5) -
             //⚠️ MIRROR PAIR with FighterMissions::adjustOffensiveBonus in Weapon::calculateHitBase
             if (window.fighterMissions) baseOB = fighterMissions.adjustOffensiveBonus(shooter, target, weapon, baseOB);
@@ -2211,6 +2224,11 @@ window.weaponManager = {
         /* An officer the player has just ordered to move (OFFICERS_PLAN.md Stage 10) serves nowhere this turn: the server
            drops his +1 once the move is committed, so the preview drops it now. 0 for every ordinary weapon. */
         if (firecontrol !== null && firecontrol !== undefined && window.officers) firecontrol -= officers.pendingMoveFireControl(shooter, weapon);
+        /* A nebula halves a fire control bonus (rounding up) and doubles a penalty (NEBULA_PLAN.md #5) - the weapon's own
+           figure only: the Hyach Computer's bonus below is "not affected by ... nebulas" (KS). ⚠️ MIRROR PAIR with
+           Nebula::fireControl in Weapon::calculateHitBase, which applies it at the same point. */
+        var nebulaActive = !!(window.nebula && nebula.isActive());
+        if (nebulaActive) firecontrol = nebula.fireControl(firecontrol);
 
         if (shipManager.hasSpecialAbility(shooter, "HyachComputer")) {
             var computer = shipManager.systems.getSystemByName(shooter, "hyachComputer");
@@ -2227,7 +2245,8 @@ window.weaponManager = {
                 if (loSBlocked) {
                     if (weapon instanceof AmmoMissileRackS) {
                         if (weapon.hasOwnProperty('basicFC') && Array.isArray(weapon.basicFC) && weapon.basicFC.length > 0) {
-                            firecontrol -= weapon.basicFC[weaponManager.getFireControlIndex(target)];
+                            var basicFC = weapon.basicFC[weaponManager.getFireControlIndex(target)];
+                            firecontrol -= nebulaActive ? nebula.fireControl(basicFC) : basicFC; //the launcher's share, as halved above
                         }
                     } else {
                         firecontrol = 0;
@@ -2456,7 +2475,7 @@ window.weaponManager = {
             otherDetail.push({ label: 'Ammo', value: ammo.hitChanceMod });
         }
 
-        var otherTotal = otherDetail.reduce(function (s, d) { return s + d.value; }, 0);
+        var otherTotal =otherDetail.reduce(function (s, d) { return s + d.value; }, 0);
         return {
             defensiveSystems: defensiveSystems,
             shieldAdaptation: shieldAdaptation,
@@ -3137,8 +3156,15 @@ window.weaponManager = {
        rather than by switching the weapon, for the shared-object reason above. */
     getInterceptRatingInMode: function getInterceptRatingInMode(weapon, mode) {
         if (!weapon) return 0;
-        if (weapon.interceptArray && weapon.interceptArray[mode] !== undefined) return weapon.interceptArray[mode];
-        return weapon.intercept || 0;
+        var rating = (weapon.interceptArray && weapon.interceptArray[mode] !== undefined) ? weapon.interceptArray[mode] : (weapon.intercept || 0);
+        /* A nebula: 1 less as the rating is spent, and an EM gun does not function (NEBULA_PLAN.md #8/#14) - so a gun
+           taken to 0 drops out of the manual intercept options, the preview totals and Meteor Defence together.
+           ⚠️ MIRROR PAIR with Weapon::getInterceptionMod / Firing::isValidInterceptor (PHP). */
+        if (window.nebula && nebula.isActive()) {
+            if (nebula.isEmDisabled(nebula.owningUnit(weapon), weapon, mode)) return 0;
+            rating = nebula.interceptRating(rating);
+        }
+        return rating;
     },
 
     /* This turn's orders on one weapon, split by kind. selfIntercept is counted separately because

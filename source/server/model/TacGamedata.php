@@ -76,6 +76,11 @@ class TacGamedata {
       read. Set by FighterFlight::recordFighterMission; ⚠️ RESET in DBManager::getSystemDataForShips immediately before
       the note sweep that sets it (one request loads gamedata twice), the $abductionPresent slot.*/
     public static $fighterMissionsPresent = false;
+    /*NEBULA_PLAN.md - is this game in a nebula (NebulaRule)? Every nebula effect - thrust, EW, fire control,
+      intercept, damage dice, ranges, EM weapons, shields, the jump arrival roll - asks this first, so an
+      ordinary game pays one false static read per site. ASSIGNED (true or false) in __construct from the
+      rules, never only set: a request that builds a second game's gamedata must not inherit the first's.*/
+    public static $nebulaPresent = false;
     /*D15, second half: a FINISHED game drops every deception so the post-mortem shows what actually
       happened. Set from $this->status, read by applyChameleonDisguise() and maskChameleonArming().
       Deliberately NOT implemented by forcing the two gates above to false: maskChameleonFireOrders()
@@ -216,6 +221,7 @@ class TacGamedata {
         $this->creator = $creator;
         $this->gamespace = $gamespace;
         $this->rules = new GameRules($rules);
+        self::$nebulaPresent = $this->rules->hasRuleName('nebula'); //see the static - assigned both ways
     }
    
     public function setPhase($phase)

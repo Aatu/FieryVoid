@@ -32,6 +32,13 @@ require_once dirname(__DIR__) . '/lib/random_compat-2.0.2/lib/random.php';
            rolls its damage dice in separate calls (the Pentagon Array's five rakes) hands them to keepBest itself. */
         public static $extraDie = 0;
 
+        /* ⭐ NEBULA (NEBULA_PLAN.md #9) - "All weapons suffer -1 on each die of damage they roll." The mirror of
+           $perDieBonus and on the die for the same reason: a SUM cannot be docked per die. Each die loses this
+           much AFTER the bonus has been capped (Elite Crew + nebula: a d10's 10 reads 9, its 1 reads 1), and is
+           never taken below 0. Weapon::getFinalDamage is its single writer, set and restored in the same finally
+           as the bonus; 0 on every ordinary request. */
+        public static $perDiePenalty = 0;
+
         public static function d($max, $times = 1){
 
             $total = 0;
@@ -55,6 +62,7 @@ require_once dirname(__DIR__) . '/lib/random_compat-2.0.2/lib/random.php';
             $roll = random_int(1 , $max);
             //min(): the cap is the die's own face value, so a maxed die is never improved.
             if ($bonus > 0) $roll = min($max, $roll + $bonus);
+            if (self::$perDiePenalty > 0) $roll = max(0, $roll - self::$perDiePenalty); //a nebula, after the bonus
             return $roll;
         }
 

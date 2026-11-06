@@ -26,11 +26,23 @@ window.mapPreview = {
         hex: "#0f2c3a",         //the hex grid: a shade above --fv-card, under everything else
         rim: "#215a7a",         //--fv-line
         terrain: "90, 106, 118", //#5a6a76, as rgb for the alpha
-        dust: "196, 160, 112"   //sand - the game's dust texture (BallisticIconContainer), as rgb for the alpha
+        dust: "196, 160, 112",  //sand - the game's dust texture (BallisticIconContainer), as rgb for the alpha
+        nebula: "150, 100, 215" //violet - the game's nebula texture (BallisticIconContainer), as rgb for the alpha
     },
 
     //The Dust Zone's wash, under the zones and terrain.
     DUST_ALPHA: 0.3,
+
+    /* The Nebula's wash (NebulaRule) - the whole map, under the hex grid - and a few soft banks of brighter
+       gas over it, always in the same places, so it reads as a cloud rather than a flat tint. A bank's x / y
+       are fractions of the map's half-size from its centre, r a fraction of its longer side. */
+    NEBULA_ALPHA: 0.2,
+    NEBULA_BANKS: [
+        { x: -0.55, y: -0.35, r: 0.38, rgb: "190, 110, 230", a: 0.22 },
+        { x: 0.5, y: 0.3, r: 0.42, rgb: "70, 185, 200", a: 0.17 },
+        { x: 0.15, y: -0.65, r: 0.28, rgb: "225, 120, 200", a: 0.14 },
+        { x: -0.25, y: 0.6, r: 0.32, rgb: "115, 120, 240", a: 0.15 }
+    ],
 
     //Logical width of the drawing; its height follows the map. Drawn at PIXEL_RATIO times that,
     //so the thin lines stay sharp however CSS scales the canvas (width 100%, height auto).
@@ -132,6 +144,7 @@ window.mapPreview = {
      *                 later ones drawn over the earlier; `label` optional ("TEAM 1")
      *   map.terrain - a rules.terrainLayout, or nothing
      *   map.dust    - a rules.dustZone, or nothing
+     *   map.nebula  - true when the game is in a nebula (rules.nebula)
      * The canvas takes the map's own proportions (height/width clamped 0.45-1.0, letterboxed
      * beyond), so a caller sizes it with CSS width alone.
      */
@@ -179,6 +192,7 @@ window.mapPreview = {
         ctx.rect(left, top, mapW, mapH);
         ctx.clip(); //zones and terrain past the rim are cut there, as the game cuts them
 
+        if (map.nebula) mapPreview.paintNebula(ctx, { x: centerX, y: centerY, w: mapW, h: mapH });
         mapPreview.paintHexGrid(ctx, scale, Math.ceil(mapW / 2 / scale) + 2, Math.ceil(mapH / 2 / (row * scale)) + 1, hexToCanvas);
         mapPreview.paintDust(ctx, scale, map.dust, map.terrain, { x: centerX, y: centerY, w: mapW, h: mapH }, hexToCanvas);
 
@@ -362,6 +376,23 @@ window.mapPreview = {
             });
             ctx.fill("nonzero");
         }
+        ctx.restore();
+    },
+
+    //The Nebula: the whole map in its wash, then the banks. `box` is the map's centre and size on the canvas.
+    paintNebula: function paintNebula(ctx, box) {
+        ctx.save();
+        ctx.fillStyle = "rgba(" + mapPreview.COLORS.nebula + ", " + mapPreview.NEBULA_ALPHA + ")";
+        ctx.fillRect(box.x - box.w / 2, box.y - box.h / 2, box.w, box.h);
+        mapPreview.NEBULA_BANKS.forEach(function (bank) {
+            var x = box.x + bank.x * box.w / 2, y = box.y + bank.y * box.h / 2;
+            var radius = bank.r * Math.max(box.w, box.h);
+            var gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+            gradient.addColorStop(0, "rgba(" + bank.rgb + ", " + bank.a + ")");
+            gradient.addColorStop(1, "rgba(" + bank.rgb + ", 0)");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+        });
         ctx.restore();
     },
 

@@ -3294,7 +3294,8 @@ window.gamedata = {
 				};
 			}),
 			terrain: gamedata.rules ? gamedata.rules.terrainLayout : null,
-			dust: gamedata.rules ? gamedata.rules.dustZone : null //its hexes were settled when the game was created
+			dust: gamedata.rules ? gamedata.rules.dustZone : null, //its hexes were settled when the game was created
+			nebula: !!(gamedata.rules && gamedata.rules.nebula)
 		});
 
 		gamedata.renderMapLegend();
@@ -3339,6 +3340,9 @@ window.gamedata = {
 		if (dustCoverage > 0 || kinds.dust || (gamedata.rules && gamedata.rules.dustZone)) {
 			html += item('<span class="lb-swatch" style="background:rgb(' + mapPreview.COLORS.dust + ')"></span>',
 				dustCoverage === 100 ? "Dust (entire map)" : "Dust");
+		}
+		if (gamedata.rules && gamedata.rules.nebula) {
+			html += item('<span class="lb-swatch" style="background:rgb(' + mapPreview.COLORS.nebula + ')"></span>', "Nebula (entire map)");
 		}
 
 		legend.html(html);

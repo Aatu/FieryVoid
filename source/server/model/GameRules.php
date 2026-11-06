@@ -46,6 +46,10 @@ class GameRules implements JsonSerializable{
         if ($dustZoneRules !== null) {
             array_push($this->rules, $dustZoneRules);
         }
+        $nebulaRules = $this->getNebulaRules($rules);
+        if ($nebulaRules !== null) {
+            array_push($this->rules, $nebulaRules);
+        }
         $terrainLayoutRules = $this->getTerrainLayoutRules($rules);
         if ($terrainLayoutRules !== null) {
             array_push($this->rules, $terrainLayoutRules);
@@ -84,9 +88,18 @@ class GameRules implements JsonSerializable{
         return null;
     }    
 
+    //Never beside a Nebula: "minefields will not appear in that terrain" (KS 9.9) - see NebulaRule.
     private function getAllowMinesRules($rules) {
-        if (isset($rules['allowMines'])) {
+        if (isset($rules['allowMines']) && empty($rules['nebula'])) {
             return new AllowMinesRule();
+        }
+        return null;
+    }
+
+    //The Nebula (NebulaRule): the whole map, so it is only on or off.
+    private function getNebulaRules($rules) {
+        if (!empty($rules['nebula'])) {
+            return new NebulaRule();
         }
         return null;
     }

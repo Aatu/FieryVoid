@@ -61,6 +61,11 @@ jQuery(function ($) {
     $(".cg-terrain-count").on("change", createGame.readTerrain);
     //The map preview shows the dust - bound after readTerrain, so it draws the rules that just changed.
     $("#dustCoverageSelect").on("change", function () { createGame.drawMapPreview(); });
+    //...and the nebula, which also locks Mines Allowed out (or is locked out by it).
+    $("#nebulaSelect").on("change", function () {
+        createGame.syncNebulaMines();
+        createGame.drawMapPreview();
+    });
     createGame.readTerrain();
 
     // In-Service Date: a year, so digits only and four at most (the lobby's own ISD box does the same).
@@ -283,7 +288,8 @@ window.createGame = {
                 label: "TEAM " + slot.team
             })),
             terrain: createGame.rules.terrainLayout,
-            dust: createGame.rules.dustZone
+            dust: createGame.rules.dustZone,
+            nebula: !!createGame.rules.nebula
         });
     },
 
@@ -333,6 +339,9 @@ window.createGame = {
             const dustText = coverage === 100 ? "Dust (entire map)"
                 : coverage > 0 ? "Dust (" + coverage + "% of map, shaped at creation)" : "Dust";
             html += '<span class="cg-legend-item"><span class="cg-swatch" style="background:rgb(' + mapPreview.COLORS.dust + ')"></span>' + dustText + "</span>";
+        }
+        if (createGame.rules.nebula) {
+            html += '<span class="cg-legend-item"><span class="cg-swatch" style="background:rgb(' + mapPreview.COLORS.nebula + ')"></span>Nebula (entire map)</span>';
         }
         $("#mapLegend").html(html);
     },
@@ -504,6 +513,31 @@ window.createGame = {
         const dust = parseInt($("#dustCoverageSelect").val(), 10) || 0;
         if (dust > 0) createGame.rules.dustZone = { coverage: dust };
         else delete createGame.rules.dustZone;
+
+        //The Nebula (NebulaRule): the whole map or nothing.
+        if ($("#nebulaSelect").val() === "1") createGame.rules.nebula = 1;
+        else delete createGame.rules.nebula;
+    },
+
+    /* Nebula OR Mines Allowed, never both (user, 2026-11-06; KS 9.9: "minefields will not appear in that
+       terrain"): whichever is chosen greys the other out, with a line saying why. A form that arrives with
+       both - an old preset, a browser restore - keeps the Nebula. GameRules never builds allowMines beside a
+       nebula either, so this is the page's half only. Called by both controls' handlers. */
+    syncNebulaMines: function syncNebulaMines() {
+        const nebula = $("#nebulaSelect").val() === "1";
+        const mines = $("#allowMinesCheck");
+        if (nebula && mines.is(":checked")) {
+            mines.prop("checked", false);
+            delete createGame.rules.allowMines;
+        }
+        const minesOn = mines.is(":checked");
+
+        mines.prop("disabled", nebula);
+        $("#nebulaSelect").prop("disabled", minesOn);
+        $("#allowMinesRow").toggleClass("is-locked", nebula);
+        $("#nebulaRow").toggleClass("is-locked", minesOn);
+        $("#allowMinesNebulaNote").prop("hidden", !nebula);
+        $("#nebulaMinesNote").prop("hidden", !minesOn);
     },
 
     doMovementCheck: function doMovementCheck(data) {
@@ -531,6 +565,7 @@ window.createGame = {
         } else {
             delete createGame.rules.allowMines;
         }
+        createGame.syncNebulaMines();
     },
 
     doAllowReinforcementsCheck: function doAllowReinforcementsCheck(data) {

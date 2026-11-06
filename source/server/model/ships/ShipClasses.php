@@ -1832,6 +1832,9 @@ class BaseShip {
 		   absorb the bonus damage but not confer the bonus to-hit penalty: a half-working shield,
 		   which is far worse than a broken one because nobody notices. */
 		Enhancements::setSystemEnhancements($this);
+		/* NEBULA_PLAN.md - thrusters -1 (not an Ancient's) and gravitic shields -1, here for the same reason:
+		   before the loop below, where Shield::onConstructed snapshots its output. Behind the static. */
+		if (TacGamedata::$nebulaPresent) Nebula::applyToShip($this);
 
         foreach ($this->systems as $system){
             $system->onConstructed($this, $turn, $phase);

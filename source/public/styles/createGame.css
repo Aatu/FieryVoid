@@ -1049,6 +1049,28 @@ textarea.cg-input {
   color: var(--fv-text);
 }
 
+/* Nebula OR Mines Allowed (createGame.syncNebulaMines): the side locked out reads greyed, and its
+   .cg-lock-note says why. */
+.cg-check-row.is-locked .cg-check-label,
+.cg-terrain-row.is-locked label {
+  color: var(--fv-text-dim);
+  cursor: not-allowed;
+}
+
+.cg-check-row.is-locked input[type=checkbox],
+.cg-terrain-row.is-locked select {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cg-lock-note {
+  color: var(--fv-warn);
+}
+
+#nebulaMinesNote {
+  margin: 0 0 4px;
+}
+
 .cg-terrain-count {
   flex: none;
   width: 116px;

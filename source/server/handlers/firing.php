@@ -105,6 +105,17 @@ class Firing
                 continue;
             }
 
+            /* NEBULA_PLAN.md #14 - "Electromagnetic weapons do not function unless mounted on advanced race ships":
+               judged in the MODE the order was given (three BSG missiles mix EM and non-EM modes). The client
+               refuses to make one; this is the server being the authority. Same reject + detach convention. */
+            if (TacGamedata::$nebulaPresent && $weapon instanceof Weapon && Nebula::isEmDisabled($weapon, $fire->firingMode)) {
+                $fire->rejected = true;
+                Debug::log("validateFireOrders: rejecting EM order in a nebula (game {$gamedata->id}, shooter {$fire->shooterid}, "
+                    . "weaponid {$fire->weaponid}, mode {$fire->firingMode}, type {$fire->type}).");
+                self::detachFireOrder($shooter, $fire);
+                continue;
+            }
+
             if ($weapon instanceof Weapon)
                 continue; //valid — leave it attached
 
@@ -1345,6 +1356,12 @@ class Firing
         }
         if ($weapon->stowed) { //Antigravity Beam on a docked Kirishiac Orbital - non-operational
             return false;
+        }
+        /* NEBULA_PLAN.md #8/#14 - a gun the nebula takes to an intercept rating of 0 would defend nothing and spend
+           its shot doing it, and an EM gun does not function at all. Behind the static. */
+        if (TacGamedata::$nebulaPresent) {
+            if (Nebula::interceptRating($weapon->getInterceptRating($gd->turn)) <= 0) return false;
+            if (Nebula::isEmDisabled($weapon)) return false;
         }
 
         // not loaded yet

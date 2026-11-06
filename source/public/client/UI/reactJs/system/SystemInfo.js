@@ -131,6 +131,9 @@ class SystemInfo extends React.Component {
 
         //an officer's OB as it is shown (officers.displayStat): an Expert Pilot's in the lobby, an Evade not yet sent in game
         let displayOffensiveBonus = window.officers ? officers.displayStat(ship, 'offensivebonus') : ship.offensivebonus;
+        //a nebula halves it, first, as the shot does (NEBULA_PLAN.md #7) - window.nebula is game.php's alone
+        const nebulaOb = !!(ship.flight && window.nebula && nebula.isActive());
+        if (nebulaOb) displayOffensiveBonus = nebula.showOffensiveBonus(displayOffensiveBonus);
         if (ship.flight && gamedata.areMinesPresent) {
 			if(ship.minesweeper){
 				displayOffensiveBonus -= window.ew.getDetectMEW(ship);
