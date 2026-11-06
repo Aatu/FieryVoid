@@ -81,7 +81,14 @@ window.webglScene = function () {
         //this.scene.add(new THREE.AmbientLight(0xff0000));
         // stencil: DeploymentIcon cuts the enemy-zone holes out of the mine deployment area with
         // the stencil buffer. three r163+ no longer allocates one unless asked.
-        this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, stencil: true });
+        try {
+            this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, stencil: true });
+        } catch (error) {
+            // No WebGL context (old GPU or driver, hardware acceleration off). Explain it on
+            // screen, then rethrow so the page load stops where it always has.
+            showWebGLUnavailable(error);
+            throw error;
+        }
         this.renderer.setSize(this.width, this.height);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -106,6 +113,40 @@ window.webglScene = function () {
         this.render();
         _step('first render');
     };
+
+    function hasWebGLContext(type) {
+        try {
+            return !!document.createElement('canvas').getContext(type);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // The notice for a browser that cannot create the renderer. Before it existed, such a
+    // player saw a blank page and an error in the console. It stays up because the game
+    // cannot run without the map. The WebGL 2 / WebGL 1 probe goes in the details line:
+    // three r163+ asks for WebGL 2 only, and r160 falls back to WebGL 1
+    // (LIBRARY_UPGRADES_PLAN.md §4.4).
+    function showWebGLUnavailable(error) {
+        var yesNo = function (ok) { return ok ? 'available' : 'unavailable'; };
+        var details = (error && error.message ? error.message + ' ' : '')
+            + '(WebGL 2: ' + yesNo(hasWebGLContext('webgl2'))
+            + ', WebGL 1: ' + yesNo(hasWebGLContext('webgl')) + ')';
+
+        var notice = jQuery('<div id="webglUnavailable" role="alert"></div>');
+        jQuery('<h2></h2>').text('The game map can\'t be displayed').appendTo(notice);
+        jQuery('<p></p>').text('This browser couldn\'t start WebGL, the graphics system Fiery Void uses to draw the map.').appendTo(notice);
+        jQuery('<p></p>').text('Things to try:').appendTo(notice);
+        var tips = jQuery('<ul></ul>').appendTo(notice);
+        jQuery('<li></li>').text('Turn on hardware acceleration in your browser settings, then restart the browser.').appendTo(tips);
+        jQuery('<li></li>').text('Update your graphics drivers.').appendTo(tips);
+        jQuery('<li></li>').text('Try a different browser.').appendTo(tips);
+        jQuery('<p></p>').append(jQuery('<a href="games.php"></a>').text('Back to games')).appendTo(notice);
+        jQuery('<p class="details"></p>').text(details).appendTo(notice);
+
+        jQuery('#webglUnavailable').remove();
+        notice.appendTo(document.body);
+    }
 
     webglScene.prototype.receiveGamedata = function (gamedata) {
         if (!this.phaseDirector) {
