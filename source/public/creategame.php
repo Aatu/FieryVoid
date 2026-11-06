@@ -328,6 +328,13 @@
                 </select>
               </div>
               <div class="cg-caption cg-lock-note" id="nebulaMinesNote" hidden>Not available while Mines Allowed is ticked.</div>
+              <!-- Electromagnetic Storm (EMStormRule, EM_STORM_PLAN.md): the whole map, No or Yes. Combines with everything. -->
+              <div class="cg-terrain-row" id="emStormRow"><label for="emStormSelect">Electromagnetic Storm</label>
+                <select id="emStormSelect" class="cg-input cg-terrain-count" name="emStorm">
+                  <option value="0">No</option>
+                  <option value="1">Yes</option>
+                </select>
+              </div>
               <div class="cg-terrain-row"><label for="meteorsSelect">Meteor Swarms</label><?php print(cgCountCombo('meteorsSelect', 'Meteor Swarms', DustAndMeteorsRule::$maxMeteors, $fieldPresets)); ?></div>              
               <div class="cg-terrain-row"><label for="asteroidsSelect">Asteroids</label><?php print(cgCountCombo('asteroidsSelect', 'Asteroids', 48, $fieldPresets)); ?></div>
               <div class="cg-terrain-row"><label for="moonsSmallSelect">Small Moons</label><?php print(cgCountCombo('moonsSmallSelect', 'Small Moons', 5, $moonPresets)); ?></div>

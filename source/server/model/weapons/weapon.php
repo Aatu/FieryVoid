@@ -2104,6 +2104,9 @@ public function getFullStartLoading()
             if (!$this->ballistic && TacGamedata::$officersPresent) $effectiveOB += Officers::shuntOb($shooter, $fireOrder->turn);
             $firstFighter = $shooter->getSampleFighter();
             $OBcrit = $firstFighter->hasCritical("tmpsensordown");
+            /* EM_STORM_PLAN.md #2 - an EM storm's 1d3, already capped at half the (nebula-halved) bonus when it was rolled,
+               so it comes off with the crit deductions. ⚠️ MIRROR PAIR with weaponManager.computeOEW's stormOB (JS). */
+            if (TacGamedata::$emStormPresent) $OBcrit += (int)$firstFighter->sumCriticalParam("EMStormOffensive", $gamedata->turn);
             $mdew = $shooter->getEWByType("Detect Mines", $gamedata->turn); //-1 OB for each point of Mine Detect
             $effectiveOB = $effectiveOB - $OBcrit - ($mdew * 2); //Every point of mdew costs 2 OB
             

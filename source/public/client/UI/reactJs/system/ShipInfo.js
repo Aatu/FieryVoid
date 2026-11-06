@@ -96,6 +96,8 @@ class ShipInfo extends React.Component {
 		//a nebula halves it, first, as the shot does (NEBULA_PLAN.md #7) - window.nebula is game.php's alone
 		const nebulaOb = !!(ship.flight && window.nebula && nebula.isActive());
 		if (nebulaOb) displayOffensiveBonus = nebula.showOffensiveBonus(displayOffensiveBonus);
+		//an EM storm's 1d3 this turn, as the shot takes it (EM_STORM_PLAN.md #2) - window.emStorm is game.php's alone
+		if (ship.flight && window.emStorm && emStorm.isActive()) displayOffensiveBonus = Math.max(0, displayOffensiveBonus - emStorm.offensivePenalty(ship));
 		if (ship.flight && gamedata.areMinesPresent) {
 			if(ship.minesweeper){
 				displayOffensiveBonus -= window.ew.getDetectMEW(ship);

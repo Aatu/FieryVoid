@@ -81,6 +81,11 @@ class TacGamedata {
       ordinary game pays one false static read per site. ASSIGNED (true or false) in __construct from the
       rules, never only set: a request that builds a second game's gamedata must not inherit the first's.*/
     public static $nebulaPresent = false;
+    /*EM_STORM_PLAN.md - is an Electromagnetic Storm raging (EMStormRule)? The storm's sweep (EMStorm, from
+      Criticals::setCriticals and DeploymentGamePhase::advance) and every reader of its one-turn criticals -
+      Scanner and Reactor output, initiative, fighter OB, the Storm Defence note - ask this first. ASSIGNED
+      both ways in __construct, as $nebulaPresent is.*/
+    public static $emStormPresent = false;
     /*D15, second half: a FINISHED game drops every deception so the post-mortem shows what actually
       happened. Set from $this->status, read by applyChameleonDisguise() and maskChameleonArming().
       Deliberately NOT implemented by forcing the two gates above to false: maskChameleonFireOrders()
@@ -222,6 +227,7 @@ class TacGamedata {
         $this->gamespace = $gamespace;
         $this->rules = new GameRules($rules);
         self::$nebulaPresent = $this->rules->hasRuleName('nebula'); //see the static - assigned both ways
+        self::$emStormPresent = $this->rules->hasRuleName('emStorm'); //likewise
     }
    
     public function setPhase($phase)

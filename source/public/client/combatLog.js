@@ -62,7 +62,8 @@ window.combatLog = {
         'RedlineLanding': true,
         'WarLeader': true,
         'AnalystScan': true,
-        'LuckyCaptain': true
+        'LuckyCaptain': true,
+        'EMStorm': true //EM_STORM_PLAN.md: one complete sentence per unit, 0 shots
     },
 
     logKindKey: function logKindKey(fire, shooter) {
@@ -348,9 +349,11 @@ window.combatLog = {
         var isAnalyst = fire.damageclass === 'AnalystScan';
         //Stage 37: a Lucky Captain's feat the same way, under "LUCKY CAPTAIN:" - its sentence names his ship
         var isLucky = fire.damageclass === 'LuckyCaptain';
-        var isSpeech = fire.damageclass === 'PoliticalSpeech' || isWarLeader || isAnalyst || isLucky;
+        //EM_STORM_PLAN.md: what an EM storm did to a unit, under "EM STORM:" - its sentence names the unit (EMStorm::logResult)
+        var isStorm = fire.damageclass === 'EMStorm';
+        var isSpeech = fire.damageclass === 'PoliticalSpeech' || isWarLeader || isAnalyst || isLucky || isStorm;
         var headerLabel = hyperspaceKind ? 'HYPERSPACE: ' : (isWarLeader ? 'WAR LEADER!: ' : (isAnalyst ? 'CARGO SCAN: '
-            : (isLucky ? 'LUCKY CAPTAIN: ' : (isSpeech ? 'SPEECH!: ' : 'FIRE: '))));
+            : (isLucky ? 'LUCKY CAPTAIN: ' : (isStorm ? 'EM STORM: ' : (isSpeech ? 'SPEECH!: ' : 'FIRE: ')))));
         var headerClass = hyperspaceKind ? 'logheader hyperspace ' + hyperspaceKind : 'logheader fire';
         //The hyperspace colours live in logPanel.css, keyed off the class - an inline literal here
         //would be a fourth copy of two values the stylesheets already own.

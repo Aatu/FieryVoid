@@ -464,6 +464,8 @@ class BaseShip {
 			   Summed, not counted: one crit is a whole roll (see the crit classes). */
 			$edfIni = (int)$CnC->sumCriticalParam("EdfIniDrain", $gamedata->turn);
 			if ($edfIni > 0) $mod -= min($edfIni, EdfExposure::INI_CAP) * EdfExposure::INI_SCALE;
+			//EM_STORM_PLAN.md #3 - an EM storm's 2d6 (tabletop) off initiative, x5 in FV's d100. A separate effect, no cap.
+			if (TacGamedata::$emStormPresent) $mod -= (int)$CnC->sumCriticalParam("EMStormInitiative", $gamedata->turn) * EMStorm::INI_SCALE;
 			}
 		    if ($this instanceof FighterFlight){
 			    $firstFighter = $this->getSampleFighter();
@@ -481,6 +483,8 @@ class BaseShip {
 					   x5 conversion and same -20-tabletop cap as the ship branch. */
 					$edfIniFtr = (int)$firstFighter->sumCriticalParam("EdfIniDrain", $gamedata->turn);
 					if ($edfIniFtr > 0) $mod -= min($edfIniFtr, EdfExposure::INI_CAP) * EdfExposure::INI_SCALE;
+					//EM storm (EM_STORM_PLAN.md #3) - the flight's crit rides its sample fighter, as the ship's rides its CnC
+					if (TacGamedata::$emStormPresent) $mod -= (int)$firstFighter->sumCriticalParam("EMStormInitiative", $gamedata->turn) * EMStorm::INI_SCALE;
 			    }
 		    }
             if (!empty($this->attached)) $mod += -10;//Attached Pods get -10 to Iniative as if just launched.

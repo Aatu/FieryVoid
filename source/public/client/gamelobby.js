@@ -3295,7 +3295,8 @@ window.gamedata = {
 			}),
 			terrain: gamedata.rules ? gamedata.rules.terrainLayout : null,
 			dust: gamedata.rules ? gamedata.rules.dustZone : null, //its hexes were settled when the game was created
-			nebula: !!(gamedata.rules && gamedata.rules.nebula)
+			nebula: !!(gamedata.rules && gamedata.rules.nebula),
+			emStorm: !!(gamedata.rules && gamedata.rules.emStorm) //EM_STORM_PLAN.md
 		});
 
 		gamedata.renderMapLegend();
@@ -3343,6 +3344,9 @@ window.gamedata = {
 		}
 		if (gamedata.rules && gamedata.rules.nebula) {
 			html += item('<span class="lb-swatch" style="background:rgb(' + mapPreview.COLORS.nebula + ')"></span>', "Nebula (entire map)");
+		}
+		if (gamedata.rules && gamedata.rules.emStorm) {
+			html += item('<span class="lb-swatch" style="background:rgb(' + mapPreview.COLORS.emStorm + ')"></span>', "EM Storm (entire map)");
 		}
 
 		legend.html(html);

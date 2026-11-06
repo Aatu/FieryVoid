@@ -2068,6 +2068,8 @@ window.weaponManager = {
         if (shooter.flight === true) {
             var firstFighter = shooter.systems[1];
             var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
+            //an EM storm's 1d3, capped when rolled (EM_STORM_PLAN.md #2) - ⚠️ MIRROR PAIR with the EMStormOffensive term in Weapon::calculateHitBase
+            if (window.emStorm && emStorm.isActive()) OBcrit += emStorm.offensivePenalty(shooter);
             var mdew = ew.getDetectMEW(shooter);
             /* ⭐⭐ WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11/3.13c) - THE FLIGHT'S OWN
                OEW, and the two ways a fighter weapon may use it. MIRROR PAIR with the
@@ -5971,7 +5973,10 @@ window.weaponManager = {
             "LuckyCaptain",
             //HangarEscape (HangarOps::escapeLogOrder): a destroyed carrier's escape roll - what flew free and what was lost with the
             //ship. 0 shots on the carrier's own Ramming Attack; its sentence continues the header with "'s".
-            "HangarEscape"
+            "HangarEscape",
+            //EMStorm (EM_STORM_PLAN.md): what an EM storm did to a unit for the coming turn - its sentence alone, under an
+            //"EM STORM:" header (combatLog.logFireOrders), 0 shots on the unit's own Ramming Attack, as the speech.
+            "EMStorm"
         ];
 
         //A crash into Huge terrain (multi-hex asteroid, moon) reads like the small-asteroid

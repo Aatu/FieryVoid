@@ -66,6 +66,8 @@ jQuery(function ($) {
         createGame.syncNebulaMines();
         createGame.drawMapPreview();
     });
+    //...and the EM storm (EM_STORM_PLAN.md), a whole-map wash of its own.
+    $("#emStormSelect").on("change", function () { createGame.drawMapPreview(); });
     createGame.readTerrain();
 
     // In-Service Date: a year, so digits only and four at most (the lobby's own ISD box does the same).
@@ -289,7 +291,8 @@ window.createGame = {
             })),
             terrain: createGame.rules.terrainLayout,
             dust: createGame.rules.dustZone,
-            nebula: !!createGame.rules.nebula
+            nebula: !!createGame.rules.nebula,
+            emStorm: !!createGame.rules.emStorm
         });
     },
 
@@ -342,6 +345,9 @@ window.createGame = {
         }
         if (createGame.rules.nebula) {
             html += '<span class="cg-legend-item"><span class="cg-swatch" style="background:rgb(' + mapPreview.COLORS.nebula + ')"></span>Nebula (entire map)</span>';
+        }
+        if (createGame.rules.emStorm) {
+            html += '<span class="cg-legend-item"><span class="cg-swatch" style="background:rgb(' + mapPreview.COLORS.emStorm + ')"></span>EM Storm (entire map)</span>';
         }
         $("#mapLegend").html(html);
     },
@@ -517,6 +523,10 @@ window.createGame = {
         //The Nebula (NebulaRule): the whole map or nothing.
         if ($("#nebulaSelect").val() === "1") createGame.rules.nebula = 1;
         else delete createGame.rules.nebula;
+
+        //The Electromagnetic Storm (EMStormRule, EM_STORM_PLAN.md): likewise.
+        if ($("#emStormSelect").val() === "1") createGame.rules.emStorm = 1;
+        else delete createGame.rules.emStorm;
     },
 
     /* Nebula OR Mines Allowed, never both (user, 2026-11-06; KS 9.9: "minefields will not appear in that

@@ -413,6 +413,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <!-- NEBULA_PLAN.md - window.nebula: the nebula rules the client applies itself (to-hit terms, jink price,
          EW lock-out, EM weapons). Runtime-only calls, so its place in the list is free. -->
     <script defer src="client/nebula.js"></script>
+    <!-- EM_STORM_PLAN.md - window.emStorm: the EM storm's client rules (fighter OB term, Storm Defence). Runtime-only calls too. -->
+    <script defer src="client/emStorm.js"></script>
     <script defer src="client/ew.js"></script>
     <script defer src="client/weaponManager.js"></script>
     <script defer src="client/damage.js"></script>

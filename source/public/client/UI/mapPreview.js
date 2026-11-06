@@ -27,8 +27,20 @@ window.mapPreview = {
         rim: "#215a7a",         //--fv-line
         terrain: "90, 106, 118", //#5a6a76, as rgb for the alpha
         dust: "196, 160, 112",  //sand - the game's dust texture (BallisticIconContainer), as rgb for the alpha
-        nebula: "150, 100, 215" //violet - the game's nebula texture (BallisticIconContainer), as rgb for the alpha
+        nebula: "150, 100, 215", //violet - the game's nebula texture (BallisticIconContainer), as rgb for the alpha
+        emStorm: "120, 205, 255" //electric blue - the game's EM storm texture (BallisticIconContainer), as rgb for the alpha
     },
+
+    /* The EM Storm's wash (EMStormRule, EM_STORM_PLAN.md) - the whole map, over the nebula and under the grid - and a few
+       fixed forked arcs, so it reads as a storm rather than a second tint. Points are fractions of the map's half-size
+       from its centre. */
+    EM_STORM_ALPHA: 0.12,
+    EM_STORM_ARCS: [
+        [[-0.85, -0.55], [-0.6, -0.42], [-0.52, -0.2], [-0.3, -0.12]],
+        [[0.2, -0.8], [0.32, -0.55], [0.22, -0.38], [0.45, -0.18]],
+        [[0.55, 0.25], [0.7, 0.4], [0.62, 0.62], [0.82, 0.78]],
+        [[-0.6, 0.35], [-0.38, 0.5], [-0.42, 0.72], [-0.2, 0.85]]
+    ],
 
     //The Dust Zone's wash, under the zones and terrain.
     DUST_ALPHA: 0.3,
@@ -145,6 +157,7 @@ window.mapPreview = {
      *   map.terrain - a rules.terrainLayout, or nothing
      *   map.dust    - a rules.dustZone, or nothing
      *   map.nebula  - true when the game is in a nebula (rules.nebula)
+     *   map.emStorm - true when an EM storm rages (rules.emStorm)
      * The canvas takes the map's own proportions (height/width clamped 0.45-1.0, letterboxed
      * beyond), so a caller sizes it with CSS width alone.
      */
@@ -193,6 +206,7 @@ window.mapPreview = {
         ctx.clip(); //zones and terrain past the rim are cut there, as the game cuts them
 
         if (map.nebula) mapPreview.paintNebula(ctx, { x: centerX, y: centerY, w: mapW, h: mapH });
+        if (map.emStorm) mapPreview.paintEMStorm(ctx, { x: centerX, y: centerY, w: mapW, h: mapH });
         mapPreview.paintHexGrid(ctx, scale, Math.ceil(mapW / 2 / scale) + 2, Math.ceil(mapH / 2 / (row * scale)) + 1, hexToCanvas);
         mapPreview.paintDust(ctx, scale, map.dust, map.terrain, { x: centerX, y: centerY, w: mapW, h: mapH }, hexToCanvas);
 
@@ -392,6 +406,29 @@ window.mapPreview = {
             gradient.addColorStop(1, "rgba(" + bank.rgb + ", 0)");
             ctx.fillStyle = gradient;
             ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+        });
+        ctx.restore();
+    },
+
+    //The EM Storm: the whole map in its wash, then the arcs, each a soft glow under a thin bright core.
+    paintEMStorm: function paintEMStorm(ctx, box) {
+        ctx.save();
+        ctx.fillStyle = "rgba(" + mapPreview.COLORS.emStorm + ", " + mapPreview.EM_STORM_ALPHA + ")";
+        ctx.fillRect(box.x - box.w / 2, box.y - box.h / 2, box.w, box.h);
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        mapPreview.EM_STORM_ARCS.forEach(function (arc) {
+            [[4, 0.18], [1.2, 0.55]].forEach(function (pass) {
+                ctx.beginPath();
+                arc.forEach(function (p, i) {
+                    var x = box.x + p[0] * box.w / 2, y = box.y + p[1] * box.h / 2;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.lineWidth = pass[0];
+                ctx.strokeStyle = "rgba(" + mapPreview.COLORS.emStorm + ", " + pass[1] + ")";
+                ctx.stroke();
+            });
         });
         ctx.restore();
     },

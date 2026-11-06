@@ -168,6 +168,7 @@ window.BallisticIconContainer = function () {
 		generateTerrainHexes.call(this, gamedata);
 		generateDustZone.call(this, gamedata);
 		generateNebula.call(this, gamedata);
+		generateEMStorm.call(this, gamedata);
 		generateEdfNetHexes.call(this, gamedata);
 		generateSensorChargeCourses.call(this, gamedata);
 		/* ONE BLUE MARKER PER HEX ACROSS BOTH SWEEPS (user report 2026-09-11, replay of game 4348).
@@ -686,6 +687,117 @@ window.BallisticIconContainer = function () {
 
 		syncSceneObject.call(this, NEBULA_KEY, 'full', () => {
 			return { object: buildBoardPlane.call(this, NEBULA_LOOK, NEBULA_Z), release: window.HexRegion.dispose }; //the texture is shared
+		});
+	}
+
+	/* THE ELECTROMAGNETIC STORM (server: EMStormRule, EM_STORM_PLAN.md R4) - gamedata.rules.emStorm. The whole map, so
+	   one board plane like the nebula's, painted with its own look: a cold blue haze, faint ionised banks and forked
+	   arcs of lightning frozen mid-crackle, with a few bright nodes where they branch. Two layers at incommensurate
+	   scales and angles, so the repeat never shows (DUST_LAYERS' note).
+
+	   ABOVE the nebula (-650) and the dust (-600) - it is weather in them - and below the hex grid (-500). STATIC: the
+	   render loop's idle gating is untouched (user ruling R4). A whole-board plane, so it goes with the map background.
+	   mapPreview.EM_STORM_ARCS is its flat stand-in in Create Game and the lobby, in the same blue. */
+	const EM_STORM_KEY = 'emstorm';
+	const EM_STORM_Z = -575;
+	const EM_STORM_TEXTURE_SIZE = 1024;
+	const EM_STORM_LAYERS = [
+		{ tile: 23, rotation: 0.6, opacity: 0.45 },
+		{ tile: 37.7, rotation: 2.6, opacity: 0.3 }
+	];
+
+	let emStormCanvas = null;
+	const emStormTextures = [];
+	const EM_STORM_LOOK = { layers: EM_STORM_LAYERS, textures: emStormTextures, getCanvas: getEMStormCanvas };
+
+	/* On a transparent tile that repeats seamlessly (every shape drawn again one tile over in each direction). A bolt is
+	   a random walk that keeps its heading within a cone and forks now and then, stroked three times - a wide faint
+	   glow, a mid halo, a thin near-white core. */
+	function getEMStormCanvas() {
+		if (emStormCanvas) return emStormCanvas;
+
+		const size = EM_STORM_TEXTURE_SIZE;
+		const canvas = window.AbstractCanvas.create(size, size);
+		const context = canvas.getContext('2d');
+		let seed = 77213;
+		const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647; //the same storm every load
+
+		const wrapped = (draw) => {
+			for (let dx = -size; dx <= size; dx += size) {
+				for (let dy = -size; dy <= size; dy += size) {
+					context.save();
+					context.translate(dx, dy);
+					draw();
+					context.restore();
+				}
+			}
+		};
+
+		//A faint blue veil, then ionised banks of haze.
+		context.fillStyle = 'rgba(80,150,230,0.05)';
+		context.fillRect(0, 0, size, size);
+		for (let i = 0; i < 40; i++) {
+			const x = random() * size, y = random() * size, radius = 90 + random() * 280, alpha = 0.03 + random() * 0.05;
+			wrapped(() => {
+				const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
+				gradient.addColorStop(0, 'rgba(110,190,255,' + alpha + ')');
+				gradient.addColorStop(1, 'rgba(110,190,255,0)');
+				context.fillStyle = gradient;
+				context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+			});
+		}
+
+		//The bolts: each a list of segments, gathered first so its three strokes trace the same path.
+		const bolt = (x, y, heading, length, depth, segments) => {
+			const points = [[x, y]];
+			for (let s = 0; s < length; s++) {
+				heading += (random() - 0.5) * 1.1;
+				x += Math.cos(heading) * (14 + random() * 18);
+				y += Math.sin(heading) * (14 + random() * 18);
+				points.push([x, y]);
+				if (depth < 2 && random() < 0.12) bolt(x, y, heading + (random() < 0.5 ? -1 : 1) * (0.5 + random() * 0.6), Math.floor(length * 0.5), depth + 1, segments);
+			}
+			segments.push({ points: points, depth: depth });
+		};
+		const bolts = [];
+		for (let i = 0; i < 9; i++) bolt(random() * size, random() * size, random() * Math.PI * 2, 10 + Math.floor(random() * 12), 0, bolts);
+
+		const strokes = [[9, 'rgba(90,170,255,0.06)'], [3.5, 'rgba(140,210,255,0.18)'], [1.2, 'rgba(225,245,255,0.55)']];
+		strokes.forEach(([width, colour]) => {
+			bolts.forEach(segment => {
+				wrapped(() => {
+					context.beginPath();
+					segment.points.forEach((p, i) => i === 0 ? context.moveTo(p[0], p[1]) : context.lineTo(p[0], p[1]));
+					context.lineWidth = width / (1 + segment.depth * 0.6);
+					context.lineJoin = 'round';
+					context.lineCap = 'round';
+					context.strokeStyle = colour;
+					context.stroke();
+				});
+			});
+		});
+
+		//Bright nodes where charge gathers.
+		for (let i = 0; i < 30; i++) {
+			const x = random() * size, y = random() * size, radius = 6 + random() * 14;
+			wrapped(() => {
+				const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
+				gradient.addColorStop(0, 'rgba(230,248,255,0.5)');
+				gradient.addColorStop(1, 'rgba(140,210,255,0)');
+				context.fillStyle = gradient;
+				context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+			});
+		}
+
+		emStormCanvas = canvas;
+		return emStormCanvas;
+	}
+
+	function generateEMStorm(gamedata) {
+		if (!(gamedata.rules && gamedata.rules.emStorm)) return;
+
+		syncSceneObject.call(this, EM_STORM_KEY, 'full', () => {
+			return { object: buildBoardPlane.call(this, EM_STORM_LOOK, EM_STORM_Z), release: window.HexRegion.dispose }; //the texture is shared
 		});
 	}
 

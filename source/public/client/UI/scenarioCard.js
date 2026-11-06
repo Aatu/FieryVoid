@@ -227,6 +227,8 @@ window.scenarioCard = {
         if (dustCoverage > 0) add("terrain", "Dust: " + (dustCoverage === 100 ? "Entire Map" : dustCoverage + "% of Map"));
         //The Nebula (NebulaRule) - always the whole map, so the name says it all.
         if (r.nebula) add("terrain", "Nebula");
+        //The Electromagnetic Storm (EMStormRule, EM_STORM_PLAN.md) - the whole map as well.
+        if (r.emStorm) add("terrain", "EM Storm");
         var layout = r.terrainLayout;
         if (layout && layout.units && layout.units.length) {
             var name = String(layout.name == null ? "" : layout.name).trim() || "Pre-placed";

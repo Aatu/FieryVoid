@@ -121,6 +121,12 @@ const MeteorBadge = styled.div`
     text-shadow: black 0 0 3px, black 0 0 3px, black 0 0 3px;
 `;
 
+/* ⚡ - an EM shield under a standing Storm Defence order (EM_STORM_PLAN.md). Same corner as the meteor badge: a shield
+   never carries that one. */
+const StormBadge = styled(MeteorBadge)`
+    color: #9fe3ff;
+`;
+
 const System = styled.div`
     position: relative;
     box-sizing: border-box;
@@ -652,6 +658,7 @@ class SystemIcon extends React.Component {
             >
                 {renderBadges(ship, system)}
                 {isMeteorDefence(ship, system) && <MeteorBadge title="Committed to meteor defence this turn">☄</MeteorBadge>}
+                {isStormDefence(system) && <StormBadge title="Storm Defence (until withdrawn): takes an EM storm strike on a side it faces">⚡</StormBadge>}
                 <SystemText>{getText(ship, system)}</SystemText>
                 {/*A destroyed system shows an EMPTY bar, matching the non-interactive
                    render above. It cannot just read getStructureLeft: a system destroyed
@@ -710,6 +717,9 @@ const isIntercepting = (ship, system) => weaponManager.isInterceptOnly(ship, sys
    whole turn all the same - it cannot be selected to fire or intercept - so it gets a state of its own,
    amber with a comet badge. */
 const isMeteorDefence = (ship, system) => Boolean(system.weapon) && weaponManager.hasMeteorDefence(ship, system);
+
+//An EM shield's Storm Defence declaration (EM_STORM_PLAN.md) - window.emStorm is game.php's alone.
+const isStormDefence = (system) => Boolean(window.emStorm) && emStorm.isActive() && emStorm.isEMShield(system) && emStorm.isDeclared(system);
 
 const isCalledShot = (ship, system) => {
     if (!system.weapon || !weaponManager.hasFiringOrder(ship, system)) return false;

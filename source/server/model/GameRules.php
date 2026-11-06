@@ -50,6 +50,10 @@ class GameRules implements JsonSerializable{
         if ($nebulaRules !== null) {
             array_push($this->rules, $nebulaRules);
         }
+        $emStormRules = $this->getEMStormRules($rules);
+        if ($emStormRules !== null) {
+            array_push($this->rules, $emStormRules);
+        }
         $terrainLayoutRules = $this->getTerrainLayoutRules($rules);
         if ($terrainLayoutRules !== null) {
             array_push($this->rules, $terrainLayoutRules);
@@ -100,6 +104,14 @@ class GameRules implements JsonSerializable{
     private function getNebulaRules($rules) {
         if (!empty($rules['nebula'])) {
             return new NebulaRule();
+        }
+        return null;
+    }
+
+    //The Electromagnetic Storm (EMStormRule, EM_STORM_PLAN.md): the whole map, so it is only on or off. Combines with anything.
+    private function getEMStormRules($rules) {
+        if (!empty($rules['emStorm'])) {
+            return new EMStormRule();
         }
         return null;
     }

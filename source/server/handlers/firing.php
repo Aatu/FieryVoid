@@ -1922,6 +1922,8 @@ public static function firePreFiringWeapons($gamedata){
             //can colour the two doorways differently. Same order, same inertness; only the class
             //name differs, so it must be skipped by the four gathers exactly as its twin is.
             || $fire->damageclass === 'JumpVortexExit'
+            //EM_STORM_PLAN.md - an EM storm's line for a unit, written as Deployment closes on the turn it is about (EMStorm::logResult)
+            || $fire->damageclass === 'EMStorm'
             //OFFICERS_PLAN.md Stage 37 - a Lucky Captain's log line, which his failed disengage writes as Initial Orders close (Officers::luckyLine):
             //on his RammingAttack, so without this the firing would take it for a ram
             || $fire->damageclass === Officers::LUCKY_LOG_CLASS;

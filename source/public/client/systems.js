@@ -102,7 +102,9 @@ shipManager.systems = {
            Engine/Reactor::getOutput() through a TURN-FILTERED param critical - which is why it
            cannot ride outputMod (ShipSystem::effectCriticals sums those with no turn filter at
            all) - and publishes the current turn's figure as edfDrain from those two systems.
-           undefined on every other system, and in every game with no field on the board. */
+           undefined on every other system, and in every game with no field on the board.
+           ⚠️ It is EVERY one-turn drain the server applies: an EM storm's sensor and power losses ride it too
+           (EM_STORM_PLAN.md #1, #4 - published by Scanner and Reactor::stripForJson). */
         if (system.edfDrain) output = Math.max(0, output - system.edfDrain);
 
         return output;
