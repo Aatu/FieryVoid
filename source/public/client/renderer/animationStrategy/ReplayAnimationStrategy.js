@@ -297,6 +297,69 @@ window.ReplayAnimationStrategy = function () {
         // Per-ship map of movement IDs already animated (to avoid duplicates across passes)
         var handledMovementsByShip = {};
 
+        /* Pass 0: GRAVITY WELL PULLS (GRAVITY_WELL_PLAN.md). The pull happens as Movement closes, before any
+           Pre-Firing weapon, so it plays first: each pulled unit's log line, then its drag. pulledTo keeps where the
+           drag left it, because everything after this reads positions from the movement animation, which stops where
+           the unit's OWN movement ended: Passes 1 and 2 start a later forced move from it, and Pass 2 plays the hits
+           there - so a unit dragged into the well is struck in the well's hex, after the drag. */
+        var pulledTo = {};
+        var isGravityPull = function (fire) {
+            return fire.fireOrder && fire.fireOrder.damageclass === 'GravityWellPull';
+        };
+
+        shipList.forEach(function (ship) {
+            var icon = this.shipIconContainer.getByShip(ship);
+            if (!icon || !icon.preFireMovements) return;
+            var pulls = icon.preFireMovements.filter(function (m) { return m.type === 'gravity'; });
+            if (pulls.length === 0) return;
+
+            var startBase = icon.getEndMovementOnTurn(this.turn) || icon.getLastMovementOnTurn(this.turn);
+            if (!startBase) return;
+
+            var lineAnimation = new AllWeaponFireAgainstShipAnimation(
+                ship,
+                this.shipIconContainer,
+                this.emitterContainer,
+                this.gamedata,
+                time,
+                this.scene,
+                this.movementAnimations,
+                logAnimation,
+                true,
+                { fireOrderFilter: isGravityPull }
+            );
+            this.animations.push(lineAnimation);
+
+            var pullMoveTime = time + lineAnimation.getDuration();
+            var currentStartState = {
+                position: new hexagon.Offset(startBase.position),
+                facing: startBase.facing,
+                heading: startBase.heading
+            };
+            handledMovementsByShip[ship.id] = handledMovementsByShip[ship.id] || [];
+
+            pulls.forEach(function (movement) {
+                var endState = {
+                    position: new hexagon.Offset(movement.position),
+                    facing: movement.facing,
+                    heading: movement.heading
+                };
+                var pullAnimation = new PreFireMovementAnimation(icon, currentStartState, endState, pullMoveTime, this.moveHexDuration);
+                this.animations.push(pullAnimation);
+                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                    pullMoveTime += pullAnimation.getDuration();
+                }
+                currentStartState = endState;
+                handledMovementsByShip[ship.id].push(movement.id);
+            }, this);
+
+            pulledTo[ship.id] = currentStartState;
+
+            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                time = pullMoveTime;
+            }
+        }, this);
+
         // Pass 1: Hex Targeted PreFire (always first, matching animateWeaponFire ordering)
         var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
         // Track which hex fire order IDs are handled in prefire so animateWeaponFire can skip them
@@ -387,8 +450,8 @@ window.ReplayAnimationStrategy = function () {
                 // If this ship has preFire movements, animate them after the hex animation.
                 var shooterIcon = this.shipIconContainer.getByShip(ship);
                 if (shooterIcon && shooterIcon.preFireMovements && shooterIcon.preFireMovements.length > 0) {
-                    // Get the starting state for this ship (end of normal movement on this turn)
-                    var startBase = shooterIcon.getEndMovementOnTurn(this.turn);
+                    // Get the starting state for this ship (end of normal movement on this turn - or of a Gravity Well's pull, Pass 0)
+                    var startBase = pulledTo[ship.id] || shooterIcon.getEndMovementOnTurn(this.turn);
                     if (!startBase) {
                         startBase = shooterIcon.getLastMovementOnTurn(this.turn);
                     }
@@ -466,7 +529,14 @@ window.ReplayAnimationStrategy = function () {
                 this.scene,
                 this.movementAnimations,
                 logAnimation,
-                true
+                true,
+                {
+                    //a pulled unit's pull line already played in Pass 0, and it is struck where the pull left it
+                    fireOrderFilter: function (fire) {
+                        return !(pulledTo[ship.id] && isGravityPull(fire));
+                    },
+                    shiftedTo: pulledTo
+                }
             );
 
             this.animations.push(perShipAnimation);
@@ -477,8 +547,8 @@ window.ReplayAnimationStrategy = function () {
 
             if (preFireMovements.length > 0) {
 
-                // Base starting state is the ship's end-of-movement position on this turn
-                var startBase = perShipAnimation.shipIcon.getEndMovementOnTurn(this.turn);
+                // Base starting state is the ship's end-of-movement position on this turn (or where Pass 0's pull left it)
+                var startBase = pulledTo[ship.id] || perShipAnimation.shipIcon.getEndMovementOnTurn(this.turn);
                 if (!startBase) {
                     startBase = perShipAnimation.shipIcon.getLastMovementOnTurn(this.turn);
                 }

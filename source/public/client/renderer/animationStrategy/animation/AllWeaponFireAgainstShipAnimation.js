@@ -13,6 +13,9 @@ window.AllWeaponFireAgainstShipAnimation = function () {
      *                     all call webglScene.moveCameraTo every frame, and the last one in the
      *                     animation array simply wins.
      *   damageIndex     - shared reverse damage map, see getAllFireOrdersForDisplayingAgainst.
+     *   shiftedTo       - Pre-Firing only: ship id -> {position} for units a forced move has already
+     *                     shifted earlier in the replay (a Gravity Well's pull, ReplayAnimationStrategy
+     *                     Pass 0). They are drawn there, not where their own movement ended.
      */
     function AllWeaponFireAgainstShipAnimation(ship, shipIconContainer, particleEmitterContainer, gamedata, time, scene, movementAnimations, logAnimation, prefire = false, opts = {}) {
         Animation.call(this);
@@ -28,6 +31,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         this.movementAnimations = movementAnimations;
         this.logAnimation = logAnimation;
         this.prefire = prefire;
+        this.shiftedTo = opts.shiftedTo || null;
 
         var incomingFire;
         if (!prefire) {
@@ -260,8 +264,10 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         var animationType = weapon.animationArray[incomingFire.firingMode] || weapon.animation;
         var animationColor = weapon.animationColorArray[incomingFire.firingMode] || weapon.animationColor;
         var startLocationTime = startTime;
+        var fromLaunchHex = false;
         if (weapon.ballistic && (!weapon.hasSpecialLaunchHexCalculation && incomingFire.fireOrder.targetid !== incomingFire.fireOrder.shooterid)) {//Some weapons target own ship e.g. Shield Reinforcement)) {
             startLocationTime = 0;
+            fromLaunchHex = true;
         }
 
         var weaponOrigin;
@@ -275,6 +281,11 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             //The Dust Zone's unit is parked far off the map; the dust is all round the unit it struck. From the
             //parking hex a trail ran ~23s (MissileEffect: distance / speed) - from here it is a brief impact.
             weaponOrigin = getShipPositionAtTime.call(this, this.shipIcon, startTime);
+        } else if (fromLaunchHex) {
+            //A ballistic leaves from its LAUNCH hex, where the movement animation starts (time 0) - before any of the
+            //turn's movement, so before any forced move too. The forced-move positions in getShipPositionAtTime below
+            //are for a ship as it stands later in the turn: they drew a pulled ship's missiles from the dragged-to hex.
+            weaponOrigin = FireAnimationHelper.getShipPositionAtTime(this.shipIconContainer.getByShip(incomingFire.shooter), 0, this.movementAnimations);
         } else { //Everything else
             weaponOrigin = getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime);
         }
@@ -610,6 +621,9 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         if (!this.prefire && icon.preFireMovements && icon.preFireMovements.length > 0) {
             var lastMove = icon.preFireMovements[icon.preFireMovements.length - 1];
             return window.coordinateConverter.fromHexToGame(lastMove.position);
+        }
+        if (this.shiftedTo && this.shiftedTo[icon.shipId]) {
+            return window.coordinateConverter.fromHexToGame(this.shiftedTo[icon.shipId].position);
         }
         return FireAnimationHelper.getShipPositionAtTime(icon, time, this.movementAnimations);
     }

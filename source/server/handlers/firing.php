@@ -77,6 +77,15 @@ class Firing
                 continue;
             }
 
+            /* GRAVITY_WELL_PLAN.md - likewise a Gravity Well's pull line. It is written as Movement closes, so it is
+               already in the database when the player who OWNS a bought well commits Pre-Firing - and the client
+               re-posts every order of the turn it holds, which Pre-Firing would insert a second time. */
+            if ($fire->damageclass === 'GravityWellPull') {
+                $fire->rejected = true;
+                if ($shooter) self::detachFireOrder($shooter, $fire);
+                continue;
+            }
+
             //Uncontrolled-flight guard. A remote-controlled Hunter-Killer flight whose
             //command link is severed (node shortfall or ELINT jamming) is driven entirely
             //by the server: AutomatedMovement moves it (drift/seek) and, if it ends co-located
@@ -1924,6 +1933,8 @@ public static function firePreFiringWeapons($gamedata){
             || $fire->damageclass === 'JumpVortexExit'
             //EM_STORM_PLAN.md - an EM storm's line for a unit, written as Deployment closes on the turn it is about (EMStorm::logResult)
             || $fire->damageclass === 'EMStorm'
+            //GRAVITY_WELL_PLAN.md - a Gravity Well's pull of one unit, written as Movement closes (GravityWells::resolvePull)
+            || $fire->damageclass === 'GravityWellPull'
             //OFFICERS_PLAN.md Stage 37 - a Lucky Captain's log line, which his failed disengage writes as Initial Orders close (Officers::luckyLine):
             //on his RammingAttack, so without this the firing would take it for a ram
             || $fire->damageclass === Officers::LUCKY_LOG_CLASS;

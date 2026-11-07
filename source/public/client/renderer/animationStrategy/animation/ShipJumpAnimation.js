@@ -19,10 +19,8 @@ window.ShipJumpAnimation = function () {
 
         this.animations = [];
 
-        var cameraAnimation = new CameraPositionAnimation(
-            FireAnimationHelper.getShipPositionAtTime(this.shipIcon, this.time, movementAnimations),
-            this.time
-        );
+        var position = getJumpPosition(this.shipIcon, this.time, movementAnimations);
+        var cameraAnimation = new CameraPositionAnimation(position, this.time);
         this.animations.push(cameraAnimation);
 
         if (noJumpPoint) {
@@ -34,7 +32,7 @@ window.ShipJumpAnimation = function () {
         } else {
             this.explosion = new ShipJumpPoint(emitterContainer, {
                 time: this.time,
-                position: FireAnimationHelper.getShipPositionAtTime(shipIcon, time, movementAnimations)
+                position: position
             });
 
             this.duration = this.explosion.getDuration();
@@ -53,6 +51,18 @@ window.ShipJumpAnimation = function () {
     }
 
     ShipJumpAnimation.prototype = Object.create(Animation.prototype);
+
+    /* A boosted drive leaves at the END of Firing, and the replay plays the jump after all firing - so a ship a forced
+       move shifted this turn (a Pre-Firing shift, a Gravity Well's pull) jumps from where that left it. The movement
+       animation alone stops where its own movement ended (a dragged Jupiter opened its vortex 3 hexes short, game
+       4550). Same rule as ShipDestroyedAnimation. */
+    function getJumpPosition(shipIcon, time, movementAnimations) {
+        if (shipIcon.preFireMovements && shipIcon.preFireMovements.length > 0) {
+            var lastMove = shipIcon.preFireMovements[shipIcon.preFireMovements.length - 1];
+            return window.coordinateConverter.fromHexToGame(lastMove.position);
+        }
+        return FireAnimationHelper.getShipPositionAtTime(shipIcon, time, movementAnimations);
+    }
 
     ShipJumpAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
 

@@ -31,6 +31,10 @@ window.mapPreview = {
         emStorm: "120, 205, 255" //electric blue - the game's EM storm texture (BallisticIconContainer), as rgb for the alpha
     },
 
+    /* The Gravity Well's legend swatch (GRAVITY_WELL_PLAN.md) - its unit's art, a black hole ringed in orange. Legend only:
+       the well is placed when the game starts, so neither preview draws it. Shared by Create Game and the lobby. */
+    GRAVITY_WELL_SWATCH: "background:#000;border-radius:50%;box-shadow:inset 0 0 0 2px rgb(235, 110, 30)",
+
     /* The EM Storm's wash (EMStormRule, EM_STORM_PLAN.md) - the whole map, over the nebula and under the grid - and a few
        fixed forked arcs, so it reads as a storm rather than a second tint. Points are fractions of the map's half-size
        from its centre. */

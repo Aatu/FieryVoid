@@ -1634,6 +1634,22 @@ window.BallisticIconContainer = function () {
 	}
 
 
+	/* The hex a Pre-Firing or Firing order was fired FROM, forced moves included - the rule
+	   FireAnimationHelper.getShipPositionForFiring gives the replay's shots (GRAVITY_WELL_PLAN.md section 7). Read from
+	   the ship's own rows: a replay leaves the turn's 'prefire' / 'gravity' rows out of the icon's movement list (they are
+	   animated separately) while the live view keeps them in, so getLastMovement() gave a dragged ship's PRE-DRAG hex in
+	   a replay, and a Transverse Drive's own DESTINATION live.
+	   - Pre-Firing: the turn's last row that is not a Pre-Firing shift - the end of its own movement, or of a Gravity
+	     Well's pull, which always comes before any Pre-Firing;
+	   - Firing: the turn's last row, after every forced move. */
+	function getOrderFiringHex(shooterIcon, ballistic, turn) {
+		const rows = ((shooterIcon.ship && shooterIcon.ship.movement) || []).filter(function (move) {
+			return move.turn == turn && move.type !== 'start' && (ballistic.type !== 'prefiring' || move.type !== 'prefire');
+		});
+		const last = rows[rows.length - 1];
+		return last ? new hexagon.Offset(last.position) : shooterIcon.getLastMovement().position;
+	}
+
 	//To create coloured hexes signifying ballistic launches and other effects.
 	function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
 
@@ -1664,7 +1680,7 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 			   fire-control penalty, which must keep applying. */
 			launchPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(Number(ballistic.x), Number(ballistic.y)));
 		} else if (ballistic.type === 'normal' || ballistic.type === 'prefiring') {
-			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
+			launchPosition = this.coordinateConverter.fromHexToGame(getOrderFiringHex(shooterIcon, ballistic, turn));
 		} else {
 			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
 		}
@@ -2185,7 +2201,7 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 
 		// Handle specific modeName cases
 		if (ballistic.type === 'normal' || ballistic.type === 'prefiring') {
-			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn)?.position);
+			launchPosition = this.coordinateConverter.fromHexToGame(getOrderFiringHex(shooterIcon, ballistic, turn));
 
 			const modeColorMap = {
 				'Shredder': 'blue',

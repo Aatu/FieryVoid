@@ -68,6 +68,8 @@ jQuery(function ($) {
     });
     //...and the EM storm (EM_STORM_PLAN.md), a whole-map wash of its own.
     $("#emStormSelect").on("change", function () { createGame.drawMapPreview(); });
+    //...and the Gravity Well (GRAVITY_WELL_PLAN.md) - placed when the game starts, so only the legend names it.
+    $("#gravityWellSelect").on("change", function () { createGame.drawMapPreview(); });
     createGame.readTerrain();
 
     // In-Service Date: a year, so digits only and four at most (the lobby's own ISD box does the same).
@@ -349,6 +351,10 @@ window.createGame = {
         if (createGame.rules.emStorm) {
             html += '<span class="cg-legend-item"><span class="cg-swatch" style="background:rgb(' + mapPreview.COLORS.emStorm + ')"></span>EM Storm (entire map)</span>';
         }
+        if (createGame.rules.gravityWell) {
+            html += '<span class="cg-legend-item"><span class="cg-swatch" style="' + mapPreview.GRAVITY_WELL_SWATCH + '"></span>Gravity Well (strength '
+                + createGame.rules.gravityWell + ', placed near the centre)</span>';
+        }
         $("#mapLegend").html(html);
     },
 
@@ -527,6 +533,11 @@ window.createGame = {
         //The Electromagnetic Storm (EMStormRule, EM_STORM_PLAN.md): likewise.
         if ($("#emStormSelect").val() === "1") createGame.rules.emStorm = 1;
         else delete createGame.rules.emStorm;
+
+        //One Gravity Well (GravityWellRule, GRAVITY_WELL_PLAN.md): its strength, 1-3, or none.
+        const gravityWell = parseInt($("#gravityWellSelect").val(), 10) || 0;
+        if (gravityWell >= 1 && gravityWell <= 3) createGame.rules.gravityWell = gravityWell;
+        else delete createGame.rules.gravityWell;
     },
 
     /* Nebula OR Mines Allowed, never both (user, 2026-11-06; KS 9.9: "minefields will not appear in that

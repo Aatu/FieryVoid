@@ -214,6 +214,8 @@ window.scenarioCard = {
             if (count(r.dustAndMeteors.dust) > 0) terrain.push("Dust (" + count(r.dustAndMeteors.dust) + ")");
             if (count(r.dustAndMeteors.meteors) > 0) terrain.push("Meteor Swarms (" + count(r.dustAndMeteors.meteors) + ")");
         }
+        //One Gravity Well (GravityWellRule, GRAVITY_WELL_PLAN.md) - placed at random near the centre, so it joins this chip.
+        if (count(r.gravityWell) > 0) terrain.push("Gravity Well (Strength " + count(r.gravityWell) + ")");
         //No-break spaces inside each type, and before each dot, so a long chip wraps only between
         //types, the dot ending the line.
         if (terrain.length) {

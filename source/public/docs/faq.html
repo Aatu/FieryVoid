@@ -1668,102 +1668,42 @@
     <img src="img/docViewer/terrain.jpg" alt="A map with asteroids, a moon, a dust cloud and a meteor swarm">
     <figcaption>Asteroids, a moon, dust and a meteor swarm on the map.</figcaption>
   </figure>
-  <dl class="fvd-defs">
-    <dt>Asteroids</dt>
-    <dd>Single hex only. Added in Create Game, or by hand from the Terrain faction's list. They block line of sight, and
-      cause 1d10 &times; Speed raking damage to any unit that moves through them or ends its movement in their hex. The
-      damage is dealt just before the Firing Phase.</dd>
-    <dt>Moons / large asteroids</dt>
-    <dd>Anything larger than an asteroid - occupying several hexes. Units moving into their area automatically crash into
-      them, during the Pre-Firing Phase.</dd>
-    <dt>Dust</dt>
-    <dd>Chosen in Create Game with the <b>Dust</b> option: <b>Entire map</b>, as the tabletop rules have it, or
-      <b>50%</b> / <b>25% of map</b> - one clump of dust round the map's centre, its shape set when the game is created
-      and shown in the lobby's Map Preview. A map template's dust hexes become part of it. Dust does not block line of
-      sight. After movement, during the Pre-Firing Phase, every unit that moved through dust that turn takes damage
-      <b>once</b>:
-      <ul>
-        <li>Ships take <b>speed / 2</b> (fractions dropped) to the Structure of the side facing the direction of motion
-          for most of their movement through the dust - the Primary Structure if that side has none. If two sides tie,
-          it falls on the one with more armour (then more structure left).</li>
-        <li>Fighters and shuttles take <b>(speed - 10) / 3</b> (fractions dropped) on every craft, against the armour
-          facing the direction of motion, so a flight at speed 12 or less takes nothing.</li>
-        <li>It is Standard damage with no hit chart roll: armour applies, shields do not.</li>
-      </ul>
-      Dust Fields and Dust Clouds bought from the Terrain faction, and those in games created before the Dust option,
-      work as before: they damage a unit once for every dust hex it enters.
-    </dd>
-    <dt>Meteor Swarms</dt>
-    <dd>Added in Create Game with the <b>Meteor Swarms</b> count, one hex each, placed at random (a swarm shows on the map
-      as a Meteoroid Swarm). Like dust, a swarm does not block line of sight. A unit that enters a swarm's hex rolls a
-      d20 on the table below, during the Pre-Firing Phase, to see how many meteors strike it: -1 to the roll at speed 4
-      or less, +1 at speed 13 or more. Each meteor is its own Standard hit for <b>1d10 + the unit's speed</b>, on the
-      side it entered through, rolled on that section's hit chart - armour and shields apply as normal. Declared
-      defensive fire can blunt them: see <a href="#meteordefence">Meteor Defence</a>.</dd>
-    <dt data-anchor="nebula">Nebula</dt>
-    <dd>Chosen in Create Game with the <b>Nebula</b> option (No / Yes). A nebula fills the whole map and hampers every
-      unit in it. A game can have a nebula or <a href="#mines">mines</a>, never both: choosing one greys the other out.
-      The map shows as violet gas, which - like dust that covers the entire map - goes away with the map background (the
-      Disable Background button, or <b>Never show map background</b> under OPTIONS). Inside a nebula:
-      <ul>
-        <li><b>Thrust:</b> every thruster rating is 1 lower, and so is every fighter and shuttle flight's thrust. Jinking
-          costs <b>2 thrust a level</b> instead of 1 (twice the pivot cost for a ship that can jink).</li>
-        <li><b>No EW of any kind:</b> no unit can allocate offensive, defensive or ELINT EW, so no ship ever has a
-          lock-on, and ship fire takes the usual no-lock penalty (range penalties doubled). Fighters never use a lock -
-          they rely on their Offensive Bonus - but see below.</li>
-        <li><b>Fire control:</b> a weapon's fire control bonus is halved, dropping fractions (+15% becomes +5%, +20%
-          becomes +10%), and a negative fire control is doubled. A fighter's Offensive Bonus is halved the same way.
-          Called shots and Piercing shots take their usual penalties, no more. A Hyach Computer's bonus fire control is
-          not affected. The weapon's <b>Fire control</b> line, a fighter's <b>Offensive bonus</b> and the hit-chance
-          tooltip all show the nebula's figures.</li>
-        <li><b>Interception:</b> a weapon firing defensively has its intercept rating cut by 1 (5%), so a weapon rated
-          -5% cannot intercept at all. See <a href="#interception">Interception</a>.</li>
-        <li><b>Damage:</b> every weapon does 1 less on each die of damage it rolls (a die can come up 0). Pulse weapons
-          instead do 1 less for each pulse that hits. Plasma weapons lose twice the usual damage per hex of range, on top
-          of the -1 per die. Rams and terrain collisions are not affected.</li>
-        <li><b>Missiles:</b> the launch and distance ranges of missile racks - fighter and bomb racks included - are
-          halved, dropping fractions. Torpedoes and mine launchers are not affected.</li>
-        <li><b>Jammers</b> do not work. Stealth systems and Shading Fields keep their own effects.</li>
-        <li><b>Electromagnetic weapons</b>, Comm Disruptors included, cannot fire unless the ship carrying them belongs to
-          an Ancient race.</li>
-        <li><b>Gravitic shields</b> are 1 point weaker.</li>
-        <li><b>Jump points</b> opened to bring in <a href="#reinforcements">reinforcements</a> roll +3 on the scatter
-          table, so they are more likely to arrive off target.</li>
-      </ul>
-      Ancient races (Ancient and Primordial factions) ignore the effects on thrust and jinking; everything else applies
-      to them as listed.</dd>
-    <dt data-anchor="emstorm">Electromagnetic Storm</dt>
-    <dd>Chosen in Create Game with the <b>EM Storm</b> option (No / Yes). The storm covers the whole map and hits every
-      unit except mines and terrain, once a turn: it is rolled as each turn ends (and, for units just placed, as
-      Deployment ends), and everything it does lasts for the coming turn only. The map shows crackling blue lightning,
-      which goes away with the map background. It can be combined with a <a href="#nebula">nebula</a>, dust and mines.
-      Each unit's results are listed in the combat log under <b>EM STORM</b>, and show on its systems as criticals.
-      <ul>
-        <li><b>Sensors:</b> a ship's sensor rating is 1d6 lower. Not rolled inside a nebula, where there is no EW anyway.</li>
-        <li><b>Offensive Bonus:</b> a fighter or shuttle flight loses 1d3 (5-15%), but never more than half its bonus -
-          in a nebula, half of the bonus the nebula has already halved.</li>
-        <li><b>Initiative:</b> every unit loses 2d6 (10-60).</li>
-        <li><b>Power:</b> a ship rolls 1d6, and on 3 or less (a medium ship), 4 or less (heavy and capital ships) or 5 or
-          less (enormous units) loses that many points of power. If it cannot switch enough systems off to cover the
-          loss, its reactor is drained and every powered system goes offline for the turn.</li>
-        <li><b>Strikes:</b> a ship is struck once (medium), 1d2 times (heavy), 1d3 times (capital) or 1d6 times
-          (enormous). Each strike hits a random side that still has its structure, and rolls on that side's hit chart. A
-          hit on structure does nothing; any other system is hit exactly as by a Burst Beam - a system that can be
-          switched off goes offline for the turn, anything else rolls for a critical at +4 (the combat log says what it
-          rolled). A system struck twice in one storm suffers once.</li>
-        <li><b>Storm Defence:</b> a ship with EM shields may have them take the strikes instead. Declare it on the shield
-          (the ⚡ button; right-click for every EM shield on the ship) in Deployment or Initial Orders. It stands for every
-          storm from then on - the shield shows a ⚡ - until you withdraw it the same way. A strike on a side a declared
-          shield faces knocks that shield offline for the turn instead of a random system. Each shield takes one strike
-          per storm.</li>
-      </ul>
-      Ancient races (Ancient and Primordial factions) take 1 less on every one of these rolls, never lose power, and are
-      not struck. Ipsha EM hardening and Advanced Armor protect against the strikes as they do against EM weapons.</dd>
-    <dt>Placing it yourself</dt>
-    <dd>For full control over where terrain goes, create an extra player slot for yourself when setting up the game and
-      buy the terrain you want from the Terrain faction (under Other). With a wide enough deployment zone, you can then
-      place it like any other unit on Turn 1.</dd>
-  </dl>
+  <p class="fvd-lede">Terrain comes from the terrain options in Create Game, or is bought from the Terrain faction and
+    placed by hand (see <a href="#placingterrain">Placing terrain yourself</a>).</p>
+
+  <h3 data-anchor="asteroids">Asteroids</h3>
+  <p>Single hex only. Added in Create Game, or by hand from the Terrain faction's list. They block line of sight, and
+    cause 1d10 &times; Speed raking damage to any unit that moves through them or ends its movement in their hex. The
+    damage is dealt just before the Firing Phase.</p>
+
+  <h3 data-anchor="moons">Moons / large asteroids</h3>
+  <p>Anything larger than an asteroid - occupying several hexes. Units moving into their area automatically crash into
+    them, during the Pre-Firing Phase.</p>
+
+  <h3 data-anchor="dust">Dust</h3>
+  <p>Chosen in Create Game with the <b>Dust</b> option: <b>Entire map</b>, as the tabletop rules have it, or
+    <b>50%</b> / <b>25% of map</b> - one clump of dust round the map's centre, its shape set when the game is created
+    and shown in the lobby's Map Preview. A map template's dust hexes become part of it. Dust does not block line of
+    sight. After movement, during the Pre-Firing Phase, every unit that moved through dust that turn takes damage
+    <b>once</b>:</p>
+  <ul>
+    <li>Ships take <b>speed / 2</b> (fractions dropped) to the Structure of the side facing the direction of motion
+      for most of their movement through the dust - the Primary Structure if that side has none. If two sides tie,
+      it falls on the one with more armour (then more structure left).</li>
+    <li>Fighters and shuttles take <b>(speed - 10) / 3</b> (fractions dropped) on every craft, against the armour
+      facing the direction of motion, so a flight at speed 12 or less takes nothing.</li>
+    <li>It is Standard damage with no hit chart roll: armour applies, shields do not.</li>
+  </ul>
+  <p>Dust Fields and Dust Clouds bought from the Terrain faction, and those in games created before the Dust option,
+    work as before: they damage a unit once for every dust hex it enters.</p>
+
+  <h3 data-anchor="meteors">Meteor Swarms</h3>
+  <p>Added in Create Game with the <b>Meteor Swarms</b> count, one hex each, placed at random (a swarm shows on the map
+    as a Meteoroid Swarm). Like dust, a swarm does not block line of sight. A unit that enters a swarm's hex rolls a
+    d20 on the table below, during the Pre-Firing Phase, to see how many meteors strike it: -1 to the roll at speed 4
+    or less, +1 at speed 13 or more. Each meteor is its own Standard hit for <b>1d10 + the unit's speed</b>, on the
+    side it entered through, rolled on that section's hit chart - armour and shields apply as normal. Declared
+    defensive fire can blunt them: see <a href="#meteordefence">Meteor Defence</a>.</p>
   <table class="fvd-roll" data-anchor="meteorchart">
     <caption>Meteors striking a unit that enters a swarm (d20)</caption>
     <thead>
@@ -1780,6 +1720,97 @@
       <tr><td>20</td><td class="fvd-num">1</td><td class="fvd-num">2</td><td class="fvd-num">2</td><td class="fvd-num">2</td><td class="fvd-num">3</td></tr>
     </tbody>
   </table>
+
+  <h3 data-anchor="nebula">Nebula</h3>
+  <p>Chosen in Create Game with the <b>Nebula</b> option (No / Yes). A nebula fills the whole map and hampers every
+    unit in it. A game can have a nebula or <a href="#mines">mines</a>, never both: choosing one greys the other out.
+    The map shows as violet gas, which - like dust that covers the entire map - goes away with the map background (the
+    Disable Background button, or <b>Never show map background</b> under OPTIONS). Inside a nebula:</p>
+  <ul>
+    <li><b>Thrust:</b> every thruster rating is 1 lower, and so is every fighter and shuttle flight's thrust. Jinking
+      costs <b>2 thrust a level</b> instead of 1 (twice the pivot cost for a ship that can jink).</li>
+    <li><b>No EW of any kind:</b> no unit can allocate offensive, defensive or ELINT EW, so no ship ever has a
+      lock-on, and ship fire takes the usual no-lock penalty (range penalties doubled). Fighters never use a lock -
+      they rely on their Offensive Bonus - but see below.</li>
+    <li><b>Fire control:</b> a weapon's fire control bonus is halved, dropping fractions (+15% becomes +5%, +20%
+      becomes +10%), and a negative fire control is doubled. A fighter's Offensive Bonus is halved the same way.
+      Called shots and Piercing shots take their usual penalties, no more. A Hyach Computer's bonus fire control is
+      not affected. The weapon's <b>Fire control</b> line, a fighter's <b>Offensive bonus</b> and the hit-chance
+      tooltip all show the nebula's figures.</li>
+    <li><b>Interception:</b> a weapon firing defensively has its intercept rating cut by 1 (5%), so a weapon rated
+      -5% cannot intercept at all. See <a href="#interception">Interception</a>.</li>
+    <li><b>Damage:</b> every weapon does 1 less on each die of damage it rolls (a die can come up 0). Pulse weapons
+      instead do 1 less for each pulse that hits. Plasma weapons lose twice the usual damage per hex of range, on top
+      of the -1 per die. Rams and terrain collisions are not affected.</li>
+    <li><b>Missiles:</b> the launch and distance ranges of missile racks - fighter and bomb racks included - are
+      halved, dropping fractions. Torpedoes and mine launchers are not affected.</li>
+    <li><b>Jammers</b> do not work. Stealth systems and Shading Fields keep their own effects.</li>
+    <li><b>Electromagnetic weapons</b>, Comm Disruptors included, cannot fire unless the ship carrying them belongs to
+      an Ancient race.</li>
+    <li><b>Gravitic shields</b> are 1 point weaker.</li>
+    <li><b>Jump points</b> opened to bring in <a href="#reinforcements">reinforcements</a> roll +3 on the scatter
+      table, so they are more likely to arrive off target.</li>
+  </ul>
+  <p>Ancient races (Ancient and Primordial factions) ignore the effects on thrust and jinking; everything else applies
+    to them as listed.</p>
+
+  <h3 data-anchor="emstorm">Electromagnetic Storm</h3>
+  <p>Chosen in Create Game with the <b>EM Storm</b> option (No / Yes). The storm covers the whole map and hits every
+    unit except mines and terrain, once a turn: it is rolled as each turn ends (and, for units just placed, as
+    Deployment ends), and everything it does lasts for the coming turn only. The map shows crackling blue lightning,
+    which goes away with the map background. It can be combined with a <a href="#nebula">nebula</a>, dust and mines.
+    Each unit's results are listed in the combat log under <b>EM STORM</b>, and show on its systems as criticals.</p>
+  <ul>
+    <li><b>Sensors:</b> a ship's sensor rating is 1d6 lower. Not rolled inside a nebula, where there is no EW anyway.</li>
+    <li><b>Offensive Bonus:</b> a fighter or shuttle flight loses 1d3 (5-15%), but never more than half its bonus -
+      in a nebula, half of the bonus the nebula has already halved.</li>
+    <li><b>Initiative:</b> every unit loses 2d6 (10-60).</li>
+    <li><b>Power:</b> a ship rolls 1d6, and on 3 or less (a medium ship), 4 or less (heavy and capital ships) or 5 or
+      less (enormous units) loses that many points of power. If it cannot switch enough systems off to cover the
+      loss, its reactor is drained and every powered system goes offline for the turn.</li>
+    <li><b>Strikes:</b> a ship is struck once (medium), 1d2 times (heavy), 1d3 times (capital) or 1d6 times
+      (enormous). Each strike hits a random side that still has its structure, and rolls on that side's hit chart. A
+      hit on structure does nothing; any other system is hit exactly as by a Burst Beam - a system that can be
+      switched off goes offline for the turn, anything else rolls for a critical at +4 (the combat log says what it
+      rolled). A system struck twice in one storm suffers once.</li>
+    <li><b>Storm Defence:</b> a ship with EM shields may have them take the strikes instead. Declare it on the shield
+      (the ⚡ button; right-click for every EM shield on the ship) in Deployment or Initial Orders. It stands for every
+      storm from then on - the shield shows a ⚡ - until you withdraw it the same way. A strike on a side a declared
+      shield faces knocks that shield offline for the turn instead of a random system. Each shield takes one strike
+      per storm.</li>
+  </ul>
+  <p>Ancient races (Ancient and Primordial factions) take 1 less on every one of these rolls, never lose power, and are
+    not struck. Ipsha EM hardening and Advanced Armor protect against the strikes as they do against EM weapons.</p>
+
+  <h3 data-anchor="gravitywell">Gravity Well</h3>
+  <p>A single-hex gravity source, such as a black hole. Chosen in Create Game with the <b>Gravity Well</b> option (None /
+    Strength 1, 2 or 3): one well of that strength is placed at random near the centre of the map when the game starts,
+    so the lobby's Map Preview does not show where (its legend just names it). Wells of strength 1, 2 and 3 can also be
+    bought from the Terrain faction and placed by hand. A well is Enormous, so it blocks line of sight.</p>
+  <ul>
+    <li><b>The pull:</b> once all movement is complete, between the Movement and Pre-Firing Phases, every unit is
+      drawn towards the well, as many hexes as the well's strength. Each hex takes it to the neighbouring hex closest to
+      the well; where two are equally close, it goes into the one nearer its heading. Its facing and heading do not
+      change. Each unit pulled is listed in the combat log under <b>GRAVITY WELL</b>, and the replay shows the drag
+      before any Pre-Firing.</li>
+    <li><b>Ancient races</b> (Ancient and Primordial factions) are pulled 1 hex less, so a strength 1 well does not move
+      them at all.</li>
+    <li><b>Not moved:</b> bases, OSATs, mines and other terrain. A unit attached to another (a breaching pod, a
+      grappling ship) is carried with it.</li>
+    <li><b>Into the well:</b> nothing is pulled past the well's own hex - but any unit that enters that hex, whether
+      dragged in or by its own movement, is <b>destroyed</b> during the Pre-Firing Phase: a ship loses its Primary
+      Structure, a flight every craft.</li>
+    <li><b>Dragged into other terrain:</b> the hexes a unit is dragged through count as hexes it entered, so it collides
+      with any asteroid, moon or Enormous unit on the way, and dust and meteor swarms affect it, just as if it had moved
+      there itself.</li>
+    <li>With several wells on the map, each pulls in turn. A unit already sitting in any well's hex is pulled no
+      further.</li>
+  </ul>
+
+  <h3 data-anchor="placingterrain">Placing terrain yourself</h3>
+  <p>For full control over where terrain goes, create an extra player slot for yourself when setting up the game and
+    buy the terrain you want from the Terrain faction (under Other). With a wide enough deployment zone, you can then
+    place it like any other unit on Turn 1.</p>
 </section>
 
 <section data-key="damagetypes" data-title="Weapon Damage Types" data-group="Rules &amp; Mechanics">

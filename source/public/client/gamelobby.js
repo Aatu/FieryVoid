@@ -3348,6 +3348,10 @@ window.gamedata = {
 		if (gamedata.rules && gamedata.rules.emStorm) {
 			html += item('<span class="lb-swatch" style="background:rgb(' + mapPreview.COLORS.emStorm + ')"></span>', "EM Storm (entire map)");
 		}
+		if (gamedata.rules && gamedata.rules.gravityWell) { //GRAVITY_WELL_PLAN.md - placed when the game starts, so not on the preview
+			html += item('<span class="lb-swatch" style="' + mapPreview.GRAVITY_WELL_SWATCH + '"></span>',
+				"Gravity Well (strength " + parseInt(gamedata.rules.gravityWell, 10) + ", placed near the centre)");
+		}
 
 		legend.html(html);
 	},

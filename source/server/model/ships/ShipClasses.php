@@ -3336,6 +3336,7 @@ class BaseShip {
        wrong by the drag angle, a whole hex facing. hexCoToPixel is affine over cube coordinates, so
        shifting the pixel pair is exactly shifting hexes and row parity looks after itself.
        Undragged units take the original path below, unchanged.
+       A Gravity Well's pull ('gravity' rows, GRAVITY_WELL_PLAN.md) is a drag in exactly this sense.
        Client twin: movement.js getPreviousLocation - keep the two in step. */
     public function getPreviousCoPos(){
         $pos = $this->getCoPos();
@@ -3343,7 +3344,7 @@ class BaseShip {
         //Where the unit's own movement left it, ignoring any forced Pre-Firing shift.
         $movedPos = null;
         for ($i = sizeof($this->movement)-1; $i>=0; $i--){
-            if ($this->movement[$i]->type == "prefire") continue;
+            if ($this->movement[$i]->type == "prefire" || $this->movement[$i]->type == "gravity") continue;
             $movedPos = $this->movement[$i]->getCoPos();
             break;
         }
@@ -3353,7 +3354,7 @@ class BaseShip {
 
         for ($i = sizeof($this->movement)-1; $i>=0; $i--){
             $move = $this->movement[$i];
-            if ($dragged && $move->type == "prefire") continue;
+            if ($dragged && ($move->type == "prefire" || $move->type == "gravity")) continue;
             //'start' is the off-board pre-deployment marker (x=+-30), not a position the unit was
             //ever really at - the same row getLastTurnMovement skips, and real only for generated
             //Terrain. It matters only on the dragged path: there the walk-back is anchored to the

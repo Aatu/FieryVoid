@@ -335,6 +335,16 @@
                   <option value="1">Yes</option>
                 </select>
               </div>
+              <!-- Gravity Well (GravityWellRule, GRAVITY_WELL_PLAN.md): one well of strength 1-3, placed near the centre when
+                   the game starts. More can be bought from the Terrain faction. -->
+              <div class="cg-terrain-row" id="gravityWellRow"><label for="gravityWellSelect">Gravity Well</label>
+                <select id="gravityWellSelect" class="cg-input cg-terrain-count" name="gravityWell">
+                  <option value="0">None</option>
+                  <option value="1">Strength 1</option>
+                  <option value="2">Strength 2</option>
+                  <option value="3">Strength 3</option>
+                </select>
+              </div>
               <div class="cg-terrain-row"><label for="meteorsSelect">Meteor Swarms</label><?php print(cgCountCombo('meteorsSelect', 'Meteor Swarms', DustAndMeteorsRule::$maxMeteors, $fieldPresets)); ?></div>              
               <div class="cg-terrain-row"><label for="asteroidsSelect">Asteroids</label><?php print(cgCountCombo('asteroidsSelect', 'Asteroids', 48, $fieldPresets)); ?></div>
               <div class="cg-terrain-row"><label for="moonsSmallSelect">Small Moons</label><?php print(cgCountCombo('moonsSmallSelect', 'Small Moons', 5, $moonPresets)); ?></div>

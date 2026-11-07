@@ -3088,10 +3088,14 @@ $newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
 
 	   The host is not double-damaged by this: it earns its own collision order from the same
 	   loop, and Firing::fire refuses to spill a TerrainCollision/TerrainCrash order from a
-	   pod onto its host precisely so the two do not stack. */
+	   pod onto its host precisely so the two do not stack.
+
+	   A Gravity Well's pull (GRAVITY_WELL_PLAN.md R2) writes one 'gravity' row per hex it drags a unit, and the
+	   unit COLLIDES with whatever it is dragged into - so those rows are compared the same way. The other forced
+	   shifts ('prefire': Gravitic Mine, Gravity Net, Transverse Drive, Singularity) stay out, as they always were. */
 	private static function isHexTransit($move, $previousPosition){
 		if ($move->type == "move" || $move->type == "slipleft" || $move->type == "slipright") return true;
-		if ($move->type != "attached") return false;
+		if ($move->type != "attached" && $move->type != "gravity") return false; //"gravity" = GravityWells::MOVE_TYPE, a literal so no other game loads that class
 		if ($previousPosition === null) return true;
 
 		return ($move->position->q != $previousPosition->q || $move->position->r != $previousPosition->r);
@@ -11920,6 +11924,110 @@ class spawnSingularity extends Terrain {
         $stripped->spawnTurn     = self::decodeSpawnTurnFromName($this->name);
         $stripped->spinDirection = self::decodeSpinFromName($this->name);
         return $stripped;
+    }
+}
+
+
+/* =============================================================================
+   GravityWellRammingAttack - GRAVITY_WELL_PLAN.md. A Gravity Well's (ships/terrain/GravityWell.php) one weapon:
+   "any unit that enters such a hex would be destroyed".
+
+   Two kinds of order ride it, both well -> unit:
+     GravityWellPull      - the log line for one unit's pull, written as Movement closes (GravityWells::resolvePull).
+                            Already resolved when written (rolled 1), a log line and never a shot - see
+                            Firing::isHyperspaceLogOrder.
+     GravityWellCollision - the destruction, made here in Pre-Firing: auto-hit, the unit destroyed outright, and
+                            nothing returned onto the well (a ram's return damage).
+   ============================================================================= */
+class GravityWellRammingAttack extends RammingAttack {
+
+    public $name        = "GravityWellRammingAttack";
+    public $displayName = "Gravity Well";
+    public $damageType  = "Standard";
+    public $weaponClass = "Gravitic";
+
+    function __construct($armour, $startArc, $endArc, $designDamage = 0, $fcbonus = 0){
+        parent::__construct($armour, $startArc, $endArc, $designDamage, $fcbonus);
+        $this->autoFireOnly = true; //immobile: it never rams anything itself
+    }
+
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+        $this->data["Special"] = "Any unit that enters this hex is destroyed - by its own movement or pulled in.";
+    }
+
+    /* The parent's terrain sweep makes an order for every unit that ENTERED the hex this turn - flying in, or pulled
+       in, since RammingAttack::isHexTransit counts the pull's 'gravity' rows (R2). Then one for any unit standing in
+       the hex without having entered it this turn (placed there in Deployment), which the sweep cannot see. */
+    public function beforePreFiringOrderResolution($gamedata){
+        parent::beforePreFiringOrderResolution($gamedata);
+
+        $well = $this->getUnit();
+        if (!$well || $well->isDestroyed()) return;
+        if ($well->getTurnDeployed($gamedata) > $gamedata->turn) return;
+        $wellHex = $well->getHexPos();
+        if (!$wellHex) return;
+
+        $ordered = array();
+        foreach ($this->fireOrders as $order) {
+            if ($order->turn == $gamedata->turn && $order->damageclass === GravityWells::COLLISION_CLASS) $ordered[$order->targetid] = true;
+        }
+
+        foreach ($gamedata->ships as $ship) {
+            if ($ship->id == $well->id || isset($ordered[$ship->id])) continue;
+            if ($ship->isDestroyed() || $ship->isTerrain()) continue;
+            if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;
+            $move = $ship->getLastTurnMovement($gamedata->turn + 1);
+            if (!$move || $move->position->q != $wellHex->q || $move->position->r != $wellHex->r) continue;
+
+            $order = new FireOrder(-1, "prefiring", $well->id, $ship->id, $this->id, -1, $gamedata->turn, 1,
+                0, 0, 1, 0, 0, $move->position->q, $move->position->r, GravityWells::COLLISION_CLASS, -1);
+            $order->chosenLocation = 1;
+            $order->notes = "loc:1";
+            $order->addToDB = true;
+            $this->fireOrders[] = $order;
+        }
+
+        //Every collision is its own sentence, naming the unit - the log prints it under "GRAVITY WELL:" (combatLog.js).
+        foreach ($this->fireOrders as $order) {
+            if ($order->turn != $gamedata->turn || $order->damageclass !== GravityWells::COLLISION_CLASS || $order->id > 0) continue;
+            $target = $gamedata->getShipById($order->targetid);
+            if (!$target) continue;
+            $order->pubnotes = GravityWells::shipLink($target) . " is drawn into the gravity well and destroyed!";
+        }
+    }
+
+    public function calculateHitBase($gamedata, $fireOrder){
+        if ($fireOrder->damageclass === GravityWells::COLLISION_CLASS) {
+            $fireOrder->needed = 100; //always
+            $fireOrder->updated = true;
+            return;
+        }
+        parent::calculateHitBase($gamedata, $fireOrder);
+    }
+
+    public function fire($gamedata, $fireOrder){
+        if ($fireOrder->damageclass === GravityWells::PULL_CLASS) return; //a log line - never reaches here, see Firing::isHyperspaceLogOrder
+        if ($fireOrder->damageclass === GravityWells::COLLISION_CLASS) {
+            //Weapon::fire, skipping RammingAttack::fire: a unit falling in rams nothing, so no damage comes back onto the well.
+            Weapon::fire($gamedata, $fireOrder);
+            return;
+        }
+        parent::fire($gamedata, $fireOrder);
+    }
+
+    protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
+        if ($fireOrder->damageclass !== GravityWells::COLLISION_CLASS) {
+            parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+            return;
+        }
+        if ($target->isDestroyed()) return; //something earlier this phase got there first
+        GravityWells::destroyOutright($target, $this, $fireOrder, $gamedata);
+    }
+
+    public function getDamage($fireOrder){
+        if ($fireOrder->damageclass === GravityWells::COLLISION_CLASS) return 0; //beforeDamage destroys outright instead
+        return parent::getDamage($fireOrder);
     }
 }
 

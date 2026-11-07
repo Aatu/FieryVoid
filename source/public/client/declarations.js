@@ -333,6 +333,7 @@ window.declarations = {
 		  if (order.turn != gamedata.turn) continue;
 		  if (order.type === 'meteorDefence') continue; //a Meteor Defence declaration aims at nothing - it would list as fire at itself
 		  if (order.damageclass === 'EMStorm') continue; //an EM storm's log line written as Deployment closed (EM_STORM_PLAN.md) - not fire either
+		  if (order.damageclass === 'GravityWellPull') continue; //a Gravity Well's pull line, written as Movement closed (GRAVITY_WELL_PLAN.md) - nor this
 		  if (order.type.indexOf('ntercept') == -1){ //this is actual offensive fire! skip 'intercept' and 'selfIntercept' orders
 		    var dispFireEntry = new dispFireNew();
 		    dispFireEntry.wpnName = weapon.displayName + ' ('+ weapon.firingModes[order.firingMode] +')';

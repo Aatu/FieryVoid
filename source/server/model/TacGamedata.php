@@ -1793,7 +1793,11 @@ class TacGamedata {
                 if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3 && !$weapon->preFires
                     && $fire->damageclass !== 'jumpexit' && $fire->damageclass !== JumpEngine::ABDUCTION_CLASS
                     && !$isMeteorDefence){
-                    if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'){ //RammingAttack isn't PreFire, but we want THESE fireorders to be passed to Front End for Replay.
+                    /* GRAVITY_WELL_PLAN.md - and a Gravity Well's pull line and its collision, on a RammingAttack too: without
+                       them this turn's replay, watched in the Firing phase, has no order to pair the 'gravity' rows with, so the
+                       pulled unit is never drawn moving. A re-posted copy is harmless: submitFireorders writes 'prefiring' only in phase 5. */
+                    if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'
+                        && $fire->damageclass !== 'GravityWellPull' && $fire->damageclass !== 'GravityWellCollision'){ //RammingAttack isn't PreFire, but we want THESE fireorders to be passed to Front End for Replay.
                         unset($system->fireOrders[$i]);
                     }    
                 }

@@ -3030,7 +3030,8 @@ shipManager.movement = {
        vector - a rigid translation, which is what a drag actually is. Note the translation is
        essential and not just tidiness: pairing a pre-drag origin with a post-drag destination is
        wrong by the drag angle, a whole hex facing. Done in cube space so row parity is handled.
-       Undragged units take the original path below, unchanged. */
+       Undragged units take the original path below, unchanged.
+       A Gravity Well's pull ('gravity' rows, GRAVITY_WELL_PLAN.md) is a drag in exactly this sense. */
     getPreviousLocation: function getPreviousLocation(ship) {
         var oPos = shipManager.getShipPosition(ship);
         var i, move, pos;
@@ -3038,7 +3039,7 @@ shipManager.movement = {
         //Where the unit's own movement left it, ignoring any forced Pre-Firing shift.
         var movedPos = null;
         for (i = ship.movement.length - 1; i >= 0; i--) {
-            if (ship.movement[i].type === "prefire") continue;
+            if (ship.movement[i].type === "prefire" || ship.movement[i].type === "gravity") continue;
             movedPos = new hexagon.Offset(ship.movement[i].position);
             break;
         }
@@ -3055,7 +3056,7 @@ shipManager.movement = {
         var isTerrain = gamedata.isTerrain(ship.shipSizeClass, ship.userid);
         for (i = ship.movement.length - 1; i >= 0; i--) {
             move = ship.movement[i];
-            if (move.type === "prefire") continue;
+            if (move.type === "prefire" || move.type === "gravity") continue;
             //'start' is the off-board pre-deployment marker (x=+-30), not a position the unit was
             //ever really at - the same row getLastTurnMovement skips, and real only for Terrain.
             //It matters only here on the dragged path: the walk-back is anchored to the PRE-drag

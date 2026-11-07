@@ -5976,7 +5976,10 @@ window.weaponManager = {
             "HangarEscape",
             //EMStorm (EM_STORM_PLAN.md): what an EM storm did to a unit for the coming turn - its sentence alone, under an
             //"EM STORM:" header (combatLog.logFireOrders), 0 shots on the unit's own Ramming Attack, as the speech.
-            "EMStorm"
+            "EMStorm",
+            //GRAVITY_WELL_PLAN.md: a Gravity Well pulling one unit (0 shots) and destroying one that fell in - each its
+            //sentence alone, naming the unit, under a "GRAVITY WELL:" header (combatLog.logFireOrders).
+            "GravityWellPull", "GravityWellCollision"
         ];
 
         //A crash into Huge terrain (multi-hex asteroid, moon) reads like the small-asteroid

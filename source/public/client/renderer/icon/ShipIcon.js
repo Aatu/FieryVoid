@@ -679,8 +679,9 @@ window.ShipIcon = function () {
         })
             // During replay, exclude preFire moves from the main movement path – they will
             // be animated separately in ReplayAnimationStrategy, after the relevant weapon hits.
+            // A Gravity Well's pull ('gravity', GRAVITY_WELL_PLAN.md) is animated the same way, after its log line.
             .filter(function (movement) {
-                return !(gamedata.replay && movement.type === 'prefire' && movement.turn === gamedata.turn);
+                return !(gamedata.replay && (movement.type === 'prefire' || movement.type === 'gravity') && movement.turn === gamedata.turn);
             })
             .filter(function (movement) {
                 return movement.commit;
@@ -706,7 +707,7 @@ window.ShipIcon = function () {
             });
 
         this.preFireMovements = []; //reset
-        movements.filter(function (m) { return m.type === 'prefire'; })
+        movements.filter(function (m) { return m.type === 'prefire' || m.type === 'gravity'; })
             .forEach(function (m) {
                 if (!this.preFireMovements.some(existing => existing.id === m.id)) {
                     if (m.turn == gamedata.turn) this.preFireMovements.push(m);

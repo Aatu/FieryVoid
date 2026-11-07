@@ -1511,6 +1511,13 @@ var SingularityRammingAttack = function SingularityRammingAttack(json, ship) {
 SingularityRammingAttack.prototype = Object.create(RammingAttack.prototype);
 SingularityRammingAttack.prototype.constructor = SingularityRammingAttack;
 
+//GRAVITY_WELL_PLAN.md - a Gravity Well's one weapon; the server does everything it does.
+var GravityWellRammingAttack = function GravityWellRammingAttack(json, ship) {
+    RammingAttack.call(this, json, ship);
+};
+GravityWellRammingAttack.prototype = Object.create(RammingAttack.prototype);
+GravityWellRammingAttack.prototype.constructor = GravityWellRammingAttack;
+
 var SingularityCore = function SingularityCore(json, ship) {
     ShipSystem.call(this, json, ship);
 };

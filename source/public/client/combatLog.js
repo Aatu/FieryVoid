@@ -63,7 +63,8 @@ window.combatLog = {
         'WarLeader': true,
         'AnalystScan': true,
         'LuckyCaptain': true,
-        'EMStorm': true //EM_STORM_PLAN.md: one complete sentence per unit, 0 shots
+        'EMStorm': true, //EM_STORM_PLAN.md: one complete sentence per unit, 0 shots
+        'GravityWellPull': true //GRAVITY_WELL_PLAN.md: one sentence per unit pulled, 0 shots
     },
 
     logKindKey: function logKindKey(fire, shooter) {
@@ -351,9 +352,11 @@ window.combatLog = {
         var isLucky = fire.damageclass === 'LuckyCaptain';
         //EM_STORM_PLAN.md: what an EM storm did to a unit, under "EM STORM:" - its sentence names the unit (EMStorm::logResult)
         var isStorm = fire.damageclass === 'EMStorm';
-        var isSpeech = fire.damageclass === 'PoliticalSpeech' || isWarLeader || isAnalyst || isLucky || isStorm;
+        //GRAVITY_WELL_PLAN.md: a Gravity Well's pull, or a unit falling in, under "GRAVITY WELL:" - its sentence names the unit
+        var isGravity = fire.damageclass === 'GravityWellPull' || fire.damageclass === 'GravityWellCollision';
+        var isSpeech = fire.damageclass === 'PoliticalSpeech' || isWarLeader || isAnalyst || isLucky || isStorm || isGravity;
         var headerLabel = hyperspaceKind ? 'HYPERSPACE: ' : (isWarLeader ? 'WAR LEADER!: ' : (isAnalyst ? 'CARGO SCAN: '
-            : (isLucky ? 'LUCKY CAPTAIN: ' : (isStorm ? 'EM STORM: ' : (isSpeech ? 'SPEECH!: ' : 'FIRE: ')))));
+            : (isLucky ? 'LUCKY CAPTAIN: ' : (isStorm ? 'EM STORM: ' : (isGravity ? 'GRAVITY WELL: ' : (isSpeech ? 'SPEECH!: ' : 'FIRE: '))))));
         var headerClass = hyperspaceKind ? 'logheader hyperspace ' + hyperspaceKind : 'logheader fire';
         //The hyperspace colours live in logPanel.css, keyed off the class - an inline literal here
         //would be a fourth copy of two values the stylesheets already own.

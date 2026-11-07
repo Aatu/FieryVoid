@@ -54,6 +54,10 @@ class GameRules implements JsonSerializable{
         if ($emStormRules !== null) {
             array_push($this->rules, $emStormRules);
         }
+        $gravityWellRules = $this->getGravityWellRules($rules);
+        if ($gravityWellRules !== null) {
+            array_push($this->rules, $gravityWellRules);
+        }
         $terrainLayoutRules = $this->getTerrainLayoutRules($rules);
         if ($terrainLayoutRules !== null) {
             array_push($this->rules, $terrainLayoutRules);
@@ -114,6 +118,13 @@ class GameRules implements JsonSerializable{
             return new EMStormRule();
         }
         return null;
+    }
+
+    //One Gravity Well (GravityWellRule, GRAVITY_WELL_PLAN.md): absent unless its strength is 1..3.
+    private function getGravityWellRules($rules) {
+        if (!isset($rules['gravityWell'])) return null;
+        $rule = new GravityWellRule($rules['gravityWell']);
+        return $rule->isEmpty() ? null : $rule;
     }
 
     /* REINFORCEMENTS_PLAN.md §2.1 - the Create Game rule, PLUS every Fleet Builder lobby
