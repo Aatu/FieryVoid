@@ -457,8 +457,8 @@ window.BallisticIconContainer = function () {
 	const DUST_GRID_HEXES = 199;             //webglHexGridRenderer's HEX_COUNT_WIDTH / HEIGHT: the whole board
 	//tile: hexes one texture tile spans. Incommensurate scales and angles, so the two repeats never coincide.
 	const DUST_LAYERS = [
-		{ tile: 12, rotation: 0, opacity: 0.25 },
-		{ tile: 19.3, rotation: 1.1, opacity: 0.2 }
+		{ tile: 12, rotation: 0, opacity: 0.45 },
+		{ tile: 19.3, rotation: 1.1, opacity: 0.3 }
 	];
 
 	let dustCanvas = null;
@@ -615,8 +615,8 @@ window.BallisticIconContainer = function () {
 	const NEBULA_Z = -650;
 	const NEBULA_TEXTURE_SIZE = 1024;
 	const NEBULA_LAYERS = [
-		{ tile: 26, rotation: 0.35, opacity: 0.7 },
-		{ tile: 41.3, rotation: 2.2, opacity: 0.5 }
+		{ tile: 26, rotation: 0.35, opacity: 0.6 },
+		{ tile: 41.3, rotation: 2.2, opacity: 0.45 }
 	];
 	const NEBULA_HUES = [[150, 90, 220], [205, 95, 200], [70, 175, 200], [95, 105, 235]]; //violet, magenta, teal, blue
 
