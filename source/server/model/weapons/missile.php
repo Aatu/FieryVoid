@@ -90,6 +90,14 @@ class MissileLauncher extends Weapon{
             },
             $this->missileArray
         );
+        /* OFFICERS_PLAN.md Stage 35 (user's notes and ruling, 2026-10-29): a fighter's MISSILE rack tells no one else how many it holds until
+           his team detects the flight's missiles (FighterFlight::missileKnowledge) - its one type is its build, so a count is all it has to say. */
+        if (FighterFlight::isMissileRack($this)){
+            $unit = $this->getUnit();
+            if ($unit instanceof FighterFlight && $unit->missileKnowledge() === null){
+                foreach ($strippedSystem->missileArray as $missile) $missile->amount = '?';
+            }
+        }
         return $strippedSystem;
     }
     

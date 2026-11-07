@@ -246,7 +246,8 @@ class SystemPowerSettings extends Component {
     canOffline() {
         const { ship, system } = this.props;
         //powerLocked: system may not be voluntarily powered down right now (Antigravity Beam while its Kirishiac Orbital is deployed)
-        return gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !system.powerLocked && !shipManager.power.isOffline(ship, system) && !weaponManager.hasFiringOrder(ship, system);
+        //OFFICERS_PLAN.md Stage 36: and a flight's weapon an Expert Electrician may shunt (officers.mayShunt)
+        return gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0 || (window.officers && officers.mayShunt(ship, system))) && !system.powerLocked && !shipManager.power.isOffline(ship, system) && !weaponManager.hasFiringOrder(ship, system);
     }
 
     canOnline() {

@@ -70,6 +70,23 @@ window.ShipTooltipInitialOrdersMenu = function () {
         /* FIGHTER MISSIONS (FIGHTER_MISSIONS_PLAN.md §3.10) - an Initial Orders choice, like the Triad's, so not in
            ewButtons either. The predicate fails closed on a null selection. */
         { className: "fighterMission", condition: [isSelf, canChooseFighterMission], action: openFighterMissionPicker, info: fighterMissionInfo },
+        /* OFFICERS_PLAN.md Stage 35 - an Expert Analyst's scan: on a unit of another team his selected ship holds OEW on, within 30 hexes, a
+           dropdown of his scans (AnalystPicker). An Initial Orders choice, so not in ewButtons. Fails closed on a null selection. */
+        { className: "analystScan", condition: [notSelf, canAnalyse], action: openAnalystPicker, info: analystInfo },
+        /* OFFICERS_PLAN.md Stage 36 - an Expert Electrician's split of the power his flight's switched-off weapons give this turn: on his own flight, a
+           yellow menu of - / + for its offensive bonus and its thrust (ElectricianPicker). An Initial Orders choice, so not in ewButtons. Fails closed
+           on a null selection. */
+        { className: "electricianShunt", condition: [isSelf, canElectrify], action: openElectricianPicker, info: electricianInfo },
+        /* OFFICERS_PLAN.md Stage 37 - a Lucky Captain's Initial Orders feat (EW Last, Disengage, Best Initiative): on his own ship, his menu
+           (LuckyPicker; the Firing-phase menu offers the same button for his Firing-phase feats). A pair, as the War Leader's below: grey while no
+           feat is picked, his green with a glow once one is. Not in ewButtons. Fails closed on a null selection. */
+        { className: "luckyCaptain", condition: [isSelf, canLucky, noLuckyPick], action: openLuckyPicker, info: luckyInfo },
+        { className: "luckyCaptainOn", condition: [isSelf, canLucky, hasLuckyPick], action: openLuckyPicker, info: luckyInfo },
+        /* OFFICERS_PLAN.md Stage 34 - an Expert War Leader's Taunt or Anticipate (user request 2026-11-01 - it was his C&C's React menu): on his own
+           ship, his menu (WarLeaderPicker). Two entries for one button, as the Triad's pairs above: grey while no order is given, his yellow with a
+           glow once one is, its line naming it. Not in ewButtons. Fails closed on a null selection. */
+        { className: "warLeaderOrder", condition: [isSelf, canWarLeaderOrder, noWarLeaderOrder], action: openWarLeaderPicker, info: warLeaderInfo },
+        { className: "warLeaderOrderOn", condition: [isSelf, canWarLeaderOrder, hasWarLeaderOrder], action: openWarLeaderPicker, info: warLeaderInfo },
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" },
         { className: "targetWeaponsHex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
         { className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
@@ -407,6 +424,94 @@ window.ShipTooltipInitialOrdersMenu = function () {
         var anchor = (event && event.currentTarget) ? event.currentTarget : null;
         if (!window.FighterMissionPicker) return;
         FighterMissionPicker.open(this.selectedShip, anchor, function () {
+            redrawAfterTriadChoice.call(menu);
+        });
+    }
+
+    function canAnalyse() {
+        return !!this.selectedShip && !!window.officers && officers.canAnalyse(this.selectedShip, this.targetedShip);
+    }
+
+    function analystInfo() {
+        return officers.analystButtonInfo(this.selectedShip, this.targetedShip);
+    }
+
+    //Anchored to the clicked button, as the fighter mission picker; the tooltip redraws after a choice so its line shows the scan waiting
+    function openAnalystPicker(isMaxClick, event) {
+        var menu = this;
+        var anchor = (event && event.currentTarget) ? event.currentTarget : null;
+        if (!window.AnalystPicker) return;
+        AnalystPicker.open(this.selectedShip, this.targetedShip, anchor, function () {
+            redrawAfterTriadChoice.call(menu);
+        });
+    }
+
+    function canElectrify() {
+        return !!this.selectedShip && !!window.officers && officers.canElectrify(this.selectedShip);
+    }
+
+    function electricianInfo() {
+        return officers.electricianButtonInfo(this.selectedShip);
+    }
+
+    //Anchored to the clicked button, as the Analyst's; the tooltip redraws once it closes after a change, so its line shows the split
+    function openElectricianPicker(isMaxClick, event) {
+        var menu = this;
+        var anchor = (event && event.currentTarget) ? event.currentTarget : null;
+        if (!window.ElectricianPicker) return;
+        ElectricianPicker.open(this.selectedShip, anchor, function () {
+            redrawAfterTriadChoice.call(menu);
+        });
+    }
+
+    function canLucky() {
+        return !!this.selectedShip && !!window.officers && officers.canLucky(this.selectedShip);
+    }
+
+    function hasLuckyPick() {
+        return !!officers.luckyPick(this.selectedShip);
+    }
+
+    function noLuckyPick() {
+        return !officers.luckyPick(this.selectedShip);
+    }
+
+    function luckyInfo() {
+        return officers.luckyButtonInfo(this.selectedShip);
+    }
+
+    //Anchored to the clicked button, as the Analyst's; the tooltip redraws after a pick, so the button lights up (or greys) and its line shows it
+    function openLuckyPicker(isMaxClick, event) {
+        var menu = this;
+        var anchor = (event && event.currentTarget) ? event.currentTarget : null;
+        if (!window.LuckyPicker) return;
+        LuckyPicker.open(this.selectedShip, anchor, function () {
+            redrawAfterTriadChoice.call(menu);
+        });
+    }
+
+    function canWarLeaderOrder() {
+        return !!this.selectedShip && !!window.officers && officers.canWarLeaderOrder(this.selectedShip);
+    }
+
+    function hasWarLeaderOrder() {
+        return !!officers.warLeaderOrder(this.selectedShip);
+    }
+
+    function noWarLeaderOrder() {
+        return !officers.warLeaderOrder(this.selectedShip);
+    }
+
+    function warLeaderInfo() {
+        return officers.warLeaderButtonInfo(this.selectedShip);
+    }
+
+    //Anchored to the clicked button, as the Lucky Captain's; the tooltip redraws after a pick, so the button lights up (or greys) and its line names it
+    function openWarLeaderPicker(isMaxClick, event) {
+        var menu = this;
+        var anchor = (event && event.currentTarget) ? event.currentTarget : null;
+        if (!window.WarLeaderPicker) return;
+        WarLeaderPicker.open(this.selectedShip, anchor, function () {
             redrawAfterTriadChoice.call(menu);
         });
     }

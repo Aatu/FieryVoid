@@ -79,8 +79,19 @@ window.FirePhaseStrategy = function () {
     };
     */
 
+    /* An Expert War Leader's icon waiting for its unit (OFFICERS_PLAN.md Stage 34): the unit clicked - an enemy, which arrives through targetShip,
+       or one of his own fleet, through selectShip - is his wrath or his center of glory, when he may name it (officers.pickWarLeaderUnit). true
+       when it was taken; anything else leaves the icon waiting and the click does what it always does. */
+    FirePhaseStrategy.prototype.takeWarLeaderPick = function (ship) {
+        if (!window.officers || !this.selectedShip || !officers.warLeaderPickingFor(this.selectedShip)) return false;
+        if (!officers.pickWarLeaderUnit(this.selectedShip, ship)) return false;
+        this.onShipMovementChanged({ ship: this.selectedShip }); //redraws the movement UI - the icon in its new colour - and the crosshairs
+        return true;
+    };
+
     //New version that allows targeting of allies when Friendly Fire Active - DK
     FirePhaseStrategy.prototype.selectShip = function (ship, payload) {
+        if (this.takeWarLeaderPick(ship)) return; //Stage 34
 
         if (this.lastClickedShipId === ship.id && gamedata.isMyShip(ship) && this.selectedShip !== ship) {
             this.setSelectedShip(ship);
@@ -188,6 +199,7 @@ window.FirePhaseStrategy = function () {
     };
 
     FirePhaseStrategy.prototype.targetShip = function (ship, payload) {
+        if (this.takeWarLeaderPick(ship)) return; //Stage 34: an Expert War Leader's wrath
         /* Same shape as InitialPhaseStrategy.targetShip, and for the same two reasons (user report
            2026-08-29): getTurnDeployed throws outright on null, and a selection that is not on the
            board yet must cost the menu its SOURCE, not cost the player the menu - the undefined
@@ -223,7 +235,8 @@ window.FirePhaseStrategy = function () {
         //...and an Expert Evader's Evade, to give or to cancel (OFFICERS_PLAN.md), and a ship's Expert Anticipator turn (Stage 23)
         if (shipManager.movement.canPivot(ship) || (shipManager.movement.countCombatPivot(ship) > 0)
             || shipManager.movement.canEvade(ship) || shipManager.movement.hasEvaded(ship)
-            || shipManager.movement.canAnticipate(ship) || shipManager.movement.hasAnticipated(ship)) {
+            || shipManager.movement.canAnticipate(ship) || shipManager.movement.hasAnticipated(ship)
+            || (window.officers && officers.warLeaderState(ship))) { //...and an Expert War Leader's icon (Stage 34)
             this.drawMovementUI(this.selectedShip);
         }
     };

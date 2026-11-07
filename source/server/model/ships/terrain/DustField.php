@@ -37,6 +37,8 @@ class DustField extends Terrain {
         $this->addPrimarySystem(new Structure(8, 300));
         $this->hitChart = array(
             0 => array(20 => "Structure"),
+            1 => array(20 => "0:Structure"),
+            2 => array(20 => "0:Structure"),                        
         );
     }
 

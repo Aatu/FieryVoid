@@ -2512,6 +2512,25 @@ class RammingAttack extends Weapon{
 	public function setAlreadyRammed($targetID){
 		$this->alreadyRammed[] = $targetID;
 	}
+
+	/* RAMMING PROW - the craft this ram struck, for the return damage: a prowed craft returns its own factor (getReturnDamage).
+	   Reset at each fire(), set as the damage lands (FighterFlight::getHitSystem picks it - a prowed one for a ram through the
+	   flight's front). */
+	private $struckCraft = null;
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		if ($system instanceof Fighter) $this->struckCraft = $system;
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+	}
+
+	//the struck craft's own Ramming Attack, when that craft has a Ramming Prow; null otherwise
+	private function getStruckProwRam(){
+		if ($this->struckCraft === null || !$this->struckCraft->hasRamProw()) return null;
+		foreach ($this->struckCraft->systems as $system){
+			if ($system instanceof RammingAttack) return $system;
+		}
+		return null;
+	}
 	
 	public function setSystemDataWindow($turn){
 		$this->setMinDamage(); //just in case it's not set correctly in the beginning!
@@ -2530,7 +2549,27 @@ class RammingAttack extends Weapon{
 		  $this->data["Special"] .= "<br>Ramming attacks will be done in ship firing phase (even attacks by fighters) and cannot be intercepted.";
 		  $this->data["Special"] .= "<br>Ships (not fighters) on the same hex as Enormous unit will automatically declare ramming attack against it!";
 		  $this->data["Special"] .= "<br>Immobile objects do have ramming attack for technical purposes, but won't use it offensively.";
+		  if ($this->hasRamProwCraft()) {
+			  $this->data["Special"] .= "<br>Ramming Prow: ramming factor " . $this->getRammingFactor() . " when this craft rams or is rammed through its front, "
+				  . $this->getRammingFactor(false) . " otherwise.";
+		  }
 	}	
+
+	private function hasRamProwCraft(){
+		$craft = $this->getParentFighter();
+		return $craft !== null && $craft->hasRamProw();
+	}
+
+	//a prowed craft's ram: its damage and Special line differ from the static blueprint's
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		if ($this->hasRamProwCraft()) {
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->data = $this->data;
+		}
+		return $strippedSystem;
+	}
 	
 
 	//Here we will check for collisions with Terrain in PRE-FIRING phase
@@ -3145,6 +3184,7 @@ $newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
 		}
 
 		if($fireOrder->damageclass == 'WaveformCollision' && $this->getDamage($fireOrder) <= 0) return; // GTS
+		$this->struckCraft = null;
 		parent::fire($gamedata, $fireOrder);
 
 		if($fireOrder->shotshit > 0){
@@ -3223,7 +3263,16 @@ if($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass ==
 	}
 	
 	
-	public function getRammingFactor(){
+	//$headOn: a craft with a Ramming Prow gets its +50% when it rams (the default - this ram is the one ramming) or is rammed head-on
+	public function getRammingFactor($headOn = true){
+		$dmg = $this->getBaseRammingFactor();
+		$craft = $this->getParentFighter();
+		if ($craft !== null && $craft->hasRamProw()) $dmg = Fighter::ramProwFactor($dmg, $headOn);
+		return $dmg;
+	}
+
+	//without any Ramming Prow
+	public function getBaseRammingFactor(){
 		$dmg = 0;
 		if ($this->designDamage > 0){
 			$dmg = 	$this->designDamage;
@@ -3504,8 +3553,12 @@ if($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass ==
 		
 		$rfactor = 0;
 		$rammingSystem = $target->getSystemByName("RammingAttack");
-		if($rammingSystem){
-			$rfactor =  $rammingSystem->getRammingFactor();
+		$prowRam = $this->getStruckProwRam();
+		if($prowRam){ //the craft struck has a Ramming Prow: its own factor, +50% if it was rammed through its front
+			$rfactor = $prowRam->getRammingFactor(Fighter::isRammedHeadOn($target, $shooter));
+			if($rammingSystem) $rammingSystem->setAlreadyRammed($fireOrder->shooterid); //prevent repeating, as below
+		}else if($rammingSystem){
+			$rfactor =  $rammingSystem->getBaseRammingFactor(); //the first craft's - never its Ramming Prow, which the craft struck has not got
 			$rammingSystem->setAlreadyRammed($fireOrder->shooterid); //prevent repeating
 		}else{ //no ramming system present... 
 			$rfactor =  $target->getRammingFactor();

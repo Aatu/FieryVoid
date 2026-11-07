@@ -173,6 +173,9 @@ window.confirm = {
         var totalCostSpan = $(".confirm .totalUnitCostAmount").first();
         var flightSize = parseInt($(".fighterAmount").html()) || 1;
         confirm.clampEnhRowsToSize(); //a smaller flight keeps no more Expert Pilots than craft
+        confirm.applyRamProwOrdnance(); //a flight with a Ramming Prow carries no ballistic ordnance - before the sums, so it is refunded
+        confirm.clampGrantedRows(); //OFFICERS_PLAN.md Stage 38: an officer another one grants goes when that one is unticked
+        confirm.refreshOfficerRows(); //...and an officer row nobody may take now is not shown
         //Per craft for a flight with a size selector; otherwise the whole unit's bare hull, which
         //confirm.setBuyBase parks on the dialog's own total. (This used to read an UNSCOPED
         //.totalUnitCostAmount and so, by document order, a hidden page template holding the base -
@@ -199,7 +202,7 @@ window.confirm = {
                 var cost = $amt.data("cost") || 0;
                 var launchers = $amt.data("launchers") || 0;
 
-                totalMissileCost += (amount * cost * flightSize * launchers);
+                totalMissileCost += (amount * cost * confirm.ordnanceSize(flightSize) * launchers); //never for a craft with a Ramming Prow
             }
         });
 
@@ -229,6 +232,8 @@ window.confirm = {
        worked out when the row was built). gamelobby.js's doBuyShip / doCopyShip / doEditShip read rows
        back through this too, so the dialog and the fleet can never charge differently. */
     enhRowCost: function enhRowCost(target, flightSize) {
+        if (confirm.isCraftCountedRow(target)) return target.data("enhCost") || 0; //bought craft by craft (the Ramming Prow)
+        if (window.lobbyEnhancements && lobbyEnhancements.isOrdnance(target.data("enhID"))) flightSize = confirm.ordnanceSize(flightSize); //never for a prowed craft
         if (!window.officers) return (target.data("enhCost") || 0) * flightSize;
         if (confirm.isFreeExpert(target)) return 0; //OFFICERS_PLAN.md Stage 25: the expert an Expert Political Officer brings
         if (confirm.isFreeQuartermasterRow(target)) return 0; //Stage 30: an Expert Quartermaster's free Improved Reactor or Jump Accelerator
@@ -236,6 +241,18 @@ window.confirm = {
             flightSize, target.data("perCraftExtra"), target.data("standardFlight"))
             - confirm.ballisticSaved(target) //OFFICERS_PLAN.md Stage 29: the rounds an Expert Ballistic Officer makes free
             - confirm.quartermasterSaved(target); //Stage 30: and those an Expert Quartermaster makes free, past his
+    },
+
+    //a row a flight buys craft by craft (lobbyEnhancements.isCraftCounted - the Ramming Prow)
+    isCraftCountedRow: function isCraftCountedRow(target) {
+        return Boolean(window.lobbyEnhancements) && lobbyEnhancements.isCraftCounted(target.data("enhID"));
+    },
+
+    //the team of the slot the dialog's unit is (or is being) bought for, or null
+    dialogTeam: function dialogTeam(ship) {
+        if (!window.playerManager) return null;
+        var slot = playerManager.getSlotById((ship && ship.slot) || gamedata.selectedSlot);
+        return slot ? slot.team : null;
     },
 
     //the enhancement spinners of the dialog holding `target`, as officers.freeExpertId and officers.ballisticFreeRounds read rows
@@ -292,10 +309,11 @@ window.confirm = {
     },
 
     /* OFFICERS_PLAN.md Stage 29: an ordnance row's "up to N, Xpts each" follows its limit (enhRowMax) - an Expert Ballistic Officer ticked in
-       this dialog enlarges it (a Solyrn's Heavy: up to 290), unticking him puts the hull's own back. Repainted with every total (getTotalCost). */
+       this dialog enlarges it (a Solyrn's Heavy: up to 290), unticking him puts the hull's own back. Repainted with every total (getTotalCost).
+       So does a row bought craft by craft (the Ramming Prow): "up to 6 levels" for a flight of 6, whatever the blueprint's limit. */
     paintOrdnanceNote: function paintOrdnanceNote(target) {
         var args = target.data("noteArgs");
-        if (!args || !/^(AMMO_|MINE_)/.test(String(target.data("enhID")))) return;
+        if (!args || (!/^(AMMO_|MINE_)/.test(String(target.data("enhID"))) && !confirm.isCraftCountedRow(target))) return;
         var row = target.closest(".buyRow");
         if (!row || !row.length) return;
         $(".buyRowNote", row).html(confirm.enhancementPriceNote(confirm.enhRowMax(target), args[0], args[1], args[2], args[3]));
@@ -317,6 +335,8 @@ window.confirm = {
             && confirm.dialogRows(target).some(function (row) { return row.id === 'OFF_BALL' && row.count > 0; })) {
             max = officers.ballisticRowLimit(confirm.dialogBlueprint(), target.data("enhID"), max);
         }
+        //bought craft by craft (the Ramming Prow): never more than the flight's craft
+        if (confirm.isCraftCountedRow(target)) return Math.min(max, parseInt($(".fighterAmount").html(), 10) || 1);
         var officer = window.officers ? officers.get(target.data("enhID")) : null;
         if (!officer || !officer.multi) return max;
         if (taken === undefined) taken = confirm.mixedTaken(target);
@@ -335,6 +355,106 @@ window.confirm = {
         return taken;
     },
 
+    /* OFFICERS_PLAN.md Stage 38: an officer another one GRANTS this unit (`grants` - the Torvalus' Expert Gambler brings one of four experts,
+       free, and only he does) is untaken once his grantor's row is. Run with every total, as the flight-size clamp below is. */
+    clampGrantedRows: function clampGrantedRows() {
+        if (!window.officers) return;
+        var ship = null;
+        $(".confirm .selectAmount").each(function () { if (!ship) ship = $(this).data("dialogRules") || null; });
+        if (!ship || !ship.officerGrants) return;
+        var rows = confirm.dialogRows($(".confirm"));
+        $(".confirm .selectAmount").each(function () {
+            var target = $(this);
+            var grant = officers.grantOf(ship, target.data("enhID"));
+            if (!grant || !((target.data("count") || 0) > 0)) return;
+            if (rows.some(function (row) { return row.id === grant.grantor && row.count > 0; })) return;
+            target.data("count", 0);
+            target.data("value", 0);
+            target.data("enhCost", 0);
+            confirm.enhShowLevel(target, 0);
+        });
+    },
+
+    /* OFFICERS_PLAN.md Stage 38 (user request 2026-10-31: options that aren't available "simply didn't appear" - players don't read the
+       notes): an untaken officer row the rest of the fleet has no room for, or the rows ticked beside it rule out - a `notWith` officer
+       ticked, a granted expert before his grantor or past what he frees - is hidden (officers.offerUnavailable). A taken row always
+       shows, so it can be untaken. Hidden by class, as the filter's rows are, so every spinner stays in the dialog. Run once the rows are
+       built (before openBuySections counts them) and with every total. */
+    refreshOfficerRows: function refreshOfficerRows(e) {
+        if (!window.officers) return;
+        var ruled = [];
+        (e ? $(".selectAmount", e) : $(".confirm .selectAmount")).each(function () { if ($(this).data("dialogRules")) ruled.push($(this)); });
+        if (!ruled.length) return; //nothing here answers to a fleet rule or a grant
+        var rows = confirm.dialogRows(e || $(".confirm"));
+        ruled.forEach(function (target) {
+            var hide = !((target.data("count") || 0) > 0) && officers.offerUnavailable(target.data("dialogRules"), target.data("enhID"), rows);
+            target.closest(".buyRow").toggleClass("is-unavailable", Boolean(hide));
+        });
+    },
+
+    //the open dialog's Ramming Prow row (empty for a unit that is offered none), and the prows bought on it
+    dialogProwRow: function dialogProwRow() {
+        return $(".confirm .selectAmount").filter(function () { return $(this).data("enhID") === 'RAM_PROW'; });
+    },
+    dialogProws: function dialogProws() {
+        var prow = confirm.dialogProwRow();
+        return prow.length ? (parseInt(prow.data("count"), 10) || 0) : 0;
+    },
+
+    //how many of `size` craft take the flight's ballistic ordnance - all but those with a Ramming Prow (lobbyEnhancements.ordnanceCraft)
+    ordnanceSize: function ordnanceSize(size) {
+        var prows = confirm.dialogProws();
+        if (!prows || !window.lobbyEnhancements) return size;
+        return lobbyEnhancements.ordnanceCraft(size, prows);
+    },
+
+    /* Ramming Prows bought in this dialog (user, 2026-11-01): a prowed craft's ballistic weapons cannot be used, so the flight's
+       ammunition rows and missile rows buy for the craft WITHOUT one - each row's count is per craft, priced x ordnanceSize, and the
+       server loads only those craft (Enhancements::ordnanceCraft, BuyingGamePhase for racks). A line says how many. With a prow on
+       every craft the rows are emptied, which refunds them (every total is summed from the rows, and gamelobby.js reads them back),
+       and hidden; fewer prows or a bigger flight give them back, empty. Run with every total, before the sums. The gun rounds
+       (EXT_AMMO) are direct fire and stay. */
+    RAM_PROW_ORDNANCE_NOTE: 'Every craft has a Ramming Prow: this flight carries no missiles or other ballistic ordnance.',
+    ramProwOrdnanceNote: function ramProwOrdnanceNote(carriers) {
+        return 'Ramming Prows fitted: missiles and ordnance are bought for the ' + carriers + ' craft without one.';
+    },
+    applyRamProwOrdnance: function applyRamProwOrdnance() {
+        if (!confirm.dialogProwRow().length) return; //a unit offered no prow
+        var dialog = $(".confirm.buyDialog");
+        var prows = confirm.dialogProws();
+        var carriers = confirm.ordnanceSize(parseInt($(".fighterAmount", dialog).html(), 10) || 1);
+        var fitted = prows > 0 && carriers === 0; //nothing left to carry ordnance
+        var rows = $(".selectAmount", dialog).filter(function () {
+            return /^(AMMO_|MINE_)/.test(String($(this).data("enhID"))) || $(this).closest(".buyMissileRow").length > 0;
+        });
+        if (!rows.length) return;
+        rows.each(function () {
+            var amount = $(this);
+            var row = amount.closest(".buyRow");
+            if (fitted) {
+                if (typeof amount.data("enhPrice") !== 'undefined') { //an ammunition enhancement row
+                    if ((amount.data("count") || 0) > 0) {
+                        amount.data("count", 0);
+                        amount.data("value", 0);
+                        amount.data("enhCost", 0);
+                        confirm.enhShowLevel(amount, 0);
+                    }
+                } else if ((amount.data("value") || 0) > 0) { //a missile row (addBuyMissileRows)
+                    amount.data("value", 0);
+                    amount.text(0);
+                }
+                if (!row.hasClass("is-unavailable")) row.addClass("is-unavailable").data("prowHidden", true);
+            } else if (row.data("prowHidden")) {
+                row.removeClass("is-unavailable").removeData("prowHidden");
+            }
+        });
+        var body = confirm.buySectionBody(dialog, 'ammo');
+        $(".buyMissileNote", body).prop("hidden", fitted);
+        var note = $(".buyProwNote", body);
+        if (!note.length) note = $('<p class="buySectionNote buyProwNote"></p>').prependTo(body);
+        note.text(fitted ? confirm.RAM_PROW_ORDNANCE_NOTE : confirm.ramProwOrdnanceNote(carriers)).prop("hidden", !prows);
+    },
+
     clampEnhRowsToSize: function clampEnhRowsToSize() {
         var enhNo = 0;
         var target = $(".selectAmount.shpenh" + enhNo);
@@ -344,8 +464,8 @@ window.confirm = {
             var count = target.data("count") || 0;
             var max = confirm.enhRowMax(target, (officer && officer.mixesWith) ? mixed : 0);
             if (officer && officer.mixesWith) mixed += Math.min(count, max);
-            if (officer && officer.multi && count > max) {
-                //an officer row: no price step and never an option, so its cost is price x count
+            if (count > max && ((officer && officer.multi) || confirm.isCraftCountedRow(target))) {
+                //an officer row or a Ramming Prow: no price step and never an option, so its cost is price x count
                 target.data("count", max);
                 target.data("value", max);
                 target.data("enhCost", target.data("enhPrice") * max);
@@ -1141,7 +1261,31 @@ window.confirm = {
         $(".confirmcancel", e).on("click", cancel);
         $(".buyDialogClose", e).on("click", cancel);
         e.on("keydown", function (ev) {
-            if (ev.key === "Escape") cancel();
+            if (ev.key !== "Escape") return;
+            //an open "?" window closes first - the dialog only from the next Escape
+            var help = $('.buyHelp[aria-expanded="true"]', e)[0];
+            if (help) {
+                confirm.closeBuyHelp(e);
+                help.focus();
+            } else {
+                cancel();
+            }
+        });
+
+        //The "?" after a row's name (addBuyHelp): one help window open at a time; a click anywhere
+        //else in the dialog closes it, as on the Create Game page's Scenario cards.
+        e.on("click", ".buyHelp", function () {
+            var wasOpen = this.getAttribute("aria-expanded") === "true";
+            confirm.closeBuyHelp(e);
+            if (!wasOpen) confirm.openBuyHelp(this);
+        });
+        e.on("click", function (ev) {
+            if (!$(ev.target).closest(".buyHelp, .buyHelpBubble").length) confirm.closeBuyHelp(e);
+        });
+        //Namespaced and replaced on every open, so dialogs opened one after another bind it once.
+        $(window).off("resize.buyHelp").on("resize.buyHelp", function () {
+            var help = $('.confirm.buyDialog .buyHelp[aria-expanded="true"]')[0];
+            if (help) confirm.positionBuyHelp(help);
         });
 
         //Any number open at once - this is not a tab switch, just a way to fold away what is not
@@ -1180,6 +1324,71 @@ window.confirm = {
             + '<button type="button" class="plusButton" aria-label="Increase">+</button>'
             + '</span>'
             + '</div>');
+    },
+
+    /* A "?" straight after the row's name, opening a short line on what it does (buyHelp.textOf -
+       an officer's is his registry summary); no text, no "?". Added once the row's name is final:
+       applyEnhancementChoiceWidget rewrites it. The button's only text is the "?" glyph, which
+       buySearchText reads as a space, so the filter box still matches the name alone. The window
+       goes beside the sections, not in the row: a section clips whatever overflows it (confirm.css
+       .buySection), and a one-row section would hide it whole. Its data-section gives it the
+       section's colours there. `item` is in the dialog already. */
+    buyHelpCount: 0,
+
+    addBuyHelp: function addBuyHelp(item, enhID) {
+        var text = window.buyHelp ? buyHelp.textOf(enhID) : '';
+        if (!text) return;
+
+        var id = 'buyHelp' + (++confirm.buyHelpCount);
+        var name = $(".buyRowName", item);
+        $('<button type="button" class="buyHelp" aria-expanded="false"><span aria-hidden="true">?</span></button>')
+            .attr({ 'aria-controls': id, 'aria-label': 'About ' + name.text() })
+            .appendTo(name);
+        $('<div class="buyHelpBubble" hidden></div>')
+            .attr({ id: id, 'data-section': item.closest(".buySection").attr("data-section") })
+            .text(text)
+            .appendTo(item.closest(".buyDialogSections"));
+    },
+
+    openBuyHelp: function openBuyHelp(button) {
+        button.setAttribute("aria-expanded", "true");
+        document.getElementById(button.getAttribute("aria-controls")).hidden = false;
+        confirm.positionBuyHelp(button);
+    },
+
+    closeBuyHelp: function closeBuyHelp(e) {
+        $('.buyHelp[aria-expanded="true"]', e).each(function () {
+            this.setAttribute("aria-expanded", "false");
+            document.getElementById(this.getAttribute("aria-controls")).hidden = true;
+        });
+    },
+
+    /* Under the "?", arrow pointing at it, slid left as far as it must to stay within the row
+       (createGame.positionHelp's placing). It goes ABOVE instead when the scrolling body has more
+       room there - the last rows' windows would otherwise open below everything shown, and the
+       Officers section, whose lines are the longest, is the last one. Either way the body then
+       scrolls just enough to show it all, if it can. Offsets are from .buyDialogSections, the
+       window's parent, which scrolls with the rows. */
+    positionBuyHelp: function positionBuyHelp(button) {
+        var bubble = document.getElementById(button.getAttribute("aria-controls"));
+        var box = bubble.parentNode.getBoundingClientRect();
+        var row = button.closest(".buyRow").getBoundingClientRect();
+        var glyph = button.querySelector("[aria-hidden]").getBoundingClientRect();
+        var centre = glyph.left + glyph.width / 2 - box.left;
+        var minLeft = row.left - box.left;
+        var maxLeft = Math.max(minLeft, row.right - box.left - bubble.offsetWidth);
+        var left = Math.min(Math.max(minLeft, centre - 16), maxLeft);
+
+        var body = button.closest(".buyDialogBody").getBoundingClientRect();
+        var roomBelow = body.bottom - glyph.bottom - 9;
+        var roomAbove = glyph.top - body.top - 9;
+        var above = bubble.offsetHeight > roomBelow && roomAbove > roomBelow;
+
+        bubble.classList.toggle("is-above", above);
+        bubble.style.left = left + "px";
+        bubble.style.top = (above ? glyph.top - box.top - 9 - bubble.offsetHeight : glyph.bottom - box.top + 9) + "px";
+        bubble.style.setProperty("--buy-help-arrow", (centre - left) + "px");
+        bubble.scrollIntoView({ block: "nearest" });
     },
 
     /* "G'Quan Heavy Cruiser #3": the class and the next number no unit on the page already carries
@@ -1295,6 +1504,8 @@ window.confirm = {
        typing handler - the edit one adjusts by the DELTA from that seeded count, the buy one
        recomputes from zero. */
     addBuyEnhancementRows: function addBuyEnhancementRows(e, ship, seed, onInput) {
+        //OFFICERS_PLAN.md Stage 33: a blueprint's Expert Evangelist priced off the fleet it is about to join (his static price is 0)
+        if (window.officers && typeof officers.priceBlueprint === 'function') officers.priceBlueprint(ship);
         //Listed alphabetically within each section (buyRowOrder); i is still the option's own index.
         var order = confirm.buyRowOrder(ship.enhancementOptions);
         for (var n = 0; n < order.length; n++) {
@@ -1310,6 +1521,11 @@ window.confirm = {
 
             //numberTaken is in LEVELS, which is what every spinner, limit and cost sum here works in.
             var enhCount = seed ? (parseInt(enhancement[2], 10) || 0) : 0;
+            /* OFFICERS_PLAN.md Stage 38: a COPY - a unit not yet in the fleet - brings no officer its fleet has no room for (perFleet / notWith):
+               the row starts at 0 (and is not shown). An EDITED unit is in the fleet: its officer stays as bought, shown, for the player to keep
+               or take off (a saved fleet past a limit - the Fleet Check says so). */
+            if (enhCount > 0 && window.officers && officers.isOfficerId(enhID) && officers.lobbyFleet().indexOf(ship) === -1
+                && officers.fleetBlock(ship, enhID)) enhCount = 0;
 
             //The arithmetic series doOnPlusEnhancement / handleInputChange* maintain: level i
             //(0-based) costs enhPrice + i*enhPriceStep. Seeded so their running delta starts right.
@@ -1341,6 +1557,8 @@ window.confirm = {
             //a ship officer already placed in a weapon (the Matter Weapons Expert, OFFICERS_PLAN.md Stage 8): why he
             //may not be bought here too, or null - read by officerBlocked, shown by addOfficerLimitNote
             selectAmountItem.data('officerBlock', (window.officers && !enhCount) ? officers.shipLevelBlock(ship, enhID) : null);
+            //OFFICERS_PLAN.md Stage 38: the unit whose fleet rules and grants the row answers to, while it has any (officerBlocked, clampGrantedRows)
+            selectAmountItem.data('dialogRules', (window.officers && officers.isOfficerId(enhID) && (ship.officerFleet || ship.officerGrants)) ? ship : null);
             //Marked before the box is first written: a stepped enhancement shows the quantity its
             //level buys (and cannot be typed into); step 1 - every one but Extra Tendrils - leaves
             //the row as it was.
@@ -1363,10 +1581,14 @@ window.confirm = {
             $(".minusButton", item).data("enhNo", i).on("click", confirm.doOnMinusEnhancement);
 
             item.appendTo(confirm.buySectionBody(e, section));
+            //the Ramming Prow, where ramming is not allowed: not shown - unless the unit already carries one, to be taken off
+            if (enhID === 'RAM_PROW' && !enhCount && window.lobbyEnhancements && !lobbyEnhancements.ramProwAllowed(confirm.dialogTeam(ship))) item.addClass("is-unavailable");
 
             //a choice-valued option (Chameleon disguise) swaps the spinner for a dropdown; no-op otherwise
             confirm.applyEnhancementChoiceWidget(item, enhancement);
+            confirm.addBuyHelp(item, enhID);
         }
+        if (ship.officerFleet || ship.officerGrants) confirm.refreshOfficerRows(e); //Stage 38: rows nobody may take now, hidden before the sections are counted
         confirm.addOfficerLimitNote(e, ship);
     },
 
@@ -1404,6 +1626,19 @@ window.confirm = {
     officerBlocked: function officerBlocked(target) {
         if (!window.officers) return false;
         var dialog = target.closest(".confirm");
+        /* Stage 38: a ship officer the rows ticked beside him refuse - his faction's `notWith` on this unit, or one another officer grants
+           while that one is unticked or has given what he frees (officers.dialogBlock). Said in a note of its own, flashed. */
+        var ruled = target.data("dialogRules");
+        var live = ruled ? officers.dialogBlock(ruled, target.data("enhID"), confirm.dialogRows(target)) : null;
+        if (live) {
+            var liveNote = $(".buyOfficerLive", dialog);
+            if (!liveNote.length) liveNote = $('<p class="buySectionNote buyOfficerNote buyOfficerLive"></p>').prependTo(confirm.buySectionBody(dialog, 'officers'));
+            liveNote.text(live);
+            liveNote.removeClass("is-flash");
+            void liveNote[0].offsetWidth;
+            liveNote.addClass("is-flash");
+            return true;
+        }
         if (!target.data("officerBlock")) {
             if (!officers.isFighterOfficer(target.data("enhID"))) return false;
             var taken = $(".selectAmount", dialog).filter(function () {
@@ -1428,7 +1663,7 @@ window.confirm = {
         if (mathlib.arrayIsEmpty(missileOptions)) return;
 
         var body = confirm.buySectionBody(e, 'ammo');
-        $('<p class="buySectionNote">Missiles are bought <b>per missile launcher</b>.</p>').appendTo(body);
+        $('<p class="buySectionNote buyMissileNote">Missiles are bought <b>per missile launcher</b>.</p>').appendTo(body); //hidden under a Ramming Prow (applyRamProwOrdnance)
 
         //Alphabetical, like every other row (buyRowOrder); i is still the firing mode it buys for.
         var missileOrder = Object.keys(missileOptions).sort(function (a, b) {
@@ -1462,6 +1697,7 @@ window.confirm = {
             $(".minusButton", item).data("firingMode", i).on("click", confirm.doOnMinusMissile);
 
             item.appendTo(body);
+            confirm.addBuyHelp(item, 'AMMO_' + i); //the firing mode is the missile class: FB, FY, LBT...
         }
     },
 
@@ -1469,7 +1705,7 @@ window.confirm = {
        starts folded (BUY_SECTIONS) - and the filter box, if there are enough rows to want one. */
     openBuySections: function openBuySections(e) {
         var used = $(".buySection", e).filter(function () {
-            return $(".buyRow", this).length > 0;
+            return $(".buyRow", this).not(".is-unavailable").length > 0; //OFFICERS_PLAN.md Stage 38: a section of hidden rows only is not shown
         });
 
         used.prop("hidden", false);
@@ -1585,7 +1821,7 @@ window.confirm = {
                 var name = confirm.buySearchText($(".buyRowName", this).text());
                 $(this).toggleClass("is-filtered", !words.every(function (w) { return name.indexOf(w) !== -1; }));
             });
-            var shown = rows.not(".is-filtered");
+            var shown = rows.not(".is-filtered").not(".is-unavailable");
             anyShown = anyShown || shown.length > 0;
 
             //:last-child cannot skip a hidden row, so the last one SHOWN drops its rule by class.
@@ -1642,7 +1878,7 @@ window.confirm = {
                 } else if (typeof amount.data("firingMode") !== 'undefined') {
                     var value = amount.data("value") || 0;
                     isTaken = value > 0;
-                    cost = value * (amount.data("cost") || 0) * (amount.data("launchers") || 0) * each;
+                    cost = value * (amount.data("cost") || 0) * (amount.data("launchers") || 0) * confirm.ordnanceSize(each);
                 }
 
                 if (isTaken) {
@@ -1667,7 +1903,7 @@ window.confirm = {
     /* A section's badge: what is bought in it - "2 selected · 45 pts" - whenever anything is, filter
        or no filter; otherwise its row count, or while a filter is typed how many of its rows match. */
     paintBuyBadge: function paintBuyBadge(section) {
-        var rows = $(".buyRow", section);
+        var rows = $(".buyRow", section).not(".is-unavailable"); //OFFICERS_PLAN.md Stage 38: a hidden officer row is not "available"
         var taken = section.data("taken") || 0;
         var text = rows.length + ' available';
 

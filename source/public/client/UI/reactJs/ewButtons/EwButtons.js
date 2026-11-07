@@ -288,7 +288,7 @@ const toggleFrame = css`
         props.$showing
             ? "linear-gradient(90deg, rgba(96, 137, 193, 0.32), rgba(96, 137, 193, 0.08))"
             : "none"};
-    box-shadow: ${props => (props.$showing ? `inset 2px 0 0 ${theme.colors.textAccent}, ` : "")}5px 5px 10px ${theme.colors.overlayBg};
+    box-shadow: ${props => (props.$showing ? `inset 2px 0 0 ${theme.colors.greenBtnLineHover}, ` : "")}5px 5px 10px ${theme.colors.overlayBg};
 `;
 const toggleIcon = css`
     opacity: ${props => (props.$showing ? 1 : 0.45)};

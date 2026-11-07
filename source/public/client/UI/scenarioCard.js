@@ -7,6 +7,7 @@
  * Loaded by BOTH creategame.php (the wizard's Summary step is a preview of exactly what the
  * opponent will see) and gamelobby.php (its Scenario Description panel). One renderer, so the two
  * screens cannot drift apart. Styles: styles/scenarioCard.css.
+ * game.php loads it too, for ruleChips alone: the DECLARATIONS briefing's rule tags.
  *
  * WHY: the scenario used to travel only as one "LABEL: value\n" string in tac_game.description,
  * which gamelobby.php recovers by splitting each line on its first colon - so a value containing

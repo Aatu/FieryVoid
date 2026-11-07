@@ -67,6 +67,9 @@ window.ShipIcon = function () {
         this.NotMovedSprite = null;
         //The crosshair on a unit an Expert Warrior's charge names (setChargeMarked) - built on first use, as most units never wear it.
         this.chargeMarkSprite = null;
+        //...and on a unit an Expert War Leader named (setWarLeaderMarked, Stage 34), with the colour it wears
+        this.warLeaderMarkSprite = null;
+        this.warLeaderMarkColour = null;
 
         this.selected = false;
         /* A JUMP VORTEX SITS A PLANE BELOW EVEN THE OTHER TERRAIN (user request 2026-08-23).
@@ -128,12 +131,18 @@ window.ShipIcon = function () {
     ShipIcon.CHARGE_MARK_SCALE = 0.85;
     ShipIcon.CHARGE_MARK_MIN_HEX = 0.9;
     ShipIcon.CHARGE_MARK_Z = 115;
-    var chargeMarkTexture = null; //one for every icon, built on first use
+    ShipIcon.WAR_LEADER_MARK_SCALE = 1.0; //a ring a little wider than the charge's, so a unit charged AND named by a War Leader shows both
+    ShipIcon.WAR_LEADER_MARK_Z = 116;
+    var markTextures = {}; //colour => texture, one for every icon, each built on first use
 
     function getChargeMarkTexture() {
-        if (chargeMarkTexture) return chargeMarkTexture;
+        return getMarkTexture((window.UI && UI.shipMovement && UI.shipMovement.chargeColour) || "#e8432e");
+    }
+
+    //Stage 34: the crosshair in any colour - the Charge's, and an Expert War Leader's wrath and center of glory
+    function getMarkTexture(colour) {
+        if (markTextures[colour]) return markTextures[colour];
         var S = 256;
-        var colour = (window.UI && UI.shipMovement && UI.shipMovement.chargeColour) || "#e8432e";
         var canvas = window.AbstractCanvas.create(S, S);
         var context = canvas.getContext("2d");
         var c = S / 2;
@@ -158,7 +167,7 @@ window.ShipIcon = function () {
         tex.minFilter = THREE.LinearMipmapLinearFilter;
         tex.magFilter = THREE.LinearFilter;
         tex.needsUpdate = true;
-        chargeMarkTexture = tex;
+        markTextures[colour] = tex;
         return tex;
     }
 
@@ -462,6 +471,30 @@ window.ShipIcon = function () {
             this.chargeMarkSprite.show();
         } else {
             this.chargeMarkSprite.hide();
+        }
+        return true;
+    };
+
+    /* Put an Expert War Leader's crosshair on this unit in `colour` (his wrath's red, his center of glory's green), or take it off (null) -
+       OFFICERS_PLAN.md Stage 34. Driven ONLY from PhaseStrategy.syncWarLeaderMarkers. The Charge's crosshair's shape, a little wider and its
+       own sprite, so a unit wearing both shows both. Returns whether anything changed, so the caller knows to kick a render. */
+    ShipIcon.prototype.setWarLeaderMarked = function (colour) {
+        if (!this.warLeaderMarkSprite) {
+            if (!colour) return false;
+            var size = Math.max(window.HexagonMath.getHexHeight() * ShipIcon.CHARGE_MARK_MIN_HEX, this.size * ShipIcon.WAR_LEADER_MARK_SCALE);
+            this.warLeaderMarkSprite = new window.webglSprite(null, { width: size, height: size }, ShipIcon.WAR_LEADER_MARK_Z).hide();
+            this.mesh.add(this.warLeaderMarkSprite.mesh);
+        }
+        if ((this.warLeaderMarkColour || null) === (colour || null)) return false;
+        this.warLeaderMarkColour = colour || null;
+        if (colour) {
+            this.warLeaderMarkSprite.uniforms.spriteTexture.value = getMarkTexture(colour);
+            //read each time it is put on, so a changed knob shows at the next mark
+            var opacity = Number(window.UI && UI.shipMovement ? UI.shipMovement.warLeaderTargetOpacity : NaN);
+            this.warLeaderMarkSprite.setOpacity(isFinite(opacity) ? opacity : 0.65);
+            this.warLeaderMarkSprite.show();
+        } else {
+            this.warLeaderMarkSprite.hide();
         }
         return true;
     };

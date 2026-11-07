@@ -122,6 +122,7 @@ class Criticals{
         if (TacGamedata::$officersPresent){
             Officers::rollKills($activeShips, $gamedata);
             Officers::clearCausedCriticals(); //Stage 28: the +1 above is Pass 1's and the kill roll's only
+            Officers::rollShuntBurnouts($activeShips, $gamedata); //Stage 36: a d6 for each weapon an Expert Electrician's flight switched off - a 1 fries it
         }
 
         // ---- Pass 2: criticalPhaseEffects + EngineShorted post-check ---

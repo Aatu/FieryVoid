@@ -35,7 +35,7 @@ class ShlassanDeltaV extends FighterFlight{
 		$fighter = new Fighter("ShlassanDeltaV", $armour, 7, $this->id);
 		$fighter->displayName = "Sh'lassan Delta-V";
 		$fighter->imagePath = "img/ships/shlassanDeltaV.png";
-		$fighter->iconPath = "img/ships/shlassanDeltaV_large.png";
+		$fighter->iconPath = "img/ships/shlassanDeltaV_Large.png";
 			
 		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2));
 			

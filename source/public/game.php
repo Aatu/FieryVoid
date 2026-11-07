@@ -381,6 +381,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/UI/shipTooltipMenu.js"></script>
     <script defer src="client/UI/shipTooltipInitialOrdersMenu.js"></script>
     <script defer src="client/UI/fighterMissionPicker.js"></script>
+    <script defer src="client/UI/analystPicker.js"></script>
+    <script defer src="client/UI/electricianPicker.js"></script>
+    <script defer src="client/UI/luckyPicker.js"></script>
+    <script defer src="client/UI/warLeaderPicker.js"></script>
     <script defer src="client/UI/shipTooltipFireMenu.js"></script>
     <!-- MUST stay after shipTooltipMenu.js - it extends it at definition time (JUMP_POINTS_PLAN.md Stage 4). -->
     <script defer src="client/UI/shipTooltipMovementMenu.js"></script>
@@ -410,6 +414,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/weaponManager.js"></script>
     <script defer src="client/damage.js"></script>
     <script defer src="client/combatLog.js"></script>
+    <!-- For scenarioCard.ruleChips only: the DECLARATIONS briefing shows the lobby's Game Rules chips.
+         Its fact grid and styles/scenarioCard.css are not used here. -->
+    <script defer src="client/UI/scenarioCard.js"></script>
     <script defer src="client/declarations.js"></script>
 	<script defer src="client/player.js"></script>
     <script defer src="client/ships.js"></script>
@@ -785,6 +792,12 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
              Label set by UI/shipMovement.js. -->
         <div id="charge" class="movement-icon" data-movement-type="Charge">
             <canvas id="chargecanvas" width="40" height="40"></canvas>
+        </div>
+
+        <!-- An Expert War Leader's Wrath / Center of Glory (OFFICERS_PLAN.md Stage 34): the Charge's spot - in the Firing phase, where it never shows.
+             Label set by UI/shipMovement.js. -->
+        <div id="warLeader" class="movement-icon" data-movement-type="War Leader">
+            <canvas id="warLeadercanvas" width="40" height="40"></canvas>
         </div>
 
         <!-- An Expert Graviton Controller's gravitic drive rotation (OFFICERS_PLAN.md Stage 31): the Charge's spot - no hull carries both.

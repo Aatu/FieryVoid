@@ -128,7 +128,7 @@ class OfficersMenu extends Component {
         return (
             <React.Fragment key={`${entry.id}-${i}`}>
                 <Row>
-                    <span>{officers.label(entry.id)}</span>
+                    <span>{officers.label(entry.id, this.props.ship)}</span>
                     <SideSwitch>
                         {sides.map(side => {
                             const on = order ? !side.current : side.current;
@@ -163,7 +163,7 @@ class OfficersMenu extends Component {
                     return (
                         <React.Fragment key={`${entry.id}-${i}`}>
                             <Row>
-                                <span>{officers.label(entry.id)}</span>
+                                <span>{officers.label(entry.id, ship)}</span>
                                 {order
                                     ? <Button title="Keep him at this post" onClick={e => this.cancel(e, entry)}>Cancel Move</Button>
                                     : <Button title="Then click the post to move him to" onClick={e => this.move(e, entry)}>Move Officer</Button>}

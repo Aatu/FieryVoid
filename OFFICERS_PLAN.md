@@ -56,7 +56,34 @@ the rotation and every move before it LOCKED - a generic movement lock in tac_sy
 Stage 32, the Redline Pilot (the Cascor 100% of a fighter, everyone else 150%), in a flight's first craft - skin dancing over an Enormous unit up to speed 8,
 his own fighter the one that crashes; a combat pivot without the thrust for it, its fire at -15%; afterburners as the flight's first order of a turn, +50% thrust,
 then a turn straight ahead with no manoeuvre of any kind; and a landing beyond the thrust tolerance on a d20, his fighter ramming the carrier on a roll at or
-under the excess (§9.39) - BUILT 2026-10-25, uncommitted.**
+under the excess (§9.39) - BUILT 2026-10-25, uncommitted.
+Stage 33, the Expert Evangelist (Corillani Theocracy CPN and OSF hulls, 5% of the fleet - the slot's points, or the fleet itself when Unlimited, priced by
+the lobby), in the C&C and movable, in Fleet Selection and in battle, to any system or Structure block - +10 initiative and +1 fire control for every unit of
+his player's fleet while he serves, -10 and -1 for the rest of the battle once he is disabled or killed, nothing once his ship jumps out (a new 'withdrawn'
+state for every officer) (§9.40) - BUILT 2026-10-29, uncommitted.
+Stage 34, the Expert War Leader (every faction; 5% of the slot's points plus 25% of his ship, 50% more outside the Narn Regime, priced by the lobby), in the
+C&C - +5 initiative on every ship of his player's fleet; once per battle each, one a turn: Taunt or Anticipate from his C&C's menu in Initial Orders (+5% / -5%
+for the enemy at his ship / his fleet's other ships; +60 initiative as Initial Orders close, winning no ties, and all his ship's EW held to the late window),
+Wrath or the Center of Glory from a new War Leader icon in the Firing phase (+5% at one enemy for his fleet's ships; +10% on every shot of one unit of his
+fleet), each told in the combat log (§9.41) - BUILT 2026-10-29, uncommitted.
+Stage 35, the Expert Analyst (a Llort capital ship or any ELINT hull, 10%), in the Sensors - one scan a turn in Initial Orders, from an enemy unit's tooltip, at a
+unit his ship holds 1 OEW on within 30 hexes: its arming that turn, or its officers and Hyach Specialists, hangars (a flight's missiles) or ammunition for the rest of
+the battle, or its cargo (a public log line); built with three hides first - an overload charge until its first sustained shot, Hyach Specialists, and fighter
+missiles, counted by a unit within 16 / 12 hexes and their dummies told at 4 (§9.42) - BUILT 2026-10-29, uncommitted.
+Stage 36, the Expert Electrician (every faction; 100% of a fighter), in a flight's first craft - the flight's weapons switched off in Initial Orders with
+their own Power Off, the maximum damage of every gun switched off over the flight's guns that turn's points, split between its offensive bonus (direct
+fire only) and its thrust from a yellow Initial Orders menu, what is left placed at random as Initial Orders close; each weapon switched off fried on a
+d6 of 1 as the turn ends, its power still counted (§9.43) - BUILT 2026-10-30, uncommitted.
+Stage 37, the Lucky Captain (every faction; the Dilgar Imperium 25%, everyone else 50%), in the C&C - four feats, once per battle each and one a turn,
+picked from a green Lucky Captain button in his own ship's tooltip and played by fixed rules (the server rolls every die): EW Last, Disengage (a d20 at
+or under the range of the nearest armed enemy that sees him, none in the 120 degrees ahead) or Best Initiative in Initial Orders; in the Firing phase,
+ARMED and spent only if it fires, a volley re-roll (when the ship's to-hit dice score below what they expected), Sure Shot, Dodge or Lucky Escape - the
+to-hit dice rolled before any is used (§9.44) - BUILT 2026-10-31, uncommitted.
+Stage 38, the ANCIENT exceptions (user request 2026-10-31) - the Kirishiac Lords' one Expert War Leader (Kingship or Lordship) or Expert Warrior (any C&C
+hull), the Walkers' one Pathfinder Expert ELINT Officer, the Mindriders' one Consortium Expert Religious Leader, the Torvalus' Expert Gambler (their
+Political Officer: his free expert and Hardened Armour opened to them through him, Torvalus speech topics) and one Lucky Captain at the Dilgar price -
+built as six new $factionRules keys (`ancients`, `hulls`, `perFleet`, `notWith`, `label`, `grants`) for any faction to use, README how-to (§9.45) -
+BUILT 2026-10-31, uncommitted.**
 Written
 against `dab951bf5`. The user
 ruled D1–D12 and QX1–QX5 on 2026-10-09; three rulings changed the draft (D3 kill roll, D9 eligibility and
@@ -233,13 +260,13 @@ here and can be built first, on their own (Stage 2a).
 |---|---|---|
 | **D1** | **Two purchase tracks, one runtime list.** Fixed-post and random-post officers, and all fighter officers, are ship-level rows. Officers whose post the player picks are per-system registry rows. `Officers::resolve()` merges both into `$ship->officers`. | 22 of the 25 officers have a post the rules set, by system type or by random draw. Putting them on the per-system track would mean buying a Helmsman by finding the C&C in the ship window, while the reserved Officers section stays empty. Putting the 2 placed officers on ship-level rows would mean a weapon dropdown per Gunner slot (three choice-valued rows on a capital, the `CHAM_DISG` widget shape) and re-inventing the D13 name check. *Alternative, not recommended:* everything per-system. One track, but worse purchase UX and a per-weapon offer tuple for every officer in every static blueprint. Breaching Expert is the 25th and fits neither track (§3.3). |
 | **D2** | **Track-1 posts are resolved, never stored.** They are picked from **blueprint** values at the top of `BaseShip::onConstructed`, before any enhancement moves an output (§4.3). A post destroyed by pre-battle damage leaves its officer disabled from the start (§4.9). | `ADV_ENG` set the precedent ([Enhancements.php:2516](source/server/model/ships/Enhancements.php#L2516)). Poor Crew takes thrust off the strongest Engine, so on a two-engine hull "strongest" depends on row order unless it is asked before any row runs. The lobby mirror picks the same way, so lobby and game agree. |
-| **D3** | **RULED: two ways out of action.** The rulebook: *"Officers are considered disabled (and unusable for the rest of the scenario) if the system they are in is destroyed, but there is also a chance they will be killed by any damage to the system. Use the normal critical hit roll to determine this (make a roll even if the system is totally destroyed). If this roll results in a '20' or greater (including any modifications), the officer is killed. This is in addition to any other critical hit effects."*<br>**Disabled** = the post is destroyed, by its own boxes or by its Structure block. **Killed** = the post took damage through its armour this turn, and its critical roll came to 20 or more. That is the roll the post makes anyway, or one made for him when the post was just destroyed (§4.4). The weapon-mounted Matter Weapons Expert is killed by **any** damage through armour, as his own text says. Both states are **permanent** (Self Repair reviving the post changes nothing) and both take effect **next turn**. | Next-turn is the convention every support system follows, `isDestroyed($turn - 1)` ([baseSystems.php:20494](source/server/model/systems/baseSystems.php#L20494)), and it keeps simultaneous fire simultaneous: the Evangelist's +1 cannot vanish halfway through the shots of the turn he falls. FV's critical roll is d20 + the system's **total** damage + both crit modifiers ([ShipSystem.php:1421](source/server/model/systems/ShipSystem.php#L1421)), so on a battered post any further hit is close to certain death. *Disabled* can be derived from the complete damage history. *Killed* is a dice result, so it has to be stored (§4.4). The two states differ for the Evangelist, whose penalty is worded "if killed" (§6). |
+| **D3** | **RULED: two ways out of action.** The rulebook: *"Officers are considered disabled (and unusable for the rest of the scenario) if the system they are in is destroyed, but there is also a chance they will be killed by any damage to the system. Use the normal critical hit roll to determine this (make a roll even if the system is totally destroyed). If this roll results in a '20' or greater (including any modifications), the officer is killed. This is in addition to any other critical hit effects."*<br>**Disabled** = the post is destroyed, by its own boxes or by its Structure block. **Killed** = the post took damage through its armour this turn, and its critical roll came to 20 or more. That is the roll the post makes anyway, or one made for him when the post was just destroyed (§4.4). The weapon-mounted Matter Weapons Expert is killed by **any** damage through armour, as his own text says. Both states are **permanent** (Self Repair reviving the post changes nothing) and both take effect **next turn**. | Next-turn is the convention every support system follows, `isDestroyed($turn - 1)` ([baseSystems.php:20494](source/server/model/systems/baseSystems.php#L20494)), and it keeps simultaneous fire simultaneous: the Evangelist's +1 cannot vanish halfway through the shots of the turn he falls. FV's critical roll is d20 + the system's **total** damage + both crit modifiers ([ShipSystem.php:1421](source/server/model/systems/ShipSystem.php#L1421)), so on a battered post any further hit is close to certain death. *Disabled* can be derived from the complete damage history. *Killed* is a dice result, so it has to be stored (§4.4). The two states differ for the Evangelist, whose penalty is worded "if killed" (§6). *His rules text (2026-10-29, §9.40) reverses his bonus on either.* |
 | **D4** | **Own team only; the game's end discloses everything; no public log line.** *(Amended 2026-10-10: an officer's effect on the published `iniativebonus` is shown to every viewer - §4.6.)* The insignia, the tooltip and the `officers` payload reach the owner and teammates (`isRevealedToCurrentViewer`), and everybody once `TacGamedata::$currentGameFinished`. Officer names never enter the public `enhancementTooltip`. | Same rule and same mechanism as the ✦ ([ShipClasses.php:985](source/server/model/ships/ShipClasses.php#L985)). ⚠️ **This is cosmetic, exactly like the ✦** (WEAPON_ENHANCEMENTS_PLAN.md D8 / §6.3). A few officers change numbers that reach the enemy anyway. §4.6 lists them, so the tooltip never claims a secrecy the feature does not deliver. |
 | **D5** | **Effects run in ONE post-pass**, `Officers::apply()`, after enhancements and after the per-system `onConstructed` loop, and before `iniativeadded` is filled ([ShipClasses.php:1779-1789](source/server/model/ships/ShipClasses.php#L1779)). Never as a `case` in `setEnhancementsShip`. | (a) That switch runs rows in `enhid` order, and an order-sensitive effect belongs in a fixed post-pass on both ends ([[arch_enhancement_storage_and_order]]). (b) `isDestroyed()` needs `structureSystem`, which `ShipSystem::onConstructed` fills ([ShipSystem.php:473](source/server/model/systems/ShipSystem.php#L473)). (c) None of the 25 has to precede `Shield::onConstructed`, which is the reason system refits run earlier. |
 | **D6** | **A new class, `Officers`** (`source/server/model/ships/Officers.php`), holds the registry and the resolver. `Enhancements.php` gains hook calls only. | `Enhancements.php` is 4,789 lines. WEAPON plan D12's argument applies: one literal per officer, so nothing gets added in three places out of four. |
 | **D7** | **ids are `OFF_*`, at most 10 characters** (table in §4.2). | `enhid` is `varchar(10)` in both tables. The prefix routes a row to the Officers section, and keeps it out of the public tooltip, with one test each. It also avoids the existing fighter `NAVIGATOR`. |
-| **D8** | **Price = ceil(pct × blueprint `pointCost`)**, the base `ELITE_CREW` uses ([Enhancements.php:244](source/server/model/ships/Enhancements.php#L244)). **Fighter officers are priced per FLIGHT**, not per craft (*re-ruled 2026-10-15, §9.9: every fighter officer is pct of one craft for a flight of six, scaled by the flight's size*). **Fleet-% officers** (Quartermaster, Evangelist) are priced off the **game's points limit**, not the live fleet total. | The lobby multiplies every fighter enhancement by flight size ([confirm.js:215](source/public/client/UI/confirm.js#L215), [gamelobby.js:4203](source/public/client/gamelobby.js#L4203) and five more sites). "1 per flight, 50 % of one fighter" is not that shape, so it needs a per-row exception (§4.10). Evader's "× number of fighters" is the one fighter officer that already fits. A price on the live fleet total is circular (the officer is part of the fleet) and changes with every purchase. The game's limit is fixed and known in the lobby. |
-| **D9** | **RULED.** **Ships: one officer of each type**, several different types per ship, "except as noted" (Gunner up to 3 / 2 / 1 by size; Breaching Expert up to 20 % of pods). **Flights: one officer in total** *(Stage 18, §9.24: up to four Expert Pilots, bought as a count, are that one officer)*. **Never on Ancient hulls (factionAge ≥ 3), OSATs (mines extend OSAT) or terrain.** Bases, LCVs and everything else only where the post exists, so a base without a jump drive is never offered a Jump Officer. Faction gates use the faction string. | User ruling (QX3, QX4) and the rulebook: a unit "may not benefit from more than one expert officer of the same type (except as noted)". The flight cap makes a flight's officer rows mutually exclusive in the buy dialog (§4.10). ⚠️ FV_factions.txt:438 still promises Shadow ships "enhancements relating to special officers"; that line now contradicts the ruling. Corillani CPN and OSF exist only in `$notes` prose ([VostovaAMCPN.php:15](source/server/model/ships/corillani/VostovaAMCPN.php#L15)), so the Evangelist needs a per-hull opt-in (`enhancementOptionsEnabled[] = 'OFF_EVAN'`), which is a contributor-area edit. |
+| **D8** | **Price = ceil(pct × blueprint `pointCost`)**, the base `ELITE_CREW` uses ([Enhancements.php:244](source/server/model/ships/Enhancements.php#L244)). **Fighter officers are priced per FLIGHT**, not per craft (*re-ruled 2026-10-15, §9.9: every fighter officer is pct of one craft for a flight of six, scaled by the flight's size*). **Fleet-% officers** (Quartermaster, Evangelist) are priced off the **game's points limit**, not the live fleet total. *Stage 33 (§9.40, user's note 2026-10-29): the Evangelist off the slot's points - and in an Unlimited slot off the live fleet after all, less the Evangelists themselves, re-priced on every change.* | The lobby multiplies every fighter enhancement by flight size ([confirm.js:215](source/public/client/UI/confirm.js#L215), [gamelobby.js:4203](source/public/client/gamelobby.js#L4203) and five more sites). "1 per flight, 50 % of one fighter" is not that shape, so it needs a per-row exception (§4.10). Evader's "× number of fighters" is the one fighter officer that already fits. A price on the live fleet total is circular (the officer is part of the fleet) and changes with every purchase. The game's limit is fixed and known in the lobby. |
+| **D9** | **RULED.** **Ships: one officer of each type**, several different types per ship, "except as noted" (Gunner up to 3 / 2 / 1 by size; Breaching Expert up to 20 % of pods). **Flights: one officer in total** *(Stage 18, §9.24: up to four Expert Pilots, bought as a count, are that one officer)*. **Never on Ancient hulls (factionAge ≥ 3), OSATs (mines extend OSAT) or terrain.** Bases, LCVs and everything else only where the post exists, so a base without a jump drive is never offered a Jump Officer. Faction gates use the faction string. | User ruling (QX3, QX4) and the rulebook: a unit "may not benefit from more than one expert officer of the same type (except as noted)". The flight cap makes a flight's officer rows mutually exclusive in the buy dialog (§4.10). ⚠️ FV_factions.txt:438 still promises Shadow ships "enhancements relating to special officers"; that line now contradicts the ruling. Corillani CPN and OSF exist only in `$notes` prose ([VostovaAMCPN.php:15](source/server/model/ships/corillani/VostovaAMCPN.php#L15)), so the Evangelist needs a per-hull opt-in (`enhancementOptionsEnabled[] = 'OFF_EVAN'`), which is a contributor-area edit. *Stage 33 (§9.40): no hull file is edited - his offer reads "(CPN)" / "(OSF)" in the notes (the user's note), Corillani Theocracy only.* |
 | **D10** | **Where they are bought:** track-1 officers in the buy dialog's Officers section; placed officers in the system's own *Add Enhancements & Damage* menu, under an **Officers** sub-heading of the gold section. **Plus filter chips in the buy dialogs (D13).** | One `buySectionOf` change lights the reserved section ([confirm.js:852](source/public/client/UI/confirm.js#L852)). A placed officer is bought where his post is. |
 | **D11** | **The insignia** is a small gold double chevron (inline SVG, `theme.colors.enhTitle`) in a top-left **badge row** shared with the ✦. One insignia per post, however many officers are posted there. **Disabled** = grey; **killed** = grey with a red slash. Both stay shown. | Top-right belongs to the meteor badge ([SystemIcon.js:69](source/public/client/UI/reactJs/system/SystemIcon.js#L69)). A shared row keeps ✦ and insignia from overlapping on a gun with both Gunsights and a Gunner. Showing a fallen officer is what tells the player why a bonus stopped. |
 | **D12** | **The tooltip** gets a gold **Officers** block in `SystemInfo`, after *Special* and before *Criticals*: one line per officer with his name and a one-line effect, plus "(disabled, turn N)" or "(killed, turn N)" once he is out of action. The text comes from a client mirror of the registry labels. | The lobby has no server round trip, so the text must exist client-side anyway. `system.data` is the wrong channel: it is rebuilt per turn, replaced wholesale by a server `data`, and shared by reference across same-class systems ([[arch_system_info_tooltip_data_flow]]). |
@@ -326,7 +353,7 @@ Medium-sized job (§3.4).
 |---|---|---|
 | **Expert Quartermaster** | Makes this ship's other enhancements and ammo free, which touches every price display, total and the saved-fleet bucket split; a fleet-% price; a random post; "+10 turn delay" is unclear. *Built in Stage 30 (§9.37): the rules text makes it ONE of six refits (the dearest bought - user's note) and two missiles a rack, a ship price (10% / 20%) in the C&C, and "+10%" turn delay; the hard part is that his free refit may be a ship-level row (reactor, accelerator) or per-system refits, so a write to either price bucket can move the other - the client settles the ship-level bucket after every refit write.* | −30 initiative; the C&C critical modifier |
 | **Breaching Expert** | His post is **one pod inside a flight**, and per-craft ids do not exist in the lobby (WEAPON plan D7). Adds a fleet-wide "20 % of all pods" cap, a change to the capture roll ([ShipSystem.php:951](source/server/model/systems/ShipSystem.php#L951)), and "+1 thrust" for one craft of a flight that moves as one. *Built in Stage 24 (§9.31) as an ordinary fighter officer in the flight's first pod: the fighter framework already gives a craft-level post, so "his pod" is that craft; the thrust is the flight's (user ruling); the 20 % is a Fleet Correctness Report line (user ruling); the triple roll is a mark on his capture party's critical.* | — |
-| **Expert Evangelist** | Fleet-wide state: +1 to hit while he serves, then −10 initiative (QX1) and −1 to hit if he is **killed**, for every ship, with a client to-hit mirror. Also a fleet-% price, a random post, and the CPN/OSF gate exists only in notes prose | — |
+| **Expert Evangelist** | Fleet-wide state: +1 to hit while he serves, then −10 initiative (QX1) and −1 to hit if he is **killed**, for every ship, with a client to-hit mirror. Also a fleet-% price, a random post, and the CPN/OSF gate exists only in notes prose. *Built in Stage 33 (§9.40) from his rules text: +10 initiative and +1 fire control for his player's whole fleet while he serves (a post-pass once every ship is constructed), reversed on a loss of either kind, nothing once his ship jumps out (a new 'withdrawn' state); bought in the C&C and movable to any system or Structure block (no random post); 5% of the slot's points, or of the live fleet in an Unlimited slot - the lobby's to price, re-priced on every fleet change, the server keeping the row's price; the CPN/OSF gate read off the notes.* | — |
 | **Expert Laser Technician** | "+1 damage per power point sent, up to +50 %" needs a new per-turn allocation UI, persistence and a cap. *Built in Stage 11 (§9.17) with no new UI or persistence: the user's design note made every laser use the existing BOOST (power entries type 2, the generic boost buttons), so the allocation, its storage and the power balance all came free; what was new is the cap, a per-turn pool, and hiding the boosts from opponents.* | +3 Spinal / +2 Blast / +1 other lasers, through `getBonusDamage` (`SpinalLaser`, `BlastLaser`, `ImprovedBlastLaser`, `LtBlastLaser` exist) |
 | **Expert Software Engineer** | Bonus fire-control points spendable in the Firing phase need a new allocation window (`HyachComputer` only allocates in Initial Orders, [baseSystems.php:12862](source/server/model/systems/baseSystems.php#L12862)). Also a "first point of damage ignored" rule in the damage path, a submarine detection range, and a self-contradictory specialist clause (§6, Software Engineer). *Built in Stage 26 (§9.33): the user's rules text settled the specialist clause and made the "submarine" a stealth unit; the Firing-phase window is the Computer's own menu reopened in the Firing phase, written as one note through `saveFirePhaseDeclaration` and judged on the loaded ship - built so that the rebuilt Computer Specialist rides it too (user ruling); the damage rule is one line beside the Scavenger's save.* | — |
 | **Expert Ion Technician** | "3 thrust → 1d10+1 on one ion weapon" is a per-turn spend with UI. *Built in Stage 17 (§9.23) with no new UI or storage: the user's note pointed at the Hypergraviton Blaster, whose boost is the generic one priced in thrust - so the Laser Technician's payload pattern with `thrustBoosted` gave the buttons, the thrust balance and the commit check for free; what was new is the discharge of a boosted gun that does not fire, at the turn change.* | +1 per die and +1 flat on Ion-class weapons; +4 on C&C crits; the Rad Cannon's flat 12 and forced crits are Medium |
@@ -334,7 +361,7 @@ Medium-sized job (§3.4).
 | **Expert Ballistic Officer** | "+1 magazine round per launcher" moves the lobby's ammo limits, which are derived from magazine capacity at offer time. Free missile swaps are lobby ammo pricing. *Built in Stage 29 (§9.36): the rules text makes it DISTANCE range, never launch range - one read-time term where FV tests it; the extra slots are the magazine's capacity raised before the ammo rows load, the free swaps a price rule (the N dearest rounds bought) with the rest rolled at the commit, as the Political Officer's picks; a weapon keeping its own count gets its extra round written once, at the commit.* | +5 launch range (`range` **and** `rangeArray` — the same mode-switch trap — and sent to the client) |
 | **Expert Anticipator** | A free **turn** for a ship in the Firing phase is a new phase-3 movement for ships (today only flights move there, as combat pivots), with masking, validation and animation. *Built in Stage 23 (§9.30): the turn is an ordinary turn row marked `anticipate`, kept by the server's Firing-phase filter for his ship only and masked with the combat pivots; its thrust is paid on the Movement phase's own panel, wired into the Firing phase. The extra die is a `Dice` flag after all, and the one weapon that rolls its damage dice one call at a time - the Pentagon Array, his rules' own example - hands them to `Dice::keepBest`.* | Rolling initiative twice is Easy. Re-rolling the lowest die is Medium: a `Dice`-level flag, which the replay harness's own `Dice` stub must mirror ([[project_replay_harness]]) |
 | **Expert Gunner, once-per-battle abilities** | A Piercing mode injected into a weapon that lacks one, and +15 % on one called shot, each once per battle and not combinable: firing-mode injection, a persisted "used", and UI. *Built in Stage 10 (§9.16), all three automatic (user simplifications), with moving officers.* | — |
-| **Expert Electrician** | Per turn: deactivate the flight's weapons, convert their max damage ÷ flight size into thrust or OB, then a d6 to see whether they stay offline | — |
+| **Expert Electrician** | Per turn: deactivate the flight's weapons, convert their max damage ÷ flight size into thrust or OB, then a d6 to see whether they stay offline. *Built in Stage 36 (§9.43): FV already carried a fighter weapon's power entries to the server and refused an offline weapon's fire, so the switch-off is the weapon's own Power Off, opened to his flight's guns; what is new is the points (each linked shot a gun), the player's split (a yellow Initial Orders menu, posted as a claim, the rest placed at random at the commit) and the fry roll (a ForcedOfflineForTurns critical, for good).* | — |
 | **Expert Analyst** | *Moved from Medium, 2026-10-16:* the user found his full rules "more complex than I first described". The Medium reading was a per-load "the viewer's team has a live Analyst" static widening `isDisclosedToCurrentViewer()` (ammo types, hangar contents) and the officer payload, per viewer; two clauses moot in FV (weapon arming already public, [weapon.php:453](source/server/model/weapons/weapon.php#L453); cargo not modelled). Needs his full rules text and its own ruling round | — |
 
 ### 3.4 Framework costs (the part that is not any one officer)
@@ -386,7 +413,10 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Scavenger | `OFF_SCAV` | Engine | 1 |
 | Breaching Expert *(Stage 24, §9.31)* | `OFF_BRCH` | his pod: a breaching pod flight's first craft - since Stage 27 (§9.34) one per pod, from the first | 1 (flight), breaching pods only, priced off one pod (`unscaled`); bought as a count, `mixesWith` the pod Troop Leader |
 | Expert Analyst | `OFF_ANLY` | Scanner | 1 |
-| Expert Evangelist | `OFF_EVAN` | random primary | 1 |
+| Expert Evangelist *(Stage 33, §9.40)* | `OFF_EVAN` | C&C (his rules text - the draft's random primary dropped), movable | 1, Corillani Theocracy CPN and OSF hulls, priced off the fleet (`fleet`) |
+| Expert Evangelist, elsewhere *(§9.40)* | `OFF_EVANP` | a chosen system or Structure block - weapons included - but his C&C | 2 |
+| Expert War Leader *(added 2026-10-29, §9.41)* | `OFF_WLEAD` | C&C | 1, every hull with one; priced off the fleet and his ship (`fleet`) |
+| Lucky Captain *(added 2026-10-31, §9.44)* | `OFF_LUCK` | C&C | 1, every hull with one; the Dilgar Imperium at half the price |
 | Expert Laser Technician | `OFF_LASR` | Reactor | 1 |
 | Expert Plasma Scientist *(added 2026-10-17, §9.18)* | `OFF_PLAS` | Engine | 1 |
 | Expert Security Officer *(added 2026-10-17, §9.19)* | `OFF_SECU` | C&C | 1 |
@@ -414,7 +444,7 @@ One literal per officer in `Officers::$registry`: `label`, `post` (a key into th
 | Expert Coordinator | `OFF_COOR` | lead craft | 1 (flight) |
 | Expert Pilot *(added 2026-10-19, §9.24)* | `OFF_PILOT` | one per craft, from the first | 1 (flight), bought as a count |
 | Expert Tailgunner *(added 2026-10-21, §9.28)* | `OFF_TAIL` | lead craft | 1 (flight), a flight with a tail gun only |
-| Expert Electrician | `OFF_ELEC` | lead craft | 1 (flight) |
+| Expert Electrician *(Stage 36, §9.43)* | `OFF_ELEC` | lead craft | 1 (flight), a flight with a gun to shunt and no heavy weapon |
 
 Offers come from one call, `Officers::addOffers($ship)`, made at the end of
 `setEnhancementOptionsShip` and of `setEnhancementOptionsFighter`. That puts them in the static
@@ -559,6 +589,8 @@ masking: individual notes never reach any client.
 | Expert Warrior (Stage 28) | `iniativebonus` (+10; +50 / -50 after his Supreme Anticipation), and a flight's his ship launched; his ship's critical modifier; his charge (a movement row); the hit chance of his ship's shots | Initiative: **yes, to every viewer** (`publish` / `lostPublish`, and a launched flight's through `addForJson`). The charge is a row of the ship's movement, which every viewer is sent - so a declared charge, and its target, are public (the tabletop declares it as it is performed). Which unit it holds against (`charged`) rides his team's officer payload, for their hit-chance preview; an opponent sees only the needed % the log prints, as for every to-hit officer. The critical modifiers are never sent (nothing displays one) |
 | Expert Graviton Controller (Stage 31) | his Engine's and the largest aft thruster's `output`; his gravitic drive's rotation; the hit chance of his ship's shots that turn | Outputs: **yes**, `output` is sent unconditionally (as the Technician's), and they stay once he is lost. The rotation is a `gravRotate` row of the ship's movement, which every viewer is sent - so the rotation, and that he is aboard, are public (the tabletop rolls it in the open); its die is the server's, and the moves locked before it ride the owner's game.php only (`window.fvMoveLocks`). The -15% is the owner's hit-chance preview; an opponent sees only the needed % the log prints. His +1 on beams and the pulse count show only as their results |
 | Redline Pilot (Stage 32) | his flight's afterburners (a `redline` movement row) and the turn it cools; a combat pivot short of the thrust (the row's thrust) and its -15%; a skin dance over a unit faster than 5; a landing beyond the tolerance | **Yes**, all of it in effect: the burn is a row of the flight's movement and its thrust shows in its moves, a short pivot's row is a combat pivot's (hidden from enemies until firing resolves, as every one), the dance and the landing are rolled by the server and told in the combat log (a crash is a ram, a landing that holds a `RedlineLanding` line) - so the tabletop's open rolls, and that he is aboard, are public. The -15% is the owner's hit-chance preview |
+| Expert Evangelist (Stage 33) | every unit of his player's fleet: an initiative MODIFIER (+10, or -10 once he is lost - its `iniativeadded`, the tooltip's "mod"; its base `iniativebonus` never moves) and every weapon's fire control (+1 / -1) | **Yes, to every viewer**: the weapons through isModified, `iniativeadded` with every ship - an opponent sees the morale, its end and its reversal, never where he sits; the officer list stays own-team |
+| Expert War Leader (Stage 34) | `iniativebonus` of every ship of his fleet (+5); his ship's initiative (+60 when he anticipates); his taunt; the units his wrath and glory name; every Wrath / Glory / Taunt hit chance | Initiative: **yes, to every viewer** (published, and the rolled total). The taunt: **to every viewer once Initial Orders close** (`warLeaderTaunt` - the enemy's preview needs it; the tabletop announces it), never while they are open. Wrath and Glory: **own team only** (`units` in the officer payload) until firing resolves, then every ability is told in the combat log ("WAR LEADER!:", user ruling) |
 | Expert ELINT Officer (Stage 20) | his array's `output`; every ELINT range from his ship; his blanket against ballistic weapons | **Yes, to every viewer**: `output` always is, and the ship payload carries `elintRangeBonus` (25) and `blanketBallistic` (3) while he serves - an opponent's own OEW under his Disruption and its hit chance against a unit under his blanket are previewed with them; his array's tooltip shows the ranges. The officer list stays own-team; a disguised Chameleon ship's payload is its simulacrum's and carries neither. The -2 on sensor criticals is never sent |
 | Laser Technician (Stage 11) | a laser's `boostable` / `boostEfficiency`, and its boost (type-2 power entries) | **Own team only** (user ruling 2026-10-17): no laser is boostable without him, so a boosted one would name him - an opponent's payload carries the laser's power entries without its boosts while he is aboard, until the game is over. His flat bonus and the boost show only as damage dealt, in the log |
 | Geneticist | both profiles +2, `toHitBonus` −1 | **Must**: the shooter's own hit-chance preview needs the profiles. Published to every viewer through the registry's `publish` list (§9.5), like the Helmsman's `iniativebonus` |
@@ -730,7 +762,11 @@ committed.
 | **29** | Expert Ballistic Officer, one of the original 25 (Hard). **BUILT 2026-10-24** (§9.36) | See §9.36 |
 | **30** | Expert Quartermaster, one of the original 25 (Hard). **BUILT 2026-10-24** (§9.37) | See §9.37 |
 | **32** | Redline Pilot, added by the user. **BUILT 2026-10-25** (§9.39) | See §9.39 |
-| **33+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
+| **33** | Expert Evangelist, one of the original 25 (Hard), from his rules text. **BUILT 2026-10-29** (§9.40) | See §9.40 |
+| **35** | Expert Analyst, one of the original 25 (Hard), with overload charges, Hyach Specialists and fighter missiles hidden first. **BUILT 2026-10-29** (§9.42) | See §9.42 |
+| **36** | Expert Electrician, one of the original 25 (Hard). **BUILT 2026-10-30** (§9.43) | See §9.43 |
+| *later* | ⏳ Every officer's initiative effect as an in-game MODIFIER (the Evangelist's way), the three base tie-breaks kept equal. **Deferred by the user 2026-10-29** - scoped at the end of §9.40 | — |
+| **34+** | The other Hard officers (the Expert Analyst among them since 2026-10-16), one at a time, each starting with its own short plan and ruling round | — |
 
 ---
 
@@ -760,9 +796,10 @@ committed.
 | Geneticist | "Scenario only" = never offered unless a hull opts in, or a Create Game rule? "−1 to hit other ships" = this ship's own weapons? **RULED 2026-10-10: offered on every hull with a C&C** ("scenario only" is by agreement, as the doc card says). The −1 was built with its default: this ship's own weapons. **RE-RULED 2026-10-15: Dilgar Imperium only** (§9.12). |
 | Scavenger | A critical first, else 4 boxes? Which system first? May he repair Structure? **RULED 2026-10-15** (§9.8): **a critical first** (as the Engineer, same order and C&C roll), else 4 boxes, by Self Repair's default system order; **Structure yes**, never a destroyed system or anything on a destroyed section, never this turn's damage. His rules text adds a **once-per-scenario save** - "up to six points of damage can be ignored in any single volley" - ruled **automatic**: spent on the first hit that would destroy the C&C, a reactor or a Structure block when ignoring up to 6 points saves it ("note the Gaim Bulkhead already has a similar function"). The campaign clauses (permanent repairs after the battle) are not built. **Widened 2026-10-15 (§9.10): Scanners and Engines too.** **Faction prices 2026-10-15 (§9.12): 15% for the Descari, 20% for Balosians, Raiders and Llort.** |
 | Breaching Expert | "+1 thrust" for one pod of a flight that moves as one? "20 % of total pods": fleet-wide, rounded down? What are "3 attack rolls on the first boarding turn" in FV's capture-mission terms? **Rules text 2026-10-21 (§9.31)** settles the last two: "No more than 20% of a fleets breaching pods (round fractions of 0.5 or more up)"; "the pod's contingent gets three attack rolls on the first turn of combat. It is still destroyed by a single hit" - three d10s for its CaptureShip critical on its first turn, one attacker to the defenders. Asked: in a pair of pods, whose Marines get the Elite benefit and the triple roll? His price: one pod flat, or §9.9's scaled rule? The 20%: a report line, also refused in the buy dialog, or enforced by the server? "He does not provide any further benefits" on a pod already Elite: the Elite clause only, or everything? **RULED 2026-10-21 (all as recommended):** **his pod only** (the thrust is the flight's); **one pod, flat**; **a Fleet Correctness Report line**; **the Elite clause only** - +1 thrust and the triple roll still apply. |
-| Analyst | Does he need range, line of sight or an OEW lock? Every enemy ship, or only those in range? Weapon arming is already public in FV: leave it so? **Moved to the Hard tier 2026-10-16** (the full rules are more complex than the brief): his own plan and ruling round when he is reached. |
+| Analyst | Does he need range, line of sight or an OEW lock? Every enemy ship, or only those in range? Weapon arming is already public in FV: leave it so? **Moved to the Hard tier 2026-10-16** (the full rules are more complex than the brief): his own plan and ruling round when he is reached. **Rules text, notes and rulings 2026-10-29 (§9.42):** an OEW lock (not CCEW) within 30 hexes, one scan a turn; overloads, Hyach Specialists and fighter missiles hidden first; fighter missiles COUNTED at 16 / 12 hexes, dummies told at 4, types by his scan; cargo the only scan told (public); nothing through a Chameleon disguise; rack modes left public; missiles only (not fighter torpedoes). |
+| Electrician | **Rules text and notes 2026-10-30 (§9.43):** the points = the maximum damage of the weapons deactivated over the flight's guns, rounded half up, for OB (direct fire only) or thrust that turn; a d6 per weapon, a 1 lost for the scenario, its power still available; 100% of a fighter; not with heavy weapons - the user's note: any weapon not ballistic loading in more than 1 turn; the existing switch-off support to be used, a yellow Initial Orders menu (his `img/electrician.png`), the split shown in the ship and weapon tooltips, a forgotten split placed at random. Asked: which weapons count; what a fried weapon gives later; when the d6 is rolled; what his loss does. **RULED 2026-10-30 (all as recommended):** **damaging direct-fire weapons only**, each linked shot a gun (the Frazi example's 12); a fried weapon counts as switched off **on every later turn** while he serves, never rolling again; the d6 **at the end of every turn** a weapon is off; once he is lost **all shunting stops** (no Power Off, the guns back on, a fried one gives nothing). |
 | Coordinator | **Rules text 2026-10-16** (§9.15): "may make a combat pivot for half the normal thrust cost (i.e., 1 point instead of 2) and with no weapons fire penalties as a result, unless the combat pivot was a full 180°, in which case a penalty of −1 is applied"; one-half the base cost of the fighter; one coordinator per flight. Built with defaults, not ruled: (a) "a full 180°" = this turn's combat pivots, rights against lefts, have turned the flight 3 hex sides or more (R-L-R is 60°, no penalty; four one way passed through 180°, penalty); (b) half rounded **up** (a shuttle's 3 → 2, a pivot-cost-3 flight's 5 → 3); (c) the −1 is waived on every shot of the flight that turn, ballistic launches included (the penalty's own scope). |
-| Evangelist | The fleet = this player's ships, or the whole team? His penalty is worded "if killed": does a merely **disabled** Evangelist (post destroyed, kill roll survived) cost the fleet its +1 without the −10 initiative / −1 to hit? (Default: yes, the penalty needs a kill.) Is the penalty permanent? Do reinforcements that arrive later get the bonus? |
+| Evangelist | The fleet = this player's ships, or the whole team? His penalty is worded "if killed": does a merely **disabled** Evangelist (post destroyed, kill roll survived) cost the fleet its +1 without the −10 initiative / −1 to hit? (Default: yes, the penalty needs a kill.) Is the penalty permanent? Do reinforcements that arrive later get the bonus? **Rules text 2026-10-29 (§9.40)** settles the last three: "disabled or killed" both reverse the bonus, "for the rest of the scenario"; "all units in the scenario" (so a reinforcement too, once it is on the field); a disengaging ship takes the bonus away without the penalty; the user's notes allow several Evangelists, not stacking, a lost one's penalty cancelled by a serving one's bonus. Asked: whose units; which hulls; how he is placed; whether the morale adds on a Gunner's weapon. **RULED 2026-10-29:** **his player's fleet only** (no mines, terrain or remotely controlled craft); **the 8 Corillani Theocracy hulls** with "(CPN)" or "(OSF)" in their notes (not the Civilian Vostova freighters or the Custom Ships); **bought in the C&C and moved freely in Fleet Selection** - re-ruled as the build began: **in battle too**; **the Gunner's +1 replaces the morale +1** on his weapon, the −1 still applies. |
 | Laser Technician | Lasers = `weaponClass` Laser (49 classes)? Is the power boost declared in Initial Orders? Is the +50 % cap on base damage? **Rules text and rulings 2026-10-17 (§9.17):** the text settles the first three - laser-category weapons (any weapon with a Laser mode; only a shot in that mode gains), the boost through the ordinary boost in Initial Orders (the user's design note: "boostable ... 1 power = 1 damage, with no maxBoostLevel but a cap"), the cap on the roll ("if the base roll was 12 damage, it could be raised to 18"). **RULED:** (1) a laser that hits more than once a turn shares its boost as **one pool** for the turn; (2) on a serving Expert Gunner's laser the Gunner's +1 per die **replaces the flat bonus only** - the boost still works there; (3) boosts **hidden from opponents**; (4) the owner's tooltip **Damage line shows** the flat bonus and the boost, with a **Laser boost** line. |
 | Plasma Scientist | *Added 2026-10-17 with his rules text (§9.18).* Which plasma weapons are "medium or heavy"? Does a battery start the battle holding the extra point? Are the web's range and the battery's capacity shown to opponents? **RULED 2026-10-17:** every plasma weapon but the light ones (`Officers::$plasmaClassBonus`); yes, a battery still holding its deployment charge starts full; yes, to every viewer (a displayed stat is public). |
 | Security Officer | *Added 2026-10-17 with his rules text (§9.19).* The user's note settles the main one: "shift all die rolls by up to 2 in any direction desired by the defending player" is a fixed **+2** ("higher rolls are almost always worse for marine attackers ... no need to build in a player choice"). Asked: do the defenders' own Capture rolls (5 or less hits) shift too? Breaching pods only, or Grappling Claws and transporters as well? 7.5% exactly, or 8%? On a hull with two C&Cs, which gets the -2? **RULED 2026-10-17 (all as recommended):** defenders **-2** too (Elite Crew's pattern, doubled); **every boarding party**; **7.5% exactly** (a percent may now carry one decimal place); **his own C&C only**. |
@@ -4916,7 +4953,7 @@ random, "although I'd rather not bloat page load ... So some kind of optimisatio
 - **Landing** - Dock in the Firing phase (`findEligibleCarriersForDock` / `confirm.hangarDock`), a `hangarDockOrder` note resolved at the end of the turn
   (`Hangar::criticalPhaseEffects` → `processWholeFlightDocks`, or `processDockOrders` for a catapult); `|carrier speed - flight speed| <= freethrust`
   (`HangarOps::canShipReceive` ↔ the client). ⚠️ The whole-flight path (`buildDockBays`) asks `canShipReceive` and goes on whatever it answers - on it, hex,
-  heading and speed are the client's alone.
+  heading and speed are the client's alone. *(Fixed 2026-10-30 - see Observation 2 below.)*
 - **A ram after the turn's fire** - `Firing::createFailedAttachRamOrders`: a 'TerrainCrash' automatic hit, persisted first (so its damage links to it), resolved at
   once; an order made later would never resolve.
 
@@ -5024,6 +5061,11 @@ GIFs' 5.1 MB, every frame kept (28 / 45 / 23 / 44 / 10); one of them is fetched 
    dancing: end in a moving Enormous unit's hex at speed 6-8.
 2. ⚠️ Pre-existing: `HangarOps::buildDockBays` asks `canShipReceive` and ignores its answer, so on the whole-flight dock path the server never checks the hex,
    heading or speed (only the client does); a crash withdraws the flight's dock orders itself for that reason.
+   **FIXED 2026-10-30** (user request): the approach checks (pivot/roll, hex, heading, speed + the Redline landing) moved verbatim out of `canShipReceive`
+   into `HangarOps::canApproachCarrier`, which `canShipReceive` calls at the same point (catapult/jump paths unchanged) and `buildDockBays` now honours -
+   a failed approach leaves the flight in space with a 'Hangar dock failed' note naming the reason. The primary-bay `canShipReceive` call stays for the
+   reason text it supplied before. `breakOffDocks` kept: a crash is a break-off, not a failed dock (no fail note), as before. Record:
+   HANGAR_OPERATIONS_PLAN.md "Whole-flight dock re-checks the approach".
 3. Not built (not asked): an afterburner's thrust for a breaching pod's speed match when it attaches - the boarding checks still read `freethrust`.
 4. Not covered by a harness: `MovementGamePhase::process`'s validateRedline line and `Firing::fireWeapons`' rollRedlineLandings line (the methods are covered),
    a crash with a real database (its order persisted before it resolves - `createFailedAttachRamOrders`' pattern), the dock dialog's risk line, and a real
@@ -5043,3 +5085,960 @@ GIFs' 5.1 MB, every frame kept (28 / 45 / 23 / 44 / 10); one of them is fetched 
 - Gates: client **1027 / 0** (canChangeSpeed after a burn and not after a move, the clip times, the icon's place with and without Minesweeping Mode, the red
   and plain arrows - short, exactly enough, plenty, without him, the Movement phase -, the cooling look); mutation **7 / 7** on the new code (the first pass
   missed the "exactly enough" boundary - a check added). Both legacy bundles rebuilt, `-Sync` done.
+
+### 9.40 Stage 33: Expert Evangelist (2026-10-29)
+
+**Rules text (user, 2026-10-29) - one of the original 25. It replaces the draft (a random primary post, +1 to hit, and -10 / -1 only "if
+killed", §3.3 / §6).** "Expert Evangelist: Some Corillani religious leaders are more like evangelists, traveling and spreading the faith by making
+personal appearances and giving performances. Occasionally, these will visit the military, and make their rounds through the various fleets. If this
+occurs, they provide a certain morale benefit. So long as the evangelist is alive and on the field of play, all units in the scenario receive a +10
+initiative bonus and +5% to hit with all weapons due to higher morale. This does not affect defensive fire, however. If the evangelist is disabled or
+killed, these bonuses are reversed into penalties (-10 to initiative and -5% to hit) for the rest of the scenario. If the evangelist's ship disengages,
+there are no ill effects, though any bonuses are lost. Location: Any system or structure block on any ship in the fleet. He may not, however, use a
+shuttle or fighter. Cost: 5% of the cost of the fleet. Availability: Corillani CPN and OSF sub-faction units only. No more than one evangelist may appear
+in any fleet." The user's notes: a Corillani unit's sub-faction is named in `$ship->notes` (e.g. `'Defenders of Corillan (DoC)'`); "A player can take
+more than one Evangelist, but their effects do not stack and losing one still provides the negative effects (although the surviving one would also
+provide benefits effectively cancelling this out)" - this overrides the text's "no more than one"; "Fleet cost can be calculated from slot points when
+this is set on the assumption the player will use all. In gamelobbys where points is unlimited, then the points will need to adjust with cost of
+purchased fleet."
+
+**What FV had (researched 2026-10-29).**
+- **Sub-factions live only in `notes`.** Corillani Theocracy hulls with "(CPN)": Conosti, Garunda, Llartol, Mollanta, Torellan; with "(OSF)": Botral,
+  Intona, Ortana - 8 hulls, every one with a C&C. The Defenders of Corillan are 5 hulls (spelt "Corillan" and "Corrilan"); the Urshtalu Starbase, the
+  Thor'ka OSAT, the mines, the Tural pods and the Drolla shuttles name none. Other hulls with "(CPN)" / "(OSF)" in their notes: the Vostova Freighter (CPN)
+  and (OSF) (faction **Civilians**), the Custom Ships' Shadow Garunda and Shadow Mollanta, and the Tillini [CPN] / [OSF] fighters. The wording varies
+  ("Orillani Space Forces (OSF)", "Orillani Space Force (OSF)"), so only the bracketed code is a reliable test.
+- **Slot points**: `slot.points`, where -1 is Unlimited; lobby code reads it through `gamedata.getMaxPoints()`, which also returns a Fleet Builder's typed
+  cap when its slot is -1. **The server never checks a fleet's total** (BuyingGamePhase's "Fleet too expensive" test is commented out) and trusts the
+  ship-level bucket (`pointCostEnh`); placed rows are re-priced by `sanitiseSystemEnhancements`. `Manager::loadSavedFleet` re-prices officer rows through
+  `rowPrice` but knows no game, and so no slot - only the lobby's `doLoadFleet` does.
+- **A bonus for units that carry no officer** already existed: the Warrior's launched flights (`applyLaunchedFlights` in `afterShipsConstructed`, the
+  TacGamedata::onConstructed post-pass, before the initiative roll), published by `addForJson` through `getOfficerLaunchIni`.
+- **"+1 to hit with all weapons" = fire control** (the user's expectation, §9.35): `raiseEveryMode`, as applyWarrior uses it. **Interception reads the
+  intercept rating, never fire control** (`Weapon::getInterceptionMod`), so "does not affect defensive fire" holds by construction; Meteor Defence counts
+  blocked boxes and makes no hit roll.
+- ⚠️ **A ship that jumps to hyperspace** (a jump-out, or a jump point exit) has its primary Structure destroyed by a `HyperspaceJump` damage row, which
+  `disabledTurn`'s Structure cascade read as **disabled** - a penalty where his rules give none. ⚠️ And `hasJumpedToHyperspace` presumes a FALLEN unit: a
+  live ship with a jump drive answers true (`JumpEngine::hasJumped` only asks whether the non-jump damage destroyed it).
+- **A kill roll for an officer in a Structure block** was already `blockKillRoll` (d20 + this turn's damage), written for the Targeter.
+- **One flag, `movable`, governs both kinds of move** (Fleet Selection, Stage 15; Initial Orders, Stage 10) - which re-ruling 3 makes exactly right.
+
+**Rulings (user, 2026-10-29, asked before building):**
+1. **His player's fleet only**: every unit of his slot - ships, bases, OSATs and flights. Not mines, terrain or remotely controlled craft (no crew to
+   inspire). An ally's fleet is untouched.
+2. **Corillani Theocracy only**: the 8 hulls whose faction is Corillani Theocracy and whose notes carry "(CPN)" or "(OSF)". Not the two Vostova freighters
+   (Civilians), and not the Custom Ships' Shadow hulls. The Tillini fighters are out by his own rules ("may not use a shuttle or fighter").
+3. **Bought in the C&C, moved freely in Fleet Selection** to any targetable system or Structure block of his ship, as the Religious Leader is (§9.21).
+   *Re-ruled 2026-10-29, as the build began: "it's fine to have him move around during the game as well, no need to be lobby-only"* - so he moves in
+   Initial Orders too, on Stage 10's rules (`movable`, the one flag both kinds of move read; no new key).
+4. **On a serving Expert Gunner's weapon the Gunner's +1 replaces the morale +1**, as it replaces the Warrior's (§9.35). The -1 penalty still applies there.
+
+**Built with defaults, stated here (ask before changing):**
+- **Units.** "+10 initiative" is FV's displayed units, as the Religious Leader's (QX1's -10 matched). "+5% to hit" is +1 fire control (one d20 step) on
+  every non-null fire control of every mode of every weapon of every unit in the fleet, a fixed-fire-control mode excepted (`shiftEveryMode`, raiseEveryMode
+  with a step). A flight's on each craft's weapons - fire control, not OB, which also moves ballistic launches and mine detection. Never the ram (ramming is
+  no weapon fire - the Religious Leader's exclusion) or a jump drive. The -1 the same way.
+- **Other fire-control officers stack with him** - the Matter Weapons Expert, the Turret Officer, the Warrior: only the Gunner's text says "does not
+  combine", and each of their own rulings makes the Gunner the one who replaces.
+- **One morale state per fleet** (the user's note): +10 / +1 while ANY Evangelist of his player serves, plus -10 / -1 once ANY of them is lost. A serving
+  one and a lost one cancel out; two lost count once. Lost = disabled or killed (D3): from the next turn, for the rest of the battle; Self Repair changes nothing.
+- **Disengaged = withdrawn, for every officer.** His ship jumped to hyperspace while he served (a `HyperspaceJump` row on the primary Structure AND
+  `hasJumpedToHyperspace`): a new `how`, `'withdrawn'`, offered before the disabling in `outState`, so the jump's cascade is never read as a loss - he
+  serves to the end of the jump turn, then gives nothing. One lost before the jump stays lost. ⚠️ This is generic: a Religious Leader on a ship that
+  jumped out is withdrawn too (no frenzy) - he left, he did not fall. The tooltip says "(left the battle, turn N)"; the insignia shows grey.
+- **"On the field of play."** A ship not yet deployed (delayed deployment, a reinforcement in hyperspace, a surrendered fleet - `getTurnDeployed`) gives
+  no bonus until its deployment turn.
+- **The turn he moves he serves nowhere** (Stage 10), so his fleet has no morale that turn.
+- **Posts.** Any system that can be enhanced (`systemMayBeEnhanced`: hit points, targetable, shown) but his C&C - weapons, thrusters, hangars and
+  Structure blocks included - 23 to 36 a hull. One placed or movable officer to a post, as ever: he cannot move into a system a Religious Leader holds,
+  nor a Religious Leader into his.
+- **Kill roll.** D3's, on whatever he sits in: his system's own critical roll, or `blockKillRoll` in a Structure block. Pre-battle damage that destroys his
+  post refunds him (§9.21).
+- **Price.** ceil(5% of the slot's points) (`getMaxPoints`, so a Fleet Builder's typed cap counts: 150 in a 3,000-point game). An Unlimited slot:
+  ceil(5% of the fleet's cost) - `gamedata.fleetCost` (hull, refits, ammunition, officers, the minefield premium) less every Evangelist's own price, so his
+  price never feeds itself and two of them each cost 5% of the rest. Re-priced by the lobby after every fleet change. In the buy dialog a store blueprint is
+  priced as he will cost with it in the fleet (in an Unlimited slot its bare hull counted in; its refits join once the purchase lands).
+- **The server keeps what his row says he cost** - the ship-level row's [4] and a twin row's [4] - at buy, save and reload (the trust D4 already gives the
+  ship-level bucket); a saved fleet keeps his price and the lobby re-prices him to the new slot. His static offer is 0.
+- **More than one is allowed** (the user's note), so no Fleet Correctness Report line.
+- **Visibility.** His officer entry is own-team (D4). The morale is public: every unit's `iniativeadded` (sent with every ship) and its weapons' fire
+  control (isModified) reach every viewer - the bonus, its end and its reversal, never where he sits. *(First built through a published `iniativebonus`;
+  re-built as a modifier - see the follow-up below.)*
+- **Lobby preview.** While one is bought (and his post stands) anywhere in the selected slot's fleet, every unit of it previews +1 fire control
+  (`officers.moraleBonus`, in fireControlRaise); never a mine, a store blueprint or a server-built unit. No loss in the lobby. *(The +10 initiative preview
+  was dropped with the follow-up: the lobby shows a unit's base initiative only, as it shows no other modifier.)*
+
+**Design.**
+- `Officers`: registry `OFF_EVAN` (post `cnc`, pct 5, new key `fleet`, `apply` null, `needs` `isCpnOrOsf`, `movable`) after OFF_GRAV - the last fixed-post
+  ship officer; `OFF_EVANP` (placed, `sameAs` OFF_EVAN, `fleet`, `hosts` `isEvangelistPost`, `nonWeapon`, `movable`) after OFF_TURR - the last placed one;
+  `$factionRules` OFF_EVAN `only` Corillani Theocracy; constants `EVANGELIST_INI` 10, `EVANGELIST_HIT` 1. ⭐ `isFleetPriced` (⚠️ MIRROR PAIR with
+  officers.isFleetPriced), ⭐ `fleetRowPrice` (the row's own price - asked by `rowPrice` and `legacyPrice`; `offerPrice` 0), `isCpnOrOsf`, `isEvangelistPost`,
+  `fleetKey` (userid|slot), `isOnField`, `moraleStates`, `feelsMorale`, ⭐ `applyMorale` (in `afterShipsConstructed`; ⚠️ MIRROR PAIR with
+  officers.moraleBonus), `moraleWeapons`, `shiftEveryMode` (raiseEveryMode with a step; `bumpFireControl` takes the step), ⭐ `withdrawnTurn` and the
+  `'withdrawn'` take in `outState`. *(Follow-up: the initiative is the `moraleIni` marker, which `BaseShip::getCommonIniModifiers` adds, plus
+  `iniativeadded` - no longer `iniativebonus`, and no longer published by `addForJson`.)*
+- `BaseShip` (ShipClasses.php): protected `$officerMoraleIni` + `getOfficerMoraleIni` / `setOfficerMoraleIni` (the `$officerLaunchIni` pattern).
+- `Enhancements`: per-system registry `OFF_EVANP` (`sysEnhEligibleOfficerEVANP` = Officers::mayHost, `sysEnhPriceOfficerEVANP` 0); the sanitiser keeps a
+  fleet-priced row's claimed price (no re-price, no notice).
+- `Manager::loadSavedFleet`: a fleet-priced officer keeps what he cost, and his row's [4] is set to it, so the lobby's re-price moves the points by the
+  difference from there.
+- Client `officers.js`: registry rows (`fleet`, `movable`; OFF_EVANP `placed`, `sameAs`), `EVANGELIST_PCT` / `_INI` / `_HIT`, `isFleetPriced`,
+  `percentOf` (⚠️ MIRROR PAIR with Officers::price), `fleetMaxPoints`, `lobbyFleet`, `hasEvangelist`, `evangelistPaid`, ⭐ `evangelistPrice`,
+  ⭐ `setEvangelistPrice` (his row's [4], every twin offer's [2] - so a lobby Move stays free - and his bought rows, moving pointCostEnh / pointCostSysEnh and
+  pointCost by the difference), ⭐ `repriceFleet` (redraws a moved row: `gamedata.refreshFleetRow`), `priceBlueprint`, ⭐ `moraleBonus`; ~~`displayStat`
+  (+10 initiative)~~ (dropped in the follow-up), `fireControlRaise` (+1, not on the ram, a jump drive or a Gunner's weapon), `priceNote` ("150pts: 5% of the 3000-point limit" /
+  "...of the fleet, re-priced as it changes"), `stateText` ("(left the battle, turn N)"). `gamelobby.js` `calculateFleet` runs `officers.repriceFleet()`
+  first (after every buy, edit, copy, removal, load and Fleet Builder cap change). `confirm.js` `addBuyEnhancementRows` runs `officers.priceBlueprint`.
+  `systemEnhancements.js` LABELS `OFF_EVANP`.
+- Docs (`docs/ammo-options.html`): an Expert Evangelist card (Ship Officers, after the Engineer - alphabetical); him in Buying officers (a system you choose;
+  the fleet-% price), Losing an officer (a ship that jumps out - "neither"), Moving an officer, and Seeing your officers.
+
+**Files.** Server: `Officers.php`, `ShipClasses.php`, `Enhancements.php`, `controller/Manager.php`. Client: `officers.js`, `gamelobby.js`, `UI/confirm.js`,
+`systemEnhancements.js`. Docs `docs/ammo-options.html`. Harnesses: `officersHarness.php` (six Stage 33 sections, a saved-fleet round trip in the DB
+section, five registry-order checks moved by one), `officersClientHarness.js` (a Stage 33 block, five registry-order checks moved by one). `fvbuild
+-Statics`, both legacy bundles (`node scripts/bundle-legacy.js` - no watcher was running), `-Sync`. No React change, no schema change, no new class.
+
+**Measured.** Statics: OFF_EVAN on the 8 hulls (at 0), OFF_EVANP 231 offers on those 8 only (23 to 36 a hull); `Corillani Theocracy.json` +6,084 B
+(563 KB). None for the Civilians or the Custom Ships.
+
+**Verified.**
+- `officersHarness.php` **2429 passed with the database** (2332 --no-db), 7 failing - all 7 pre-existing on a clean tree (observation 2). Stage 33's six
+  sections: the registry place and keys; offers on the 8 hulls at 0 and none on a DoC hull (both spellings), the Civilians' Vostova, the Custom Ships'
+  Shadow Mollanta, the base, the OSAT, a CPN flight or an Omega; the post; a doctored row on a DoC hull; the twin on every enhanceable system but the C&C
+  (a Particle Cannon, a Structure block, a thruster, the Reactor among them; never the ram), at 0, limit 1, none for the DoC, Vostova or Omega or an opted-out
+  hull; the statics sweep. Price: Officers::price's 5%; rowPrice / legacyPrice the row's (163, 171), 0 for a row priced but not bought; the REAL sanitiser
+  keeping 171 with no notice, on a weapon too, dropping the C&C, a pre-battle-destroyed Scanner and an Omega, and still re-pricing a Gunner. Morale through
+  the post-pass: +10 on his ship, a DoC cruiser and a Tillini flight of his player, nothing on an enemy or an ally of his team; +1 on every mode of a Particle
+  Cannon, Heavy Plasma, Twin Array, missile rack, the cruiser's gun and a Tillini's gun, sent (isModified); never the ram or the jump drive; intercept unchanged;
+  an enemy sent the numbers, not the officer; the twin in a Structure block; a mine untouched. A Gunner's cannon +1 (not +2), and +1 -1 once lost. Lost: killed
+  last turn -10 / -1 on every unit, killed this turn +10, three turns ago -10, C&C destroyed and ship destroyed -10 (disabled); jumped out last turn -
+  withdrawn, nothing; jumping this turn +10; killed before the jump -10; a jump row on a wrecked hull no jump; a Religious Leader withdrawn, no frenzy. Two
+  serving +10 once, one lost one serving 0, both lost -10 once. Not deployed until T+1: nothing on T, +10 on T+1. Moves: to a Particle Cannon (OFF_EVANP) and
+  the fleet +10 next turn, nothing the turn he moves, to the aft block, refused onto a Religious Leader's Reactor; Initial Orders targets (weapons, blocks,
+  the Reactor, never the C&C). The kill roll in a block (17 + 3 kills - "Expert Evangelist killed", 16 + 3 does not). The DB section: a saved fleet with a C&C
+  Evangelist and a twin in a Structure block - saved at 150, reloaded at 150 with no re-price, the row's [4] 150, the refit bucket 150, rolled back.
+- `officersClientHarness.js` **1053 passed**, 5 failing - all pre-existing (observation 2). Stage 33's 31: the registry and constants against Officers.php;
+  percentOf; repriceFleet in a 3000-point slot (150 on his row, his twin's offers and the unit, the row redrawn, a Gunner's offers and another cruiser untouched,
+  idempotent), the price note both ways; Unlimited 90, 130 with another cruiser, two Evangelists 180 each, back to 90; hasEvangelist / evangelistPaid; the
+  lobby Move to a laser and back, free, the twin re-priced; priceBlueprint (capped 150, Unlimited with the hull 140, a fleet unit untouched); the REAL
+  confirm.addBuyEnhancementRows asking it; the morale preview (+10 / +1 read-time, not the ram or jump drive, the Gunner's laser +1 only; none on a store
+  blueprint, a server-built unit, a mine, another slot, a destroyed C&C, an unbought row); "(left the battle, turn 3)"; the REAL gamedata.calculateFleet in a
+  sandbox (1950 capped, 1890 Unlimited through the real fleetCost).
+- `enhancementsHarness` **298 / 0** (fingerprint unchanged); `enhancementsDifferential.js` **964 / 0**.
+- `fvbuild -Check`: autoload current, validator clean (0 new errors), replay **159 / 3** - games 4237-4239 differ ONLY in ship faction strings
+  ("Centauri republic" -> "Centauri Republic", three ships -> "Orieni Imperium"), from the user's own Shuttle.php commits of the same morning (a6c93147c,
+  after the session began) - not from this stage. Not re-recorded. `-Statics`, both legacy bundles and `-Sync` done.
+- **Mutation-tested: 55 / 55 caught** (32 server - 30 against a generated copy of the harness with only the Stage 33 sections, ~2 s each, 2 against the
+  full harness with the database for the saved-fleet load; 23 client), files byte-identical after. The first pass missed one - fleetRowPrice counting a
+  priced row that is not bought - and a check was added. Runner `mutate33.js`, session scratchpad only.
+
+**Observations, not changed:**
+1. Not play-tested. Worth a test: a 3,000-point game, a Mollanta with him (150 points); the fleet's DoC cruiser shows +10 initiative and +1 on every
+   weapon's fire control in its ship window; move him to a Particle Cannon in Fleet Selection (free); in game an enemy sees the raised initiative and fire
+   control. Then lose his post: -10 / -1 everywhere from the next turn. In an Unlimited lobby, buy and remove ships and watch his price follow.
+2. ⚠️ Pre-existing, not changed (7 officersHarness / 4 client statics checks, failing on a clean tree): ships contributors added since Stage 32 (a new
+   "Terran Federation" faction, one more fighter, more ballistic and C&C hulls) moved the Ballistic Officer's, Quartermaster's, Redline Pilot's and
+   isOtherSetting sweeps' recorded counts. Also pre-existing: the client "clicked: the burn ordered" check (Stage 32).
+3. Not covered by a harness: TacGamedata::onConstructed's `$officersPresent` gate around afterShipsConstructed (the harness calls the post-pass
+   directly), and a real browser's lobby.
+4. The enhancementsDifferential compares single ships, so the fleet-wide morale has no differential case; both harnesses pin the same numbers instead.
+
+**Follow-up (user, 2026-10-29, after play test 4520): the morale's initiative is a MODIFIER, not the base.** "I think the Initiative bonus/penalty
+should show as a mod, not the base Initiative value of the ship." Every price and fire-control rule worked as built; only the initiative moved:
+- `Officers::applyMorale` no longer touches `iniativebonus`. It sets the unit's `moraleIni` marker and adds the shift to `iniativeadded` - the
+  modifier `BaseShip::onConstructed` fills for display before the post-pass runs.
+- `BaseShip::getCommonIniModifiers` adds the marker (outside its OSAT guard - OSATs feel the morale), so both rolls count it: `Manager::generateIniative`
+  and `SimultaneousMovementRule::generateIniative` (game 4520's rule) each add getInitiativebonus + getCommonIniModifiers to the d100.
+- `addForJson` no longer publishes `iniativebonus` for it: `iniativeadded` is sent with every ship already. The map tooltip reads
+  "base <iniativebonus>; mod <iniativeadded>", and the ship window shows base + mod, its Initiative row yellow while the mod is not 0.
+- The lobby's +10 initiative preview (`displayStat`) is gone: the lobby shows a unit's base initiative only, as it shows no other modifier (speed,
+  criticals). Its +1 fire control preview stays - fire control has no base / mod split, and in game the weapons' own fire control is raised.
+- Gates: officersHarness **2433 with the database** (7 pre-existing), new checks: the base unchanged on every unit, getCommonIniModifiers = iniativeadded =
+  +10, the REAL Manager::generateIniative and SimultaneousMovementRule::generateIniative (the DoC cruiser 10 above an identical ally's on the same die
+  difference); an enemy sent the mod, the base unmoved. Client **1053** (5 pre-existing): the lobby's base initiative 40, not 50.
+  enhancementsHarness 298 / 0, differential 964 / 0, `-Check` replay 159 / 3 (the same three faction-string games). Mutation: 5 new mutants (the
+  iniativeadded write, the marker, getCommonIniModifiers' line, the base raised again, the lobby preview put back) all caught; the two retired mutants
+  (the old publish line and preview) removed from `mutate33.js`. Both legacy bundles rebuilt, `-Sync` done.
+
+**Second follow-up (user, 2026-10-29).** The lobby's +10 initiative preview is BACK (`officers.displayStat` adds `moraleBonus` x 10 to the Initiative
+value) - "mod in game, shown in Initiative value in lobby". Client 1053 (5 pre-existing); bundles rebuilt, `-Sync` done.
+
+**⏳ LATER (user, 2026-10-29 - deferred, not built): every officer's initiative effect as a MODIFIER in game, as the Evangelist's now is.** Today the
+Helmsman (+5), Security Officer (+5), Religious Leader (+10, frenzy +20), Political Officer (speech +30), Warrior (+10, Supreme Anticipation +50 / -50,
+and +10 on the flights his ship launched), Quartermaster (-30) and Dogfighter (+5) all write `iniativebonus` (the BASE) and publish it; the lobby
+already shows each in its Initiative value (`stats`), so only the game side would change. Found while scoping it, and why it was deferred:
+- ⚠️ **Three tie-breaks compare the BASE** - `TacGamedata::sortShips` (which `Manager::generateIniative`'s tie separator turns into the final order),
+  `BaseShip::hasBetterIniative` and the client's `shipManager.hasBetterInitive` (ships.js, the Simultaneous Movement brackets). Moving an officer's
+  share out of `iniativebonus` changes who wins an exact tie unless all three compare base + the officer share - and the client would need that share
+  in the payload (an `officerIni` field), as it cannot split `iniativeadded`.
+- The shape: one generic `BaseShip` officer-initiative marker (the Evangelist's `$officerMoraleIni`, generalised), added by
+  `getCommonIniModifiers` (no class overrides it; the Pak'ma'ra and Polaren `getInitiativebonus` are base + a fleet term, so totals hold); each
+  `apply` / `lost` method writes the marker instead of `iniativebonus`; the post-pass ones (launched flights, morale) add to `iniativeadded` too;
+  the `publish` / `lostPublish` `iniativebonus` entries and `addForJson`'s launched-flight line go.
+- Knock-ons: dozens of officersHarness checks read `iniativebonus`; `enhancementsDifferential.js` compares the lobby's displayStat initiative with
+  the server's `iniativebonus` (would need base + marker); the enhancementsHarness fingerprint may record it; replay corpus games with initiative
+  officers would FAIL on their snapshots and need re-recording (user's OK).
+- ⚠️ Already true of the Evangelist since the first follow-up: his ±10 is in the modifier, so the base tie-breaks above no longer count it (they
+  did while it sat in `iniativebonus`). Harmless outside an exact tie; the same fix would cover him.
+
+**Third follow-up (user, 2026-10-29): the morale is back in the BASE initiative, in game too** - "Let's move the Evangelist bonus back into the base Ini
+value in games too", once the tie-breaks above were seen. So the first follow-up is UNDONE: `applyMorale` adds the ±10 to `iniativebonus` again (and sets
+the `moraleIni` marker), `addForJson` publishes `iniativebonus` for a unit with a morale shift, `getCommonIniModifiers` no longer reads the marker and
+`iniativeadded` is untouched. Exactly as the other initiative officers today, so TacGamedata::sortShips, BaseShip::hasBetterIniative and the client's
+hasBetterInitive all count it again. The lobby keeps showing it in the Initiative value (second follow-up). The deferred change above still stands
+for ALL initiative officers together, the Evangelist with them.
+- Gates: officersHarness **2433 with the database** (7 pre-existing) - the Stage 33 checks read the base again (+10 on every unit of his fleet, iniativeadded
+  unchanged, both REAL rolls 10 higher, the enemy sent the raised base); client **1053** (5 pre-existing); enhancementsHarness 298 / 0, differential
+  964 / 0; `-Check` replay 159 / 3 (the same faction-string games). Mutation: the five initiative mutants re-aimed at the base (the publish line, the
+  `iniativebonus` write, the marker, a modifier written as well, the lobby preview removed) - all caught. Bundles rebuilt, `-Sync` done.
+
+### 9.41 Stage 34: Expert War Leader (2026-10-29)
+
+**Rules text (user, 2026-10-29) - an officer the user added.** "Expert War Leader: Narn history is replete with heroic leaders who rose to the occasion,
+getting their people out of danger or fighting to victory despite desperate odds. When such a leader commands a fleet, he provides significant benefits to
+the entire force. An expert war leader adds +1 to the initiative of every Narn ship present, so long as his ship is in command. Once only once during the
+scenario, the war leader can do each of the following, but can only do one on any turn: 1. He can select a single enemy unit, declaring it as the subject of
+his personal wrath. All ships gain +1 to hit that unit on that turn only. This must be announced before any weapons roll to-hit. 2. He can declare a single
+friendly unit to be the "center of glory." It receives a + 2 bonus to hit on that turn only. This must be announced before any weapons roll to-hit. 3. He can
+taunt the enemy, drawing their attention to himself. They receive a +1 bonus to hit his ship on that turn, but a -1 penalty to hit any other ship (but not
+fighters or shuttles). Note that this would be a good turn to suggest his ship use a full complement of defensive EW! 4. He can anticipate his enemy's
+actions. He must announce the use of this ability at the start of the turn, before the EW Determination Step of the Combat Sequence. On this turn only, he
+can wait to determine his ship's (and only his ship's) EW until after his opponents have all announced their EW. He must still determine ballistic weapons
+launch at the usual time, however. In addition to this, his ship receives a bonus of +60 (in FV) to initiative on that turn only, in addition to all other
+benefits. Location: C&C. Cost: 5% of the base cost of all units involved in the scenario, plus 25% of the cost of his own ship. Availability: All races
+have such influential leaders, but they are rarer outside Narn space, and cost 50% more than the listed price." The user's notes: one ability a turn, so a
+new React menu on the C&C offers them in Initial Orders; the two Firing-phase abilities through the Expert Warrior's Charge approach - a new movement icon
+(`img/warLeader.png`, the user's art), click it then the unit; no icon once an ability was used earlier in the turn; yellow by default, red for Wrath, green
+for Glory; Wrath marked with a crosshair as the Charge (another colour - a Drazi ship may carry both), Glory the same on allies; Taunt applies to the turn;
+Anticipate changes the initiative order in game, as the officers / features that change it in Initial Orders do, and its EW hold works as the Expert
+Scanner's, except that ALL EW may be held.
+
+**What FV had.**
+- **Initiative after the roll**: the Triad Command Node and Fighter Missions rewrite a unit's rolled initiative when Initial Orders close
+  (`InitialOrdersGamePhase::advance`, before the first active ship is picked): `CnC::shiftIniative` (classic: total + the ini bonus row; simultaneous
+  movement: the raw total and its bracket), `CnC::breakCommandNodeTies` (+1 wins a tie, -1 loses it), `DBManager::updateIniative`.
+- **Late EW**: the Expert Scanner's point rides the EW Detector's allowance (`Officers::savedEwBonus` -> `EW::getDetectorAllowance`), clamped by the
+  unspent pool (`getSavedEwAllowance`), spent in Pre-Firing / Firing (`submitLateEw`, additive only - an Initial Orders allocation stays).
+- **Firing-phase declarations from a C&C**: the Political Officer's speech and the Warrior's Supreme Anticipation (`CnC::saveFirePhaseDeclaration`,
+  judged on the loaded ship, OffUsed notes); the Charge's icon, pick and crosshair (`UI.shipMovement`, `MovementPhaseStrategy.targetShip`,
+  `ShipIcon.setChargeMarked`); fleet scope and the lobby's fleet price - the Evangelist's (`fleetKey`, `isOnField`, `fleet`, `officers.repriceFleet`).
+- **OffUsed values** were "id:ability" (`takeNote` split in two).
+
+**Rulings (user, 2026-10-29, asked before building):**
+1. **The Initial Orders menu**: Taunt and Anticipate as buttons, one at most, cancellable until the commit; Wrath and Glory listed for their state only. In
+   the Firing phase ONE icon picks the ability by what is clicked: an enemy - Wrath (red), a friendly unit - Glory (green).
+2. **"+1 initiative to every Narn ship present"** (+5, QX1): every unit of his PLAYER's fleet that is not a flight (ships, bases, OSATs), whatever its
+   faction - the Evangelist's fleet scope; for a non-Narn leader "Narn" reads "his fleet's".
+3. **Wrath, "All ships gain +1"** (+5%): every unit of his fleet but flights - the literal "ships", as the Taunt's own wording sets fighters apart.
+4. **Glory, "a single friendly unit"** (+10%): only units of his own fleet.
+5. **Taunt's -1** applies only to shots at the other ships of his own fleet; the taunt public once Initial Orders close (the enemy preview needs it).
+6. **Price**: 5% of his slot's points (an Unlimited slot: his fleet's hull costs) plus 25% of his ship, rounded up once; x1.5 outside the Narn Regime.
+   "Since we've limited his abilities to only his own fleet". A 3,000-point slot and a 600-point ship: 300 / 450.
+7. **A combat log line for every ability** (as the Political Officer's speech).
+8. **Anticipate's +60 does not win ties** (user's note with the rulings).
+
+**Built with defaults, stated here (ask before changing):**
+- **Eligibility**: every hull with a C&C, every faction ("All races"), D9's exclusions as ever; fixed in the C&C (not movable). Several in one fleet: the +5
+  once per ship; each leader's own abilities.
+- **"So long as his ship is in command"** = he serves (D3) and his ship is on the field (`isOnField`). Nothing when he is lost - no penalty.
+- **"Doesn't win ties"** = classic movement keeps every total distinct (the roll's own rule), so a tie the +60 makes is broken AGAINST his ship (-1, the
+  fighter mission change's step). Simultaneous movement: the raw total and bracket move, no tie-break.
+- **Anticipate's EW**: on that turn his late-EW allowance is ALL of it (`WARLEADER_EW_HOLD` 1000, clamped to what he left unspent) - the Scanner's window
+  (Pre-Firing / Firing), additive only. So he also sees movement before placing it - the user's "same way as Expert Scanner".
+- **Shots**: Wrath / Glory / Taunt are hit-chance modifiers for that turn (as the Charge's +2): ballistic shots resolving that turn included, never the ram, a
+  jump drive or an interception; they stack with a Gunner's and a Charge's; several leaders' add up. Wrath and Glory name a unit on the board, deployed, not
+  destroyed, not terrain; Wrath any enemy unit (flights too), Glory any unit of his fleet (his own ship, its flights).
+- **Visibility**: Wrath and Glory own-team until the log tells them; the crosshairs shown to his team for the whole Firing phase, whatever is selected (the
+  wrath is every ship's to use) - the wrath's in a deeper red than the Charge's (`warLeaderWrathColour` #c8143c), a little wider ring, its own sprite.
+
+**Design.**
+- `Officers`: registry `OFF_WLEAD` (post `cnc`, pct 25, `fleet`, `apply` null) right after the Evangelist; constants `WARLEADER_INI` 5, `WRATH_HIT` 1,
+  `GLORY_HIT` 2, `TAUNT_HIT` 1, `WARLEADER_ANTICIPATION` 60, `WARLEADER_EW_HOLD` 1000, `WARLEADER_FLEET_PCT` 5, `WARLEADER_SHIP_PCT` 25,
+  `WARLEADER_OUTSIDER_PCT` 150, `WARLEADER_LOG_CLASS` 'WarLeader'; `$warLeaderHome` (Narn Regime); `$abilityNames` taunt / anticipate / wrath / glory and
+  `$unitAbilities`. ⭐ `spend()` takes an optional unit, written as the note's third part ("OFF_WLEAD:wrath:12"); `takeNote` splits USE notes in three,
+  `BaseShip::recordOfficerUse` keeps `unit`, `resolveUses` puts it in the entry's `units`. War Leader: `warLeaderIndex`, `warLeaderMay` (⚠️ MIRROR PAIR),
+  `warLeaderUsed`, `isLed` (a "ship": no flight, mine or terrain - ⚠️ MIRROR PAIR), `unitById`, ⭐ `warLeaderPrice` (⚠️ MIRROR PAIR - the rule written down;
+  the lobby prices him), `applyLeadership` (in `afterShipsConstructed`; marker `$officerLeaderIni` on BaseShip, published by `addForJson`),
+  `saveWarLeaderOrder`, ⭐ `applyWarLeaderInitiative`, `anticipationEwHold` (in `savedEwBonus`), `saveWarLeaderPick`, `warLeaderNames` (⚠️ MIRROR PAIR),
+  ⭐ `warLeaderShotBonus` (⚠️ MIRROR PAIR), `taunting` (`addForJson`: `warLeaderTaunt` to every viewer from phase 2 on), `warLeaderLog` /
+  `warLeaderSentence` / `shipLink`. Payload row `units`.
+- Hooks: `InitialOrdersGamePhase::process` (saveWarLeaderOrder on the reloaded ship, the POST-side C&C's transfer) and `::advance`
+  (applyWarLeaderInitiative after FighterMissions); `CnC::saveFirePhaseDeclaration` ("wrath:<id>" / "glory:<id>" items); `FireGamePhase::advance`
+  (warLeaderLog after speechLog); `Weapon::calculateHitBase` (after chargeHitBonus).
+- Client `officers.js`: the registry row; constants; ⭐ `fleetFamily` - the Evangelist's `evangelistPaid` / `setEvangelistPrice` (now `family`-aware) /
+  `moraleBonus` count HIS rows only (they read every fleet-priced row before - a War Leader's row would have been re-priced as an Evangelist's);
+  `repriceFleet` / `priceBlueprint` price both; `unitHullCost`, ⭐ `warLeaderPrice`, `priceNote`; `leadershipBonus` (displayStat +5 in the lobby);
+  in game `warLeaderEntry`, `spentTurn`, `warLeaderUsed`, `warLeaderMay`, `warLeaderCnc`, `onBoardUnit`, `canWarLeaderOrder` / `warLeaderOrder` /
+  `setWarLeaderOrder` (the order on his C&C: `warLeaderOrder`), `warLeaderPicking` / `warLeaderPick` / ⭐ `warLeaderState` / `warLeaderNames` /
+  `toggleWarLeaderPick` / `pickWarLeaderUnit` (the pick on his C&C: `warLeaderPick` {ability, unit}), `warLeaderMarks` / `warLeaderNamed`, ⭐
+  `warLeaderShotBonus`, `isLed`, `fleetKey`; `savedEwBonus` + the hold; ABILITY_NAMES. `model/system/baseSystems.js` CnC: `doIndividualNotesTransfer`
+  posts the order / pick beside the Triad's [1, swap] and the speech, `getWarLeaderTransfer`; Save Orders keys `warLeaderOrder`, `warLeaderPick`.
+  React `system/WarLeaderMenu.js` (Officers blue) in `SystemInfoButtons` (`canWarLeaderMenu`). `UI/shipMovement.js`: knobs `warLeaderIcon` /
+  `warLeaderColour` (yellow) / `warLeaderWrathColour` / `warLeaderGloryColour` / `warLeaderOffOpacity` / `warLeaderGlowColour` / `warLeaderTargetOpacity`,
+  `drawWarLeaderIcon` (the Charge's spot - Firing phase only, where the Charge, Rotate and Redline never show), `warLeaderCallback`;
+  `ShipMovementCallbacks.warLeaderCallback`; `FirePhaseStrategy.takeWarLeaderPick` (from `selectShip` and `targetShip`), the movement UI drawn for his ship;
+  `PhaseStrategy.syncWarLeaderMarkers` (from syncChargeMarker, never in a replay); `ShipIcon.setWarLeaderMarked` (texture per colour - `getMarkTexture`);
+  `weaponManager.computeShotModifiers` "War Leader" line, `doShortLogText` WarLeader; `combatLog.js` "WAR LEADER!:" (standalone); `game.php`
+  `#warLeader`; `tactical.css` pulse.
+- Docs: an Expert War Leader card (Ship Officers, before the Warrior - alphabetical).
+
+**Files.** Server: `Officers.php`, `ShipClasses.php`, `systems/baseSystems.php` (CnC), `weapons/weapon.php`, `Phase/InitialOrdersGamePhase.php`,
+`Phase/FireGamePhase.php`. Client: `officers.js`, `model/system/baseSystems.js`, `UI/reactJs/system/WarLeaderMenu.js` (new), `SystemInfoButtons.js`,
+`UI/shipMovement.js`, `ShipMovementCallbacks.js`, `renderer/phaseStrategy/FirePhaseStrategy.js`, `PhaseStrategy.js`, `renderer/icon/ShipIcon.js`,
+`weaponManager.js`, `combatLog.js`, `game.php`, `styles/tactical.css`, `img/warLeader.png` (the user's). Docs `ammo-options.html`. Harnesses:
+`officersHarness.php` (eight Stage 34 sections; six registry-order checks moved by one), `officersClientHarness.js` (a Stage 34 block; six moved by one),
+`enhancementsHarness` fingerprint re-recorded (old copy `fingerprint.before-officers-stage34.txt`). `yarn build` (UI + both legacy bundles - no watcher
+was running). No schema change.
+
+**Verified (the Docker stack was down - harnesses run in the throwaway `fv-phpcheck:8.4` image, no database).**
+- `officersHarness.php --no-db` **2423 passed, 8 failed**: the 7 pre-existing (§9.40 observation 2) and Stage 34's statics sweep, which waits for
+  `fvbuild -Statics`. Stage 34's: the registry place and keys; offers at 0 on a Gquan, an Omega and a Corillani hull, none on a flight or an OSAT; the post;
+  the price (300 / 450, 307 / 460 - rounded once -, an Unlimited 277), rowPrice keeping the row's; +5 on his ship and his player's Omega, not his flight, an
+  enemy or an ally, two leaders once, killed last turn none, this turn still, published to an enemy without the officer; Taunt / Anticipate through
+  saveWarLeaderOrder (one note "Expert War Leader: taunt used", phase 1; one a turn; beside a Triad [1, -1]; once per battle each; the turn after a wrath;
+  another player, nothing asked, killed, the gate off); takeNote's three parts and the load's `units`; Wrath / Glory through the REAL
+  saveFirePhaseDeclaration (the note "OFF_WLEAD:wrath:12"; Glory on his Omega, flight, own ship; refused on the ally, the enemy, Wrath at his own or the
+  ally's or no unit, an unknown ability, a turn he taunted, a second wrath, a destroyed unit, another player, another system; beside "anticipation");
+  warLeaderShotBonus and the REAL calculateHitBase (wrath +5% for his ships, not his flight / the ally / an interception / the ram, last turn's nothing;
+  glory +10% for his flight; taunt +5% / -5% for the enemy, nothing at his flight or the ally or for his team; the gate off); Anticipate +60 losing its tie
+  (110 -> 109, written once, re-sorted), no tie 80, last turn's or a taunt nothing, simultaneous movement 30 -> 90 and its bracket; savedEwBonus 1000 this
+  turn only, getSavedEwAllowance all 7 unspent / 0; the four log lines (and none for last turn's); the payload (`units` own team, nothing to the enemy;
+  `warLeaderTaunt` to an enemy in Movement, never in Initial Orders).
+- `officersClientHarness.js` **1090 passed, 5 failed** (the 5 pre-existing): the row and constants against Officers.php; the lobby price (307, idempotent,
+  the note; a Drazi ship 460; Unlimited 228; beside an Evangelist neither overwritten; priceBlueprint 307 / 259); the +5 preview (not a flight, another slot,
+  a mine, a store blueprint, a destroyed C&C, unbought); the menu's rule and the REAL C&C transfer ["taunt"] / ["anticipate"] with Save Orders; the icon's
+  states, the pick (ally refused, enemy wrath, flight glory, cancel), the REAL C&C ["wrath:12"], the shot preview, the crosshair marks, the taunt preview,
+  the EW hold; the REAL drawWarLeaderIcon's colours (yellow / pulsing / red + crosshair / green + crosshair, his art).
+- `enhancementsHarness` **298 / 0** after re-recording: the fingerprint gained exactly 20 lines, all `offer OFF_WLEAD` (one per test hull with a C&C),
+  nothing else changed.
+- Bundles: `fvbuild -Client` (yarn build) - the new code found in all three.
+- **With the stack up (user, same day):** `fvbuild -Statics` - OFF_WLEAD on **1,827** hulls of 80 factions (52 Narn), every one at 0; `officersHarness`
+  WITH the database **2524 passed, 7 failed** (the 7 pre-existing; the statics sweep now passes); `officersClientHarness` **1091 / 5** (pre-existing);
+  `enhancementsDifferential.js` **964 / 0** (his effect is fleet-wide, so no single-ship case - as the Evangelist's); `fvbuild -Check`: autoload current,
+  validator 0 new errors, replay **159 / 3** - games 4237-4239, the same faction-string differences from the user's Shuttle.php commit (a6c93147c) as
+  at Stage 33, not re-recorded; `-Sync` done (the served copy carries the code, the art, the statics and all three bundles).
+- **Mutation-tested: 62 / 62 caught + 1 equivalent** (37 server against `tests/replay/warLeaderProbe.php` - a generated copy of the harness with only the
+  Stage 34 sections, ~2 s a run -, 25 client), every file byte-identical after. The first pass missed 4: S04 is EQUIVALENT (warLeaderMay's "already
+  spent" test - `spend()` repeats it, as Stage 25's speakerIndex); S32 / S34 (the leadership's and the Taunt's `isOnField`) had no test - added: his fleet
+  deploying next turn gets no +5 and may not taunt, +5 from that turn; C03 (setEvangelistPrice's `family` test) had none - added: one Corillani CPN ship
+  carrying BOTH fleet-priced officers keeps 460 and 150. Runner `mutate34.js`, session scratchpad only. Not covered by a harness: the one-line hooks in
+  InitialOrdersGamePhase (process / advance) and FireGamePhase, and FirePhaseStrategy's pick / PhaseStrategy's crosshair sync / ShipIcon in a browser.
+  Not play-tested.
+
+**Follow-ups (user, play test 4523, 2026-10-29) - built, uncommitted.**
+1. The War Leader icon stood too close to the ship icon: astern at `UI.shipMovement.warLeaderDistance` px (60, was 42 - the Charge's spot), a knob.
+2. The War Leader menu "less generic blue": Narn red with gold (WarLeaderMenu's own INK - the header and buttons in the icon's yellow, white text).
+3. **The Glory crosshair outlived its turn** (on G'Quan from Turn 1 into Turn 2's Initial Orders, until a reload). Cause: `syncWarLeaderMarkers` kept
+   what was on show on the STRATEGY (`warLeaderMarked`), but the icons outlive it - the Waiting strategy after the Firing commit put the crosshair up,
+   its deactivate syncs nothing with no ship selected, and the Initial Orders strategy after it held no record to take down. Now read off each icon's
+   `warLeaderMarkColour`, so whichever strategy runs next corrects every icon (a replay takes them down too). Wrath had the same fault (one code
+   path). **The Charge's crosshair does not:** it is up only while a ship is selected, and every deactivate deselects with `inactive` set.
+   Checked by a node simulation of the 4523 sequence (Fire -> Waiting -> Initial Orders), scratchpad only.
+
+**Follow-up (user, play test 4517, 2026-10-29) - built, uncommitted: a fleet-priced officer charged twice.** An Apollo (900) bought with a War Leader
+in a 3500 slot read 1500 + "+600p" in the fleet list with 1400 left - 2100 charged. Cause: the buy dialog prices him on the clone it opened
+(`priceBlueprint`), but `gamedata.doBuyShip` builds the unit from a FRESH `getShipByType` clone whose offer still reads the static 0. The dialog's total
+(his 600 in it) goes into pointCost / pointCostEnh, then `repriceFleet` moves the points by the difference from the row's 0 - his price again. The
+Evangelist (Stage 33) the same, and `doCopyShip` (the same rebuild). Fix: both spinner loops write the dialog's `enhPrice` onto a fleet-priced row's [4],
+so the row says what was charged and repriceFleet moves only a real difference. Client only - though the server keeps the client's ship-level bucket,
+so the doubled pointCostEnh would have reached tac_ship.enhvalue too. Client harness: a new section drives the REAL buyShip / doBuyShip / copyShip /
+doCopyShip / updateFleet / calculateFleet in a sandbox (with the fix stripped the 5 pricing checks fail, 2100 / 1400 left as in 4517).
+Second fix (user-approved, same day): the Copy dialog PREVIEWED the War Leader off an inflated hull - copyShip carried pointCost but not pointCostEnh /
+pointCostEnh2, so `unitHullCost` read the copied enhancements, his own price among them, as hull (825 / 1725 asked on the Apollo, not 600 / 1500; the
+copy still landed at 600 once repriceFleet ran). copyShip now carries both buckets, as copyBulk does; a sixth check pins 600 / 1500 (825 / 1725 without).
+Third fix (user-approved, same day): in an UNLIMITED slot the Copy dialog previewed an Evangelist 3 high (103 / 1103, not 100 / 1100, copying a
+1000-point ship with him at 50) - priceBlueprint counted the copy's whole pointCost, his own price in it, into the fleet (both landed at 100 once
+repriceFleet ran). priceBlueprint now takes `evangelistPaid(ship)` off it (0 on a store blueprint), as evangelistPrice does for every fleet unit; a
+seventh check pins 100 / 1100 (103 / 1103 with the line reverted).
+Client run 1079/11, none from this: the 5 "buy dialog's note" checks are stale since 04bdcfc93 (notes shortened to "Npts"); Stage 28's section throws in
+PhaseStrategy.syncWarLeaderMarkers (its fake shipIconContainer has no getArray - since the 4523 follow-up); the known 4 statics + "the burn ordered".
+
+**Follow-up (user request 2026-11-01) - built, uncommitted: the officers' once-per-battle orders moved onto the ship tooltip.** Client only; the server,
+the C&C transfer and Save Orders are unchanged.
+1. **War Leader, Initial Orders:** Taunt / Anticipate left the C&C's React menu (`WarLeaderMenu.js` DELETED, unhooked from SystemInfoButtons) for a
+   tooltip button on his own ship, "in the same way as Lucky Captain": it opens `client/UI/warLeaderPicker.js` (plain DOM, the Lucky picker's shape, the
+   old menu's Narn red and gold as `.fv-missionpicker--warleader` in hexPicker.css) listing all four - Taunt / Anticipate picks, Wrath / Center of Glory
+   with a state chip. `officers.canWarLeaderOrder(ship)` (signature changed: no system) is the button's gate - his own ship on the board, he serves,
+   Taunt or Anticipate still his, or one given (both spent: no button). `warLeaderButtonInfo` is its line ("Expert War Leader: Taunt ordered").
+2. **Speech (§9.32) and Supreme Anticipation (§9.35), Firing phase:** the C&C's Activate box retired (CnC canActivate / canDeactivate / labels / doActivate /
+   doDeactivate / the activationMenuPurple getter / mayDeclare removed - ShipSystem's false answers now); plain on/off toggles on his own ship's
+   Firing tooltip instead, offered while canSpeak / canAnticipateSupreme says he may (so not once used). `officers.declarationCnc / declared /
+   toggleDeclaration / declarationInfo`; the order is still the C&C's `active` (suppressActiveBoost kept - the icon would glow as power-boosted).
+3. **The buttons:** each is a PAIR of entries on opposite conditions (the Triad pattern - a tooltip button's class is fixed): grey `#8c8c8c` until ordered,
+   then lit with a drop-shadow glow - War Leader yellow `#f2c230` (UI.shipMovement.warLeaderColour), speech purple `#b05ce6`, anticipation the Charge's
+   red `#e8432e`. The user's white art (`warLeader2.png`, `speech.png`, `supremeAnticipate.png`, 50x50) is tinted through a CSS MASK on a ::before (as
+   confirm.css's buy-dialog icons), so the PNGs are used as delivered and the button's white hover fill stays behind the art. Colours = `--officer-ink`
+   in shipTooltip.css. A toggle sets the tooltip's line by hand after its redraw (the pointer has not moved - cancelJumpGateSignal's pattern).
+- Gates: officersClientHarness **1251 / 0** (Stage 25 / 28 sections rewritten for the toggles; Stage 34's gate call; a new section drives the REAL tooltip
+  menus' pairs and toggle actions and the REAL WarLeaderPicker on a fake DOM). Mutation **19 / 19** (scratchpad `mutateTT.js`) - the first pass missed
+  canWarLeaderOrder's isMyShip test (every "not mine" fixture had no list); now pinned with a teammate's War Leader, whose list his team IS sent.
+  lateEwElint's crash is pre-existing (getProjectionOrigin); walkers 16 / 19 / 20 green. `fvbuild -Client` (all three bundles carry it), `-Sync` done.
+  Headless screenshot of the six buttons + the picker checked. Docs (ammo-options.html) updated. Not play-tested.
+- Second round (user, same day): with one order waiting, the other is still a pick and REPLACES it in one click (the menu closes on a pick - the React
+  menu's "one a turn" until it was taken back cost two clicks); a spent one still shows "used". The lit glow cut to ONE faint halo
+  (`drop-shadow(0 0 2px` the colour at 0.55 alpha) - the bright double drop-shadow filled the gaps in the art. Client 1254 / 0; the picker / CSS mutants
+  re-run 6 / 6 (M12 now "a swap refused").
+
+### 9.42 Stage 35: Expert Analyst, with three things FV now hides first (2026-10-29)
+
+**Rules text (user, 2026-10-29) - one of the original 25, moved to the Hard tier 2026-10-16.** "Expert Analyst: This expert is adept at locating
+the choicest items to steal and making off with them at the best possible speed. While this in and of itself has little usefulness in a combat
+situation, his ability to analyze scans of the opposition has provided him with some unique powers of observation. Accessing any of these special
+scanning abilities requires a lock-on against the target being viewed. Against fighters and shuttles, an actual lock-on with OEW (not CCEW) is
+required. The target must be within 30 hexes of the Expert Analyst for his abilities to function. Only one of these abilities can be used in any
+turn, and they take place at the same time the lock-on is announced. (1) Any special weapon arming modes (sustained, piercing, etc.) currently active
+are detected. (2) The presence, type and location of any elite officers or crew are detected, so long as they are currently performing their jobs (if
+they are moving from system to system, are disabled, or just aren't in use, they will not be seen). This will also identify Hyach specialists if they
+are in a position to perform their special function, even if they do not use it on that turn. Experts on fighters or shuttles in a hangar are not
+detected, but this scan can be made against a flight on the map, and will identify all experts and their exact locations. (3) The contents of all
+cargo bays are known. [...] (4) The quantity and type of all fighters and shuttles aboard the ship is known (but no other information about them). If
+used on a flight on the map, the fighters are identified, missiles and other options are revealed, armed shuttles are detected as such, and any
+modifications are identified. Elite officers are not detected with this scan. (5) The number, type and location of all special weapon ammunition is
+learned. [...] The player can also count the exact amount of ammo in any rack or weapon, including reload racks, but not cargo storage. Location:
+Sensors. Cost: 10% of the ship's base cost. Availability: Llort capital ships or ELINT ships only. This officer cannot be used on bases."
+
+**The user's notes (2026-10-29).** His own Initial Orders tooltip button - a dropdown list, shown while his ship has an OEW lock - picks the scan; the
+data of scans 2, 4 and 5 stays shown for the rest of the game (individual notes). (1) FV does not hide overloading from opponents: hide it until the
+moment a sustained weapon fires, then the Analyst can detect it - and reveal the system enhancements on the weapons too. (2) Officers are hidden
+already; Hyach Specialists are shown to enemies, so hide them from anyone not on the Hyach player's team and reveal them by this scan. (3) Cargo is
+irrelevant to FV: moved to the LAST ability, kept as a scenario piece - no in-game effect, a log message "Cargo holds scanned on 'Ship X'". (4) Hangar
+contents are hidden already: reveal them and keep showing them. Fighter missiles to be hidden by default (an intended future change anyway), with the
+tabletop's detection rule: "An enemy unit can detect the presence of a missile on a fighter from a range of 16 hexes for ships or 12 hexes for fighters
+or shuttles. At these ranges, the number of missiles can be counted by the enemy and should be announced. Dummy missiles (costing 1 point) are
+available as deception items, but these are revealed as such if any unit reaches range 4 or less to the fighter." Known to the detecting team from
+then on; the Analyst detects from 30 hexes with 1 OEW. (5) Magazine contents are hidden already: reveal them and keep showing them.
+
+**Rulings (user, 2026-10-29, asked before building - all as recommended):**
+1. **Fighter missiles at 16 / 12 hexes: the COUNT only** ("the number of missiles can be counted") - a fighter magazine then reads as a ship's does
+   (total public, types hidden); a Dummy Missile is exposed as one within 4 hexes; the Analyst's scan reveals the types (from 30 hexes).
+2. **Log lines: cargo only, public** - a scenario piece both players act on; the other four scans are silent (his team sees the revealed data on the
+   target, the enemy learns nothing - officers stay hidden).
+3. **A Chameleon-disguised ship: nothing through it** - a scan finds only what the disguise shows.
+
+**Built with defaults, stated here (ask before changing):**
+- **Eligibility**: a Llort hull of size class 3 or more (capital and enormous), or any hull with an ELINT system (`isElint`, any faction, any size);
+  never a base (`$base`), with D9's exclusions as ever. 10%, in the Sensors (the strongest Scanner - the Expert Scanner's post).
+- **Lock-on**: his own ship's OEW (type OEW, not CCEW or SOEW), at least 1 point, on the target this turn; the target within 30 hexes in Initial
+  Orders, on the board, of another team. One scan per Analyst a turn, at one target; cancellable until the commit. Takes effect as Initial Orders
+  close (from the Movement phase) - "at the same time the lock-on is announced".
+- **The dropdown**: 1 Arming, 2 Officers & Specialists, 3 Hangars (on a flight: Fighters), 4 Ammunition, 5 Cargo. On a flight only 2, 3 and 4.
+- **(1) Arming** shows THAT TURN only (the user's note keeps 2, 4 and 5): a weapon's overload charge, a Laser / Ion Technician's boosts, the Expert
+  Gunner's added Piercing mode, and the refits (✦) on the weapons. A ship with a live Chameleon suite masks its arming anyway (D11 of that feature).
+- **(2) Officers & Specialists**: the officers SERVING at the scan (not moving, not out of action) and the Hyach Specialists, from then on with their
+  live state; on a flight, its officer.
+- **(3) Hangars** and **(4) Ammunition**: the live contents for the rest of the game - a bay's craft and a Docking Bay's ships (never its queued
+  orders); every magazine's types. On a flight (3) and (4) both reveal its missiles' types.
+- **Overload hiding**: an overloadable weapon's overload charge (its type-3 power entries and `overloadturns`) is hidden from opponents until it fires
+  its first sustained shot; the always-sustained classes (`alwaysoverloading`) are unchanged - sustained by nature, not an arming choice.
+- **Specialists**: an opponent sees how many the ship has left; which types, and which were used, stay with its own team.
+- **Fighter-missile detection** is tested at the end of each Movement phase (where every unit has moved), against every enemy unit on the board.
+**Second ruling round (user, 2026-10-29, mid-build).** Building the fighter half showed that a magazine-fed rack - a ship's or a fighter's
+(`AmmoMissileRackS` / `AmmoFighterRack`) - recompiles its firing modes to the types its magazine holds, and every viewer is sent that list: an
+opponent can read a ship's missile types, Dummies included, off its racks today, whatever the magazine mask hides. Asked, and RULED:
+4. **Rack modes stay public** (ships and fighters) - the masks hide counts only. (Reported: the ship magazine mask's "types own-team-only" is
+   cosmetic against the rack's mode list.)
+5. **Missiles only**: the fighter torpedo launchers built on the Fighter Missile Rack (FighterTorpedoLauncher, the CW / EW / Nexus / Trek / Star
+   Wars proton launchers) keep showing their rounds; the missile racks are `FighterMissileRack` and `SWFtrConcMissileLauncher`, by exact class.
+
+**Design.**
+- `Officers`: registry `OFF_ANLY` (post `scanner`, pct 10, `apply` null, `needs` isAnalystHull) right after the War Leader - the last fixed-post
+  ship officer; constants `ANALYST_RANGE` 30, `SCAN_NOTE` 'OffScan' ("ability:target id" on his post), `ANALYST_LOG_CLASS` 'AnalystScan';
+  `$analystScanNames` / `$analystFlightScans` (⚠️ MIRROR PAIR). `isAnalystHull` (⚠️ MIRROR PAIR - read off the systems' `specialAbilities`, so
+  the statics answer it as a game does), `analystIndex`, ⭐ `mayAnalyse` (⚠️ MIRROR PAIR), `holdsLock` (the POST's own EW - just validated and
+  written by InitialOrdersGamePhase::process), `scanOn`, `saveAnalystScan`, `settleAnalystScans` (in `afterShipsConstructed`: each scan put on
+  the unit scanned as `addAnalystReveal`, from the close of Initial Orders; arming only on its own turn; cargo nothing), ⭐ `analystReveals` /
+  `analystRevealTurns` (THE question every mask asks; nothing through `chameleonDisguisedForViewer`, no arming on a live Chameleon suite),
+  `analystOfficersForJson` (the officers serving on a scan's turn, id / post / out / how only), `weaponEnhancementRows`, `analystLog`; `takeNote`
+  reads OffScan; `laserForJson` / `ionForJson` send the boosts (and their price, never the buttons) to a team that scanned the arming.
+- ⭐ The reveals ride the TARGET ship object (`BaseShip::$analystReveals`, protected, rebuilt each load) - not a static index - so one request's
+  several gamedata loads cannot leak into each other. `BaseShip` also keeps `$analystScans` and the POST claim `$analystScanClaim` (Manager::
+  getShipsFromJSON reads `analystScan`); its stripForJson sends the weapons' refit rows to a team that scanned the arming.
+- **Overload** (`Weapon::overloadHiddenFromViewer` / `maskOverload`): an overloadable, not always-sustained weapon not mid-sustain (`0 <
+  overloadshots < extraoverloadshots` is public) loses `overloadturns`, `overloadshots` and its type-3 power entries (every turn's) for anyone but
+  its own team, game over excepted, an arming scan excepted. ⚠️ Every overloadable weapon carries an idle `overloadturns` of 1 ("so that Turn 1
+  displays correctly") - hidden too, harmlessly: the client reads it only beside a type-3 entry. The added Piercing mode is public to an arming scan.
+- **Specialists** (`HyachSpecialists::stripForJson`): to anyone but its own team (game over / an officers scan excepted) `data` is
+  {Specialists: left, Special: a one-line note} and the type lists go; the client copes (its constructor assigns into `{}`).
+- **Hangars / Docking Bays**: the contents gate (`$disclosedUsage`, DockingBay `$contentsShown`) adds a hangar scan; the queued orders keep `$disclosed`.
+- **Magazines**: a ship's types after an ammunition scan; a FIGHTER's magazine is no longer exempt - `FighterFlight::missileKnowledge()` 'all' (own
+  team, game over, a hangar or ammunition scan of that flight) / 'count' (the ship mask, plus "Dummy missiles: N" once a unit of the viewer's team
+  was within 4 hexes) / null (no total, `outputDisplay` "?", a "not yet detected" line). A Fighter Missile Rack's `missileArray` amounts read "?"
+  until detected (`MissileLauncher::stripForJson`).
+- **Detection** (`FighterFlight`): `$missileSightings` (kind 'count' / 'dummy' => team => first turn), MslSeen notes on the first craft taken by
+  `takeMissileNote` in DBManager's note loop; `detectMissiles` from `MovementGamePhase::advance` once every unit has moved - every other team's
+  unit on the board (not terrain or a mine) within 16 hexes (a flight 12) counts, within 4 tells the dummies; each written once.
+- Hooks: `InitialOrdersGamePhase::process` (saveAnalystScan after the War Leader's), `FireGamePhase::advance` (analystLog after warLeaderLog),
+  `MovementGamePhase::advance` (detectMissiles), DBManager's note loop (takeMissileNote), `Manager::getShipsFromJSON` (the claim).
+- Client: `officers.js` - the registry row (`needs` 'analyst' - passesNeeds mirror), `ANALYST_*` constants and words, `analystEntry`,
+  `analystScansFor`, ⭐ `mayAnalyse` (⚠️ MIRROR PAIR), `holdsAnalystLock`, `canAnalyse`, `analystScan` / `setAnalystScan` (the pick on his SHIP:
+  `ship.analystScan` {a, t}, one a turn, cancellable), `analystClaim` (dropped at the commit if the lock or the unit went), `analystScanLabel` /
+  `analystScanNote` / `analystButtonInfo`. NEW `UI/analystPicker.js` (the Fighter Missions picker's surface, `.fv-missionpicker`, no CSS of its
+  own); `shipTooltipInitialOrdersMenu.js` button `analystScan` (not an EW button); `ajaxInterface.js` posts `analystScan`; `savedOrders.js` keeps
+  the pick (re-checked against the restored EW); `game.php` script tag; `shipTooltip.css` `.analystScan` - ⚠️ a STAND-IN icon (the 16x16 scanner
+  system icon, contained) until 40x40 art replaces it; `combatLog.js` "CARGO SCAN:" (standalone, the speech's clothes); `weaponManager.doShortLogText`.
+- Docs (`ammo-options.html`): an Expert Analyst card (first - alphabetical); "Seeing your officers" names him and the two new hides; the
+  Missiles section the detection rule.
+
+**Files.** Server: `Officers.php`, `ShipClasses.php`, `FighterFlight.php`, `weapons/weapon.php`, `weapons/missile.php`, `systems/baseSystems.php`
+(Hangar, DockingBay, HyachSpecialists, AmmoMagazine), `controller/Manager.php`, `controller/DBManager.php`, `Phase/InitialOrdersGamePhase.php`,
+`Phase/MovementGamePhase.php`, `Phase/FireGamePhase.php`. Client: `officers.js`, `UI/analystPicker.js` (new), `UI/shipTooltipInitialOrdersMenu.js`,
+`ajaxInterface.js`, `savedOrders.js`, `combatLog.js`, `weaponManager.js`, `game.php`, `styles/shipTooltip.css`. Docs `ammo-options.html`. No new PHP
+class (no autoload change), no schema change. Statics regenerated (168 offers, 62 factions - 8 Llort hulls); legacy bundles rebuilt
+(`node scripts/bundle-legacy.js`), `fvbuild -Sync` done.
+
+**Verified.**
+- `officersHarness.php` (with DB) **2599 passed, 7 failed** before the last three Stage 35 checks were added - the 7 the pre-existing contributor
+  statics counts (§9.40). Seven registry-order checks moved by one (OFF_ANLY before the placed officers). Stage 35's six sections, **74 checks**
+  (`tests/replay/analystProbe2.php`, a generated copy running only them, ~2s): offers (Erlorra 60, Turlisk 55, Fwellgon 70, Delphi 83, Oracle Scout
+  Epsilon 63, Tachila Kor 103; never a Llort medium without ELINT, a Llort base, an Omega, a Hyach hull without ELINT, a flight), every static
+  offer on an eligible hull, the post; saveAnalystScan (the note and its words; 30 hexes yes, 31 no; no OEW / half a point / CCEW / OEW elsewhere /
+  last turn's; an ally; arming at a flight; officers at a flight; cargo; an unknown scan; a second this turn, last turn's no bar; killed; another
+  player; the gate); takeNote; settle (phase 1 nothing, Movement on, to him and his ally only, nothing through a disguise, two turns later still,
+  arming only its turn, cargo nothing, his later loss takes nothing back); the masks through the REAL stripForJson (hangar contents not orders; a
+  ship magazine's types; an officer id/post only, one killed before unseen, one killed after shown killed; refit rows; an overload charging /
+  charged / fired / scanned / game over; Specialists for an enemy, the owner, after a scan); detection (16 / 17 hexes, a flight 12 / 13, 4 and 5
+  hexes, no second note, takeMissileNote); the fighter magazine's four states and a third team; a Fighter Missile Rack's "?"; a torpedo launcher
+  never a missile rack; the cargo log line, none for a hangar scan or last turn's. **Mutation 39/39** (`mutate35.js`, scratchpad; the first pass
+  missed two real gaps - nothing at 5 hexes, nothing at half a point of OEW - both now tested).
+- `officersClientHarness.js` **1093 passed, 11 failed** - the 11 pre-existing (§9.41). Seven order checks moved by one; a Stage 35 block (14): the
+  row, constants and words against Officers.php, the eligibility mirror, canAnalyse (range, ally, every lock failure, killed, another player, no
+  officer, phase), the dropdown's scans, set / replace / claim / cancel, a claim dropped with its OEW, and the REAL menu's `analystScan` button.
+  Save Orders checked by a scratch run (capture, count, restore, dropped without its OEW).
+- `enhancementsHarness` **300 / 0** after re-recording: exactly one line added (`offer OFF_ANLY`), the rest byte-identical (old copy
+  `fingerprint.before-officers-stage35.txt`). `enhancementsDifferential.js` 964 / 0.
+- `fvbuild -Check`: the replay corpus **134 passed, 51 failed - every failure the three new hides, NOT re-recorded (needs the user's OK)**. With
+  `--diff-limit=100000` all 732 changed paths are in `snapshot` reports (no movement, to-hit, damage or masking report moved) and every one sits on
+  a ship of ANOTHER team than the viewer's: `overloadturns` / `overloadshots` / type-3 `power` (overloads), a flight craft's magazine
+  `remainingAmmo` / `output` / `outputDisplay` "?" / `data.Special` / `ammoCountArray` / `ammoSizeArray` (undetected missiles), and the Specialists'
+  `data` / `availableSpec` / `allocatedSpec` / `specTotal_used` / `specAllocatedCount`.
+
+**Not built / observed:**
+- Play-tested in games 4524 / 4525; the follow-ups below.
+- `replay.php` builds a past turn at the game's current turn ([[arch_replay_and_advance_gamedata_turns]]), so an arming scan of turn T is not shown in
+  a replay of turn T watched later (settle reads the load's turn) - the other scans are unaffected.
+- A detection is tested at the end of each Movement phase only - a pass within range during a move, ending outside it, is not seen.
+
+**Play tests 4524 / 4525 follow-ups (user, 2026-10-30), built, uncommitted:**
+1. **The Arming scan finds every refit, for the rest of the battle** - on weapons and on every other system (asked: "Arming: every refit",
+   the user's points 1 and 3 together). The overloads, boosts and Piercing mode it shows stay that turn only. `settleAnalystScans` puts a
+   second reveal, `'refits'`, on the target for every arming scan of any past turn (still not while that turn's Initial Orders are open);
+   `BaseShip::stripForJson` asks it for the refit rows (`Officers::refitRows`, which replaced `weaponEnhancementRows`: every non-officer row)
+   AND for the "System Enhancements (n)" line, which it no longer strips for that team. A refit is no arming state, so a live Chameleon suite
+   does not mask it (a disguise still does - `analystRevealTurns`).
+2. **His Initial Orders button** is the user's `img/analyst.png` (a magnifier), resized 50x50 -> 40x40 like every icon in that menu and
+   tinted violet `#b48cff` (alpha kept; the user's white original in the session scratchpad only). `.analystScan` drops the off-size lines.
+   **His dropdown wears the same violet**: `.fv-missionpicker--analyst` in `hexPicker.css` - a local palette (`--an-*` properties on the
+   modifier, never a `:root` block), solid colours - as the War Leader's menu wears Narn red/gold. ⚠️ The dropdown is NOT React
+   (`UI/analystPicker.js`, plain DOM on the Fighter Missions picker's surface).
+3. **At a flight, two scans: Officers and Ammunition** - the hangar scan showed exactly what the ammunition scan does (its missiles).
+   `$analystFlightScans` / `ANALYST_FLIGHT_SCANS` (MIRROR PAIR) lost 'hangar'; the officers scan reads "Officers" there (no fighter
+   Specialists exist). `FighterFlight::missileKnowledge` still reads a 'hangar' reveal, for a flight scanned before this change.
+4. **Cancel scan is a button**, centred in a footer under the list (`.fv-missionpicker__footer` / `__button`, generic on the picker surface,
+   violet in his). A scan waiting at another unit is said in the line above the list instead ("Arming scan waiting at X; a pick here replaces it").
+- Docs (`ammo-options.html`): the card's Arming / Hangars / Ammunition bullets and Notes, and the refit section's "hidden from your opponent".
+- Verified: Stage 35 probe (`tests/replay/analystProbe2.php`, regenerated from the harness) **79 / 0** (+5: a hangar scan at a flight refused,
+  an ammunition scan there written, an arming scan in Initial Orders reveals no refits yet, last turn's arming scan keeps its refits and to his
+  team only, and the REAL payload - rows and the summary line to his team two turns on, never an enemy or a third team);
+  `officersClientHarness.js` 1093 / 11 (the 11 pre-existing, §9.41); the picker rendered headless (real `officers.js`, `analystPicker.js`,
+  `tokens.css`, `hexPicker.css`): the button's two gaps 104 / 104 px. Legacy bundles rebuilt (`node scripts/bundle-legacy.js`), `fvbuild -Sync`.
+
+### 9.43 Stage 36: Expert Electrician (2026-10-30)
+
+**Rules text (user, 2026-10-30) - one of the original 25 (Hard).** "Expert Electrician: This officer is capable of rigging special power shunts in his
+flight's power plant hookups. This allows the fighter to deactivate its weapons for extra thrust or offensive bonuses during a scenario. A flight may
+deactivate any or all of its weapons. For each weapon deactivated in a turn, add the maximum damage it can cause to a running total, then divide this by the
+number of guns in the flight, rounding fractions of 0.5 or more up. This results in a number of points which can be added to either the flight's offensive
+rating or thrust rating for that turn. However, any added offensive rating points apply only to direct-fire weapons, not ballistic weapons. For example, a
+flight of Narn Frazis has a total of 12 paired particle beams, each of which can score as much as 11 damage on a hit (1d6 + 5). If 5 of these are
+deactivated, the sum of the damage potentials is 55, which (after dividing by 12 and rounding the fraction up) yields 5 points to distribute between the
+flight's thrust rating and offensive bonus for that turn. It is permissible to put all of these points into one or the other [...] Because of the
+jury-rigging required in setting up this kind of power shunt, there is a possibility that each deactivated weapon may fry its circuits and not
+re-activate after use. Roll 1d6 for each weapon (not just one roll for the whole flight), and on a roll of 1, it is lost for the rest of the scenario.
+There are no modifiers to this roll. Note that if the weapon fails to reactivate, its power is still available for use as described previously. Point
+Cost: Equal to the cost of a fighter. Limitations: Fighters with heavy weapons, such as the Rutarian (but not the Thunderbolt as ballistics are exempt
+from this), cannot benefit from expert electricians due to the already tenuous nature of their power plant hookups."
+
+**The user's notes (2026-10-30).** "Heavy weapons" = any fighter weapon that is not ballistic and has a loading time of more than 1 turn. There is
+existing support for switching fighter systems off in Initial Orders - build on it. A menu to allocate the points to OB and thrust: a new Initial Orders
+tooltip button that knows the points it has to spend (the user's `img/electrician.png`), and the client shows the updated Thrust and OB in the ship
+tooltip and the flight's weapon tooltips. A player who forgets to allocate gets a random allocation, so no deactivated weapon is wasted. The menu and its
+icon yellow.
+
+**Rulings (user, 2026-10-30, asked before building - all as recommended):**
+1. **Damaging direct-fire weapons only** are shunted and counted as guns - never a ballistic launcher, Marines or a weapon that scores nothing (a sensor
+   spike, a defence gun, an EM wave disruptor). **Each of a weapon's shots is a gun**: FV models the Frazi's paired particle beams as one Particle Gun
+   firing two, so six Frazi have 12 guns of 11, as the example. *Confirmed after play test 4526 (below), once a same-day change was withdrawn:
+   each of a weapon's shots counts in the total too - two Frazi weapons off give 44/12 -> 4.* ⏳ **Skipped for now (user, 2026-10-30): half a
+   paired gun.** The example switches off 5 of the 12 beams - half of one Frazi's pair; FV switches a weapon off whole (one power entry for both
+   its shots), so a paired gun gives both its guns or neither.
+2. **A fried weapon counts as switched off on every later turn** while he serves, without the player doing anything, and never rolls again.
+3. **The d6 at the end of every turn a weapon was switched off** - a fried one shows before the next Initial Orders; a weapon kept off for three turns
+   rolls three times (free, since its power still counts once fried).
+4. **Once he is lost, all shunting stops**: no Power Off on a fighter weapon, every gun back on next turn, a fried one gives nothing.
+
+**Built with defaults, stated here (ask before changing):**
+- **"Maximum damage"** = the highest `maxDamage` of the weapon's modes (a B-Wing's Laser 13, its Salvo mode, not 10). **Guns** = a weapon's `shots`
+  (a Particle Gun firing two is two; a pulse or variable-shot weapon fires one shot and is one gun). Over the craft still flying.
+- **Heavy** = any weapon (not the ram) that is not ballistic and loads in more than one turn in any mode - the user's rule as written, so no-damage
+  specials count too: the Colonial Raptor (its Sensor Spear) is barred. 45 flights barred as heavy, 46 more for having no gun that scores (Marine-only
+  breaching pods, missile-only shuttles, the Rizek's defence gun, transports); 269 of the 360 flights that may carry an officer are offered him.
+- **100% of one craft**, scaled by the flight's size (§9.9); every faction (no `$factionRules` line); D9's one officer to a flight.
+- **The random fill**: each point left unplaced at the commit a d2 - 1 OB, 2 thrust (`Dice::d(2)`). A claim past the points is cut to them, OB first.
+- **The fried weapon** is a `ForcedOfflineForTurns` critical of the turn it fried, `turnend` 0 (for good), `param` 'electrician' - FV's own
+  machinery: the server refuses an offline weapon's fire (`ShipSystem::isOfflineOnTurn` reads the critical), the client shows it forced offline and
+  will not switch it back on, everyone sees it (an offline weapon is public). One die per weapon - a linked pair is one weapon.
+- **Visibility**: the split is a displayed stat (user ruling 2026-10-10) - to every viewer once Initial Orders close, to his own team from their commit,
+  never to an opponent while Initial Orders are open. ⚠️ Cosmetic secrecy as ever (§4.6): a flight's switched-off guns, and a fried one's critical
+  (its param names him), tell an opponent he is aboard.
+- **Not counted for a landing**: the shunted thrust moves the flight; the hangar's thrust tolerance (`HangarOps` - the Redline Pilot's burn counts there)
+  is left alone. Ask if wanted.
+
+**Design.**
+- `Officers`: registry `OFF_ELEC` (post `craft`, flight, pct 100, `apply` null, `needs` hasShuntGuns) LAST; constants `SHUNT_NOTE` 'OffShunt'
+  ("ob:thrust" on his craft), `FRY_DIE` 6, `FRY_ON` 1, `FRIED_PARAM` 'electrician'. `electricianIndex`, ⭐ `isShuntGun` / `gunMaxDamage` / `gunCount` /
+  `isHeavyWeapon` / `hasShuntGuns` / `isFried` / `isShunted` / ⭐ `shuntPoints` (all ⚠️ MIRROR PAIRS), `shuntOn`, `shuntOb` (Weapon::calculateHitBase's
+  fighter branch, direct fire only, on the bonus before the crit and mine deductions - the mission term's place), `shuntThrust`, `saveElectricianShunt`
+  (InitialOrdersGamePhase::process, on the RELOADED flight - its officers, and this POST's power entries, written before the reload - for every flight,
+  claim or none), `rollShuntBurnouts` (Criticals::setCriticals beside the kill rolls; `updated` crits saved by getUpdatedCriticals, which reaches
+  fighter subsystems). `takeNote` reads OffShunt; `addForJson` publishes `electricianShunt` {turn, ob, thrust}.
+- `FighterFlight`: protected `$electricianShunts` (turn => ob, thrust) and `$electricianClaim` (Manager::getShipsFromJSON reads `electricianShunt`).
+- Client `officers.js`: the registry row (`needs` 'shuntGuns'), `FRY_DIE` / `FRIED_PARAM`, `electricianEntry`, the mirrors above, `shuntCrafts`,
+  `shuntAllowed` (no phase: power.js asks it too) / `mayShunt` (Initial Orders), `shuntState`, the pending split `ship.shuntSplit` {turn, ob, thrust}
+  (`shuntPending` / `setShuntSplit` / `shuntSplit` - cut to the points when read / `stepShunt` / `allShunt`), `shuntClaim`, ⭐ `shuntNow` (the server's
+  split once written, else his own pending one in Initial Orders) -> `shuntOb` / `shuntThrust`, `canElectrify`, `electricianButtonInfo`.
+- The switch-off: `SystemPowerSettings.canOffline` and `SystemInfoButtons.canOffline` admit a gun `officers.mayShunt` allows; `power.js`
+  `offlineAll` / `onlineAll` reach every craft of a flight (`flightSystemsNamed` - they walked `ship.systems`, a flight's craft), and
+  `copyLastTurnPower` carries a fighter weapon's Power Off into the next turn only while `shuntAllowed`.
+- Read where shown: `movement.js` getRemainingEngineThrust / getFullEngineThrust (+ shuntThrust, beside the Redline burn - the map tooltip's
+  Thrust line follows); `weaponManager.computeOEW` (+ shuntOb, direct fire); `SystemInfo` (a weapon's Offensive bonus line, direct fire only);
+  `ShipInfo` ("Offensive bonus: 30 (+10 shunted, direct fire only)", "Thrust: 13 (+3 shunted)"); `ShipNotesPanel` (the flight stats).
+- The menu: NEW `UI/electricianPicker.js` (plain DOM, the picker surface `.fv-missionpicker`): the points and how many weapons are off (fried ones
+  counted), Offensive bonus and Thrust rows of - / value / +, the frying warning, All to OB / All to thrust; stays open while stepping, the tooltip
+  redrawn once it closes after a change. `shipTooltipInitialOrdersMenu.js` button `electricianShunt` [isSelf, canElectrify] (not an EW button);
+  `ajaxInterface.js` posts `electricianShunt`; `savedOrders.js` keeps the split; `game.php` script tag. `shipTooltip.css` `.electricianShunt` -
+  the user's plug art, resized 50x50 -> 40x40 and recoloured `#ffd23f` (alpha kept; the white original in the session scratchpad only);
+  `hexPicker.css` `.fv-missionpicker--electrician` (local `--el-*` palette, solid colours) and the stepper parts `__value` / `__step` / `__warn`.
+- Docs (`ammo-options.html`): an Expert Electrician card between the Dogfighter and the Evader.
+
+**Files.** Server: `Officers.php`, `FighterFlight.php`, `weapons/weapon.php`, `handlers/criticals.php`, `controller/Manager.php`,
+`Phase/InitialOrdersGamePhase.php`. Client: `officers.js`, `UI/electricianPicker.js` (new), `UI/shipTooltipInitialOrdersMenu.js`, `power.js`,
+`movement.js`, `weaponManager.js`, `ajaxInterface.js`, `savedOrders.js`, `UI/reactJs/system/SystemPowerSettings.js`, `SystemInfoButtons.js`,
+`SystemInfo.js`, `ShipInfo.js`, `UI/reactJs/shipWindow/ShipNotesPanel.js`, `game.php`, `styles/shipTooltip.css`, `styles/hexPicker.css`,
+`img/electrician.png`. Docs `ammo-options.html`. No new PHP class (no autoload change), no schema change. Statics regenerated (269 offers); legacy
+bundles rebuilt (`node scripts/bundle-legacy.js`), the React bundle by the watcher; `fvbuild -Sync`.
+
+**Verified.**
+- `officersHarness.php` (with DB) **2670 passed, 7 failed** - the 7 the pre-existing contributor statics counts (§9.40). Two registry-order checks moved by one.
+  Stage 36's six sections (`tests/replay/electricianProbe.php`, a generated copy running only them, ~5s): offers (Frazi 58, scaled 29 / 116; never the
+  Rutarian or the Calaq, a missiles-only shuttle, the Colonial Raptor, a ship or a Hunter-Killer; the Thunderbolt and a Gamma Starfury yes; Marines no
+  gun), the statics (269 offered, 91 barred, each by the rule read off the blueprint), the post, a doctored second officer; the points (0 / 2 / 4 / 6 /
+  11, without him, his craft lost, a craft lost 6.6 -> 7, last / next turn's Power Off, a fried gun counted from the next turn, a cooldown not, nothing
+  once he is lost, the Raptor Support's two-shot and one-shot scatterguns 8 / 4, the B-Wing's Salvo maximum 7, a Gamma's rack nothing); the commit's
+  split (the note and its words, cut OB first, nonsense, the d2 fill 3:3 and 0:6, no points, once a turn, his craft lost, another player, the gate,
+  takeNote); the fry (a die each, the critical's shape, offline from the next turn, saved, no second die, an old fry none, no die without him or on a
+  lost craft, his craft lost THIS turn still rolls); the real calculateHitBase (+5% a point on a gun, nothing on a missile launch, last turn's
+  nothing, the gate); the payload per viewer and phase. **Mutation 27/27** (`mutate36.js`, scratchpad).
+- `officersClientHarness.js` **1135 passed, 11 failed** - the 11 pre-existing (§9.41). Five registry-order checks moved by one; a Stage 36 block: the row and the
+  constants against Officers.php, the lobby mirror over every static flight (269), the points mirror (as the server's cases), mayShunt, the split's
+  steps / clamp / claim / turn, shuntNow (his pending split, the server's to any viewer), the REAL movement.js thrust and computeOEW (gun 6, missile 4),
+  the REAL power.js (copyLastTurnPower carried only while he serves; offlineAll / onlineAll over every craft, never a fried gun or a lost craft's), the
+  ShipInfo and SystemInfo lines, and the REAL menu's `electricianShunt` button. **Mutation 30/30** - the first pass missed one real gap: the menu's "without him" case handed it two different flights, so `isSelf` refused before `canElectrify` was asked; one object now, and canElectrify asked directly (`mutate36.js`, scratchpad).
+- The menu rendered headless (real `officers.js`, `electricianPicker.js`, `tokens.css`, `shipTooltip.css`, `hexPicker.css` - driver `elec36.mjs` in
+  the scratchpad, page `officersE2E/elec36_harness.html`): **12 / 0** - under its button, title and rail #ffd23f, its line ("6 points from 3 weapons switched off - 6 unplaced ..."), both rows at +0 with - disabled, the All buttons and the frying warning; two + on OB and one on thrust read +10 / +1 (three SystemDataChanged), All to thrust 0 / 6, Escape closes it and redraws the tooltip, clamped 8 px inside a 360 px screen.
+- `enhancementsHarness` **301 / 0** (the fingerprint unchanged - it covers ship-level offers only); `enhancementsDifferential.js` **964 / 0**.
+- `fvbuild -Check`: the replay corpus **134 passed, 51 failed - the same 51 as §9.42** (Stage 35's three hides, still awaiting the user's OK to
+  re-record): 391 reported paths, every one an overload charge, a fighter magazine or the Hyach Specialists; no corpus game has an Electrician.
+
+**Not built / observed:**
+- Play-tested in game 4526 (Initial Orders of turn 1); the follow-ups below.
+- The one-line hooks (InitialOrdersGamePhase::process, Criticals::setCriticals, Manager::getShipsFromJSON) and the claim's round trip through a real
+  commit are not harness-covered; the menu's steps are (headless), the tooltip button's placement is not.
+- A flight docked in a hangar is not singled out: guns it left switched off still roll at the turn's end.
+
+**Play test 4526 follow-ups (user, 2026-10-30), built, uncommitted:**
+1. **The points - changed, then REVERTED the same day (user).** The play test asked for a weapon switched off to add its maximum damage once
+   (two Frazi weapons 22/12 -> 2); it was built, then withdrawn: "your initial interpretation was correct after all". Each of a weapon's shots is
+   a gun again, in the total and the divisor alike - two of six Frazi's Particle Guns off 44/12 -> 4, three 66/12 -> 6, all six 132/12 -> 11
+   (`Officers::shuntPoints` / `officers.shuntState`, MIRROR PAIR, as first built). ⏳ **Skipped for now (user): switching off half a paired
+   gun**, which the rules' example does (5 of 12 beams) - FV switches a weapon off whole; see ruling 1 above.
+2. **Cancel all** in the menu's footer beside All to OB / All to thrust (`officers.clearShunt`: nothing placed, every point free again - the
+   weapons stay switched off); the menu's buttons a little lower (the footer's 3px padding, the steppers 20px - the Electrician's own rules in
+   `hexPicker.css`, never the picker surface's shared ones).
+3. **The Initial Orders button only with points to spend** - a weapon switched off, or fried (`officers.canElectrify` asks `shuntPoints > 0`);
+   the menu's own steps ask it too.
+- Docs (`ammo-options.html`): the button's line; the points example as first written, plus "a weapon is always switched off whole".
+- Verified (after the revert): `tests/replay/electricianProbe.php` (regenerated) **129 / 0** - the figures as first built;
+  `officersClientHarness.js` **1137 / 11** (the 11 pre-existing; + no button and nothing to cancel without a weapon off, Cancel all, the menu
+  refused on an idle flight); `officersHarness.php` (with DB) **2670 / 7** (the 7 pre-existing); **mutation 28/28 server + 33/33 client** (`mutate36.js` - three new: the
+  withdrawn per-weapon numerator as a mutant, the button without points, Cancel all with nothing placed); the menu headless **14 / 0**
+  (three off: 6 points; All to OB, All to thrust, Cancel all - the footer buttons 22px, were 26; the steppers 20px, were 24). Legacy bundles
+  rebuilt, `fvbuild -Sync`.
+
+### 9.44 Stage 37: Lucky Captain (2026-10-31)
+
+**Rules text (user, 2026-10-31) - an officer the user added, the last planned.** "Lucky Ship Captain: The Dilgar were known to have several of these
+officers, whose skillful tactics in battle were matched only by their incredible luck. [...] A lucky captain may perform each of the following feats once
+per scenario. He may not perform more than one in any given turn. 1. After all the ship's weapons have been fired, but before any damage has been rolled,
+the player may choose to discard those dice and roll again. He is, however, stuck with whatever is rolled on the second attempt. This decision must be
+made before any damage or weapon effects are determined. 2. The player may choose to alter one die roll, either by himself or an opponent, to any number
+desired. If used against an opponent, the effect or damage must have been directed at his ship, not another unit in the same fleet or even a fighter or
+shuttle from the lucky captain's ship. Typically, this ability is used to prevent a catastrophic critical hit, to alter the hit location of a weapon, or to
+prevent a successful ramming attack. It can also be used to guarantee the location of a called shot, or the best possible result in an initiative die
+roll [...] 3. The player may wait until all other ships have determined and announced their EW values before determining his own. 4. The player may
+attempt to automatically disengage his ship from the battle. To do this, he must be facing an edge of the map with no enemy units (excepting any unarmed
+or disabled units, or units that lack line-of-sight to his ship) in the 120-degree arc ahead of his vessel (relative to his current direction of motion).
+If this is attempted, determine the range from his ship to the nearest applicable enemy and roll a single d20. If his roll is less than or equal to the
+range, he disengages successfully. Obviously, if the closest unit is 20 or more hexes away, or if no unit has LOS to his ship [...], success is automatic.
+This die roll is made at the start of the turn, before systems are deactivated for extra power, so if he fails the roll he can still operate his ship
+normally. Note that the status of his vessel has no bearing on the roll [...]. Location: C&C. Cost: 25% of the ship's base value. Availability: Any race
+can have such an officer, but they are extremely rare, costing double the listed price for non-Dilgar ships."
+
+**The user's notes (2026-10-31).** FV automates the dice on the server, so the player chooses WHICH feat to use on a turn - in the Firing phase for
+feats 1 and 2, in Initial Orders for 3 and 4 - and the dice are changed by the rule a player would follow (feat 1: re-rolled when the hit rolls came in
+below an average threshold, noted in the combat log). No Firing-phase feat once one was used in Initial Orders (as the War Leader). Feat 3 = the War
+Leader's Anticipate EW hold. The icon: `img/luckyCaptain.png` (the user's d20, 50x50 white), recoloured.
+
+**Rulings (user, 2026-10-31, asked before building):**
+1. **Feat 1 - re-rolled when the volley scores below what it expected** (recommended over "only below half"): the player has chosen this turn, and an
+   armed feat that does not fire stays his.
+2. **Feat 2 as four named uses**, each with a fixed rule: **Sure Shot** (Firing - his missed shot worth most becomes a hit; a called shot among them),
+   **Dodge** (Firing - the enemy hit on his ship worth most becomes a miss, a ram first), **Lucky Escape** (Firing - a catastrophic critical's d20 set to 1)
+   and **Best Initiative** (moved to Initial Orders - the die as 100, applied as Initial Orders close: the one use where the player sees the roll before
+   choosing, as at the table). "Alter the hit location" dropped: when the choice comes before the dice, Dodge always does better.
+3. **Lucky Escape's "catastrophic"** = a critical on his C&C or Reactor, or a roll that would kill an officer serving where it is rolled - "a good basis
+   to start", to be **easy to edit after player feedback**: one table (`Officers::$luckyEscapeSystems`) and one switch (`LUCKY_ESCAPE_OFFICERS`).
+4. **Disengage**: the map-edge test dropped (every heading points at some edge; an open map has none) - the enemy-free 120-degree arc is the condition;
+   no Disengage on a base. (OSATs carry no officers - D9.)
+
+**Built with defaults, stated here (ask before changing):**
+- **Offered on every hull with a C&C** (every faction - "any race"), 50%, the Dilgar Imperium 25% (`$factionRules`). Fixed in the C&C.
+- **An armed Firing feat is spent only if it fires** (the user's note); otherwise it is still his, and nothing is logged. One armed a turn.
+- **Feat 1's score**: every to-hit die of his ship's own shots this turn (not interceptions, not the ram - rams resolve before fire - not Pre-Firing),
+  a hit worth its mode's average damage (at least 1), a pulse hit its average pulses more, a linked shot all its shots; expected = each die's chance
+  (after interception, less grouping) times that worth. Re-rolled when the score is under `LUCKY_REROLL_BELOW_PCT` (100) % of expected; the log gives
+  both results ("1 of 2 hit ... 0 of 2").
+- **Sure Shot**: the die set to 1 (`LUCKY_SURE_ROLL` - a Pulse weapon's best result); never a shot a 1 still misses (needed under 1); the first to resolve
+  on equal worth. **Dodge**: the die set to 100 (`LUCKY_DODGE_ROLL`); never a shot that needed 100 or more; only another team's shots aimed at his ship
+  (not hex-targeted); a ram before any shot, else the worth. Both are spent - and told - when that shot rolls, so a fighter shot down before it fires
+  spends nothing.
+- **Lucky Escape**: the FIRST qualifying critical roll of the turn on his ship takes it (as a player watching each die would), and only when a d20 of 1
+  makes it better (a lower critical or none; an officer spared). Pass 1's rolls only (ShipSystem::testCritical): the kill roll a post destroyed this turn
+  rolls for itself (Officers::rollFor) is not covered.
+- **Best Initiative**: his total becomes what a d100 of 100 gives with his bonus and modifiers - FIRST in InitialOrdersGamePhase::advance, so the Triad
+  Command Node, a fighter mission and the War Leader's +60 land on top of it; a tie it makes is lost (the War Leader's rule); nothing when he already
+  rolled that high.
+- **EW Last**: the War Leader's hold - `LUCKY_EW_HOLD` 1000 through `savedEwBonus` (the late window, clamped to what he left unspent).
+- **Disengage**: an applicable enemy is another team's unit on the board (deployed, not destroyed, never terrain or a mine), armed (a weapon that is no ram
+  or jump drive, not destroyed; a flight's on craft still flying), not disabled (`isDisabled`; flights never), with line of sight (Enormous units block
+  it). The arc is 60 degrees each side of his HEADING. Ordered only where allowed (checked at the commit on the positions of the turn start); rolled as
+  Initial Orders close, "at the start of the turn", so a failure leaves his orders standing. A success leaves as a jump out does
+  (`Movement::applyJumpOut`: a HyperspaceJump order and structure row, the CV note - counted as having left, never destroyed), with anything attached.
+  The attempt spends the feat.
+- **Visibility**: an armed feat own-team only (`armed`) until the log tells it; the disengage answer own-team, Initial Orders only (`disengage`); the
+  spent feats as every officer's `abilities`. Every feat used is told in the combat log under "LUCKY CAPTAIN:" - the Initial Orders ones once firing
+  resolves (EW Last, Best Initiative), the disengage as Initial Orders close, the Firing ones as they fire.
+
+**Design.**
+- `Officers`: registry `OFF_LUCK` (post `cnc`, pct 50, `apply` null) right after the Analyst - the last fixed-post ship officer; `$factionRules` line;
+  constants `LUCK_NOTE` 'OffLuck', `LUCKY_LOG_CLASS` 'LuckyCaptain', `LUCKY_REROLL_BELOW_PCT`, `LUCKY_SURE_ROLL`, `LUCKY_DODGE_ROLL`, `LUCKY_ESCAPE_DIE`,
+  `LUCKY_ESCAPE_OFFICERS`, `LUCKY_INITIATIVE_DIE`, `LUCKY_EW_HOLD`, `LUCKY_DISENGAGE_DIE`, `LUCKY_DISENGAGE_ARC`; `$luckyFeats` (feat => the abilities that
+  spend it - ⚠️ MIRROR PAIR), `$luckyOrders` / `$luckyArms` (⚠️ MIRROR PAIRS), ⭐ `$luckyEscapeSystems`; `$abilityNames` + seven. `luckyIndex`,
+  `luckyFeat`, ⭐ `luckyMay` (⚠️ MIRROR PAIR), `luckyUsed`, `luckyArmOn`, `luckyArmedIndex`; `saveLuckyOrder` (spent at once, one OffUsed note),
+  `saveLuckyArm` (one OffLuck note "ability", never spent); `luckyDisengageState` / `isLuckyFoe` / `isArmedUnit` / `settleLuckyDisengage`
+  (afterShipsConstructed, phase 1) / ⭐ `resolveLuckyDisengages`; ⭐ `applyLuckyInitiative`; the dice rolled ahead - `$luckRolls` / `$luckAlters` /
+  `$luckGamedata` (per request, keyed by spl_object_id of the order), ⭐ `planLuckyRolls($gd, 'rams' | 'fire')`, `endLuckyRolls`, ⭐ `toHitRoll`,
+  `luckyDice`, `rollsAtUnit`, `luckyVolley`, `luckyIncoming`, `rollLuckyDice`, `luckyScore`, `planReroll`, `planSureShot`, `planDodge`,
+  `spendAlteredDie`; ⭐ `luckyEscape`, `officerServesIn`; `luckyLine`, `luckyOrdersLog`. `takeNote` reads OffLuck; `savedEwBonus` adds the hold;
+  `addForJson` sends `armed` and `disengage`.
+- `BaseShip`: protected `$luckyArms` (`getLuckyArms` / `recordLuckyArm`). `ShipSystem`: ⭐ `criticalTier($roll)` (testCritical's own reading of the
+  protected possibleCriticals), and testCritical keeps its d20 apart to ask `Officers::luckyEscape`.
+- Hooks: `InitialOrdersGamePhase::process` (saveLuckyOrder beside the War Leader's) and `::advance` (applyLuckyInitiative FIRST, resolveLuckyDisengages
+  after the War Leader's +60, before the first active ship is picked); `CnC::saveFirePhaseDeclaration` ("luck:<ability>"); `FireGamePhase::advance`
+  (luckyOrdersLog); `Firing::fireWeapons` (planLuckyRolls 'rams' first, 'fire' after the rams, endLuckyRolls after the fighters);
+  `Firing::isHyperspaceLogOrder` (a LuckyCaptain line is inert - the failed disengage's is written before the firing gathers); the to-hit roll sites:
+  `Weapon::fire`, the Vortex Disruptor's own `fire`, the Hypergraviton Blaster's first roll (every other `Dice::d(100)` site is an auto-hit or a hex shot).
+- Client `officers.js`: the registry row; `LUCKY_FEATS` / `LUCKY_ORDERS` / `LUCKY_ARMS` / `LUCKY_EW_HOLD`; `LUCKY_ABILITIES` (the menu's rows - ⚠️ Lucky
+  Escape's line names `$luckyEscapeSystems`); `luckyEntry`, `luckyAbilityName`, `luckyFeat`, `luckyMay` (mirror), `luckySpent`, `luckyUsed`, `luckyCnc`,
+  `luckyPhaseAbilities`, `canLucky`, `luckyChoice` (the pick on his C&C: `luckyOrder`), `luckyArmed`, `luckyDisengage`, `luckyPickable`,
+  `setLuckyChoice`, `luckyButtonInfo`; `savedEwBonus` + the hold; ABILITY_NAMES + seven. `model/system/baseSystems.js` CnC: `getLuckyTransfer`,
+  posted in both phases by `doIndividualNotesTransfer`; Save Orders key `luckyOrder`. NEW `UI/luckyPicker.js` (plain DOM, the picker surface): the seven
+  rows, this phase's open ones picks, the rest dimmed with a chip saying why (used / the other phase / one a turn / blocked), the disengage row the
+  server's range or who is ahead; Cancel. Buttons `luckyCaptain` in `shipTooltipInitialOrdersMenu.js` [isSelf, canLucky] and `shipTooltipFireMenu.js`
+  [isMine, isFiringPhase, canLucky]; `combatLog.js` "LUCKY CAPTAIN:" (standalone); `weaponManager.doShortLogText` LuckyCaptain; `game.php` script tag.
+  `shipTooltip.css` `.luckyCaptain` (50x50, so `background-size: contain`); `hexPicker.css` `.fv-missionpicker--lucky` (local `--lk-*` palette).
+  `img/luckyCaptain.png` recoloured `#5fd38d` (alpha kept; the white original in the session scratchpad).
+- 2026-11-03 (user request): the button is now a PAIR like the War Leader's / speech's - `luckyCaptain` grey while nothing is picked or armed,
+  `luckyCaptainOn` green `#5fd38d` with a glow once one is (`officers.luckyPick` = armed || choice; `noLuckyPick` / `hasLuckyPick` in both menus).
+  Painted through the shared `--officer-ink` CSS mask in `shipTooltip.css`, so the PNG's own green is ignored (only its alpha counts).
+- Docs (`ammo-options.html`): a Lucky Captain card between the Expert Warrior and the Matter Weapons Expert.
+
+**Files.** Server: `Officers.php`, `ShipClasses.php`, `systems/ShipSystem.php`, `systems/baseSystems.php` (CnC), `handlers/firing.php`,
+`weapons/weapon.php`, `weapons/gravitic.php`, `weapons/specialWeapons.php`, `Phase/InitialOrdersGamePhase.php`, `Phase/FireGamePhase.php`. Client:
+`officers.js`, `model/system/baseSystems.js`, `UI/luckyPicker.js` (new), `UI/shipTooltipInitialOrdersMenu.js`, `UI/shipTooltipFireMenu.js`,
+`combatLog.js`, `weaponManager.js`, `game.php`, `styles/shipTooltip.css`, `styles/hexPicker.css`, `img/luckyCaptain.png` (the user's, recoloured).
+Docs `ammo-options.html`. No new PHP class, no schema change. Legacy bundles rebuilt (`node scripts/bundle-legacy.js` - no watcher was running).
+
+**Verified (the Docker stack was down - harnesses run in the throwaway `fv-phpcheck:8.4` image with `-d memory_limit=2G`, no database).**
+- `officersHarness.php --no-db` **2691 passed, 1 failed**: the one Stage 37's statics sweep, which waits for `fvbuild -Statics`. Eight registry-order
+  checks moved by one. Stage 37's nine sections (`tests/replay/luckyProbe.php`, a generated copy running only them, ~3s): the registry place and keys,
+  offers (AthraskalaAM at 25%, an Omega and a Gquan at 50%, none on a flight or an OSAT), the post; luckyMay (once per battle, feat 2's four uses one
+  feat, one a turn); the Initial Orders feats through saveLuckyOrder (the notes and their words, Best Initiative, one a turn, after a Dodge, beside a
+  Triad and a taunt, Disengage with the enemy behind / ahead, a Firing feat refused, another player, killed, the gate); the Firing feats through the REAL
+  saveFirePhaseDeclaration (the OffLuck note, nothing spent, one a turn, after EW Last, feat 2 spent, wrong phase, unknown, another player, another
+  system, takeNote); the dice rolled ahead with forced dice (re-rolled at 3 of 13.8 expected and the second set used, kept at 20 of 13.8 and at exactly
+  expected, re-rolled at 62%, nothing armed, last turn's arm; Sure Shot on the heavy gun's miss, every hit, needing 0, intercepted into a miss, the REAL
+  Weapon::fire rolling 1; Dodge on the heavy gun, an ally's shot never planned, a ram first, all missed, needing 100, never at the 'fire' stage); Lucky
+  Escape through the REAL testCritical (the C&C eased, a gun not, an Expert Scanner spared, one a 1 cannot save, a d20 of 1, no critical, Dodge armed
+  instead, feat 2 spent); Best Initiative (40 -> the best, a tie lost, already past it, last turn's, simultaneous movement); Disengage (ahead, behind,
+  destroyed, unarmed, disabled, line of sight blocked, a flight ahead, a base, the payload per phase; the roll: 4 and 5 at range 5 leave, 12 stays and
+  is told, 20 at range 30, last turn's order, EW Last instead); the log lines, the EW hold and the payload per viewer.
+- `officersClientHarness.js` **1192 passed, 0 failed**: eight registry-order checks moved by one; a Stage 37 block - the row, the feats / lists / EW hold
+  against Officers.php, the menu rows (Lucky Escape's line naming `$luckyEscapeSystems`), luckyMay, the pick and the REAL C&C transfer in both phases with
+  Save Orders, the server's `armed` and `disengage`, the EW hold, the REAL tooltip menus' buttons (both phases, never Pre-Firing), and the REAL
+  LuckyPicker on a small fake DOM (its chips in both phases, pick and take back).
+- `enhancementsHarness` **301 / 0** after re-recording: the fingerprint gained exactly 20 lines, all `offer OFF_LUCK` (one per test hull with a C&C);
+  nothing else changed. Old copy `fingerprint.before-officers-stage37.txt`.
+- **Mutation 67 / 68 caught + 1 equivalent** (53 server against `tests/replay/luckyProbe.php`, 15 client against the client harness; `mutate37.js`, session
+  scratchpad only), every file byte-identical after. The first pass broke on one (S47 - no EW Last line): the check's own message read `$lines[0]`
+  unguarded, which FV's error handler makes fatal - now null-safe, and S47 is caught. C12 is EQUIVALENT: the Firing menu button's `isFiringPhase`
+  never decides, as `canLucky` already refuses every phase but 1 and 3 (kept, as the hangar buttons beside it have it).
+
+**Not built / observed:**
+- **To run with the stack up**: `fvbuild -Statics` (the offers), the officers harness WITH the database, `enhancementsDifferential.js`, `fvbuild -Check`,
+  `fvbuild -Sync`.
+- The one-line hooks (InitialOrdersGamePhase::process / advance, FireGamePhase::advance, the two plan calls in Firing::fireWeapons) are not
+  harness-covered, nor the picker in a browser. Not play-tested.
+
+**Play test 4527 (user, 2026-10-31) - statics regenerated by the user; checked against the database, follow-ups built, uncommitted.**
+- **What the game showed, feat by feat** (five ships, all with him): EW Last on turns 1, 2 and 3 (one note each, a log line for the first two once firing
+  resolved); turn 1's armed feats - a re-roll (877874: "3 of 6 hit ... 3 of 6", the six orders' final dice exactly that), a Sure Shot (877875: its one
+  Heavy Pulse Cannon order rolled 1, six pulses), a Dodge (877871) and a Sure Shot on a ship that fired nothing (877873: kept, as ruled - its EW Last
+  on turn 3 was allowed); turn 2's Disengage failed fairly ("rolled 12, needing 4 or less"), the ship played on. Lucky Escape and Best Initiative were
+  not used.
+- ⚠️⚠️ **A BUG, FIXED: a defender's Dodge against a shooter's own re-roll.** 877874 re-rolled its volley at 877871, which had Dodge armed. The Dodge was
+  planned at the 'rams' stage, BEFORE the re-roll ('fire' stage), and set one Light Pulse Cannon hit to 100; the re-roll then replaced every die of the
+  volley, but the Dodge's "spend when this die rolls" mark stayed - so the Dodge was spent and told ("misses his ship") on the re-roll's die. One of the
+  two Light Pulse Cannon orders (498067) rolled 23 and hit 877871 five times. Now (`planLuckyRolls`): the 'rams' stage plans a Dodge at RAMS only; the
+  'fire' stage plans every shooter's own feat first (re-roll, Sure Shot), THEN every Dodge, on the dice as they stand (a die not rolled ahead yet is
+  rolled then) - the target alters a die of the shooter's FINAL roll. And a die another Lucky Captain changed is never changed again (a Sure Shot's
+  1 cannot be dodged - "alter one die roll", each die once): built default, ask to change. "A ram first" holds - rams resolve before the second stage,
+  so a ram dodged has spent it.
+- **The picker grouped (user request).** Feats in the rules' order (`officers.LUCKY_FEATS`): Re-roll Volley; **Alter One Die** - a full-width band (a
+  lifted fill, under a small uppercase heading) holding Sure Shot, Dodge, Lucky Escape and Best Initiative, its heading's line "One feat, four ways to use it - using any
+  one of them uses all four for the rest of the battle" and, once spent, "used, turn N" on the heading and "used" on the use that spent it, the other
+  three shut; EW Last; Disengage. `officers.LUCKY_FEAT_NAMES` / `LUCKY_FEAT_NOTES`; `luckyPicker.js` `useRow` / `featGroup`; `hexPicker.css`
+  `.fv-missionpicker--lucky .fv-missionpicker__group` / `__grouphead` (`--lk-group`). Re-done after the user's review the same day:
+  the first take - an inset frame with its own green rail and indented rows - put its rows out of line with the rest; now no inset, no rail, no indent,
+  every label (the heading's too) on one column (measured: 11px in all three states). Rendered headless with the real CSS in three
+  states (Initial Orders, a Sure Shot picked in the Firing phase, feat 2 spent) - scratchpad driver `lucky37.mjs`.
+- **The Vortex Disruptor and Hypergraviton Blaster roll sites (user's note: their factions cannot take him).** Kept - each is one gate check. The
+  Disruptor's is never reached (it fires at a jump point, never at his ship, and its own side cannot carry him); the Blaster's still matters: an enemy
+  Blaster's hit on HIS ship can be Dodged, and its first roll is the die that would be.
+- Verified (stack up): `officersHarness.php` WITH the database **2792 / 0** (Stage 37's statics sweep passes on the user's statics; probe 104 / 0 with
+  the play test cases: an enemy re-roll then his Dodge on the second set, an enemy Sure Shot's die left alone, a ram dodged first and a missed ram then
+  a gun's hit); `officersClientHarness.js` **1194 / 0** (the picker's frame, its order and the spent state); `enhancementsDifferential.js` **964 / 0**;
+  `fvbuild -Check` **all checks passed** (replay 189 / 0); legacy bundles rebuilt, `fvbuild -Sync`. **Mutation 69 / 70 + 1 equivalent**
+  (C12, as before; three new mutants on the fix - Dodge's two stages mixed, a Sure Shot die re-altered, Dodge rolling over the shooter's dice - all caught).
+
+### 9.45 Stage 38: the Ancient exceptions (2026-10-31)
+
+**The user's request (2026-10-31).** "Up until now Ancient factions have been prevented from using any officers. However there are a few exceptions to
+this rule: Kirishiac can use a single Expert War Leader on a Kingship or Lordship. If no War Leader chosen can take Expert Warrior instead on any ship. The
+two are mutually exclusive. A single Walker Pathfinder may be equipped with an Expert ELINT officer. Torvalus: Have Expert Political Officer but this is
+renamed as Expert Gambler (effects are the same, however we should change the topics of the speeches when the faction is Torvalus). One ship in a Torvalus
+fleet can get the Lucky Captain too, and they pay the Dilgar price for it, not the inflated price. One Mindrider Consortium ship may have the Expert
+Religious Leader." The user's note: these need more specificity in when a ship is eligible, and the lobby must refuse a pick once another is made -
+"incorporate this to the overall officer setting method, in case it proves useful for custom faction developers", and update the README.
+
+**Rulings (user, 2026-10-31, asked before building):**
+1. **Kirishiac: ONE of the two in a fleet** - a single War Leader (Kingship or Lordship) or a single Expert Warrior (any hull with a C&C), never both.
+2. **Mindriders: the Consortium HULL** (not any Mindrider ship), one in a fleet.
+3. **The Gambler's freebies OPEN to the Torvalus** - his free expert (Helmsman, Scanner, Engineer or Navigator) and five free Hardened Armour work for
+   them, though Ancients can buy neither otherwise. (No Torvalus hull has a hangar, so no armed shuttle - stated.) No limit to a fleet, as for the
+   Centauri; capital ships and larger, as for the Centauri (Black Rapier, Dark Knife, Black Dagger).
+4. **Primordial hulls of these factions included** (factionAge 4: the Torvalus Black Dagger, the Kirishiac Conqueror) - the exceptions are per FACTION.
+
+**Six new `$factionRules` keys** (Officers.php; the README's "Narrower rules" section is the custom-faction how-to):
+- `ancients` - the Ancient factions he is offered to. `factionAllows` now reads `ancients` ALONE for a hull of factionAge 3+, `only`/`never` for every
+  other. `mayCarryOfficers($ship, $id = null)`: asked about no officer, an Ancient hull still answers no (D9, and every harness caller); asked about one, the
+  faction rules decide. Its non-age half is `unitMayCarry` (OSATs, mines, remote craft, terrain), now asked first by `isEligible`.
+- `hulls` - faction => PHP class names (case-insensitive, `isHullListed`).
+- `perFleet`, `notWith` - read by `fleetRule($ship, $id)` (by rulesId; notWith both ways, so one side's list is enough).
+- `label` - `labelFor($ship, $id)`: the offer (so the static row, the stored enhname), every note's notekey_human, loadSavedFleet's notices, the speech.
+- `grants` - faction => ids that come ONLY with this officer: `grantorOf($ship, $id)` (only what `grantGroups($grantor)` says his rules make free:
+  the Political Officer's four experts, one free, and SYS_HARM, five free, never on Structure). A granted officer is offered exactly where his grantor is
+  (`factionAllows`), serves only as the grantor's free one (`grantStands` in pickPosts, sanitiseFleet and loadSavedFleet's offered test); a granted refit
+  passes the refit age gate only where the hull is offered the grantor (`grantsRefit`, first thing in `Enhancements::systemEnhancementAllowsAge`), never on
+  Structure (`grantMayHost`, in systemEnhancementsFor and the sanitiser), and stands only while free (`dropUngrantedRefits`, last in `priceFreeRefits`).
+  The commit's random picks (placePoliticalPicks) work unchanged: their candidates are what the hull is offered.
+
+**The fleet rules on the server: `Officers::sanitiseFleet($fleet)`**, called once per slot in `BuyingGamePhase::process` over the submitting player's
+units, before any is saved: unit by unit in fleet order, officers in REGISTRY order (the offers are listed by label, not registry order - found by the
+harness), then placed rows; a row past `perFleet`, beside a `notWith` officer of the same faction kept before it, or a granted one not freed, is ZEROED (it
+buys nothing, its points stay spent - pickPosts' way with a row it refuses). The rules are per faction: a Kirishiac War Leader beside a Drazi Warrior in one
+fleet is fine. Placed twins (OFF_RELIP) count as their rulesId and are judged only where the system is offered them.
+
+**Placed officers on Ancient hulls:** the per-system registry's officer entries carry `ages => array(1, 2)`, so the Consortium got no OFF_RELIP offer at
+first (found by the probe). `systemEnhancementAllowsAge` now asks `Officers::mayCarryOfficers($ship, $id)` for an officer entry on an Ancient hull.
+
+**The lobby** - no mirror of the table: the static blueprint carries three new annotations (`blueprintAnnotations`, also in game.php's blueprints):
+`officerLabels` (every hull of a faction with a `label`), `officerFleet` ({rulesId: {max, notWith}} for the offered officers that have rules) and
+`officerGrants` ({grantor: [{ids, count, notStructure}]}).
+- `officers.label(id, ship)` reads `officerLabels`; every caller with a ship passes it (13 legacy, 5 React).
+- `officers.fleetBlock(ship, id)` - the rest of the lobby slot (never the unit itself: an edit, or a copy's fresh clone): returned by `shipLevelBlock` (the
+  buy dialog's static note) and `placedBlock` (the system menu). A COPY seeds such a row at 0 (`addBuyEnhancementRows`).
+- `officers.dialogBlock(ship, id, rows)` - the rows ticked beside him: a `notWith` officer on the same unit, a granted expert with no Gambler ticked or a
+  second one. `confirm.officerBlocked` asks it through the row's `dialogRules` (the unit, set only on officer rows of a unit with rules) and flashes a
+  note of its own (`.buyOfficerLive`); `confirm.clampGrantedRows` (every total) untakes a granted row once its grantor is unticked; the row's price note
+  reads "free, only with the Expert Gambler (one of 4)".
+- `officers.refitBlock(ship, systemid, enhID)` - a granted refit with no grantor (his C&C standing), on Structure, or past his five: the system menu row's
+  `blocked` and `systemEnhancements.set`'s refusal.
+- `officers.dropUngranted(ship)` - run at the end of `dropDestroyedPosts` (every edit, fleet load and pre-battle damage refresh): a granted expert or refit
+  no longer free is removed and refunded, `describeRemoved` saying "this ship has it only free, with the Expert Gambler".
+- `officers.fleetConflicts(units)` - the Fleet Correctness Report: one line per ruled officer the slot carries, FAILURE past a rule (a saved fleet).
+
+**The speech:** "The Gambler on-board <ship> begins a stirring speech about ..." - the label without "Expert ", on `$speechTopicsByFaction['Torvalus
+Speculators']` (22 topics, odds and wagers and the Speculators' ledger).
+
+**Offers measured (probe `tests/replay/ancientProbe.php`):** Kirishiac - Expert Warrior on all 7 C&C hulls (Citadel starbase and the Primordial Conqueror
+included; the Overlord has a C&C too), War Leader on the Kingship and Lordship (fleet-priced, x1.5 outside the Narn Regime as everyone's); Walkers - ELINT
+on the Pathfinder (30%); Mindriders - Religious Leader on the Consortium (15%) and his twin on 5 of its systems; Torvalus - the Gambler (40%) and his four
+experts on the three capitals, with Hardened Armour on 18-20 systems each, and the Lucky Captain (25%) on all six C&C hulls. No other Ancient hull is
+offered anything.
+
+**Not built / left as is:** the statics sweeps of earlier stages that assume "no Ancient" pass (they filter by faction); the client harness's Stage 28
+Warrior count moved 51 -> 58. FIXED the same day (user confirmed it): a lobby COPY now keeps the original's PER-SYSTEM rows - see the copy follow-up below.
+- Verified (stack up, 2026-10-31): `officersHarness.php` WITH the database **2853 / 0** (61 new: the statics sweep of every Ancient/Primordial hull, prices,
+  label, mayCarryOfficers, the Consortium's twin offers, the three annotations, serving, sanitiseFleet incl. notWith from one side only, the Gambler's
+  armour and speech; `checkFactionRules` knows the six keys and checks each - an Ancient faction, a faction's own hull class, a label short enough, a grant
+  his rules free); `officersClientHarness.js` **1219 / 0** (25 new; the Stage 28 Warrior statics count 51 -> 58); `enhancementsHarness.php` **302 / 0**
+  (fingerprint unchanged); `enhancementsDifferential.js` **964 / 0**; `fvbuild -Check` **all checks passed** (replay 189 / 0); statics regenerated,
+  bundles rebuilt (`fvbuild -Client`), `fvbuild -Sync`. **Mutation 37 / 37** (`mutate38.js`, 20 server against the generated `ancientChecksProbe.php`,
+  17 client); the first pass let two through - notWith read from one side (both table entries list the pair) and dropUngranted's refund read after
+  re-pricing (every caller re-totals first) - both pinned by a test since. Not play-tested.
+
+**Follow-ups (user, 2026-10-31, same day):**
+- **Unavailable options are not shown** ("players often refuse to read the text"): in the buy dialog an untaken officer row is hidden while the fleet has
+  no room for him (fleetBlock) or the rows ticked beside him rule him out (dialogBlock) - `officers.offerUnavailable`, `confirm.refreshOfficerRows` (once
+  the rows are built, before `openBuySections` counts them, and with every total), class `.buyRow.is-unavailable` (confirm.css); a section of hidden rows
+  only is not shown, and its badge counts only rows shown. A TAKEN row always shows, so it can be untaken. `shipLevelBlock` no longer carries the fleet
+  reason (no note for a row that is not there). The ship window's system menus likewise leave out a placed twin past a fleet limit and a granted refit
+  that would not be free (`officers.menuRowUnavailable`, filtered in `systemEnhancements.menuRowsFor`); every older greyed-out reason is unchanged.
+- **A copy, not an edit:** the copy dialog's "no room" reset now applies only to a unit not yet in the fleet. An EDITED unit in a fleet already past a
+  limit (a saved fleet) keeps its officer, shown, for the player to keep or take off - found by the browser driver: the first version zeroed it silently.
+- **The Expert Evangelist: one to a fleet** (`perFleet`, Corillani Theocracy), replacing the 2026-10-29 note that allowed several; applyMorale still
+  copes with several (a game committed before the limit). Docs card and registry note updated.
+- **Ruled, not built:** `grants` stays the Political Officer's (the user had read it as a general freebie mechanism - not needed for the Quartermaster or
+  Ballistic Officer); the Gambler stays capital ships only, as for the Centauri.
+- **Copies keep their refits and placed officers** (pre-existing bug, user-confirmed once "refits" was explained - ship-level officers always copied):
+  copyShip put the original's per-system rows on the dialog's unit, but doCopyShip rebuilds the unit from a fresh blueprint and dropped them, uncharged.
+  Now carried across the rebuild (DEEP clone, as the damage), painted after lobbyEnhancements.apply and the damage preview as doEditShip does, priced
+  by what the copy bought (a Gambler's / Political Officer's / Quartermaster's free ones stay free only with him), swept - a placed officer past a
+  fleet limit (`officers.dropFleetBlockedPlaced`, with a notice), a system the damage destroys (D11), what an unticked officer granted
+  (dropDestroyedPosts) - and the affordability check moved after, so the refits count. The copy's rows always replace the rebuilt unit's own
+  (copyShip's stand-in can register a class off a bought unit on a loaded fleet). Client harness +5 (real copyShip / doCopyShip in a vm), browser
+  driver +1 (the real Copy window: an Omega with Gunsights and a Gunner copies at 1033), mutants K01-K03 caught.
+- Verified: `officersHarness.php` (DB) **2854 / 0**; `officersClientHarness.js` **1227 / 0** (after the copy fix); differential **964 / 0**; enhancements **302 / 0**;
+  `fvbuild -Check` **all checks passed** (replay 189 / 0); new browser driver `tests/replay/officersE2E/ancient38.mjs` (the REAL buy dialog over the
+  real bundles, no PHP/session) **20 / 20**; mutation `mutate38b.js` **14 / 14** (E05, a taken row hidden, survived until the edit-a-saved-fleet case
+  was added). Statics, bundles, `-Sync` done. Not play-tested.

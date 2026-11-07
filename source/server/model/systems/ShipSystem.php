@@ -1467,7 +1467,10 @@ public function setParentFighter($fighter) {
         }
 	*/
 
-        $roll = Dice::d(20) + floor(($this->getTotalDamage())*$damageMulti) + $add +$bonusCrit;
+        $die = Dice::d(20);
+        $roll = $die + floor(($this->getTotalDamage())*$damageMulti) + $add +$bonusCrit;
+        //OFFICERS_PLAN.md Stage 37: a Lucky Captain's Lucky Escape may set this d20 to 1 when the roll is catastrophic (Officers::luckyEscape decides)
+        if (TacGamedata::$officersPresent && $die > Officers::LUCKY_ESCAPE_DIE) $roll = Officers::luckyEscape($ship, $this, $gamedata, $roll, $roll - $die + Officers::LUCKY_ESCAPE_DIE);
         $this->lastCritRoll = array((int)$gamedata->turn, (int)$roll); //an officer posted here dies on 20+ (Officers::rollKills)
         $criticalTypes = -1;
 
@@ -1495,6 +1498,16 @@ public function setParentFighter($fighter) {
     }
 	
     
+    /* The highest step of this system's critical table a critical roll of $roll reaches (its threshold), or -1 for none - testCritical's own reading
+       of possibleCriticals, for a rule that compares two rolls (OFFICERS_PLAN.md Stage 37: Officers::luckyEscape). */
+    public function criticalTier($roll){
+        $tier = -1;
+        foreach ($this->possibleCriticals as $threshold => $value){
+            if ($roll >= $threshold) $tier = max($tier, (int)$threshold);
+        }
+        return $tier;
+    }
+
     public function addCritical($shipid, $phpclass, $gamedata){
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;

@@ -1904,7 +1904,10 @@ public static function firePreFiringWeapons($gamedata){
             //HYPERSPACE_IMPROVEMENTS_PLAN.md Item 1 - and the BLUE one, split off so the combat log
             //can colour the two doorways differently. Same order, same inertness; only the class
             //name differs, so it must be skipped by the four gathers exactly as its twin is.
-            || $fire->damageclass === 'JumpVortexExit';
+            || $fire->damageclass === 'JumpVortexExit'
+            //OFFICERS_PLAN.md Stage 37 - a Lucky Captain's log line, which his failed disengage writes as Initial Orders close (Officers::luckyLine):
+            //on his RammingAttack, so without this the firing would take it for a ram
+            || $fire->damageclass === Officers::LUCKY_LOG_CLASS;
     }
 
     /* A METEOR DEFENCE DECLARATION IS NOT A SHOT EITHER (METEOR_DEFENCE_PLAN.md §2.3, trap T5).
@@ -2248,6 +2251,10 @@ public static function firePreFiringWeapons($gamedata){
     public static function fireWeapons($gamedata, $dbManager = null){
         $rammingOrders  = array();
 
+        /* OFFICERS_PLAN.md Stage 37: a Lucky Captain's armed Dodge rolls ahead the to-hit dice of the rams at his ship, which resolve below, and picks
+           the hit to turn into a miss; each die is handed to its shot as it rolls (Officers::toHitRoll). Nothing in a game without one. */
+        if (TacGamedata::$officersPresent) Officers::planLuckyRolls($gamedata, 'rams');
+
         //Reactor explosions and Ramming Orders first    
         foreach ($gamedata->ships as $ship){		
             /*account for possible reactor overload!*/
@@ -2313,6 +2320,9 @@ public static function firePreFiringWeapons($gamedata){
            only a called shot can hit its weapons. Every order of the turn is known by now, so it is decided once, here, for the ship and
            fighter fire below (the rams above are collisions, not fire), and closed again after it. */
         Officers::openShelter($gamedata);
+        //Stage 37: and his armed volley re-roll or Sure Shot rolls his ship's to-hit dice ahead - after the rams, which may have destroyed his guns -
+        //then a Dodge picks from every other shot at its ship, on those dice as they stand
+        if (TacGamedata::$officersPresent) Officers::planLuckyRolls($gamedata, 'fire');
 
         $fireOrders  = array();  //Array for non-ramming ship fire.
         //Now fire ship weapons.
@@ -2441,6 +2451,7 @@ public static function firePreFiringWeapons($gamedata){
             }
         }
         Officers::closeShelter();
+        Officers::endLuckyRolls(); //Stage 37: no die rolled ahead outlives the firing
 
         //Attachment outcomes are only known now, so units that failed to attach to an
         //Enormous unit ram it here - see createFailedAttachRamOrders.

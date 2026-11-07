@@ -709,6 +709,12 @@ TrekPhaserKellyType7.prototype.initBoostableInfo = function () {
 	return this;
 };
 
+var TrekPhaserKellyType4 = function TrekPhaserKellyType4(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekPhaserKellyType4.prototype = Object.create(Weapon.prototype);
+TrekPhaserKellyType4.prototype.constructor = TrekPhaserKellyType4;
+
 
 var TrekShieldProjectionKelly = function TrekShieldProjectionKelly(json, ship) {
     ShipSystem.call(this, json, ship);

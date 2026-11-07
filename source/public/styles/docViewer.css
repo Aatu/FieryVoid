@@ -1119,7 +1119,8 @@ html.fvd-lock body {
   min-width: 0;
 }
 
-.fvd-spec dd ul {
+.fvd-spec dd ul,
+.fvd-spec dd ol {
   margin: 0;
 }
 

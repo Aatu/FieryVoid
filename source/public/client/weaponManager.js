@@ -539,6 +539,9 @@ window.weaponManager = {
 
         if (weapon.autoFireOnly && !abductionSelect) return; //this is auto-fire only weapon, should not be fired manually!
 
+        //a ballistic weapon on a craft with a Ramming Prow may not be used (user ruling 2026-11-01; Weapon::fitRamProw)
+        if (weapon.ramProw && weapon.ballistic) return;
+
         //An Ancient ship jumping out this turn may not fire (JumpEngine::$ancientJump). Setting the
         //jump already withdrew its orders (JumpEngine.onBoostIncrease); this stops new ones, and the
         //server withdraws anything that gets past both (Firing::withdrawFireFromJumpingUnits). A ram
@@ -2088,6 +2091,9 @@ window.weaponManager = {
             //a fighter mission's term goes on the bonus BEFORE the crit / mine deductions (FIGHTER_MISSIONS_PLAN.md D5) -
             //⚠️ MIRROR PAIR with FighterMissions::adjustOffensiveBonus in Weapon::calculateHitBase
             if (window.fighterMissions) baseOB = fighterMissions.adjustOffensiveBonus(shooter, target, weapon, baseOB);
+            //an Expert Electrician's shunted power: OB for this turn's DIRECT fire, before the crit / mine deductions (OFFICERS_PLAN.md Stage 36) -
+            //⚠️ MIRROR PAIR with Officers::shuntOb in Weapon::calculateHitBase
+            if (!weapon.ballistic && window.officers) baseOB += officers.shuntOb(shooter);
             var effectiveOB = Math.max(0, baseOB - OBcrit - (mdew * 2));
 
             if (weapon.ballistic) {
@@ -2317,6 +2323,14 @@ window.weaponManager = {
         return -weaponManager.TAIL_GUN_PENALTY;
     },
 
+    /* A weapon on a craft with a RAMMING PROW (`ramProw` from the live payload, Weapon::fitRamProw): -2 (-10%) to hit. Its arc
+       arrives with the payload too, and a ballistic one may not be fired at all (selectWeapon).
+       ⚠️ MIRROR PAIR with Weapon::getRamProwMod (PHP). */
+    RAM_PROW_PENALTY: 2,
+    getRamProwMod: function getRamProwMod(weapon) {
+        return (weapon && weapon.ramProw) ? -weaponManager.RAM_PROW_PENALTY : 0;
+    },
+
     //Weapon::firedOffensivelyOnTurn over the weapon's craft's OTHER direct-fire weapons, this turn
     craftFiresOtherWeapon: function craftFiresOtherWeapon(shooter, weapon) {
         var craft = shipManager.systems.getFighterBySystem(shooter, weapon.id);
@@ -2372,6 +2386,8 @@ window.weaponManager = {
             }
             var tailGun = weaponManager.getTailGunMod(shooter, weapon);
             if (tailGun !== 0) otherDetail.push({ label: tailGun > 0 ? 'Expert Tailgunner' : 'Tail Gun', value: tailGun });
+            var ramProw = weaponManager.getRamProwMod(weapon);
+            if (ramProw !== 0) otherDetail.push({ label: 'Ramming Prow', value: ramProw });
         } else {
             var rolling = (shooter.agile === true)
                 ? shipManager.movement.hasRolled(shooter)
@@ -2422,6 +2438,10 @@ window.weaponManager = {
         if (precision !== 0) otherDetail.push({ label: 'Precision Strike', value: precision });
         var chargeHit = window.officers ? officers.chargeHitBonus(shooter, weapon, target) : 0;
         if (chargeHit !== 0) otherDetail.push({ label: 'Charge', value: chargeHit });
+        /* This turn's Expert War Leader abilities (OFFICERS_PLAN.md Stage 34): his wrath, a center of glory, a taunt.
+           ⚠️ MIRROR PAIR with the warLeaderShotBonus line in Weapon::calculateHitBase. */
+        var warLeader = window.officers ? officers.warLeaderShotBonus(shooter, weapon, target) : 0;
+        if (warLeader !== 0) otherDetail.push({ label: 'War Leader', value: warLeader });
 
         /* An Expert Gunner's once-per-battle shot (OFFICERS_PLAN.md Stage 10): +4 on his gun's first native Piercing
            shot, +3 on its first called shot. ⚠️ MIRROR PAIR with the gunnerShotBonus line in Weapon::calculateHitBase. */
@@ -5914,6 +5934,15 @@ window.weaponManager = {
             //RedlineLanding (OFFICERS_PLAN.md Stage 32): a Redline Pilot's landing beyond the thrust tolerance that held - its roll. 0 shots
             //on his craft's Ramming Attack, at his own flight; its sentence continues the header with "'s" (a crash is the ram itself).
             "RedlineLanding",
+            //WarLeader (OFFICERS_PLAN.md Stage 34): an Expert War Leader's taunt, anticipation, wrath or center of glory - its sentence alone,
+            //under a "WAR LEADER!:" header (combatLog.logFireOrders), 0 shots on the ship's own Ramming Attack, as the speech.
+            "WarLeader",
+            //AnalystScan (OFFICERS_PLAN.md Stage 35): an Expert Analyst's cargo scan - its sentence alone, under a "CARGO SCAN:" header, 0 shots on
+            //his ship's own Ramming Attack, as the speech.
+            "AnalystScan",
+            //LuckyCaptain (OFFICERS_PLAN.md Stage 37): a Lucky Captain's feat - its sentence alone, under a "LUCKY CAPTAIN:" header, 0 shots on his ship's
+            //own Ramming Attack, as the speech.
+            "LuckyCaptain",
             //HangarEscape (HangarOps::escapeLogOrder): a destroyed carrier's escape roll - what flew free and what was lost with the
             //ship. 0 shots on the carrier's own Ramming Attack; its sentence continues the header with "'s".
             "HangarEscape"

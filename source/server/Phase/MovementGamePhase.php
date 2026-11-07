@@ -114,6 +114,10 @@ class MovementGamePhase implements Phase
             ElintModules::validateAfterMovement($latestgameData, $dbManager);
         }
 
+        /* OFFICERS_PLAN.md Stage 35 (user's note 2026-10-29) - every unit has moved: a flight's missiles are counted by every team with a unit
+           close enough (16 hexes a ship, 12 a fighter or shuttle), its Dummy Missiles told apart at 4 - known to that team from now on. */
+        FighterFlight::detectMissiles($latestgameData);
+
         // Update game phase to Pre-Firing
         $gameData->setPhase(5);
         $gameData->setActiveship(-1);

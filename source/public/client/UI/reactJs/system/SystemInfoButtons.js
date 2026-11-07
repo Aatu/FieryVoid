@@ -921,7 +921,8 @@ export const canDoAnything = (ship, system) => {
 };
 
 //powerLocked: system may not be voluntarily powered down right now (Antigravity Beam while its Kirishiac Orbital is deployed)
-const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !system.powerLocked && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
+//OFFICERS_PLAN.md Stage 36: a flight's weapon an Expert Electrician may shunt is switched off here too (officers.mayShunt)
+const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0 || (window.officers && officers.mayShunt(ship, system))) && !system.powerLocked && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 
 // A system forced offline by a cooldown / forced-shutdown crit cannot be powered back
 // on by the player (it auto-recovers when the crit expires); onOnlineClicked/onlineAll

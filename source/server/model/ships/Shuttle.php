@@ -431,7 +431,7 @@ class EmperorsYacht extends Shuttle
         $this->phpclass = "EmperorsYacht";
         $this->shipClass = "Yacht";
         $this->hangarRequired = 'yacht';
-        $this->faction = "Centauri republic";        
+        $this->faction = "Centauri Republic";        
         $this->offensivebonus = 2;
         $this->forwardDefense = 10;
         $this->sideDefense = 12;
@@ -868,7 +868,7 @@ class ShuttleDilgar extends Shuttle
         parent::setShuttleDefaults();
         $this->phpclass = "ShuttleDilgar";
         $this->shipClass = "Shuttle";
-        $this->faction = "Centauri Republic";
+        $this->faction = "Dilgar Imperium";
         $this->forwardDefense = 9;
         $this->sideDefense = 10;
         $this->freethrust = 5;
@@ -1316,7 +1316,7 @@ class ShuttleOrieni extends Shuttle
         parent::setShuttleDefaults();
         $this->phpclass = "ShuttleOrieni";
         $this->shipClass = "Shuttle";
-        $this->faction = "Centauri Republic";
+        $this->faction = "Orieni Imperium";
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
         $this->freethrust = 3;
@@ -2064,7 +2064,7 @@ class ShuttleGCOrieni extends ShuttleOrieni
         parent::setShuttleDefaults();
         $this->phpclass = "ShuttleOrieni";
         $this->shipClass = "Shuttle";
-        $this->faction = "Centauri Republic";
+        $this->faction = "Orieni Imperium";
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
         $this->freethrust = 3;

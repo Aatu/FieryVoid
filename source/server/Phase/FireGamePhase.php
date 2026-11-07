@@ -71,6 +71,12 @@ class FireGamePhase implements Phase
 
         //OFFICERS_PLAN.md Stage 25: every Expert Political Officer's speech this turn, told in the combat log once firing has resolved
         Officers::speechLog($servergamedata);
+        //Stage 34: and every Expert War Leader ability used this turn - his taunt, anticipation, wrath or center of glory
+        Officers::warLeaderLog($servergamedata);
+        //Stage 35: and every Expert Analyst's cargo scan this turn - the only scan told (user ruling 2026-10-29)
+        Officers::analystLog($servergamedata);
+        //Stage 37: and every Lucky Captain's Initial Orders feat that has no line yet - his EW set last, his best initiative
+        Officers::luckyOrdersLog($servergamedata);
 
         $newFireOrders = $servergamedata->getNewFireOrders();
         $dbManager->submitFireorders($servergamedata->id, $newFireOrders, $servergamedata->turn, 3);

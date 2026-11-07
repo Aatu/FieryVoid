@@ -32,7 +32,7 @@ class CylonBasestar extends SixSidedShip{
 		$this->canvasSize = 200;
 
 		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
-		$this->addPrimarySystem(new Hangar(6, 36));
+		$this->addPrimarySystem(new Hangar(6, 54));
 		$this->addPrimarySystem(new CnC(6, 30, 0, 0));
 		$this->addPrimarySystem(new Scanner(6, 24, 5, 8));
         $this->addPrimarySystem(new Engine(6, 25, 0, 16, 3));			
