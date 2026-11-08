@@ -1049,6 +1049,56 @@ textarea.cg-input {
   color: var(--fv-text);
 }
 
+/* position: the "?" windows (.cg-help-bubble) are placed against the card, as on a Scenario card. */
+.cg-terrain-card {
+  position: relative;
+}
+
+/* The row's name and its "?", which sits right after it as on the Scenario cards. */
+.cg-terrain-name {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* Nebula / Electromagnetic Storm: a tick box centred in the controls' column, so it lines up with
+   the centred values in the rows round it. As tall as the other controls, so every row is too. */
+.cg-terrain-check {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 116px;
+  min-height: 30px;
+}
+
+/* base.css nudges every checkbox down 2px; this column centres its own. */
+.cg-terrain-check input[type=checkbox] {
+  top: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--fv-accent);
+  cursor: pointer;
+}
+
+.cg-terrain-row:has(.cg-terrain-check) label {
+  cursor: pointer;
+}
+
+/* The Terrain Features "?" and its window wear the card's blue rail; the Scenario ones, purple. */
+.cg-terrain-card .cg-help:hover span[aria-hidden],
+.cg-terrain-card .cg-help[aria-expanded="true"] span[aria-hidden] {
+  color: var(--rail);
+  border-color: var(--rail);
+}
+
+.cg-terrain-card .cg-help-bubble,
+.cg-terrain-card .cg-help-bubble::before {
+  border-color: var(--rail);
+}
+
 /* Nebula OR Mines Allowed (createGame.syncNebulaMines): the side locked out reads greyed, and its
    .cg-lock-note says why. */
 .cg-check-row.is-locked .cg-check-label,
@@ -1058,7 +1108,7 @@ textarea.cg-input {
 }
 
 .cg-check-row.is-locked input[type=checkbox],
-.cg-terrain-row.is-locked select {
+.cg-terrain-row.is-locked input[type=checkbox] {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -1077,6 +1127,14 @@ textarea.cg-input {
   min-height: 30px;
   padding: 4px 6px;
   font-size: 12px;
+}
+
+/* Every Terrain Features dropdown reads centred, like the count combos' values: the selects' shown
+   value (text-align-last for older engines) and their options where the browser draws the list. */
+select.cg-terrain-count,
+select.cg-terrain-count option {
+  text-align: center;
+  text-align-last: center;
 }
 
 /* Count combo (Asteroids / Dust / Meteor Swarms): a numeric field that takes any value, plus a
@@ -1146,6 +1204,7 @@ textarea.cg-input {
   padding: 6px 12px;
   font-size: 12px;
   color: var(--fv-text);
+  text-align: center;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -1674,6 +1733,7 @@ div[data-team-id="2"] .remove-team-btn {
 @media (pointer: coarse) {
   .cg-input,
   .cg-terrain-count,
+  .cg-terrain-check,
   .cg-btn {
     min-height: 44px;
   }
