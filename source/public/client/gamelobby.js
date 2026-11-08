@@ -6842,7 +6842,8 @@ jQuery(function () {
 	  cursor off the icon to reach the menu's own buttons would close it.*/
 	var systemInfoState = null;
 
-	//officersOnly (OFFICERS_PLAN.md Stage 19): a Structure bar's tooltip, naming the block's officers and nothing else
+	//structureBar: a section's health bar raised it - the block's Structure card, which the bar's own mouse-out takes down
+	//(until 2026-11-08 this was officersOnly, the bar's officers-only tooltip - the card names the block's officer itself)
 	var showInfo = function (payload) {
 		if (systemInfoState && systemInfoState.menu) return;   //a sticky menu wins over hover
 		uiManager.showSystemInfo({
@@ -6850,9 +6851,10 @@ jQuery(function () {
 			selectedShip: null,
 			system: payload.system,
 			boundingBox: getBoundingBox(payload.element),
-			officersOnly: Boolean(payload.officersOnly)
+			avoidBox: shipWindowBox(payload.element), //the system card opens beside the window, as the menu does
+			structureBar: Boolean(payload.structureBar)
 		});
-		systemInfoState = { menu: false, officersOnly: Boolean(payload.officersOnly) };
+		systemInfoState = { menu: false, structureBar: Boolean(payload.structureBar) };
 	};
 
 	/*Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §5.2) gave the lobby its first
@@ -6895,15 +6897,15 @@ jQuery(function () {
 					showInfo(payload);
 				}
 				break;
-			/* A section's Structure health bar (ShipSection): there is no map to draw its arc on here, but a block holding an
-			   officer (the Expert Targeter, Stage 19) names him in the officers-only tooltip, as in game. */
+			/* A section's Structure health bar (ShipSection): there is no map to draw its arc on here, but it opens the block's
+			   Structure card, as in game (which names an Expert Targeter posted there - Stage 19). */
 			case 'StructureMouseOver':
-				if (payload.element && payload.structure && window.officers && officers.hasPostTooltip(payload.ship, payload.structure)) {
-					showInfo({ ship: payload.ship, system: payload.structure, element: payload.element, officersOnly: true });
+				if (payload.element && payload.structure) {
+					showInfo({ ship: payload.ship, system: payload.structure, element: payload.element, structureBar: true });
 				}
 				break;
 			case 'StructureMouseOut':
-				if (systemInfoState && systemInfoState.officersOnly) hideInfo(false);
+				if (systemInfoState && systemInfoState.structureBar) hideInfo(false);
 				break;
 			case 'SystemClicked': //tap/click = show info too (the touch path relies on it)
 				if (uiManager.canShowSystemInfoMenu(payload.ship, payload.system)) {

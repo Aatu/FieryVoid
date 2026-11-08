@@ -29,6 +29,11 @@ const theme = {
            uses for its "[Deploys on Turn N]" fleet header and FighterIcon uses for DOCKED, so a
            pending arrival reads the same wherever it is shown. */
         statusPending: "#00b8e6",
+        /* The system tooltip card (system/SystemCard.js, user choice 2026-11-08) needed three values that
+           tokens.css already had but this file did not - added as their twins, not as new colours. */
+        card: "#0a1c26",                        //--fv-card   - the card's header band, a shade above panelBg
+        rule: "#1e3a4a",                        //--fv-rule   - hairlines inside a panel (cells, footer)
+        accent: "#8bcaf2",                      //--fv-accent - section labels
         /* THE GOLD SET - "this was bought, it is not standard equipment".
            enhText was already here; the other three were hex literals repeated in
            ShipNotesPanel.js (Block $gold and EnhTitle). They were extracted when the
@@ -80,9 +85,49 @@ const theme = {
     fonts: {
         body: "arial",
         mono: 'Consolas, "Lucida Console", monospace', //numeric readouts - SCS datasheet feel
+        //the platform's own UI face (Segoe UI / San Francisco / Roboto) - the system tooltip card's text
+        //(user choice 2026-11-08: crisper than Arial at 12-13px, and no download). No tokens.css twin.
+        ui: 'system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
         //--fv-display - the lobby's panel and section titles. Only pages that @import it
         //(gamesNew.css) have it: game.php does NOT, so reach for it only on lobby surfaces.
         display: '"Orbitron", sans-serif',
+    },
+    /* The system card's class chips (user request 2026-11-08). A WEAPON CLASS keeps one colour everywhere: the
+       animation colour its family fires with - the family base class's animationColor, or the commonest one across
+       the ship files where there is no base class. Two are nudged so they do not read as a neighbour (Gravitic, Psychic),
+       and Ballistic, whose own colour is a near-black grey, takes gunmetal (--fv-gunmetal, the Ammo & Ordnance bar).
+       A class not listed - and the black ones: Ramming, JumpPoint, Standard, Boarding - draws in `neutral`.
+       DAMAGE TYPES have a set of their own, drawn as OUTLINES (SystemCard Chip) so the two kinds of chip never read as one.
+       Signals, like the allegiance set: retune them as a set, never one alone. No tokens.css twins - nothing in CSS paints them. */
+    chips: {
+        neutral: "#8c9bab",
+        weaponClass: {
+            Laser: "#e60000",           //Laser (230, 0, 0)
+            Particle: "#ff6600",        //Particle (255, 102, 0)
+            Matter: "#fafabe",          //Matter (250, 250, 190)
+            Plasma: "#4bfa5a",          //Plasma (75, 250, 90)
+            Molecular: "#afe1af",       //Molecular (175, 225, 175)
+            Antimatter: "#00b8e6",      //AntimatterWeapon (0, 184, 230)
+            Gravitic: "#c8ff00",        //Gravitic (99, 255, 0), pushed toward chartreuse - it read as Plasma's green
+            Ion: "#7f00ff",             //commonest (127, 0, 255)
+            Electromagnetic: "#a5a5ff", //commonest (165, 165, 255)
+            SWIon: "#5096fa",           //(80, 150, 250)
+            Projectile: "#ff0b0b",      //(255, 11, 11)
+            Psychic: "#b01e3c",         //(128, 0, 0), lifted toward crimson - the raw value read as a dim Laser
+            Pulse: "#c0c0c0",           //(192, 192, 192)
+            Support: "#63ff00",         //(99, 255, 0)
+            Ballistic: "#8e9aa6",       //--fv-gunmetal
+        },
+        damageType: {
+            Standard: "#deebff",
+            Raking: "#e60000",
+            Pulse: "#f5a524",
+            Flash: "#ffe45c",
+            Piercing: "#d17cff",
+            Special: "#3fd0c9",
+            Plasma: "#5fe07a",
+            Matter: "#e8dca0",
+        },
     },
     //Corner radii (roadmap item 6). THE tell that a surface belongs to the old world or
     //the new one: the SCS ship windows are square, the chrome around them used to be

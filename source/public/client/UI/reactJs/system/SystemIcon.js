@@ -4,6 +4,7 @@ import theme from "../styled/theme";
 import { canApplyPreBattleDamage } from "./SystemInfoButtons";
 import { MENU_CHROME, SECTION_INK } from "./menuControls";
 import { isMenuTarget } from "../helpers/menuTarget";
+import { isCardPinned } from "./SystemCard";
 
 const HealthBar = styled.div`
     position: absolute;
@@ -480,6 +481,10 @@ class SystemIcon extends React.Component {
         event.stopPropagation();
         event.preventDefault();
 
+        //Moving between the icon's own parts (its number overlay, health bar, badges) is not a new hover. Without this,
+        //entering one icon fired over/out 2-3 times, and each pair tore the system card down and built it again (2026-11-08).
+        if (event.relatedTarget && event.currentTarget.contains(event.relatedTarget)) return;
+
         let { system, ship } = this.props;
         system = shipManager.systems.initializeSystem(system);
 
@@ -498,6 +503,7 @@ class SystemIcon extends React.Component {
 
         event.stopPropagation();
         event.preventDefault();
+        if (event.relatedTarget && event.currentTarget.contains(event.relatedTarget)) return; //still on the icon - see onSystemMouseOver
         window.uiEvents.relay('SystemMouseOut');
     }
 
@@ -565,8 +571,13 @@ class SystemIcon extends React.Component {
             clearTimeout(this.longPressTimer);
             this.longPressTimer = null;
             // Short tap should not show arcs, clickSystem will handle selection and showing Action Menu.
+        } else if (isCardPinned()) {
+            // Long press, and its system card is up: it stays, pinned and scrollable, until the next tap anywhere
+            // outside it - SystemCard closes it then (user choice 2026-11-08; it used to hide on release).
+            // Restart the ghost-mouse shield from the RELEASE, so a compatibility mouseout fired now cannot close it.
+            window.lastTouchActiveTime = Date.now();
         } else {
-            // Timer already fired (long press). Hide info on release.
+            // Long press with no card up (a click menu holds the tooltip root): clear the hover on release, as before.
             window.uiEvents.relay('SystemMouseOut');
         }
 

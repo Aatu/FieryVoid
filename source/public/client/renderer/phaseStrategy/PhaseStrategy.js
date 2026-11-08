@@ -134,9 +134,18 @@ window.PhaseStrategy = function () {
         });
     };
 
-    //officersOnly (OFFICERS_PLAN.md Stage 19): a Structure bar's tooltip, which names the block's officers and nothing else
+    /* The ship window an element sits in (ShipWindow tags its container data-ship-window), or null: the system card opens
+       BESIDE it rather than over its icons - the rule the lobby's shipWindowBox gives its click menu. */
+    function shipWindowBox(element) {
+        var el = element && (element.getBoundingClientRect ? element : (element.get ? element.get(0) : null));
+        var win = el && el.closest ? el.closest('[data-ship-window]') : null;
+        return win ? win.getBoundingClientRect() : null;
+    }
+
+    //structureBar: a section's health bar raised it (onStructureMouseOver) - the card for that block's Structure, which the bar's
+    //  own mouse-out takes down again. Until 2026-11-08 this flag was `officersOnly`, the bar's officers-only tooltip.
     //craft: the flight craft card hovered (FighterIcon), so a flight's tooltip lists only the officers one-to-a-craft aboard it
-    PhaseStrategy.prototype.showSystemInfo = function (ship, system, element, menu, officersOnly, craft) {
+    PhaseStrategy.prototype.showSystemInfo = function (ship, system, element, menu, structureBar, craft) {
         if (this.systemInfoState && this.systemInfoState.menu && !menu) {
             return;
         }
@@ -150,9 +159,9 @@ window.PhaseStrategy = function () {
             }
             this.uiManager.showSystemInfoMenu({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox });
         } else {
-            this.uiManager.showSystemInfo({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox, officersOnly: Boolean(officersOnly), craft: craft || null });
+            this.uiManager.showSystemInfo({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox, avoidBox: shipWindowBox(element), structureBar: Boolean(structureBar), craft: craft || null });
         }
-        this.systemInfoState = { menu: menu, element: element, system: system, officersOnly: Boolean(officersOnly) && !menu, craft: craft || null }
+        this.systemInfoState = { menu: menu, element: element, system: system, structureBar: Boolean(structureBar) && !menu, craft: craft || null }
     }
 
     PhaseStrategy.prototype.consumeGamedata = function () {
@@ -1414,17 +1423,17 @@ window.PhaseStrategy = function () {
 
     /* Structure arc indicator (STRUCTURE_ARCS_PLAN.md): the ship window's section health bars
        raise their OWN event rather than SystemMouseOver, so hovering a bar draws the section's
-       facing wedge without also opening the system info tooltip (a structure has nothing useful
-       to say there) and without disturbing the weapon-arc show/hide. */
+       facing wedge without disturbing the weapon-arc show/hide. Since 2026-11-08 it also opens the
+       block's Structure card (below); the bar's own mouse-out takes both down. */
     PhaseStrategy.prototype.onStructureMouseOver = function (payload) {
         this.shipIconContainer.getArray().forEach(function (icon) {
             icon.hideStructureArcs();
         });
 
-        /* OFFICERS_PLAN.md Stage 19: a block holding an officer the viewer may see (the Expert Targeter - own team only, through
-           officers.listFor) names him in an officers-only tooltip (SystemInfo `officersOnly`), "and nothing else" (user request
-           2026-10-20). Any other bar still raises no tooltip. */
-        if (payload.element && payload.structure && window.officers && officers.hasPostTooltip(payload.ship, payload.structure)) {
+        /* Every bar raises its block's Structure card (user request 2026-11-08) - structure, armour, arc, criticals, and the
+           Expert Targeter if one is posted there (OFFICERS_PLAN.md Stage 19), so the officers-only tooltip a bar used to raise
+           for him alone is gone. */
+        if (payload.element && payload.structure) {
             this.showSystemInfo(payload.ship, payload.structure, payload.element, false, true);
         }
 
@@ -1438,8 +1447,8 @@ window.PhaseStrategy = function () {
         this.shipIconContainer.getArray().forEach(function (icon) {
             icon.hideStructureArcs();
         });
-        //only the bar's own tooltip: a menu (or another system's hover) is left alone
-        if (this.systemInfoState && this.systemInfoState.officersOnly) this.hideSystemInfo();
+        //only the bar's own card: a menu (or another system's hover) is left alone
+        if (this.systemInfoState && this.systemInfoState.structureBar) this.hideSystemInfo();
     };
 
     /* Ship-window EW panel hover (2026-07-30): hovering the BDEW or Detect Mines row raises that
@@ -1745,7 +1754,7 @@ window.PhaseStrategy = function () {
         }
 
         if (this.systemInfoState) {
-            this.showSystemInfo(ship, this.systemInfoState.system, this.systemInfoState.element, this.systemInfoState.menu, false, this.systemInfoState.craft);
+            this.showSystemInfo(ship, this.systemInfoState.system, this.systemInfoState.element, this.systemInfoState.menu, this.systemInfoState.structureBar, this.systemInfoState.craft);
         }
 
         //Keep an open tooltip in step, the way onShipEwChanged does: toggling a Shading Field /
