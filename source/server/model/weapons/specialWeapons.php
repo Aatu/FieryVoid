@@ -11459,7 +11459,22 @@ class SingularityMine extends AoE {
         }
 
         // --- Spawn singularity terrain ---
-        $this->spawnSingularityTerrain($gamedata, $fireOrder, $shooter, $target, $spinDirection);
+        $singularity = $this->spawnSingularityTerrain($gamedata, $fireOrder, $shooter, $target, $spinDirection);
+
+        /* Detonated inside an Energy Draining Field (Walkers of Sigma-957): "the mine detonates as
+           normal during the initial Damage Resolution Step, including all damage, but vanishes at
+           the end of the turn due to the dampening effect of the field." So everything above stands
+           - the 10-hex shear damage is NOT contained to one hex the way AoE::fire contains an
+           ordinary proximity blast - and only the singularity's life is cut short: it is removed by
+           its own end-of-turn sweep (SingularityCore::generateIndividualNotes) this turn rather than
+           two turns from now, so it never pulls anything.
+           Measured at the hex the mine actually landed on, after scatter, and team-blind like every
+           field-dampening rule (TacGamedata::isHexInEdfField). */
+        if (TacGamedata::$edfPresent && $gamedata->isHexInEdfField($target)) {
+            $core = $singularity->getSystemByName("SingularityCore");
+            if ($core instanceof SingularityCore) $core->dampenByEdf();
+            $fireOrder->pubnotes .= "<br>Energy Draining Field dampens the singularity: it will vanish at the end of the turn.";
+        }
 
         $fireOrder->rolled = max(1, $fireOrder->rolled);
         $fireOrder->updated = true;
@@ -11488,6 +11503,8 @@ class SingularityMine extends AoE {
 
         $spinLabel = ($spinDirection == "CW") ? "Clockwise" : "Anti-Clockwise";
         $fireOrder->pubnotes .= "<br>Singularity ($spinLabel) formed at " . $targetHex->q . ' ' . $targetHex->r . '.';
+
+        return $singularity;
     }
 }
 
@@ -11673,8 +11690,19 @@ class SingularityCore extends ShipSystem {
 
     private static $processedThisTurn = array();
 
+    /* Set by SingularityMine::fire when the mine detonated inside an Energy Draining Field: the
+       singularity vanishes at the end of the turn it formed on. IN-MEMORY ONLY, and that is enough:
+       the only reader is the turnsAlive 0 branch of generateIndividualNotes below, which runs in the
+       same FireGamePhase::advance, on the same $servergamedata the mine spawned this unit into.
+       Private, so it never reaches the wire (ShipSystem::stripForJson is a whitelist anyway). */
+    private $edfDampened = false;
+
     function __construct($armour, $maxhealth, $powerReq, $startArc = 0) {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc);
+    }
+
+    public function dampenByEdf() {
+        $this->edfDampened = true;
     }
 
     public function getSpawnTurn() {
@@ -11699,13 +11727,15 @@ public function generateIndividualNotes($gameData, $dbManager) {
     $turnsAlive = $gameData->turn - $spawnTurn;
 
     if ($gameData->phase === 4) {
-        if ($turnsAlive >= 2) {
+        // Normally at the end of its second turn; on the turn it formed if an Energy Draining Field dampened it
+        $edfVanish = ($turnsAlive == 0 && $this->edfDampened);
+        if ($turnsAlive >= 2 || $edfVanish) {
             $structure = $singularity->getSystemByName("Structure");
             if ($structure && !$structure->isDestroyed()) {
                 $damageEntry = new DamageEntry(
                     -1, $singularity->id, $gameData->id, $gameData->turn, $structure->id,
                     $structure->maxhealth, 0, 0, -1, true, false,
-                    "Singularity dissipates", "Standard"
+                    $edfVanish ? "Singularity dampened by Energy Draining Field" : "Singularity dissipates", "Standard"
                 );
                 $damageEntry->updated = true;
                 $structure->damage[] = $damageEntry;
