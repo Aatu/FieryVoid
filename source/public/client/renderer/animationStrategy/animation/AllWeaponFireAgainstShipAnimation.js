@@ -532,9 +532,28 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         return incomingFire.damagesCaused.filter(damage => damage.destroyed)
             .map(damage => ({
                 name: shipManager.systems.getDisplayName(damage.system),
-                structure: damage.system instanceof Structure
+                structure: damage.system instanceof Structure,
+                section: getLostSection(damage, incomingFire)
             }));
     }
+
+    /* A destroyed NON-primary structure block is a section torn off the hull art
+       (ShipIcon.setLostSections). Tagging it on the floating-text entry lets SystemDestroyedEffect
+       note WHEN that text pops - the moment the killing shot lands - and the replay drops the section
+       off the icon at exactly that moment (ReplayAnimationStrategy.animateSectionLoss, which reads it
+       back through getSectionLosses). */
+    function getLostSection(damage, incomingFire) {
+        if (!(damage.system instanceof Structure) || damage.system.location == 0) return null;
+        return {
+            shipId: damage.system.ship ? damage.system.ship.id : incomingFire.fireOrder.targetid,
+            location: damage.system.location
+        };
+    }
+
+    //[{ shipId, location, time }] for every section this animation shows being shot off.
+    AllWeaponFireAgainstShipAnimation.prototype.getSectionLosses = function () {
+        return this.systemDestroyedEffect ? this.systemDestroyedEffect.getSectionLosses() : [];
+    };
 
     function getSystemNamesCriticals(incomingFire) {
         const turn = incomingFire.fireOrder.turn;

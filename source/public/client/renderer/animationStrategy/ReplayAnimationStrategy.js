@@ -966,6 +966,8 @@ window.ReplayAnimationStrategy = function () {
     }
 
     function animateShipDestruction(time, logAnimation) {
+        var passStart = time; //when a section lost with no shot animated for it comes off - see animateSectionLoss
+
         this.gamedata.ships.filter(function (ship) {
 //GTS_Triad
 //            return shipManager.getTurnDestroyed(ship) === this.turn && !ship.flight && !ship.mine;
@@ -1043,7 +1045,69 @@ window.ReplayAnimationStrategy = function () {
             this.shipIconContainer.getByShip(ship).hideFighters(fightersToHide);
         }, this);
 
+        animateSectionLoss.call(this, passStart);
+
         return time;
+    }
+
+    /* Destroyed sections on the hull art (ShipIcon.setLostSections), the hull's equivalent of the
+       fighter hiding just above. The replay opens with the sections lost on EARLIER turns already
+       torn away; each one lost THIS turn comes off the moment the shot that destroyed it lands - the
+       instant its "... STRUCTURE" text pops, which the fire animations already built above recorded
+       (AllWeaponFireAgainstShipAnimation.getSectionLosses). A loss no animated shot announces - a
+       collision, damage with no fire animation of its own - falls back to fallbackTime, the start of
+       the destruction pass. Time-driven rather than set once, so a rewind puts sections back. */
+    function animateSectionLoss(fallbackTime) {
+        var turn = this.turn;
+
+        var shotOff = {}; //shipId -> location -> earliest time a fire animation shows it destroyed
+        this.animations.forEach(function (animation) {
+            if (typeof animation.getSectionLosses !== 'function') return;
+            animation.getSectionLosses().forEach(function (loss) {
+                var times = shotOff[loss.shipId] || (shotOff[loss.shipId] = {});
+                if (times[loss.location] === undefined || loss.time < times[loss.location]) times[loss.location] = loss.time;
+            });
+        });
+
+        var entries = [];
+
+        this.gamedata.ships.forEach(function (ship) {
+            if (ship.flight) return;
+            var icon = this.shipIconContainer.getByShip(ship);
+            if (!icon) return;
+
+            var before = ShipIcon.getLostSections(ship, turn);
+            icon.setLostSections(before);
+
+            var times = shotOff[ship.id] || {};
+            var losses = ShipIcon.getLostSections(ship, turn + 1).filter(function (location) {
+                return before.indexOf(location) === -1;
+            }).map(function (location) {
+                return { location: location, time: times[location] !== undefined ? times[location] : fallbackTime };
+            }).sort(function (a, b) { return a.time - b.time; });
+
+            if (losses.length) entries.push({ icon: icon, before: before, losses: losses, shown: 0 });
+        }, this);
+
+        if (entries.length === 0) return;
+
+        this.animations.push({
+            update: function () { },
+            cleanUp: function () { },
+            getDuration: function () { return 0; },
+            render: function (now, total) {
+                entries.forEach(function (entry) {
+                    //losses are in time order, so what is off at `total` is always a leading run of them
+                    var shown = 0;
+                    while (shown < entry.losses.length && total >= entry.losses[shown].time) shown++;
+                    if (shown === entry.shown) return;
+                    entry.shown = shown;
+                    entry.icon.setLostSections(entry.before.concat(entry.losses.slice(0, shown).map(function (loss) {
+                        return loss.location;
+                    })).sort(function (a, b) { return a - b; }));
+                });
+            }
+        });
     }
 
     function setMovementAnimationDuration(moveAnimation) {
