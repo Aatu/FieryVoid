@@ -312,75 +312,96 @@
               </div>
             </div>
 
-            <!-- Terrain Features: one fixed row per type (plan §8.4), alphabetical, the three moons together where
-                 "Moon" falls. Zero / unticked = none of that type; createGame.readTerrain() turns the rows into rules.
-                 Each "?" opens a short summary (cgTerrainHelp) - the FAQ's Terrain section has the full rules. -->
+            <!-- Terrain Features: one fixed row per type (plan §8.4), in two groups - what the whole map is like, then what
+                 is scattered over it. Zero / None / Off = none of that type; createGame.readTerrain() turns the rows into
+                 rules. Every control is the same 116px box - a centred value, then a 28px slot holding a ▾ or the tick
+                 box - so the column reads as one. Each "?" opens a short summary (cgTerrainHelp); the FAQ's Terrain
+                 section has the full rules. -->
             <div class="cg-card cg-terrain-card" id="terrainCard">
               <h3 class="cg-card-label">Terrain Features</h3>
-              <div class="cg-caption">Placed at random when the game starts.</div>
-              <div class="cg-terrain-row">
-                <div class="cg-terrain-name"><label for="asteroidsSelect">Asteroids</label><?php print(cgTerrainHelp('asteroidsSelect', 'Asteroids',
-                  'Rocks of one hex, or two or three for one in six. They block line of sight, and a unit that moves through one, or ends its move in it, takes 1d10 &times; its speed in raking damage before firing.')); ?></div>
-                <?php print(cgCountCombo('asteroidsSelect', 'Asteroids', 48, $fieldPresets)); ?>
+
+              <div class="cg-terrain-group" role="group" aria-labelledby="terrainEnvHead">
+                <h4 class="cg-terrain-head" id="terrainEnvHead">Environment</h4>
+                <!-- Nebula (NebulaRule, NEBULA_PLAN.md): it fills the whole map, so a tick box. Never with Mines Allowed -
+                     createGame.syncNebulaMines greys out whichever of the two is not chosen. -->
+                <div class="cg-terrain-row" id="nebulaRow">
+                  <div class="cg-terrain-name"><label for="nebulaCheck">Nebula</label><?php print(cgTerrainHelp('nebulaCheck', 'Nebula',
+                    'Fills the whole map. No EW of any kind, so no lock-ons; fire control and fighters\' Offensive Bonus are halved, thrust is 1 lower, every damage die rolls 1 less and missile ranges are halved. Cannot be combined with mines.')); ?></div>
+                  <label class="cg-toggle">
+                    <span class="cg-toggle-value" aria-hidden="true"><span class="cg-toggle-off">Off</span><span class="cg-toggle-on">On</span></span>
+                    <span class="cg-toggle-slot"><input type="checkbox" id="nebulaCheck" class="cg-terrain-toggle" name="nebula" aria-describedby="nebulaMinesNote"></span>
+                  </label>
+                </div>
+                <div class="cg-caption cg-lock-note" id="nebulaMinesNote" hidden>Not available while Mines Allowed is ticked.</div>
+                <!-- Electromagnetic Storm (EMStormRule, EM_STORM_PLAN.md): the whole map, so a tick box. Combines with everything. -->
+                <div class="cg-terrain-row" id="emStormRow">
+                  <div class="cg-terrain-name"><label for="emStormCheck">Electromagnetic Storm</label><?php print(cgTerrainHelp('emStormCheck', 'Electromagnetic Storm',
+                    'Covers the whole map and hits every unit as each turn ends: sensors, initiative and fighters\' Offensive Bonus drop, ships may lose power, and lightning strikes knock systems offline or force critical rolls. EM shields can be set to take the strikes.')); ?></div>
+                  <label class="cg-toggle">
+                    <span class="cg-toggle-value" aria-hidden="true"><span class="cg-toggle-off">Off</span><span class="cg-toggle-on">On</span></span>
+                    <span class="cg-toggle-slot"><input type="checkbox" id="emStormCheck" class="cg-terrain-toggle" name="emStorm"></span>
+                  </label>
+                </div>
+                <!-- Dust (DustZoneRule): the tabletop's dust zone covers the whole map; 50% / 25% is one clump round
+                     the centre, grown when the game is created. A choice, not a count, so a select (dressed as the combos). -->
+                <div class="cg-terrain-row">
+                  <div class="cg-terrain-name"><label for="dustCoverageSelect">Dust</label><?php print(cgTerrainHelp('dustCoverageSelect', 'Dust',
+                    'Dust over the whole map, or one clump round the centre covering half or a quarter of it. It does not block line of sight, but a unit that moved through dust takes damage once a turn before firing - the faster it went, the more.')); ?></div>
+                  <span class="cg-select">
+                    <select id="dustCoverageSelect" class="cg-input cg-terrain-count" name="dustCoverage">
+                      <option value="0">None</option>
+                      <option value="100">Entire map</option>
+                      <option value="50">50% of map</option>
+                      <option value="25">25% of map</option>
+                    </select>
+                    <span class="cg-select-arrow" aria-hidden="true"><span class="cg-chevron"></span></span>
+                  </span>
+                </div>
               </div>
-              <!-- Dust (DustZoneRule): the tabletop's dust zone covers the whole map; 50% / 25% is one clump round
-                   the centre, grown when the game is created. A choice, not a count, so a plain select. -->
-              <div class="cg-terrain-row">
-                <div class="cg-terrain-name"><label for="dustCoverageSelect">Dust</label><?php print(cgTerrainHelp('dustCoverageSelect', 'Dust',
-                  'Dust over the whole map, or one clump round the centre covering half or a quarter of it. It does not block line of sight, but a unit that moved through dust takes damage once a turn before firing - the faster it went, the more.')); ?></div>
-                <select id="dustCoverageSelect" class="cg-input cg-terrain-count" name="dustCoverage">
-                  <option value="0">None</option>
-                  <option value="100">Entire map</option>
-                  <option value="50">50% of map</option>
-                  <option value="25">25% of map</option>
-                </select>
+
+              <div class="cg-terrain-group" role="group" aria-labelledby="terrainScatterHead">
+                <h4 class="cg-terrain-head" id="terrainScatterHead">Placed at random</h4>
+                <div class="cg-terrain-row">
+                  <div class="cg-terrain-name"><label for="asteroidsSelect">Asteroids</label><?php print(cgTerrainHelp('asteroidsSelect', 'Asteroids',
+                    'Rocks of one hex, or two or three for one in six. They block line of sight, and a unit that moves through one, or ends its move in it, takes 1d10 &times; its speed in raking damage before firing.')); ?></div>
+                  <?php print(cgCountCombo('asteroidsSelect', 'Asteroids', 48, $fieldPresets)); ?>
+                </div>
+                <div class="cg-terrain-row">
+                  <div class="cg-terrain-name"><label for="meteorsSelect">Meteor Swarms</label><?php print(cgTerrainHelp('meteorsSelect', 'Meteor Swarms',
+                    'Swarms one hex across. They do not block line of sight, but a unit that enters one may be struck by meteors before firing, each a 1d10 + its speed hit. Defensive fire can blunt them.')); ?></div>
+                  <?php print(cgCountCombo('meteorsSelect', 'Meteor Swarms', DustAndMeteorsRule::$maxMeteors, $fieldPresets)); ?>
+                </div>
+                <div class="cg-terrain-row">
+                  <div class="cg-terrain-name"><label for="moonsSmallSelect">Small Moons</label><?php print(cgTerrainHelp('moonsSmallSelect', 'Small Moons',
+                    'A small moon, 7 hexes across. It blocks line of sight, and a unit that moves into it rams it before firing.')); ?></div>
+                  <?php print(cgCountCombo('moonsSmallSelect', 'Small Moons', 5, $moonPresets)); ?>
+                </div>
+                <div class="cg-terrain-row">
+                  <div class="cg-terrain-name"><label for="moonsMediumSelect">Medium Moons</label><?php print(cgTerrainHelp('moonsMediumSelect', 'Medium Moons',
+                    'A moon of 19 hexes. It blocks line of sight, and a unit that moves into it rams it before firing.')); ?></div>
+                  <?php print(cgCountCombo('moonsMediumSelect', 'Medium Moons', 4, $moonPresets)); ?>
+                </div>
+                <div class="cg-terrain-row">
+                  <div class="cg-terrain-name"><label for="moonsLargeSelect">Large Moons</label><?php print(cgTerrainHelp('moonsLargeSelect', 'Large Moons',
+                    'A large moon of 37 hexes. It blocks line of sight, and a unit that moves into it rams it before firing.')); ?></div>
+                  <?php print(cgCountCombo('moonsLargeSelect', 'Large Moons', 2, $moonPresets)); ?>
+                </div>
+                <!-- Gravity Well (GravityWellRule, GRAVITY_WELL_PLAN.md): one well of strength 1-3, placed near the centre when
+                     the game starts. More can be bought from the Terrain faction. -->
+                <div class="cg-terrain-row" id="gravityWellRow">
+                  <div class="cg-terrain-name"><label for="gravityWellSelect">Gravity Well</label><?php print(cgTerrainHelp('gravityWellSelect', 'Gravity Well',
+                    'One well, placed near the centre of the map. After movement it drags every unit as many hexes towards it as its strength, and any unit that enters its hex is destroyed. Bases, mines and terrain are not moved.')); ?></div>
+                  <span class="cg-select">
+                    <select id="gravityWellSelect" class="cg-input cg-terrain-count" name="gravityWell">
+                      <option value="0">None</option>
+                      <option value="1">Strength 1</option>
+                      <option value="2">Strength 2</option>
+                      <option value="3">Strength 3</option>
+                    </select>
+                    <span class="cg-select-arrow" aria-hidden="true"><span class="cg-chevron"></span></span>
+                  </span>
+                </div>
               </div>
-              <!-- Electromagnetic Storm (EMStormRule, EM_STORM_PLAN.md): the whole map, so a tick box. Combines with everything. -->
-              <div class="cg-terrain-row" id="emStormRow">
-                <div class="cg-terrain-name"><label for="emStormCheck">Electromagnetic Storm</label><?php print(cgTerrainHelp('emStormCheck', 'Electromagnetic Storm',
-                  'Covers the whole map and hits every unit as each turn ends: sensors, initiative and fighters\' Offensive Bonus drop, ships may lose power, and lightning strikes knock systems offline or force critical rolls. EM shields can be set to take the strikes.')); ?></div>
-                <span class="cg-terrain-check"><input type="checkbox" id="emStormCheck" class="cg-terrain-toggle" name="emStorm"></span>
-              </div>
-              <!-- Gravity Well (GravityWellRule, GRAVITY_WELL_PLAN.md): one well of strength 1-3, placed near the centre when
-                   the game starts. More can be bought from the Terrain faction. -->
-              <div class="cg-terrain-row" id="gravityWellRow">
-                <div class="cg-terrain-name"><label for="gravityWellSelect">Gravity Well</label><?php print(cgTerrainHelp('gravityWellSelect', 'Gravity Well',
-                  'One well, placed near the centre of the map. After movement it drags every unit as many hexes towards it as its strength, and any unit that enters its hex is destroyed. Bases, mines and terrain are not moved.')); ?></div>
-                <select id="gravityWellSelect" class="cg-input cg-terrain-count" name="gravityWell">
-                  <option value="0">None</option>
-                  <option value="1">Strength 1</option>
-                  <option value="2">Strength 2</option>
-                  <option value="3">Strength 3</option>
-                </select>
-              </div>
-              <div class="cg-terrain-row">
-                <div class="cg-terrain-name"><label for="meteorsSelect">Meteor Swarms</label><?php print(cgTerrainHelp('meteorsSelect', 'Meteor Swarms',
-                  'Swarms one hex across. They do not block line of sight, but a unit that enters one may be struck by meteors before firing, each a 1d10 + its speed hit. Defensive fire can blunt them.')); ?></div>
-                <?php print(cgCountCombo('meteorsSelect', 'Meteor Swarms', DustAndMeteorsRule::$maxMeteors, $fieldPresets)); ?>
-              </div>
-              <div class="cg-terrain-row">
-                <div class="cg-terrain-name"><label for="moonsSmallSelect">Small Moons</label><?php print(cgTerrainHelp('moonsSmallSelect', 'Small Moons',
-                  'A small moon, 7 hexes across. It blocks line of sight, and a unit that moves into it rams it before firing.')); ?></div>
-                <?php print(cgCountCombo('moonsSmallSelect', 'Small Moons', 5, $moonPresets)); ?>
-              </div>
-              <div class="cg-terrain-row">
-                <div class="cg-terrain-name"><label for="moonsMediumSelect">Medium Moons</label><?php print(cgTerrainHelp('moonsMediumSelect', 'Medium Moons',
-                  'A moon of 19 hexes. It blocks line of sight, and a unit that moves into it rams it before firing.')); ?></div>
-                <?php print(cgCountCombo('moonsMediumSelect', 'Medium Moons', 4, $moonPresets)); ?>
-              </div>
-              <div class="cg-terrain-row">
-                <div class="cg-terrain-name"><label for="moonsLargeSelect">Large Moons</label><?php print(cgTerrainHelp('moonsLargeSelect', 'Large Moons',
-                  'A large moon of 37 hexes. It blocks line of sight, and a unit that moves into it rams it before firing.')); ?></div>
-                <?php print(cgCountCombo('moonsLargeSelect', 'Large Moons', 2, $moonPresets)); ?>
-              </div>
-              <!-- Nebula (NebulaRule, NEBULA_PLAN.md): it fills the whole map, so a tick box. Never with Mines Allowed -
-                   createGame.syncNebulaMines greys out whichever of the two is not chosen. -->
-              <div class="cg-terrain-row" id="nebulaRow">
-                <div class="cg-terrain-name"><label for="nebulaCheck">Nebula</label><?php print(cgTerrainHelp('nebulaCheck', 'Nebula',
-                  'Fills the whole map. No EW of any kind, so no lock-ons; fire control and fighters\' Offensive Bonus are halved, thrust is 1 lower, every damage die rolls 1 less and missile ranges are halved. Cannot be combined with mines.')); ?></div>
-                <span class="cg-terrain-check"><input type="checkbox" id="nebulaCheck" class="cg-terrain-toggle" name="nebula" aria-describedby="nebulaMinesNote"></span>
-              </div>
-              <div class="cg-caption cg-lock-note" id="nebulaMinesNote" hidden>Not available while Mines Allowed is ticked.</div>
               <!-- Filled by createGame.setTerrainLayout() while a Map Template with its own terrain is picked. -->
 
               <div id="terrainLayoutNote" class="cg-caption cg-terrain-note" hidden></div>

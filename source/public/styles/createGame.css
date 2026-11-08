@@ -1024,6 +1024,14 @@ textarea.cg-input {
   cursor: pointer;
 }
 
+/* A label with no .cg-check-line round it (Mines Allowed, Friendly Fire...) is a block of its own line
+   height, as a flex item's is. Inline, it sat on .cg-check-body's taller line and came out ~2px lower
+   than the others, leaving its tick box high. fit-content: only the words are clickable, as before. */
+.cg-check-body > .cg-check-label {
+  display: block;
+  width: fit-content;
+}
+
 /* The control a ticked box reveals, inline after its label (plan §11.6). Hidden here; the
    rule's own handler shows it. lobby.css indents both ids by 15px for the old layout. */
 .cg-dep {
@@ -1035,6 +1043,20 @@ textarea.cg-input {
   margin-left: 0;
 }
 
+/* A revealed select (Simultaneous Movement's brackets, Desperate Scenario's teams) sits ON the label's
+   18.75px line without making it taller: 24px, pulled in by half the difference, so neither the label
+   nor its tick box moves when it appears - the ISD year box's rule (§12.16), with room for a select.
+   A block, so its .cg-dep wrapper is exactly its margin box (inline, it sat on the wrapper's baseline
+   and grew the line again). Outranks the coarse-pointer min-height too. */
+.cg-check-line .cg-input--inline:not(.cg-input--year) {
+  display: block;
+  height: 24px;
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin: calc((18.75px - 24px) / 2) 0;
+}
+
 .cg-terrain-row {
   display: flex;
   align-items: center;
@@ -1044,14 +1066,30 @@ textarea.cg-input {
   border-bottom: 1px solid #0e222c;
 }
 
-.cg-terrain-row label {
-  font-size: 12.5px;
-  color: var(--fv-text);
+.cg-terrain-group .cg-terrain-row:last-child {
+  border-bottom: none;
 }
 
 /* position: the "?" windows (.cg-help-bubble) are placed against the card, as on a Scenario card. */
 .cg-terrain-card {
   position: relative;
+}
+
+/* Environment / Placed at random: what the whole map is like, then what is scattered over it. In the
+   card's rail blue, so they read as a level under the dim card label. */
+.cg-terrain-group + .cg-terrain-group {
+  margin-top: 16px;
+}
+
+.cg-terrain-head {
+  margin: 0;
+  padding: 0 0 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--rail);
+  border-bottom: 1px solid var(--fv-line-soft);
 }
 
 /* The row's name and its "?", which sits right after it as on the Scenario cards. */
@@ -1062,29 +1100,100 @@ textarea.cg-input {
   min-width: 0;
 }
 
-/* Nebula / Electromagnetic Storm: a tick box centred in the controls' column, so it lines up with
-   the centred values in the rows round it. As tall as the other controls, so every row is too. */
-.cg-terrain-check {
+.cg-terrain-name label {
+  font-size: 12.5px;
+  color: var(--fv-text);
+  font-weight: bold;
+}
+
+.cg-terrain-row:has(.cg-toggle) .cg-terrain-name label {
+  cursor: pointer;
+}
+
+/* Nebula / Electromagnetic Storm: the count combo's box with its parts swapped - the state where the
+   number goes, the tick box where the ▾ goes - so the values and slots line up down the column. The
+   whole box is a label: a click anywhere on it ticks. */
+.cg-toggle {
+  flex: none;
+  display: flex;
+  width: 116px;
+  min-height: 30px;
+  font-size: 12px;
+  color: var(--fv-text);
+  background: #081420;
+  border: 1px solid var(--fv-line-soft);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+/* The combo input's own padding (6px left, the slot's 30px right), so "Off" centres where "0" does. */
+.cg-toggle-value {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px 0 6px;
+}
+
+.cg-toggle-on,
+.cg-toggle:has(input:checked) .cg-toggle-off {
+  display: none;
+}
+
+.cg-toggle:has(input:checked) .cg-toggle-on {
+  display: inline;
+}
+
+.cg-toggle-slot {
   flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 116px;
-  min-height: 30px;
+  width: 28px;
+  border-left: 1px solid var(--fv-line-soft);
 }
 
-/* base.css nudges every checkbox down 2px; this column centres its own. */
-.cg-terrain-check input[type=checkbox] {
+/* base.css nudges every checkbox down 2px; the slot centres its own. Focus shows on the box, as
+   .cg-input's does. */
+.cg-toggle-slot input[type=checkbox] {
   top: 0;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   margin: 0;
   accent-color: var(--fv-accent);
   cursor: pointer;
 }
 
-.cg-terrain-row:has(.cg-terrain-check) label {
-  cursor: pointer;
+.cg-toggle-slot input[type=checkbox]:focus-visible {
+  outline: none;
+}
+
+.cg-toggle:has(input:focus-visible) {
+  border-color: var(--fv-accent);
+}
+
+/* Dust / Gravity Well: a native select dressed as the count combos - no native arrow, the combo's
+   slot and chevron drawn over it (.cg-select-arrow shares .cg-combo-toggle's rule), value centred. */
+.cg-select {
+  position: relative;
+  flex: none;
+  width: 116px;
+}
+
+.cg-select select.cg-terrain-count {
+  width: 100%;
+  padding-right: 30px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.cg-select-arrow {
+  pointer-events: none;
+}
+
+.cg-select:hover .cg-select-arrow,
+.cg-select:focus-within .cg-select-arrow {
+  color: var(--fv-accent);
 }
 
 /* The Terrain Features "?" and its window wear the card's blue rail; the Scenario ones, purple. */
@@ -1108,7 +1217,8 @@ textarea.cg-input {
 }
 
 .cg-check-row.is-locked input[type=checkbox],
-.cg-terrain-row.is-locked input[type=checkbox] {
+.cg-terrain-row.is-locked .cg-toggle,
+.cg-terrain-row.is-locked .cg-toggle input[type=checkbox] {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -1129,8 +1239,8 @@ textarea.cg-input {
   font-size: 12px;
 }
 
-/* Every Terrain Features dropdown reads centred, like the count combos' values: the selects' shown
-   value (text-align-last for older engines) and their options where the browser draws the list. */
+/* Every Terrain Features value reads centred, as the count combos' do: the selects' shown value
+   (text-align-last for older engines) and their options where the browser draws the list. */
 select.cg-terrain-count,
 select.cg-terrain-count option {
   text-align: center;
@@ -1151,7 +1261,8 @@ select.cg-terrain-count option {
   text-align: center;  
 }
 
-.cg-combo-toggle {
+.cg-combo-toggle,
+.cg-select-arrow {
   position: absolute;
   top: 1px;
   right: 1px;
@@ -1168,7 +1279,7 @@ select.cg-terrain-count option {
   cursor: pointer;
 }
 
-/* Drawn, not a glyph: the same weight as the native <select> chevrons on the moon rows. */
+/* Drawn, not a glyph, so the combos and the dressed selects (.cg-select) wear the same one. */
 .cg-chevron {
   width: 7px;
   height: 7px;
@@ -1653,10 +1764,12 @@ div[data-team-id="2"] .remove-team-btn {
     min-width: 0;
   }
 
-  /* 16px: anything smaller and iOS Safari zooms the whole page when the field takes focus. */
+  /* 16px: anything smaller and iOS Safari zooms the whole page when the field takes focus. The
+     Terrain toggles follow, so "Off" stays the size of the "0" beside it. */
   .cg-input,
   .cg-input--inline,
-  .cg-terrain-count {
+  .cg-terrain-count,
+  .cg-toggle {
     font-size: 16px;
   }
 
@@ -1733,7 +1846,7 @@ div[data-team-id="2"] .remove-team-btn {
 @media (pointer: coarse) {
   .cg-input,
   .cg-terrain-count,
-  .cg-terrain-check,
+  .cg-toggle,
   .cg-btn {
     min-height: 44px;
   }
@@ -1744,6 +1857,12 @@ div[data-team-id="2"] .remove-team-btn {
 
   .cg-link {
     min-height: 32px;
+  }
+
+  /* View Ladder: the bigger tap target overhangs the label's line instead of making it taller, which
+     dropped "Ladder Game" ~7px below its tick box. */
+  .cg-check-line .cg-link {
+    margin: calc((18.75px - 32px) / 2) 0;
   }
 
   .cg-slot-actions,
