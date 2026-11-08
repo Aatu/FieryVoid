@@ -8,9 +8,11 @@ window.ReplayAnimationStrategy = function () {
         ALL: 3
     };
 
-    function ReplayAnimationStrategy(gamedata, shipIcons, scene, type) {
+    //ballisticIcons (optional): the BallisticIconContainer, so a drifting field's white terrain hexes can travel with it (animateTerrainDrift)
+    function ReplayAnimationStrategy(gamedata, shipIcons, scene, type, ballisticIcons) {
         AnimationStrategy.call(this);
         this.shipIconContainer = shipIcons;
+        this.ballisticIconContainer = ballisticIcons || null;
         this.gamedata = gamedata;
         this.turn = gamedata.turn;
         this.emitterContainer = new ParticleEmitterContainer(scene);
@@ -105,8 +107,47 @@ window.ReplayAnimationStrategy = function () {
         this.endTime = time;
     }
 
+    /* DRIFTING TERRAIN (server: TerrainDrift) - every asteroid and meteor swarm that drifted at the start of this turn
+       moves its one hex here, all of them at once and before any unit's own movement, as it happened. Each is then
+       marked done so the per-unit loop gives it no slot or camera pan of its own: with a whole field drifting that
+       would be a pan per rock. Played from the raw rows - the row before the 'drift' row is where the field stood, even
+       when that was its 'start' row, which the icon's movement list leaves out.
+       ⚠️ A field that STAYED put has a 'drift' row in its own hex (the server writes one every turn) and gets an animation
+       too - a still one. Taking a unit out of the loop takes away the one thing that places its icon in a replay: a
+       field that stayed on turn 2 kept the hex the live turn-3 board had left it on, a hex away from its white outline
+       (user report, game 4552). The drift step only takes time when something actually moved. */
+    function animateTerrainDrift(time, animatedShips) {
+        var turn = this.turn;
+        var drifts = [];
+        this.gamedata.ships.forEach(function (ship) {
+            var moves = ship.movement || [];
+            for (var i = 1; i < moves.length; i++) {
+                if (moves[i].type === 'drift' && moves[i].turn === turn) {
+                    animatedShips[ship.id] = true;
+                    var from = moves[i - 1], to = moves[i];
+                    var moved = from.position.q !== to.position.q || from.position.r !== to.position.r || from.heading !== to.heading;
+                    drifts.push({ ship: ship, from: from, to: to, moved: moved });
+                    break;
+                }
+            }
+        });
+        if (drifts.length === 0) return time;
+
+        var informative = this.type === ReplayAnimationStrategy.type.INFORMATIVE;
+        var duration = informative ? this.moveHexDuration * 2 : this.moveAnimationDuration;
+        drifts.forEach(function (drift) {
+            var icon = this.shipIconContainer.getByShip(drift.ship);
+            if (!icon) return;
+            this.animations.push(new TerrainDriftAnimation(icon, drift.from, drift.to, time, duration, this.ballisticIconContainer));
+        }, this);
+
+        var anyMoved = drifts.some(function (drift) { return drift.moved; });
+        return (informative && anyMoved) ? time + duration : time;
+    }
+
     function animateMovement(time) {
         var animatedShips = {}; // Track ships already fully processed
+        time = animateTerrainDrift.call(this, time, animatedShips);
 
         // Helper: get host ID from this ship's raw movement orders
         var self = this;
@@ -1195,6 +1236,29 @@ window.ReplayAnimationStrategy = function () {
     PreFireMovementAnimation.prototype.cleanUp = function (scene) {
         // No persistent resources to clean up - this animation only manipulates
         // the shipIcon which is managed elsewhere
+    };
+
+    /* A drifting field's one hex (animateTerrainDrift): its icon exactly as PreFireMovementAnimation moves it, AND its white
+       terrain hexes with it. Those are built by BallisticIconContainer where the drift ENDS, so on their own the replay
+       opened with the hexes already a hex ahead of the rock (user report 2026-11-08). They follow the hex CENTRE between
+       the two rows, not the icon, which may sit offset in a shared hex. The container puts them back on their own hex
+       whenever it next regenerates, so leaving a replay mid-drift leaves nothing displaced. */
+    function TerrainDriftAnimation(shipIcon, startState, endState, startTime, duration, ballisticIconContainer) {
+        PreFireMovementAnimation.call(this, shipIcon, startState, endState, startTime, duration);
+        this.ballisticIconContainer = ballisticIconContainer || null;
+    }
+
+    TerrainDriftAnimation.prototype = Object.create(PreFireMovementAnimation.prototype);
+
+    TerrainDriftAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
+        PreFireMovementAnimation.prototype.render.call(this, now, total, last, delta, zoom, back, paused);
+        if (!this.ballisticIconContainer || total < this.time) return; //before its window, as the icon
+
+        var t = this.duration > 0 ? (total - this.time) / this.duration : 1;
+        t = Math.max(0, Math.min(1, t));
+        var from = window.coordinateConverter.fromHexToGame(this.startState.position);
+        var to = window.coordinateConverter.fromHexToGame(this.endState.position);
+        this.ballisticIconContainer.placeTerrainOverlay(this.shipIcon.shipId, mathlib.getPointBetween(from, to, t));
     };
 
     /* //Old version before Pre-Firing - DK Nov 2025

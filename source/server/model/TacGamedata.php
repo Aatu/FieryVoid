@@ -2023,9 +2023,16 @@ class TacGamedata {
                 //ship window / icon lose its Rolled/Rolling/Pivoting status (and the window's
                 //port-starboard mirroring) while awaiting their move. A roll or pivot ORDERED
                 //this turn is a normal "roll"/"pivot" move and stays hidden until committed.
+                //
+                //Nor a drifting asteroid's or swarm's 'drift' row (TerrainDrift::MOVE_TYPE, a literal so
+                //no other game loads that class): rolled by the server at the start of the turn and
+                //public from then on. Under Simultaneous Movement terrain's Ini falls in the LOWEST
+                //bracket (SimultaneousMovementRule clamps it to iniRangeMin), so while that bracket
+                //moved, every drifted field would jump back to last turn's hex.
                 if ($move->type !== "deploy" && $move->type !== "start"
                     && $move->type !== "isRolled" && $move->type !== "isRolling"
                     && $move->type !== "isPivotingLeft" && $move->type !== "isPivotingRight"
+                    && $move->type !== "drift"
                     && empty($move->forced)) {
                     $toDelete[] = $i;
                 }

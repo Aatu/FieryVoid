@@ -2718,6 +2718,11 @@ class Manager{
         //them visible in OOB but unselectable in the Movement Phase.
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
 
+        /* DRIFTING ASTEROIDS AND METEOR SWARMS (TerrainDriftRule) - "at the start of each turn", so first of all: the
+           turn's Deployment phase and Initial Orders see every field where it has drifted to, and the wave below walks
+           out of its doorway after it moved. One rule lookup in every game without it. */
+        TerrainDrift::resolve($servergamedata, self::$dbManager);
+
         /* HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6c - THE WAVE WALKS OUT OF ITS DOORWAY HERE, with no
            DEPLOYMENT: REINFORCEMENTS phase to do it in. HERE rather than at the end of FireGamePhase::
            advance (where the plan first put it) because this load is the one the retired phase used to

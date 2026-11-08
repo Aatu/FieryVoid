@@ -241,14 +241,14 @@ window.ShipIcon = function () {
     };
 
     ShipIcon.prototype.setHeading = function (heading) {
-        if (!this.terrain) { //No sprite for Terrain  
+        if (this.shipDirectionOfMovementSprite) { //No sprite for Terrain - except drifting terrain (see create())
             this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
         }
     };
 
     //this function is never used actually... and certainly shouldn't use provided heading as it's GET method
     ShipIcon.prototype.getHeading = function (heading) {
-        this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
+        if (this.shipDirectionOfMovementSprite) this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
     };
 
     ShipIcon.prototype.setOverlayColorAlpha = function (alpha) {
@@ -360,8 +360,10 @@ window.ShipIcon = function () {
     ShipIcon.prototype.setHighlighted = function (value) {
         if (value) {
             this.mesh.position.z = this.baseZ + (this.terrain ? 10 : 499);
-            if (!this.terrain) { //No sprite for Terrain  
+            if (!this.terrain) { //No sprite for Terrain
                 this.shipDirectionOfProwSprite.show();
+                this.shipDirectionOfMovementSprite.show();
+            } else if (this.shipDirectionOfMovementSprite) { //a drifting field: only the heading its drift follows
                 this.shipDirectionOfMovementSprite.show();
             }
         } else {
@@ -375,8 +377,10 @@ window.ShipIcon = function () {
             if (window.matchMedia("(pointer: coarse)").matches && this.selected && !this.terrain) {
                 this.shipDirectionOfProwSprite.show();
                 this.shipDirectionOfMovementSprite.show();
-            } else if (!this.terrain) { //No sprite for Terrain  
+            } else if (!this.terrain) { //No sprite for Terrain
                 this.shipDirectionOfProwSprite.hide();
+                this.shipDirectionOfMovementSprite.hide();
+            } else if (this.shipDirectionOfMovementSprite) {
                 this.shipDirectionOfMovementSprite.hide();
             }
         }
@@ -537,6 +541,13 @@ window.ShipIcon = function () {
             this.mesh.add(this.shipDirectionOfProwSprite.mesh);
             this.shipDirectionOfProwSprite.hide();
 
+            this.shipDirectionOfMovementSprite = new window.webglSprite('./img/directionOfMovement.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
+            this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
+            this.shipDirectionOfMovementSprite.hide();
+        } else if (gamedata.isDriftingTerrain && gamedata.isDriftingTerrain(ship)) {
+            /* A drifting asteroid or meteor swarm (TerrainDrift) gets back the heading arrow every ship has, shown on
+               hover in the same way: its next drift goes straight along it or 60 degrees to either side. Never the prow
+               arrow - a drift does not turn the field, so its facing says nothing. */
             this.shipDirectionOfMovementSprite = new window.webglSprite('./img/directionOfMovement.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
             this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
             this.shipDirectionOfMovementSprite.hide();

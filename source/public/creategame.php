@@ -361,15 +361,26 @@
 
               <div class="cg-terrain-group" role="group" aria-labelledby="terrainScatterHead">
                 <h4 class="cg-terrain-head" id="terrainScatterHead">Placed at random</h4>
+                <!-- Asteroids / Meteor Swarms: a count, and a "Drifts" tick box (TerrainDriftRule) - every one-hex asteroid or
+                     swarm in the game then drifts a hex at the start of each turn, the random ones, a map template's and
+                     any bought from the Terrain faction alike. -->
                 <div class="cg-terrain-row">
                   <div class="cg-terrain-name"><label for="asteroidsSelect">Asteroids</label><?php print(cgTerrainHelp('asteroidsSelect', 'Asteroids',
-                    'Rocks of one hex, or two or three for one in six. They block line of sight, and a unit that moves through one, or ends its move in it, takes 1d10 &times; its speed in raking damage before firing.')); ?></div>
-                  <?php print(cgCountCombo('asteroidsSelect', 'Asteroids', 48, $fieldPresets)); ?>
+                    'Rocks of one hex, or two or three for one in six. They block line of sight, and a unit that moves through one, or ends its move in it, takes 1d10 &times; its speed in raking damage before firing. The two- and three-hex rocks are rammed instead, at full ramming damage, as moons are.'
+                    . '<br><br><b>Drifts:</b> at the start of each turn every one-hex asteroid may drift one hex - straight on or 60&deg; to either side, with a 1 in 4 chance it stays put. A unit it drifts onto is struck as though it had moved into it. The two- and three-hex rocks never drift.')); ?></div>
+                  <div class="cg-terrain-controls">
+                    <label class="cg-drift"><input type="checkbox" id="asteroidsDriftCheck" class="cg-terrain-toggle" name="asteroidsDrift">Drifts</label>
+                    <?php print(cgCountCombo('asteroidsSelect', 'Asteroids', 48, $fieldPresets)); ?>
+                  </div>
                 </div>
                 <div class="cg-terrain-row">
                   <div class="cg-terrain-name"><label for="meteorsSelect">Meteor Swarms</label><?php print(cgTerrainHelp('meteorsSelect', 'Meteor Swarms',
-                    'Swarms one hex across. They do not block line of sight, but a unit that enters one may be struck by meteors before firing, each a 1d10 + its speed hit. Defensive fire can blunt them.')); ?></div>
-                  <?php print(cgCountCombo('meteorsSelect', 'Meteor Swarms', DustAndMeteorsRule::$maxMeteors, $fieldPresets)); ?>
+                    'Swarms one hex across. They do not block line of sight, but a unit that enters one may be struck by meteors before firing, each a 1d10 + its speed hit. Defensive fire can blunt them.'
+                    . '<br><br><b>Drifts:</b> at the start of each turn every swarm may drift one hex - straight on or 60&deg; to either side, with a 1 in 4 chance it stays put. A unit it drifts onto is struck as though it had moved into it.')); ?></div>
+                  <div class="cg-terrain-controls">
+                    <label class="cg-drift"><input type="checkbox" id="meteorsDriftCheck" class="cg-terrain-toggle" name="meteorsDrift">Drifts</label>
+                    <?php print(cgCountCombo('meteorsSelect', 'Meteor Swarms', DustAndMeteorsRule::$maxMeteors, $fieldPresets)); ?>
+                  </div>
                 </div>
                 <div class="cg-terrain-row">
                   <div class="cg-terrain-name"><label for="moonsSmallSelect">Small Moons</label><?php print(cgTerrainHelp('moonsSmallSelect', 'Small Moons',

@@ -58,6 +58,10 @@ class GameRules implements JsonSerializable{
         if ($gravityWellRules !== null) {
             array_push($this->rules, $gravityWellRules);
         }
+        $terrainDriftRules = $this->getTerrainDriftRules($rules);
+        if ($terrainDriftRules !== null) {
+            array_push($this->rules, $terrainDriftRules);
+        }
         $terrainLayoutRules = $this->getTerrainLayoutRules($rules);
         if ($terrainLayoutRules !== null) {
             array_push($this->rules, $terrainLayoutRules);
@@ -124,6 +128,13 @@ class GameRules implements JsonSerializable{
     private function getGravityWellRules($rules) {
         if (!isset($rules['gravityWell'])) return null;
         $rule = new GravityWellRule($rules['gravityWell']);
+        return $rule->isEmpty() ? null : $rule;
+    }
+
+    //Drifting asteroids / meteor swarms (TerrainDriftRule): absent unless at least one of the two kinds drifts.
+    private function getTerrainDriftRules($rules) {
+        if (!isset($rules['terrainDrift'])) return null;
+        $rule = new TerrainDriftRule($rules['terrainDrift']);
         return $rule->isEmpty() ? null : $rule;
     }
 

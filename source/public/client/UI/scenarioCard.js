@@ -223,6 +223,12 @@ window.scenarioCard = {
                 return type.replace(/ /g, " ");
             }).join(" · "));
         }
+        //Drifting asteroids / meteor swarms (TerrainDriftRule) - every one in the game, not only the random ones, so a chip of its own.
+        var drift = r.terrainDrift || {};
+        var drifting = [];
+        if (count(drift.asteroids) > 0) drifting.push("Asteroids");
+        if (count(drift.meteors) > 0) drifting.push("Meteor Swarms");
+        if (drifting.length) add("terrain", "Drifting: " + drifting.join(" & "));
         //The Dust Zone (DustZoneRule) - not random at 100%, so a chip of its own. Coverage 0 is a map
         //template's dust alone, which the Terrain Map chip already covers.
         var dustCoverage = r.dustZone ? count(r.dustZone.coverage) : 0;

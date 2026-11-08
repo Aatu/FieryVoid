@@ -3362,6 +3362,8 @@ spl_autoload_register(
                 'tendrildestroyed' => '/server/model/cricialClasses.php',
                 'terillon' => '/server/model/ships/llort/terillon.php',
                 'terrain' => '/server/model/ships/ShipClasses.php',
+                'terraindrift' => '/server/handlers/TerrainDrift.php',
+                'terraindriftrule' => '/server/model/TerrainDriftRule.php',
                 'terrainlayoutrule' => '/server/model/TerrainLayoutRule.php',
                 'testgun' => '/server/model/weapons/customDevelopment.php',
                 'testgun1' => '/server/model/weapons/customNexus.php',

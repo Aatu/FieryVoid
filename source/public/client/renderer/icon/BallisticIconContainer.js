@@ -405,13 +405,31 @@ window.BallisticIconContainer = function () {
 			const dim = isFieldTerrain(ship) ? FIELD_TERRAIN_DIM : 1;
 
 			//position + facing fix the footprint, so an unmoved moon is never rebuilt
-			syncSceneObject.call(this, TERRAIN_KEY_PREFIX + ship.id, `${position.q},${position.r}|${facing}|${hexes.length}`, () => {
+			const overlay = syncSceneObject.call(this, TERRAIN_KEY_PREFIX + ship.id, `${position.q},${position.r}|${facing}|${hexes.length}`, () => {
 				const overlay = buildHexRegionOverlay.call(this, position, hexes, 'hexWhite', dim);
 
 				return overlay && { object: overlay, release: window.HexRegion.dispose };
 			});
+			//...but always back on its own hex: a replay's drift (placeTerrainOverlay) may have left a kept one partway along
+			if (overlay) {
+				const centre = this.coordinateConverter.fromHexToGame(position);
+				overlay.position.x = centre.x;
+				overlay.position.y = centre.y;
+			}
 		});
 	}
+
+	/* REPLAY, DRIFTING TERRAIN (TerrainDrift): a drifting unit's white hexes are built where its drift ENDS, and
+	   ReplayAnimationStrategy's TerrainDriftAnimation carries them along with the rock instead - gamePosition is the game-space
+	   point for the footprint's centre hex. A move, not a rebuild: the footprint's shape is game-space deltas from that centre
+	   (buildHexRegionOverlay), so it lands on whole hexes at either end. Nothing to move for a unit with no overlay. */
+	BallisticIconContainer.prototype.placeTerrainOverlay = function (shipId, gamePosition) {
+		const entry = this.sceneObjects.get(TERRAIN_KEY_PREFIX + shipId);
+		if (!entry) return false;
+		entry.object.position.x = gamePosition.x;
+		entry.object.position.y = gamePosition.y;
+		return true;
+	};
 
 	/* Deployment: placing or turning a terrain unit is a local 'deploy' move, and nothing on that
 	   path runs consumeGamedata - so its footprint stayed put until the next poll (the reason terrain

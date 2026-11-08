@@ -58,16 +58,16 @@ jQuery(function ($) {
     // Terrain Features: the rules follow the rows, no master checkbox. The combos bind their own
     // clamp-on-change FIRST, so readTerrain always sees a value already inside 0..max.
     createGame.initCountCombos();
-    $(".cg-terrain-count").on("change", createGame.readTerrain);
+    $(".cg-terrain-count, .cg-terrain-toggle").on("change", createGame.readTerrain);
     //The map preview shows the dust - bound after readTerrain, so it draws the rules that just changed.
     $("#dustCoverageSelect").on("change", function () { createGame.drawMapPreview(); });
     //...and the nebula, which also locks Mines Allowed out (or is locked out by it).
-    $("#nebulaSelect").on("change", function () {
+    $("#nebulaCheck").on("change", function () {
         createGame.syncNebulaMines();
         createGame.drawMapPreview();
     });
     //...and the EM storm (EM_STORM_PLAN.md), a whole-map wash of its own.
-    $("#emStormSelect").on("change", function () { createGame.drawMapPreview(); });
+    $("#emStormCheck").on("change", function () { createGame.drawMapPreview(); });
     //...and the Gravity Well (GRAVITY_WELL_PLAN.md) - placed when the game starts, so only the legend names it.
     $("#gravityWellSelect").on("change", function () { createGame.drawMapPreview(); });
     createGame.readTerrain();
@@ -527,17 +527,25 @@ window.createGame = {
         else delete createGame.rules.dustZone;
 
         //The Nebula (NebulaRule): the whole map or nothing.
-        if ($("#nebulaSelect").val() === "1") createGame.rules.nebula = 1;
+        if ($("#nebulaCheck").is(":checked")) createGame.rules.nebula = 1;
         else delete createGame.rules.nebula;
 
         //The Electromagnetic Storm (EMStormRule, EM_STORM_PLAN.md): likewise.
-        if ($("#emStormSelect").val() === "1") createGame.rules.emStorm = 1;
+        if ($("#emStormCheck").is(":checked")) createGame.rules.emStorm = 1;
         else delete createGame.rules.emStorm;
 
         //One Gravity Well (GravityWellRule, GRAVITY_WELL_PLAN.md): its strength, 1-3, or none.
         const gravityWell = parseInt($("#gravityWellSelect").val(), 10) || 0;
         if (gravityWell >= 1 && gravityWell <= 3) createGame.rules.gravityWell = gravityWell;
         else delete createGame.rules.gravityWell;
+
+        //Drifting asteroids / meteor swarms (TerrainDriftRule): whichever "Drifts" boxes are ticked, whatever the counts -
+        //the rule moves every unit of that kind, a map template's and bought ones included.
+        const drift = {};
+        if ($("#asteroidsDriftCheck").is(":checked")) drift.asteroids = 1;
+        if ($("#meteorsDriftCheck").is(":checked")) drift.meteors = 1;
+        if (Object.keys(drift).length) createGame.rules.terrainDrift = drift;
+        else delete createGame.rules.terrainDrift;
     },
 
     /* Nebula OR Mines Allowed, never both (user, 2026-11-06; KS 9.9: "minefields will not appear in that
@@ -545,7 +553,7 @@ window.createGame = {
        both - an old preset, a browser restore - keeps the Nebula. GameRules never builds allowMines beside a
        nebula either, so this is the page's half only. Called by both controls' handlers. */
     syncNebulaMines: function syncNebulaMines() {
-        const nebula = $("#nebulaSelect").val() === "1";
+        const nebula = $("#nebulaCheck").is(":checked");
         const mines = $("#allowMinesCheck");
         if (nebula && mines.is(":checked")) {
             mines.prop("checked", false);
@@ -554,7 +562,7 @@ window.createGame = {
         const minesOn = mines.is(":checked");
 
         mines.prop("disabled", nebula);
-        $("#nebulaSelect").prop("disabled", minesOn);
+        $("#nebulaCheck").prop("disabled", minesOn);
         $("#allowMinesRow").toggleClass("is-locked", nebula);
         $("#nebulaRow").toggleClass("is-locked", minesOn);
         $("#allowMinesNebulaNote").prop("hidden", !nebula);
@@ -1624,8 +1632,9 @@ window.createGame = {
             if (digits !== this.value) this.value = digits;
         });
 
-        //One help window open at a time; a click anywhere else, or Escape, closes it.
-        $("#scenarioFields").on("click", ".cg-help", function () {
+        //One help window open at a time - these fields' and the Terrain Features rows' - and a
+        //click anywhere else, or Escape, closes it.
+        $("#scenarioFields, #terrainCard").on("click", ".cg-help", function () {
             const wasOpen = createGame.openHelpButton === this;
             createGame.closeHelp();
             if (!wasOpen) createGame.openHelp(this);
@@ -1665,7 +1674,7 @@ window.createGame = {
     //Offsets are from the card's padding box, which is what `left`/`top` are measured from.
     positionHelp: function positionHelp(button) {
         const bubble = document.getElementById($(button).attr("aria-controls"));
-        const card = button.closest(".cg-scn-card");
+        const card = button.closest(".cg-scn-card, .cg-terrain-card");
         const cardBox = card.getBoundingClientRect();
         const glyph = button.querySelector("[aria-hidden]").getBoundingClientRect();
         const centre = glyph.left + glyph.width / 2 - cardBox.left - card.clientLeft;
@@ -2023,6 +2032,7 @@ window.createGame = {
         createGame.presetSelects.forEach(function (id) { selects[id] = $("#" + id).val(); });
         const terrain = {};
         $(".cg-terrain-count").each(function () { terrain[this.id] = parseInt(this.value, 10) || 0; });
+        $(".cg-terrain-toggle").each(function () { terrain[this.id] = this.checked ? 1 : 0; });
 
         return {
             v: createGame.PRESET_VERSION,
@@ -2111,6 +2121,12 @@ window.createGame = {
         const savedTerrain = settings.terrain || {};
         if (!("dustCoverageSelect" in savedTerrain) && parseInt(savedTerrain.dustSelect, 10) > 0) dustSelect.val("100").trigger("change");
         else if (dustSelect.val() == null) dustSelect.val("0").trigger("change");
+        //Nebula / EM Storm are tick boxes: 1 or 0 under their own ids, or - saved before they were - under
+        //the No/Yes selects' ids (nebulaSelect / emStormSelect), with the same values.
+        $(".cg-terrain-toggle").each(function () {
+            const id = this.id in savedTerrain ? this.id : this.id.replace(/Check$/, "Select");
+            $(this).prop("checked", parseInt(savedTerrain[id], 10) > 0).trigger("change");
+        });
 
         //Map: a template brings its size, teams and any pre-placed terrain; a Custom map - or a
         //template this page no longer has - takes the saved size.

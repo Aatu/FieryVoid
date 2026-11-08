@@ -1172,6 +1172,39 @@ textarea.cg-input {
   border-color: var(--fv-accent);
 }
 
+/* Asteroids / Meteor Swarms: the "Drifts" tick box (TerrainDriftRule) just left of the count, which keeps its place
+   at the right edge, so the column of 116px boxes still lines up. The native tick box, as in Rules & Options. */
+.cg-terrain-controls {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cg-drift {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--fv-text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cg-drift:has(input:checked) {
+  color: var(--fv-text);
+}
+
+/* base.css nudges every checkbox down 2px; the label centres its own. */
+.cg-drift input[type=checkbox] {
+  top: 0;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--fv-accent);
+  cursor: pointer;
+}
+
 /* Dust / Gravity Well: a native select dressed as the count combos - no native arrow, the combo's
    slot and chevron drawn over it (.cg-select-arrow shares .cg-combo-toggle's rule), value centred. */
 .cg-select {
@@ -1867,6 +1900,11 @@ div[data-team-id="2"] .remove-team-btn {
 
   .cg-slot-actions,
   .cg-presets .cg-btn {
+    min-height: 44px;
+  }
+
+  /* the Drifts label is the tap target, the height of the count box beside it */
+  .cg-drift {
     min-height: 44px;
   }
 
