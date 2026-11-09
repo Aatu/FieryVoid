@@ -14355,13 +14355,17 @@ class DiffuserTendril extends ShipSystem{
 		return $this->getTotalDamage();
 	}
 	
-	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
+	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1, $shooterid = null, $weaponid = null){ //or dissipate, with negative value
 		//$fireOrderid ties what the tendril soaked to the shot that caused it. The combat log finds a
 		//shot's damage by matching entries on fireorderid (weaponManager.getDamagesCausedBy), so
 		//without it a fully absorbed shot read as "damaged for 0" and looked like nothing happened.
 		//Dissipation and the docking-reabsorption in HangarOps pass no id and stay unlinked (-1), so
 		//they are never reported as damage from a shot.
-		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Dissipate!", "Tendril");
+		//$shooterid/$weaponid: an order the SERVER creates mid-resolution (terrain collisions, proximity
+		//mines, auto-rams) has no id yet (-1). DBManager::submitDamages back-fills those from the row's
+		//shooter + weapon, exactly as it does for the hit's own row, so the absorbed amount lands on the
+		//same order as the damage it reduced.
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Dissipate!", "Tendril", $shooterid, $weaponid);
 		$damageEntry->updated = true;
 		$this->damage[] = $damageEntry;
 	}
@@ -14416,17 +14420,18 @@ class DiffuserTendrilFtr extends DiffuserTendril{
 		return $this->usedCapacityTotal;
 	}
 	
-	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
+	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1, $shooterid = null, $weaponid = null){ //or dissipate, with negative value
 		$this->usedCapacityTotal += $value; //running count
 		$this->thisTurnEntries[] = $value; //mark for database
 
 		//Capacity lives in the notes above, so on its own a fighter tendril left the combat log nothing
 		//to find (the log matches a shot's rows by fireorderid). Leave a LOG-ONLY row linked to the shot:
 		//damage 0, so health and every damage sum are untouched, with the absorbed amount in the `shields`
-		//column, which combatLog.js reads for this damageclass. Same scheme as TrekShieldFtr::absorbDamage.
-		//Dissipation passes no id, so it never produces one.
-		if ($value > 0 && $fireOrderid > 0) {
-			$logEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, 0, 0, $value, $fireOrderid, false, false, "Absorb!", "TendrilFtr");
+		//column, which combatLog.js reads for this damageclass. Same scheme as TrekShieldFtr::absorbDamage,
+		//including the shooter + weapon that let submitDamages link a server-made order with no id yet.
+		//Dissipation passes none of them, so it never produces one.
+		if ($value > 0 && ($fireOrderid > 0 || $shooterid !== null)) {
+			$logEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, 0, 0, $value, $fireOrderid, false, false, "Absorb!", "TendrilFtr", $shooterid, $weaponid);
 			$logEntry->updated = true;
 			$this->damage[] = $logEntry;
 		}
@@ -14699,7 +14704,7 @@ by 4.
 		if($mostSuitableAbsorbtion>0){ //appropriate tendril found!
 			$damageAbsorbed=min($damageToAbsorb,$mostSuitableAbsorbtion);
 			$returnValues['dmg']=$effectiveDamage-$damageAbsorbed;
-			$mostSuitableTendril->absorbDamage($target,$gamedata,$damageAbsorbed, $fireOrder->id);//link to the shot so the combat log can report it
+			$mostSuitableTendril->absorbDamage($target,$gamedata,$damageAbsorbed, $fireOrder->id, ($shooter ? $shooter->id : null), ($weapon ? $weapon->id : null));//link to the shot so the combat log can report it
 		}
 		
 		return $returnValues;
