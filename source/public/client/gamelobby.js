@@ -899,7 +899,7 @@ window.gamedata = {
 		}
 
 		return '<div class="ship-actions">' +
-			' <span class="showship clickable">Details</span> ' +
+			' <span class="showship clickable">Details / Options</span> ' +
 			' -<span class="editship clickable">Edit</span> ' +
 			' -<span class="copyship clickable">Copy</span> ' +
 			reinforce +

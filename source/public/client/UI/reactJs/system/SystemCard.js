@@ -25,7 +25,12 @@ import { parseRulesText, briefCount, rulesBlocks, boldSegments } from "../helper
    - The lobby's gamesNew.css sets Arial on EVERY element (* {...}), which beats an inherited face, so the face
      goes on each element here and the Consolas parts take theirs back with a doubled class (&&). */
 
-const TRACK_MAX = 30;        //structure drawn box by box up to this many boxes; a bar above it
+/* The structure track: one box per point, always ONE full-width row - the boxes widen or narrow to fill it (user choice
+   2026-11-09: a 6-box Twin Array draws wide boxes, a Structure block thin ones). The pane is 284px wide: on a 1x screen
+   past ~120 boxes the boxes, under 1.4px, snap unevenly and run together, so the plain bar takes over there (a base's
+   biggest blocks; 6,614 of 6,818 Structure blocks are 120 or fewer). */
+const TRACK_MAX = 120;
+const TRACK_WIDE_GAPS = 60;  //up to this many boxes the gaps are 2px; past it 1px, so the boxes keep some width
 const TOUCH_WINDOW = 1500;   //ms after SystemIcon's touchstart stamp within which a new card counts as opened by touch
 const WIDE_LEFT = 284;       //the numbers pane when the card opens wide
 const WIDE_COLUMN = 296;     //one rules column when the card opens wide
@@ -270,13 +275,12 @@ const Of = styled.span`
 
 const Track = styled.span`
     grid-column: 1 / -1;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
+    display: grid;
+    grid-template-columns: repeat(${props => props.$count}, minmax(0, 1fr));
+    column-gap: ${props => props.$count > TRACK_WIDE_GAPS ? 1 : 2}px;
 `;
 
 const TrackBox = styled.i`
-    width: 7px;
     height: 10px;
     background-color: ${props => props.$lost ? "transparent" : (props.$crit ? theme.colors.healthCrit : theme.colors.healthOk)};
     box-shadow: ${props => props.$lost ? `inset 0 0 0 1px ${tint(theme.colors.line, 0.6)}` : "none"};
@@ -304,7 +308,7 @@ export const Structure = ({ remaining, max, crit }) => {
             <Lab>Structure</Lab>
             <Num>{left}<Of>/{max}</Of></Num>
             {max > 0 && max <= TRACK_MAX
-                ? <Track>{Array.from({ length: max }, (_, i) => <TrackBox key={i} $lost={i >= left} $crit={crit} />)}</Track>
+                ? <Track $count={max}>{Array.from({ length: max }, (_, i) => <TrackBox key={i} $lost={i >= left} $crit={crit} />)}</Track>
                 : <Bar><BarFill $crit={crit} style={{ width: (max > 0 ? 100 * left / max : 0) + "%" }} /></Bar>}
         </StructRow>
     );
