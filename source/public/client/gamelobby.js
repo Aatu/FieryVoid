@@ -759,7 +759,7 @@ window.gamedata = {
 
 		var listHtml = '';
 		lines.forEach(function (line) {
-			listHtml += '<div class="ship-enhancement-entry"><span class="ship-enhancement-name">- ' + line.text + '</span>'
+			listHtml += '<div class="ship-enhancement-entry"><span class="ship-enhancement-name">' + line.text + '</span>'
 				+ (line.cost ? '<span class="ship-enhancement-cost">' + gamedata.formatEnhancementCost(line.cost) + '</span>' : '')
 				+ '</div>';
 		});
@@ -852,12 +852,9 @@ window.gamedata = {
 		});
 		if (!row.length) return;
 
-		row.find(".shipDamagedBadge").remove();
-		var badge = gamedata.damagedShipBadge(ship);
-		if (badge) row.prepend(badge);
-
+		//The badge sits INSIDE the name (the row is a grid - a badge of its own would take a cell).
 		var display = gamedata.rowDisplay(ship);
-		row.find(".shipname").first().text(display.name);
+		row.find(".shipname").first().html(gamedata.damagedShipBadge(ship) + display.nameHtml);
 		row.find(".boughtPointCost").first().text(display.cost + 'p');
 
 		/* Re-inserted BEFORE .ship-actions rather than appended: the row is a block stack
@@ -889,34 +886,50 @@ window.gamedata = {
 		   carries the rule so every other lobby's row is byte-identical to before. It reads as
 		   the ACTION, not the state (the state is the group the row sits in and the colour of
 		   its name), which is the convention the other four links follow. */
+		//The Store's link grammar (its Add to fleet · Show details): .lb-linkbtn buttons, · between.
+		var sep = '<span class="lb-ship-sep" aria-hidden="true">&middot;</span>';
+		var link = function (cls, text, title) {
+			return '<button type="button" class="lb-linkbtn ' + cls + '"' + (title ? ' title="' + title + '"' : '') + '>' + text + '</button>';
+		};
+
 		var reinforce = '';
 		//canBeReinforcement: no link at all on a hull that is on the board on turn 1 regardless
 		//(base, OSAT, Terrain) - offering it would be offering a state it can never hold.
 		if (gamedata.reinforcementsAllowed() && gamedata.canBeReinforcement(ship)) {
-			reinforce = gamedata.isReinforcementRow(ship)
-				? ' -<span class="reinforcetoggle clickable" title="Move this unit into the main fleet instead">Main Fleet</span> '
-				: ' -<span class="reinforcetoggle clickable" title="Hold this unit in hyperspace and bring it in through a jump point">Reinforcement</span> ';
+			reinforce = sep + (gamedata.isReinforcementRow(ship)
+				? link('reinforcetoggle', 'Main Fleet', 'Move this unit into the main fleet instead')
+				: link('reinforcetoggle', 'Reinforcement', 'Hold this unit in hyperspace and bring it in through a jump point'));
 		}
 
 		return '<div class="ship-actions">' +
-			' <span class="showship clickable">Details / Options</span> ' +
-			' -<span class="editship clickable">Edit</span> ' +
-			' -<span class="copyship clickable">Copy</span> ' +
+			link('showship', 'Details / Options') +
+			sep + link('editship', 'Edit') +
+			sep + link('copyship', 'Copy') +
 			reinforce +
-			' -<span class="remove clickable">Remove</span> </div>';
+			sep + link('remove', 'Remove') + '</div>';
 	},
 
 	/* The name and cost a fleet-list row displays. A bulk row shows the whole purchase:
-	   "Gravitic Mine (10)" at the cost of all ten. The cost leaves out the enhancements, which
+	   "Gravitic Mine ×10" at the cost of all ten. The cost leaves out the enhancements, which
 	   enhancementListHtml prices line by line underneath (user 2026-10-08) - taken off the row's
-	   real charge, so the row and its lines always add up to it. */
+	   real charge, so the row and its lines always add up to it.
+	   nameHtml is escaped HTML: the unit number of a name ending " #3" (confirm.js names every unit
+	   "<class> #N") or a bulk row's "×10" goes in a dim .boughtNameTag, so the name reads first. */
 	rowDisplay: function rowDisplay(ship) {
 		var count = gamedata.bulkCount(ship);
 		var enhancements = 0;
 		gamedata.enhancementLines(ship).forEach(function (line) { enhancements += line.cost; });
 
+		var name = String(ship.name);
+		var tag = count > 1 ? '&#215;' + count : '';
+		var numbered = !tag && /^(.*\S)\s+(#\d+)$/.exec(name);
+		if (numbered) {
+			name = numbered[1];
+			tag = numbered[2];
+		}
+
 		return {
-			name: count > 1 ? ship.name + ' (' + count + ')' : ship.name,
+			nameHtml: scenarioCard.escapeHtml(name) + (tag ? '<span class="boughtNameTag">' + tag + '</span>' : ''),
 			cost: Math.ceil(Math.round((gamedata.rowPointCost(ship) - enhancements) * 100) / 100)
 		};
 	},
@@ -948,9 +961,9 @@ window.gamedata = {
 		var reinforcementClass = gamedata.isReinforcementRow(ship) ? ' reinforcement' : '';
 
 		var h = $('<div class="ship bought' + reinforcementClass + ' slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
-			damageBadge +
-			'<span class="shipname name">' + display.name + '</span>' +
-			//Class and cost in one box, so a narrow fleet column wraps them onto a line together.
+			//The badge inside the name, as refreshFleetRow writes it.
+			'<span class="shipname name">' + damageBadge + display.nameHtml + '</span>' +
+			//Class and cost: a wrapper the row's grid sees through (gameLobby.css, display: contents).
 			'<span class="boughtClassCost"><span class="boughtShiptype">' + displayType + '</span>' +
 			'<span class="boughtPointCost">' + display.cost + 'p</span></span>' +
 			enhancementHtml +
@@ -2430,9 +2443,9 @@ window.gamedata = {
 			var reinforcementClass = gamedata.isReinforcementRow(ship) ? ' reinforcement' : '';
 
 			var h = $('<div class="ship bought' + reinforcementClass + ' slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
-				damageBadge +
-				'<span class="shipname name">' + display.name + '</span>' +
-				//Class and cost in one box, so a narrow fleet column wraps them onto a line together.
+				//The badge inside the name, as refreshFleetRow writes it.
+				'<span class="shipname name">' + damageBadge + display.nameHtml + '</span>' +
+				//Class and cost: a wrapper the row's grid sees through (gameLobby.css, display: contents).
 				'<span class="boughtClassCost"><span class="boughtShiptype">' + displayType + '</span>' +
 				'<span class="boughtPointCost">' + display.cost + 'p</span></span>' +
 				enhancementHtml +
