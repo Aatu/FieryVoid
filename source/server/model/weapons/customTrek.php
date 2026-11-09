@@ -1445,9 +1445,21 @@ class TrekShieldFtr extends ShipSystem{
 		return $this->usedCapacityTotal;
 	}
 	
-	public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
+	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
 		$this->usedCapacityTotal += $value; //running count
 		$this->thisTurnEntries[] = $value; //mark for database
+
+		//Capacity lives in the notes above, so on its own a fighter projection left the combat log
+		//nothing to find: the log matches a shot's rows by fireorderid (weaponManager.getDamagesCausedBy),
+		//and a fully absorbed shot against a flight read as if nothing happened. Leave a LOG-ONLY row
+		//linked to the shot: damage 0 (so health, getTotalDamage and every damage sum are untouched) with
+		//the absorbed amount in the otherwise unused `shields` column, which combatLog.js reads for this
+		//damageclass. Recharge passes no id, so it never produces one.
+		if ($value > 0 && $fireOrderid > 0) {
+			$logEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, 0, 0, $value, $fireOrderid, false, false, "Absorb!", "TrekShieldFtr");
+			$logEntry->updated = true;
+			$this->damage[] = $logEntry;
+		}
 	}
 
 
@@ -1485,7 +1497,7 @@ class TrekShieldFtr extends ShipSystem{
 			$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
 			$damageToAbsorb += -$absorbedDamage;
 			if($absorbedDamage>0){ //mark!
-				$this->absorbDamage($target,$gamedata,$absorbedDamage);
+				$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id);
 			}
 			$returnValues['dmg'] = $damageToAbsorb;
 			$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
@@ -1530,8 +1542,9 @@ class TrekShieldFtr extends ShipSystem{
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
 		$ship = $this->getUnit();
 		switch($gameData->phase){
+				case 5: //pre-firing phase - rams and collisions resolve here, and what they cost the projection must persist too (each phase reloads, so unsaved entries are lost)
 				case 4: //firing phase
-					foreach($this->thisTurnEntries as $tte){					
+					foreach($this->thisTurnEntries as $tte){
 						$notekey = 'absorb';
 						$noteHuman = 'Trek Shield absorbed or dissipated';
 						$noteValue = $tte;

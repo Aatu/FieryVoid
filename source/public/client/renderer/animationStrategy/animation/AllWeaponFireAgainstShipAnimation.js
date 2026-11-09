@@ -567,7 +567,9 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                 damage.damageclass !== "ThirdspaceShield"
                 && damage.damageclass !== "ThoughtShield"
                 && damage.damageclass !== "TrekShieldProjection"
+                && damage.damageclass !== "TrekShieldFtr"
                 && damage.damageclass !== "Tendril"
+                && damage.damageclass !== "TendrilFtr"
             )
             .filter(damage =>
                 shipManager.criticals.sufferedCritThisTurn(damage.system, turn)

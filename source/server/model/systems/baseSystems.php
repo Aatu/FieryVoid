@@ -14416,12 +14416,20 @@ class DiffuserTendrilFtr extends DiffuserTendril{
 		return $this->usedCapacityTotal;
 	}
 	
-	//$fireOrderid is accepted only to keep the signature compatible with the parent - a fighter
-	//tendril stores its absorption as individual notes, not as damage entries, so there is nothing
-	//for the combat log to link to. Fighter diffuser absorption stays invisible in the log.
 	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
 		$this->usedCapacityTotal += $value; //running count
 		$this->thisTurnEntries[] = $value; //mark for database
+
+		//Capacity lives in the notes above, so on its own a fighter tendril left the combat log nothing
+		//to find (the log matches a shot's rows by fireorderid). Leave a LOG-ONLY row linked to the shot:
+		//damage 0, so health and every damage sum are untouched, with the absorbed amount in the `shields`
+		//column, which combatLog.js reads for this damageclass. Same scheme as TrekShieldFtr::absorbDamage.
+		//Dissipation passes no id, so it never produces one.
+		if ($value > 0 && $fireOrderid > 0) {
+			$logEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, 0, 0, $value, $fireOrderid, false, false, "Absorb!", "TendrilFtr");
+			$logEntry->updated = true;
+			$this->damage[] = $logEntry;
+		}
 	}
 	
 	
@@ -14432,8 +14440,9 @@ class DiffuserTendrilFtr extends DiffuserTendril{
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
 		$ship = $this->getUnit();
 		switch($gameData->phase){
+				case 5: //pre-firing phase - rams and collisions resolve here, and what they cost the tendril must persist too (each phase reloads, so unsaved entries are lost)
 				case 4: //firing phase
-					foreach($this->thisTurnEntries as $tte){					
+					foreach($this->thisTurnEntries as $tte){
 						$notekey = 'absorb';
 						$noteHuman = 'Tendril absorbed or dissipated';
 						$noteValue = $tte;

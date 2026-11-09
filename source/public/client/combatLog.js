@@ -512,8 +512,19 @@ window.combatLog = {
                         shieldAbsorbed += Number(d.damage); // never string-concatenate a JSON value
                         continue;
                     }
+                    // A fighter's Shield Projection (TrekShieldFtr) and diffuser tendril (TendrilFtr) keep
+                    // their capacity in individual notes, so their row is a LOG-ONLY marker: damage 0,
+                    // the absorbed amount carried in `shields` (see their absorbDamage()).
+                    if (d.damageclass === "TrekShieldFtr") {
+                        shieldAbsorbed += Number(d.shields) || 0;
+                        continue;
+                    }
                     if (d.damageclass === "Tendril") {
                         tendrilAbsorbed += Number(d.damage);
+                        continue;
+                    }
+                    if (d.damageclass === "TendrilFtr") {
+                        tendrilAbsorbed += Number(d.shields) || 0;
                         continue;
                     }
 
