@@ -1558,7 +1558,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 	public $doNotIntercept = true; //this weapon is a field, "attacks" are just for technical reason
         
         public $rangePenalty = 0; //no range penalty, but range itself is limited
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
+        public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 
 	
 	public $boostlevel = 0;
 		
@@ -4031,6 +4031,7 @@ class IonFieldGenerator extends Weapon{
 	public $animation = "ball";
 	public $animationColor = array(160, 0, 255);
 	public $animationExplosionScale = 2; //covers 2 hexes away from explosion center
+    public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 	
 
 	/*useless
 	public $explosionColor = array(30, 170, 255);
@@ -4253,6 +4254,7 @@ class VortexDisruptor extends Weapon{
 	public $range = 23;//no point firing at further target with base 24 to hit!
 	public $loadingtime = 3;
     public $rangePenalty = 1;//-1/hex
+    public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 	
 
 	public $animation = "ball";
 	public $animationColor = array(245, 90, 90);
@@ -4825,6 +4827,7 @@ class ShadowFighterBomb extends Weapon{
 	public $animationColor = array(160, 60, 200);
 	public $animationExplosionScale = 0.5;
 	public $animationExplosionType = "AoE";
+    public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 	
 
 	public $firingModes = array(
 		1 => "Fighter Bomb"
@@ -7222,7 +7225,7 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 
 	public $range = 4;        
     public $rangePenalty = 0; //no range penalty, but range itself is limited
-    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
+    public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 
 	
 	public $boostlevel = 0;
     public $canOffLine = true;	

@@ -5,6 +5,7 @@ class AoE extends Weapon
     public $damageType = "Flash";
     public $weaponClass = "Ballistic";
 	public $hextarget = true;
+    public $fireControl = array(null, null, null); // fighters, <mediums, <capitals     
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
     {
