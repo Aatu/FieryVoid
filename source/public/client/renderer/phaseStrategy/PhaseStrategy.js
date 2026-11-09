@@ -715,8 +715,26 @@ window.PhaseStrategy = function () {
     PhaseStrategy.prototype.onClickEvent = function (payload) {
         var icons = getInterestingStuffInPosition.call(this, payload, this.gamedata.turn);
 
+        /* What the click landed on, handed to every callback (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 1).
+           Only the hex picker reads it: it stays open when a click lands on a unit. Every other
+           callback is a bind() with ONE bound argument and one formal parameter, so the extra
+           argument is ignored - keep it that way, or give a new callback a second parameter on
+           purpose.
+
+           ⚠️ VISIBLE units only, the filter onShipsClicked and onShipClicked apply. A hex holding
+           nothing but an undetected stealth unit (or an undeployed one) is empty space to the
+           player, and a picker that stayed open on a click there would reveal that it is not. */
+        var gd = this.gamedata;
+        var click = {
+            payload: payload,
+            landsOnUnit: icons.some(function (icon) {
+                var ship = gd.getShip(icon.shipId);
+                return !!ship && !shipManager.shouldBeHidden(ship);
+            })
+        };
+
         this.onClickCallbacks = this.onClickCallbacks.filter(function (callback) {
-            return callback();
+            return callback(click);
         });
 
         if (icons.length > 1) {
@@ -903,6 +921,7 @@ window.PhaseStrategy = function () {
         if (window.fleetListManager) fleetListManager.revealShipRow(ship);
 
         this.syncChargeMarker();
+        this.refreshSelectFromShips(); //the open picker's SELECTED row (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 1)
     };
 
     /* keepWeapons: leave gamedata.selectedSystems alone. Passed ONLY by setSelectedShip when the
@@ -921,6 +940,7 @@ window.PhaseStrategy = function () {
         this.uiManager.hideWeaponList();
         if (gamedata.showLoS) mathlib.clearLosSprite();
         this.syncChargeMarker();
+        this.refreshSelectFromShips(); //drop the SELECTED row (Stage 1); setSelectedShip redraws it after
     };
 
     /* THE CHARGE CROSSHAIR (OFFICERS_PLAN.md Stage 28; user request after play test 4509): while an Expert Warrior's ship is the selected
@@ -1192,6 +1212,17 @@ window.PhaseStrategy = function () {
             this.onMouseOutCallbacks.push(this.hideShipTooltip.bind(this, shipTooltip));
         }
 
+        /* An open hex picker keeps the tooltip clear of itself - from the moment the tooltip
+           exists (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 1 follow-up, user report 2026-11-09). The
+           picker now stays open while the player clicks units elsewhere, and a tooltip for a unit
+           beside the stack opened over the card, then jumped clear on the next mouse move over a
+           row. Same call the picker makes on hover, zoom and scroll, so where it first appears
+           is where it stays. Same JS task as the append, so no frame paints it in the way. */
+        if (this.selectFromShips && !this.selectFromShips.destroyed
+            && typeof this.selectFromShips.placeTooltipClear === 'function') {
+            this.selectFromShips.placeTooltipClear();
+        }
+
         // Mobile/Tablet specific logic: Highlight ships (shows direction sprites) when tooltip is shown
         // Only if not 'hide' (i.e. persistent tooltip from click/tap), to avoid highlighting on spurious touches/scrolling
         if (!hide && window.matchMedia("(pointer: coarse)").matches) {
@@ -1202,9 +1233,50 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.showSelectFromShips = function (ships, payload) {
+        /* ONE PICKER AT A TIME. This used to come for free: the map click that opened a second
+           picker had already closed the first through onClickCallbacks. A picker that survives
+           clicks on units (Stage 1, below) survives exactly that click, so close it here. */
+        if (this.selectFromShips) {
+            this.hideSelectFromShips(this.selectFromShips);
+        }
+
         var selectFromShips = new window.SelectFromShips(this.selectedShip, ships, payload, this)
         this.selectFromShips = selectFromShips;
-        this.onClickCallbacks.push(this.hideSelectFromShips.bind(this, selectFromShips));
+        this.onClickCallbacks.push(this.onMapClickForSelectFromShips.bind(this, selectFromShips));
+    };
+
+    /* Does the hex picker stay open while the player works (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 1)?
+       Base: no - it closes on any map click, and when a row changes the selection, as it always
+       has. InitialPhaseStrategy, PreFiringPhaseStrategy and FirePhaseStrategy answer yes: there
+       the player selects each unit of a stack in turn and points its EW or weapons at units
+       elsewhere, and reopening the picker after every one of those clicks was the cost.
+       Movement keeps the old rule on purpose: units leave the hex as they plot, so the list goes
+       stale. Deployment's actions destroy the picker by design. Waiting and Replay issue no orders. */
+    PhaseStrategy.prototype.keepsSelectFromShipsOpen = function () {
+        return false;
+    };
+
+    /* The picker's onClickCallbacks entry. Truthy = stay registered for the next click (see the
+       filter in onClickEvent); anything else is the one-shot discard every other entry is.
+       `click` is onClickEvent's record. MovementPhaseStrategy runs the same list with no argument,
+       which reads as "close" - its old behaviour. */
+    PhaseStrategy.prototype.onMapClickForSelectFromShips = function (selectFromShips, click) {
+        //Replaced by a newer picker, or closed by its ✕ / Esc / a commit: this entry is spent.
+        if (this.selectFromShips !== selectFromShips) return false;
+
+        if (!selectFromShips.destroyed && click && click.landsOnUnit && this.keepsSelectFromShipsOpen()) return true;
+
+        //Also the path for a picker that destroyed ITSELF (a selection outside the sticky phases,
+        //a Deployment action): this is what clears the strategy's reference to it, as before.
+        this.hideSelectFromShips(selectFromShips);
+        return false;
+    };
+
+    //Redraw the open picker's rows - its SELECTED row (Stage 1). Safe with no picker, or a dead one.
+    PhaseStrategy.prototype.refreshSelectFromShips = function () {
+        if (this.selectFromShips && typeof this.selectFromShips.refresh === 'function') {
+            this.selectFromShips.refresh();
+        }
     };
 
     PhaseStrategy.prototype.hideShipTooltip = function (shipTooltip) {
