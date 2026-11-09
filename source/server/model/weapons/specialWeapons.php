@@ -13121,6 +13121,13 @@ class LightningArray extends Weapon {
         4 => array( 2, 6, 6),
     );
 
+    protected $combinedFireControlArrayTooltip = array(
+        1 => array( 40, 30, 20),
+        2 => array( 30, 30, 25),
+        3 => array( 20, 30, 30),
+        4 => array( 10, 30, 30),
+    );	
+
     /* RANGE PENALTY TABLE, keyed by fused discharge count - per-hex penalties, the same units as
        $rangePenalty. Fusing IMPROVES the reach (a tighter bolt carries further), which is the
        opposite of what the fighter column of the fire-control table does. Row 1 IS $rangePenalty. */
@@ -13587,8 +13594,8 @@ class LightningArray extends Weapon {
             $row  = $this->combinedDamageArray[$n];
             $out .= "<br> - " . $n . " discharge" . ($n > 1 ? "s" : "") . ": "
                  . $row['dice'] . "d10+" . $row['add'];
-            if (isset($this->combinedFireControlArray[$n])) {
-                $out .= " (FC " . implode("/", $this->combinedFireControlArray[$n]) . ")";
+            if (isset($this->combinedFireControlArrayTooltip[$n])) {
+                $out .= " (FC " . implode("/", $this->combinedFireControlArrayTooltip[$n]) . ")";
             }
             if (isset($this->combinedRangePenaltyArray[$n]) && $this->combinedRangePenaltyArray[$n] > 0) {
                 //Same units the generic "Range penalty" tooltip line uses: penalty x5 per hex.
