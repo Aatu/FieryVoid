@@ -13599,7 +13599,7 @@ class LightningArray extends Weapon {
             }
             if (isset($this->combinedRangePenaltyArray[$n]) && $this->combinedRangePenaltyArray[$n] > 0) {
                 //Same units the generic "Range penalty" tooltip line uses: penalty x5 per hex.
-                $out .= " (range -" . number_format($this->combinedRangePenaltyArray[$n] * 5, 2) . "/hex)";
+                $out .= " (" . number_format($this->combinedRangePenaltyArray[$n] * 5, 2) . "/hex)";
             }
         }
         return $out;
