@@ -58,6 +58,11 @@ const MeteorGlyph = styled.span`
     pointer-events: none;
 `;
 
+//...and the lightning bolt, the Storm Defence pair (EM_STORM_PLAN.md).
+const StormGlyph = styled(MeteorGlyph)`
+    color: #9fe3ff;
+`;
+
 class SystemInfoButtons extends React.Component {
 	constructor(props) {
 		super(props);
@@ -317,6 +322,35 @@ class SystemInfoButtons extends React.Component {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
 		weaponManager.removeMeteorDefenceAll(ship, system);
+		webglScene.customEvent('CloseSystemInfo');
+	}
+
+	/*EM_STORM_PLAN.md - Storm Defence, a standing order set or withdrawn in Deployment / Initial Orders: this EM shield takes
+	  a storm strike on a side it faces. RMB = every EM shield on the unit. The rules live in client/emStorm.js.*/
+	declareStormDefence(e) {
+		e.stopPropagation(); e.preventDefault();
+		const { ship, system } = this.props;
+		if (!canStormDefence(ship, system)) return;
+		emStorm.declare(ship, system);
+		webglScene.customEvent('CloseSystemInfo');
+	}
+	declareStormDefenceAll(e) {
+		e.stopPropagation(); e.preventDefault();
+		const { ship } = this.props;
+		emStorm.declareAll(ship);
+		webglScene.customEvent('CloseSystemInfo');
+	}
+	remStormDefence(e) {
+		e.stopPropagation(); e.preventDefault();
+		const { ship, system } = this.props;
+		if (!canRemStormDefence(ship, system)) return;
+		emStorm.withdraw(ship, system);
+		webglScene.customEvent('CloseSystemInfo');
+	}
+	remStormDefenceAll(e) {
+		e.stopPropagation(); e.preventDefault();
+		const { ship } = this.props;
+		emStorm.withdrawAll(ship);
 		webglScene.customEvent('CloseSystemInfo');
 	}
 
@@ -627,6 +661,10 @@ class SystemInfoButtons extends React.Component {
 					</FiringModeSelector>
 				)}
 				<ButtonRow>
+					{canStormDefence(ship, system) && <Button title="Storm Defence: until withdrawn, this EM shield takes an EM storm strike on a side it faces (one per storm), going offline for that turn instead of a random system (RMB = all EM shields)" onClick={this.declareStormDefence.bind(this)} onContextMenu={this.declareStormDefenceAll.bind(this)} img="./img/selfIntercept.png"><StormGlyph>⚡</StormGlyph></Button>}
+					{canRemStormDefence(ship, system) && <Button title="Withdraw Storm Defence (RMB = all EM shields)" onClick={this.remStormDefence.bind(this)} onContextMenu={this.remStormDefenceAll.bind(this)} img="./img/remSelfIntercept.png"><StormGlyph>⚡</StormGlyph></Button>}
+				</ButtonRow>
+				<ButtonRow>
 					{canSelectAllWeapons(ship, system) && <Button title="Select all weapons of this type" onClick={this.selectAllWeapons.bind(this)} img="./img/selectAllWeapons.png" $blend="screen"></Button>}
 					{canSelectAllWeapons(ship, system) && <Button title="Deselect all weapons of this type" onClick={this.deselectAllWeapons.bind(this)} img="./img/deselectAllWeapons.png" $blend="screen"></Button>}
 				</ButtonRow>
@@ -913,6 +951,7 @@ export const canDoAnything = (ship, system) => {
 		|| canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrderMulti(ship, system)
 		|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
 		|| canSelfIntercept(ship, system) || canRemIntercept(ship, system) || canMeteorDefence(ship, system) || canRemMeteorDefence(ship, system)
+		|| canStormDefence(ship, system) || canRemStormDefence(ship, system)
 		|| canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system)
 		|| canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system)
 		|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system) || canJumpEngineMenu(ship, system) || canSystemActivation(ship, system) || canSelectAllWeapons(ship, system)
@@ -1051,6 +1090,9 @@ const canWeaponMenu = (ship, system) => canChangeFiringMode(ship, system) || can
    the intercept pair, which is the closest thing they are. */
 const canMeteorDefence = (ship, system) => system.weapon && weaponManager.canDeclareMeteorDefence(ship, system);
 const canRemMeteorDefence = (ship, system) => system.weapon && weaponManager.canRemoveMeteorDefence(ship, system);
+//EM_STORM_PLAN.md - window.emStorm is game.php's alone (the lobby never has a storm to declare against)
+const canStormDefence = (ship, system) => !!(window.emStorm && emStorm.canDeclare(ship, system));
+const canRemStormDefence = (ship, system) => !!(window.emStorm && emStorm.canWithdraw(ship, system));
 
 //GraviticAugmenter excluded: its Activate/Deactivate lives in its own green menu, not the generic SystemActivation box.
 //jumpEngine joins the exclusions: its activation pair is the Maintain toggle, which JumpEngineMenu

@@ -345,8 +345,10 @@ shipManager.movement = {
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!
         if (!ship.flight && ship.jinkinglimit <= 0) return false;
         if (accel == 0) return true;
-        //only adding jink costs thrust (reducing refunds it) - and not an Expert Pilot's free level (OFFICERS_PLAN.md §9.24)
-        if (accel > 0 && !shipManager.movement.nextJinkIsFree(ship) && shipManager.movement.getRemainingEngineThrust(ship) <= 0) return false;
+        //only adding jink costs thrust (reducing refunds it) - and not an Expert Pilot's free level (OFFICERS_PLAN.md §9.24).
+        //A flight's level costs its whole price up front (2 in a nebula); a ship's goes through the thrust panel as before.
+        var levelCost = ship.flight ? shipManager.movement.jinkLevelCost(ship) : 1;
+        if (accel > 0 && !shipManager.movement.nextJinkIsFree(ship) && shipManager.movement.getRemainingEngineThrust(ship) < levelCost) return false;
         var jinking = shipManager.movement.getJinking(ship);
         //Gravitic Augmenter grants forced jink levels (marked forced=true) that the player
         //may not remove: a reduction cannot take the total below that forced floor.
@@ -383,6 +385,13 @@ shipManager.movement = {
         return shipManager.movement.getFreeJinkRows(ship) < officers.freeJinks(ship);
     },
 
+    /* A FLIGHT's thrust for one jink level: 1 - or 2 in a nebula, unless it is an Ancient's ("Jinking requires 2
+       thrust per level", NEBULA_PLAN.md #3). A jinking ship pays its pivot cost a level, times the same
+       multiplier (doJink). Client-only, like the jink's price itself; AutomatedMovement::jinkCost prices an HK's. */
+    jinkLevelCost: function jinkLevelCost(ship) {
+        return (window.nebula && nebula.isActive()) ? nebula.jinkCostMultiplier(ship) : 1;
+    },
+
     getJinking: function getJinking(ship) {
         var j = 0;
         for (var i in ship.movement) {
@@ -414,13 +423,13 @@ shipManager.movement = {
         var assignedThrust = Array();
         if (ship.flight) {
             commit = true;
-            //an Expert Pilot's free level costs nothing (OFFICERS_PLAN.md §9.24)
-            var cost = shipManager.movement.nextJinkIsFree(ship) ? 0 : 1;
+            //an Expert Pilot's free level costs nothing (OFFICERS_PLAN.md §9.24); a nebula doubles the rest (jinkLevelCost)
+            var cost = shipManager.movement.nextJinkIsFree(ship) ? 0 : shipManager.movement.jinkLevelCost(ship);
             requiredThrust[0] = cost;
             assignedThrust[0] = cost;
         } else {
-            //this is a ship, not fighter flight!
-            requiredThrust = Array(ship.pivotcost, 0, 0, 0, 0);
+            //this is a ship, not fighter flight! Its pivot cost a level - doubled in a nebula, as a flight's 1 is.
+            requiredThrust = Array(ship.pivotcost * shipManager.movement.jinkLevelCost(ship), 0, 0, 0, 0);
         }
         if (accel < 0) {
             //Never remove a forced jink (Gravitic Augmenter minimum) - only the player's own: the first. On a flight, the first
@@ -3021,7 +3030,8 @@ shipManager.movement = {
        vector - a rigid translation, which is what a drag actually is. Note the translation is
        essential and not just tidiness: pairing a pre-drag origin with a post-drag destination is
        wrong by the drag angle, a whole hex facing. Done in cube space so row parity is handled.
-       Undragged units take the original path below, unchanged. */
+       Undragged units take the original path below, unchanged.
+       A Gravity Well's pull ('gravity' rows, GRAVITY_WELL_PLAN.md) is a drag in exactly this sense. */
     getPreviousLocation: function getPreviousLocation(ship) {
         var oPos = shipManager.getShipPosition(ship);
         var i, move, pos;
@@ -3029,7 +3039,7 @@ shipManager.movement = {
         //Where the unit's own movement left it, ignoring any forced Pre-Firing shift.
         var movedPos = null;
         for (i = ship.movement.length - 1; i >= 0; i--) {
-            if (ship.movement[i].type === "prefire") continue;
+            if (ship.movement[i].type === "prefire" || ship.movement[i].type === "gravity") continue;
             movedPos = new hexagon.Offset(ship.movement[i].position);
             break;
         }
@@ -3046,7 +3056,7 @@ shipManager.movement = {
         var isTerrain = gamedata.isTerrain(ship.shipSizeClass, ship.userid);
         for (i = ship.movement.length - 1; i >= 0; i--) {
             move = ship.movement[i];
-            if (move.type === "prefire") continue;
+            if (move.type === "prefire" || move.type === "gravity") continue;
             //'start' is the off-board pre-deployment marker (x=+-30), not a position the unit was
             //ever really at - the same row getLastTurnMovement skips, and real only for Terrain.
             //It matters only here on the dragged path: the walk-back is anchored to the PRE-drag
@@ -4136,7 +4146,9 @@ shipManager.movement = {
             for (var sys in ship.systems) {
                 if (ship.systems[sys].displayName == "Thruster") {
                     if (ship.systems[sys].direction == thrusterLoc && !ship.systems[sys].destroyed) {
-                        if (ship.systems[sys].channeled < ship.systems[sys].output) { //auto-assignment shall not overhrust
+                        //The rating the thrust panel shows (getOutput - output + outputMod), not the blueprint's: a nebula takes 1 off it (NEBULA_PLAN.md #1).
+                        ship.systems[sys].autoCapacity = shipManager.systems.getOutput(ship, ship.systems[sys]);
+                        if (ship.systems[sys].channeled < ship.systems[sys].autoCapacity) { //auto-assignment shall not overhrust
                             //if (ship.systems[sys].criticals.length == 0) {
                             //Only two criticals matter for thursters, ignore others - DK Dec 2024
                             if (shipManager.criticals.hasCritical(ship.systems[sys], "HalfEfficiency")) continue;
@@ -4159,7 +4171,7 @@ shipManager.movement = {
                         return;
                     }
 
-                    if (thrusters[j].channeled + 1 > thrusters[j].output) {
+                    if (thrusters[j].channeled + 1 > thrusters[j].autoCapacity) {
                         checked++;
                         continue;
                     }

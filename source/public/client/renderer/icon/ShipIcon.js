@@ -70,6 +70,8 @@ window.ShipIcon = function () {
         //...and on a unit an Expert War Leader named (setWarLeaderMarked, Stage 34), with the colour it wears
         this.warLeaderMarkSprite = null;
         this.warLeaderMarkColour = null;
+        //What setLostSections last drew (locations + bearings), so an unchanged poll costs nothing.
+        this.lostSectionsKey = '';
 
         this.selected = false;
         /* A JUMP VORTEX SITS A PLANE BELOW EVEN THE OTHER TERRAIN (user request 2026-08-23).
@@ -239,14 +241,14 @@ window.ShipIcon = function () {
     };
 
     ShipIcon.prototype.setHeading = function (heading) {
-        if (!this.terrain) { //No sprite for Terrain  
+        if (this.shipDirectionOfMovementSprite) { //No sprite for Terrain - except drifting terrain (see create())
             this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
         }
     };
 
     //this function is never used actually... and certainly shouldn't use provided heading as it's GET method
     ShipIcon.prototype.getHeading = function (heading) {
-        this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
+        if (this.shipDirectionOfMovementSprite) this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
     };
 
     ShipIcon.prototype.setOverlayColorAlpha = function (alpha) {
@@ -358,8 +360,10 @@ window.ShipIcon = function () {
     ShipIcon.prototype.setHighlighted = function (value) {
         if (value) {
             this.mesh.position.z = this.baseZ + (this.terrain ? 10 : 499);
-            if (!this.terrain) { //No sprite for Terrain  
+            if (!this.terrain) { //No sprite for Terrain
                 this.shipDirectionOfProwSprite.show();
+                this.shipDirectionOfMovementSprite.show();
+            } else if (this.shipDirectionOfMovementSprite) { //a drifting field: only the heading its drift follows
                 this.shipDirectionOfMovementSprite.show();
             }
         } else {
@@ -373,8 +377,10 @@ window.ShipIcon = function () {
             if (window.matchMedia("(pointer: coarse)").matches && this.selected && !this.terrain) {
                 this.shipDirectionOfProwSprite.show();
                 this.shipDirectionOfMovementSprite.show();
-            } else if (!this.terrain) { //No sprite for Terrain  
+            } else if (!this.terrain) { //No sprite for Terrain
                 this.shipDirectionOfProwSprite.hide();
+                this.shipDirectionOfMovementSprite.hide();
+            } else if (this.shipDirectionOfMovementSprite) {
                 this.shipDirectionOfMovementSprite.hide();
             }
         }
@@ -538,6 +544,13 @@ window.ShipIcon = function () {
             this.shipDirectionOfMovementSprite = new window.webglSprite('./img/directionOfMovement.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
             this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
             this.shipDirectionOfMovementSprite.hide();
+        } else if (gamedata.isDriftingTerrain && gamedata.isDriftingTerrain(ship)) {
+            /* A drifting asteroid or meteor swarm (TerrainDrift) gets back the heading arrow every ship has, shown on
+               hover in the same way: its next drift goes straight along it or 60 degrees to either side. Never the prow
+               arrow - a drift does not turn the field, so its facing says nothing. */
+            this.shipDirectionOfMovementSprite = new window.webglSprite('./img/directionOfMovement.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
+            this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
+            this.shipDirectionOfMovementSprite.hide();
         }
         /* THE ALWAYS-ON FACING ARROW. A blueprint that sets `facingArrow` (a path) gets that image
            laid over its icon, permanently — not hover-gated the way the prow/heading arrows above
@@ -679,8 +692,9 @@ window.ShipIcon = function () {
         })
             // During replay, exclude preFire moves from the main movement path – they will
             // be animated separately in ReplayAnimationStrategy, after the relevant weapon hits.
+            // A Gravity Well's pull ('gravity', GRAVITY_WELL_PLAN.md) is animated the same way, after its log line.
             .filter(function (movement) {
-                return !(gamedata.replay && movement.type === 'prefire' && movement.turn === gamedata.turn);
+                return !(gamedata.replay && (movement.type === 'prefire' || movement.type === 'gravity') && movement.turn === gamedata.turn);
             })
             .filter(function (movement) {
                 return movement.commit;
@@ -706,7 +720,7 @@ window.ShipIcon = function () {
             });
 
         this.preFireMovements = []; //reset
-        movements.filter(function (m) { return m.type === 'prefire'; })
+        movements.filter(function (m) { return m.type === 'prefire' || m.type === 'gravity'; })
             .forEach(function (m) {
                 if (!this.preFireMovements.some(existing => existing.id === m.id)) {
                     if (m.turn == gamedata.turn) this.preFireMovements.push(m);
@@ -1824,6 +1838,358 @@ window.ShipIcon = function () {
         }, this);
         this.structureArcs = [];
     };
+
+    /* DESTROYED SECTIONS ON THE HULL ART. When a section's structure block is destroyed, that part of
+       the icon is torn away with a ragged, scorched edge. Fiery Void did this in the canvas renderer
+       (client/damageDrawer.js, removed in f05215cbc when WebGL took over); this uses
+       the same two images - img/damagemask.png the hole, img/damage.png the scorch - stamped on the
+       GPU instead (webglSprite.setDamageStamps), so nothing per-ship is baked into the shared texture.
+
+       WHERE: the section's structure ARC (startArc/endArc - filled from getLocations() and carried in
+       the static bundle, see showStructureArc), so every hull the game knows places itself: HCV,
+       capital, six-sided, the base layouts, Vree rings. getArcs applies the roll, so a rolled ship's
+       port loss shows on the side it now presents, exactly as the structure wedge does. Along that
+       bearing the stamp sits on the hull's real EDGE, read from the art's own alpha (getHullRay),
+       so a thin spine with a wide middle - the Omega - loses a bite of hull rather than of space.
+
+       HOW BIG: fractions of the hull's reach, so a corvette and a dreadnought lose proportionate
+       chunks. DEPTH is the stamp's radius along the section's bearing, SPAN across it - which is what
+       turns a side loss on a long thin hull into a long shallow gouge instead of a hole straight
+       through - and MAX_ASPECT stops the ragged edge being smeared out. The hole itself is the mask's
+       solid core, about 0.6 of the stamp radius, spikes reaching ~0.8 and scorch ~0.95. SCORCH is how
+       dark the char gets.
+
+       Two more for long thin hulls (user report, game 4527: a Targath losing a side showed nothing).
+       Its side ray meets a spine 6px from the centre, so DEPTH alone made a hole ~2px deep. MIN_DEPTH
+       is a floor on DEPTH as a fraction of the hull's half-LENGTH, which makes the bite visible; a
+       normal hull's side reach is already well past it (an Omega's ~4x), so only thin profiles move.
+       MAX_THROUGH then caps how far the HOLE may reach through the hull along that line, as a fraction
+       of its full thickness there - without it the floor snapped the Targath's spine on one side loss
+       and cut the ship in two with both, which reads as the primary section gone. At 0.45 the cap sits
+       above what DEPTH alone ever asks for (0.7 x 0.6 of the reach), so in practice it only trims the
+       floor's lift and normal hulls never meet it. 0.35 left the Targath's notch barely visible even
+       zoomed in. All of these knobs are meant to be tuned by eye. */
+    ShipIcon.SECTION_DAMAGE_DEPTH = 0.7;
+    ShipIcon.SECTION_DAMAGE_MIN_DEPTH = 0.15;
+    ShipIcon.SECTION_DAMAGE_MAX_THROUGH = 0.45;
+
+    /* A WAISTED SIDE - a thin middle between bigger masses, like the Targath's spine between its
+       claw and engine block (user screenshot, 2026-11-08). Even sized up, a notch in the spine barely
+       reads, because the eye goes to the masses either side of it. So when a section's middle reaches
+       out less than WAIST of what those masses do, the loss also takes a bite out of the outer edge of
+       each mass on that side (getWaistLobes). WAIST_BITE sizes those bites as a fraction of how far
+       that mass stands out from the hull's axis - the hole itself is ~0.6 of that again, so 0.75 eats
+       a bit under half way into the claw or engine block (0.6 still barely read on the Targath).
+       WAIST_MAX caps those bites at a fraction of the hull's half-length: a broad mass - a Brakiri
+       Corumai's swept wing - otherwise lost more than a whole normal side does. Sides only - see
+       getWaistLobes. A sweep of 417 hulls in 20 factions found ~8% waisted: thin-spined designs such
+       as the Targath, Hyperion, Corumai and Lykorai, a few Pak'ma'ra; everything else keeps its
+       single bite. */
+    ShipIcon.SECTION_DAMAGE_WAIST = 0.5;
+    ShipIcon.SECTION_DAMAGE_WAIST_BITE = 0.75;
+    ShipIcon.SECTION_DAMAGE_WAIST_MAX = 0.3;
+    ShipIcon.SECTION_DAMAGE_SPAN = 0.3;
+    ShipIcon.SECTION_DAMAGE_MAX_ASPECT = 2.5;
+    ShipIcon.SECTION_DAMAGE_SCORCH = 0.85;
+
+    //Used only when a structure carries no usable arc (a stale static bundle): the standard B5W layout.
+    var SECTION_FALLBACK_BEARINGS = { 1: 0, 2: 180, 3: 270, 4: 90, 31: 300, 32: 240, 41: 60, 42: 120 };
+    var HULL_SOLID_ALPHA = 128;
+    var DAMAGE_MASK_CORE = 0.6; //img/damagemask.png's solid hole, as a fraction of the stamp's radius
+
+    /* The locations whose section is lost: any NON-primary structure block destroyed (one entry per
+       location - a Vree section has an outer ring block as well as its own). Primary never appears:
+       losing it loses the ship. beforeTurn, if given, counts only blocks destroyed on an EARLIER turn,
+       which is what a replay of that turn opens with. Terrain and flights have no sections to lose. */
+    ShipIcon.getLostSections = function (ship, beforeTurn) {
+        var lost = [];
+        if (!ship || ship.flight || !ship.systems) return lost;
+
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            if (!system || system.name !== 'structure' || system.location == 0) continue;
+            if (lost.indexOf(system.location) !== -1) continue;
+
+            if (beforeTurn === undefined) {
+                if (!shipManager.systems.isDestroyed(ship, system)) continue;
+            } else {
+                var turn = damageManager.getTurnDestroyed(ship, system);
+                if (turn === null || turn >= beforeTurn) continue;
+            }
+            lost.push(system.location);
+        }
+
+        return lost.sort(function (a, b) { return a - b; });
+    };
+
+    /* Show exactly these locations as lost (and every other section intact). Cheap to call on every
+       poll and every replay frame - it returns at once unless the set, or a rolled ship's bearings,
+       changed. The art may still be loading on a fresh icon, so the stamps wait for it. */
+    ShipIcon.prototype.setLostSections = function (locations) {
+        if (!this.shipSprite || this.terrain) return;
+
+        var ship = this.ship;
+        var sections = (locations || []).map(function (location) {
+            return { location: location, bearing: getSectionBearing(ship, location) };
+        });
+        var key = sections.map(function (s) { return s.location + '@' + Math.round(s.bearing); }).join(',');
+        if (key === this.lostSectionsKey) return;
+        this.lostSectionsKey = key;
+
+        var sprite = this.shipSprite;
+        if (sections.length === 0) {
+            sprite.setDamageStamps(null);
+            requestSceneRender();
+            return;
+        }
+
+        var self = this;
+        sprite.whenTextureReady(function (texture) {
+            if (self.lostSectionsKey !== key) return; //superseded while the art was loading
+            var hull = getHullAlpha(texture);
+            if (!hull) return;
+            var built = sections.map(function (section) {
+                return buildSectionStamps(hull, ship.id, section);
+            });
+            //every section's main bite first, so if a busy hull ever runs past the shader's 8 it is
+            //waist satellites that are dropped, never a section
+            var stamps = built.map(function (b) { return b.main; });
+            built.forEach(function (b) { stamps = stamps.concat(b.satellites); });
+            sprite.setDamageStamps(stamps, ShipIcon.SECTION_DAMAGE_SCORCH);
+            requestSceneRender();
+        });
+    };
+
+    function requestSceneRender() {
+        if (window.webglScene && window.webglScene.requestRender) window.webglScene.requestRender();
+    }
+
+    //Game bearing (clockwise from the prow) of a section's centre, after any roll.
+    function getSectionBearing(ship, location) {
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (!s || s.name !== 'structure' || s.location != location) continue;
+            if (typeof s.startArc !== 'number' || typeof s.endArc !== 'number' || s.startArc === s.endArc) continue;
+            var arcs = shipManager.systems.getArcs(ship, s);
+            return mathlib.getArcCentre(arcs.start, arcs.end);
+        }
+
+        var bearing = SECTION_FALLBACK_BEARINGS[location] || 0;
+        return shipManager.movement.isRolled(ship) ? (360 - bearing) % 360 : bearing;
+    }
+
+    /* The hull art's alpha, read once per IMAGE (cached on the shared texture) and only for a class
+       that has actually lost a section - an intact fleet never pays for it. texture.image is the
+       cleaned canvas webglSprite built the texture from. */
+    function getHullAlpha(texture) {
+        var data = texture.userData || (texture.userData = {});
+        if (data.hullAlpha !== undefined) return data.hullAlpha;
+        data.hullAlpha = null;
+
+        var canvas = texture.image;
+        if (!canvas || !canvas.width || !canvas.height || typeof canvas.getContext !== 'function') return null;
+
+        try {
+            var width = canvas.width;
+            var height = canvas.height;
+            var rgba = canvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, width, height).data;
+            var alpha = new Uint8Array(width * height);
+            var extentX = 0;
+            var extentY = 0;
+            for (var i = 0; i < alpha.length; i++) {
+                alpha[i] = rgba[i * 4 + 3];
+                if (alpha[i] < HULL_SOLID_ALPHA) continue;
+                extentX = Math.max(extentX, Math.abs(i % width + 0.5 - width / 2));
+                extentY = Math.max(extentY, Math.abs(Math.floor(i / width) + 0.5 - height / 2));
+            }
+            data.hullAlpha = {
+                width: width, height: height, alpha: alpha,
+                extentX: extentX || width / 2, extentY: extentY || height / 2, //the hull's half-length / half-beam
+                rays: {}
+            };
+        } catch (e) {
+            //an unreadable canvas leaves the hull drawn intact rather than throwing out of a poll
+        }
+
+        return data.hullAlpha;
+    }
+
+    /* Where a section's bearing meets the hull: { angle, reach } - the pixel-space direction from the
+       image centre (where the unit stands in its hex; radians, counter-clockwise, v up) and the
+       distance out to the outermost solid pixel that way.
+
+       The bearing is read in the hull's OWN PROPORTIONS (scaled by its half-length and half-beam), so
+       on a long hull a 60-degree quarter - a base's 41, a six-sided ship's forward quarter - lands on
+       the forward CORNER where that section is, not a third of the way along the side where a plain
+       60-degree ray would leave a thin hull almost at once. Square-on bearings are unchanged by it.
+
+       The widest of three rays 4 degrees apart, so one slipping between two prongs doesn't sink the
+       stamp into the middle of the hull. */
+    function getHullRay(hull, phi) {
+        var key = Math.round(mathlib.radianToDegree(phi));
+        if (hull.rays[key] !== undefined) return hull.rays[key];
+
+        var cx = hull.width / 2;
+        var cy = hull.height / 2;
+        var direction = Math.atan2(Math.sin(phi) * hull.extentY, Math.cos(phi) * hull.extentX);
+        var best = 0;
+
+        [-4, 0, 4].forEach(function (offset) {
+            var angle = direction + mathlib.degreeToRadian(offset);
+            var dx = Math.cos(angle);
+            var dy = -Math.sin(angle); //canvas rows run down, the sprite's v runs up
+
+            for (var t = Math.ceil(Math.hypot(cx, cy)); t > best; t--) {
+                var x = Math.round(cx + dx * t);
+                var y = Math.round(cy + dy * t);
+                if (x < 0 || y < 0 || x >= hull.width || y >= hull.height) continue;
+                if (hull.alpha[y * hull.width + x] >= HULL_SOLID_ALPHA) {
+                    best = t;
+                    break;
+                }
+            }
+        });
+
+        if (!best) best = Math.min(cx, cy) * 0.5; //nothing solid that way at all: a token bite nearer the middle
+        hull.rays[key] = { angle: direction, reach: best };
+        return hull.rays[key];
+    }
+
+    /* A section's stamps: { main, satellites }. main sits on the hull's edge along the section's
+       bearing; satellites (usually none) are the extra bites a WAISTED side takes - see
+       SECTION_DAMAGE_WAIST. Satellites are the main bite's size, but round rather than drawn out
+       along the hull, and each spun by its own seed. */
+    function buildSectionStamps(hull, shipId, section) {
+        var phi = -mathlib.degreeToRadian(section.bearing); //game bearings run clockwise; setFacing(-facing)
+        var ray = getHullRay(hull, phi);
+        var reach = ray.reach;
+        var across = (getHullRay(hull, phi + Math.PI / 2).reach + getHullRay(hull, phi - Math.PI / 2).reach) / 2;
+        var seed = getSectionSeed(shipId, section.location);
+
+        var halfLength = Math.max(hull.extentX, hull.extentY);
+        var thickness = reach + getHullRay(hull, phi + Math.PI).reach; //edge to edge through the centre, on this line
+        var depth = Math.min(
+            Math.max(ShipIcon.SECTION_DAMAGE_DEPTH * reach, ShipIcon.SECTION_DAMAGE_MIN_DEPTH * halfLength) * (0.92 + 0.16 * seed.size),
+            ShipIcon.SECTION_DAMAGE_MAX_THROUGH * thickness / DAMAGE_MASK_CORE
+        );
+        var span = Math.min(Math.max(ShipIcon.SECTION_DAMAGE_SPAN * across, depth), depth * ShipIcon.SECTION_DAMAGE_MAX_ASPECT);
+
+        var main = makeStamp(hull, reach * Math.cos(ray.angle), reach * Math.sin(ray.angle), ray.angle, depth, span, seed.spin);
+        var satellites = getWaistLobes(hull, ray.angle, reach).map(function (lobe, i) {
+            var lobeDepth = Math.max(depth, Math.min(ShipIcon.SECTION_DAMAGE_WAIST_BITE * lobe.reach,
+                ShipIcon.SECTION_DAMAGE_WAIST_MAX * halfLength));
+            return makeStamp(hull, lobe.x, lobe.y, ray.angle, lobeDepth, lobeDepth,
+                getSectionSeed(shipId, section.location + 100 * (i + 1)).spin);
+        });
+
+        return { main: main, satellites: satellites };
+    }
+
+    /* One stamp for webglSprite.setDamageStamps: its UV centre (x, y = pixels from the image centre,
+       v up), and the matrix taking a UV offset from there to the stamp's own -1..1 square - UV to
+       pixels, into the bite's frame (radial along `angle`, tangential), onto the depth x span
+       ellipse, then spun so no two holes look alike. Linear end to end, hence one matrix. */
+    function makeStamp(hull, x, y, angle, depth, span, spin) {
+        var cos = Math.cos(angle);
+        var sin = Math.sin(angle);
+        var spinCos = Math.cos(spin);
+        var spinSin = Math.sin(spin);
+
+        function toLocal(px, py) {
+            var r = (px * cos + py * sin) / depth;
+            var t = (-px * sin + py * cos) / span;
+            return [r * spinCos - t * spinSin, r * spinSin + t * spinCos];
+        }
+
+        var du = toLocal(hull.width, 0);  //where a step of 1 in u lands
+        var dv = toLocal(0, hull.height); //...and of 1 in v
+
+        return {
+            u: 0.5 + x / hull.width,
+            v: 0.5 + y / hull.height,
+            m00: du[0], m01: dv[0],
+            m10: du[1], m11: dv[1]
+        };
+    }
+
+    /* THE WAIST TEST, for a side facing `angle` (pixel space, v up). Walk lines parallel to that
+       bearing, offset along the hull from the centre, and measure how far out the hull reaches on
+       each - the side's profile. Where `middle` (the main bite's own reach) is less than
+       SECTION_DAMAGE_WAIST of the most prominent mass found 30-80% of the way out along the hull on
+       either side, that mass's outer edge is a lobe: { x, y } in pixels from the image centre.
+       Measured against the MAIN BITE's reach, not the profile's middle: an Omega's image centre is on
+       the thin spine just aft of its rotating section, but the main bite's fanned ray already lands
+       on that section, so there is no waist to make up for. Reaches along the profile are the LEAST
+       of three lines 3px apart, so a lone fin or antenna can't pose as a mass. Cached per image and
+       bearing. */
+    function getWaistLobes(hull, angle, middle) {
+        hull.lobes = hull.lobes || {};
+        var key = Math.round(mathlib.radianToDegree(angle));
+        if (hull.lobes[key]) return hull.lobes[key];
+
+        var dx = Math.cos(angle);
+        var dy = Math.sin(angle);
+
+        /* Only a SIDE has a waist: a bearing within ~20 degrees of square-on to the hull's long axis.
+           On a diagonal the profile's lines run slantwise down the length of the hull and "reach"
+           stops meaning how far a mass stands out - a B5 aft quarter measured the whole aft spine
+           and its satellite took the station's aft half away. */
+        if (Math.abs(hull.extentX >= hull.extentY ? dx : dy) > 0.35) {
+            hull.lobes[key] = [];
+            return hull.lobes[key];
+        }
+
+        var tx = -dy; //along the hull, at right angles to the bearing
+        var ty = dx;
+        var along = Math.abs(tx) * hull.extentX + Math.abs(ty) * hull.extentY;
+
+        var profile = function (s) {
+            return Math.min(
+                getEdgeDistance(hull, (s - 3) * tx, (s - 3) * ty, dx, dy),
+                getEdgeDistance(hull, s * tx, s * ty, dx, dy),
+                getEdgeDistance(hull, (s + 3) * tx, (s + 3) * ty, dx, dy)
+            );
+        };
+
+        var step = Math.max(1, Math.round(along / 40));
+        var lobes = [];
+
+        [1, -1].forEach(function (sign) {
+            var best = null;
+            for (var s = Math.round(along * 0.3); s <= along * 0.8; s += step) {
+                var reach = profile(sign * s);
+                if (!best || reach > best.reach) best = { s: sign * s, reach: reach };
+            }
+            if (best && best.reach > 0 && middle < ShipIcon.SECTION_DAMAGE_WAIST * best.reach) {
+                lobes.push({ x: best.s * tx + best.reach * dx, y: best.s * ty + best.reach * dy, reach: best.reach });
+            }
+        });
+
+        hull.lobes[key] = lobes;
+        return lobes;
+    }
+
+    /* Distance from (ox, oy) - pixels from the image centre, v up - along (dx, dy) to the outermost
+       solid pixel on that line, or 0 if the hull never reaches out that way from there. */
+    function getEdgeDistance(hull, ox, oy, dx, dy) {
+        var cx = hull.width / 2;
+        var cy = hull.height / 2;
+        for (var u = Math.ceil(Math.hypot(hull.width, hull.height)); u > 0; u--) {
+            var x = Math.round(cx + ox + dx * u);
+            var y = Math.round(cy - (oy + dy * u)); //canvas rows run down
+            if (x < 0 || y < 0 || x >= hull.width || y >= hull.height) continue;
+            if (hull.alpha[y * hull.width + x] >= HULL_SOLID_ALPHA) return u;
+        }
+        return 0;
+    }
+
+    //Stable per ship and section, so a hole looks the same every poll, every replay and to every player.
+    function getSectionSeed(shipId, location) {
+        var id = Number(shipId) || 0;
+        var a = Math.sin(id * 12.9898 + location * 78.233) * 43758.5453;
+        var b = Math.sin(id * 39.3468 + location * 11.135) * 24634.6345;
+        return { spin: (a - Math.floor(a)) * Math.PI * 2, size: b - Math.floor(b) };
+    }
 
     var BDEW_HEXES = 20; //the blanket is 20 hexes whatever the ship's BDEW rating - 25 with an Expert ELINT Officer (ew.elintRange)
 

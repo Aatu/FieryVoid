@@ -626,7 +626,7 @@ class HeavyPlasmaBolter extends Plasma{
 				$damage -= 0;
 				}
 			else {
-				$damage -= round(($dis - 15) * $this->rangeDamagePenaltyPBolter);
+				$damage -= round(($dis - 15) * $this->rangeDamagePenaltyPBolter * $this->getRangeDamageFactor());
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated
@@ -682,7 +682,7 @@ class MediumPlasmaBolter extends Plasma{
 				$damage -= 0;
 				}
 			else {
-				$damage -= round(($dis - 10) * $this->rangeDamagePenaltyPBolter);
+				$damage -= round(($dis - 10) * $this->rangeDamagePenaltyPBolter * $this->getRangeDamageFactor());
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated
@@ -736,7 +736,7 @@ class LightPlasmaBolter extends Plasma{
 				$damage -= 0;
 				}
 			else {
-				$damage -= round(($dis - 5) * $this->rangeDamagePenaltyPBolter);
+				$damage -= round(($dis - 5) * $this->rangeDamagePenaltyPBolter * $this->getRangeDamageFactor());
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated
@@ -800,7 +800,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
 				$damage -= 0;
 				}
 			else {
-				$damage -= round(($dis - 3) * $this->rangeDamagePenaltyPBolter);
+				$damage -= round(($dis - 3) * $this->rangeDamagePenaltyPBolter * $this->getRangeDamageFactor());
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated

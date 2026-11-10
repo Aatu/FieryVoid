@@ -854,7 +854,19 @@ window.shipManager = {
         // never write for docked flights — so no explosion fires.
         if (ship.removed) return true;
 
+        //The Dust Zone's unit is gone for every purpose the same way (isHiddenUnit).
+        if (shipManager.isHiddenUnit(ship)) return true;
+
         return shipManager.isDestroyedByDamage(ship);
+    },
+
+    /* A unit the player must never see or touch - only the Dust Zone's (server: ships/terrain/DustZone.php),
+       which exists so the dust's damage has a shooter. The dust is gamedata.rules.dustZone, drawn by
+       BallisticIconContainer; the unit stands off the map. isDestroyed answers true for it, which hides its
+       icon and keeps it out of targeting and hex occupancy as it does a docked flight; the combat log still
+       names it as the source of dust damage. By phpclass, which is on every ship, blueprint or not. */
+    isHiddenUnit: function isHiddenUnit(ship) {
+        return Boolean(ship) && ship.phpclass === 'DustZone';
     },
 
     /* The same question asked of the DAMAGE ALONE, without the docked-in-a-hangar

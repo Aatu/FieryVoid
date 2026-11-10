@@ -107,6 +107,11 @@ class MovementGamePhase implements Phase
             MineStealth::checkMovementDetection($latestgameData, $dbManager);
         }
 
+        /* GRAVITY_WELL_PLAN.md - every unit has moved ("when all other movement is complete"): each Gravity Well now
+           pulls the board towards it, before anything below reads where units ended up. After the loop above, so its
+           rows follow every unit's 'end' row. One instanceof per unit in a game without a well. */
+        GravityWells::resolvePull($latestgameData, $dbManager);
+
         /* KIRISHIAC_ORBITAL_REFITS_PLAN.md §8.4 - every unit has moved: ELINT module points spent on a
            unit that is now outside every live module's arc are lost (R9). Once per turn, before
            anything reads this turn's EW for firing. One static boolean in every game without modules. */

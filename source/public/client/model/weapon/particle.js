@@ -454,19 +454,6 @@ ParticleRepeater.prototype.initBoostableInfo = function () {
     return this;
 };
 
-ParticleRepeater.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-
-            return;
-        }
-    }
-};
-
 ParticleRepeater.prototype.initializationUpdate = function () {
 
     if (gamedata.gamephase == 3) {
@@ -683,18 +670,6 @@ RepeaterGun.prototype.initBoostableInfo = function () {
     this.data.Intercept = this.intercept * -5;
 
     return this;
-};
-RepeaterGun.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-
-            return;
-        }
-    }
 };
 
 var HeavyBolter = function HeavyBolter(json, ship) {

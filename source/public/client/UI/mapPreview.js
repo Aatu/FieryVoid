@@ -25,8 +25,40 @@ window.mapPreview = {
         well: "#04161c",        //--fv-well
         hex: "#0f2c3a",         //the hex grid: a shade above --fv-card, under everything else
         rim: "#215a7a",         //--fv-line
-        terrain: "90, 106, 118" //#5a6a76, as rgb for the alpha
+        terrain: "90, 106, 118", //#5a6a76, as rgb for the alpha
+        dust: "196, 160, 112",  //sand - the game's dust texture (BallisticIconContainer), as rgb for the alpha
+        nebula: "150, 100, 215", //violet - the game's nebula texture (BallisticIconContainer), as rgb for the alpha
+        emStorm: "120, 205, 255" //electric blue - the game's EM storm texture (BallisticIconContainer), as rgb for the alpha
     },
+
+    /* The Gravity Well's legend swatch (GRAVITY_WELL_PLAN.md) - its unit's art, a black hole ringed in orange. Legend only:
+       the well is placed when the game starts, so neither preview draws it. Shared by Create Game and the lobby. */
+    GRAVITY_WELL_SWATCH: "background:#000;border-radius:50%;box-shadow:inset 0 0 0 2px rgb(235, 110, 30)",
+
+    /* The EM Storm's wash (EMStormRule, EM_STORM_PLAN.md) - the whole map, over the nebula and under the grid - and a few
+       fixed forked arcs, so it reads as a storm rather than a second tint. Points are fractions of the map's half-size
+       from its centre. */
+    EM_STORM_ALPHA: 0.12,
+    EM_STORM_ARCS: [
+        [[-0.85, -0.55], [-0.6, -0.42], [-0.52, -0.2], [-0.3, -0.12]],
+        [[0.2, -0.8], [0.32, -0.55], [0.22, -0.38], [0.45, -0.18]],
+        [[0.55, 0.25], [0.7, 0.4], [0.62, 0.62], [0.82, 0.78]],
+        [[-0.6, 0.35], [-0.38, 0.5], [-0.42, 0.72], [-0.2, 0.85]]
+    ],
+
+    //The Dust Zone's wash, under the zones and terrain.
+    DUST_ALPHA: 0.3,
+
+    /* The Nebula's wash (NebulaRule) - the whole map, under the hex grid - and a few soft banks of brighter
+       gas over it, always in the same places, so it reads as a cloud rather than a flat tint. A bank's x / y
+       are fractions of the map's half-size from its centre, r a fraction of its longer side. */
+    NEBULA_ALPHA: 0.2,
+    NEBULA_BANKS: [
+        { x: -0.55, y: -0.35, r: 0.38, rgb: "190, 110, 230", a: 0.22 },
+        { x: 0.5, y: 0.3, r: 0.42, rgb: "70, 185, 200", a: 0.17 },
+        { x: 0.15, y: -0.65, r: 0.28, rgb: "225, 120, 200", a: 0.14 },
+        { x: -0.25, y: 0.6, r: 0.32, rgb: "115, 120, 240", a: 0.15 }
+    ],
 
     //Logical width of the drawing; its height follows the map. Drawn at PIXEL_RATIO times that,
     //so the thin lines stay sharp however CSS scales the canvas (width 100%, height auto).
@@ -82,14 +114,22 @@ window.mapPreview = {
     TERRAIN_ALPHA: 1,
     FIELD_TERRAIN_ALPHA: 0.55,
 
-    //Which kinds of marker a layout draws, for a legend: {solid, fields}.
+    /* Which kinds of marker a layout draws, for a legend: {solid, fields, dust}. A template's dust is drawn
+       as dust (paintDust) - it joins the Dust Zone when the game is created - so `fields` is the Meteor
+       Swarms alone. */
     terrainKinds: function terrainKinds(layout) {
         var units = (layout && layout.units) || [];
         var types = mapPreview.TERRAIN_TYPES;
         return {
             solid: units.some(function (unit) { return types[unit.type] && !types[unit.type].field; }),
-            fields: units.some(function (unit) { return types[unit.type] && types[unit.type].field; })
+            fields: units.some(function (unit) { return types[unit.type] && types[unit.type].field && unit.type !== 'dust'; }),
+            dust: units.some(function (unit) { return unit.type === 'dust'; })
         };
+    },
+
+    //A rules.dustZone's coverage: 100, 50, 25, or 0 for none (or only a template's dust hexes).
+    dustCoverage: function dustCoverage(zone) {
+        return zone ? (parseInt(zone.coverage, 10) || 0) : 0;
     },
 
     /* Mathlib::getRotatedHex (server), which BuyingGamePhase uses for the same footprint: hex ->
@@ -119,6 +159,9 @@ window.mapPreview = {
      *   map.zones   - [{x, y, w, h, rgb: [r, g, b], label}], (x, y) the zone's CENTRE in hexes, the
      *                 later ones drawn over the earlier; `label` optional ("TEAM 1")
      *   map.terrain - a rules.terrainLayout, or nothing
+     *   map.dust    - a rules.dustZone, or nothing
+     *   map.nebula  - true when the game is in a nebula (rules.nebula)
+     *   map.emStorm - true when an EM storm rages (rules.emStorm)
      * The canvas takes the map's own proportions (height/width clamped 0.45-1.0, letterboxed
      * beyond), so a caller sizes it with CSS width alone.
      */
@@ -166,7 +209,10 @@ window.mapPreview = {
         ctx.rect(left, top, mapW, mapH);
         ctx.clip(); //zones and terrain past the rim are cut there, as the game cuts them
 
+        if (map.nebula) mapPreview.paintNebula(ctx, { x: centerX, y: centerY, w: mapW, h: mapH });
+        if (map.emStorm) mapPreview.paintEMStorm(ctx, { x: centerX, y: centerY, w: mapW, h: mapH });
         mapPreview.paintHexGrid(ctx, scale, Math.ceil(mapW / 2 / scale) + 2, Math.ceil(mapH / 2 / (row * scale)) + 1, hexToCanvas);
+        mapPreview.paintDust(ctx, scale, map.dust, map.terrain, { x: centerX, y: centerY, w: mapW, h: mapH }, hexToCanvas);
 
         var labels = [];
         (map.zones || []).forEach(function (zone) {
@@ -295,9 +341,106 @@ window.mapPreview = {
         ctx.restore();
     },
 
+    /* The Dust Zone (server: DustZoneRule) as a sand wash, the game's dust colour: the whole map at
+       100%, otherwise its hexes - the clump's, which the server grows when the game is created, and a
+       map template's dust, which joins it then. Before that (Create Game) a 50% / 25% clump has no hexes
+       yet, so it is shown by its size and place alone: an ellipse of that share of the map round the
+       centre, dashed because the real edge will wander. `box` is the map's centre and size on the canvas. */
+    paintDust: function paintDust(ctx, scale, zone, layout, box, toCanvas) {
+        var coverage = mapPreview.dustCoverage(zone);
+        var fill = "rgba(" + mapPreview.COLORS.dust + ", " + mapPreview.DUST_ALPHA + ")";
+
+        ctx.save();
+        ctx.fillStyle = fill;
+        if (coverage === 100) {
+            ctx.fillRect(box.x - box.w / 2, box.y - box.h / 2, box.w, box.h);
+            ctx.restore();
+            return;
+        }
+
+        var hexes = [];
+        ((zone && zone.spans) || []).forEach(function (span) {
+            for (var q = span[1]; q <= span[2]; q++) hexes.push({ q: q, r: span[0] });
+        });
+        ((layout && layout.units) || []).forEach(function (unit) {
+            if (unit.type === 'dust') hexes.push({ q: unit.q, r: unit.r });
+        });
+
+        if (coverage > 0 && !(zone.spans && zone.spans.length)) {
+            var k = Math.sqrt(4 * (coverage / 100) / Math.PI); //an ellipse inscribed in the map has pi/4 of its area
+            ctx.beginPath();
+            ctx.ellipse(box.x, box.y, box.w / 2 * k, box.h / 2 * k, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "rgba(" + mapPreview.COLORS.dust + ", 0.8)";
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([6, 4]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        //Every hex in one path and one fill, so neighbours meet without a seam.
+        if (hexes.length) {
+            var radius = scale / Math.sqrt(3);
+            var corners = [];
+            for (var c = 0; c < 6; c++) {
+                var angle = (60 * c + 30) * Math.PI / 180;
+                corners.push({ x: radius * Math.cos(angle), y: radius * Math.sin(angle) });
+            }
+            ctx.beginPath();
+            hexes.forEach(function (hex) {
+                var p = toCanvas(hex.q, hex.r);
+                ctx.moveTo(p.x + corners[5].x, p.y + corners[5].y);
+                for (var i = 0; i < 6; i++) ctx.lineTo(p.x + corners[i].x, p.y + corners[i].y);
+            });
+            ctx.fill("nonzero");
+        }
+        ctx.restore();
+    },
+
+    //The Nebula: the whole map in its wash, then the banks. `box` is the map's centre and size on the canvas.
+    paintNebula: function paintNebula(ctx, box) {
+        ctx.save();
+        ctx.fillStyle = "rgba(" + mapPreview.COLORS.nebula + ", " + mapPreview.NEBULA_ALPHA + ")";
+        ctx.fillRect(box.x - box.w / 2, box.y - box.h / 2, box.w, box.h);
+        mapPreview.NEBULA_BANKS.forEach(function (bank) {
+            var x = box.x + bank.x * box.w / 2, y = box.y + bank.y * box.h / 2;
+            var radius = bank.r * Math.max(box.w, box.h);
+            var gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+            gradient.addColorStop(0, "rgba(" + bank.rgb + ", " + bank.a + ")");
+            gradient.addColorStop(1, "rgba(" + bank.rgb + ", 0)");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+        });
+        ctx.restore();
+    },
+
+    //The EM Storm: the whole map in its wash, then the arcs, each a soft glow under a thin bright core.
+    paintEMStorm: function paintEMStorm(ctx, box) {
+        ctx.save();
+        ctx.fillStyle = "rgba(" + mapPreview.COLORS.emStorm + ", " + mapPreview.EM_STORM_ALPHA + ")";
+        ctx.fillRect(box.x - box.w / 2, box.y - box.h / 2, box.w, box.h);
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        mapPreview.EM_STORM_ARCS.forEach(function (arc) {
+            [[4, 0.18], [1.2, 0.55]].forEach(function (pass) {
+                ctx.beginPath();
+                arc.forEach(function (p, i) {
+                    var x = box.x + p[0] * box.w / 2, y = box.y + p[1] * box.h / 2;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.lineWidth = pass[0];
+                ctx.strokeStyle = "rgba(" + mapPreview.COLORS.emStorm + ", " + pass[1] + ")";
+                ctx.stroke();
+            });
+        });
+        ctx.restore();
+    },
+
     /* Grey markers of each unit's real size: a disc for a moon, a dot per hex for the rest. A
        marker big enough to carry one gets the mockup's halo - a fainter ring INSIDE the unit's
-       footprint, so a moon still reads at its true size. Dust / meteor fields: fainter, no halo. */
+       footprint, so a moon still reads at its true size. Meteor fields: fainter, no halo. A
+       template's dust is not a marker: paintDust draws it as dust. */
     paintTerrain: function paintTerrain(ctx, scale, layout, toCanvas) {
         if (!layout || !layout.units) return;
 
@@ -305,7 +448,7 @@ window.mapPreview = {
         ctx.save();
         layout.units.forEach(function (unit) {
             var type = mapPreview.TERRAIN_TYPES[unit.type];
-            if (!type) return;
+            if (!type || unit.type === 'dust') return;
 
             var alpha = type.field ? mapPreview.FIELD_TERRAIN_ALPHA : mapPreview.TERRAIN_ALPHA;
             var hexes = [{ q: unit.q, r: unit.r }];

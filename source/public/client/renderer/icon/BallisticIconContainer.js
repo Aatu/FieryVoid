@@ -166,6 +166,9 @@ window.BallisticIconContainer = function () {
 
 		generateBallisticLines.call(this);
 		generateTerrainHexes.call(this, gamedata);
+		generateDustZone.call(this, gamedata);
+		generateNebula.call(this, gamedata);
+		generateEMStorm.call(this, gamedata);
 		generateEdfNetHexes.call(this, gamedata);
 		generateSensorChargeCourses.call(this, gamedata);
 		/* ONE BLUE MARKER PER HEX ACROSS BOTH SWEEPS (user report 2026-09-11, replay of game 4348).
@@ -204,7 +207,7 @@ window.BallisticIconContainer = function () {
 			return null;
 		}
 
-		built.object.visible = this.iconsVisible;
+		built.object.visible = isSceneObjectVisible.call(this, built.object);
 		this.scene.add(built.object);
 		this.sceneObjects.set(key, { object: built.object, release: built.release, signature: signature, used: true });
 
@@ -215,6 +218,29 @@ window.BallisticIconContainer = function () {
 		this.scene.remove(entry.object);
 		entry.release(entry.object);
 	}
+
+	/* WHOLE-BOARD TERRAIN FOLLOWS THE MAP BACKGROUND (user, play-test game 4545). A plane over the entire board - 100%
+	   dust, a nebula (buildBoardPlane tags it userData.fullBoard) - is part of the backdrop, so the EW strip's Disable
+	   Background button and the OPTIONS tab's "Never show map background" take it away with the image.
+	   ⛔ ONLY the whole-board planes: a 50% / 25% dust clump stays drawn whatever the background does - players must
+	   always see where it is (user ruling 2026-11-05, when tying ALL dust to the toggle was built and rolled back).
+	   The state is read off #background itself - EwButtons.setBackground sets its image to 'none' - so a plane built
+	   after the switch was thrown starts hidden, and the switch needs no copy of its own anywhere. */
+	function isMapBackgroundOff() {
+		const background = document.getElementById('background');
+		return !!background && background.style.backgroundImage === 'none';
+	}
+
+	function isSceneObjectVisible(object) {
+		return this.iconsVisible && !(object.userData.fullBoard && isMapBackgroundOff());
+	}
+
+	//EwButtons.setBackground, through webglScene.customEvent (which requests the frame).
+	BallisticIconContainer.prototype.onMapBackgroundSet = function () {
+		this.sceneObjects.forEach(entry => {
+			if (entry.object.userData.fullBoard) entry.object.visible = isSceneObjectVisible.call(this, entry.object);
+		});
+	};
 
 	//Whatever nothing claimed this pass has gone from the board.
 	function pruneSceneObjects() {
@@ -379,13 +405,31 @@ window.BallisticIconContainer = function () {
 			const dim = isFieldTerrain(ship) ? FIELD_TERRAIN_DIM : 1;
 
 			//position + facing fix the footprint, so an unmoved moon is never rebuilt
-			syncSceneObject.call(this, TERRAIN_KEY_PREFIX + ship.id, `${position.q},${position.r}|${facing}|${hexes.length}`, () => {
+			const overlay = syncSceneObject.call(this, TERRAIN_KEY_PREFIX + ship.id, `${position.q},${position.r}|${facing}|${hexes.length}`, () => {
 				const overlay = buildHexRegionOverlay.call(this, position, hexes, 'hexWhite', dim);
 
 				return overlay && { object: overlay, release: window.HexRegion.dispose };
 			});
+			//...but always back on its own hex: a replay's drift (placeTerrainOverlay) may have left a kept one partway along
+			if (overlay) {
+				const centre = this.coordinateConverter.fromHexToGame(position);
+				overlay.position.x = centre.x;
+				overlay.position.y = centre.y;
+			}
 		});
 	}
+
+	/* REPLAY, DRIFTING TERRAIN (TerrainDrift): a drifting unit's white hexes are built where its drift ENDS, and
+	   ReplayAnimationStrategy's TerrainDriftAnimation carries them along with the rock instead - gamePosition is the game-space
+	   point for the footprint's centre hex. A move, not a rebuild: the footprint's shape is game-space deltas from that centre
+	   (buildHexRegionOverlay), so it lands on whole hexes at either end. Nothing to move for a unit with no overlay. */
+	BallisticIconContainer.prototype.placeTerrainOverlay = function (shipId, gamePosition) {
+		const entry = this.sceneObjects.get(TERRAIN_KEY_PREFIX + shipId);
+		if (!entry) return false;
+		entry.object.position.x = gamePosition.x;
+		entry.object.position.y = gamePosition.y;
+		return true;
+	};
 
 	/* Deployment: placing or turning a terrain unit is a local 'deploy' move, and nothing on that
 	   path runs consumeGamedata - so its footprint stayed put until the next poll (the reason terrain
@@ -408,6 +452,372 @@ window.BallisticIconContainer = function () {
 			this.sceneObjects.delete(key);
 		});
 	};
+
+	/* THE DUST ZONE (server: DustZoneRule) - gamedata.rules.dustZone, B5W's "Dust".
+
+	   NOT a terrain footprint: the zone's unit is hidden and parked off the map (shipManager.isHiddenUnit),
+	   and the dust is the rule's own hexes, drawn here as ONE mesh under a tiling dust texture - a single
+	   plane over the whole board at 100% coverage, one region over the clump's hexes (plus any map
+	   template's dust) otherwise. However much of the map it covers, it is that one shape.
+
+	   It is painted twice, as the mesh and one child sharing its outline, each with the same texture at its
+	   own scale and angle (DUST_LAYERS). A single tiling texture repeats in a grid the eye picks out at any
+	   distance; two whose repeats never line up do not repeat at all.
+
+	   The hexes are fixed when the game is created, so the signature never changes and syncSceneObject
+	   builds it once per container. Below the hex grid (-500), so the grid still reads crisply over it;
+	   the region's soft rim tells the edge of a clump. Tune the look with the constants. */
+	const DUST_ZONE_KEY = 'dustzone';
+	const DUST_ZONE_Z = -600;
+	const DUST_ZONE_RIM = 0xc8a46e;          //sand, a shade brighter than the dust itself
+	const DUST_ZONE_RIM_OPACITY = 0.25;
+	const DUST_TEXTURE_SIZE = 1024;
+	const DUST_GRID_HEXES = 199;             //webglHexGridRenderer's HEX_COUNT_WIDTH / HEIGHT: the whole board
+	//tile: hexes one texture tile spans. Incommensurate scales and angles, so the two repeats never coincide.
+	const DUST_LAYERS = [
+		{ tile: 12, rotation: 0, opacity: 0.45 },
+		{ tile: 19.3, rotation: 1.1, opacity: 0.3 }
+	];
+
+	let dustCanvas = null;
+	const dustTextures = []; //one per layer, shared by every container, never disposed - like the hex sprites' textures
+
+	/* Drifting haze and grit on a transparent tile that repeats seamlessly: each soft blob is drawn again
+	   one tile over in every direction, so whatever crosses an edge comes back in on the other side. */
+	function getDustCanvas() {
+		if (dustCanvas) return dustCanvas;
+
+		const size = DUST_TEXTURE_SIZE;
+		const canvas = window.AbstractCanvas.create(size, size);
+		const context = canvas.getContext('2d');
+		let seed = 9301;
+		const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647; //the same dust every load
+
+		//An even veil first, then gentle haze over it at every scale, wide banks to small knots: low contrast,
+		//so the tile's repeat gives the eye nothing to lock on to.
+		context.fillStyle = 'rgba(190,155,110,0.09)';
+		context.fillRect(0, 0, size, size);
+		for (let i = 0; i < 220; i++) {
+			const x = random() * size, y = random() * size;
+			const radius = 40 + Math.pow(random(), 1.6) * 300;
+			const alpha = 0.01 + random() * 0.03;
+			const warm = Math.round(random() * 30);
+			for (let dx = -size; dx <= size; dx += size) {
+				for (let dy = -size; dy <= size; dy += size) {
+					const gradient = context.createRadialGradient(x + dx, y + dy, 0, x + dx, y + dy, radius);
+					gradient.addColorStop(0, 'rgba(' + (190 + warm) + ',' + (155 + warm) + ',110,' + alpha + ')');
+					gradient.addColorStop(1, 'rgba(' + (190 + warm) + ',' + (155 + warm) + ',110,0)');
+					context.fillStyle = gradient;
+					context.fillRect(x + dx - radius, y + dy - radius, radius * 2, radius * 2);
+				}
+			}
+		}
+
+		for (let i = 0; i < 7000; i++) {
+			context.fillStyle = 'rgba(230,205,165,' + (0.08 + random() * 0.3) + ')';
+			context.fillRect(Math.floor(random() * size), Math.floor(random() * size), 1 + Math.round(random()), 1 + Math.round(random()));
+		}
+
+		dustCanvas = canvas;
+		return dustCanvas;
+	}
+
+	/* A LOOK is a tiling canvas painted in layers: its layer table ({tile, rotation, opacity} each), the
+	   textures it has built so far (one per layer, shared by every container) and the function that paints
+	   its canvas. The dust has one and the nebula (generateNebula) has another; the three builders below
+	   serve both. */
+	const DUST_LOOK = { layers: DUST_LAYERS, textures: dustTextures, getCanvas: getDustCanvas };
+
+	/* A layer's material. Both meshes carry UVs in GAME UNITS (ShapeGeometry's own; the plane's rewritten to
+	   match), so a texture's repeat - one tile per look.layers[n].tile hexes - serves either. A layer's
+	   texture shares the look's one canvas; it is its own texture only for its repeat and angle. */
+	function buildLayerMaterial(look, layer) {
+		const spec = look.layers[layer];
+		let texture = look.textures[layer];
+		if (!texture) {
+			texture = new THREE.CanvasTexture(look.getCanvas());
+			texture.colorSpace = THREE.SRGBColorSpace;
+			texture.wrapS = THREE.RepeatWrapping;
+			texture.wrapT = THREE.RepeatWrapping;
+			texture.rotation = spec.rotation;
+			texture.needsUpdate = true;
+			look.textures[layer] = texture;
+		}
+		const tile = spec.tile * this.coordinateConverter.getHexDistance();
+		texture.repeat.set(1 / tile, 1 / tile);
+
+		return new THREE.MeshBasicMaterial({
+			map: texture,
+			transparent: true,
+			opacity: spec.opacity,
+			depthWrite: false,
+			side: THREE.DoubleSide
+		});
+	}
+
+	//A shape painted with every layer of a look: the first on the mesh itself, the rest as children just above it.
+	function buildLayeredMesh(look, geometry) {
+		const mesh = new THREE.Mesh(geometry, buildLayerMaterial.call(this, look, 0));
+		for (let layer = 1; layer < look.layers.length; layer++) {
+			const overlay = new THREE.Mesh(geometry.clone(), buildLayerMaterial.call(this, look, layer)); //its own copy: HexRegion.dispose frees each child's
+			overlay.position.z = 0.005 * layer;
+			mesh.add(overlay);
+		}
+		return mesh;
+	}
+
+	//A look over the whole board: one plane the size of the board's hex grid, centred where the grid is, at depth z.
+	function buildBoardPlane(look, z) {
+		const width = window.HexagonMath.getGridWidth(DUST_GRID_HEXES);
+		const height = window.HexagonMath.getGridHeight(DUST_GRID_HEXES);
+		const geometry = new THREE.PlaneGeometry(width, height, 1, 1);
+		const positions = geometry.attributes.position;
+		const uvs = geometry.attributes.uv;
+		for (let i = 0; i < uvs.count; i++) uvs.setXY(i, positions.getX(i), positions.getY(i));
+		uvs.needsUpdate = true;
+
+		const mesh = buildLayeredMesh.call(this, look, geometry);
+		mesh.position.set(window.HexagonMath.getHexB() / 2, 0, z); //webglHexGridRenderer's own offset
+		mesh.userData.fullBoard = true; //goes with the map background (isSceneObjectVisible)
+		return mesh;
+	}
+
+	//Dust in part of the map: the hexes as one region (HexRegion), filled with dust and edged with a faint rim.
+	function buildClumpDust(spans) {
+		const hexes = [];
+		spans.forEach(span => {
+			for (let q = span[1]; q <= span[2]; q++) hexes.push({ q: q, r: span[0] });
+		});
+		if (!hexes.length) return null;
+
+		const centre = hexes[Math.floor(hexes.length / 2)];
+		const loops = window.HexRegion.buildRegionFromHexes(centre, hexes, this.coordinateConverter.getHexDistance());
+		if (!loops.length) return null;
+
+		//HexRegion's fill is only borrowed for its geometry - holes and all - and painted with the dust instead.
+		const fill = window.HexRegion.buildFill(loops, 0xffffff, 1);
+		fill.material.dispose();
+		const mesh = buildLayeredMesh.call(this, DUST_LOOK, fill.geometry);
+		mesh.add(window.HexRegion.buildOutline(loops, DUST_ZONE_RIM, DUST_ZONE_RIM_OPACITY, getHexSpriteStrokeWidth()));
+
+		const position = this.coordinateConverter.fromHexToGame(new hexagon.Offset(centre.q, centre.r));
+		mesh.position.set(position.x, position.y, DUST_ZONE_Z);
+		return mesh;
+	}
+
+	function generateDustZone(gamedata) {
+		const zone = gamedata.rules && gamedata.rules.dustZone;
+		if (!zone) return;
+
+		const full = parseInt(zone.coverage, 10) === 100;
+		const spans = Array.isArray(zone.spans) ? zone.spans : [];
+		if (!full && !spans.length) return;
+
+		syncSceneObject.call(this, DUST_ZONE_KEY, full ? 'full' : 'spans:' + spans.length, () => {
+			const mesh = full ? buildBoardPlane.call(this, DUST_LOOK, DUST_ZONE_Z) : buildClumpDust.call(this, spans);
+			return mesh && { object: mesh, release: window.HexRegion.dispose }; //geometry and material only: the texture is shared
+		});
+	}
+
+	/* THE NEBULA (server: NebulaRule, NEBULA_PLAN.md) - gamedata.rules.nebula. It fills the whole map, so it
+	   is one plane over the whole board like 100% dust, painted with its own look: banks of violet, magenta,
+	   teal and blue gas, darker lanes between them, bright filaments and a scatter of embedded stars. Two
+	   layers at incommensurate scales and angles, as the dust (DUST_LAYERS' note), so the repeat never shows.
+
+	   Below the dust, which lies IN it, and below the hex grid (-500). Static, so the render loop's idle
+	   gating is untouched. A whole-board plane, so it goes with the map background (isSceneObjectVisible), as
+	   100% dust does. Built once per container: the rule cannot change.
+	   Tune the look with the constants; mapPreview.NEBULA_BANKS is its flat stand-in in Create Game and the
+	   lobby, in the same colours. */
+	const NEBULA_KEY = 'nebula';
+	const NEBULA_Z = -650;
+	const NEBULA_TEXTURE_SIZE = 1024;
+	const NEBULA_LAYERS = [
+		{ tile: 26, rotation: 0.35, opacity: 0.6 },
+		{ tile: 41.3, rotation: 2.2, opacity: 0.45 }
+	];
+	const NEBULA_HUES = [[150, 90, 220], [205, 95, 200], [70, 175, 200], [95, 105, 235]]; //violet, magenta, teal, blue
+
+	let nebulaCanvas = null;
+	const nebulaTextures = [];
+	const NEBULA_LOOK = { layers: NEBULA_LAYERS, textures: nebulaTextures, getCanvas: getNebulaCanvas };
+
+	/* The gas, on a transparent tile that repeats seamlessly: every shape is drawn again one tile over in
+	   every direction, so whatever crosses an edge comes back in on the other side. A shape is a radial glow
+	   squashed to `stretch` of its width along its own angle - round for a bank, thin for a filament. */
+	function getNebulaCanvas() {
+		if (nebulaCanvas) return nebulaCanvas;
+
+		const size = NEBULA_TEXTURE_SIZE;
+		const canvas = window.AbstractCanvas.create(size, size);
+		const context = canvas.getContext('2d');
+		let seed = 52711;
+		const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647; //the same nebula every load
+
+		const glow = (x, y, radius, stretch, angle, rgb, alpha) => {
+			for (let dx = -size; dx <= size; dx += size) {
+				for (let dy = -size; dy <= size; dy += size) {
+					context.save();
+					context.translate(x + dx, y + dy);
+					context.rotate(angle);
+					context.scale(1, stretch);
+					const gradient = context.createRadialGradient(0, 0, 0, 0, 0, radius);
+					gradient.addColorStop(0, 'rgba(' + rgb.join(',') + ',' + alpha + ')');
+					gradient.addColorStop(1, 'rgba(' + rgb.join(',') + ',0)');
+					context.fillStyle = gradient;
+					context.fillRect(-radius, -radius, radius * 2, radius * 2);
+					context.restore();
+				}
+			}
+		};
+		const hue = () => NEBULA_HUES[Math.floor(random() * NEBULA_HUES.length)];
+
+		//A faint violet veil, so no part of the map is clear of it, then the banks at every scale.
+		context.fillStyle = 'rgba(110,80,180,0.07)';
+		context.fillRect(0, 0, size, size);
+		for (let i = 0; i < 90; i++) {
+			glow(random() * size, random() * size, 80 + Math.pow(random(), 1.4) * 360, 0.5 + random() * 0.5,
+				random() * Math.PI, hue(), 0.04 + random() * 0.09);
+		}
+		//Darker lanes between them, for structure.
+		for (let i = 0; i < 25; i++) {
+			glow(random() * size, random() * size, 60 + random() * 160, 0.3 + random() * 0.5,
+				random() * Math.PI, [12, 8, 28], 0.08 + random() * 0.08);
+		}
+		//Bright filaments.
+		for (let i = 0; i < 60; i++) {
+			const rgb = hue().map(c => Math.min(255, c + 40));
+			glow(random() * size, random() * size, 60 + random() * 160, 0.12 + random() * 0.18,
+				random() * Math.PI, rgb, 0.06 + random() * 0.08);
+		}
+		//Embedded stars.
+		for (let i = 0; i < 160; i++) {
+			context.fillStyle = 'rgba(255,240,255,' + (0.25 + random() * 0.5) + ')';
+			context.fillRect(Math.floor(random() * size), Math.floor(random() * size), 1 + Math.round(random()), 1 + Math.round(random()));
+		}
+
+		nebulaCanvas = canvas;
+		return nebulaCanvas;
+	}
+
+	function generateNebula(gamedata) {
+		if (!(gamedata.rules && gamedata.rules.nebula)) return;
+
+		syncSceneObject.call(this, NEBULA_KEY, 'full', () => {
+			return { object: buildBoardPlane.call(this, NEBULA_LOOK, NEBULA_Z), release: window.HexRegion.dispose }; //the texture is shared
+		});
+	}
+
+	/* THE ELECTROMAGNETIC STORM (server: EMStormRule, EM_STORM_PLAN.md R4) - gamedata.rules.emStorm. The whole map, so
+	   one board plane like the nebula's, painted with its own look: a cold blue haze, faint ionised banks and forked
+	   arcs of lightning frozen mid-crackle, with a few bright nodes where they branch. Two layers at incommensurate
+	   scales and angles, so the repeat never shows (DUST_LAYERS' note).
+
+	   ABOVE the nebula (-650) and the dust (-600) - it is weather in them - and below the hex grid (-500). STATIC: the
+	   render loop's idle gating is untouched (user ruling R4). A whole-board plane, so it goes with the map background.
+	   mapPreview.EM_STORM_ARCS is its flat stand-in in Create Game and the lobby, in the same blue. */
+	const EM_STORM_KEY = 'emstorm';
+	const EM_STORM_Z = -575;
+	const EM_STORM_TEXTURE_SIZE = 1024;
+	const EM_STORM_LAYERS = [
+		{ tile: 23, rotation: 0.6, opacity: 0.45 },
+		{ tile: 37.7, rotation: 2.6, opacity: 0.3 }
+	];
+
+	let emStormCanvas = null;
+	const emStormTextures = [];
+	const EM_STORM_LOOK = { layers: EM_STORM_LAYERS, textures: emStormTextures, getCanvas: getEMStormCanvas };
+
+	/* On a transparent tile that repeats seamlessly (every shape drawn again one tile over in each direction). A bolt is
+	   a random walk that keeps its heading within a cone and forks now and then, stroked three times - a wide faint
+	   glow, a mid halo, a thin near-white core. */
+	function getEMStormCanvas() {
+		if (emStormCanvas) return emStormCanvas;
+
+		const size = EM_STORM_TEXTURE_SIZE;
+		const canvas = window.AbstractCanvas.create(size, size);
+		const context = canvas.getContext('2d');
+		let seed = 77213;
+		const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647; //the same storm every load
+
+		const wrapped = (draw) => {
+			for (let dx = -size; dx <= size; dx += size) {
+				for (let dy = -size; dy <= size; dy += size) {
+					context.save();
+					context.translate(dx, dy);
+					draw();
+					context.restore();
+				}
+			}
+		};
+
+		//A faint blue veil, then ionised banks of haze.
+		context.fillStyle = 'rgba(80,150,230,0.05)';
+		context.fillRect(0, 0, size, size);
+		for (let i = 0; i < 40; i++) {
+			const x = random() * size, y = random() * size, radius = 90 + random() * 280, alpha = 0.03 + random() * 0.05;
+			wrapped(() => {
+				const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
+				gradient.addColorStop(0, 'rgba(110,190,255,' + alpha + ')');
+				gradient.addColorStop(1, 'rgba(110,190,255,0)');
+				context.fillStyle = gradient;
+				context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+			});
+		}
+
+		//The bolts: each a list of segments, gathered first so its three strokes trace the same path.
+		const bolt = (x, y, heading, length, depth, segments) => {
+			const points = [[x, y]];
+			for (let s = 0; s < length; s++) {
+				heading += (random() - 0.5) * 1.1;
+				x += Math.cos(heading) * (14 + random() * 18);
+				y += Math.sin(heading) * (14 + random() * 18);
+				points.push([x, y]);
+				if (depth < 2 && random() < 0.12) bolt(x, y, heading + (random() < 0.5 ? -1 : 1) * (0.5 + random() * 0.6), Math.floor(length * 0.5), depth + 1, segments);
+			}
+			segments.push({ points: points, depth: depth });
+		};
+		const bolts = [];
+		for (let i = 0; i < 9; i++) bolt(random() * size, random() * size, random() * Math.PI * 2, 10 + Math.floor(random() * 12), 0, bolts);
+
+		const strokes = [[9, 'rgba(90,170,255,0.06)'], [3.5, 'rgba(140,210,255,0.18)'], [1.2, 'rgba(225,245,255,0.55)']];
+		strokes.forEach(([width, colour]) => {
+			bolts.forEach(segment => {
+				wrapped(() => {
+					context.beginPath();
+					segment.points.forEach((p, i) => i === 0 ? context.moveTo(p[0], p[1]) : context.lineTo(p[0], p[1]));
+					context.lineWidth = width / (1 + segment.depth * 0.6);
+					context.lineJoin = 'round';
+					context.lineCap = 'round';
+					context.strokeStyle = colour;
+					context.stroke();
+				});
+			});
+		});
+
+		//Bright nodes where charge gathers.
+		for (let i = 0; i < 30; i++) {
+			const x = random() * size, y = random() * size, radius = 6 + random() * 14;
+			wrapped(() => {
+				const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
+				gradient.addColorStop(0, 'rgba(230,248,255,0.5)');
+				gradient.addColorStop(1, 'rgba(140,210,255,0)');
+				context.fillStyle = gradient;
+				context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+			});
+		}
+
+		emStormCanvas = canvas;
+		return emStormCanvas;
+	}
+
+	function generateEMStorm(gamedata) {
+		if (!(gamedata.rules && gamedata.rules.emStorm)) return;
+
+		syncSceneObject.call(this, EM_STORM_KEY, 'full', () => {
+			return { object: buildBoardPlane.call(this, EM_STORM_LOOK, EM_STORM_Z), release: window.HexRegion.dispose }; //the texture is shared
+		});
+	}
 
 	/* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.7, Stage 7) - the Energy Draining NET field.
 
@@ -1242,6 +1652,22 @@ window.BallisticIconContainer = function () {
 	}
 
 
+	/* The hex a Pre-Firing or Firing order was fired FROM, forced moves included - the rule
+	   FireAnimationHelper.getShipPositionForFiring gives the replay's shots (GRAVITY_WELL_PLAN.md section 7). Read from
+	   the ship's own rows: a replay leaves the turn's 'prefire' / 'gravity' rows out of the icon's movement list (they are
+	   animated separately) while the live view keeps them in, so getLastMovement() gave a dragged ship's PRE-DRAG hex in
+	   a replay, and a Transverse Drive's own DESTINATION live.
+	   - Pre-Firing: the turn's last row that is not a Pre-Firing shift - the end of its own movement, or of a Gravity
+	     Well's pull, which always comes before any Pre-Firing;
+	   - Firing: the turn's last row, after every forced move. */
+	function getOrderFiringHex(shooterIcon, ballistic, turn) {
+		const rows = ((shooterIcon.ship && shooterIcon.ship.movement) || []).filter(function (move) {
+			return move.turn == turn && move.type !== 'start' && (ballistic.type !== 'prefiring' || move.type !== 'prefire');
+		});
+		const last = rows[rows.length - 1];
+		return last ? new hexagon.Offset(last.position) : shooterIcon.getLastMovement().position;
+	}
+
 	//To create coloured hexes signifying ballistic launches and other effects.
 	function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
 
@@ -1272,7 +1698,7 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 			   fire-control penalty, which must keep applying. */
 			launchPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(Number(ballistic.x), Number(ballistic.y)));
 		} else if (ballistic.type === 'normal' || ballistic.type === 'prefiring') {
-			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
+			launchPosition = this.coordinateConverter.fromHexToGame(getOrderFiringHex(shooterIcon, ballistic, turn));
 		} else {
 			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
 		}
@@ -1667,7 +2093,7 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 			icon.targetSprite?.show();
 		});
 		this.iconsVisible = true;
-		this.sceneObjects.forEach(entry => entry.object.visible = true);
+		this.sceneObjects.forEach(entry => entry.object.visible = isSceneObjectVisible.call(this, entry.object)); //a whole-board plane stays off with the background
 		return this;
 	};
 
@@ -1793,7 +2219,7 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 
 		// Handle specific modeName cases
 		if (ballistic.type === 'normal' || ballistic.type === 'prefiring') {
-			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn)?.position);
+			launchPosition = this.coordinateConverter.fromHexToGame(getOrderFiringHex(shooterIcon, ballistic, turn));
 
 			const modeColorMap = {
 				'Shredder': 'blue',

@@ -214,6 +214,8 @@ window.scenarioCard = {
             if (count(r.dustAndMeteors.dust) > 0) terrain.push("Dust (" + count(r.dustAndMeteors.dust) + ")");
             if (count(r.dustAndMeteors.meteors) > 0) terrain.push("Meteor Swarms (" + count(r.dustAndMeteors.meteors) + ")");
         }
+        //One Gravity Well (GravityWellRule, GRAVITY_WELL_PLAN.md) - placed at random near the centre, so it joins this chip.
+        if (count(r.gravityWell) > 0) terrain.push("Gravity Well (Strength " + count(r.gravityWell) + ")");
         //No-break spaces inside each type, and before each dot, so a long chip wraps only between
         //types, the dot ending the line.
         if (terrain.length) {
@@ -221,6 +223,20 @@ window.scenarioCard = {
                 return type.replace(/ /g, " ");
             }).join(" · "));
         }
+        //Drifting asteroids / meteor swarms (TerrainDriftRule) - every one in the game, not only the random ones, so a chip of its own.
+        var drift = r.terrainDrift || {};
+        var drifting = [];
+        if (count(drift.asteroids) > 0) drifting.push("Asteroids");
+        if (count(drift.meteors) > 0) drifting.push("Meteor Swarms");
+        if (drifting.length) add("terrain", "Drifting: " + drifting.join(" & "));
+        //The Dust Zone (DustZoneRule) - not random at 100%, so a chip of its own. Coverage 0 is a map
+        //template's dust alone, which the Terrain Map chip already covers.
+        var dustCoverage = r.dustZone ? count(r.dustZone.coverage) : 0;
+        if (dustCoverage > 0) add("terrain", "Dust: " + (dustCoverage === 100 ? "Entire Map" : dustCoverage + "% of Map"));
+        //The Nebula (NebulaRule) - always the whole map, so the name says it all.
+        if (r.nebula) add("terrain", "Nebula");
+        //The Electromagnetic Storm (EMStormRule, EM_STORM_PLAN.md) - the whole map as well.
+        if (r.emStorm) add("terrain", "EM Storm");
         var layout = r.terrainLayout;
         if (layout && layout.units && layout.units.length) {
             var name = String(layout.name == null ? "" : layout.name).trim() || "Pre-placed";

@@ -464,6 +464,8 @@ class BaseShip {
 			   Summed, not counted: one crit is a whole roll (see the crit classes). */
 			$edfIni = (int)$CnC->sumCriticalParam("EdfIniDrain", $gamedata->turn);
 			if ($edfIni > 0) $mod -= min($edfIni, EdfExposure::INI_CAP) * EdfExposure::INI_SCALE;
+			//EM_STORM_PLAN.md #3 - an EM storm's 2d6 (tabletop) off initiative, x5 in FV's d100. A separate effect, no cap.
+			if (TacGamedata::$emStormPresent) $mod -= (int)$CnC->sumCriticalParam("EMStormInitiative", $gamedata->turn) * EMStorm::INI_SCALE;
 			}
 		    if ($this instanceof FighterFlight){
 			    $firstFighter = $this->getSampleFighter();
@@ -481,6 +483,8 @@ class BaseShip {
 					   x5 conversion and same -20-tabletop cap as the ship branch. */
 					$edfIniFtr = (int)$firstFighter->sumCriticalParam("EdfIniDrain", $gamedata->turn);
 					if ($edfIniFtr > 0) $mod -= min($edfIniFtr, EdfExposure::INI_CAP) * EdfExposure::INI_SCALE;
+					//EM storm (EM_STORM_PLAN.md #3) - the flight's crit rides its sample fighter, as the ship's rides its CnC
+					if (TacGamedata::$emStormPresent) $mod -= (int)$firstFighter->sumCriticalParam("EMStormInitiative", $gamedata->turn) * EMStorm::INI_SCALE;
 			    }
 		    }
             if (!empty($this->attached)) $mod += -10;//Attached Pods get -10 to Iniative as if just launched.
@@ -1832,6 +1836,9 @@ class BaseShip {
 		   absorb the bonus damage but not confer the bonus to-hit penalty: a half-working shield,
 		   which is far worse than a broken one because nobody notices. */
 		Enhancements::setSystemEnhancements($this);
+		/* NEBULA_PLAN.md - thrusters -1 (not an Ancient's) and gravitic shields -1, here for the same reason:
+		   before the loop below, where Shield::onConstructed snapshots its output. Behind the static. */
+		if (TacGamedata::$nebulaPresent) Nebula::applyToShip($this);
 
         foreach ($this->systems as $system){
             $system->onConstructed($this, $turn, $phase);
@@ -3329,6 +3336,7 @@ class BaseShip {
        wrong by the drag angle, a whole hex facing. hexCoToPixel is affine over cube coordinates, so
        shifting the pixel pair is exactly shifting hexes and row parity looks after itself.
        Undragged units take the original path below, unchanged.
+       A Gravity Well's pull ('gravity' rows, GRAVITY_WELL_PLAN.md) is a drag in exactly this sense.
        Client twin: movement.js getPreviousLocation - keep the two in step. */
     public function getPreviousCoPos(){
         $pos = $this->getCoPos();
@@ -3336,7 +3344,7 @@ class BaseShip {
         //Where the unit's own movement left it, ignoring any forced Pre-Firing shift.
         $movedPos = null;
         for ($i = sizeof($this->movement)-1; $i>=0; $i--){
-            if ($this->movement[$i]->type == "prefire") continue;
+            if ($this->movement[$i]->type == "prefire" || $this->movement[$i]->type == "gravity") continue;
             $movedPos = $this->movement[$i]->getCoPos();
             break;
         }
@@ -3346,7 +3354,7 @@ class BaseShip {
 
         for ($i = sizeof($this->movement)-1; $i>=0; $i--){
             $move = $this->movement[$i];
-            if ($dragged && $move->type == "prefire") continue;
+            if ($dragged && ($move->type == "prefire" || $move->type == "gravity")) continue;
             //'start' is the off-board pre-deployment marker (x=+-30), not a position the unit was
             //ever really at - the same row getLastTurnMovement skips, and real only for generated
             //Terrain. It matters only on the dragged path: there the walk-back is anchored to the
