@@ -29,8 +29,8 @@ import { parseRulesText, briefCount, rulesBlocks, boldSegments } from "../helper
    2026-11-09: a 6-box Twin Array draws wide boxes, a Structure block thin ones). The pane is 284px wide: on a 1x screen
    past ~120 boxes the boxes, under 1.4px, snap unevenly and run together, so the plain bar takes over there (a base's
    biggest blocks; 6,614 of 6,818 Structure blocks are 120 or fewer). */
-const TRACK_MAX = 120;
-const TRACK_WIDE_GAPS = 60;  //up to this many boxes the gaps are 2px; past it 1px, so the boxes keep some width
+const TRACK_MAX = 40;
+const TRACK_WIDE_GAPS = 30;  //up to this many boxes the gaps are 2px; past it 1px, so the boxes keep some width
 const TOUCH_WINDOW = 1500;   //ms after SystemIcon's touchstart stamp within which a new card counts as opened by touch
 const WIDE_LEFT = 284;       //the numbers pane when the card opens wide
 const WIDE_COLUMN = 296;     //one rules column when the card opens wide
