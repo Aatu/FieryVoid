@@ -2,14 +2,31 @@
 
 window.FireAnimationHelper = {
 
-    getShipPositionForFiring: function getShipPositionForFiring(icon, time, movementAnimations, weapon, turn) {
+    /* Where a hex-targeted shot starts - the hex the ship is ACTUALLY in when it fires, forced moves included
+       (the movement animation alone stops where the ship's own movement ended):
+       - ballistic: its launch hex - launched in Initial Orders, before any of the turn's movement;
+       - Pre-Firing: where Movement left it, then a Gravity Well's pull - every pull plays before any Pre-Firing
+         (ReplayAnimationStrategy Pass 0, GRAVITY_WELL_PLAN.md);
+       - Firing: after every forced move of the turn (Pre-Firing shifts and pulls alike), the rule
+         AllWeaponFireAgainstShipAnimation, ShipDestroyedAnimation and ShipJumpAnimation use. */
+    getShipPositionForFiring: function getShipPositionForFiring(icon, time, movementAnimations, weapon, turn, fireOrder) {
         if (weapon.ballistic) {
             return window.coordinateConverter.fromHexToGame(icon.getFirstMovementOnTurn(turn).position);
         }
 
-        if (weapon.preFires) {
+        var forcedMoves = icon.preFireMovements || [];
+
+        if (weapon.preFires || (fireOrder && fireOrder.type === 'prefiring')) {
+            var pulls = forcedMoves.filter(function (move) { return move.type === 'gravity'; });
+            if (pulls.length > 0) {
+                return window.coordinateConverter.fromHexToGame(pulls[pulls.length - 1].position);
+            }
             return window.coordinateConverter.fromHexToGame(icon.getEndMovementOnTurn(turn).position);
-        }        
+        }
+
+        if (forcedMoves.length > 0) {
+            return window.coordinateConverter.fromHexToGame(forcedMoves[forcedMoves.length - 1].position);
+        }
 
         return FireAnimationHelper.getShipPositionAtTime(icon, time, movementAnimations);
     },

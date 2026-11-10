@@ -43,7 +43,7 @@
      the two competing window bodies item 6 exists to reconcile: the 2011 legacy
      teal and the item-5 desaturated SCS blue-grey. */
   --fv-well: #04161c;                 /* theme.colors.panelBg                    */
-  --fv-card: #0a1c26;
+  --fv-card: #0a1c26;                 /* theme.colors.card                       */
   --fv-card-hover: #102a36;
   --fv-panel: rgba(23, 39, 54, 0.92); /* base.css .panel — the site-wide page panel */
   --fv-chrome-scs: #152029de;         /* theme.colors.windowBg                   */
@@ -84,7 +84,7 @@
   --fv-line-soft: #1a3f55;
   --fv-line-scs: #496791;             /* theme.colors.line — THE border now      */
   --fv-line-accent: #8bcaf2;  
-  --fv-rule: #1e3a4a;                 /* the divider under a modal's control bar */
+  --fv-rule: #1e3a4a;                 /* the divider under a modal's control bar; theme.colors.rule */
 
 
   /* ── Text ──────────────────────────────────────────────────────────────────
@@ -95,7 +95,7 @@
   --fv-text-bright: #ffffff;          /* theme.colors.text — text on the black overlay */
   --fv-text-accent: #C6E2FF;          /* theme.colors.textAccent — bluish-white values */
   --fv-text-dim: #8ca5c0;
-  --fv-accent: #8bcaf2;
+  --fv-accent: #8bcaf2;               /* theme.colors.accent                     */
   --fv-warning: #ffd84d;  
 
   /* ── Type ──────────────────────────────────────────────────────────────────

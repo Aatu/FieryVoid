@@ -236,6 +236,42 @@ window.SelectFromShips = function () {
 
     };
 
+    /* Re-render the rows from a fresh model (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 1). What changes
+       today is the SELECTED row; PhaseStrategy.setSelectedShip and deselectShip call this through
+       refreshSelectFromShips.
+
+       Everything the player has set on this instance survives: folded groups and expanded runs
+       live on `this` and renderList reads them; the list's scroll position and the card's top are
+       carried across by hand (reflow holds the top, as a fold does); and keyboard focus goes back
+       to the same unit's row when it was in the list - Enter on a focused row is how the keyboard
+       selects, and that selection is exactly what calls this. */
+    HexPicker.prototype.refresh = function () {
+        if (this.destroyed || !this.listElement) return;
+
+        var focusedId = null;
+        var active = document.activeElement;
+        if (active && jQuery.contains(this.listElement[0], active)) {
+            focusedId = jQuery(active).closest('.fv-hexpicker__row').attr('data-ship-id') || null;
+        }
+        var scrollTop = this.listElement[0].scrollTop;
+        var before = this.captureBox();
+
+        this.model = buildModel.call(this);
+        renderList.call(this);
+
+        this.listElement[0].scrollTop = scrollTop;
+        if (focusedId !== null) {
+            var row = this.listElement.find('.fv-hexpicker__row').filter(function () {
+                return this.getAttribute('data-ship-id') === focusedId;
+            })[0];
+            if (row) {
+                try { row.focus({ preventScroll: true }); } catch (e) { row.focus(); }
+            }
+        }
+
+        this.reflow(before);
+    };
+
     // =========================================================================
     //  Positioning
     // =========================================================================
@@ -418,7 +454,12 @@ window.SelectFromShips = function () {
         return parseInt(a.id, 10) - parseInt(b.id, 10);
     }
 
-    function describe(ship) {
+    //Ids can arrive as strings (spawned units), so compare them as strings when the objects differ.
+    function isSameUnit(a, b) {
+        return !!(a && b && (a === b || String(a.id) === String(b.id)));
+    }
+
+    function describe(ship, selectedShip) {
         var category = categoryOf(ship);
         var label = ship.name;
         var masked = false;
@@ -458,7 +499,10 @@ window.SelectFromShips = function () {
             art: masked ? null : ship.imagePath,
             allyClass: getAllyClass(ship),
             teamVars: getTeamColorVars(ship),
-            ini: iniOrderOf(ship)
+            ini: iniOrderOf(ship),
+            //The phase strategy's selected unit (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 1). The picker
+            //now stays open after a row selects one of your units, so the list says which one.
+            selected: isSameUnit(ship, selectedShip)
         };
 
         // The comparison key is the RENDERED CONTENT, not the ship type or phpclass: two
@@ -470,7 +514,8 @@ window.SelectFromShips = function () {
             descriptor.teamVars,
             descriptor.ini === null ? '-' : descriptor.ini,
             descriptor.count === null ? '-' : descriptor.count,
-            masked ? 'MASKED' : (descriptor.art || '')
+            masked ? 'MASKED' : (descriptor.art || ''),
+            descriptor.selected ? 'SELECTED' : ''
         ].join('');
 
         return descriptor;
@@ -499,7 +544,10 @@ window.SelectFromShips = function () {
     }
 
     function buildModel() {
-        var descriptors = this.ships.map(describe);
+        var selectedShip = this.phaseStrategy ? this.phaseStrategy.selectedShip : null;
+        var descriptors = this.ships.map(function (ship) {
+            return describe(ship, selectedShip);
+        });
 
         var buckets = {};
         CATEGORY_ORDER.forEach(function (category) { buckets[category] = []; });
@@ -886,6 +934,10 @@ window.SelectFromShips = function () {
             row.attr('style', descriptor.teamVars);
         }
 
+        if (descriptor.selected) {
+            row.addClass('fv-hexpicker__row--selected');
+        }
+
         row.append(jQuery('<span class="fv-hexpicker__bar"></span>'));
 
         //The art sits in a wrapper so the fighter-count badge has something to be
@@ -934,6 +986,10 @@ window.SelectFromShips = function () {
             .text(count ? count + ' x ' + label : label));
 
         var meta = jQuery('<span class="fv-hexpicker__meta"></span>');
+        //First in the line, so it sits in the same place on every row whatever the class text is.
+        if (descriptor.selected) {
+            meta.append(jQuery('<span class="fv-hexpicker__chip fv-hexpicker__chip--selected"></span>').text('Selected'));
+        }
         if (descriptor.shipClass) {
             meta.append(jQuery('<span class="fv-hexpicker__class"></span>').text(descriptor.shipClass));
         }
@@ -965,6 +1021,8 @@ window.SelectFromShips = function () {
         var ship = descriptor.ship;
 
         var row = buildRowShell(descriptor);
+        //refresh() rebuilds the rows; this is how it puts keyboard focus back on the same unit.
+        row.attr('data-ship-id', ship.id);
         //No count in the name: a flight's fighter count is the badge over its art now.
         row.append(buildText(descriptor, descriptor.label, null));
         row.append(buildIni(descriptor, this.sheet));
@@ -1082,9 +1140,15 @@ window.SelectFromShips = function () {
             this.destroy();
         } else {
             this.phaseStrategy.onShipClicked(ship, this.payload);
-            //Only close when the click actually CHANGED the selection. A targeting click
-            //leaves the picker open so the player can keep working the stack.
-            if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+            //A targeting click has always left the picker open so the player can keep working
+            //the stack; it closed only when the click CHANGED the selection. In Initial Orders,
+            //Pre-Firing and Firing it now stays open for that too (SHIP_TOOLTIP_REDESIGN_PLAN.md
+            //Stage 1), so the player can select each of their stacked units in turn without
+            //reopening it. The SELECTED row is redrawn from PhaseStrategy.setSelectedShip, via
+            //refresh() below. Every other phase closes on a selection exactly as before.
+            var keepOpen = typeof this.phaseStrategy.keepsSelectFromShipsOpen === 'function'
+                && this.phaseStrategy.keepsSelectFromShipsOpen();
+            if (!keepOpen && this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
                 this.destroy();
             }
         }
@@ -1117,9 +1181,18 @@ window.SelectFromShips = function () {
     //
     // The overlap case remains real at low zoom, where a wide tooltip can still reach
     // under a card only 20px clear of the hex. Then the smallest correction that works:
-    // slide the tooltip horizontally to the card's far side, keeping its vertical
-    // relationship to the hex. reposition() re-derives this on every step, so it is
-    // stable through a gesture rather than being undone by it.
+    // slide the tooltip horizontally clear of the card, keeping its vertical relationship
+    // to its unit. reposition() re-derives this on every step, so it is stable through a
+    // gesture rather than being undone by it.
+    //
+    // ⭐ It also runs the moment ANY tooltip is created while a picker is open
+    // (PhaseStrategy.showShipTooltip; SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 1 follow-up, user
+    // report 2026-11-09). Since the picker stays open while the player clicks units on the
+    // map, a tooltip for a unit NEXT TO the stack could open over the card, and it only
+    // moved on the next mouse move over a row - a visible jump to the other side. Cleared
+    // at creation, the place it first appears is the place it keeps.
+    //
+    // Which side: see clearSide below - no longer always the hex's side.
     //
     // Sheet mode has no side to sit beside — it owns the whole bottom edge — so a
     // collision there lifts the tooltip above the sheet instead.
@@ -1152,21 +1225,7 @@ window.SelectFromShips = function () {
         if (this.sheet) {
             top = card.top - TOOLTIP_GAP - height;
         } else {
-            left = (this.placement === 'left')
-                ? card.right + TOOLTIP_GAP
-                : card.left - TOOLTIP_GAP - width;
-
-            //Pushed off the screen instead of clear of the card — try the other way
-            //before falling back on the clamp, which would leave it overlapping.
-            if (left < EDGE_MARGIN || left + width > window.innerWidth - EDGE_MARGIN) {
-                var alternative = (this.placement === 'left')
-                    ? card.left - TOOLTIP_GAP - width
-                    : card.right + TOOLTIP_GAP;
-                if (alternative >= EDGE_MARGIN
-                    && alternative + width <= window.innerWidth - EDGE_MARGIN) {
-                    left = alternative;
-                }
-            }
+            left = clearSide.call(this, tooltip, tip, card, width);
         }
 
         tooltip.element.css({
@@ -1174,6 +1233,42 @@ window.SelectFromShips = function () {
             top: clamp(top, EDGE_MARGIN, window.innerHeight - height - EDGE_MARGIN) + 'px'
         });
     };
+
+    // The x a tooltip in the card's way moves to: just left or just right of the card.
+    //
+    // The side that moves it LEAST from where ShipTooltip put it, i.e. the side its own
+    // unit is on. For a row of this card that is the hex's side - the only answer the old
+    // rule ever gave, because the tooltip of a stacked unit is anchored on the stack's hex.
+    // But with the picker staying open, the tooltip can belong to a unit clicked elsewhere
+    // on the map, and pushing it to the hex's side then threw it right across the card,
+    // away from the unit it describes.
+    //
+    // The choice is STICKY for the tooltip it was made for (the picker's own rule - see
+    // positionSelf): zoom and scroll re-derive the position on every step, and a fresh
+    // least-move decision each time would flip a tooltip that sits near the middle back
+    // and forth mid-gesture. It is only revisited when that side no longer fits on screen.
+    // A side that fits beats one that does not; with neither, the least move and the clamp.
+    function clearSide(tooltip, tip, card, width) {
+        var spots = {
+            left: card.left - TOOLTIP_GAP - width,
+            right: card.right + TOOLTIP_GAP
+        };
+        var fits = function (x) {
+            return x >= EDGE_MARGIN && x + width <= window.innerWidth - EDGE_MARGIN;
+        };
+
+        if (this.clearedTooltip === tooltip && this.clearedSide && fits(spots[this.clearedSide])) {
+            return spots[this.clearedSide];
+        }
+
+        var nearest = Math.abs(spots.left - tip.left) <= Math.abs(spots.right - tip.left) ? 'left' : 'right';
+        var other = nearest === 'left' ? 'right' : 'left';
+        var side = fits(spots[nearest]) ? nearest : (fits(spots[other]) ? other : nearest);
+
+        this.clearedTooltip = tooltip;
+        this.clearedSide = side;
+        return spots[side];
+    }
 
     // =========================================================================
     //  Header drag

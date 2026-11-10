@@ -20,10 +20,16 @@ class Jammer extends ShipSystem implements SpecialAbility{
     {
         if (!isset($args["shooter"]) || !isset($args["target"]))
             throw new InvalidArgumentException("Missing arguments for Jammer getSpecialAbilityValue");
-        
+
+        /* NEBULA_PLAN.md #13 - "jammers won't function at all" in a nebula (KS 5.12). This system only (user
+           ruling D2): Stealth systems and Shading Fields answer the same ability with their own rules. One
+           method covers every reader - to-hit, SOEW/ELINT, mines and the missile-launch denial.
+           ⚠️ MIRROR PAIR with ew.getJammerValueFromTo (JS). */
+        if (TacGamedata::$nebulaPresent) return 0;
+
         $shooter = $args["shooter"];
         $target = $args["target"];
-        
+
         if ($shooter->faction === $target->faction) return 0; //same-faction units ignore Jammer
 		
         if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip)) 
@@ -1076,6 +1082,78 @@ class EMShield extends Shield implements DefensiveSystem{
         // shieldfactor is handled as output.
         parent::__construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc);
     }
+
+    /* ===== STORM DEFENCE (EM_STORM_PLAN.md, rulings R1/R3) ================================================
+       "Ships with EM shields may elect to accept this effect using a facing shield, but this must be declared before
+       the roll for location is made." A STANDING ORDER (R3, amended after play-test game 4547): declared or withdrawn
+       in Deployment or Initial Orders, it stands for every storm from then on until it is withdrawn.
+
+       Stored as CHANGES: a 'stormDefence' note with value 1 (declared) or 0 (withdrawn), stamped with the turn AND
+       phase it was made in. The state at any point is the latest note at or before it - Deployment counts before
+       Initial Orders of the same turn (turn 1 can carry both). The client posts its current state at every commit of
+       those two phases; only a change is written. Everything behind $emStormPresent. */
+    private $stormDefenceNotes = array(); //array(turn, rank, value): rank 0 = Deployment, 1 = Initial Orders
+
+    //Deployment (-1) ranks before Initial Orders; every later phase of a turn reads as Initial Orders (their notes are final).
+    private static function stormDefenceRank($phase){
+        return ((int)$phase === -1) ? 0 : 1;
+    }
+
+    //Is the standing order in force as of ($turn, $phase)? The latest change at or before that point decides.
+    public function isStormDefenceActive($turn, $phase){
+        $rank = self::stormDefenceRank($phase);
+        $best = null;
+        foreach ($this->stormDefenceNotes as $note){
+            if ($note[0] > (int)$turn || ($note[0] === (int)$turn && $note[1] > $rank)) continue; //after the point asked about
+            if ($best === null || $note[0] > $best[0] || ($note[0] === $best[0] && $note[1] >= $best[1])) $best = $note;
+        }
+        return $best !== null && $best[2] === 1;
+    }
+
+    /* POST-side rebuild (process()): the submitter's own non-advanced unit, in the two phases that take it. This
+       rebuilt shield has no notes loaded (arch_post_side_ship_reconstruction), so the state it changes FROM is read
+       off the server's own load of the same shield - and only a change is written. */
+    public function generateIndividualNotes($gameData, $dbManager){
+        parent::generateIndividualNotes($gameData, $dbManager);
+        if (!TacGamedata::$emStormPresent) return;
+        $phase = (int)$gameData->phase;
+        if ($phase !== -1 && $phase !== 1) return;
+        $transfer = $this->individualNotesTransfer;
+        if (!is_array($transfer) || !isset($transfer[0])) return;
+        $wanted = ((int)$transfer[0] === 1);
+
+        $ship = $this->getUnit();
+        if (!$ship || $ship->userid != $gameData->forPlayer || EMStorm::isAdvanced($ship)) return;
+
+        $serverShip = $gameData->getShipById($ship->id);
+        $serverShield = $serverShip ? $serverShip->getSystemById($this->id) : null;
+        $current = ($serverShield instanceof EMShield) && $serverShield->isStormDefenceActive($gameData->turn, $phase);
+        if ($wanted === $current) return;
+
+        $this->individualNotes[] = new IndividualNote(-1, TacGamedata::$currentGameID, $gameData->turn, $phase,
+            $ship->id, $this->id, EMStorm::NOTE_KEY, $wanted ? "Storm Defence declared" : "Storm Defence withdrawn", $wanted ? 1 : 0);
+    }
+
+    public function onIndividualNotesLoaded($gamedata){
+        if (TacGamedata::$emStormPresent){
+            foreach ($this->individualNotes as $currNote){
+                if ($currNote->notekey == EMStorm::NOTE_KEY){
+                    $this->stormDefenceNotes[] = array((int)$currNote->turn, self::stormDefenceRank($currNote->phase), ((int)$currNote->notevalue === 1) ? 1 : 0);
+                }
+            }
+        }
+        parent::onIndividualNotesLoaded($gamedata);
+    }
+
+    //Whether the standing order is in force now, for the client's button and icon (emStorm.isDeclared) - own side only (D13).
+    public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        if (TacGamedata::$emStormPresent && !empty($this->stormDefenceNotes) && $this->isRevealedToCurrentViewer()
+            && $this->isStormDefenceActive(TacGamedata::$currentTurn, TacGamedata::$currentPhase)) {
+            $strippedSystem->stormDefence = true;
+        }
+        return $strippedSystem;
+    }
 }
 
 // GTS_Triad
@@ -1150,14 +1228,19 @@ class Reactor extends ShipSystem implements SpecialAbility {
         $output = parent::getOutput();
         if ($output > 0 && !empty($this->criticals)){
             $output = max(0, $output - (int)$this->sumCriticalParam("EdfPowerDrain"));
+            //EM_STORM_PLAN.md #4 - an EM storm's power loss, the same kind of one-turn param crit
+            if (TacGamedata::$emStormPresent) $output = max(0, $output - (int)$this->sumCriticalParam("EMStormPower"));
         }
         return $output;
     }
 
+    /* ⚠️ edfDrain is EVERY one-turn drain on this reactor - the EDF's and an EM storm's (EM_STORM_PLAN.md #4) - since
+       power.js subtracts it whatever its source. */
     public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         if (!empty($this->criticals)){
             $drain = (int)$this->sumCriticalParam("EdfPowerDrain");
+            if (TacGamedata::$emStormPresent) $drain += (int)$this->sumCriticalParam("EMStormPower");
             if ($drain > 0) $strippedSystem->edfDrain = $drain;
         }
         return $strippedSystem;
@@ -2087,19 +2170,23 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
            Scanner's own output stops there instead of eating into the array. */
         if ($output > 0 && !empty($this->criticals)){
             $output = max(0, $output - (int)$this->sumCriticalParam("EdfEwDrain"));
+            //EM_STORM_PLAN.md #1 - "Ships suffer a penalty of 1d6 from their sensor ratings", the same kind of crit
+            if (TacGamedata::$emStormPresent) $output = max(0, $output - (int)$this->sumCriticalParam("EMStormSensors"));
         }
 
-        return $output;        
-    }    
+        return $output;
+    }
 
     /* The client computes the EW budget itself (ew.js getScannerOutput sums
        shipManager.systems.getOutput over every outputType "EW" system), so the drain is
        published as its own field exactly as Engine and Reactor publish theirs - and
-       shipManager.systems.getOutput already subtracts it. Only when non-zero. */
+       shipManager.systems.getOutput already subtracts it. Only when non-zero.
+       ⚠️ edfDrain is EVERY one-turn drain on this scanner - the EDF's and an EM storm's (EM_STORM_PLAN.md #1). */
     public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         if (!empty($this->criticals)){
             $drain = (int)$this->sumCriticalParam("EdfEwDrain");
+            if (TacGamedata::$emStormPresent) $drain += (int)$this->sumCriticalParam("EMStormSensors");
             if ($drain > 0) $strippedSystem->edfDrain = $drain;
         }
         return $strippedSystem;
@@ -9210,7 +9297,7 @@ class JumpEngine extends Weapon{
         return $result;
     }
 
-    /* THE MODIFIERS, all of them negative - a jump point exit is aimed by the fleet that is
+    /* THE MODIFIERS, all of them negative but a nebula's +3 - a jump point exit is aimed by the fleet that is
      * already here as much as by the drive that opens it (section 2.5). The fifth, an Expert Jump
      * Officer aboard the opener (-1), is OFFICERS_PLAN.md Stage 7's.
      *
@@ -9253,6 +9340,9 @@ class JumpEngine extends Weapon{
 
         //OFFICERS_PLAN.md Stage 7 - an Expert Jump Officer aboard the opener: "a -1 shift to the vortex scatter chart"
         if (TacGamedata::$officersPresent) $mod += Officers::exitScatterShift($opener, $turn);
+
+        //NEBULA_PLAN.md #16 - the one modifier that is not a help: "arriving in nebula +3" (KS jump arrival chart)
+        if (TacGamedata::$nebulaPresent) $mod += 3;
 
         return $mod;
     }
@@ -14265,13 +14355,17 @@ class DiffuserTendril extends ShipSystem{
 		return $this->getTotalDamage();
 	}
 	
-	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
+	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1, $shooterid = null, $weaponid = null){ //or dissipate, with negative value
 		//$fireOrderid ties what the tendril soaked to the shot that caused it. The combat log finds a
 		//shot's damage by matching entries on fireorderid (weaponManager.getDamagesCausedBy), so
 		//without it a fully absorbed shot read as "damaged for 0" and looked like nothing happened.
 		//Dissipation and the docking-reabsorption in HangarOps pass no id and stay unlinked (-1), so
 		//they are never reported as damage from a shot.
-		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Dissipate!", "Tendril");
+		//$shooterid/$weaponid: an order the SERVER creates mid-resolution (terrain collisions, proximity
+		//mines, auto-rams) has no id yet (-1). DBManager::submitDamages back-fills those from the row's
+		//shooter + weapon, exactly as it does for the hit's own row, so the absorbed amount lands on the
+		//same order as the damage it reduced.
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Dissipate!", "Tendril", $shooterid, $weaponid);
 		$damageEntry->updated = true;
 		$this->damage[] = $damageEntry;
 	}
@@ -14326,12 +14420,21 @@ class DiffuserTendrilFtr extends DiffuserTendril{
 		return $this->usedCapacityTotal;
 	}
 	
-	//$fireOrderid is accepted only to keep the signature compatible with the parent - a fighter
-	//tendril stores its absorption as individual notes, not as damage entries, so there is nothing
-	//for the combat log to link to. Fighter diffuser absorption stays invisible in the log.
-	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
+	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1, $shooterid = null, $weaponid = null){ //or dissipate, with negative value
 		$this->usedCapacityTotal += $value; //running count
 		$this->thisTurnEntries[] = $value; //mark for database
+
+		//Capacity lives in the notes above, so on its own a fighter tendril left the combat log nothing
+		//to find (the log matches a shot's rows by fireorderid). Leave a LOG-ONLY row linked to the shot:
+		//damage 0, so health and every damage sum are untouched, with the absorbed amount in the `shields`
+		//column, which combatLog.js reads for this damageclass. Same scheme as TrekShieldFtr::absorbDamage,
+		//including the shooter + weapon that let submitDamages link a server-made order with no id yet.
+		//Dissipation passes none of them, so it never produces one.
+		if ($value > 0 && ($fireOrderid > 0 || $shooterid !== null)) {
+			$logEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, 0, 0, $value, $fireOrderid, false, false, "Absorb!", "TendrilFtr", $shooterid, $weaponid);
+			$logEntry->updated = true;
+			$this->damage[] = $logEntry;
+		}
 	}
 	
 	
@@ -14342,8 +14445,9 @@ class DiffuserTendrilFtr extends DiffuserTendril{
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
 		$ship = $this->getUnit();
 		switch($gameData->phase){
+				case 5: //pre-firing phase - rams and collisions resolve here, and what they cost the tendril must persist too (each phase reloads, so unsaved entries are lost)
 				case 4: //firing phase
-					foreach($this->thisTurnEntries as $tte){					
+					foreach($this->thisTurnEntries as $tte){
 						$notekey = 'absorb';
 						$noteHuman = 'Tendril absorbed or dissipated';
 						$noteValue = $tte;
@@ -14600,7 +14704,7 @@ by 4.
 		if($mostSuitableAbsorbtion>0){ //appropriate tendril found!
 			$damageAbsorbed=min($damageToAbsorb,$mostSuitableAbsorbtion);
 			$returnValues['dmg']=$effectiveDamage-$damageAbsorbed;
-			$mostSuitableTendril->absorbDamage($target,$gamedata,$damageAbsorbed, $fireOrder->id);//link to the shot so the combat log can report it
+			$mostSuitableTendril->absorbDamage($target,$gamedata,$damageAbsorbed, $fireOrder->id, ($shooter ? $shooter->id : null), ($weapon ? $weapon->id : null));//link to the shot so the combat log can report it
 		}
 		
 		return $returnValues;

@@ -638,19 +638,6 @@ NexusHeavyChargedPlasmaGun.prototype.initBoostableInfo = function () {
     return this;
 };
 
-NexusHeavyChargedPlasmaGun.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-
-            return;
-        }
-    }
-};
-
 NexusHeavyChargedPlasmaGun.prototype.hasMaxBoost = function () {
     return true;
 };
@@ -704,19 +691,6 @@ NexusChargedPlasmaGun.prototype.calculateSpecialRangePenalty = function (distanc
     return rangePenalty;
 };
 
-
-NexusChargedPlasmaGun.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-
-            return;
-        }
-    }
-};
 
 NexusChargedPlasmaGun.prototype.hasMaxBoost = function () {
     return true;
@@ -1050,17 +1024,6 @@ NexusPlasmaCharge.prototype.initBoostableInfo = function () {
 //    return 1 + shipManager.power.getBoost(this);
 //};
 
-NexusPlasmaCharge.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-            return;
-        }
-    }
-};
-
 NexusPlasmaCharge.prototype.hasMaxBoost = function () {
     return true;
 };
@@ -1112,17 +1075,6 @@ NexusPlasmaChargeThrust.prototype.initBoostableInfo = function () {
         }
     }
     return this;
-};
-
-NexusPlasmaChargeThrust.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-            return;
-        }
-    }
 };
 
 NexusPlasmaChargeThrust.prototype.hasMaxBoost = function () {

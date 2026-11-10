@@ -1558,7 +1558,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 	public $doNotIntercept = true; //this weapon is a field, "attacks" are just for technical reason
         
         public $rangePenalty = 0; //no range penalty, but range itself is limited
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
+        public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 
 	
 	public $boostlevel = 0;
 		
@@ -2577,6 +2577,12 @@ class RammingAttack extends Weapon{
 		$shooter = $this->getUnit();
 		$deployTurn = $shooter->getTurnDeployed($gamedata);
 		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't ram anything!			
+
+		//The Dust Zone's unit stands off the map and is never entered: its dust is the rule's hexes, once per unit per turn.
+		if($shooter instanceof DustZone){
+			if(!$shooter->isDestroyed()) $this->createDustZoneOrders($gamedata, $shooter);
+			return; //an immobile base - autoFireOnly - so it would never ram below either
+		}
 	
 		//First let's check if any units moved through this Terrain unit and create appropriate fireOrders.		
 		if($shooter->isTerrain() && !$shooter->isDestroyed() && ($shooter->Enormous || !empty($shooter->isDustField) || !empty($shooter->isMeteoroid))){ //Only Enormous terrain (asteroids/moons) collides; bases like shipyards/jumpgates do not.
@@ -2598,15 +2604,24 @@ class RammingAttack extends Weapon{
 			$bearings = array();
 			$collisiontargets = $this->checkForCollisions($relevantShips,  $gamedata, $terrrainPosition, $shooter, $hexEntries, $bearings);
 
+			//A drifting field that moved onto a unit at the start of the turn struck it before anything else happened, so that
+			//is the unit's one collision with it, on the side facing the drift, whatever its own movement did afterwards.
+			$overruns = $this->getDriftOverruns($relevantShips, $gamedata, $shooter, $bearings);
+			foreach ($overruns as $targetid => $location) $collisiontargets[$targetid] = $location;
+			$driftingKind = !empty($shooter->isMeteoroid) ? "meteor swarm" : "asteroid";
+
 			foreach($collisiontargets as $targetid=>$location){
 				$target = $gamedata->getShipById($targetid);
                 if($targetid == $shooter->id) continue; // GTS_Triad - prevent terrain firing at itself
-				
+
 				$type = "TerrainCollision"; //Moving through asteroids hex, d10 * speed damage.
 				if($shooter->Huge > 0 ) $type = "TerrainCrash"; //Larger Terrain, like Moons.  Full ramming damage.
                 if(isset($shooter->terrainCollisionType)) $type = $shooter->terrainCollisionType; // GTS_Triad
 				$targetMovement = $target->getLastTurnMovement($gamedata->turn+1);
 				if (!$targetMovement) continue;
+				$overrun = isset($overruns[$targetid]);
+				//d10 x speed is nothing to a unit overrun while standing still: no order, rather than a "collision" for 0 (as Dust)
+				if ($overrun && $type === "TerrainCollision" && $target->getSpeed() - ($target->factionAge >= 3 ? 2 : 0) <= 0) continue;
 
 				if ($target instanceof FighterFlight && $type === "TerrainCrash") {
 					$first = true; // Flag to track the first entry
@@ -2623,7 +2638,8 @@ $newFireOrder->chosenLocation = $location ?: 1;
 $newFireOrder->notes = "loc:" . ($location ?: 1);
 				
 						if ($first) {
-							$newFireOrder->pubnotes = "<br>COLLISION! A fighter unit collided with terrain during its movement!";
+							$newFireOrder->pubnotes = $overrun ? "<br>COLLISION! A drifting " . $driftingKind . " moved into a fighter unit's hex at the start of the turn!"
+								: "<br>COLLISION! A fighter unit collided with terrain during its movement!";
 							$first = false; // Set flag to false after first iteration
 						}
 				
@@ -2657,6 +2673,8 @@ $newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
 						if ($n == 0) { //one line per terrain unit in the log, however many hexes it was entered through
 							if ($type === 'DustCollision') {
 								$newFireOrder->pubnotes = "<br>DUST! Unit passed through " . $ordersToCreate . " dust " . ($ordersToCreate == 1 ? "hex" : "hexes") . " during its movement.";
+							} else if ($overrun) {
+								$newFireOrder->pubnotes = "<br>COLLISION! A drifting " . $driftingKind . " moved into the unit's hex at the start of the turn!";
 							} else {
 								$newFireOrder->pubnotes = "<br>COLLISION! Ship collided with terrain during its movement!";
 							}
@@ -2686,8 +2704,8 @@ $newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
 			if($shooter->hasSpecialAbility("Attaches") && !$shooter instanceof Terrain) continue; //ignore pods/grapple ships for now as we assume they are attaching.						
 			if($target instanceof Terrain) continue; //Terrain Enormous units are handled as collisions now.		
 			if($targetID == $shooter->id) continue; //do not ram self			
-			if($target->isDestroyed()) continue; //destroyed unit does not ram... and neither is rammed			
-			if($deployTurn > $gamedata->turn) continue;  //Ship not deployed yet, don't ram it!			
+			if($target->isDestroyed()) continue; //destroyed unit does not ram... and neither is rammed
+			if($target->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Target not deployed yet, don't ram it! (was the shooter's turn, checked above)
 			if (isset($shooter->skinDancing[$targetID])) continue; //Already skin-dancing, or additional fighter after the first has succeeded/rammed.		
 
 			$skinDancing = $this->getSkinDancingResult($shooter, $target, $gamedata); //Targeting FIXED call internal method
@@ -2887,26 +2905,209 @@ $newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
 	//Every hex a Terrain unit occupies: its centre hex, plus the extra hexes given by an irregular hexOffsets shape or by a circular Huge radius.
 	//Public static so other weapons that need a terrain unit's whole footprint can reuse it (PlanetCrackerBeam sweeps it) - it never touched $this.
 	public static function getTerrainOccupiedHexes($terrain){
-		$terrainPosition = $terrain->getHexPos();
-		$occupiedHexes = array($terrainPosition); //Centre hex is always occupied.
+		$move = $terrain->getLastMovement();
+		return self::getTerrainHexesAt($terrain, $terrain->getHexPos(), $move ? $move->facing : 0);
+	}//endof getTerrainOccupiedHexes()
+
+	//The same footprint centred on any hex at any hex facing (0-5) - eg. where a drifting field stood before it moved.
+	public static function getTerrainHexesAt($terrain, $centre, $facing){
+		$occupiedHexes = array($centre); //Centre hex is always occupied.
 
 		if (property_exists($terrain, 'hexOffsets') && !empty($terrain->hexOffsets)) {
 			// 1. Irregular Shape defined by hexOffsets - hexOffsets lists only the EXTRA hexes
-			$move = $terrain->getLastMovement();
-			$facing = $move ? $move->facing : 0;
 			foreach ($terrain->hexOffsets as $offset) {
 				// Use accurate pixel-based rotation to get absolute hex position
-				$occupiedHexes[] = Mathlib::getRotatedHex($terrainPosition, $offset, $facing);
+				$occupiedHexes[] = Mathlib::getRotatedHex($centre, $offset, $facing);
 			}
 		} else if ($terrain->Huge > 0) {
 			// 2. Standard Circular Shape defined by Huge radius
-			foreach (Mathlib::getNeighbouringHexes($terrainPosition, $terrain->Huge) as $n) {
+			foreach (Mathlib::getNeighbouringHexes($centre, $terrain->Huge) as $n) {
 				$occupiedHexes[] = new OffsetCoordinate($n['q'], $n['r']);
 			}
 		}
 
 		return $occupiedHexes;
-	}//endof getTerrainOccupiedHexes()
+	}//endof getTerrainHexesAt()
+
+
+	/* DRIFTING TERRAIN (TerrainDrift, user ruling 2026-11-08): a unit sitting in a hex this field drifted INTO at the start
+	   of the turn is struck as though it had moved into the field - the same order its own movement would have earned, on
+	   the side facing the drift. Only the hexes the field newly covers count - one hex for the one-hex units that drift
+	   today; the footprint difference keeps it right for any shape. Where the unit stood is its last move before this
+	   turn, as the collision sweep reads it; a unit placed this turn arrived after the drift.
+	   Returns shipid => location struck, and sets $bearings[shipid] to the direction the field came from, relative to the
+	   unit's facing - the meteor order's brg, which meteor defence reads. */
+	private function getDriftOverruns($relevantShips, $gamedata, $terrain, &$bearings){
+		$overruns = array();
+		$drift = TerrainDrift::getDriftOnTurn($terrain, $gamedata->turn);
+		if ($drift === null || $drift['from'] === null) return $overruns;
+
+		$facing = (int)$drift['to']->facing; //a drift never turns the field
+		$before = array();
+		foreach (self::getTerrainHexesAt($terrain, Movement::toOffset($drift['from']->position), $facing) as $hex) $before[$hex->q . ',' . $hex->r] = true;
+		$entered = array();
+		foreach (self::getTerrainHexesAt($terrain, Movement::toOffset($drift['to']->position), $facing) as $hex) {
+			if (!isset($before[$hex->q . ',' . $hex->r])) $entered[$hex->q . ',' . $hex->r] = true;
+		}
+		if (empty($entered)) return $overruns;
+		$cameFrom = Mathlib::addToHexFacing((int)$drift['to']->heading, 3); //each hex is entered from the one behind it
+
+		foreach ($relevantShips as $ship) {
+			if ($ship->getTurnDeployed($gamedata) >= $gamedata->turn) continue;
+			$startMove = $ship->getLastTurnMovement($gamedata->turn);
+			if (!$startMove) continue;
+			$standing = Movement::toOffset($startMove->position);
+			if (!$standing || !isset($entered[$standing->q . ',' . $standing->r])) continue;
+
+			$bearing = $this->getTempBearing($standing, $standing->moveToDirection($cameFrom), $ship, $startMove->getFacingAngle());
+			$overruns[$ship->id] = $this->getCollisionLocation($bearing, $ship);
+			$bearings[$ship->id] = $bearing;
+		}
+		return $overruns;
+	}//endof getDriftOverruns()
+
+
+	/* THE DUST ZONE (DustZoneRule). B5W: "After movement is complete, each unit takes damage depending on its
+	   speed during that turn ... armor facing the direction of motion does apply to the incoming damage. (If a
+	   unit turns or pivots, the 'armor facing the direction of motion' is considered to be the one facing that
+	   direction for the majority of movement. If there is a tie, the owning player chooses which side is
+	   damaged.)"
+
+	   ONE order per unit per turn - not a Dust Field's one per hex entered (user, 2026-11-05): with the whole
+	   map dust, per-hex damage would be speed x speed / 2. A unit is in the dust when any hex it ENTERED this
+	   turn is dust - so every moving unit at 100%, and only those that crossed the clump at 50% / 25% - and a
+	   half-phased Shadow ship slips through it unless it stops in it, as through any terrain. The damage is
+	   DustField::getDustDamage, landed by beforeDamage / damageOneSheet like any other DustCollision.
+
+	   The side struck is the one that led into the most of those hexes (chooseDustZoneSide). The order carries
+	   it as loc:N, and as brg:B - the direction of motion relative to the unit's facing - which damageOneSheet
+	   turns into the armour facing it on each of a flight's craft. */
+	private function createDustZoneOrders($gamedata, $zone){
+		$rule = $gamedata->rules ? $gamedata->rules->getRuleByName('dustZone') : null;
+		if (!$rule) return;
+
+		foreach ($gamedata->ships as $ship) {
+			if ($ship->isDestroyed()) continue;
+			if ($ship->isTerrain()) continue;
+			if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;
+			if ($zone::getDustDamage($ship->getSpeed(), $ship instanceof FighterFlight) <= 0) continue; //too slow to be hurt: no order, rather than a "hit" for 0
+
+			$bearings = $this->getDustZoneBearings($ship, $gamedata, $rule);
+			if (empty($bearings)) continue;
+
+			if ($ship->faction === 'Shadow Association' && Movement::isHalfPhased($ship, $gamedata->turn)) {
+				$rest = $ship->getLastTurnMovement($gamedata->turn + 1); //where it came to rest
+				if ($rest && !$rule->isDustHex($rest->position->q, $rest->position->r)) continue;
+			}
+
+			$targetMovement = $ship->getLastTurnMovement($gamedata->turn + 1);
+			if (!$targetMovement) continue;
+			$side = $this->chooseDustZoneSide($ship, $bearings, $gamedata);
+
+			$newFireOrder = new FireOrder(
+				-1, "prefiring", $zone->id, $ship->id,
+				$this->id, -1, $gamedata->turn, 1,
+				0, 0, 1, 0, 0,
+				$targetMovement->position->q, $targetMovement->position->r, 'DustCollision', -1
+			);
+			$newFireOrder->chosenLocation = $side['loc'] ?: 1; //0 would make damageOneSheet pick by bearing from the zone's parking hex; getStructureSystem falls back to Primary anyway
+			$newFireOrder->notes = "loc:" . ($side['loc'] ?: 1) . " brg:" . $side['bearing'];
+			$newFireOrder->pubnotes = "<br>DUST! Unit moved through dust" . ($rule->isDustEverywhere() ? "" : " in " . count($bearings) . (count($bearings) == 1 ? " hex" : " hexes")) . " this turn.";
+			$newFireOrder->addToDB = true;
+			$this->fireOrders[] = $newFireOrder;
+		}
+	}//endof createDustZoneOrders()
+
+	/* One relative bearing per dust hex the unit entered this turn: its direction of motion into that hex,
+	   against the facing it had then. What counts as entering a hex is Movement::getHexesEnteredFrom's -
+	   each step, and every hex on the way of a row that moved further (an Uncontrolled HK's drift is one
+	   'end' row; a riding pod has only 'attached' rows). */
+	private function getDustZoneBearings($ship, $gamedata, $rule){
+		$bearings = array();
+		$startMove = $ship->getLastTurnMovement($gamedata->turn);
+		if (!$startMove) return $bearings;
+		$current = $startMove->position;
+		$facing = $startMove->getFacingAngle();
+
+		foreach ($ship->movement as $shipMove) {
+			if ($shipMove->turn != $gamedata->turn || $shipMove->type == 'start') continue;
+
+			$entered = Movement::getHexesEnteredFrom($current, array($shipMove), $gamedata->turn);
+			array_shift($entered); //the first is $current itself
+			foreach ($entered as $hex) {
+				if ($rule->isDustHex($hex->q, $hex->r)) $bearings[] = $this->getTempBearing($current, $hex, $ship, $facing);
+				$current = $hex;
+			}
+			$facing = $shipMove->getFacingAngle();
+		}
+
+		return $bearings;
+	}//endof getDustZoneBearings()
+
+	/* Which side of the unit faced its direction of motion for most of its dust hexes - a Structure location
+	   for a ship (as getCollisionLocation reads a bearing), one of the four armour facings for a flight.
+	   A tie is the owner's to break, which Pre-Firing cannot ask, so it goes to the tied side that stands it
+	   best (user, 2026-11-05): the most armour, then the most structure left.
+	   Returns ['loc' => Structure location (0 for a flight), 'bearing' => a relative bearing on that side]. */
+	private function chooseDustZoneSide($ship, $bearings, $gamedata){
+		$isFlight = $ship instanceof FighterFlight;
+		$locations = $ship->getLocations();
+		$sides = array();
+
+		foreach ($bearings as $bearing) {
+			if ($isFlight) {
+				$key = 0;
+				foreach ($locations as $index => $location) {
+					if (mathlib::isInArc($bearing, $location["min"], $location["max"])) {
+						$key = $index;
+						break;
+					}
+				}
+				$loc = 0;
+			} else {
+				$loc = $this->getCollisionLocation($bearing, $ship);
+				$key = $loc;
+			}
+			if (!isset($sides[$key])) $sides[$key] = array('key' => $key, 'loc' => $loc, 'count' => 0, 'bearing' => $bearing);
+			$sides[$key]['count']++;
+			$sides[$key]['bearing'] = $bearing; //the latest entry on that side
+		}
+
+		foreach ($sides as $key => $side) {
+			if ($isFlight) {
+				$location = $locations[$key];
+				$sides[$key]['armour'] = $location["armour"];
+				$sides[$key]['health'] = 0; //every facing shares the craft's health
+				//The middle of that facing, so no rounding can tip the armour lookup into the next one.
+				$sides[$key]['bearing'] = (int)round(($location["min"] + ((($location["max"] - $location["min"]) % 360 + 360) % 360) / 2)) % 360;
+			} else {
+				$structure = $ship->getStructureSystem($side['loc']);
+				$sides[$key]['armour'] = $structure ? max(0, $structure->armour - $structure->hasCritical("ArmorReduced", $gamedata->turn)) : 0;
+				$sides[$key]['health'] = $structure ? $structure->getRemainingHealth() : 0;
+			}
+		}
+
+		usort($sides, function ($a, $b) {
+			if ($a['count'] != $b['count']) return $b['count'] <=> $a['count'];
+			if ($a['armour'] != $b['armour']) return $b['armour'] <=> $a['armour'];
+			if ($a['health'] != $b['health']) return $b['health'] <=> $a['health'];
+			return $a['key'] <=> $b['key'];
+		});
+
+		return $sides[0];
+	}//endof chooseDustZoneSide()
+
+	/* A DustCollision from the Dust Zone has no shooter in any real hex - its unit is parked off the map - so
+	   what a hit would normally read from the shooter's position is read from the order's brg:B instead: a
+	   point in that direction of motion, as seen from the unit struck now. Null for any other order. */
+	private function getDustZoneSourcePos($target, $shooter, $fireOrder){
+		if (!($shooter instanceof DustZone)) return null;
+		if (!preg_match('/brg:(\d+)/', (string)$fireOrder->notes, $m)) return null;
+
+		$heading = Mathlib::addToDirection($target->getFacingAngle(), (int)$m[1]);
+		$here = $target->getCoPos();
+		return mathlib::getPointInDirection(10, -$heading, $here["x"], $here["y"]); //compass headings run clockwise
+	}//endof getDustZoneSourcePos()
 
 
 	//Shadow Association ships that half-phase during their movement pass harmlessly through terrain - but only if they don't END that movement inside it.
@@ -2939,10 +3140,14 @@ $newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
 
 	   The host is not double-damaged by this: it earns its own collision order from the same
 	   loop, and Firing::fire refuses to spill a TerrainCollision/TerrainCrash order from a
-	   pod onto its host precisely so the two do not stack. */
+	   pod onto its host precisely so the two do not stack.
+
+	   A Gravity Well's pull (GRAVITY_WELL_PLAN.md R2) writes one 'gravity' row per hex it drags a unit, and the
+	   unit COLLIDES with whatever it is dragged into - so those rows are compared the same way. The other forced
+	   shifts ('prefire': Gravitic Mine, Gravity Net, Transverse Drive, Singularity) stay out, as they always were. */
 	private static function isHexTransit($move, $previousPosition){
 		if ($move->type == "move" || $move->type == "slipleft" || $move->type == "slipright") return true;
-		if ($move->type != "attached") return false;
+		if ($move->type != "attached" && $move->type != "gravity") return false; //"gravity" = GravityWells::MOVE_TYPE, a literal so no other game loads that class
 		if ($previousPosition === null) return true;
 
 		return ($move->position->q != $previousPosition->q || $move->position->r != $previousPosition->r);
@@ -3048,9 +3253,12 @@ $newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
             if( $relativeBearing !== 0 ) { //mirror of 0 is 0
                 $relativeBearing = 360-$relativeBearing;
             }
-        }        
+        }
 
-		return round($relativeBearing);//Round and return!
+		//Round and return, as 0-359: a dead-ahead bearing can round up to 360 (or mirror to it above), which getCollisionLocation
+		//misses on every hull with a section ending AT 360 (HeavyCombatVesselLeftRight, MediumShipLeftRight, the six/eight-section
+		//bases, Vree and Mindrider capitals) - it fell through to 0, the Primary.
+		return (((int)round($relativeBearing)) % 360 + 360) % 360;
 	}
 
 
@@ -3196,7 +3404,9 @@ $newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
 
 			//The chosenLocation set in beforePreFiringOrderResolution is the colliding ship's location and was used by parent::fire() to damage the ship correctly.
 			//For return damage, we now switch chosenLocation to refer to the unit taking it (this->unit).
-			if($fireOrder->damageclass == 'TerrainCrash') {
+			//Only when the unit taking it IS terrain: TerrainCrash is also the class of a ship's auto-ram into an Enormous unit
+			//(failed skin dance, failed attach), whose return damage is an ordinary ram's - the side that entered the hex, below.
+			if($fireOrder->damageclass == 'TerrainCrash' && $target->isTerrain()) {
 				//Return damage lands on the terrain itself, not the colliding ship - recompute against terrain's own location chart.
 				$collider = $gamedata->getShipById($fireOrder->targetid);
 				if($collider) {
@@ -3360,10 +3570,9 @@ if($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass ==
 				$this->damageModRolled = 0.5;
 			}//if lower, stays 0.25
 			$damage = ceil($this->damageModRolled * $rfactor);
-			if ($fireOrder->notes != '') $fireOrder->notes .= "; ";
-			$fireOrder->notes .= "; mod = " . $this->damageModRolled . " rammingfactor: $rfactor" ;
 			if ((!($shooter instanceof FighterFlight)) && ($target instanceof FighterFlight)) $damage += 1000;  //fighter colliding with ship will always be destroyed
-			$fireOrder->notes .= "mod = " . $this->damageModRolled . " rammingfactor: $rfactor damage: $damage" ;		
+			if ($fireOrder->notes != '') $fireOrder->notes .= "; ";
+			$fireOrder->notes .= "mod = " . $this->damageModRolled . " rammingfactor: $rfactor damage: $damage";
 			return $damage;
 		}				     
 	}//endof function getDamage
@@ -3495,6 +3704,7 @@ if($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass ==
 				$useSplitArcs ? ($weapon->startArcArray ?? []) : [], $useSplitArcs ? ($weapon->endArcArray ?? []) : [])) continue;
 
 			$rating = $weapon->getInterceptRating($gamedata->turn);
+			if (TacGamedata::$nebulaPresent) $rating = Nebula::interceptRating($rating); //defensive fire in a nebula: 1 less (NEBULA_PLAN.md #8)
 			if ($rating <= 0) continue;
 
 			for ($g = $declaration->shotshit; $g < $declaration->shots; $g++) {
@@ -3531,16 +3741,22 @@ if($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass ==
 			return;
 		}
 		if ($target->isDestroyed()) return;
+		//The Dust Zone's orders say which way the unit was moving (brg:B); a Dust Field's shooter is the hex itself.
+		$dustSourcePos = $this->getDustZoneSourcePos($target, $shooter, $fireOrder);
 		if ($target instanceof FighterFlight) { //every craft flew through it, so every craft takes the full amount
 			foreach ($target->systems as $fighter) {
 				if ($fighter == null || $fighter->isDestroyed()) continue;
-				$this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false, 0);
+				//$pos picks a craft's armour facing: the one leading the move, for the Dust Zone
+				$this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, $dustSourcePos, $gamedata, false, 0);
 			}
 			return;
 		}
 		//The section that entered the dust hex, set when the order was made. The Chameleon mirror pass clears
-		//it so a phantom picks its own section, exactly as Weapon::damageOneSheet does.
-		$location = ($fireOrder->chosenLocation > 0) ? $fireOrder->chosenLocation : $target->getHitSection($shooter, $fireOrder->turn);
+		//it so a phantom picks its own section, exactly as Weapon::damageOneSheet does - from the direction of
+		//motion for the Dust Zone, whose unit is nowhere near.
+		if ($fireOrder->chosenLocation > 0) $location = $fireOrder->chosenLocation;
+		else if ($dustSourcePos !== null) $location = $target->getHitSectionPos($dustSourcePos, $fireOrder->turn);
+		else $location = $target->getHitSection($shooter, $fireOrder->turn);
 		$structure = $target->getStructureSystem($location); //that section's Structure - PRIMARY when it has none (MCVs, or a side without its own)
 		if ($structure == null) return;
 		$this->doDamage($target, $shooter, $structure, $damage, $fireOrder, null, $gamedata, false, $structure->location);
@@ -3815,6 +4031,7 @@ class IonFieldGenerator extends Weapon{
 	public $animation = "ball";
 	public $animationColor = array(160, 0, 255);
 	public $animationExplosionScale = 2; //covers 2 hexes away from explosion center
+    public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 	
 
 	/*useless
 	public $explosionColor = array(30, 170, 255);
@@ -4037,6 +4254,7 @@ class VortexDisruptor extends Weapon{
 	public $range = 23;//no point firing at further target with base 24 to hit!
 	public $loadingtime = 3;
     public $rangePenalty = 1;//-1/hex
+    public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 	
 
 	public $animation = "ball";
 	public $animationColor = array(245, 90, 90);
@@ -4609,6 +4827,7 @@ class ShadowFighterBomb extends Weapon{
 	public $animationColor = array(160, 60, 200);
 	public $animationExplosionScale = 0.5;
 	public $animationExplosionType = "AoE";
+    public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 	
 
 	public $firingModes = array(
 		1 => "Fighter Bomb"
@@ -7006,7 +7225,7 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 
 	public $range = 4;        
     public $rangePenalty = 0; //no range penalty, but range itself is limited
-    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
+    public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 
 	
 	public $boostlevel = 0;
     public $canOffLine = true;	
@@ -11299,7 +11518,22 @@ class SingularityMine extends AoE {
         }
 
         // --- Spawn singularity terrain ---
-        $this->spawnSingularityTerrain($gamedata, $fireOrder, $shooter, $target, $spinDirection);
+        $singularity = $this->spawnSingularityTerrain($gamedata, $fireOrder, $shooter, $target, $spinDirection);
+
+        /* Detonated inside an Energy Draining Field (Walkers of Sigma-957): "the mine detonates as
+           normal during the initial Damage Resolution Step, including all damage, but vanishes at
+           the end of the turn due to the dampening effect of the field." So everything above stands
+           - the 10-hex shear damage is NOT contained to one hex the way AoE::fire contains an
+           ordinary proximity blast - and only the singularity's life is cut short: it is removed by
+           its own end-of-turn sweep (SingularityCore::generateIndividualNotes) this turn rather than
+           two turns from now, so it never pulls anything.
+           Measured at the hex the mine actually landed on, after scatter, and team-blind like every
+           field-dampening rule (TacGamedata::isHexInEdfField). */
+        if (TacGamedata::$edfPresent && $gamedata->isHexInEdfField($target)) {
+            $core = $singularity->getSystemByName("SingularityCore");
+            if ($core instanceof SingularityCore) $core->dampenByEdf();
+            $fireOrder->pubnotes .= "<br>Energy Draining Field dampens the singularity: it will vanish at the end of the turn.";
+        }
 
         $fireOrder->rolled = max(1, $fireOrder->rolled);
         $fireOrder->updated = true;
@@ -11328,6 +11562,8 @@ class SingularityMine extends AoE {
 
         $spinLabel = ($spinDirection == "CW") ? "Clockwise" : "Anti-Clockwise";
         $fireOrder->pubnotes .= "<br>Singularity ($spinLabel) formed at " . $targetHex->q . ' ' . $targetHex->r . '.';
+
+        return $singularity;
     }
 }
 
@@ -11349,8 +11585,12 @@ class SingularityRammingAttack extends RammingAttack {
     public $weaponClass = "Gravitic";
     public $factionAge  = 4;
 
+    /* Kept in the ShipSystem shape spawnSingularity calls it with - (0, 1, 0, 0, 360). RammingAttack's own constructor is
+       ($armour, $startArc, $endArc, $designDamage, $fcbonus) and fixes maxhealth 1 / power 0 itself, so only the arc goes
+       on: passing all five gave an arc of 1 -> 0 and +360 fire control. */
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
-        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        parent::__construct($armour, $startArc, $endArc);
+        $this->autoFireOnly = true; //immobile terrain: its collisions only - it never rams an Enormous unit in its hex itself
     }
 
 public function getDamage($fireOrder) {
@@ -11513,8 +11753,19 @@ class SingularityCore extends ShipSystem {
 
     private static $processedThisTurn = array();
 
+    /* Set by SingularityMine::fire when the mine detonated inside an Energy Draining Field: the
+       singularity vanishes at the end of the turn it formed on. IN-MEMORY ONLY, and that is enough:
+       the only reader is the turnsAlive 0 branch of generateIndividualNotes below, which runs in the
+       same FireGamePhase::advance, on the same $servergamedata the mine spawned this unit into.
+       Private, so it never reaches the wire (ShipSystem::stripForJson is a whitelist anyway). */
+    private $edfDampened = false;
+
     function __construct($armour, $maxhealth, $powerReq, $startArc = 0) {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc);
+    }
+
+    public function dampenByEdf() {
+        $this->edfDampened = true;
     }
 
     public function getSpawnTurn() {
@@ -11539,13 +11790,15 @@ public function generateIndividualNotes($gameData, $dbManager) {
     $turnsAlive = $gameData->turn - $spawnTurn;
 
     if ($gameData->phase === 4) {
-        if ($turnsAlive >= 2) {
+        // Normally at the end of its second turn; on the turn it formed if an Energy Draining Field dampened it
+        $edfVanish = ($turnsAlive == 0 && $this->edfDampened);
+        if ($turnsAlive >= 2 || $edfVanish) {
             $structure = $singularity->getSystemByName("Structure");
             if ($structure && !$structure->isDestroyed()) {
                 $damageEntry = new DamageEntry(
                     -1, $singularity->id, $gameData->id, $gameData->turn, $structure->id,
                     $structure->maxhealth, 0, 0, -1, true, false,
-                    "Singularity dissipates", "Standard"
+                    $edfVanish ? "Singularity dampened by Energy Draining Field" : "Singularity dissipates", "Standard"
                 );
                 $damageEntry->updated = true;
                 $structure->damage[] = $damageEntry;
@@ -11764,6 +12017,110 @@ class spawnSingularity extends Terrain {
         $stripped->spawnTurn     = self::decodeSpawnTurnFromName($this->name);
         $stripped->spinDirection = self::decodeSpinFromName($this->name);
         return $stripped;
+    }
+}
+
+
+/* =============================================================================
+   GravityWellRammingAttack - GRAVITY_WELL_PLAN.md. A Gravity Well's (ships/terrain/GravityWell.php) one weapon:
+   "any unit that enters such a hex would be destroyed".
+
+   Two kinds of order ride it, both well -> unit:
+     GravityWellPull      - the log line for one unit's pull, written as Movement closes (GravityWells::resolvePull).
+                            Already resolved when written (rolled 1), a log line and never a shot - see
+                            Firing::isHyperspaceLogOrder.
+     GravityWellCollision - the destruction, made here in Pre-Firing: auto-hit, the unit destroyed outright, and
+                            nothing returned onto the well (a ram's return damage).
+   ============================================================================= */
+class GravityWellRammingAttack extends RammingAttack {
+
+    public $name        = "GravityWellRammingAttack";
+    public $displayName = "Gravity Well";
+    public $damageType  = "Standard";
+    public $weaponClass = "Gravitic";
+
+    function __construct($armour, $startArc, $endArc, $designDamage = 0, $fcbonus = 0){
+        parent::__construct($armour, $startArc, $endArc, $designDamage, $fcbonus);
+        $this->autoFireOnly = true; //immobile: it never rams anything itself
+    }
+
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+        $this->data["Special"] = "Any unit that enters this hex is destroyed - by its own movement or pulled in.";
+    }
+
+    /* The parent's terrain sweep makes an order for every unit that ENTERED the hex this turn - flying in, or pulled
+       in, since RammingAttack::isHexTransit counts the pull's 'gravity' rows (R2). Then one for any unit standing in
+       the hex without having entered it this turn (placed there in Deployment), which the sweep cannot see. */
+    public function beforePreFiringOrderResolution($gamedata){
+        parent::beforePreFiringOrderResolution($gamedata);
+
+        $well = $this->getUnit();
+        if (!$well || $well->isDestroyed()) return;
+        if ($well->getTurnDeployed($gamedata) > $gamedata->turn) return;
+        $wellHex = $well->getHexPos();
+        if (!$wellHex) return;
+
+        $ordered = array();
+        foreach ($this->fireOrders as $order) {
+            if ($order->turn == $gamedata->turn && $order->damageclass === GravityWells::COLLISION_CLASS) $ordered[$order->targetid] = true;
+        }
+
+        foreach ($gamedata->ships as $ship) {
+            if ($ship->id == $well->id || isset($ordered[$ship->id])) continue;
+            if ($ship->isDestroyed() || $ship->isTerrain()) continue;
+            if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;
+            $move = $ship->getLastTurnMovement($gamedata->turn + 1);
+            if (!$move || $move->position->q != $wellHex->q || $move->position->r != $wellHex->r) continue;
+
+            $order = new FireOrder(-1, "prefiring", $well->id, $ship->id, $this->id, -1, $gamedata->turn, 1,
+                0, 0, 1, 0, 0, $move->position->q, $move->position->r, GravityWells::COLLISION_CLASS, -1);
+            $order->chosenLocation = 1;
+            $order->notes = "loc:1";
+            $order->addToDB = true;
+            $this->fireOrders[] = $order;
+        }
+
+        //Every collision is its own sentence, naming the unit - the log prints it under "GRAVITY WELL:" (combatLog.js).
+        foreach ($this->fireOrders as $order) {
+            if ($order->turn != $gamedata->turn || $order->damageclass !== GravityWells::COLLISION_CLASS || $order->id > 0) continue;
+            $target = $gamedata->getShipById($order->targetid);
+            if (!$target) continue;
+            $order->pubnotes = GravityWells::shipLink($target) . " is drawn into the gravity well and destroyed!";
+        }
+    }
+
+    public function calculateHitBase($gamedata, $fireOrder){
+        if ($fireOrder->damageclass === GravityWells::COLLISION_CLASS) {
+            $fireOrder->needed = 100; //always
+            $fireOrder->updated = true;
+            return;
+        }
+        parent::calculateHitBase($gamedata, $fireOrder);
+    }
+
+    public function fire($gamedata, $fireOrder){
+        if ($fireOrder->damageclass === GravityWells::PULL_CLASS) return; //a log line - never reaches here, see Firing::isHyperspaceLogOrder
+        if ($fireOrder->damageclass === GravityWells::COLLISION_CLASS) {
+            //Weapon::fire, skipping RammingAttack::fire: a unit falling in rams nothing, so no damage comes back onto the well.
+            Weapon::fire($gamedata, $fireOrder);
+            return;
+        }
+        parent::fire($gamedata, $fireOrder);
+    }
+
+    protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
+        if ($fireOrder->damageclass !== GravityWells::COLLISION_CLASS) {
+            parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+            return;
+        }
+        if ($target->isDestroyed()) return; //something earlier this phase got there first
+        GravityWells::destroyOutright($target, $this, $fireOrder, $gamedata);
+    }
+
+    public function getDamage($fireOrder){
+        if ($fireOrder->damageclass === GravityWells::COLLISION_CLASS) return 0; //beforeDamage destroys outright instead
+        return parent::getDamage($fireOrder);
     }
 }
 
@@ -12105,6 +12462,7 @@ class AsteroidSalvo extends AoE {
         $this->data["Special"] .= "<br>25% chance to scatter up to d6 hexes. 40% chance of that scatter to dissipate.";
         $this->data["Special"] .= "<br>On clean hit: spawns an asteroid at target hex, meteoroid fields at range 1, dust fields at range 2 (from next turn onwards).";
         $this->data["Special"] .= "<br>Terrain stacking: asteroid > meteoroid > dust. Existing asteroid/meteoroid is not replaced.";
+        $this->data["Special"] .= "<br>No dust is laid where the scenario's Dust already covers the map.";
     }
 
     public function getDamage($fireOrder) { return 50; }
@@ -12208,15 +12566,16 @@ class AsteroidSalvo extends AoE {
         }
         //Deduplicate
         $seen = array();
+        $dustSpawned = false; //none in a Dust Zone that already covers the ring
         foreach ($range2Hexes as $hex) {
             $key = $hex->q . ',' . $hex->r;
             if (!isset($seen[$key])) {
                 $seen[$key] = true;
-                $this->spawnTerrainAtHex($gamedata, $shooter, $hex, 'dust', $fireOrder);
+                if ($this->spawnTerrainAtHex($gamedata, $shooter, $hex, 'dust', $fireOrder)) $dustSpawned = true;
             }
         }
 
-        $fireOrder->pubnotes .= "<br>Asteroid formed at " . $targetHex->q . ' ' . $targetHex->r . '. Meteoroid and dust fields spawned.';
+        $fireOrder->pubnotes .= "<br>Asteroid formed at " . $targetHex->q . ' ' . $targetHex->r . '. Meteoroid' . ($dustSpawned ? ' and dust fields' : ' fields') . ' spawned.';
     }
 
     //Spawn terrain at a specific hex, respecting stacking rules.
@@ -12239,21 +12598,25 @@ class AsteroidSalvo extends AoE {
                 $hasDust = true;
             }
         }
+        //A Dust Zone hex (DustZoneRule) is dust already, so no dust is laid on it (user, 2026-11-05) - at 100%
+        //coverage the salvo forms only its asteroid and meteoroids. Asteroids and meteoroids are not affected.
+        $dustZone = $gamedata->rules ? $gamedata->rules->getRuleByName('dustZone') : null;
+        if ($dustZone && $dustZone->isDustHex($hex->q, $hex->r)) $hasDust = true;
 
         //Apply stacking rules
         if ($type == 'asteroid') {
-            if ($hasAsteroid) return; //already has asteroid
+            if ($hasAsteroid) return false; //already has asteroid
             //Remove existing meteoroid/dust and replace with asteroid
             $terrain = new spawnAsteroidSalvo($gamedata->id, -5, "Asteroid", $shooter->slot);
         } else if ($type == 'meteoroid') {
-            if ($hasAsteroid || $hasMeteoroid) return; //asteroid/meteoroid already present
+            if ($hasAsteroid || $hasMeteoroid) return false; //asteroid/meteoroid already present
             //Can replace dust with meteoroid
             $terrain = new spawnMeteoroid($gamedata->id, -5, "Meteoroid Field", $shooter->slot);
         } else if ($type == 'dust') {
-            if ($hasAsteroid || $hasMeteoroid || $hasDust) return; //higher or equal tier present
+            if ($hasAsteroid || $hasMeteoroid || $hasDust) return false; //higher or equal tier present
             $terrain = new spawnDustField($gamedata->id, -5, "Dust Field", $shooter->slot);
         } else {
-            return;
+            return false;
         }
 
         //Insert terrain into game using ballistic mine pattern
@@ -12285,6 +12648,7 @@ class AsteroidSalvo extends AoE {
             $gamedata->turn
         );
         Manager::insertIndividualNote($note);
+        return true; //spawned - false above when stacking ruled it out
     }
 
     //Override AOEdamage to use Matter damage class
@@ -12760,6 +13124,13 @@ class LightningArray extends Weapon {
         4 => array( 2, 6, 6),
     );
 
+    protected $combinedFireControlArrayTooltip = array(
+        1 => array( 40, 30, 20),
+        2 => array( 30, 30, 25),
+        3 => array( 20, 30, 30),
+        4 => array( 10, 30, 30),
+    );	
+
     /* RANGE PENALTY TABLE, keyed by fused discharge count - per-hex penalties, the same units as
        $rangePenalty. Fusing IMPROVES the reach (a tighter bolt carries further), which is the
        opposite of what the fighter column of the fire-control table does. Row 1 IS $rangePenalty. */
@@ -13226,12 +13597,12 @@ class LightningArray extends Weapon {
             $row  = $this->combinedDamageArray[$n];
             $out .= "<br> - " . $n . " discharge" . ($n > 1 ? "s" : "") . ": "
                  . $row['dice'] . "d10+" . $row['add'];
-            if (isset($this->combinedFireControlArray[$n])) {
-                $out .= " (FC " . implode("/", $this->combinedFireControlArray[$n]) . ")";
+            if (isset($this->combinedFireControlArrayTooltip[$n])) {
+                $out .= " (FC " . implode("/", $this->combinedFireControlArrayTooltip[$n]) . ")";
             }
             if (isset($this->combinedRangePenaltyArray[$n]) && $this->combinedRangePenaltyArray[$n] > 0) {
                 //Same units the generic "Range penalty" tooltip line uses: penalty x5 per hex.
-                $out .= " (range -" . number_format($this->combinedRangePenaltyArray[$n] * 5, 2) . "/hex)";
+                $out .= " (" . number_format($this->combinedRangePenaltyArray[$n] * 5, 2) . "/hex)";
             }
         }
         return $out;

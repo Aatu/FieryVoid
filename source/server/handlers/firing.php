@@ -77,6 +77,15 @@ class Firing
                 continue;
             }
 
+            /* GRAVITY_WELL_PLAN.md - likewise a Gravity Well's pull line. It is written as Movement closes, so it is
+               already in the database when the player who OWNS a bought well commits Pre-Firing - and the client
+               re-posts every order of the turn it holds, which Pre-Firing would insert a second time. */
+            if ($fire->damageclass === 'GravityWellPull') {
+                $fire->rejected = true;
+                if ($shooter) self::detachFireOrder($shooter, $fire);
+                continue;
+            }
+
             //Uncontrolled-flight guard. A remote-controlled Hunter-Killer flight whose
             //command link is severed (node shortfall or ELINT jamming) is driven entirely
             //by the server: AutomatedMovement moves it (drift/seek) and, if it ends co-located
@@ -102,6 +111,17 @@ class Firing
             //flag alone is enough to keep an order out of the DB).
             if ($weapon instanceof JumpEngine) {
                 self::validateVortexDeclaration($fire, $weapon, $shooter, $gamedata, $fireOrders);
+                continue;
+            }
+
+            /* NEBULA_PLAN.md #14 - "Electromagnetic weapons do not function unless mounted on advanced race ships":
+               judged in the MODE the order was given (three BSG missiles mix EM and non-EM modes). The client
+               refuses to make one; this is the server being the authority. Same reject + detach convention. */
+            if (TacGamedata::$nebulaPresent && $weapon instanceof Weapon && Nebula::isEmDisabled($weapon, $fire->firingMode)) {
+                $fire->rejected = true;
+                Debug::log("validateFireOrders: rejecting EM order in a nebula (game {$gamedata->id}, shooter {$fire->shooterid}, "
+                    . "weaponid {$fire->weaponid}, mode {$fire->firingMode}, type {$fire->type}).");
+                self::detachFireOrder($shooter, $fire);
                 continue;
             }
 
@@ -1346,6 +1366,12 @@ class Firing
         if ($weapon->stowed) { //Antigravity Beam on a docked Kirishiac Orbital - non-operational
             return false;
         }
+        /* NEBULA_PLAN.md #8/#14 - a gun the nebula takes to an intercept rating of 0 would defend nothing and spend
+           its shot doing it, and an EM gun does not function at all. Behind the static. */
+        if (TacGamedata::$nebulaPresent) {
+            if (Nebula::interceptRating($weapon->getInterceptRating($gd->turn)) <= 0) return false;
+            if (Nebula::isEmDisabled($weapon)) return false;
+        }
 
         // not loaded yet
         if ($weapon->getTurnsloaded() < $weapon->getLoadingTime()) {
@@ -1905,6 +1931,10 @@ public static function firePreFiringWeapons($gamedata){
             //can colour the two doorways differently. Same order, same inertness; only the class
             //name differs, so it must be skipped by the four gathers exactly as its twin is.
             || $fire->damageclass === 'JumpVortexExit'
+            //EM_STORM_PLAN.md - an EM storm's line for a unit, written as Deployment closes on the turn it is about (EMStorm::logResult)
+            || $fire->damageclass === 'EMStorm'
+            //GRAVITY_WELL_PLAN.md - a Gravity Well's pull of one unit, written as Movement closes (GravityWells::resolvePull)
+            || $fire->damageclass === 'GravityWellPull'
             //OFFICERS_PLAN.md Stage 37 - a Lucky Captain's log line, which his failed disengage writes as Initial Orders close (Officers::luckyLine):
             //on his RammingAttack, so without this the firing would take it for a ram
             || $fire->damageclass === Officers::LUCKY_LOG_CLASS;

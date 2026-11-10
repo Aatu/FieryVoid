@@ -105,14 +105,15 @@ class AutomatedMovement
         $moves[] = $end;
 
         $jink = isset($intent['jink']) ? (int)$intent['jink'] : 0;
+        $jinkCost = self::jinkCost($ship);
         for ($i = 0; $i < $jink; $i++) {
             $jinkMove = new MovementOrder(
                 null, 'jink', $newPos, 0, 0,
                 $speed, $heading, $facing,
                 false, $gamedata->turn, 1, $ship->iniative //value 1 = one jink level
             );
-            $jinkMove->requiredThrust = array(1, 0, 0, 0, 0);
-            $jinkMove->assignedThrust = array(1, 0, 0, 0, 0);
+            $jinkMove->requiredThrust = array($jinkCost, 0, 0, 0, 0);
+            $jinkMove->assignedThrust = array($jinkCost, 0, 0, 0, 0);
             $moves[] = $jinkMove;
         }
 
@@ -137,7 +138,7 @@ class AutomatedMovement
      * SEEK (Strategy A): pursue the nearest enemy ship and ram on contact.
      *
      * Thrust budget order (per design):
-     *   1. JINK     — intent['jink'] levels, 1 thrust each.
+     *   1. JINK     — intent['jink'] levels, 1 thrust each (2 in a nebula - jinkCost).
      *   2. ACCEL    — change speed toward the gap, capped at HALF the thrust left
      *                 after jinking (1 thrust per ±1 speed).
      *   3. TURNING  — whatever thrust remains; spent greedily turning toward the
@@ -168,9 +169,10 @@ class AutomatedMovement
                      ? (int)$ship->getEffectiveFreeThrust($gamedata->turn)
                      : (int)$ship->freethrust;
 
-        // 1. Jink budget (clamped to what's available).
-        $jink = max(0, min($jink, $thrustTotal));
-        $thrustAfterJink = $thrustTotal - $jink;
+        // 1. Jink budget (clamped to what's available). A level costs 2 in a nebula (jinkCost).
+        $jinkCost = self::jinkCost($ship);
+        $jink = max(0, min($jink, intdiv($thrustTotal, $jinkCost)));
+        $thrustAfterJink = $thrustTotal - $jink * $jinkCost;
 
         // 2. Accel/decel POOL: the rules cap acceleration OR deceleration at half the
         //    thrust remaining after jinking. This single pool funds BOTH the initial
@@ -355,12 +357,18 @@ class AutomatedMovement
                 $finalSpeed, $heading, $facing,
                 false, $gamedata->turn, 1, $iniative
             );
-            $jinkMove->requiredThrust = array(1, 0, 0, 0, 0);
-            $jinkMove->assignedThrust = array(1, 0, 0, 0, 0);
+            $jinkMove->requiredThrust = array($jinkCost, 0, 0, 0, 0);
+            $jinkMove->assignedThrust = array($jinkCost, 0, 0, 0, 0);
             $moves[] = $jinkMove;
         }
 
         return $moves;
+    }
+
+    //Thrust a jink level costs: 1, or 2 in a nebula unless the unit is an Ancient's (NEBULA_PLAN.md #3).
+    private static function jinkCost($ship)
+    {
+        return TacGamedata::$nebulaPresent ? Nebula::jinkCostMultiplier($ship) : 1;
     }
 
     const SPEED_CAP = 20; // sanity clamp on auto-pilot speed (well above any real flight)

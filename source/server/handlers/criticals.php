@@ -79,6 +79,14 @@ class Criticals{
             EdfExposure::resolve($gamedata);
         }
 
+        /* EM_STORM_PLAN.md: the Electromagnetic Storm's roll for next turn - sensors, power, initiative, fighter OB and
+           its "attacks". BEFORE Pass 1 on purpose: an attack on a system that cannot be switched off forces its critical
+           roll at +4 (Burst Beam's table), and Pass 1 is what rolls it. Both lines inside the gate, the EDF's reason. */
+        if (TacGamedata::$emStormPresent) {
+            EMStorm::$resolvedTurn = -1;
+            EMStorm::resolveEndOfTurn($gamedata);
+        }
+
 
         /* OFFICERS_PLAN.md Stage 28 - "any critical hits caused by the expert warrior's ship gain +1 on their dice": every system his
            ship's weapons damaged this turn rolls 1 higher in Pass 1 (and in the kill roll below); taken back after it. */
@@ -115,6 +123,9 @@ class Criticals{
                 }
             }
         }
+
+        //EM_STORM_PLAN.md: the storm's forced critical rolls were just made above - write their results into its log lines
+        if (TacGamedata::$emStormPresent) EMStorm::reportForcedRolls();
 
         /* OFFICERS_PLAN.md §4.4 - an officer whose post was damaged dies on its critical roll of 20+.
            After Pass 1, which made the posts' own rolls, and before Pass 2's Self Repair. One static

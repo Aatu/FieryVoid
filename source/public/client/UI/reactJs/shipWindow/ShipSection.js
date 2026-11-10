@@ -4,6 +4,7 @@ import SystemIcon, { OfficerInsignia, EnhancementStar } from "../system/SystemIc
 import { canApplyPreBattleDamage, canApplyMineDamage } from "../system/SystemInfoButtons"
 import { SECTION_INK, MENU_CHROME } from "../system/menuControls";
 import { isMenuTarget } from "../helpers/menuTarget";
+import { isCardPinned } from "../system/SystemCard";
 import theme from "../styled/theme";
 
 /*SCS-style section panel (SHIPWINDOW_REDESIGN_PLAN.md Stage 1a): dotted panel with a
@@ -187,9 +188,9 @@ const IconArea = styled.div`
 /*Structure arc indicator (STRUCTURE_ARCS_PLAN.md): hovering (or long-pressing) a section's
   health bar draws that section's facing wedge on the 3D icon, so a player can see at a glance
   which bearings feed damage into the bar they are looking at. The header raises its OWN
-  StructureMouseOver/Out event rather than SystemMouseOver: the arc is all that's wanted here,
-  with no system-info tooltip and no interference with the weapon-arc show/hide. PhaseStrategy
-  handles it on game.php; the lobby's uiEvents handler ignores it (no map to draw on).
+  StructureMouseOver/Out event rather than SystemMouseOver, so it never disturbs the weapon-arc
+  show/hide. Both handlers (PhaseStrategy on game.php, the lobby's uiEvents handler, which has no
+  map to draw on) also open the block's Structure card from it (2026-11-08).
 
   Touch mirrors SystemIcon: 400ms hold, 10px move cancels, plus the shared
   window.lastTouchActiveTime guard against the ghost mouse events a tap emits afterwards.*/
@@ -275,8 +276,7 @@ class ShipSection extends React.Component {
         this.hideStructureArc();
     }
 
-    /*`element`: the bar, for the officers-only tooltip a block holding an officer raises with its arc (Stage 19) - the game's
-      and the lobby's handlers draw it only when officers.hasPostTooltip says so*/
+    /*`element`: the bar, which the block's Structure card opens beside (it names an Expert Targeter posted there - Stage 19)*/
     showStructureArc() {
         const { ship, systems } = this.props;
         this.arcShown = true;
@@ -294,6 +294,8 @@ class ShipSection extends React.Component {
         if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return; //ghost mouseover after a tap
 
         event.stopPropagation();
+        //crossing the bar's own parts (name, badges, readout) is not a new hover - each pair rebuilt the Structure card
+        if (event.relatedTarget && event.currentTarget.contains(event.relatedTarget)) return;
         this.showStructureArc();
     }
 
@@ -302,6 +304,7 @@ class ShipSection extends React.Component {
         if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return;
 
         event.stopPropagation();
+        if (event.relatedTarget && event.currentTarget.contains(event.relatedTarget)) return; //still on the bar
         this.hideStructureArc();
     }
 
@@ -342,7 +345,16 @@ class ShipSection extends React.Component {
             //the hold DID complete, so this touch was "show me the arc", not "damage this
             //section" - swallow the click the browser synthesises after touchend
             this.ignoreNextClick = true;
-            this.hideStructureArc();
+            if (isCardPinned()) {
+                //the block's Structure card came up pinned (2026-11-08): it and the wedge stay until the next tap outside
+                //the card, which closes both (SystemCard relays StructureMouseOut). The card owns that close now, so the
+                //bar forgets its wedge - a later hideStructureArc must not relay a stale mouse-out over another bar's card.
+                //The ghost-mouse shield restarts from the release, as SystemIcon's does.
+                this.arcShown = false;
+                window.lastTouchActiveTime = Date.now();
+            } else {
+                this.hideStructureArc();
+            }
         }
 
         setTimeout(() => {

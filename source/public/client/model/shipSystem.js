@@ -217,7 +217,12 @@ Weapon.prototype.getFiringModeDisplayName = function (fireOrder) {
 	return this.firingModes ? this.firingModes[mode] : null;
 };
 
+/* The tooltip's "Fire control" line. In a NEBULA it shows the figures the shot is actually rolled with - a bonus halved,
+   a penalty doubled (nebula.fireControl, NEBULA_PLAN.md #5) - marked "(nebula)". Every builder of that line comes through
+   here (a mode change, systems.initializeSystem's rebuild on load, an officer's display adjustment), and each passes the
+   weapon's own figures: the nebula is never applied to fireControl itself, so it cannot be applied twice. */
 Weapon.prototype.translateFCtoD100txt = function (fireControl) {
+	var nebulaActive = !!(window.nebula && nebula.isActive());
 	var FCtxt = '';
 	var i = 0;
 	var toAdd;
@@ -226,11 +231,13 @@ Weapon.prototype.translateFCtoD100txt = function (fireControl) {
 		if (fireControl[i] === null) {
 			toAdd = '-';
 		} else {
+			if (nebulaActive) toAdd = nebula.fireControl(toAdd);
 			toAdd = toAdd * 5; //d20 to d100
 		}
 		FCtxt = FCtxt + toAdd;
 		if (i < 2) FCtxt = FCtxt + '/';
 	}
+	//if (nebulaActive) FCtxt = FCtxt + ' (nebula)';
 	return FCtxt;
 }; //endof Weapon.prototype.translateFCtoD100txt
 
@@ -287,7 +294,8 @@ Weapon.prototype.changeFiringMode = function () {
 	}
 	if (!mathlib.arrayIsEmpty(this.loadingtimeArray)) this.loadingtime = this.loadingtimeArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.turnsloadedArray)) this.turnsloaded = this.turnsloadedArray[this.firingMode];
-	this.data["Loading"] = this.turnsloaded + '/' + this.loadingtime;
+	//no data["Loading"] row (removed 2026-11-08): the icon shows loading already, the server stopped sending it
+	//(weapon.php setSystemDataWindow), and `data` can be shared by same-class systems, so one weapon's numbers leaked onto its siblings
 	if (!mathlib.arrayIsEmpty(this.extraoverloadshotsArray)) this.extraoverloadshots = this.extraoverloadshotsArray[this.firingMode];
 
 	if (!mathlib.arrayIsEmpty(this.uninterceptableArray)) this.uninterceptable = this.uninterceptableArray[this.firingMode];
@@ -436,7 +444,8 @@ Weapon.prototype.updateFiringModeData = function () {
 	}
 	if (!mathlib.arrayIsEmpty(this.loadingtimeArray)) this.loadingtime = this.loadingtimeArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.turnsloadedArray)) this.turnsloaded = this.turnsloadedArray[this.firingMode];
-	this.data["Loading"] = this.turnsloaded + '/' + this.loadingtime;
+	//no data["Loading"] row (removed 2026-11-08): the icon shows loading already, the server stopped sending it
+	//(weapon.php setSystemDataWindow), and `data` can be shared by same-class systems, so one weapon's numbers leaked onto its siblings
 	if (!mathlib.arrayIsEmpty(this.extraoverloadshotsArray)) this.extraoverloadshots = this.extraoverloadshotsArray[this.firingMode];
 
 	if (!mathlib.arrayIsEmpty(this.uninterceptableArray)) this.uninterceptable = this.uninterceptableArray[this.firingMode];
@@ -793,7 +802,8 @@ Weapon.prototype.changeFiringMode = function () {
 	}
 	if (!mathlib.arrayIsEmpty(this.loadingtimeArray)) this.loadingtime = this.loadingtimeArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.turnsloadedArray)) this.turnsloaded = this.turnsloadedArray[this.firingMode];
-	this.data["Loading"] = this.turnsloaded + '/' + this.loadingtime;
+	//no data["Loading"] row (removed 2026-11-08): the icon shows loading already, the server stopped sending it
+	//(weapon.php setSystemDataWindow), and `data` can be shared by same-class systems, so one weapon's numbers leaked onto its siblings
 	if (!mathlib.arrayIsEmpty(this.extraoverloadshotsArray)) this.extraoverloadshots = this.extraoverloadshotsArray[this.firingMode];
 
 	if (!mathlib.arrayIsEmpty(this.uninterceptableArray)) this.uninterceptable = this.uninterceptableArray[this.firingMode];

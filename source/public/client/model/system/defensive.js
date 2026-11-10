@@ -81,6 +81,20 @@ EMShield.prototype.initializationUpdate = function () {
 	return this;
 };
 
+/* EM_STORM_PLAN.md - Storm Defence, a standing order: at a Deployment or Initial Orders commit, post this shield's
+   current state, [1] standing or [0] withdrawn. EMShield::generateIndividualNotes writes a note only when that differs
+   from what the server has; emStorm.js holds the rules. */
+EMShield.prototype.doIndividualNotesTransfer = function () {
+	this.individualNotesTransfer = "";
+	if (!window.emStorm || !emStorm.isEligible(this.ship, this)) return false;
+	this.individualNotesTransfer = [emStorm.isDeclared(this) ? 1 : 0];
+	return true;
+};
+
+//Save Orders: the declaration, in the two phases it is made (SAVE_ORDERS_PLAN.md §1.4).
+EMShield.prototype.draftStateKeys = ['stormDefence'];
+EMShield.prototype.draftStatePhases = [-1, 1];
+
 // GTS_Triad
 var FlareShielding = function FlareShielding(json, ship) {
 	Shield.call(this, json, ship);

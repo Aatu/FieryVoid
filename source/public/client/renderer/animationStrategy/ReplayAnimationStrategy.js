@@ -8,9 +8,11 @@ window.ReplayAnimationStrategy = function () {
         ALL: 3
     };
 
-    function ReplayAnimationStrategy(gamedata, shipIcons, scene, type) {
+    //ballisticIcons (optional): the BallisticIconContainer, so a drifting field's white terrain hexes can travel with it (animateTerrainDrift)
+    function ReplayAnimationStrategy(gamedata, shipIcons, scene, type, ballisticIcons) {
         AnimationStrategy.call(this);
         this.shipIconContainer = shipIcons;
+        this.ballisticIconContainer = ballisticIcons || null;
         this.gamedata = gamedata;
         this.turn = gamedata.turn;
         this.emitterContainer = new ParticleEmitterContainer(scene);
@@ -105,8 +107,47 @@ window.ReplayAnimationStrategy = function () {
         this.endTime = time;
     }
 
+    /* DRIFTING TERRAIN (server: TerrainDrift) - every asteroid and meteor swarm that drifted at the start of this turn
+       moves its one hex here, all of them at once and before any unit's own movement, as it happened. Each is then
+       marked done so the per-unit loop gives it no slot or camera pan of its own: with a whole field drifting that
+       would be a pan per rock. Played from the raw rows - the row before the 'drift' row is where the field stood, even
+       when that was its 'start' row, which the icon's movement list leaves out.
+       ⚠️ A field that STAYED put has a 'drift' row in its own hex (the server writes one every turn) and gets an animation
+       too - a still one. Taking a unit out of the loop takes away the one thing that places its icon in a replay: a
+       field that stayed on turn 2 kept the hex the live turn-3 board had left it on, a hex away from its white outline
+       (user report, game 4552). The drift step only takes time when something actually moved. */
+    function animateTerrainDrift(time, animatedShips) {
+        var turn = this.turn;
+        var drifts = [];
+        this.gamedata.ships.forEach(function (ship) {
+            var moves = ship.movement || [];
+            for (var i = 1; i < moves.length; i++) {
+                if (moves[i].type === 'drift' && moves[i].turn === turn) {
+                    animatedShips[ship.id] = true;
+                    var from = moves[i - 1], to = moves[i];
+                    var moved = from.position.q !== to.position.q || from.position.r !== to.position.r || from.heading !== to.heading;
+                    drifts.push({ ship: ship, from: from, to: to, moved: moved });
+                    break;
+                }
+            }
+        });
+        if (drifts.length === 0) return time;
+
+        var informative = this.type === ReplayAnimationStrategy.type.INFORMATIVE;
+        var duration = informative ? this.moveHexDuration * 2 : this.moveAnimationDuration;
+        drifts.forEach(function (drift) {
+            var icon = this.shipIconContainer.getByShip(drift.ship);
+            if (!icon) return;
+            this.animations.push(new TerrainDriftAnimation(icon, drift.from, drift.to, time, duration, this.ballisticIconContainer));
+        }, this);
+
+        var anyMoved = drifts.some(function (drift) { return drift.moved; });
+        return (informative && anyMoved) ? time + duration : time;
+    }
+
     function animateMovement(time) {
         var animatedShips = {}; // Track ships already fully processed
+        time = animateTerrainDrift.call(this, time, animatedShips);
 
         // Helper: get host ID from this ship's raw movement orders
         var self = this;
@@ -297,6 +338,69 @@ window.ReplayAnimationStrategy = function () {
         // Per-ship map of movement IDs already animated (to avoid duplicates across passes)
         var handledMovementsByShip = {};
 
+        /* Pass 0: GRAVITY WELL PULLS (GRAVITY_WELL_PLAN.md). The pull happens as Movement closes, before any
+           Pre-Firing weapon, so it plays first: each pulled unit's log line, then its drag. pulledTo keeps where the
+           drag left it, because everything after this reads positions from the movement animation, which stops where
+           the unit's OWN movement ended: Passes 1 and 2 start a later forced move from it, and Pass 2 plays the hits
+           there - so a unit dragged into the well is struck in the well's hex, after the drag. */
+        var pulledTo = {};
+        var isGravityPull = function (fire) {
+            return fire.fireOrder && fire.fireOrder.damageclass === 'GravityWellPull';
+        };
+
+        shipList.forEach(function (ship) {
+            var icon = this.shipIconContainer.getByShip(ship);
+            if (!icon || !icon.preFireMovements) return;
+            var pulls = icon.preFireMovements.filter(function (m) { return m.type === 'gravity'; });
+            if (pulls.length === 0) return;
+
+            var startBase = icon.getEndMovementOnTurn(this.turn) || icon.getLastMovementOnTurn(this.turn);
+            if (!startBase) return;
+
+            var lineAnimation = new AllWeaponFireAgainstShipAnimation(
+                ship,
+                this.shipIconContainer,
+                this.emitterContainer,
+                this.gamedata,
+                time,
+                this.scene,
+                this.movementAnimations,
+                logAnimation,
+                true,
+                { fireOrderFilter: isGravityPull }
+            );
+            this.animations.push(lineAnimation);
+
+            var pullMoveTime = time + lineAnimation.getDuration();
+            var currentStartState = {
+                position: new hexagon.Offset(startBase.position),
+                facing: startBase.facing,
+                heading: startBase.heading
+            };
+            handledMovementsByShip[ship.id] = handledMovementsByShip[ship.id] || [];
+
+            pulls.forEach(function (movement) {
+                var endState = {
+                    position: new hexagon.Offset(movement.position),
+                    facing: movement.facing,
+                    heading: movement.heading
+                };
+                var pullAnimation = new PreFireMovementAnimation(icon, currentStartState, endState, pullMoveTime, this.moveHexDuration);
+                this.animations.push(pullAnimation);
+                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                    pullMoveTime += pullAnimation.getDuration();
+                }
+                currentStartState = endState;
+                handledMovementsByShip[ship.id].push(movement.id);
+            }, this);
+
+            pulledTo[ship.id] = currentStartState;
+
+            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                time = pullMoveTime;
+            }
+        }, this);
+
         // Pass 1: Hex Targeted PreFire (always first, matching animateWeaponFire ordering)
         var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
         // Track which hex fire order IDs are handled in prefire so animateWeaponFire can skip them
@@ -387,8 +491,8 @@ window.ReplayAnimationStrategy = function () {
                 // If this ship has preFire movements, animate them after the hex animation.
                 var shooterIcon = this.shipIconContainer.getByShip(ship);
                 if (shooterIcon && shooterIcon.preFireMovements && shooterIcon.preFireMovements.length > 0) {
-                    // Get the starting state for this ship (end of normal movement on this turn)
-                    var startBase = shooterIcon.getEndMovementOnTurn(this.turn);
+                    // Get the starting state for this ship (end of normal movement on this turn - or of a Gravity Well's pull, Pass 0)
+                    var startBase = pulledTo[ship.id] || shooterIcon.getEndMovementOnTurn(this.turn);
                     if (!startBase) {
                         startBase = shooterIcon.getLastMovementOnTurn(this.turn);
                     }
@@ -466,7 +570,14 @@ window.ReplayAnimationStrategy = function () {
                 this.scene,
                 this.movementAnimations,
                 logAnimation,
-                true
+                true,
+                {
+                    //a pulled unit's pull line already played in Pass 0, and it is struck where the pull left it
+                    fireOrderFilter: function (fire) {
+                        return !(pulledTo[ship.id] && isGravityPull(fire));
+                    },
+                    shiftedTo: pulledTo
+                }
             );
 
             this.animations.push(perShipAnimation);
@@ -477,8 +588,8 @@ window.ReplayAnimationStrategy = function () {
 
             if (preFireMovements.length > 0) {
 
-                // Base starting state is the ship's end-of-movement position on this turn
-                var startBase = perShipAnimation.shipIcon.getEndMovementOnTurn(this.turn);
+                // Base starting state is the ship's end-of-movement position on this turn (or where Pass 0's pull left it)
+                var startBase = pulledTo[ship.id] || perShipAnimation.shipIcon.getEndMovementOnTurn(this.turn);
                 if (!startBase) {
                     startBase = perShipAnimation.shipIcon.getLastMovementOnTurn(this.turn);
                 }
@@ -896,6 +1007,8 @@ window.ReplayAnimationStrategy = function () {
     }
 
     function animateShipDestruction(time, logAnimation) {
+        var passStart = time; //when a section lost with no shot animated for it comes off - see animateSectionLoss
+
         this.gamedata.ships.filter(function (ship) {
 //GTS_Triad
 //            return shipManager.getTurnDestroyed(ship) === this.turn && !ship.flight && !ship.mine;
@@ -973,7 +1086,69 @@ window.ReplayAnimationStrategy = function () {
             this.shipIconContainer.getByShip(ship).hideFighters(fightersToHide);
         }, this);
 
+        animateSectionLoss.call(this, passStart);
+
         return time;
+    }
+
+    /* Destroyed sections on the hull art (ShipIcon.setLostSections), the hull's equivalent of the
+       fighter hiding just above. The replay opens with the sections lost on EARLIER turns already
+       torn away; each one lost THIS turn comes off the moment the shot that destroyed it lands - the
+       instant its "... STRUCTURE" text pops, which the fire animations already built above recorded
+       (AllWeaponFireAgainstShipAnimation.getSectionLosses). A loss no animated shot announces - a
+       collision, damage with no fire animation of its own - falls back to fallbackTime, the start of
+       the destruction pass. Time-driven rather than set once, so a rewind puts sections back. */
+    function animateSectionLoss(fallbackTime) {
+        var turn = this.turn;
+
+        var shotOff = {}; //shipId -> location -> earliest time a fire animation shows it destroyed
+        this.animations.forEach(function (animation) {
+            if (typeof animation.getSectionLosses !== 'function') return;
+            animation.getSectionLosses().forEach(function (loss) {
+                var times = shotOff[loss.shipId] || (shotOff[loss.shipId] = {});
+                if (times[loss.location] === undefined || loss.time < times[loss.location]) times[loss.location] = loss.time;
+            });
+        });
+
+        var entries = [];
+
+        this.gamedata.ships.forEach(function (ship) {
+            if (ship.flight) return;
+            var icon = this.shipIconContainer.getByShip(ship);
+            if (!icon) return;
+
+            var before = ShipIcon.getLostSections(ship, turn);
+            icon.setLostSections(before);
+
+            var times = shotOff[ship.id] || {};
+            var losses = ShipIcon.getLostSections(ship, turn + 1).filter(function (location) {
+                return before.indexOf(location) === -1;
+            }).map(function (location) {
+                return { location: location, time: times[location] !== undefined ? times[location] : fallbackTime };
+            }).sort(function (a, b) { return a.time - b.time; });
+
+            if (losses.length) entries.push({ icon: icon, before: before, losses: losses, shown: 0 });
+        }, this);
+
+        if (entries.length === 0) return;
+
+        this.animations.push({
+            update: function () { },
+            cleanUp: function () { },
+            getDuration: function () { return 0; },
+            render: function (now, total) {
+                entries.forEach(function (entry) {
+                    //losses are in time order, so what is off at `total` is always a leading run of them
+                    var shown = 0;
+                    while (shown < entry.losses.length && total >= entry.losses[shown].time) shown++;
+                    if (shown === entry.shown) return;
+                    entry.shown = shown;
+                    entry.icon.setLostSections(entry.before.concat(entry.losses.slice(0, shown).map(function (loss) {
+                        return loss.location;
+                    })).sort(function (a, b) { return a - b; }));
+                });
+            }
+        });
     }
 
     function setMovementAnimationDuration(moveAnimation) {
@@ -1061,6 +1236,29 @@ window.ReplayAnimationStrategy = function () {
     PreFireMovementAnimation.prototype.cleanUp = function (scene) {
         // No persistent resources to clean up - this animation only manipulates
         // the shipIcon which is managed elsewhere
+    };
+
+    /* A drifting field's one hex (animateTerrainDrift): its icon exactly as PreFireMovementAnimation moves it, AND its white
+       terrain hexes with it. Those are built by BallisticIconContainer where the drift ENDS, so on their own the replay
+       opened with the hexes already a hex ahead of the rock (user report 2026-11-08). They follow the hex CENTRE between
+       the two rows, not the icon, which may sit offset in a shared hex. The container puts them back on their own hex
+       whenever it next regenerates, so leaving a replay mid-drift leaves nothing displaced. */
+    function TerrainDriftAnimation(shipIcon, startState, endState, startTime, duration, ballisticIconContainer) {
+        PreFireMovementAnimation.call(this, shipIcon, startState, endState, startTime, duration);
+        this.ballisticIconContainer = ballisticIconContainer || null;
+    }
+
+    TerrainDriftAnimation.prototype = Object.create(PreFireMovementAnimation.prototype);
+
+    TerrainDriftAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
+        PreFireMovementAnimation.prototype.render.call(this, now, total, last, delta, zoom, back, paused);
+        if (!this.ballisticIconContainer || total < this.time) return; //before its window, as the icon
+
+        var t = this.duration > 0 ? (total - this.time) / this.duration : 1;
+        t = Math.max(0, Math.min(1, t));
+        var from = window.coordinateConverter.fromHexToGame(this.startState.position);
+        var to = window.coordinateConverter.fromHexToGame(this.endState.position);
+        this.ballisticIconContainer.placeTerrainOverlay(this.shipIcon.shipId, mathlib.getPointBetween(from, to, t));
     };
 
     /* //Old version before Pre-Firing - DK Nov 2025

@@ -8,12 +8,13 @@ class BuyingGamePhase implements Phase
         $servergamedata = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
 
         $randomTerrain = $gameData->rules->hasRuleName("asteroids") || $gameData->rules->hasRuleName("moons")
-            || $gameData->rules->hasRuleName("dustAndMeteors");
+            || $gameData->rules->hasRuleName("dustAndMeteors") || $gameData->rules->hasRuleName("gravityWell");
 
         if ($randomTerrain){
             // Sort ships to prioritise placing larger terrain first
             usort($servergamedata->ships, function($a, $b) {
                 $getWeight = function($ship) {
+                    if ($ship instanceof GravityWell) return 100; //first of all: everything else keeps its distance from it
                     if ($ship instanceof moonLarge) return 90;
                     if ($ship instanceof moonNew) return 80;
                     if ($ship instanceof moonSmallNew) return 70;
@@ -171,7 +172,17 @@ class BuyingGamePhase implements Phase
         }
 
         foreach ($servergamedata->ships as $ship) {
-            if ($randomTerrain && $ship->userid == -5 && !isset($placedByLayout[$ship->id])) {
+            if ($ship instanceof DustZone) {
+                //The Dust Zone's unit is no part of the map: parked off it, never in the random pass.
+                $ship->movement = array(new MovementOrder(-1, "start", DustZone::getParkingHex(), 0, 0, 0, 0, 0, true, 1, 0, 0));
+            } else if ($randomTerrain && $ship->userid == -5 && $ship instanceof GravityWell && !isset($placedByLayout[$ship->id])) {
+                /* Create Game's Gravity Well (GRAVITY_WELL_PLAN.md R4): near the centre, and registered as a moon is, so
+                   the moons placed after it keep 7 hexes from it and the asteroids 4. */
+                $center = $this->getGravityWellHex($this->getGamespace($gameData), $terrainOccupiedHexes);
+                $moonPositions[] = [$center->q, $center->r];
+                $terrainOccupiedHexes[] = $center->q . "," . $center->r;
+                $ship->movement = array(new MovementOrder(-1, "start", $center, 0, 0, 0, 0, 0, true, 1, 0, 0));
+            } else if ($randomTerrain && $ship->userid == -5 && !isset($placedByLayout[$ship->id])) {
                 // It's an asteroid or moon, so assign a unique random position.
                 $deploymentZone = $this->getGamespace($gameData);
 
@@ -309,6 +320,38 @@ class BuyingGamePhase implements Phase
     private function isMoon($ship)
     {
         return ($ship instanceof moonSmallNew) || ($ship instanceof moonNew) || ($ship instanceof moonLarge);
+    }
+
+    /* The random Gravity Well's hex (GRAVITY_WELL_PLAN.md R4): inside the central ellipse the 25% Dust clump grows in -
+       semi-axes a quarter of the map's width and height, so a quarter of its area - and at least 3 hexes from any
+       terrain a map template has already placed. Failing that, the most open hex it tried. */
+    private function getGravityWellHex($space, $occupiedHexes)
+    {
+        $semiX = max(1, $space['width'] / 4);
+        $semiY = max(1, $space['height'] / 4);
+        $occupied = array();
+        foreach ($occupiedHexes as $key) {
+            list($q, $r) = explode(',', $key);
+            $occupied[] = new OffsetCoordinate((int)$q, (int)$r);
+        }
+
+        $best = new OffsetCoordinate(0, 0);
+        $bestClearance = -1;
+        for ($attempt = 0; $attempt < 200; $attempt++) {
+            $q = rand(-(int)floor($semiX), (int)floor($semiX));
+            $r = rand(-(int)floor($semiY), (int)floor($semiY));
+            if (pow($q / $semiX, 2) + pow($r / $semiY, 2) > 1) continue;
+
+            $hex = new OffsetCoordinate($q, $r);
+            $clearance = PHP_INT_MAX;
+            foreach ($occupied as $other) $clearance = min($clearance, Mathlib::getDistanceHex($hex, $other));
+            if ($clearance >= 3) return $hex;
+            if ($clearance > $bestClearance) {
+                $best = $hex;
+                $bestClearance = $clearance;
+            }
+        }
+        return $best;
     }
 
     /* TerrainLayoutRule: one unit per pre-placed entry (advance() puts each on its hex). Named in
@@ -674,6 +717,11 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                             $enhName = Enhancements::getStoredEnhancementName($ship, $enhancementEntry); //choice-valued options store the PICK here, not the label
                             $enhNo = $enhancementEntry[2];
                             if ($enhNo > 0){ //actually taken
+                                /* Low Crew Training: the scenario's d6 is rolled HERE, once per ship (each
+                                   copy of a bulk its own), and stored as the row's enhname - the label
+                                   Enhancements::lowCrewTrainingLabel gives that result, read back on every load.
+                                   Never at getStoredEnhancementName: a saved fleet goes through that too. */
+                                if ($enhID === 'LOW_TRAIN') $enhName = Enhancements::rollLowCrewTraining($ship);
                                 $dbManager->submitEnhancement($gameData->id, $id, $enhID, $enhNo, $enhName);
                             }
                         }
@@ -811,6 +859,17 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
             if ($gameData->rules->hasRuleName("dustAndMeteors") && $slot->slot == 1) {
                 $dmData = $gameData->rules->getRuleByName('dustAndMeteors')->jsonSerialize();
                 $this->addDustAndMeteors($gameData, $dbManager, (int)$dmData['dust'], (int)$dmData['meteors'], $slot->slot, $named['dust'], $named['meteors']);
+            }
+
+            //The Dust Zone (DustZoneRule): its dust is the rule's hexes, and this one hidden unit owns the damage.
+            if ($gameData->rules->hasRuleName("dustZone") && $slot->slot == 1) {
+                $dbManager->submitShip($gameData->id, new DustZone($gameData->id, -5, "Dust", $slot->slot), -5);
+            }
+
+            //One Gravity Well (GravityWellRule) of the chosen strength - an ordinary GravityWell unit, placed in advance().
+            if ($gameData->rules->hasRuleName("gravityWell") && $slot->slot == 1) {
+                $wellClass = $gameData->rules->getRuleByName('gravityWell')->getGravityWellClass();
+                if ($wellClass) $dbManager->submitShip($gameData->id, new $wellClass($gameData->id, -5, "Gravity Well", $slot->slot), -5);
             }
 
         }
