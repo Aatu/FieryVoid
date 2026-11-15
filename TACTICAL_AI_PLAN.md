@@ -2,7 +2,7 @@
 
 Status: **Stage T0 COMPLETE (committed 2026-11-13, 5807979b8, play-tested in game 4568; as-built
 notes: section 10.1). Stage T1a COMPLETE (committed 2026-11-13, 9537a8b72, Auto-Deploy play-tested
-by the user; section 10.2). Stage T1b COMPLETE (2026-11-13, uncommitted; harnesses and self-play green, play-tested by the user in game 4626; section 10.3).** T2 onward not started. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
+by the user; section 10.2). Stage T1b COMPLETE (2026-11-13, uncommitted; harnesses and self-play green, play-tested by the user in game 4626; section 10.3). Stage T2 BUILT (2026-11-14, uncommitted; harnesses green, not yet play-tested by the user; one part of its "done when" is open - section 10.4).** T3 onward not started. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
 layer, which uses this for battles against NPCs - see its section 7) and `STRATEGIC_AI_PLAN.md` (what
 NPC empires do on the campaign map).
 
@@ -462,7 +462,7 @@ unchanged) and the self-play harness.
 | **T0 Skeleton** ✅ COMPLETE | `Features` helper and the `cpuOpponent` off switch (first), `db/cpuOpponent.sql` (bot accounts, `cpu` column, `tac_ai_state`, `tac_ai_log`), `submitShipsForPlayer` split, the extracted ship builder, CPU slot in Create Game and the creator-built fleet path (8.1) behind the flag, `AIDriver`, fallback orders for every phase, self-play CLI harness, the flag-off harness (section 2) | With the flag off nothing is visible or reachable and the replay harness is byte-identical; with it on, the creator buys a fleet for a CPU slot and two bots play a full game to FINISHED on fallbacks with zero rejected submissions |
 | **T1a Deployer + Auto-Deploy** ✅ COMPLETE | `FleetDeployer` (battlegroups, formation, legality), `autoDeploy.php`, the Auto-Deploy button and panel behind the `autoDeploy` flag, `DeployDecider` calling the same service; `deployerHarness.php` (every plan across zone shapes, terrain and fleet mixes passes `validateDeploymentArea`; deterministic; never touches placed units unless asked) | A player clicks Auto-Deploy, gets a legal formation, adjusts it and commits by hand; the phase is never committed for them. **Releasable to players on its own** |
 | **T1b ShipMover** ✅ COMPLETE (uncommitted) | `ShipMover` for standard hulls (speed, straight, turns, slips, thruster allocation) | `shipMoverHarness` clean for all EA and raider hulls |
-| **T2 Firing** | engagement table, `FireDecider`, interception reserve | Bots destroy each other; a human loses to an EA bot by standing still |
+| **T2 Firing** ✅ BUILT (uncommitted, 10.4) | engagement table, `FireDecider`, interception reserve | Bots destroy each other; a human loses to an EA bot by standing still |
 | **T3 EW and power** | `EWDecider`, `PowerDecider` (negative-power handling) | Bot EW passes `validateEW` in every self-play turn; hit rates rise measurably versus T2 |
 | **T4 Ballistics and fighters** | `BallisticDecider`; flight tactics on top of `AutomatedMovement` (escort, strike, intercept) | Missile and carrier fleets fight sensibly |
 | **T5 Movement search** | `MoveDecider` scoring, range bands, terrain (drifting too) and mine avoidance, pivots and rolls, gravitic hulls | Hard beats Normal beats Easy in self-play ladders at >= 60% |
@@ -658,6 +658,92 @@ regenerated with phpab for the two new classes.
   * Flights still fly straight (and so off the map): their moves are `AutomatedMovement`'s, T4.
   * ShipMover re-reads its rows on every question - simple, and slow for a deep search.
 
+### 10.4 Stage T2 as built (2026-11-14) - BUILT, uncommitted, not yet play-tested
+
+No flag of its own, no migration. `source/autoload.php` regenerated for the two new classes.
+
+* **`source/server/ai/AIView.php`** - the engagement table. `myUnits()`, `enemies()`,
+  `unitBlock()` / `weaponBlock()` (why the bot leaves a unit's or a weapon's guns alone, or null),
+  `modes()`, `shot($unit, $weapon, $target, $mode)` (null, or chance / orders / shots / damage
+  class / expected damage), `why()`, `value()`, `healthLeft()`, `threat()`. Hit chance is
+  `Weapon::calculateHitBase` on a tentative order, never re-derived.
+* **⚠️ Firing legality is the CLIENT's too** (the same finding as 10.3, for the other phase).
+  `Firing::validateFireOrders` only checks that the weapon id names a weapon; arc, range, line of
+  sight, "loaded", "switched on", "destroyed" and the fire-control nulls are asked by
+  `weaponManager.selectWeapon` / `targetShip` alone, and the server resolves whatever it is sent.
+  So `AIView::shot` is a PORT of those two functions, and the harness has two halves:
+  * `tests/ai/fireHarness.php` (no database): every hull - flights, bases and OSATs included - at
+    the origin with four enemies (Omega, OlympusBeta, Tethys, a Starfury flight) at random ranges
+    (the same hex included), bearings and facings; EW as a commit leaves it; weapons empty, off or
+    shot away; rolled; disabled; a rock in the line. Asks AIView about every weapon x mode x enemy,
+    runs `FireDecider::plan`, and pushes its entries through `ShipPayload` + `validateFireOrders`.
+  * `tests/ai/fireOracle.js` (node, host): loads the REAL client (`weaponManager.js`, `ew.js`,
+    the `Ship` / system / weapon models and what they lean on), builds each game from the stripped
+    gamedata + `BlueprintCache` blueprints as `model/ship.js` does, and clicks every pairing.
+    A shot AIView has must come out of the page as the same orders (count, mode, shots, damage
+    class) at the same hit chance; a pairing AIView refuses for geometry or weapon state the page
+    must refuse; every PLANNED shot must be one the page builds.
+  * Result, EA + raiders: **178 hulls, 1,068 situations, 54,300 pairings: 5,376 shots built
+    identically, 34,195 refused by both, 2,888 planned shots all page-legal, 0 differences.**
+    Hit chance agrees to the percent on 5,289 of 5,437 orders; the other 148 are the edge case below.
+    Mutation pass (12 broken copies of AIView): 11 caught, every one ONLY by the client replay;
+    the twelfth (a disabled ship firing) had no situation then and has one now.
+  * **All 2,656 hulls of every faction (informational, `--factions=all --rounds=2`): 239,358
+    pairings, 23,065 shots agree, 1,026 differences** - special weapons whose rules live in their
+    own client class (Chaff Launcher, Quad Pulsar and others). That is what the readiness list
+    (section 7) is for. ⚠️ Nothing enforces that list before T8: a creator can buy any faction for
+    a CPU slot today, and a non-EA / raider bot will fire with a port that is not proven for it.
+* **What the bot fires (principle P4).** Loaded direct-fire weapons with nothing special about
+  them, uncalled, at an enemy, in the best of the weapon's firing modes. Left alone: ballistics
+  (T4), ramming, boarding, jump engines, hex-targeted, pre-firing, split-shot, split / special
+  arcs, linked groups, exclusive weapons, Support, limited ammunition, special hit or range
+  calculation, fixed fire control, compound (dual / duo) weapons, anything overloading. Units
+  left alone: disabled, stealth hulls, mines, Hunter-Killers, attached or skin-dancing units,
+  units jumping out or riding a docking bay. A Heavy Laser that is not overloading is a plain gun.
+* **Flags the page reads are often protected on the server**, and one has a default that means
+  nothing (`Weapon::$specialArcs` is true on every weapon). `AIView::flag` reads a public
+  property as it is and anything else only from the weapon's own `stripForJson` - what the page
+  is actually sent. Some flags exist ONLY in the client's weapon classes (`hasSpecialTargeting`
+  ...): the server cannot see those at all, and only the oracle finds them.
+* **The edge case.** A shooter exactly on a line between two of the target's sections (every
+  30 degrees round it): the defender chooses the section hit, so the server prices the shot on
+  the section it picks while the page uses the forward / aft profile - up to 15 points apart,
+  either way (a difference that exists for human players too). `AIView::onEdge` marks such
+  shots and `FireDecider` wants `FIRE_MIN_CHANCE_EDGE` (20) for them, so it never posts one the
+  page would have refused as "no chance".
+* **Two tests for "disabled".** The server never calls an OSAT disabled; the page can. The page
+  all but never calls a base disabled; the server can. The bot fires only when both let it.
+* **`ai/deciders/FireDecider.php`** - greedy: the best shot on the board is taken, its expected
+  damage booked on the target, the rest judged again. Score = worth (share of the target the
+  volley should remove x the target's value) x focus (`FIRE_FOCUS`, until the plan kills the
+  target `FIRE_OVERKILL` times over) x threat (`FIRE_THREAT_WEIGHT`). Thresholds
+  `FIRE_MIN_CHANCE` 5, `FIRE_MIN_CHANCE_SLOW` 20 for a weapon that takes more than a turn to load.
+  **Interception reserve:** a gun with an intercept rating that gets no order is used by
+  `Firing::automateIntercept`, so holding back is not ordering - one interceptor per incoming
+  ballistic shot (`FIRE_RESERVE_PER_BALLISTIC`), and any interceptor with no offensive shot of
+  `FIRE_INTERCEPTOR_MIN_CHANCE` (30) or better.
+* **The masked view (P2, 3.2 step 2) starts here:** `FireDecider::orders` runs
+  `prepareForPlayer()` on the bot's own load before deciding (the object is thrown away after).
+  Deployment and Movement still decide on the unmasked load, as in T1.
+* `AIOrderBuilder::fire` writes the row `targetShip` builds (one per gun; `x` / `y` the strings
+  "null", as the page sends them). `TacticalAI` logs one `decision` line per Fire phase to
+  `tac_ai_log` ("12 weapons at 2 of 4 enemies; 6 held to intercept").
+* **Gates, 2026-11-14:** self-play both movement modes with no refused submission and no defect;
+  `cpuLobbyHarness`, `flagOffHarness`, `deployerHarness` (195) green; replay check 203/205
+  (4504 and 4507, the played-on games, as before). `selfPlayHarness` gained `--map=WxH`.
+* **⚠️ OPEN - the "done when" is half met.** The bots shoot each other whenever they are in
+  range (a kept 42x30 game: 24 orders, 18 hits on turn 3; a Hyperion took 231 damage over the
+  game), but T1b's movement only holds a course: the fleets pass, fly to opposite edges, come
+  round and meet again about every 11 turns. Four 42x30 games all reached the 40-turn cap; on a
+  24x16 map one of three was fought to a finish (54 turns). So "bots destroy each other" happens
+  slowly, and "a human loses by standing still" has not been tried. Closing on the enemy is
+  MoveDecider scoring - stage T5 in the table above. **Needs a ruling:** bring a minimal "close
+  with the nearest enemy" term forward, or leave it to T5.
+* **Left for later stages:** called shots; holding a slow weapon for a better shot next turn
+  (T5's look-ahead); levels (Easy's "no focus-fire" is one constant); the pre-flight validators of
+  3.2 step 5 (the harness proves the orders instead); `threat()` prices an enemy weapon in its
+  current mode and ignores whether it is loaded.
+
 ---
 
 ## 11. Testing
@@ -667,7 +753,7 @@ regenerated with phpab for the two new classes.
   rejected submission, no validator finding, no PHP warning, the game ended. Run in batches across
   faction pairs and seeds. This doubles as a fuzz test of the engine itself - expect it to find real
   FV bugs; report them, do not fold fixes into AI work without asking.
-* **`shipMoverHarness.php`**: section 5.4.
+* **`shipMoverHarness.php`**: section 5.4. **`fireHarness.php` + `fireOracle.js`**: section 10.4.
 * **Ladder harness**: win rates between levels and against a frozen previous AI version, to catch
   regressions in play strength.
 * **Masking test**: run a decider with the unmasked object swapped in; decisions must not change

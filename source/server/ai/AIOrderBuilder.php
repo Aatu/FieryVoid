@@ -72,6 +72,27 @@ class AIOrderBuilder
         );
     }
 
+    /* One fire order, in the shape weaponManager.targetShip builds it. A weapon with several guns
+       posts one of these per gun. The page sends the strings "null" for the hex of a shot aimed
+       at a unit, and so does this. */
+    public static function fire($shooterid, $targetid, $weaponid, $turn, $firingMode, $shots, $damageclass, $type = 'normal')
+    {
+        return array(
+            'id' => -1,
+            'type' => $type,
+            'shooterid' => (int)$shooterid,
+            'targetid' => (int)$targetid,
+            'weaponid' => (int)$weaponid,
+            'calledid' => -1,
+            'turn' => (int)$turn,
+            'firingMode' => (int)$firingMode,
+            'shots' => (int)$shots,
+            'x' => 'null',
+            'y' => 'null',
+            'damageclass' => $damageclass
+        );
+    }
+
     //The entries -> the ship array a Phase::process() takes.
     public static function build(array $entries)
     {

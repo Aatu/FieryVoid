@@ -6,9 +6,8 @@
  * Manager::submitShipsForPlayer - the body a browser's POST runs, line for line. Nothing in a
  * phase, handler or rule knows a bot is there (principle P1).
  *
- * STAGE T0: there are no deciders yet, so the decision IS the fallback (AIFallback). The stages
- * that add deciders slot in at the marked line of play(); the fallback then becomes what a
- * refused decision is replaced with.
+ * A phase with a decider (Deployment, Movement, Firing so far) plays its decision; a phase without
+ * one plays the fallback (AIFallback), which is also what a refused decision is replaced with.
  *
  * A refusal is an AI defect and is logged as one (tac_ai_log, kind 'defect'). A bot refused
  * AIConfig::STALL_LIMIT times at the same point of the game surrenders its seat, so a human is
@@ -50,16 +49,24 @@ class TacticalAI
 
         /* The decision. A phase with a decider uses it; a phase without one, a decider that threw,
            and any retry after a refusal play the fallback (principle P3). Deciders so far:
-           Deployment (stage T1a), Movement (stage T1b - holds course, steers clear of terrain). */
+           Deployment (stage T1a), Movement (stage T1b - holds course, steers clear of terrain),
+           Firing (stage T2 - direct fire; it masks $gamedata in place, as the view of the bot's
+           own player, which is why the fallback below reads nothing a mask touches). */
         $entries = null;
+        $summary = null;
         if ($refusals == 0) {
             try {
                 if ($phase == -1) $entries = DeployDecider::orders($gamedata, $botId, $seat);
                 else if ($phase == 2) $entries = MoveDecider::orders($gamedata, $botId, $seat);
+                else if ($phase == 3) {
+                    $entries = FireDecider::orders($gamedata, $botId, $seat);
+                    $summary = FireDecider::$lastSummary;
+                }
             } catch (Throwable $e) {
                 Debug::error($e);
-                $db->aiLog($gameid, $botId, $turn, $phase, 'defect', 'Decider threw: ' . get_class($e) . ': ' . $e->getMessage(), AIConfig::LOG_CAP);
+                $db->aiLog($gameid, $botId, $turn, $phase, 'defect', 'Decider threw: ' . get_class($e) . ': ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')', AIConfig::LOG_CAP);
                 $entries = null;
+                $summary = null;
             }
         }
         if ($entries === null) $entries = AIFallback::orders($gamedata, $botId);
@@ -69,6 +76,7 @@ class TacticalAI
         $error = self::submit($gameid, $botId, $turn, $phase, $activeship, $ships, '');
 
         if ($error === null) {
+            if ($summary !== null) $db->aiLog($gameid, $botId, $turn, $phase, 'decision', $summary, AIConfig::LOG_CAP);
             if ($refusals > 0) {
                 unset($state['stall']);
                 $db->setAiState($gameid, $botId, $turn, $state);
