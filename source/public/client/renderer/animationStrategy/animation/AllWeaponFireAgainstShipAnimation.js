@@ -13,6 +13,9 @@ window.AllWeaponFireAgainstShipAnimation = function () {
      *                     all call webglScene.moveCameraTo every frame, and the last one in the
      *                     animation array simply wins.
      *   damageIndex     - shared reverse damage map, see getAllFireOrdersForDisplayingAgainst.
+     *   shiftedTo       - Pre-Firing only: ship id -> {position} for units a forced move has already
+     *                     shifted earlier in the replay (a Gravity Well's pull, ReplayAnimationStrategy
+     *                     Pass 0). They are drawn there, not where their own movement ended.
      */
     function AllWeaponFireAgainstShipAnimation(ship, shipIconContainer, particleEmitterContainer, gamedata, time, scene, movementAnimations, logAnimation, prefire = false, opts = {}) {
         Animation.call(this);
@@ -28,6 +31,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         this.movementAnimations = movementAnimations;
         this.logAnimation = logAnimation;
         this.prefire = prefire;
+        this.shiftedTo = opts.shiftedTo || null;
 
         var incomingFire;
         if (!prefire) {
@@ -260,8 +264,10 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         var animationType = weapon.animationArray[incomingFire.firingMode] || weapon.animation;
         var animationColor = weapon.animationColorArray[incomingFire.firingMode] || weapon.animationColor;
         var startLocationTime = startTime;
+        var fromLaunchHex = false;
         if (weapon.ballistic && (!weapon.hasSpecialLaunchHexCalculation && incomingFire.fireOrder.targetid !== incomingFire.fireOrder.shooterid)) {//Some weapons target own ship e.g. Shield Reinforcement)) {
             startLocationTime = 0;
+            fromLaunchHex = true;
         }
 
         var weaponOrigin;
@@ -271,6 +277,15 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.fireOrders[0].x, weapon.fireOrders[0].y));//First fire order for Prox. laser is hextargeted, use this as origin.		
         } else if (weapon.specialPosNoLauncher && weapon.fireOrders.targetid != -1) { //BL Launcher - So that Mine comes from hex it lands in.
             weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.fireOrders[0].x, weapon.fireOrders[0].y));
+        } else if (shipManager.isHiddenUnit(incomingFire.shooter)) {
+            //The Dust Zone's unit is parked far off the map; the dust is all round the unit it struck. From the
+            //parking hex a trail ran ~23s (MissileEffect: distance / speed) - from here it is a brief impact.
+            weaponOrigin = getShipPositionAtTime.call(this, this.shipIcon, startTime);
+        } else if (fromLaunchHex) {
+            //A ballistic leaves from its LAUNCH hex, where the movement animation starts (time 0) - before any of the
+            //turn's movement, so before any forced move too. The forced-move positions in getShipPositionAtTime below
+            //are for a ship as it stands later in the turn: they drew a pulled ship's missiles from the dragged-to hex.
+            weaponOrigin = FireAnimationHelper.getShipPositionAtTime(this.shipIconContainer.getByShip(incomingFire.shooter), 0, this.movementAnimations);
         } else { //Everything else
             weaponOrigin = getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime);
         }
@@ -517,9 +532,28 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         return incomingFire.damagesCaused.filter(damage => damage.destroyed)
             .map(damage => ({
                 name: shipManager.systems.getDisplayName(damage.system),
-                structure: damage.system instanceof Structure
+                structure: damage.system instanceof Structure,
+                section: getLostSection(damage, incomingFire)
             }));
     }
+
+    /* A destroyed NON-primary structure block is a section torn off the hull art
+       (ShipIcon.setLostSections). Tagging it on the floating-text entry lets SystemDestroyedEffect
+       note WHEN that text pops - the moment the killing shot lands - and the replay drops the section
+       off the icon at exactly that moment (ReplayAnimationStrategy.animateSectionLoss, which reads it
+       back through getSectionLosses). */
+    function getLostSection(damage, incomingFire) {
+        if (!(damage.system instanceof Structure) || damage.system.location == 0) return null;
+        return {
+            shipId: damage.system.ship ? damage.system.ship.id : incomingFire.fireOrder.targetid,
+            location: damage.system.location
+        };
+    }
+
+    //[{ shipId, location, time }] for every section this animation shows being shot off.
+    AllWeaponFireAgainstShipAnimation.prototype.getSectionLosses = function () {
+        return this.systemDestroyedEffect ? this.systemDestroyedEffect.getSectionLosses() : [];
+    };
 
     function getSystemNamesCriticals(incomingFire) {
         const turn = incomingFire.fireOrder.turn;
@@ -533,7 +567,9 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                 damage.damageclass !== "ThirdspaceShield"
                 && damage.damageclass !== "ThoughtShield"
                 && damage.damageclass !== "TrekShieldProjection"
+                && damage.damageclass !== "TrekShieldFtr"
                 && damage.damageclass !== "Tendril"
+                && damage.damageclass !== "TendrilFtr"
             )
             .filter(damage =>
                 shipManager.criticals.sufferedCritThisTurn(damage.system, turn)
@@ -606,6 +642,9 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         if (!this.prefire && icon.preFireMovements && icon.preFireMovements.length > 0) {
             var lastMove = icon.preFireMovements[icon.preFireMovements.length - 1];
             return window.coordinateConverter.fromHexToGame(lastMove.position);
+        }
+        if (this.shiftedTo && this.shiftedTo[icon.shipId]) {
+            return window.coordinateConverter.fromHexToGame(this.shiftedTo[icon.shipId].position);
         }
         return FireAnimationHelper.getShipPositionAtTime(icon, time, this.movementAnimations);
     }

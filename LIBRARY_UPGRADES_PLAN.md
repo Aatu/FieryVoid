@@ -12,6 +12,9 @@ Status (2026-10-08):
 - **Committed (cef9d634d):** local Docker on `php:8.4-fpm` (§2.1) and the React build-mode config (§5.1).
 - **BUILT 2026-10-08, uncommitted:** the `round()` fix on both sides (§2.4, options A and B), the pollStats fix (§2.3 #1),
   React 19.3 (§5.2) and THREE r186 with its two fixes (§4). Verification for each is in its section.
+- **2026-11-06: THREE pinned back to r160** (§4.4). r186 reached live on 2026-11-03 and locked out a
+  player whose graphics only support WebGL 1. The upgrade to r186 is still planned: §4.4 lists what to
+  do before trying it again.
 - Still open: §6.
 
 ## 1. Verdict at a glance
@@ -20,7 +23,7 @@ Status (2026-10-08):
 |---|---|---|---|
 | **PHP** | live 8.4.24; local now 8.4.26 | 8.5.11 (8.6 is at RC3) | **Done** — local matches live. Two follow-ups (§2.3); 8.4 is supported to 31 Dec 2028 |
 | **jQuery** | 4.0.0 + jQuery UI 1.14.2 | 4.0.0 (Jan 2026) + UI 1.14.2 (Jan 2026) | **Up to date** |
-| **THREE** | **r186** (0.186.1) | r186 (0.186.1, Sep 2026) | **Upgraded** — two fixes; pixel-identical to r160 (§4) |
+| **THREE** | **r160** (0.160.1, pinned) | r186 (0.186.1, Sep 2026) | **Pinned back from r186** for WebGL 1 players; the upgrade is ready to redo (§4.4) |
 | **React** | **19.3.0** | 19.3.0 (Sep 2026) | **Upgraded**, with the build mode fixed (§5) |
 
 ## 2. PHP — live is on 8.4, local now matches
@@ -187,6 +190,45 @@ isn't worth it either.
 - **Negative control:** r186 with the stencil forced off paints the mine zone straight over the hole (7%
   of the screen changes). That proves the A/B can see the r163 regression, and that the fix removes it.
 
+### 4.4 Pinned back to r160 — 2026-11-06 (the r186 upgrade is deferred, not abandoned)
+
+**What happened.** r186 did not reach live until the 2026-11-03 deploy (PR #132). Every deploy before
+that was built in the DouglasChanges copy while its `node_modules` still held r160, so the build quietly
+shipped an r160 shim (§6 item 4). Once that copy ran `yarn install` for Vite 8, r186 shipped. On
+2026-11-05 a player reported a blank game screen. Their laptop has an Intel HD Graphics 3000 with a 2011
+driver, so Chrome runs on Direct3D 9 and can only offer WebGL 1. r163+ asks for `webgl2` only, while r160
+falls back to `webgl` (the §4.1 bullet "r163 drops WebGL 1"). Their hardware is too old for a driver that
+would enable WebGL 2.
+
+**What changed (uncommitted):**
+- `package.json`: `"three": "0.160.1"`. This is an exact pin, so nothing moves it by accident. `yarn.lock`
+  has the same r160 entry and integrity hash as before §4.3. The shim was rebuilt as r160.
+- `webglScene.js`: if `new THREE.WebGLRenderer(...)` throws, `showWebGLUnavailable()` shows a fixed
+  notice (`#webglUnavailable`, styled in `tactical.css`) with what to try and a link back to games.php,
+  then rethrows, so the page load stops where it always has. The details line records the error and
+  whether WebGL 2 and WebGL 1 are available, so a report shows which case it is.
+- `stencil: true` and `generateMipmaps = false` from §4.3 stay. They are correct on r160 too.
+
+**Verified headless** against the local site (anonymous spectator, game 4277, non-GET requests blocked):
+| Browser | Shim | Result |
+|---|---|---|
+| Normal | r160 | Map renders on a WebGL 2 context |
+| WebGL 1 only (`getContext('webgl2')` forced to null) | r160 | Map renders on a WebGL 1 context; three logs its "WebGL 1 deprecated" warning |
+| WebGL 1 only | r186 (served in place of the new shim) | The player's failure: no map, the notice shows "WebGL 2: unavailable, WebGL 1: available" |
+| `--disable-webgl` | r160 | Notice, "WebGL 2: unavailable, WebGL 1: unavailable" |
+
+**Before upgrading again:**
+1. Decide whether WebGL 1-only players can be dropped. No later three release brings WebGL 1 back. After
+   the upgrade those players get the notice instead of a blank page, but they still cannot play.
+2. Set `"three": "^0.186.1"` (or newer; read the migration notes past r186 first), run
+   `yarn install --ignore-scripts`, then `yarn build:three`. Check that the shim contains `="186"` and
+   no longer contains `experimental-webgl`.
+3. **Run `yarn install` in the DouglasChanges copy before its build**, for both the pin and the upgrade.
+   The three version comes from that copy's `node_modules`, not from the merged `package.json`. A
+   build there without an install ships whatever is installed and gives no warning. That is how r186
+   reached live three weeks late, and it is how this pin could be undone without anyone noticing.
+4. If the jump goes past r186, redo the §4.3 A/B, including the stencil negative control.
+
 ## 5. React
 
 ### 5.1 Build mode — FIXED 2026-10-08 (uncommitted)
@@ -243,7 +285,8 @@ Notes:
 
 ## 6. Decisions for you
 1. ~~Round fix~~ — A and B done.
-2. ~~pollStats~~ — done. ~~React 19~~ — done. ~~THREE r186~~ — done.
+2. ~~pollStats~~ — done. ~~React 19~~ — done. THREE r186 — done, then pinned back to r160 on
+   2026-11-06 for WebGL 1 players. **When should it be redone?** See §4.4.
 3. **Fixes 3–6** now, or when an 8.5 move comes up?
 4. **Deploying:** the deploy copy needs `yarn install` before `yarn build` to pick up React 19 and three
    r186. Without it, the build silently ships React 18 / r160, which is still correct: every code change

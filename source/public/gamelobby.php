@@ -808,7 +808,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 						</div>
 
 						<!-- ⚠️ `store` stays on the FLEET's box: lobby.css styles the bought rows through it
-						     (.store .ship, .store span, .store .ship .clickable), as it did when both columns
+						     (.store .ship, .store span), as it did when both columns
 						     sat in one table.store. The Store itself does not carry it. -->
 						<div class="lb-fleet store">
 							<!-- REINFORCEMENTS_PLAN.md 2.1 - the BUY MODE: everything added to the fleet while it is

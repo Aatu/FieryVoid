@@ -15,10 +15,7 @@ window.ShipDestroyedAnimation = function () {
         this.emitterContainer = emitterContainer;
         this.movementAnimations = movementAnimations;
 
-        const cameraAnimation = new CameraPositionAnimation(
-            FireAnimationHelper.getShipPositionAtTime(this.shipIcon, this.time, this.movementAnimations),
-            this.time
-        );
+        const cameraAnimation = new CameraPositionAnimation(getDestroyedPosition(this.shipIcon, this.time, this.movementAnimations), this.time);
 
         this.animations.push(cameraAnimation);
         this.duration = 4000; // match explosion duration
@@ -26,13 +23,25 @@ window.ShipDestroyedAnimation = function () {
 
     ShipDestroyedAnimation.prototype = Object.create(Animation.prototype);
 
+    /* The replay plays every destruction AFTER the firing, so a ship a forced move shifted this turn (a Pre-Firing
+       shift, a Gravity Well's pull) blows up where that left it. The movement animation alone stops where its own
+       movement ended - which put a unit dragged into a well exploding one hex short of it. Same rule as
+       AllWeaponFireAgainstShipAnimation's Firing-phase position. */
+    function getDestroyedPosition(shipIcon, time, movementAnimations) {
+        if (shipIcon.preFireMovements && shipIcon.preFireMovements.length > 0) {
+            const lastMove = shipIcon.preFireMovements[shipIcon.preFireMovements.length - 1];
+            return window.coordinateConverter.fromHexToGame(lastMove.position);
+        }
+        return FireAnimationHelper.getShipPositionAtTime(shipIcon, time, movementAnimations);
+    }
+
     ShipDestroyedAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
         this.animations.forEach(animation => animation.render(now, total, last, delta, zoom, back, paused));
 
         if (!this.explosionTriggered && total >= this.time) {
             this.explosionTriggered = true;
 
-            const position = FireAnimationHelper.getShipPositionAtTime(this.shipIcon, this.time, this.movementAnimations);
+            const position = getDestroyedPosition(this.shipIcon, this.time, this.movementAnimations);
 
             // --- Trigger explosion visuals ---
             this.explosion = new ShipExplosion(this.emitterContainer, {

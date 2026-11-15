@@ -305,6 +305,24 @@ window.gamedata = {
 
     },
 
+    /* DRIFTING TERRAIN (server: TerrainDrift / TerrainDriftRule) - the classes under each Create Game "Drifts" box,
+       mirroring TerrainDrift::getKind. Every unit of a ticked kind drifts, however it got onto the map - one-hex
+       asteroids only: the 2- and 3-hex rocks never drift. */
+    DRIFT_KINDS: {
+        asteroids: ["asteroidSNew", "asteroidMNew", "asteroidLNew"],
+        meteors: ["MeteorSwarm"]
+    },
+
+    //Does this unit drift in this game? Its icon then wears the heading arrow its drift follows.
+    isDriftingTerrain: function isDriftingTerrain(unit) {
+        var drift = this.rules && this.rules.terrainDrift;
+        if (!drift || !unit) return false;
+        var kinds = this.DRIFT_KINDS;
+        return Object.keys(kinds).some(function (kind) {
+            return !!drift[kind] && kinds[kind].indexOf(unit.phpclass) !== -1;
+        });
+    },
+
     /* JUMP_GATES_PLAN.md - IS THIS UNIT A FIXED JUMP GATE?
 
        ONE PLACE holds the class name, mirroring shipManager.movement.isJumpVortex, because three

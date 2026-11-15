@@ -988,13 +988,17 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			return 	$deductArmour;		
 		}//endof checkArmourDeduction
 		
-		public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
+		public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1, $shooterid = null, $weaponid = null){ //or dissipate, with negative value
 			//$fireOrderid ties what the shield soaked to the shot that caused it. The combat log finds
 			//a shot's damage by matching entries on fireorderid (weaponManager.getDamagesCausedBy), so
 			//without it a fully absorbed shot read as "damaged for 0" and looked like nothing happened.
 			//Regeneration/dissipation calls pass no id and stay unlinked (-1), so they are never
 			//reported as damage from a shot.
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "ThirdspaceShield");
+			//$shooterid/$weaponid: an order the SERVER creates mid-resolution (terrain collisions, proximity
+			//mines, auto-rams) has no id yet (-1). DBManager::submitDamages back-fills those from the row's
+			//shooter + weapon, exactly as it does for the hit's own row (ShipSystem::assignDamageReturnOverkill
+			//stamps both), so the absorbed amount lands on the same order as the damage it reduced.
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "ThirdspaceShield", $shooterid, $weaponid);
 			$damageEntry->updated = true;
 			$this->damage[] = $damageEntry;
 		}
@@ -1043,16 +1047,16 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 				$damageToAbsorb += -$absorbedDamage;//Deduct the amount of shield absorption from initial damage.
 				
 				if($absorbedDamage>0){ //Damage was absorbed, update Shield!
-					$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id);
+					$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id, ($shooter ? $shooter->id : null), ($weapon ? $weapon->id : null));
 				}
 				$returnValues['dmg'] = $damageToAbsorb;
 				$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
 			}
-			
+
 			return $returnValues;
 		} //endof function doProtect
 
-	// this method generates additional non-standard information in the form of individual system notes, in this case: - Initial phase: check setting changes made by user, convert to notes.	
+	// this method generates additional non-standard information in the form of individual system notes, in this case: - Initial phase: check setting changes made by user, convert to notes.
 	public function doIndividualNotesTransfer(){
 	//data received in variable individualNotesTransfer, positive if Shield decreased, negative if Shield increased.
 	    if (is_array($this->individualNotesTransfer) && isset($this->individualNotesTransfer[0])) { // Check if it's an array and the key exists
@@ -1312,12 +1316,16 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			$this->damage[] = $damageEntry;
 		}
 		
-		public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
-			//$fireOrderid ties what the shield soaked to the shot that caused it - see the identical
-			//note on ThirdspaceShield::absorbDamage. Regeneration/dissipation calls pass no id and
-			//stay unlinked (-1).
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "ThoughtShield");
-			if($gamedata->phase == 4) $damageEntry->updated = true; //Don't duplicate a damage save in PreFiring phase.
+		public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1, $shooterid = null, $weaponid = null){ //or dissipate, with negative value
+			//$fireOrderid ties what the shield soaked to the shot that caused it, and $shooterid/$weaponid
+			//let submitDamages link it when that order has no id yet - see the identical note on
+			//ThirdspaceShield::absorbDamage. Regeneration calls pass none of them and stay unlinked (-1).
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "ThoughtShield", $shooterid, $weaponid);
+			//Don't duplicate a damage save in PreFiring phase - but a SHOT's absorption is always saved. The
+			//guard dates from when MindriderEngine replayed Contraction through this method at LOAD time (it
+			//uses applyContraction now); left on shots it threw away everything the shield soaked in
+			//Pre-Firing (rams, collisions), so it faced the Fire Phase at full strength again.
+			if($gamedata->phase == 4 || $shooterid !== null) $damageEntry->updated = true;
 			$this->damage[] = $damageEntry;
 		}
 		
@@ -1392,7 +1400,7 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 				$damageToAbsorb += -$absorbedDamage;//Reduce amount to absorb by Armour or reduce to 0 if less than Armour.
 					
 				if($absorbedDamage>0){ //Damage was absorbed, update Shield!
-					$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id);
+					$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id, ($shooter ? $shooter->id : null), ($weapon ? $weapon->id : null));
 				}
 				$returnValues['dmg'] = $damageToAbsorb;
 				$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);

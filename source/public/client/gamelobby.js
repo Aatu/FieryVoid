@@ -759,7 +759,7 @@ window.gamedata = {
 
 		var listHtml = '';
 		lines.forEach(function (line) {
-			listHtml += '<div class="ship-enhancement-entry"><span class="ship-enhancement-name">- ' + line.text + '</span>'
+			listHtml += '<div class="ship-enhancement-entry"><span class="ship-enhancement-name">' + line.text + '</span>'
 				+ (line.cost ? '<span class="ship-enhancement-cost">' + gamedata.formatEnhancementCost(line.cost) + '</span>' : '')
 				+ '</div>';
 		});
@@ -852,12 +852,9 @@ window.gamedata = {
 		});
 		if (!row.length) return;
 
-		row.find(".shipDamagedBadge").remove();
-		var badge = gamedata.damagedShipBadge(ship);
-		if (badge) row.prepend(badge);
-
+		//The badge sits INSIDE the name (the row is a grid - a badge of its own would take a cell).
 		var display = gamedata.rowDisplay(ship);
-		row.find(".shipname").first().text(display.name);
+		row.find(".shipname").first().html(gamedata.damagedShipBadge(ship) + display.nameHtml);
 		row.find(".boughtPointCost").first().text(display.cost + 'p');
 
 		/* Re-inserted BEFORE .ship-actions rather than appended: the row is a block stack
@@ -889,34 +886,50 @@ window.gamedata = {
 		   carries the rule so every other lobby's row is byte-identical to before. It reads as
 		   the ACTION, not the state (the state is the group the row sits in and the colour of
 		   its name), which is the convention the other four links follow. */
+		//The Store's link grammar (its Add to fleet · Show details): .lb-linkbtn buttons, · between.
+		var sep = '<span class="lb-ship-sep" aria-hidden="true">&middot;</span>';
+		var link = function (cls, text, title) {
+			return '<button type="button" class="lb-linkbtn ' + cls + '"' + (title ? ' title="' + title + '"' : '') + '>' + text + '</button>';
+		};
+
 		var reinforce = '';
 		//canBeReinforcement: no link at all on a hull that is on the board on turn 1 regardless
 		//(base, OSAT, Terrain) - offering it would be offering a state it can never hold.
 		if (gamedata.reinforcementsAllowed() && gamedata.canBeReinforcement(ship)) {
-			reinforce = gamedata.isReinforcementRow(ship)
-				? ' -<span class="reinforcetoggle clickable" title="Move this unit into the main fleet instead">Main Fleet</span> '
-				: ' -<span class="reinforcetoggle clickable" title="Hold this unit in hyperspace and bring it in through a jump point">Reinforcement</span> ';
+			reinforce = sep + (gamedata.isReinforcementRow(ship)
+				? link('reinforcetoggle', 'Main Fleet', 'Move this unit into the main fleet instead')
+				: link('reinforcetoggle', 'Reinforcement', 'Hold this unit in hyperspace and bring it in through a jump point'));
 		}
 
 		return '<div class="ship-actions">' +
-			' <span class="showship clickable">Details</span> ' +
-			' -<span class="editship clickable">Edit</span> ' +
-			' -<span class="copyship clickable">Copy</span> ' +
+			link('showship', 'Details / Options') +
+			sep + link('editship', 'Edit') +
+			sep + link('copyship', 'Copy') +
 			reinforce +
-			' -<span class="remove clickable">Remove</span> </div>';
+			sep + link('remove', 'Remove') + '</div>';
 	},
 
 	/* The name and cost a fleet-list row displays. A bulk row shows the whole purchase:
-	   "Gravitic Mine (10)" at the cost of all ten. The cost leaves out the enhancements, which
+	   "Gravitic Mine ×10" at the cost of all ten. The cost leaves out the enhancements, which
 	   enhancementListHtml prices line by line underneath (user 2026-10-08) - taken off the row's
-	   real charge, so the row and its lines always add up to it. */
+	   real charge, so the row and its lines always add up to it.
+	   nameHtml is escaped HTML: the unit number of a name ending " #3" (confirm.js names every unit
+	   "<class> #N") or a bulk row's "×10" goes in a dim .boughtNameTag, so the name reads first. */
 	rowDisplay: function rowDisplay(ship) {
 		var count = gamedata.bulkCount(ship);
 		var enhancements = 0;
 		gamedata.enhancementLines(ship).forEach(function (line) { enhancements += line.cost; });
 
+		var name = String(ship.name);
+		var tag = count > 1 ? '&#215;' + count : '';
+		var numbered = !tag && /^(.*\S)\s+(#\d+)$/.exec(name);
+		if (numbered) {
+			name = numbered[1];
+			tag = numbered[2];
+		}
+
 		return {
-			name: count > 1 ? ship.name + ' (' + count + ')' : ship.name,
+			nameHtml: scenarioCard.escapeHtml(name) + (tag ? '<span class="boughtNameTag">' + tag + '</span>' : ''),
 			cost: Math.ceil(Math.round((gamedata.rowPointCost(ship) - enhancements) * 100) / 100)
 		};
 	},
@@ -948,9 +961,9 @@ window.gamedata = {
 		var reinforcementClass = gamedata.isReinforcementRow(ship) ? ' reinforcement' : '';
 
 		var h = $('<div class="ship bought' + reinforcementClass + ' slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
-			damageBadge +
-			'<span class="shipname name">' + display.name + '</span>' +
-			//Class and cost in one box, so a narrow fleet column wraps them onto a line together.
+			//The badge inside the name, as refreshFleetRow writes it.
+			'<span class="shipname name">' + damageBadge + display.nameHtml + '</span>' +
+			//Class and cost: a wrapper the row's grid sees through (gameLobby.css, display: contents).
 			'<span class="boughtClassCost"><span class="boughtShiptype">' + displayType + '</span>' +
 			'<span class="boughtPointCost">' + display.cost + 'p</span></span>' +
 			enhancementHtml +
@@ -1095,6 +1108,13 @@ window.gamedata = {
 		var points10 = 0;
 		var points33 = 0;
 		var points50 = 0;
+		/* Low Crew Training (Enhancements.php LOW_TRAIN): "no more than 10% of their battle force",
+		   measured on base cost exactly like the 10% bracket, and like it one single ship may break the
+		   limit (user ruling 2026-11-05). Very small races take them in unlimited numbers - their ships
+		   are left out of the count. */
+		var lowTrainExemptFactions = ['Alacan Republic', 'Small Races'];
+		var lowTrainPoints = 0;
+		var lowTrainUnits = 0;
 		var totalU = 0;
 		var totalR = 0;
 		var jumpDrivePresent = false;
@@ -1215,6 +1235,16 @@ window.gamedata = {
 			if (lship.limited == 50) {
 				points50 += bracketBaseCost;
 				units50 += 1;
+			}
+			if (!lship.flight && lowTrainExemptFactions.indexOf(lship.faction) === -1) {
+				for (var ltNo in lship.enhancementOptions) {
+					var ltEntry = lship.enhancementOptions[ltNo];
+					if (ltEntry[0] === 'LOW_TRAIN' && ltEntry[2] > 0) {
+						lowTrainPoints += bracketBaseCost;
+						lowTrainUnits += 1;
+						break;
+					}
+				}
 			}
 			totalEnhancementsValue += lship.pointCostEnh;
 			var vLetter = gamedata.variantLetter(lship);
@@ -1818,6 +1848,18 @@ window.gamedata = {
 				problemFound = true;
 			}
 		}
+		//Low Crew Training: shown only when the fleet carries any (outside the exempt factions)
+		if (lowTrainUnits > 0) {
+			checkResult += "<br> - Low Crew Training: " + lowTrainPoints + "/" + limit10 + ": ";
+			if (lowTrainPoints <= limit10) {
+				checkResult += R_OK;
+			} else if (lowTrainUnits == 1) { //only 1 unit - allowed to break limit
+				checkResult += "<span class='fc-ok'>OK</span> (one single ship is allowed to break limit)";
+			} else {
+				checkResult += "<span class='fc-bad'>FAILED!</span> (no more than 10% of the fleet may have Low Crew Training)";
+				problemFound = true;
+			}
+		}
 		//The escort rule is a rule about RESTRICTED (10%) units only - it must not
 		//learn about the 33% or 50% brackets.
 		if (points10 > 0 && totalShips < 2) {
@@ -2401,9 +2443,9 @@ window.gamedata = {
 			var reinforcementClass = gamedata.isReinforcementRow(ship) ? ' reinforcement' : '';
 
 			var h = $('<div class="ship bought' + reinforcementClass + ' slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
-				damageBadge +
-				'<span class="shipname name">' + display.name + '</span>' +
-				//Class and cost in one box, so a narrow fleet column wraps them onto a line together.
+				//The badge inside the name, as refreshFleetRow writes it.
+				'<span class="shipname name">' + damageBadge + display.nameHtml + '</span>' +
+				//Class and cost: a wrapper the row's grid sees through (gameLobby.css, display: contents).
 				'<span class="boughtClassCost"><span class="boughtShiptype">' + displayType + '</span>' +
 				'<span class="boughtPointCost">' + display.cost + 'p</span></span>' +
 				enhancementHtml +
@@ -3264,7 +3306,10 @@ window.gamedata = {
 					label: labelSlot[slot.team] === slot ? "TEAM " + slot.team : null
 				};
 			}),
-			terrain: gamedata.rules ? gamedata.rules.terrainLayout : null
+			terrain: gamedata.rules ? gamedata.rules.terrainLayout : null,
+			dust: gamedata.rules ? gamedata.rules.dustZone : null, //its hexes were settled when the game was created
+			nebula: !!(gamedata.rules && gamedata.rules.nebula),
+			emStorm: !!(gamedata.rules && gamedata.rules.emStorm) //EM_STORM_PLAN.md
 		});
 
 		gamedata.renderMapLegend();
@@ -3304,7 +3349,22 @@ window.gamedata = {
 
 		var kinds = mapPreview.terrainKinds(gamedata.rules ? gamedata.rules.terrainLayout : null);
 		if (kinds.solid) html += item(terrainSwatch(mapPreview.TERRAIN_ALPHA), "Asteroids &amp; Moons");
-		if (kinds.fields) html += item(terrainSwatch(mapPreview.FIELD_TERRAIN_ALPHA), "Dust &amp; Meteor Swarms");
+		if (kinds.fields) html += item(terrainSwatch(mapPreview.FIELD_TERRAIN_ALPHA), "Meteor Swarms");
+		var dustCoverage = mapPreview.dustCoverage(gamedata.rules ? gamedata.rules.dustZone : null);
+		if (dustCoverage > 0 || kinds.dust || (gamedata.rules && gamedata.rules.dustZone)) {
+			html += item('<span class="lb-swatch" style="background:rgb(' + mapPreview.COLORS.dust + ')"></span>',
+				dustCoverage === 100 ? "Dust (entire map)" : "Dust");
+		}
+		if (gamedata.rules && gamedata.rules.nebula) {
+			html += item('<span class="lb-swatch" style="background:rgb(' + mapPreview.COLORS.nebula + ')"></span>', "Nebula (entire map)");
+		}
+		if (gamedata.rules && gamedata.rules.emStorm) {
+			html += item('<span class="lb-swatch" style="background:rgb(' + mapPreview.COLORS.emStorm + ')"></span>', "EM Storm (entire map)");
+		}
+		if (gamedata.rules && gamedata.rules.gravityWell) { //GRAVITY_WELL_PLAN.md - placed when the game starts, so not on the preview
+			html += item('<span class="lb-swatch" style="' + mapPreview.GRAVITY_WELL_SWATCH + '"></span>',
+				"Gravity Well (strength " + parseInt(gamedata.rules.gravityWell, 10) + ", placed near the centre)");
+		}
 
 		legend.html(html);
 	},
@@ -6795,7 +6855,8 @@ jQuery(function () {
 	  cursor off the icon to reach the menu's own buttons would close it.*/
 	var systemInfoState = null;
 
-	//officersOnly (OFFICERS_PLAN.md Stage 19): a Structure bar's tooltip, naming the block's officers and nothing else
+	//structureBar: a section's health bar raised it - the block's Structure card, which the bar's own mouse-out takes down
+	//(until 2026-11-08 this was officersOnly, the bar's officers-only tooltip - the card names the block's officer itself)
 	var showInfo = function (payload) {
 		if (systemInfoState && systemInfoState.menu) return;   //a sticky menu wins over hover
 		uiManager.showSystemInfo({
@@ -6803,9 +6864,10 @@ jQuery(function () {
 			selectedShip: null,
 			system: payload.system,
 			boundingBox: getBoundingBox(payload.element),
-			officersOnly: Boolean(payload.officersOnly)
+			avoidBox: shipWindowBox(payload.element), //the system card opens beside the window, as the menu does
+			structureBar: Boolean(payload.structureBar)
 		});
-		systemInfoState = { menu: false, officersOnly: Boolean(payload.officersOnly) };
+		systemInfoState = { menu: false, structureBar: Boolean(payload.structureBar) };
 	};
 
 	/*Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §5.2) gave the lobby its first
@@ -6848,15 +6910,15 @@ jQuery(function () {
 					showInfo(payload);
 				}
 				break;
-			/* A section's Structure health bar (ShipSection): there is no map to draw its arc on here, but a block holding an
-			   officer (the Expert Targeter, Stage 19) names him in the officers-only tooltip, as in game. */
+			/* A section's Structure health bar (ShipSection): there is no map to draw its arc on here, but it opens the block's
+			   Structure card, as in game (which names an Expert Targeter posted there - Stage 19). */
 			case 'StructureMouseOver':
-				if (payload.element && payload.structure && window.officers && officers.hasPostTooltip(payload.ship, payload.structure)) {
-					showInfo({ ship: payload.ship, system: payload.structure, element: payload.element, officersOnly: true });
+				if (payload.element && payload.structure) {
+					showInfo({ ship: payload.ship, system: payload.structure, element: payload.element, structureBar: true });
 				}
 				break;
 			case 'StructureMouseOut':
-				if (systemInfoState && systemInfoState.officersOnly) hideInfo(false);
+				if (systemInfoState && systemInfoState.structureBar) hideInfo(false);
 				break;
 			case 'SystemClicked': //tap/click = show info too (the touch path relies on it)
 				if (uiManager.canShowSystemInfoMenu(payload.ship, payload.system)) {

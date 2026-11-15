@@ -42,8 +42,8 @@ window.gameOptions = (function () {
         },
         {
             key: "hideMapBackground",
-            label: "Never show map background",
-            title: "Every game opens with the background image switched off, as the Disable Background button on the map does - that button still turns it back on for the session",
+            label: "Never show background",
+            title: "Every game opens with the background/terrain images switched off, as the Disable Background button on the map does - that button still turns it back on for the session",
             def: false,
             onChange: applyMapBackground
         }

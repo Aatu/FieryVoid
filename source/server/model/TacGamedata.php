@@ -76,6 +76,16 @@ class TacGamedata {
       read. Set by FighterFlight::recordFighterMission; ⚠️ RESET in DBManager::getSystemDataForShips immediately before
       the note sweep that sets it (one request loads gamedata twice), the $abductionPresent slot.*/
     public static $fighterMissionsPresent = false;
+    /*NEBULA_PLAN.md - is this game in a nebula (NebulaRule)? Every nebula effect - thrust, EW, fire control,
+      intercept, damage dice, ranges, EM weapons, shields, the jump arrival roll - asks this first, so an
+      ordinary game pays one false static read per site. ASSIGNED (true or false) in __construct from the
+      rules, never only set: a request that builds a second game's gamedata must not inherit the first's.*/
+    public static $nebulaPresent = false;
+    /*EM_STORM_PLAN.md - is an Electromagnetic Storm raging (EMStormRule)? The storm's sweep (EMStorm, from
+      Criticals::setCriticals and DeploymentGamePhase::advance) and every reader of its one-turn criticals -
+      Scanner and Reactor output, initiative, fighter OB, the Storm Defence note - ask this first. ASSIGNED
+      both ways in __construct, as $nebulaPresent is.*/
+    public static $emStormPresent = false;
     /*D15, second half: a FINISHED game drops every deception so the post-mortem shows what actually
       happened. Set from $this->status, read by applyChameleonDisguise() and maskChameleonArming().
       Deliberately NOT implemented by forcing the two gates above to false: maskChameleonFireOrders()
@@ -216,6 +226,8 @@ class TacGamedata {
         $this->creator = $creator;
         $this->gamespace = $gamespace;
         $this->rules = new GameRules($rules);
+        self::$nebulaPresent = $this->rules->hasRuleName('nebula'); //see the static - assigned both ways
+        self::$emStormPresent = $this->rules->hasRuleName('emStorm'); //likewise
     }
    
     public function setPhase($phase)
@@ -1781,7 +1793,11 @@ class TacGamedata {
                 if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3 && !$weapon->preFires
                     && $fire->damageclass !== 'jumpexit' && $fire->damageclass !== JumpEngine::ABDUCTION_CLASS
                     && !$isMeteorDefence){
-                    if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'){ //RammingAttack isn't PreFire, but we want THESE fireorders to be passed to Front End for Replay.
+                    /* GRAVITY_WELL_PLAN.md - and a Gravity Well's pull line and its collision, on a RammingAttack too: without
+                       them this turn's replay, watched in the Firing phase, has no order to pair the 'gravity' rows with, so the
+                       pulled unit is never drawn moving. A re-posted copy is harmless: submitFireorders writes 'prefiring' only in phase 5. */
+                    if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'
+                        && $fire->damageclass !== 'GravityWellPull' && $fire->damageclass !== 'GravityWellCollision'){ //RammingAttack isn't PreFire, but we want THESE fireorders to be passed to Front End for Replay.
                         unset($system->fireOrders[$i]);
                     }    
                 }
@@ -2007,9 +2023,16 @@ class TacGamedata {
                 //ship window / icon lose its Rolled/Rolling/Pivoting status (and the window's
                 //port-starboard mirroring) while awaiting their move. A roll or pivot ORDERED
                 //this turn is a normal "roll"/"pivot" move and stays hidden until committed.
+                //
+                //Nor a drifting asteroid's or swarm's 'drift' row (TerrainDrift::MOVE_TYPE, a literal so
+                //no other game loads that class): rolled by the server at the start of the turn and
+                //public from then on. Under Simultaneous Movement terrain's Ini falls in the LOWEST
+                //bracket (SimultaneousMovementRule clamps it to iniRangeMin), so while that bracket
+                //moved, every drifted field would jump back to last turn's hex.
                 if ($move->type !== "deploy" && $move->type !== "start"
                     && $move->type !== "isRolled" && $move->type !== "isRolling"
                     && $move->type !== "isPivotingLeft" && $move->type !== "isPivotingRight"
+                    && $move->type !== "drift"
                     && empty($move->forced)) {
                     $toDelete[] = $i;
                 }

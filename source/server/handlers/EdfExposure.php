@@ -277,11 +277,15 @@ class EdfExposure
      * ⚠️ Skipped for an already-destroyed reactor: the ship has bigger problems, and blacking out
      * a wreck would write a crit per system for nothing.
      */
-    private static function applyPowerBlackout($unit, $reactor, $gamedata)
+    /* ⚠️ PUBLIC since the EM storm (EM_STORM_PLAN.md D14): its one-turn power loss can leave the same unsheddable
+       deficit, so EMStorm calls this too, and the drain measured here is BOTH one-turn drains in force next turn - a
+       field's and a storm's together are what the ship has to cover. */
+    public static function applyPowerBlackout($unit, $reactor, $gamedata)
     {
         if ($reactor->isDestroyed()) return false;
 
         $nextDrain = (int)$reactor->sumCriticalParam("EdfPowerDrain", (int)$gamedata->turn + 1);
+        if (TacGamedata::$emStormPresent) $nextDrain += (int)$reactor->sumCriticalParam("EMStormPower", (int)$gamedata->turn + 1);
         if ($nextDrain <= 0) return false;
 
         //"as much negative power as the total amount of power it provides to offline-able systems"

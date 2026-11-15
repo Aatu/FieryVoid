@@ -1433,9 +1433,13 @@ class AmmoMissileRackS extends Weapon{
 		if (!empty($this->animationExplosionScaleArray))$strippedSystem->animationExplosionScaleArray = $this->animationExplosionScaleArray;
 		if (!empty($this->uninterceptableArray))$strippedSystem->uninterceptableArray = $this->uninterceptableArray;		
 		if (!empty($this->doNotInterceptArray))$strippedSystem->doNotInterceptArray = $this->doNotInterceptArray;
-		if (!empty($this->mineRangeArray))$strippedSystem->mineRangeArray = $this->mineRangeArray;				
+		if (!empty($this->mineRangeArray))$strippedSystem->mineRangeArray = $this->mineRangeArray;
+		/* NEBULA_PLAN.md #12 - the range arrays were just rewritten from the weapon's own (unhalved) ones above, over the
+		   halved copies Weapon::stripForJson put there, so the nebula's halving goes on again, last. Recomputed from the
+		   weapon each time, so a second pass is harmless. BallisticMineLauncher comes through here too; isMissile says no. */
+		if (TacGamedata::$nebulaPresent && Nebula::isMissile($this)) Nebula::missileRangesForJson($this, $strippedSystem);
 		return $strippedSystem;
-	} 
+	}
 
 	//actually use getDamage() method of ammo!
     public function getDamage($fireOrder)
@@ -2865,8 +2869,10 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 			$strippedSystem->rangeArray = $this->rangeArray;
 			$strippedSystem->firedInRapidMode = $this->firedInRapidMode;			
 			$strippedSystem->firedInLongRangeMode = $this->firedInLongRangeMode;
-			$strippedSystem->noHexTargeting = $this->noHexTargeting;													
-			$strippedSystem->iconPath = $this->iconPath;			
+			$strippedSystem->noHexTargeting = $this->noHexTargeting;
+			$strippedSystem->iconPath = $this->iconPath;
+			//range, rangeArray and data were just rewritten unhalved - the nebula's halving again, last (NEBULA_PLAN.md #12)
+			if (TacGamedata::$nebulaPresent && Nebula::isMissile($this)) Nebula::missileRangesForJson($this, $strippedSystem);
 			return $strippedSystem;
 		}
 

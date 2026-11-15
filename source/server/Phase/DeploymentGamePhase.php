@@ -40,6 +40,13 @@ class DeploymentGamePhase implements Phase
         HkControlNodeOrieni::$deploymentShortfallResolved = false; //reset once-per-advance guard
         HkControlNodeOrieni::resolveDeploymentShortfall($gameData);
         $dbManager->submitCriticals($gameData->id, $gameData->getUpdatedCriticals(), $gameData->turn);
+
+        /* EM_STORM_PLAN.md (user ruling R1): the units placed this turn - on turn 1, everybody - meet the storm before
+           their first Initial Orders. A FRESH load: $gameData predates the last submitter's notes, and with them that
+           player's Storm Defence declarations. The sweep saves its own criticals and log lines. */
+        if (TacGamedata::$emStormPresent) {
+            EMStorm::resolveDeployment($dbManager->getTacGamedata($gameData->forPlayer, $gameData->id), $dbManager);
+        }
     }
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)

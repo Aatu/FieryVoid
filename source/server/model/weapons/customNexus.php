@@ -1672,7 +1672,7 @@ class NexusHeavyPlasmaCharge extends Torpedo{
 				$damage -= 0;
 				}
 			else {
-				$damage -= round(($dis - 10) * $this->rangeDamagePenaltyHPCharge);
+				$damage -= round(($dis - 10) * $this->rangeDamagePenaltyHPCharge * $this->getRangeDamageFactor());
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated
@@ -6569,7 +6569,7 @@ class NexusChargedPlasmaGun extends Plasma{
 				$damage -= 0;
 				}
 			else {
-				$damage -= round(($dis - 10) * $this->rangeDamagePenaltyHCPG);
+				$damage -= round(($dis - 10) * $this->rangeDamagePenaltyHCPG * $this->getRangeDamageFactor());
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated
@@ -6730,7 +6730,7 @@ class NexusHeavyChargedPlasmaGun extends Plasma{
 				$damage -= 0;
 				}
 			else {
-				$damage -= round(($dis - 10) * $this->rangeDamagePenaltyHCPG);
+				$damage -= round(($dis - 10) * $this->rangeDamagePenaltyHCPG * $this->getRangeDamageFactor());
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated
@@ -6968,7 +6968,7 @@ class NexusHeavyEnhPlasma extends Plasma{
 				$damage -= 0;
 				}
 			else {
-				$damage -= round(($dis - 12) * $this->rangeDamagePenaltyPBolter);
+				$damage -= round(($dis - 12) * $this->rangeDamagePenaltyPBolter * $this->getRangeDamageFactor());
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated
@@ -7025,7 +7025,7 @@ class NexusMedEnhPlasma extends Plasma{
 				$damage -= 0;
 				}
 			else {
-				$damage -= round(($dis - 7) * $this->rangeDamagePenaltyPBolter);
+				$damage -= round(($dis - 7) * $this->rangeDamagePenaltyPBolter * $this->getRangeDamageFactor());
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated
@@ -7082,7 +7082,7 @@ class NexusLightEnhPlasma extends Plasma{
 				$damage -= 0;
 				}
 			else {
-				$damage -= round(($dis - 3) * $this->rangeDamagePenaltyPBolter);
+				$damage -= round(($dis - 3) * $this->rangeDamagePenaltyPBolter * $this->getRangeDamageFactor());
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated
@@ -7146,7 +7146,7 @@ class NexusLtEnhPlasmaFtr extends LinkedWeapon{
 				$damage -= 0;
 				}
 			else {
-				$damage -= round(($dis - 2) * $this->rangeDamagePenaltyPBolter);
+				$damage -= round(($dis - 2) * $this->rangeDamagePenaltyPBolter * $this->getRangeDamageFactor());
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated

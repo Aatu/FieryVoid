@@ -86,6 +86,29 @@ class TerrainLayoutRule implements JsonSerializable {
         return $list;
     }
 
+    /* GameRules::finaliseDustZone, at creation: the template's dust entries leave the layout and become
+       Dust Zone hexes, so no Dust Field unit is ever made for them. Returns the hexes of those on the
+       map ([[q, r], ...]); the rest are dropped, as getUnitsOnMap would have dropped them. Saved games
+       created before the Dust Zone keep their 'dust' entries and still get Dust Field units. */
+    public function takeDustHexes($gamespace) {
+        $halfW = (int)floor($gamespace['width'] / 2);
+        $halfH = (int)floor($gamespace['height'] / 2);
+
+        $hexes = array();
+        $kept = array();
+        foreach ($this->units as $unit) {
+            if ($unit['type'] !== 'dust') {
+                $kept[] = $unit;
+                continue;
+            }
+            if (abs($unit['q']) > $halfW || abs($unit['r']) > $halfH) continue;
+            $hexes[] = array($unit['q'], $unit['r']);
+        }
+        $this->units = $kept;
+
+        return $hexes;
+    }
+
     public function jsonSerialize(): mixed {
         return array(
             'name' => $this->name,
