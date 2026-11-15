@@ -72,6 +72,20 @@ class AIOrderBuilder
         );
     }
 
+    /* One power row, in the shape power.js writes it. $type: 1 = switched off, 2 = boost,
+       3 = overload. It goes on its system's entry: $entry['systems'][$systemid]['power'][]. */
+    public static function power($shipid, $systemid, $turn, $type, $amount = 0)
+    {
+        return array(
+            'id' => null,
+            'shipid' => (int)$shipid,
+            'systemid' => (int)$systemid,
+            'type' => (int)$type,
+            'turn' => (int)$turn,
+            'amount' => (int)$amount
+        );
+    }
+
     /* One fire order, in the shape weaponManager.targetShip builds it. A weapon with several guns
        posts one of these per gun. The page sends the strings "null" for the hex of a shot aimed
        at a unit, and so does this. */

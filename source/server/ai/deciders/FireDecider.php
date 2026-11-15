@@ -14,14 +14,24 @@
  *           there and the remaining guns look elsewhere;
  *   threat  the more an enemy can do to this fleet, the sooner it is shot (FIRE_THREAT_WEIGHT).
  *
- * THE INTERCEPTION RESERVE. A gun with an intercept rating that is given no order is used by the
- * server to intercept (Firing::automateIntercept), so holding one back is simply not ordering it:
+ * SLOW WEAPONS (the user's feedback, 2026-11-15). A shot costs a weapon its reload, so a slow one
+ * fires only at FIRE_MIN_CHANCE_BY_LOAD or better (minimumChance), and waits when a turn closer
+ * is clearly better (holdSlow: the real formula again where both units will be, range penalty and
+ * plasma range damage included).
+ *
+ * THE ENEMY'S INTERCEPTION (InterceptModel). A shot is worth what it adds to its target's volley
+ * once the target's interceptors have been given out as the server gives them - so the bot neither
+ * pretends there is none nor assumes every shot is intercepted, and a slow gun's floor holds on the
+ * chance it keeps after interception.
+ *
+ * THE INTERCEPTION RESERVE - its own. A gun with an intercept rating that is given no order is used
+ * by the server to intercept (Firing::automateIntercept), so holding one back is simply not ordering it:
  *   - a unit with ballistics coming at it holds back its best interceptors, FIRE_RESERVE_PER_BALLISTIC
  *     for each incoming shot;
  *   - any interceptor with no offensive shot of FIRE_INTERCEPTOR_MIN_CHANCE or better stays on defence.
  *
- * NOT YET: called shots, ballistics (stage T4), holding a slow weapon for next turn's better shot
- * beyond one threshold (T5 brings look-ahead), and every weapon AIView::weaponBlock turns away.
+ * Ballistics are BallisticDecider's (Initial Orders). NOT YET: called shots, and every weapon
+ * AIView::weaponBlock turns away.
  *
  * The decision is made on the bot's own MASKED view of the game (principle P2).
  */
@@ -94,7 +104,7 @@ class FireDecider
             foreach ($view->weapons($unit) as $mount) {
                 $weapon = $mount['weapon'];
                 $options = array();
-                $minimum = ($weapon->getLoadingTime() > 1) ? AIConfig::FIRE_MIN_CHANCE_SLOW : AIConfig::FIRE_MIN_CHANCE;
+                $minimum = self::minimumChance($weapon, true); //the least it is ever fired at; holdSlow() asks for more
                 $modes = $view->modes($weapon);
 
                 foreach ($enemies as $enemy) {
@@ -118,19 +128,52 @@ class FireDecider
             }
         }
 
+        $kept = self::holdSlow($view, $guns);
+
+        /* INTERCEPTION (InterceptModel; the user's feedback, 2026-11-15). Each target's volley is
+           valued as the server will leave it once that target's interceptors have taken their pick:
+           a shot is worth what it ADDS to its target's volley - which is less than its own damage
+           while the target has interceptors to spare, and can be more, when it draws them off a
+           shot already planned. The bot's own missiles of this turn are in the volleys from the
+           start: they arrive now, and the interceptors that go to them do not go to the guns. */
+        $model = new InterceptModel($view);
+        $volleys = array();
+        foreach ($enemies as $enemy) $volleys[$enemy->id] = array('entries' => array(), 'value' => 0.0);
+        foreach (self::ownMissiles($view, $state) as $targetId => $entries) {
+            $volleys[$targetId]['entries'] = $entries;
+            $volleys[$targetId]['value'] = $model->value($view->gamedata->getShipById($targetId), $entries);
+            $state[$targetId]['booked'] += $volleys[$targetId]['value'];
+        }
+
         //Greedy: take the best shot left, book it, judge the rest again.
+        $added = array(); //"gun:target" => what the shot adds to its target's volley; forgotten when that volley changes
+        $swallowed = array(); //slow guns turned away at some point because the interceptors would have taken too much
         while (count($guns) > 0) {
             $bestScore = 0;
             $bestGun = null;
             $bestTarget = null;
+            $bestAdds = 0;
 
             foreach ($guns as $index => $gun) {
                 foreach ($gun['options'] as $targetId => $shot) {
-                    $score = self::score($shot, $state[$targetId], $maxThreat);
+                    $key = $index . ':' . $targetId;
+                    if (!isset($added[$key])) $added[$key] = self::adds($model, $view, $volleys[$targetId], $targetId, $gun, $shot);
+                    $adds = $added[$key];
+                    if ($shot['damage'] <= 0) continue;
+                    /* A slow weapon's floor holds on the chance the shot keeps once the interceptors have
+                       had it, not before: a reload spent on a shot they will swallow is a reload wasted.
+                       A one-turn gun loses nothing by firing, and fires for whatever it adds. */
+                    if (isset($shot['floor']) && $shot['chance'] * $adds / $shot['damage'] < $shot['floor']) {
+                        $swallowed[$index] = true;
+                        continue;
+                    }
+
+                    $score = self::score(array('damage' => $adds) + $shot, $state[$targetId], $maxThreat);
                     if ($score > $bestScore) {
                         $bestScore = $score;
                         $bestGun = $index;
                         $bestTarget = $targetId;
+                        $bestAdds = $adds;
                     }
                 }
             }
@@ -139,26 +182,157 @@ class FireDecider
 
             $gun = $guns[$bestGun];
             $shot = $gun['options'][$bestTarget];
-            $state[$bestTarget]['booked'] += $shot['damage'];
+            $volleys[$bestTarget]['entries'][] = array('unit' => $gun['unit'], 'weapon' => $gun['weapon'], 'shot' => $shot, 'ballistic' => false);
+            $volleys[$bestTarget]['value'] += $bestAdds;
+            $state[$bestTarget]['booked'] += $bestAdds;
+            foreach (array_keys($added) as $key) {
+                if (substr($key, strpos($key, ':') + 1) == $bestTarget) unset($added[$key]);
+            }
             $plan[] = array(
                 'unit' => $gun['unit'], 'weapon' => $gun['weapon'], 'fighter' => $gun['fighter'],
                 'target' => $view->gamedata->getShipById($bestTarget),
                 'mode' => $shot['mode'], 'chance' => $shot['chance'], 'orders' => $shot['orders'], 'shots' => $shot['shots'],
-                'damageclass' => $shot['damageclass'], 'damage' => $shot['damage'], 'score' => $bestScore
+                'damageclass' => $shot['damageclass'], 'damage' => $bestAdds, 'score' => $bestScore
             );
             unset($guns[$bestGun]);
         }
 
+        //each weapon back in the mode its order is in: the volleys were valued with every candidate in turn
+        foreach ($plan as $shot) {
+            if ((int)$shot['weapon']->firingMode !== (int)$shot['mode']) $shot['weapon']->changeFiringMode((int)$shot['mode']);
+        }
+
         $targets = array();
         foreach ($plan as $shot) $targets[$shot['target']->id] = true;
-        self::$lastSummary = count($plan) . ' weapons at ' . count($targets) . ' of ' . count($enemies) . ' enemies; ' . $held . ' held to intercept';
+        $intercepted = 0; //slow guns left unfired because the interceptors would have swallowed their shot
+        foreach (array_keys($swallowed) as $index) {
+            if (isset($guns[$index])) $intercepted++;
+        }
+        self::$lastSummary = count($plan) . ' weapons at ' . count($targets) . ' of ' . count($enemies) . ' enemies; ' . $held . ' held to intercept'
+            . ($kept > 0 ? '; ' . $kept . ' slow weapons kept for a better shot' : '')
+            . ($intercepted > 0 ? '; ' . $intercepted . ' slow weapons not fired into the interceptors' : '');
 
         return $plan;
     }
 
+    //What a shot adds to its target's volley, interception counted.
+    private static function adds(InterceptModel $model, AIView $view, array $volley, $targetId, array $gun, array $shot)
+    {
+        $entries = $volley['entries'];
+        $entries[] = array('unit' => $gun['unit'], 'weapon' => $gun['weapon'], 'shot' => $shot, 'ballistic' => false);
+        return $model->value($view->gamedata->getShipById($targetId), $entries) - $volley['value'];
+    }
+
+    /* The bot's own missiles arriving this turn - its ballistic orders of Initial Orders, at a unit
+       it may shoot at - as volley entries by target: what each should do where its target now
+       stands, priced from its launch hex (AIView::launched). */
+    private static function ownMissiles(AIView $view, array $state)
+    {
+        $volleys = array();
+        foreach ($view->myUnits() as $unit) {
+            foreach ($view->mounts($unit) as $mount) {
+                $weapon = $mount['weapon'];
+                if (!$weapon->ballistic) continue;
+                $byTarget = array(); //target id => array(mode, orders)
+                foreach ($weapon->fireOrders as $fire) {
+                    if ((int)$fire->turn !== $view->turn || $fire->type !== 'ballistic' || !isset($state[(int)$fire->targetid])) continue;
+                    $targetId = (int)$fire->targetid;
+                    if (!isset($byTarget[$targetId])) $byTarget[$targetId] = array((int)$fire->firingMode, 0);
+                    $byTarget[$targetId][1]++;
+                }
+                foreach ($byTarget as $targetId => $launch) {
+                    $shot = $view->launched($unit, $weapon, $view->gamedata->getShipById($targetId), $launch[0]);
+                    if ($shot === null || $shot['chance'] < 1) continue;
+                    $shot['orders'] = $launch[1]; //one order is one missile
+                    $volleys[$targetId][] = array('unit' => $unit, 'weapon' => $weapon, 'shot' => $shot, 'ballistic' => true);
+                }
+            }
+        }
+        return $volleys;
+    }
+
+    /* The least hit chance (percent) a weapon is fired at. A shot costs the weapon its reload, so
+       a slow weapon asks for more (AIConfig::FIRE_MIN_CHANCE_BY_LOAD). $parting: the floor for a
+       slow weapon whose target is drawing away - nothing better is coming. */
+    public static function minimumChance(Weapon $weapon, $parting = false)
+    {
+        $load = (int)$weapon->getLoadingTime();
+        if ($load <= 1) return AIConfig::FIRE_MIN_CHANCE;
+        if ($parting) return AIConfig::FIRE_MIN_CHANCE_PARTING;
+
+        $floor = AIConfig::FIRE_MIN_CHANCE;
+        foreach (AIConfig::FIRE_MIN_CHANCE_BY_LOAD as $turns => $chance) {
+            if ($load >= $turns) $floor = $chance;
+        }
+        return $floor;
+    }
+
+    /* FIRE NOW, OR A TURN CLOSER? (user, 2026-11-15.) A weapon that loads in one turn loses
+       nothing by firing, so this is only about the slow ones. Each of a slow gun's shots is
+       priced a second time where shooter and target will be if both fly straight on - the real
+       hit formula again, so the range penalty comes into it, and for a plasma weapon the damage
+       the range takes off as well. The arc is not asked next turn: a player expects to keep his
+       guns on the target he is closing with. Then, per shot:
+
+         - next turn is enough better (AIConfig::FIRE_HOLD_CONFIDENCE and the weapon's loading
+           time - a turn's wait is half a 2-turn gun's fire and a quarter of a 4-turn gun's): wait;
+         - not worth waiting for, but under the weapon's floor (minimumChance): wait - unless the
+           target is drawing away, when the parting floor is all that is asked.
+
+       Only the SAME target a turn on is looked at, so a gun never waits for an enemy it cannot
+       bear on. Empties the options of the guns that wait (by reference); returns how many. */
+    private static function holdSlow(AIView $view, array &$guns)
+    {
+        $slow = array();
+        foreach ($guns as $index => $gun) {
+            if ((int)$gun['weapon']->getLoadingTime() > 1) $slow[] = $index;
+        }
+        if (count($slow) == 0) return 0;
+
+        $gamedata = $view->gamedata;
+        $price = function () use ($view, $gamedata, &$guns, $slow) {
+            $worth = array();
+            foreach ($slow as $index) {
+                $gun = $guns[$index];
+                foreach ($gun['options'] as $targetId => $shot) {
+                    if ((int)$gun['weapon']->firingMode !== (int)$shot['mode']) $gun['weapon']->changeFiringMode((int)$shot['mode']);
+                    $worth[$index][$targetId] = $view->estimate($gun['unit'], $gun['weapon'], $gamedata->getShipById($targetId), false);
+                }
+            }
+            return $worth;
+        };
+        $now = $price();
+        $next = $view->ahead($price);
+
+        $kept = 0;
+        foreach ($slow as $index) {
+            $weapon = $guns[$index]['weapon'];
+            $wait = AIConfig::FIRE_HOLD_CONFIDENCE * (1 - 1 / max(1, (int)$weapon->getLoadingTime()));
+            $floor = self::minimumChance($weapon);
+
+            foreach ($guns[$index]['options'] as $targetId => $shot) {
+                $a = $now[$index][$targetId];
+                $b = $next[$index][$targetId];
+                if ($a <= 0 && $b <= 0) $hold = ($shot['chance'] < $floor);     //nothing to compare (a shot the estimate will not price): the floor alone
+                else if ($a < $b * $wait) $hold = true;                          //a turn closer is worth the wait
+                else $hold = ($shot['chance'] < $floor && $b >= $a);            //a poor shot that is not getting worse
+                if ($hold) unset($guns[$index]['options'][$targetId]);
+                //the floor the shot was let through on, which plan() holds a slow gun to again once interception is counted
+                else $guns[$index]['options'][$targetId]['floor'] = ($shot['chance'] < $floor) ? AIConfig::FIRE_MIN_CHANCE_PARTING : $floor;
+            }
+
+            if (count($guns[$index]['options']) == 0) {
+                unset($guns[$index]);
+                $kept++;
+            }
+        }
+
+        return $kept;
+    }
+
     /* What a shot is worth, given what is already booked on its target. Damage beyond
        FIRE_OVERKILL times the target's remaining health counts for nothing. */
-    private static function score(array $shot, array $target, $maxThreat)
+    public static function score(array $shot, array $target, $maxThreat)
     {
         $room = $target['health'] * AIConfig::FIRE_OVERKILL - $target['booked'];
         $useful = min($shot['damage'], max(0, $room));

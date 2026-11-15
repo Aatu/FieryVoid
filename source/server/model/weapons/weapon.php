@@ -1531,6 +1531,20 @@ public function getFullStartLoading()
         return Array("rp" => $rangePenalty, "notes" => $notes);
     }
 */
+    /* A to-hit goal on the d20 scale -> the percentage a shot needs. ⚠️ MIRROR PAIR with
+       weaponManager.goalToPercent (JS): the two MUST round alike, or the page shows one chance and
+       the server rolls against another.
+       The goal is a sum of fractions (a 0.33 or 0.66 range penalty per hex, half and third points
+       of ELINT support), and the page and the server add its terms in different orders - so a goal
+       that is exactly on a half percent (a Gravitic Cannon, 0.33 a hex, at 10 hexes: x.5) came out
+       as 18.499999... on one side and 18.5 on the other, and rounded apart. The value is therefore
+       snapped to six decimals first, which takes the adding order out of it, and only then rounded
+       (a half away from zero, as round() always did here). Still a float, as round() returned. */
+    public static function goalToPercent($goal)
+    {
+        return round(round($goal * 5, 6));
+    }
+
     public function calculateRangePenalty($distance)
     {
         $rangePenalty = $this->rangePenalty * $distance;
@@ -2441,7 +2455,7 @@ public function getFullStartLoading()
         $goal = $defence + $hitBonuses - $hitPenalties;
 
 		
-        $change = round($goal * 5); //d20 to d100: ($goal/20)*100
+        $change = self::goalToPercent($goal); //d20 to d100: ($goal/20)*100
 		$target->setExpectedDamage($hitLoc, $change, $this, $shooter);
 
         //range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty,
@@ -2468,7 +2482,7 @@ public function getFullStartLoading()
         if ($disguisedProfile !== null || $disguisedDEW !== null) {
             $goalFake = $defenceFake + $hitBonuses - ($hitPenalties - $dew + $dewFake);
             $fireOrder->chameleonFake = array(
-                'needed' => round($goalFake * 5),
+                'needed' => self::goalToPercent($goalFake),
                 'hit'    => 0,
                 'mirror' => true,
             );

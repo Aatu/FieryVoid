@@ -2,7 +2,7 @@
 
 Status: **Stage T0 COMPLETE (committed 2026-11-13, 5807979b8, play-tested in game 4568; as-built
 notes: section 10.1). Stage T1a COMPLETE (committed 2026-11-13, 9537a8b72, Auto-Deploy play-tested
-by the user; section 10.2). Stage T1b COMPLETE (2026-11-13, uncommitted; harnesses and self-play green, play-tested by the user in game 4626; section 10.3). Stage T2 BUILT (2026-11-14, uncommitted; harnesses green, not yet play-tested by the user; one part of its "done when" is open - section 10.4).** T3 onward not started. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
+by the user; section 10.2). Stage T1b COMPLETE (2026-11-13, uncommitted; harnesses and self-play green, play-tested by the user in game 4626; section 10.3). Stage T2 COMPLETE (committed 15624ab89; play-tested by the user in game 4679; one part of its "done when" is still open - section 10.4). Stage T3 BUILT (2026-11-15, uncommitted; play-tested by the user in game 4698, feedback taken in 10.6 A). Stage T4 COMPLETE (2026-11-15, uncommitted; play-tested by the user in game 4701, reviewed clean; section 10.6).** T5 onward not started. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
 layer, which uses this for battles against NPCs - see its section 7) and `STRATEGIC_AI_PLAN.md` (what
 NPC empires do on the campaign map).
 
@@ -462,10 +462,10 @@ unchanged) and the self-play harness.
 | **T0 Skeleton** ✅ COMPLETE | `Features` helper and the `cpuOpponent` off switch (first), `db/cpuOpponent.sql` (bot accounts, `cpu` column, `tac_ai_state`, `tac_ai_log`), `submitShipsForPlayer` split, the extracted ship builder, CPU slot in Create Game and the creator-built fleet path (8.1) behind the flag, `AIDriver`, fallback orders for every phase, self-play CLI harness, the flag-off harness (section 2) | With the flag off nothing is visible or reachable and the replay harness is byte-identical; with it on, the creator buys a fleet for a CPU slot and two bots play a full game to FINISHED on fallbacks with zero rejected submissions |
 | **T1a Deployer + Auto-Deploy** ✅ COMPLETE | `FleetDeployer` (battlegroups, formation, legality), `autoDeploy.php`, the Auto-Deploy button and panel behind the `autoDeploy` flag, `DeployDecider` calling the same service; `deployerHarness.php` (every plan across zone shapes, terrain and fleet mixes passes `validateDeploymentArea`; deterministic; never touches placed units unless asked) | A player clicks Auto-Deploy, gets a legal formation, adjusts it and commits by hand; the phase is never committed for them. **Releasable to players on its own** |
 | **T1b ShipMover** ✅ COMPLETE (uncommitted) | `ShipMover` for standard hulls (speed, straight, turns, slips, thruster allocation) | `shipMoverHarness` clean for all EA and raider hulls |
-| **T2 Firing** ✅ BUILT (uncommitted, 10.4) | engagement table, `FireDecider`, interception reserve | Bots destroy each other; a human loses to an EA bot by standing still |
-| **T3 EW and power** | `EWDecider`, `PowerDecider` (negative-power handling) | Bot EW passes `validateEW` in every self-play turn; hit rates rise measurably versus T2 |
-| **T4 Ballistics and fighters** | `BallisticDecider`; flight tactics on top of `AutomatedMovement` (escort, strike, intercept) | Missile and carrier fleets fight sensibly |
-| **T5 Movement search** | `MoveDecider` scoring, range bands, terrain (drifting too) and mine avoidance, pivots and rolls, gravitic hulls | Hard beats Normal beats Easy in self-play ladders at >= 60% |
+| **T2 Firing** ✅ COMPLETE (10.4) | engagement table, `FireDecider`, interception reserve | Bots destroy each other; a human loses to an EA bot by standing still |
+| **T3 EW and power** ✅ BUILT (uncommitted, 10.5) | `EWDecider`, `PowerDecider` (negative-power handling) | Bot EW passes `validateEW` in every self-play turn; hit rates rise measurably versus T2 |
+| **T4 Ballistics and fighters** ✅ COMPLETE (uncommitted, 10.6) | `BallisticDecider`; flight tactics (escort, strike, intercept) - built on `ShipMover`, not `AutomatedMovement`, whose rows the page never checked | Missile and carrier fleets fight sensibly |
+| **T5 Movement search** | `MoveDecider` scoring, range bands, terrain (drifting too) and mine avoidance, pivots and rolls, gravitic hulls; closing with the enemy (the T2 pursuit question, ruled into T5); moving to bring the most direct-fire weapons into arc within the turn AND the most ballistic launchers to bear for next turn's launch (user, game 4701) | Hard beats Normal beats Easy in self-play ladders at >= 60% |
 | **T6 Withdrawal** | posture logic, surrender, jump-out | No game runs past the turn cap for lack of a decision |
 | **T7 Specials** | handler registry; handlers faction by faction; readiness list grows | Each added faction meets the section 7 criteria |
 | **T8 Skirmish release** | server `FleetChecker` port + parity test; `FleetComposer` (auto-compose as the default for an empty CPU slot); level and personality pickers; lobby and games-list display of CPU seats; docs page | Every auto-composed fleet across all ready factions and a range of point values passes the Fleet Checker; Beta on live via `betaTesters`, then the flag |
@@ -658,7 +658,14 @@ regenerated with phpab for the two new classes.
   * Flights still fly straight (and so off the map): their moves are `AutomatedMovement`'s, T4.
   * ShipMover re-reads its rows on every question - simple, and slow for a deep search.
 
-### 10.4 Stage T2 as built (2026-11-14) - BUILT, uncommitted, not yet play-tested
+### 10.4 Stage T2 as built (2026-11-14) - COMPLETE, committed 15624ab89
+
+**Play-tested by the user, game 4679 (human Hyperion v CPU Battlewagon + Dragonship, 48 asteroids,
+3 turns), checked 2026-11-15:** 7 fire orders over three Fire phases, every one in arc, in range
+and with a clear line of sight at the positions of its turn; a 2-turn Particle Cannon fired on
+turn 1 was rightly silent on turn 2; no `defect` row in `tac_ai_log`; the two turns with few orders
+are the Hyperion's interceptors and 6 DEW pulling most shots under the thresholds. (To re-check a
+past turn, take positions from `tac_shipmovement`: the loader keeps only turn 1, N-1 and N.)
 
 No flag of its own, no migration. `source/autoload.php` regenerated for the two new classes.
 
@@ -737,12 +744,282 @@ No flag of its own, no migration. `source/autoload.php` regenerated for the two 
   round and meet again about every 11 turns. Four 42x30 games all reached the 40-turn cap; on a
   24x16 map one of three was fought to a finish (54 turns). So "bots destroy each other" happens
   slowly, and "a human loses by standing still" has not been tried. Closing on the enemy is
-  MoveDecider scoring - stage T5 in the table above. **Needs a ruling:** bring a minimal "close
-  with the nearest enemy" term forward, or leave it to T5.
+  MoveDecider scoring - stage T5 in the table above. ~~Needs a ruling~~ **Ruled 2026-11-15: left to
+  T5**, which is next.
 * **Left for later stages:** called shots; holding a slow weapon for a better shot next turn
   (T5's look-ahead); levels (Easy's "no focus-fire" is one constant); the pre-flight validators of
   3.2 step 5 (the harness proves the orders instead); `threat()` prices an enemy weapon in its
   current mode and ignores whether it is loaded.
+* **Amended 2026-11-15 by the user's play-test feedback - see 10.6 A:** firing floors by loading
+  time and a one-turn look-ahead for slow guns (replacing `FIRE_MIN_CHANCE_SLOW`), plasma range
+  damage priced, and interception modelled as the server allocates it (`InterceptModel`).
+
+### 10.5 Stage T3 as built (2026-11-15) - BUILT, uncommitted, not yet play-tested
+
+No flag of its own, no migration. `source/autoload.php` regenerated for the two new classes.
+
+* **⚠️ Power and EW legality are the CLIENT's too** (the finding of 10.3 and 10.4, for the third
+  phase). `EW::validateEW` returns true for anything, and the server has no twin of the power
+  balance: "too many EW points", Restricted EW, an LCV's sensors, who may be locked on to, and
+  "turn systems off before you commit" are all said by `ew.js`, `power.js` and the commit gate in
+  `gamedata.js`. So both deciders are PORTS of those, with a harness in two halves:
+  * `tests/ai/ordersHarness.php` (no database): every ship hull at the origin with four enemies,
+    in six kinds of trouble (none; a reactor short by 2 to 34; Restricted EW and a gun shot away;
+    the scanner hurt or dead with "sensors down"; weapons forced off and a deep deficit; a
+    disabled ship or a reactor shut down). Takes the whole decision (`TacticalAI::initialOrders`)
+    and pushes it through `ShipPayload`.
+  * `tests/ai/ordersOracle.js` (node, host): loads the REAL client, starts the turn as the page
+    does (`repeatLastTurnPower`), and makes the bot's orders as a player would. Every system the
+    page forces off must be in the bot's rows; every other "off" row must be one the Off button
+    allows, on a ship in deficit, and never one more than the deficit needs; the commit gate
+    (`getShipsNegativePower` and its neighbours) must pass; every OEW / CCEW point is clicked in
+    (`ew.AssignOEW`, `ew.assignEW`); `convertUnusedToDEW`, `checkRestrictedEW` and
+    `checkLCVSensors` must pass; and the page's EW rows must then equal the bot's, DEW included.
+  * Result, EA + raiders: **155 hulls, 930 situations, 0 differences** - 465 ships in deficit, 1,520
+    systems switched off for it, 558 rows the page forces, 261 offensive EW rows (461 points).
+    Its first run found two real differences, both fixed: mines get the page's forced-off rows
+    too, and the scanner figure (next point).
+* **`ai/deciders/PowerDecider.php`.** `plan()` returns the power rows and also writes them onto
+  the loaded systems, so the EW decision sees a scanner that was switched off. Two things only:
+  the "off" row the page writes for a system under a ForcedOffline critical (the server reads that
+  critical by itself; the row is for agreement), and shedding load on a ship in deficit - the jump
+  engine first (the bot does not jump before T6), then weapons still loading, other systems,
+  loaded weapons (least fire per point of power first), the engine, the scanner. Never the
+  reactor, the C&C or a shield generator. No boost, no overload. The bot posts only this turn's
+  rows and carries nothing over, so the same deficit switches the same systems off each turn.
+  `balance()` is `shipManager.power.getReactorPower` for a ship with one ordinary reactor.
+  **Left alone (P4), no rows as before:** bases, Mag-Grav reactors, ships with a Power Capacitor
+  or Plasma Battery. ⚠️ The oracle counts 30 situations (bases in deficit) where the page would
+  have stopped a player and the bot commits anyway - a gap until those reactors get a handler.
+* **`ai/deciders/EWDecider.php`.** Per ship every point starts as DEW; one point at a time moves to
+  OEW on an enemy (or CCEW when enemy flights are in sight) while that gains at least
+  `EW_MIN_GAIN`. Score = `EW_OFFENCE` x what the ship's loaded guns should do, each gun against
+  the enemy it does most to with the OEW held there, minus `EW_DEFENCE` x what the enemy's guns
+  should do to this ship at its DEW, shared over the bot's units. Both come from
+  `Weapon::calculateHitBase` with the EW tried (`AIView::estimate`, now public, with an arc-free
+  form) - never a formula of the bot's own. Two guesses, the ones a player makes: its own ships
+  are judged where flying straight on takes them (what MoveDecider does), arcs are not asked,
+  and the enemy is taken to repeat LAST turn's EW.
+  * Limits ported from the page: Restricted EW keeps half the output in DEW; an LCV (`LCVSensors`)
+    puts all but 2 points into OEW; no row at all in a nebula; DEW only for a unit riding a
+    docking bay, a Kirishiac ELINT-module ship, and any unit `AIView::unitBlock` names. Targets:
+    targetable enemies not riding a docking bay. The DEW row is always posted, 0 included, last.
+  * **The scanner figure is the page's** (`EWDecider::points`, a port of `ew.getScannerOutput`),
+    not `EW::getScannerOutput`: the server gives a base or OSAT with a disabled C&C no sensors and
+    the page does, and only the page knows the "sensors down" critical.
+  * **The mask (P2):** the decision runs on `prepareForPlayer()`'s view, which in Initial Orders
+    wipes every other unit's EW - all turns. `EWDecider::remembered` therefore takes the enemy's
+    rows of turn N-1 (public then) from the load BEFORE masking, and nothing of turn N.
+  * Not used: ELINT functions (T7), Detect Stealth / Detect Mines, flight EW, levels.
+* `TacticalAI::initialOrders` composes the two (power first) and logs one `decision` line per
+  Initial Orders ("EW: 9 of 14 points offensive, on 2 enemies (2 ships); power: 1 systems switched
+  off"). `AIOrderBuilder::power` writes the row; `AIConfig::EW_*` holds the weights.
+  `TacticalAI::$without` (harness only) plays listed phases on the fallback.
+* **"Hit rates rise measurably versus T2" - met.** `selfPlayHarness.php` now prints each game's
+  firing figures and takes `--without=1`. Three 24x16 games each way, default EA fleets:
+
+  | | orders | mean chance | hits | damage | games fought to a finish |
+  |---|---|---|---|---|---|
+  | T3 (EW + power) | 130-153 | 46-51% | 65-72 | 1,367-1,541 | 3 of 3 (17, 18, 31 turns) |
+  | T2 (`--without=1`, all DEW) | 81-163 | 25-27% | 15-46 | 318-837 | 0 of 3 (turn cap) |
+
+  41-70% of the bots' EW points went offensive in those games. "Passes `validateEW` in every self-play turn" is true
+  and means nothing (it cannot fail); the oracle above is the real test.
+* **Gates, 2026-11-15:** self-play both movement modes on 42x30 with no refused submission and no
+  defect; `cpuLobbyHarness`, `flagOffHarness`, `deployerHarness` (195) green; fire harness pair at
+  the T2 settings (`--rounds=6`) 0 differences; replay check 203/205 (4504 and 4507, as before).
+* **Seen on the way, and fixed at the user's request (2026-11-15) - a rounding difference between
+  page and server.** The fire harness at its DEFAULT `--rounds=4` drew a situation the T2 run
+  never had: IMLAttackCruiser's Gravitic Cannons (0.33 a hex) at 10 hexes, page 18%, server 19%.
+  The goal sat exactly on a half percent; the two sides add its fractional terms in different
+  orders, so one had 18.4999... and the other 18.5. Both now go through one rule -
+  `Weapon::goalToPercent` (PHP) and `weaponManager.goalToPercent` (JS), a MIRROR PAIR: snap to six
+  decimals, then round a half away from zero. This is game code, not AI code, and applies to every
+  player's shots. After it: fire pair 0 differences at `--rounds=4` and `--rounds=6`; replay check
+  unchanged at 203/205 (no recorded shot moved).
+* **Left for later stages:** sensor boosting where power is spare (5.3); Easy's simple split and
+  Hard's per-point optimum (T8); the T2 open ruling on closing with the enemy still stands - with
+  EW the small-map games now finish; the 42x30 ones were only run to a 14-turn cap here.
+* **Amended 2026-11-15 by the user's play-test feedback - see 10.6 A:** soft locks on enemies that
+  move after the ship.
+
+### 10.6 Stage T4 as built (2026-11-15) - COMPLETE, uncommitted
+
+**Play-tested by the user, game 4701 (human Hyperion v CPU Hyperion Missile Cruiser + Aurora
+Starfury flight, 2 turns played), reviewed 2026-11-15:** every order the bot gave was legal at the
+positions of its own turn (checked with the oracle-proven `AIView`, the game wound back to each
+moment) - the turn-2 salvo of four Basic missiles at 17 hexes (Class-S launch range 20), each in
+arc, one `AmmoUsed` note per round; the flight's six Uni-Pulse Cannon orders at 4 hexes, 50%. The
+salvo resolved at 55% base against the Hyperion's DEW 6; the server put four interceptors on the
+first missile and one on the second, exactly the allocation `InterceptModel` mirrors. EW all DEW
+(a missile ship's offence uses no OEW); the flight escorted on turn 1 and struck on turn 2
+(accelerated to 9, turned onto the target at the end). No defect in `tac_ai_log`.
+**User's note for T5 (game 4701, turn 3):** the missile cruiser held course instead of turning to
+bring its three unfired racks (arcs 120-240 and 180-0) to bear for turn 3's launch. Moving to
+maximise the ballistic weapons that can fire next turn - and the direct-fire weapons in arc within
+a turn - is an important player skill; T5's movement scoring must count it.
+
+Started with the user's feedback on T2 and T3 (2026-11-15, after game 4698); that came first.
+No flag of its own, no migration. `source/autoload.php` regenerated for the three new classes
+(`BallisticDecider`, `FlightDecider`, `InterceptModel`).
+
+**A. The user's feedback on T2 / T3, and what changed**
+
+1. *"Link the hit chance a bot fires at to the weapon's loading time; range penalty and plasma
+   range damage matter too - in game 4698 I wouldn't have fired the Hyperion's Medium Plasma or
+   Medium Pulse Cannons until a turn closer."*
+   * `FireDecider::minimumChance`: a 1-turn gun fires at 5% or better; a slow one at
+     `AIConfig::FIRE_MIN_CHANCE_BY_LOAD` (2 turns 25%, 3-4 turns 34%) - or 15%
+     (`FIRE_MIN_CHANCE_PARTING`) when its target is drawing away and nothing better is coming.
+   * `FireDecider::holdSlow`: each slow gun's shot is priced again where both units will be if they
+     fly straight on (`AIView::ahead`, the real formula, so the range penalty is in it); the gun
+     WAITS when `now < next x FIRE_HOLD_CONFIDENCE (0.8) x (1 - 1/loading time)` - a turn's wait
+     costs a 2-turn gun half a shot and a 4-turn gun a quarter. Only the same target a turn on.
+   * `AIView::damagePerHit` takes `rangeDamagePenalty` off a hit (Plasma; doubled in a nebula),
+     as `Weapon::getDamageMod` does.
+   * **Game 4698, turn 1, replayed with these rules** (scratch script, positions and EW of that
+     turn): the bot fires the Heavy Laser (70%) and the three Standard Particle Beams (35%), and
+     holds both Medium Plasma Cannons (30%, 3-turn) and both Medium Pulse Cannons (35%, 2-turn) for
+     a turn closer. T2 fired all eight at 20-40%.
+2. *"Check we're not overcompensating for intercept - there are only so many interceptor shots, so
+   it's possible to saturate the enemy with fire."*
+   * Finding: the bot counted NO interception at all. The -15 / -20 on every shot is the
+     Interceptor's **Energy Web** (`InterceptorMkI` / `MkII` as a `DefensiveSystem`): the engine
+     takes it off every shot from the interceptor's arc and the page shows it to humans too, so the
+     bot's chance was exactly the page's. **User ruling, 2026-11-15:** correct - the E-Web deducts
+     from ALL hit chances while an online Interceptor is in arc of the shot, an effect separate from
+     the interception shot itself.
+   * But ignoring interception cost real damage: self-play game 4700 had six interceptors pile on a
+     lone missile ("Interception: 90 sources: 6, final to hit: 0") - against a ballistic the server
+     loses nothing for each extra interceptor. 206 of 321 single launches in the ballistic harness
+     would have been intercepted.
+   * **`ai/InterceptModel.php`**: a volley at one unit is valued as the server will leave it. The
+     shots become throwaway fire orders and get that unit's interceptors exactly as
+     `Firing::automateIntercept` gives them - `compareInterceptAbility` order, each gun to the shot
+     where it stops most damage, the server's own `isLegalIntercept` and each weapon's real
+     `getInterceptionMod`, `getBestInterception`'s damage estimate (ported in `weight()`; the
+     selection loop is ported too, because the server's re-tests geometry on every call and a
+     decision asks thousands of times). The interceptors are gathered by the bot's own copy of
+     `getUnassignedInterceptors`, because the server's would leak hidden information (P2): it
+     switches an enemy missile rack into Interceptor mode from the magazine's TRUE contents, and
+     reads a fighter gun's ammunition. Racks and ammunition guns are therefore not counted.
+     **Parity:** `fireHarness.php` runs the real `automateIntercept` on every planned volley -
+     1,491 direct-fire orders (508 intercepted) and 299 launches (147 intercepted), every total
+     identical.
+   * `FireDecider`: a shot is worth what it ADDS to its target's volley (less while the target has
+     interceptors to spare; more when it draws them off a shot already planned); the bot's own
+     missiles of the turn are in the volleys from the start (`ownMissiles`). A SLOW gun's floor
+     holds on the chance it keeps after interception - the log says "N slow weapons not fired into
+     the interceptors"; a 1-turn gun fires for whatever it adds.
+   * `BallisticDecider` launches by SALVOS (B below).
+3. *"Harder locks on enemies that move before the ship (a better chance of a good arc), softer locks
+   (1-2) on those that move after."* `EWDecider`: an enemy with the same or higher initiative (it
+   moves after) gets at most `EW_SOFT_LOCK` (2) points of OEW, and the fire hoped for against it
+   counts `EW_MOVES_AFTER_WEIGHT` (0.5); a base, OSAT or mine counts as having moved.
+
+**Determinism - found while doing the above.** Two runs of the orders harness differed by a point
+of OEW. Since 2026-01-12 a shot from exactly between two of the target's sections hits one of them
+at RANDOM, weighted by profile (`BaseShip::doGetHitSectionBearing`, on `Dice::d` = `random_int`,
+not seedable), and the section's profile is the shot's defence - so the bot's tentative
+`calculateHitBase` rolled a real die, cached the section per shooter (`activeHitLocations`) and
+added to the target's expected damage, making every answer depend on the questions asked before it
+(the look-ahead would have been priced on this turn's section). **`AIView::hitBase`** now asks the
+engine once per ENTRY of the section table the roll would choose between (a heavy combat vessel's
+table holds its front section twice, at two profiles) - forced through the engine's own cache for
+direct fire; for a ballistic (no cache) by making the other sections look destroyed and setting the
+hull's two profile figures for the call, or, if the table does not read them, by not launching from
+that exact line - weights them as the roll does, and puts the bookkeeping back after every call.
+Two orders-harness runs are now byte-identical.
+
+**B. Ballistics (`ai/deciders/BallisticDecider.php`), in Initial Orders**
+* `AIView` has a ballistic mode (`$ballistics`, on in phase 1): ballistic weapons only, a launch at
+  a unit in the same hex whatever the arc, a young race's launch at a stealth flight over 5 hexes
+  refused (`checkIsInRange`), `FireOrder` type 'ballistic'.
+* Magazine-fed racks (`AmmoMissileRackS` and kin, fighters' racks included) are judged by the ROUND
+  (`rackBlock`, `modes`): only `AIConfig::BALLISTIC_ROUNDS` (Basic, LongRange, Heavy, Flash,
+  Antifighter, D-Light, Dogfight) that the magazine still holds. Every special round stays in the
+  magazine (an Interceptor is still used by the server). Other plain ballistics (Ion Torpedo) too.
+* Ammunition: a ledger per magazine keeps the plan inside the page's two limits (rounds of each
+  kind, the magazine's total); the entry posts one mode name per launch in the magazine's
+  `individualNotesTransfer`, as `AmmoMagazine.doIndividualNotesTransfer` does - the server writes an
+  `AmmoUsed` note for each and asks nothing.
+* Salvos: for every target, the best 1, 2, 3... launches still to be had are valued together
+  through `InterceptModel`; the salvo worth most per launch is taken if its launches keep, on
+  average, `BALLISTIC_MIN_CHANCE` (35; 50 at a flight) of what each would do unintercepted.
+* Priced against the enemy repeating last turn's EW (`EWDecider` leaves those rows on the enemy
+  units) and the bot's own EW just decided (`TacticalAI::initialOrders` stands it on its ships).
+* Harness: `fireHarness.php --phase=1` + `fireOracle.js` (phase 1): 1,528 launches built identically
+  by the page, the whole plan clicked in and committed through the page's magazine check
+  (`doVerifyAmmoUsage` / `...Fighter`), every round drawn as the bot posts it, 0 differences. The
+  page prices a launch against the target's unseen DEW (all its unspent EW); the oracle puts that
+  back before comparing.
+* **PAGE DEFECT found, and FIXED at the user's request (2026-11-15) - game code, affects players:**
+  the page derived a weapon's per-mode range / fire control / damage only when the mode CHANGED
+  (`updateFiringModeData`); at load they came from the static blueprint (`Weapon::stripForJson`
+  sends `range` only after a critical). A magazine-fed rack whose live first round differed from the
+  blueprint's (a fighter that bought Heavy or LongRange missiles) was aimed with the wrong range
+  until the player cycled the mode - a Heavy missile launchable out to 8 hexes instead of 5, a
+  LongRange one refused past 8 instead of 15. **Fix:** the client `Weapon` constructor
+  (`model/shipSystem.js`) calls `updateFiringModeData()` for a `checkAmmoMagazine` weapon - what a
+  mode change does; each weapon has its own `data` copy by then, so no tooltip text leaks. The
+  oracle now FAILS on any magazine-fed weapon that loads stale: 12 such racks in the earlier run,
+  0 after the fix, on the same cases. Legacy bundles rebuilt by hand (`bundle-legacy.js`; the
+  watcher had missed the edit) and synced.
+* Self-play (missile fleet v gun fleet, 24x16): game 4703 - no launch "eaten" whole; turn 9's salvo
+  4 of 4 hits, turn 16's 5 of 6 (game 4700, before salvos: 7 launches intercepted to nothing).
+
+**C. Flights**
+* **`ShipMover` plots fighter flights** (it is the movement.js mirror for them too): one pool of
+  thrust (`freethrust`), no thrusters - each speed change, turn (ceil(speed x turn cost), never
+  under 1) and sideslip (1) paid in full on its row and committed at once; facing kept on the
+  heading; no alignment test on a turn, no thrust-per-5-speed test on a slip, no Quartermaster
+  delay; JINKING a level at a time up to `jinkinglimit` (1 thrust a level, 2 in a nebula),
+  `jinkLevels()` / `jinkRoom()`. `enumerate()` leaves jinks out (no hex changes). Refused:
+  remote-controlled flights (Hunter-Killers), gravitic flights. Harness: `shipMoverHarness.php` +
+  `shipMoverOracle.js` now include flights - 150 hulls (22 flights), 333 flight situations, 720
+  jink steps; 32,766 plans and 247,508 steps replayed through movement.js, 0 differences.
+* **`ai/deciders/FlightDecider.php`** chooses among those plans (grouped by end hex and facing, which
+  is all fire and danger depend on), in "value removed": offence (the flight's guns, in their arcs,
+  at this turn's Fire phase - `AIView::atFireTime` flies units yet to move straight on), minus
+  danger (every enemy gun that can reach it there, `FLIGHT_DANGER_WEIGHT`), minus terrain and map
+  edge (`MoveDecider::hazard`). With nothing in reach it CLOSES on its target (`FLIGHT_CLOSING_PER_
+  HEX`) - or, the target more than two turns off, ESCORTS: stays within `FLIGHT_ESCORT_RANGE` of
+  the fleet. Mission: INTERCEPT the enemy flights within `FLIGHT_INTERCEPT_RANGE` of the bot's ships
+  when its guns can fire at fighters, else STRIKE. It jinks all it can where it would take more
+  than it deals. Movement decisions now run on the masked view (P2), as Firing's do.
+* Self-play, carrier fleet (Avenger, 3 Starfury flights, Tethys) v gun fleet, 24x16, game 4705: the
+  flights did most of the carrier side's fighting (63 orders, 38 hits), striking on most turns and
+  jinking on 28 flight-turns; no defect.
+
+**Gates, 2026-11-15:** fire pair (phase 3) 0 differences at `--rounds=4` and `--rounds=6`;
+ballistic pair 0 differences; orders pair 0 differences and two runs byte-identical; ShipMover pair
+0 differences; `deployerHarness` (195), `flagOffHarness`, `cpuLobbyHarness` green; replay check
+203/205 (4504 and 4507, the played-on games, as before); self-play with missiles, carriers and the
+default fleets, no refused submission, no defect.
+
+**⚠️ The cost, measured.** Three default EA games on 24x16 against T3's figures (10.5):
+
+| | orders | mean chance | hits | damage | fought to a finish |
+|---|---|---|---|---|---|
+| T4 | 175-270 | 48.5-54.7% | 97-121 | 1,843-2,263 | 1 of 3 (52 turns; two at the 56 / 58-turn cap) |
+| T3 | 130-153 | 46-51% | 65-72 | 1,367-1,541 | 3 of 3 (17, 18, 31 turns) |
+
+Every shot is better and more damage is done, but over far more turns. A fourth game, kept and
+read (4719, 37 turns, finished): of its 72 Fire decisions, 36 fired nothing at all - no enemy in
+reach - while the new holds came to 34 weapon-turns (20 waiting for a closer turn, 14 kept out of
+idle interceptors) against 223 weapons fired. So the time goes on fleets that only hold course
+(T1b) passing out of each other's reach, and the flights now dogfight each other instead of
+running into the enemy's ships; the firing rules are a small part. The knobs are
+`FIRE_MIN_CHANCE_BY_LOAD`, `FIRE_HOLD_CONFIDENCE` and the slow-gun floor after interception; T5's
+movement (closing to the range a fleet's guns want) is what should shorten games.
+
+**Left for later:** closing with the enemy (the 10.4 pursuit question - **user ruling 2026-11-15:
+T5 is next and takes it**), with moving to bring the most weapons and launchers to bear (the user's
+4701 note above); flights do not pivot, dock or launch
+(the bot's flights start on the map), fly Fighter Missions or coordinate; special rounds (T7);
+holding missiles back by level (`BALLISTIC_RESERVE`, T8). Seen in the engine, not changed: a
+ballistic's hit LOCATION and its PROFILE come from two separate rolls on an exact section line
+(`calculateHitBase` calls `getHitSectionPos` and `getHitSectionProfilePos` separately).
 
 ---
 
@@ -753,7 +1030,9 @@ No flag of its own, no migration. `source/autoload.php` regenerated for the two 
   rejected submission, no validator finding, no PHP warning, the game ended. Run in batches across
   faction pairs and seeds. This doubles as a fuzz test of the engine itself - expect it to find real
   FV bugs; report them, do not fold fixes into AI work without asking.
-* **`shipMoverHarness.php`**: section 5.4. **`fireHarness.php` + `fireOracle.js`**: section 10.4.
+* **`shipMoverHarness.php`**: section 5.4 (flights since 10.6). **`fireHarness.php` + `fireOracle.js`**:
+  section 10.4; `--phase=1` for launches and magazines, and the interception parity check, 10.6.
+  **`ordersHarness.php` + `ordersOracle.js`**: section 10.5.
 * **Ladder harness**: win rates between levels and against a frozen previous AI version, to catch
   regressions in play strength.
 * **Masking test**: run a decider with the unmasked object swapped in; decisions must not change

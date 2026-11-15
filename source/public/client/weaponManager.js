@@ -1189,6 +1189,15 @@ window.weaponManager = {
        them because its per-hex penalty depends on how many discharges the shot against THAT target
        fuses, and the hook is otherwise handed nothing but a distance - which would leave the range
        half of a prediction describing a different shot from the fire-control half. */
+    /* A to-hit goal on the d20 scale -> the percentage a shot needs. ⚠️ MIRROR PAIR with
+       Weapon::goalToPercent (PHP) - read its note. The goal is a sum of fractions added in a
+       different order on each side, so it is snapped to six decimals before it is rounded, and a
+       half rounds away from zero as PHP's round() does (Math.round alone sends -0.5 to 0). */
+    goalToPercent: function goalToPercent(goal) {
+        var percent = Math.round(goal * 5 * 1e6) / 1e6;
+        return percent < 0 ? -Math.round(-percent) : Math.round(percent);
+    },
+
     calculateRangePenalty: function calculateRangePenalty(distance, weapon, target, calledid, fireOrder) {
         var rangePenalty = 0;
 
@@ -2611,7 +2620,7 @@ window.weaponManager = {
                  + shotMods.calledShot
                  + shotMods.otherTotal
                  - edfPenalty;
-        var hitChance = Math.round(goal * 5);
+        var hitChance = weaponManager.goalToPercent(goal);
 
         //Build modifier list (zeros omitted)
         var modifiers = [];
@@ -2641,7 +2650,7 @@ window.weaponManager = {
 
         //Dev-mode invariant: breakdown sum must reproduce hitChance
         var sumCheck = modifiers.reduce(function (s, m) { return s + m.value; }, 0);
-        if (Math.round(sumCheck / 20 * 100) !== hitChance) {
+        if (weaponManager.goalToPercent(sumCheck) !== hitChance) {
             console.warn('calculateHitChange breakdown sum mismatch', { sumCheck: sumCheck, hitChance: hitChance, goal: goal });
         }
 

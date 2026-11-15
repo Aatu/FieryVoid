@@ -8,14 +8,27 @@
  * ("movement never turns away from terrain or the map edge"). Choosing where to go - targets,
  * range bands, arcs - is stage T5, and replaces score() below.
  *
- * Units ShipMover does not plot for (flights, gravitic hulls, a ship carrying another...) keep
- * the fallback's rows: straight on.
+ * FIGHTER FLIGHTS (stage T4) go where FlightDecider sends them - strike, intercept or escort -
+ * among the plans ShipMover finds for them.
+ *
+ * Units ShipMover does not plot for (Hunter-Killers, gravitic hulls, a ship carrying another...)
+ * keep the fallback's rows: straight on.
+ *
+ * The decision is made on the bot's own MASKED view of the game (principle P2).
  */
 class MoveDecider
 {
+    //One line about the last orders(), for tac_ai_log (only when a flight was moved).
+    public static $lastSummary = null;
+
     //The bot's Movement entries, one per unit it owns. $seat is its DBManager::getCpuSeats row.
     public static function orders(TacGamedata $gamedata, $botId, array $seat)
     {
+        $gamedata->prepareForPlayer(); //the mask a human in this seat plays behind
+        self::$lastSummary = null;
+        FlightDecider::reset();
+        $view = null;
+
         $active = array();
         foreach ($gamedata->getMyActiveShips() as $ship) $active[$ship->id] = true;
 
@@ -23,18 +36,52 @@ class MoveDecider
         $bounds = self::mapBounds($gamedata);
 
         $entries = array();
+        $flights = 0;
         foreach (AIFallback::ownUnits($gamedata, $botId) as $ship) {
             $entry = AIOrderBuilder::entry($ship);
 
             if (isset($active[$ship->id])) {
                 $mover = ShipMover::forShip($ship, $gamedata);
-                $entry['movement'] = ($mover !== null) ? self::choose($mover, $blocked, $bounds) : AIFallback::straightRows($ship, $gamedata);
+                if ($mover !== null && $mover->isFlight()) {
+                    if ($view === null) $view = new AIView($gamedata, $botId);
+                    $entry['movement'] = FlightDecider::rows($view, $mover, $ship, $blocked, $bounds);
+                    $flights++;
+                } else {
+                    $entry['movement'] = ($mover !== null) ? self::choose($mover, $blocked, $bounds) : AIFallback::straightRows($ship, $gamedata);
+                }
             }
 
             $entries[] = $entry;
         }
 
+        if ($flights > 0) {
+            $f = FlightDecider::$last;
+            self::$lastSummary = $flights . ' flights: ' . $f['strike'] . ' striking, ' . $f['intercept'] . ' intercepting, ' . $f['escort'] . ' escorting; ' . $f['jinking'] . ' jinking';
+        }
+
         return $entries;
+    }
+
+    /* The part of score() that is about the board, not the plan's manoeuvres: a blocked hex entered,
+       ending off the map, and the same on next turn's straight continuation. 0 = nothing wrong. */
+    public static function hazard(array $path, OffsetCoordinate $end, $heading, $speed, array $blocked, $bounds)
+    {
+        $score = 0;
+        foreach ($path as $hex) {
+            if (isset($blocked[$hex->q . ',' . $hex->r])) $score += AIConfig::MOVE_COST_BLOCKED;
+        }
+        $over = self::hexesOffMap($end, $bounds);
+        if ($over > 0) $score += AIConfig::MOVE_COST_OFF_MAP + $over * AIConfig::MOVE_COST_PER_HEX_OVER;
+
+        $ahead = $end;
+        $aheadBlocked = false;
+        for ($step = 0; $step < $speed; $step++) {
+            $ahead = $ahead->moveToDirection($heading);
+            if (isset($blocked[$ahead->q . ',' . $ahead->r])) $aheadBlocked = true;
+        }
+        if ($aheadBlocked) $score += AIConfig::MOVE_COST_NEXT_TURN;
+        $score += self::hexesOffMap($ahead, $bounds) * AIConfig::MOVE_COST_PER_HEX_OVER;
+        return $score;
     }
 
     /* The rows for one ship. $blocked: "q,r" => true for every hex not to be entered. $bounds:
@@ -70,23 +117,7 @@ class MoveDecider
        ship in open space never manoeuvres at all. */
     private static function score(array $path, OffsetCoordinate $end, $heading, $speed, $cruise, array $actions, array $blocked, $bounds)
     {
-        $score = 0;
-
-        foreach ($path as $hex) {
-            if (isset($blocked[$hex->q . ',' . $hex->r])) $score += AIConfig::MOVE_COST_BLOCKED;
-        }
-        $over = self::hexesOffMap($end, $bounds);
-        if ($over > 0) $score += AIConfig::MOVE_COST_OFF_MAP + $over * AIConfig::MOVE_COST_PER_HEX_OVER;
-
-        $ahead = $end;
-        $aheadBlocked = false;
-        for ($step = 0; $step < $speed; $step++) {
-            $ahead = $ahead->moveToDirection($heading);
-            if (isset($blocked[$ahead->q . ',' . $ahead->r])) $aheadBlocked = true;
-        }
-        if ($aheadBlocked) $score += AIConfig::MOVE_COST_NEXT_TURN;
-        $score += self::hexesOffMap($ahead, $bounds) * AIConfig::MOVE_COST_PER_HEX_OVER;
-
+        $score = self::hazard($path, $end, $heading, $speed, $blocked, $bounds);
         if ($score == 0) return 0;
 
         $score += max(0, $cruise - $speed) * AIConfig::MOVE_COST_SPEED_LOST;

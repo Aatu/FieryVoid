@@ -15,8 +15,9 @@
  * Until the deciders exist (stages T1-T5) these ARE the bot's play.
  *
  * NOT YET, and each waits for the stage that owns it:
- *   - Initial Orders does not clear negative power (T3, PowerDecider). The server does not refuse
- *     a commit for it - the client does - so nothing is rejected meanwhile.
+ *   - Initial Orders here does not clear negative power: that is PowerDecider's job (stage T3).
+ *     The server does not refuse a commit for it - the client does - so this stays the plain
+ *     retry for when the deciders' orders are refused.
  *   - Movement here never turns: a unit flying straight into terrain collides, as a human's
  *     would. Steering clear is MoveDecider's job (stage T1b, on ShipMover); this stays the plain
  *     retry for when its orders are refused.

@@ -26,12 +26,19 @@
  * boost, agile snap turns, a rolled or reversed ship, Elite / Poor Crew, a Quartermaster and
  * docked LCVs are all costed as the page costs them.
  *
- * WHAT IT DOES NOT: pivots, rolls, jinking, extended turns, jump-out, half-phasing, contraction.
- * It never orders one. A ship that arrives in such a state (still pivoting or rolling from last
- * turn) is offered only what the page would still allow it, which is usually "straight on".
- * Hulls it refuses outright are listed in unsupportedReason(): flights (AutomatedMovement plots
- * those), bases, OSATs, mines, terrain, gravitic and Mindrider drives, and a ship carrying or
- * riding another unit.
+ * FIGHTER FLIGHTS (stage T4) are plotted too, by the page's flight rules: one pool of thrust (the
+ * flight's freethrust) and no thrusters, every manoeuvre paid in full on its own row and committed
+ * at once (speed changes at their accel cost, turns at ceil(speed x turn cost) and never less than
+ * 1, sideslips at 1), facing kept on the heading, and JINKING - a level at a time up to the
+ * flight's jinking limit, 1 thrust a level (2 in a nebula). A jink changes no hex, so enumerate()
+ * leaves it out and the caller adds levels to the plan it picks (jinkLevels()).
+ *
+ * WHAT IT DOES NOT: pivots, rolls, a ship's jinking, extended turns, jump-out, half-phasing,
+ * contraction. It never orders one. A ship that arrives in such a state (still pivoting or rolling
+ * from last turn) is offered only what the page would still allow it, which is usually "straight
+ * on". Units it refuses outright are listed in unsupportedReason(): remote-controlled flights
+ * (Hunter-Killers - AutomatedMovement may be driving them), bases, OSATs, mines, terrain, gravitic
+ * and Mindrider drives, and a unit carrying or riding another.
  *
  * ONE POLICY OF ITS OWN: it never overthrusts. The page lets a thruster carry up to twice its
  * rating at the risk of a critical; a bot's thrusters carry their rating and no more.
@@ -45,6 +52,7 @@ class ShipMover
     const SLIP_LEFT = 'slipleft';
     const SLIP_RIGHT = 'slipright';
     const MOVE = 'move';
+    const JINK = 'jink'; //a flight's: one more level
 
     //Thruster directions, as Thruster::$direction and a row's requiredThrust index them.
     const DIR_ANY = 0;
@@ -77,12 +85,15 @@ class ShipMover
     private $submarine = false;
     private $lcvSurcharge = 0;
     private $crewMod = 0;
+    private $flight = false;       //a fighter flight: one pool of thrust, no thrusters
+    private $jinkLimit = 0;
+    private $jinkCost = 1;
 
     /* Why this unit is not one ShipMover plots for, or null when it is. Such a unit keeps the
        fallback: straight on (AIFallback::movement). */
     public static function unsupportedReason($ship, $turn)
     {
-        if ($ship instanceof FighterFlight) return 'a flight';
+        if ($ship instanceof FighterFlight && !empty($ship->remoteControl)) return 'a remote-controlled flight';
         if ($ship->isTerrain()) return 'terrain';
         if (!empty($ship->base) || !empty($ship->smallBase)) return 'a base';
         if (!empty($ship->osat)) return 'an OSAT';
@@ -127,8 +138,13 @@ class ShipMover
         $this->turnDelayRate = round((float)$ship->turndelaycost * 100) / 100;      //getTurnDelayCost
         $this->accelCost = (float)$ship->accelcost;
         $this->submarine = !empty($ship->submarine);
-        $this->lcvSurcharge = !empty($ship->LCVCarrier) ? (int)HangarOps::dockedLCVCount($ship) : 0;
+        $this->flight = ($ship instanceof FighterFlight);
+        $this->lcvSurcharge = (!$this->flight && !empty($ship->LCVCarrier)) ? (int)HangarOps::dockedLCVCount($ship) : 0;
         $this->crewMod = (int)$ship->getCrewTurnDelayModifier();
+        if ($this->flight) {
+            $this->jinkLimit = (int)$ship->jinkinglimit;
+            $this->jinkCost = TacGamedata::$nebulaPresent ? (int)Nebula::jinkCostMultiplier($ship) : 1; //movement.js jinkLevelCost
+        }
 
         $this->readSystems();
     }
@@ -140,6 +156,14 @@ class ShipMover
     {
         $ship = $this->ship;
         $turn = $this->turn;
+
+        //A flight (getRemainingEngineThrust): its free thrust, nothing to destroy or set adrift.
+        if ($this->flight) {
+            $this->engineThrust = (int)$ship->freethrust;
+            $this->engineDestroyed = false;
+            $this->adrift = false;
+            return;
+        }
         $thrust = 0;
         $engines = 0;
         $enginesAlive = 0;
@@ -231,10 +255,39 @@ class ShipMover
     public function options()
     {
         $options = array();
-        foreach (array(self::ACCEL, self::DECEL, self::TURN_LEFT, self::TURN_RIGHT, self::SLIP_LEFT, self::SLIP_RIGHT, self::MOVE) as $action) {
+        foreach (array(self::ACCEL, self::DECEL, self::TURN_LEFT, self::TURN_RIGHT, self::SLIP_LEFT, self::SLIP_RIGHT, self::MOVE, self::JINK) as $action) {
             if ($this->can($action)) $options[] = $action;
         }
         return $options;
+    }
+
+    public function isFlight()
+    {
+        return $this->flight;
+    }
+
+    //A flight's jinking levels this turn (getJinking), and how many more it may add (canJink's limit) and pay for.
+    public function jinking()
+    {
+        $levels = 0;
+        foreach ($this->rows as $row) {
+            if ($row['turn'] == $this->turn && $row['type'] === 'jink') $levels += (int)$row['value'];
+        }
+        return $levels;
+    }
+
+    public function jinkRoom()
+    {
+        if (!$this->flight || $this->jinkCost <= 0) return 0;
+        return max(0, min($this->jinkLimit - $this->jinking(), intdiv(max(0, $this->remainingEngineThrust()), $this->jinkCost)));
+    }
+
+    //Add $levels jinking levels (as many as can be had). Returns how many were added.
+    public function jinkLevels($levels)
+    {
+        $added = 0;
+        while ($added < $levels && $this->jink()) $added++;
+        return $added;
     }
 
     //Can this order be given now, and paid for?
@@ -250,7 +303,7 @@ class ShipMover
     public function clientOffers()
     {
         $speed = $this->canChangeSpeed();
-        return array(
+        $offers = array(
             self::ACCEL => $speed,
             self::DECEL => $speed,
             self::TURN_LEFT => $this->canTurn(),
@@ -259,6 +312,8 @@ class ShipMover
             self::SLIP_RIGHT => $this->canSlip(true),
             self::MOVE => $this->canMove()
         );
+        if ($this->flight) $offers[self::JINK] = $this->canJink(); //a ship's jinking is not plotted, so not compared
+        return $offers;
     }
 
     /* Give one order. $extraThrust (turns only): thrust paid over the turn's cost to shorten its
@@ -274,6 +329,7 @@ class ShipMover
             case self::SLIP_LEFT: return $this->slip(false);
             case self::SLIP_RIGHT: return $this->slip(true);
             case self::MOVE: return $this->move();
+            case self::JINK: return $this->jink();
         }
         return false;
     }
@@ -412,6 +468,7 @@ class ShipMover
             if ($mover->isComplete()) self::keepPlan($plans, $mover);
 
             foreach ($mover->options() as $action) {
+                if ($action === self::JINK) continue; //no hex changes with it: the caller adds levels to the plan it picks
                 $next = clone $mover;
                 if (!$next->apply($action)) continue;
 
@@ -462,8 +519,9 @@ class ShipMover
         $channeled = array();
         foreach ($this->thrusters as $id => $thruster) $channeled[] = $this->channeledReal($id, false);
 
+        //(the thrust left too: a flight has no thrusters to tell two movers' spending apart)
         return implode('|', array($last['q'], $last['r'], $last['heading'], $last['facing'], $last['speed'], $this->remainingMovement(),
-            $this->currentTurnDelay(), $slip, $speedChanges, $this->isLastRowTurn() ? 't' : '', implode(',', $channeled)));
+            $this->currentTurnDelay(), $slip, $speedChanges, $this->isLastRowTurn() ? 't' : '', implode(',', $channeled), $this->remainingEngineThrust()));
     }
 
     private function isLastRowTurn()
@@ -491,7 +549,7 @@ class ShipMover
         }
 
         $required = array(null, null, null, null, null);
-        $required[$this->directionRequired($accel ? self::DIR_MAIN : self::DIR_RETRO)] = $this->speedChangeCost();
+        $required[$this->flight ? self::DIR_ANY : $this->directionRequired($accel ? self::DIR_MAIN : self::DIR_RETRO)] = $this->speedChangeCost();
 
         $this->rows[] = $this->newRow('speedchange', $last['q'], $last['r'], $speed, $heading, $last['facing'], $required, $value) + array('accel' => $accel);
         return $this->payLastRow(0);
@@ -505,10 +563,12 @@ class ShipMover
         $required = $this->turnRequirement($right);
         $last = $this->rows[count($this->rows) - 1];
         $step = $right ? 1 : -1;
+        $heading = Mathlib::addToHexFacing($last['heading'], $step);
 
+        //a flight's facing follows its heading (doNormalTurn); a flight pays no extra to shorten a turn's delay
         $this->rows[] = $this->newRow($right ? 'turnright' : 'turnleft', $last['q'], $last['r'], $last['speed'],
-            Mathlib::addToHexFacing($last['heading'], $step), Mathlib::addToHexFacing($last['facing'], $step), $required, 0);
-        return $this->payLastRow($extraThrust);
+            $heading, $this->flight ? $heading : Mathlib::addToHexFacing($last['facing'], $step), $required, 0);
+        return $this->payLastRow($this->flight ? 0 : $extraThrust);
     }
 
     //doSlip
@@ -521,8 +581,9 @@ class ShipMover
         $position = (new OffsetCoordinate($last['q'], $last['r']))->moveToDirection($towards);
 
         $required = array(null, null, null, null, null);
-        //slipping to starboard is pushed by the port thrusters
-        $required[$this->directionRequired($right ? self::DIR_PORT : self::DIR_STBD)] = (int)ceil($this->speed() / 5);
+        //slipping to starboard is pushed by the port thrusters; a flight's slip is 1 thrust from its pool
+        if ($this->flight) $required[self::DIR_ANY] = 1;
+        else $required[$this->directionRequired($right ? self::DIR_PORT : self::DIR_STBD)] = (int)ceil($this->speed() / 5);
 
         $this->rows[] = $this->newRow($right ? 'slipright' : 'slipleft', $position->q, $position->r, $last['speed'], $last['heading'], $last['facing'], $required, 0);
         return $this->payLastRow(0);
@@ -537,6 +598,19 @@ class ShipMover
         $position = (new OffsetCoordinate($last['q'], $last['r']))->moveToDirection($last['heading']);
 
         $row = $this->newRow('move', $position->q, $position->r, $last['speed'], $last['heading'], $last['facing'], array(null, null, null, null, null), 0);
+        $row['commit'] = true;
+        $this->rows[] = $row;
+        return true;
+    }
+
+    //doJink, a flight adding a level: its whole price on the row, committed at once
+    private function jink()
+    {
+        if (!$this->canJink()) return false;
+
+        $last = $this->lastCommitted();
+        $row = $this->newRow('jink', $last['q'], $last['r'], $last['speed'], $last['heading'], $last['facing'], array(self::DIR_ANY => $this->jinkCost), 1);
+        $row['assignedThrust'] = array(self::DIR_ANY => $this->jinkCost);
         $row['commit'] = true;
         $this->rows[] = $row;
         return true;
@@ -610,9 +684,17 @@ class ShipMover
 
         if ($this->remainingEngineThrust() < max(1, $this->turnCost()) + $this->lcvSurcharge) return false;
         if ($this->isPivoting() !== 'no') return false;
-        if ($this->isOutOfAlignment()) return false;
+        if (!$this->flight && $this->isOutOfAlignment()) return false;
 
         return true;
+    }
+
+    //canJink, a flight adding a level: the thrust for it, and the jinking limit
+    private function canJink()
+    {
+        if (!$this->flight || $this->adrift) return false;
+        if ($this->remainingEngineThrust() < $this->jinkCost) return false;
+        return $this->jinking() + 1 <= $this->jinkLimit;
     }
 
     private function turnCost()
@@ -626,6 +708,9 @@ class ShipMover
     private function turnRequirement($right)
     {
         $required = array(null, null, null, null, null);
+
+        //a flight: the whole cost from its pool, never less than 1 (asked before the speed-0 case, as the page asks it)
+        if ($this->flight) return array(max(1, $this->turnCost()), null, null, null, null);
 
         if ($this->speed() === 0) return array(1 + $this->lcvSurcharge, 0, 0, 0, 0); //one point, through any thruster
 
@@ -656,7 +741,7 @@ class ShipMover
         if (!$moveBetween) return false;
 
         $thrust = $this->remainingEngineThrust();
-        if (ceil($this->speed() / 5) > $thrust) return false;
+        if (!$this->flight && ceil($this->speed() / 5) > $thrust) return false;
         if ($thrust == 0) return false;
         if ($this->remainingMovement() < 1) return false;
 
@@ -678,6 +763,18 @@ class ShipMover
     private function payLastRow($extra)
     {
         $index = count($this->rows) - 1;
+
+        //A flight has no thrusters: the row is paid from its pool in full, and committed (changeSpeed / doNormalTurn / doSlip)
+        if ($this->flight) {
+            $cost = (int)$this->rows[$index]['requiredThrust'][self::DIR_ANY];
+            if ($this->remainingEngineThrust() < $cost) {
+                array_pop($this->rows);
+                return false;
+            }
+            $this->rows[$index]['assignedThrust'] = array(self::DIR_ANY => $cost);
+            $this->rows[$index]['commit'] = true;
+            return true;
+        }
 
         for ($guard = 0; $guard < 400; $guard++) {
             $still = $this->stillRequired($index, false);
@@ -847,7 +944,7 @@ class ShipMover
         if ($index < 0) return 0;
 
         $delay = (int)ceil($this->rows[$index]['speed'] * $this->turnDelayRate);
-        $delay += Officers::turnDelayPenalty($this->ship, $delay);
+        if (!$this->flight) $delay += Officers::turnDelayPenalty($this->ship, $delay); //getQuartermasterTurnDelay: not a flight's
         $delay = $this->applyCrew($delay);
         $delay += $this->lcvSurcharge;
 

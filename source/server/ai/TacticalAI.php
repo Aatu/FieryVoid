@@ -6,7 +6,7 @@
  * Manager::submitShipsForPlayer - the body a browser's POST runs, line for line. Nothing in a
  * phase, handler or rule knows a bot is there (principle P1).
  *
- * A phase with a decider (Deployment, Movement, Firing so far) plays its decision; a phase without
+ * A phase with a decider (Deployment, Initial Orders, Movement, Firing so far) plays its decision; a phase without
  * one plays the fallback (AIFallback), which is also what a refused decision is replaced with.
  *
  * A refusal is an AI defect and is logged as one (tac_ai_log, kind 'defect'). A bot refused
@@ -15,6 +15,14 @@
  */
 class TacticalAI
 {
+    /* Phases to play on the fallback although a decider exists. For the harnesses only (a ladder
+       against "the bot without stage X", the hit-rate comparison of stage T3): nothing in the
+       game sets it. */
+    public static $without = array();
+
+    //One line about the last Initial Orders decision, for tac_ai_log.
+    public static $lastSummary = '';
+
     /* Play $seat's bot once, if it owes the game anything. $seat is a DBManager::getCpuSeats row.
        Returns array('status' => ..., 'error' => text or null):
          'idle'         nothing owed (not its turn, already submitted, game not running)
@@ -49,15 +57,23 @@ class TacticalAI
 
         /* The decision. A phase with a decider uses it; a phase without one, a decider that threw,
            and any retry after a refusal play the fallback (principle P3). Deciders so far:
-           Deployment (stage T1a), Movement (stage T1b - holds course, steers clear of terrain),
+           Deployment (stage T1a), Initial Orders (stage T3 - power and EW; masks $gamedata too),
+           Movement (stage T1b - holds course, steers clear of terrain),
            Firing (stage T2 - direct fire; it masks $gamedata in place, as the view of the bot's
            own player, which is why the fallback below reads nothing a mask touches). */
         $entries = null;
         $summary = null;
-        if ($refusals == 0) {
+        if ($refusals == 0 && !in_array((int)$phase, self::$without, true)) {
             try {
                 if ($phase == -1) $entries = DeployDecider::orders($gamedata, $botId, $seat);
-                else if ($phase == 2) $entries = MoveDecider::orders($gamedata, $botId, $seat);
+                else if ($phase == 1) {
+                    $entries = self::initialOrders($gamedata, $botId, $seat);
+                    $summary = self::$lastSummary;
+                }
+                else if ($phase == 2) {
+                    $entries = MoveDecider::orders($gamedata, $botId, $seat);
+                    $summary = MoveDecider::$lastSummary; //null unless a flight was moved
+                }
                 else if ($phase == 3) {
                     $entries = FireDecider::orders($gamedata, $botId, $seat);
                     $summary = FireDecider::$lastSummary;
@@ -89,6 +105,67 @@ class TacticalAI
         $db->aiLog($gameid, $botId, $turn, $phase, 'defect', 'Submission refused: ' . $error, AIConfig::LOG_CAP);
 
         return self::result('rejected', $error);
+    }
+
+    /* INITIAL ORDERS (stage T3): power first, then electronic warfare - a scanner switched off for
+       want of power has no points to give. Returns the entries, one per unit the bot owns; the
+       line for tac_ai_log is left in $lastSummary.
+
+       Power is decided on the bot's own ships, which no mask touches. EW is decided on the MASKED
+       load (principle P2); the one thing taken from before the mask is the enemy's EW of LAST
+       turn, which every player was shown then (EWDecider::remembered). */
+    public static function initialOrders(TacGamedata $gamedata, $botId, array $seat)
+    {
+        $remembered = EWDecider::remembered($gamedata, $botId);
+        $power = PowerDecider::plan($gamedata, $botId);
+
+        $gamedata->prepareForPlayer();
+        $view = new AIView($gamedata, $botId);
+        $ew = EWDecider::plan($view, $remembered);
+
+        /* Ballistics (stage T4) last: a launch is priced with the EW just decided, so that split
+           is stood on the bot's own ships first - what a player's page holds when he clicks a
+           torpedo on to a target after setting his EW. */
+        foreach (AIFallback::ownUnits($gamedata, $botId) as $unit) {
+            $id = (int)$unit->id;
+            if (!isset($ew[$id])) continue;
+            $rows = array();
+            foreach ($unit->EW as $entry) {
+                if ((int)$entry->turn !== (int)$gamedata->turn) $rows[] = $entry;
+            }
+            foreach ($ew[$id] as $row) $rows[] = new EWentry(-1, $id, $row['turn'], $row['type'], $row['amount'], $row['targetid']);
+            $unit->EW = $rows;
+        }
+        $launches = BallisticDecider::systems(BallisticDecider::plan($view), $gamedata->turn);
+
+        $entries = array();
+        foreach (AIFallback::ownUnits($gamedata, $botId) as $unit) {
+            $entry = AIOrderBuilder::entry($unit);
+            $id = (int)$unit->id;
+            if (isset($ew[$id])) $entry['EW'] = $ew[$id];
+            if (isset($power[$id])) {
+                foreach ($power[$id] as $row) {
+                    if (!isset($entry['systems'][$row['systemid']])) $entry['systems'][$row['systemid']] = array('id' => $row['systemid'], 'power' => array());
+                    $entry['systems'][$row['systemid']]['power'][] = $row;
+                }
+            }
+            if (isset($launches[$id])) {
+                foreach ($launches[$id] as $systemId => $system) {
+                    $entry['systems'][$systemId] = isset($entry['systems'][$systemId]) ? array_merge($entry['systems'][$systemId], $system) : $system;
+                }
+            }
+            $entries[] = $entry;
+        }
+
+        $e = EWDecider::$last;
+        $p = PowerDecider::$last;
+        $b = BallisticDecider::$last;
+        self::$lastSummary = 'EW: ' . $e['offensive'] . ' of ' . $e['points'] . ' points offensive, on ' . $e['targets'] . ' enemies (' . $e['ships'] . ' ships)'
+            . ($p['off'] > 0 ? '; power: ' . $p['off'] . ' systems switched off' : '')
+            . ($p['short'] > 0 ? ', ' . $p['short'] . ' ships still short' : '')
+            . ($b['launches'] > 0 ? '; ballistics: ' . $b['launches'] . ' launchers at ' . $b['targets'] . ' enemies' : '');
+
+        return $entries;
     }
 
     /* Does this bot owe the current phase a submission? The same tests the game itself applies to
