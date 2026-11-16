@@ -806,6 +806,105 @@ class AIView
         return $this->threat[$enemy->id] = $total;
     }
 
+    /* How much a hit from $shooter's side costs $unit, against an ordinary hit (stage T5 - the user's
+       ruling of 2026-11-16: protect a damaged section moderately, a DESTROYED one far more). The
+       section is picked as the engine picks it (doGetHitSectionBearing): the entries of the hit table
+       whose arc holds the shooter's bearing, the live ones shared out by profile. A live section counts
+       1 + MOVE_SECTION_DAMAGED x the share of its structure already lost. When every section facing
+       the shooter is gone the hit goes into the primary structure (getHitSection answers 0), and counts
+       MOVE_SECTION_DESTROYED. A hull with no section there (its primary takes such hits by design), and
+       a flight, count 1. Positions and facings are the units' current ones. */
+    public function exposure($unit, $shooter)
+    {
+        if ($unit instanceof FighterFlight) return 1.0;
+
+        $bearing = $unit->getBearingOnUnit($shooter);
+        $weights = 0;
+        $total = 0;
+        $dead = false;
+        foreach ($unit->getLocations() as $loc) {
+            if (!Mathlib::isInArc($bearing, $loc['min'], $loc['max'])) continue;
+            $structure = $unit->getStructureSystem($loc['loc']);
+            if (!$structure) continue;
+            $left = $structure->getRemainingHealth();
+            if ($left <= 0) {
+                $dead = true;
+                continue;
+            }
+            $profile = max(1, (float)$loc['profile']);
+            $lost = 1 - $left / max(1, (int)$structure->maxhealth);
+            $weights += $profile;
+            $total += $profile * (1 + AIConfig::MOVE_SECTION_DAMAGED * max(0, $lost));
+        }
+
+        if ($weights > 0) return $total / $weights;
+        return $dead ? AIConfig::MOVE_SECTION_DESTROYED : 1.0;
+    }
+
+    //Is the line between two units clear of terrain and Enormous units (the page's test in shot())?
+    public function clearLine($from, $to)
+    {
+        if (count($this->blocked) == 0) return true;
+        return !Mathlib::isLoSBlocked($from->getHexPos(), $to->getHexPos(), $this->blocked);
+    }
+
+    /* Will this ballistic weapon of $unit be one the bot launches NEXT turn (stage T5)? The P4 tests
+       BallisticDecider's view applies (weaponBlock in ballistic mode), with "loaded" asked of next
+       turn: a launcher still loading counts once a turn more completes it, and one that has launched
+       this turn only if it reloads in a turn. */
+    public function launcherNextTurn($unit, Weapon $weapon)
+    {
+        if (!$weapon->ballistic) return false;
+        $was = $this->ballistics;
+        $this->ballistics = true;
+        try {
+            $why = $this->weaponBlock($unit, $weapon, null);
+        } finally {
+            $this->ballistics = $was;
+        }
+        if ($why === null) return true;
+        if ($why === 'not loaded') return (int)$weapon->getLoadingTime() <= (int)$weapon->turnsloaded + 1;
+        if ($why === 'already has an order this turn') return (int)$weapon->getLoadingTime() <= 1;
+        return false;
+    }
+
+    /* What a ballistic weapon of $shooter should do to $target if launched NEXT turn from where
+       $shooter now stands (stage T5: "launchers to bear for next turn's launch", the user's note on
+       game 4701). A launch is made in Initial Orders from the hex the last Movement phase ended in,
+       so the tentative order is dated next turn - Weapon::getFiringHex then takes this turn's last
+       row as the launch hex. Arc and launch range are the page's tests as shot() makes them (a unit
+       in the same hex whatever the arc, a stealth flight not beyond 5 hexes); the hit formula is the
+       engine's, with this turn's EW standing in for next turn's. The weapon is asked in its current
+       mode. 0 when it could not be launched at $target from there. */
+    public function launchEstimate($shooter, Weapon $weapon, $target)
+    {
+        if (!$weapon->ballistic) return 0;
+        if (TacGamedata::$officersPresent && $weapon->damageType === 'Piercing') return 0;
+
+        $fc = $weapon->fireControl;
+        $index = ($target instanceof FighterFlight) ? 0 : (($target->shipSizeClass < 2) ? 1 : 2);
+        if (!isset($fc[$index])) return 0;
+
+        $distance = $shooter->getHexPos()->distanceTo($target->getHexPos());
+        if ($distance > 0 && !$this->onArc($shooter, $weapon, $target)) return 0;
+        if (!$this->inRange($shooter, $weapon, $target, $distance)) return 0;
+        if ($target instanceof FighterFlight && $distance > 5 && $target->getSystemByName('Stealth')) return 0;
+
+        $order = new FireOrder(-1, 'ballistic', $shooter->id, $target->id, $weapon->id, -1, $this->turn + 1, $weapon->firingMode, 0, 0, $weapon->defaultShots, 0, 0, null, null, null);
+        try {
+            $answers = $this->hitBase($weapon, $shooter, $target, $order);
+        } catch (Throwable $e) {
+            return 0;
+        }
+
+        $total = 0;
+        foreach ($answers as $answer) {
+            $chance = max(0, min(100, $answer['needed']));
+            if ($chance > 0) $total += $answer['weight'] * $this->expected($weapon, $shooter, $target, $chance, $answer['loc'], $distance);
+        }
+        return $total;
+    }
+
     //A direct-fire gun that does damage of its own and still exists - anybody's, loaded or not.
     public function plainGun(Weapon $weapon, $fighter = null)
     {

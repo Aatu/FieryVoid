@@ -2,7 +2,7 @@
 
 Status: **Stage T0 COMPLETE (committed 2026-11-13, 5807979b8, play-tested in game 4568; as-built
 notes: section 10.1). Stage T1a COMPLETE (committed 2026-11-13, 9537a8b72, Auto-Deploy play-tested
-by the user; section 10.2). Stage T1b COMPLETE (2026-11-13, uncommitted; harnesses and self-play green, play-tested by the user in game 4626; section 10.3). Stage T2 COMPLETE (committed 15624ab89; play-tested by the user in game 4679; one part of its "done when" is still open - section 10.4). Stage T3 BUILT (2026-11-15, uncommitted; play-tested by the user in game 4698, feedback taken in 10.6 A). Stage T4 COMPLETE (2026-11-15, uncommitted; play-tested by the user in game 4701, reviewed clean; section 10.6).** T5 onward not started. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
+by the user; section 10.2). Stage T1b COMPLETE (2026-11-13, uncommitted; harnesses and self-play green, play-tested by the user in game 4626; section 10.3). Stage T2 COMPLETE (committed 15624ab89; play-tested by the user in game 4679; one part of its "done when" is still open - section 10.4). Stage T3 COMPLETE and Stage T4 COMPLETE (committed together as 501272f04; play-tested by the user in games 4698 and 4701; sections 10.5, 10.6). Stage T5 STARTED 2026-11-16 (section 10.7).** T6 onward not started. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
 layer, which uses this for battles against NPCs - see its section 7) and `STRATEGIC_AI_PLAN.md` (what
 NPC empires do on the campaign map).
 
@@ -1020,6 +1020,134 @@ T5 is next and takes it**), with moving to bring the most weapons and launchers 
 holding missiles back by level (`BALLISTIC_RESERVE`, T8). Seen in the engine, not changed: a
 ballistic's hit LOCATION and its PROFILE come from two separate rolls on an exact section line
 (`calculateHitBase` calls `getHitSectionPos` and `getHitSectionProfilePos` separately).
+
+### 10.7 Stage T5 - movement search (started 2026-11-16)
+
+T3 and T4 were committed by the user as 501272f04.
+
+**User rulings, 2026-11-16 (asked at the start of T5):**
+* **Range: "best trade".** A ship goes where the damage it deals less the damage it takes is best,
+  both from the real hit formula - so a laser ship stands off from a plasma ship and a short-ranged
+  ship closes. Personality presets may tilt the balance later (T8).
+* **Formation: loose.** Each ship takes its own best position but pays a small cost for straying
+  from the rest of the fleet (mutual interceptor cover, concentrated fire).
+* **Damaged sections: protect moderately.** "If the guns brought to bear are high damage with decent
+  hit chances I might risk exposing my damaged side. Also, I would protect a destroyed section far
+  more than a moderately damaged side." (A hit on a destroyed section goes to the primary structure:
+  `BaseShip::getHitSection` answers 0.)
+* **Pivots and rolls: "rarely worth it"** - built last. Their real use is a damaged ship's: "rolling
+  to change side thrusters used for a planned turn, or pivot to decelerate after retro thrusters are
+  destroyed."
+
+**Measured before building:** `ShipMover::enumerate` is exhaustive well inside its quota for
+capital and heavy hulls (Omega 39-97 end states, Hyperion 17-69, Olympus Beta 120-198 at speeds
+4-8) and reaches 400 for nimble ones (Tethys, Hermes), in 11-250 ms; `AIView::estimate` costs
+0.03-0.04 ms a call. So every end state can be scored with the real formula, and "a search aimed
+at a goal" is not needed for breadth - the T1b bias was in the ORDER of a quota that big hulls
+never fill.
+
+**Sub-stages** (each one played and measured before the next):
+
+| | Deliverable |
+|---|---|
+| T5a ✅ BUILT | `ShipDecider`: where a ship goes, scored in "value removed" like `FlightDecider` - this turn's direct fire from the end hex and facing, next turn's launchers from it (the user's 4701 note), the enemy's fire at it (damaged and destroyed sections weighted), next turn's trade a turn straight on, closing when nothing is in reach, loose formation, the T1b hazards. Every end state `ShipMover` finds. |
+| T5b ✅ BUILT | Overthrust allowance (10.3 ruling): `ShipMover` may overthrust when asked, plans carry the excess, the scoring weighs the critical roll it invites. Both harness halves. |
+| T5c | Terrain that drifts (next position predicted) and mines the bot can see, avoided. Drift (`TerrainDrift`): from turn 2, at the START of each turn a one-hex asteroid or meteor swarm stays (25%) or moves one hex straight on or 60 degrees either side (25% each), and a unit in the hex it enters is struck in Pre-Firing - so an end hex in a field's three forward hexes is a 25% overrun each, and next turn's continuation must miss all four of its possible hexes. Mines: read their trigger rules first. |
+| T5d | Gravitic hulls in `ShipMover` (mirror + oracle). |
+| T5e | Pivots and rolls for the damaged-ship uses above (mirror + oracle). |
+| T5f | Levels (Easy: noise; Hard: one-ply look-ahead, the enemy's best reply) and the ladder harness - the stage's "done when". |
+
+**T5a as built (2026-11-16) - BUILT, uncommitted, not play-tested by the user.**
+No flag, no migration; `source/autoload.php` regenerated for the one new class (phpab in the
+`fv-phpcheck:8.4` image - one added line).
+* **`ai/deciders/ShipDecider.php`** - `rows($view, $mover, $ship, $blocked, $bounds)`. Every end state
+  `ShipMover::enumerate` finds (quota `SHIP_PLANS` 1500, never reached by a big hull) is scored; the
+  fire terms are cached by end hex and facing. Terms, all from `AIView::estimate` / the engine:
+  * *offence* - this turn's loaded direct-fire guns from the end state, arcs and line of sight asked,
+    every other unit where `atFireTime` puts it; fire at an enemy yet to move x `MOVE_UNMOVED_OFFENCE`.
+  * *launch* - next turn's launchers (`AIView::launcherNextTurn`) from the end hex at the enemy's
+    end-of-turn hexes, priced by `AIView::launchEstimate`: a tentative ballistic order dated NEXT
+    turn, so `Weapon::getFiringHex` takes this turn's last row as the launch hex.
+  * *danger* - every enemy's plain guns at the ship: a unit that has moved with its arcs, one yet to
+    move with all its guns at `MOVE_UNMOVED_DANGER`, each enemy weighed by `AIView::exposure` (the
+    engine's section choice; a damaged section 1 + `MOVE_SECTION_DAMAGED` x share lost, all facing
+    sections destroyed `MOVE_SECTION_DESTROYED`), x `MOVE_DANGER_WEIGHT` 0.75 against offence.
+  * *next turn* - the same trade with everybody a turn straight on (`AIView::ahead`), x 0.5; a slow gun
+    that fires this turn is not counted again.
+  * *shaping*, in hexes of `MOVE_HEX_VALUE` (0.5%) of the ship's own value: closing on the nearest
+    enemy SHIP (flights only when nothing else is left), this turn + half of next; formation (2.5 a hex
+    beyond 4 of the nearest other ship of the bot); speed below 3, above the size's comfortable speed,
+    and above `ShipMover::fastestTurnable` (the fastest at which a whole turn's thrust still pays for a
+    turn); a little per manoeuvre (slips dearest). The T1b hazards (`MoveDecider::hazard`) outweigh all.
+  * `$trace` (harness only) lists the five best plans with every term.
+* **Two corrections the first self-play games forced:**
+  * *Closing was an on/off term* (only with nothing in reach from any end state) - one end state with a
+    token 8 points of fire turned it off for all, and ships slid off sideways. Now always counted, small.
+  * *Uncapped worth.* `value / health` of a nearly dead unit is enormous: one volley at a crippled
+    Hyperion scored 13,924, the crippled ship's own "danger" 11,458. In game 4720 that ship fled off the
+    map (the 5,000 off-map hazard was cheaper) and an Omega chased it there at speed 9 - where it could
+    no longer turn - and flew on to r -69. Now no target counts past the damage that finishes it
+    (`removed()`, greedy, best gun first) and a ship's loss stops at its whole value (`lost()`).
+* **`MoveDecider`** routes hulls to `ShipDecider`, flights to `FlightDecider` as before, and stands each
+  decided unit at its end (`standAtEnd`) so units moving in the same activation see each other.
+  `MoveDecider::choose` (the T1b rule) stays: the fallback, and `MoveDecider::$plainFor` (harness only).
+  The Movement decision line in `tac_ai_log` now names each ship's plan and terms.
+* **`selfPlayHarness.php`**: `--plain-move=2` (those slots move ships by the T1b rule) and a result
+  line per game - each side's surviving value (point cost x combat value) and who is ahead.
+* **Measured, 24x16, default EA fleets, T5 against the T1b mover (sides swapped half way):** T5 ahead in
+  **6 of 6** games, keeping 34-85% of its value against 0-10%; four games fought to a finish (16, 26,
+  47, 54 turns), two at the turn cap. No refused submission, no defect. Decisions take 50-600 ms a
+  ship (DB-free scratch timing); a 24x16 game runs 35-128 s.
+* **Gates, 2026-11-16:** ShipMover pair 32,766 plans / 247,508 steps, 0 differences; fire pair 0
+  differences; `flagOffHarness`, `cpuLobbyHarness` green.
+* **Seen, left for later stages:**
+  * Both turn-capped games ended with one side down to a fighter flight that could not hurt the
+    other's last ship, and with crippled ships drifting off the map - T6 ("no game runs past the turn
+    cap for lack of a decision").
+  * The drifters were real physics, not decisions: a Hyperion at speed 8 lost both retro thrusters
+    (cannot brake, cannot pay a turn at 8), a Tethys four thrusters. Exactly the user's pivot use
+    (T5e): "pivot to decelerate after retro thrusters are destroyed".
+  * `FlightDecider` still prices danger with the uncapped `value / health` - the flaw fixed above for
+    ships. Not seen to misbehave yet; not changed (T4 code).
+  * `EWDecider` still judges the bot's own ships where flying straight on takes them.
+  * Interception is not in the movement scores (it changes how much a volley does far more than where
+    it is best fired from).
+* **Performance fix the deployer harness showed:** `deployerHarness` lets `AIDriver::run(gameid, 3600)`
+  play up to 200 submissions after deploying, so it now drives `ShipDecider` over its asteroid
+  scenarios - and took 25 minutes (195 checks green). Line of sight (`Mathlib::isLoSBlocked`, which
+  walks every blocked hex) was asked once per GUN per enemy per end state; now once per enemy per end
+  state, each way (`lines()` - the engine asks it from the shooter). With 150 blocked hexes a decision
+  takes 274 ms for an Omega, 1.1 s for a Tethys (with T5b's extra end states).
+
+**T5b as built (2026-11-16) - BUILT, uncommitted.** The overthrust ruling of 10.3.
+* **`ShipMover::allowOverthrust($points)`**: a thruster may carry up to that many points over its
+  rating (default 0 = the T1b policy, byte-identical plans). A point goes over a rating only when no
+  thruster facing the right way can take it within its own (`clickBest` sorts within-rating thrusters
+  first); `click()` still holds the page's ceiling of twice the rating. **`overthrust()`** = thruster
+  id => points over the rating, for each thruster the plan took over (or further over - Engine
+  Shorted's push may already be); every plan carries it.
+* **`ShipDecider::candidates`**: every end state within the ratings, then - allowance
+  `MOVE_OVERTHRUST` (99, i.e. the page's ceiling) - only the end states nothing within the ratings
+  reaches. Each is priced by the critical it invites (`overthrustRisk`): per thruster the end-of-turn
+  roll d20 + damage + excess (Criticals: 15 First Thrust Ignored, 20 Half Efficiency as well), each
+  expected critical `MOVE_COST_THRUSTER_CRIT` (10 hexes), Half Efficiency counted twice. One point over
+  a sound thruster costs 4.5 hexes: always worth it to stay on the map (5,000), worth it for real
+  fire, never for a tie. The decision line says `OVERTHRUST #id +n`.
+* **Harness:** each situation gets one more random walk with the allowance, and one overthrusting plan
+  of the search is replayed; the first step of such a case carries `allowance` and the oracle checks
+  the thrusters against rating + allowance (the page refuses any point past twice the rating click by
+  click). The server half also checks that `overthrust()` is exactly the excess Criticals rolls for.
+  **150 hulls, 5,435 situations, 41,302 plans (8,692 allowed to overthrust, 4,950 thrusters taken over
+  their rating), 314,217 steps replayed through movement.js, 0 differences; 707,736 server checks.**
+* **Self-play with T5a + T5b (2026-11-16):** against the T1b mover on 24x16, T5 ahead in **6 of 6**
+  again - and **all six fought to a finish** (23-36 turns; T5 kept 18-83% of its value, T1b 0-7%).
+  T5 against T5 on the full **42x30** map: both games fought to a finish (32, 46 turns) - every 42x30
+  game before T5 hit the 40-turn cap (10.4). No refused submission, no defect. The bots overthrew in 30
+  of ~1,150 Movement decisions (under 3%; live players: 4.2% of ship-turns), mostly 1 point. One Omega
+  crab-walked three turns of one game with four slips a turn, a side thruster 3 over its rating each
+  time, to step out of the arcs of enemies that had moved - the risk priced at 6.5 hexes against a few
+  hundred points of danger. That is the ruling's trade-off as written; `MOVE_COST_THRUSTER_CRIT` is the
+  knob if it should be more conservative.
 
 ---
 

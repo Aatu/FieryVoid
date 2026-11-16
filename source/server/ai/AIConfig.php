@@ -34,6 +34,40 @@ class AIConfig
     const MOVE_COST_PER_HEX_OVER = 100;     //each hex past the map's edge, at this turn's end and next turn's
     const MOVE_COST_SPEED_LOST = 150;       //each point of speed given up to avoid trouble
 
+    /* Ships, stage T5 (ShipDecider): where a ship goes, among EVERY end state ShipMover finds for it.
+       The fire terms are in "value removed" - expected damage times what a point of the unit hit is
+       worth (its value over the damage that finishes it), as FireDecider's worth. The shaping terms
+       (closing, formation, speed, manoeuvres) are in HEXES, each hex worth MOVE_HEX_VALUE of the ship's
+       own value: enough to decide where fire is slight or even, too little to override a real trade.
+       User rulings 2026-11-16: range by best trade, loose formation, damaged sections protected
+       moderately and destroyed ones far more. */
+    const SHIP_PLANS = 1500;                //end states asked of ShipMover (big hulls have well under 200)
+    const MOVE_HEX_VALUE = 0.005;           //one hex of the shaping terms, as a share of the ship's own value
+    const MOVE_DANGER_WEIGHT = 0.75;        //the enemy's fire at the ship, against its own at the enemy: under 1 so a balanced bot leans into a fight
+    const MOVE_UNMOVED_OFFENCE = 0.5;       //fire at an enemy that has yet to move this turn: it may turn away
+    const MOVE_UNMOVED_DANGER = 0.5;        //an enemy yet to move: EVERY gun of it counts (it may turn to bring them to bear), at this weight
+    const MOVE_LAUNCH_WEIGHT = 0.8;         //next turn's launches from the end hex (the end state decides which launchers bear)
+    const MOVE_NEXT_TURN_WEIGHT = 0.5;      //the trade a turn on, everybody flying straight on: keeps a ship from overshooting
+    const MOVE_SECTION_DAMAGED = 0.5;       //a hit on a section counts 1 + this x the share of the section already lost
+    const MOVE_SECTION_DESTROYED = 3.0;     //...and a hit through a destroyed section - into the primary - this much
+    const MOVE_CLOSING_PER_HEX = 1.0;       //each hex to the nearest enemy where the Fire phase should find it (always counted)...
+    const MOVE_CLOSING_NEXT_TURN = 0.5;     //...and this much a hex of it a turn on, everybody flying straight on: a ship closing points at its enemy
+    const MOVE_FORMATION_RANGE = 4;         //a loose formation: within this many hexes of the nearest of the bot's other ships...
+    const MOVE_FORMATION_PER_HEX = 2.5;     //...at this much a hex beyond it (more than closing gains a hex, so a leader waits for the fleet)
+    const MOVE_MIN_SPEED = 3;               //each point of speed below this costs MOVE_COST_SLOW (the deployer's floor too)
+    const MOVE_COST_SLOW = 1.0;
+    const MOVE_COST_FAST = 1.5;             //each point above the comfortable speed of the ship's size (live data: capital 4.7, heavy 5.2, medium 6.1)
+    const MOVE_COMFORT_SPEED = array(3 => 5, 2 => 5, 1 => 6, 0 => 7); //shipSizeClass => speed; a bigger class uses the last
+    const MOVE_COST_UNTURNABLE = 5.0;       //each point of speed above the fastest at which a whole turn's thrust still pays for a turn (ShipMover::fastestTurnable)
+    /* Overthrust (stage T5b; user ruling 2026-11-13 - players overthrust to make a turn they need, to stay on the
+       map above all). Plans within the thrusters' ratings are found first; overthrust only adds end states they
+       cannot reach, each priced by the critical it invites. */
+    const MOVE_OVERTHRUST = 99;             //points over a rating a thruster may carry (the page's own ceiling, twice the rating, still holds); 0 = never
+    const MOVE_COST_THRUSTER_CRIT = 10.0;   //hexes per expected thruster critical (1 point over a sound thruster: 35% + 10% = 4.5 hexes)
+    const MOVE_COST_TURN = 0.2;             //each turn: the plainest plan wins among equals
+    const MOVE_COST_SLIP = 0.5;             //each sideslip - dearer, or slips become a cheaper way than braking to give up ground
+    const MOVE_COST_SPEED_CHANGE = 0.3;     //each speed change
+
     /* Flights, stage T4 (FlightDecider): where a fighter flight goes, among the legal plans ShipMover
        finds for it. Scores are in "value removed" - expected damage times what a point of the unit
        hit is worth (its value over the damage that finishes it), as FireDecider's worth. */
@@ -51,7 +85,7 @@ class AIConfig
        (user, 2026-11-15: "1-20% with a weapon that recharges in 1 turn anyway is fine; 1-33% for a
        3 or 4 turn recharge would be unwise"). Loading time => the least chance it fires at; a
        longer loading time than the last entry uses the last. FireDecider::minimumChance. */
-    const FIRE_MIN_CHANCE_BY_LOAD = array(2 => 25, 3 => 34, 4 => 34);
+    const FIRE_MIN_CHANCE_BY_LOAD = array(2 => 25, 3 => 34, 4 => 40);
     const FIRE_MIN_CHANCE_PARTING = 15;     //...but a slow weapon whose target is drawing away takes what it can get, down to this
     /* Holding a slow weapon for next turn (FireDecider::holdSlow). The same target is priced again
        where both units will be if they fly straight on; the weapon waits when

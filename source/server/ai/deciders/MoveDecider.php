@@ -2,11 +2,9 @@
 /**
  * CPU opponent - Movement (TACTICAL_AI_PLAN.md sections 3.3 and 5.4).
  *
- * STAGE T1b: there is no tactics here yet. A ship HOLDS ITS COURSE - straight on at its speed -
- * unless that would fly it into terrain or off the map, this turn or the next; then it takes the
- * plainest legal plan ShipMover has that does not. That closes the gap the T0 fallback left
- * ("movement never turns away from terrain or the map edge"). Choosing where to go - targets,
- * range bands, arcs - is stage T5, and replaces score() below.
+ * SHIPS (stage T5) go where ShipDecider sends them: every end state ShipMover finds is scored by
+ * the fire it brings to bear this turn and next, the fire it takes, the launchers it brings to bear
+ * for next turn, and the board's hazards.
  *
  * FIGHTER FLIGHTS (stage T4) go where FlightDecider sends them - strike, intercept or escort -
  * among the plans ShipMover finds for them.
@@ -14,12 +12,20 @@
  * Units ShipMover does not plot for (Hunter-Killers, gravitic hulls, a ship carrying another...)
  * keep the fallback's rows: straight on.
  *
+ * choose() below is the T1b rule - hold the course unless that flies into terrain or off the map -
+ * and is what a decider falls back on when it has no plan to choose from.
+ *
  * The decision is made on the bot's own MASKED view of the game (principle P2).
  */
 class MoveDecider
 {
-    //One line about the last orders(), for tac_ai_log (only when a flight was moved).
+    //One line about the last orders(), for tac_ai_log.
     public static $lastSummary = null;
+
+    /* Bots (player ids) whose SHIPS keep the stage T1b rule - hold course, steer clear of terrain and
+       the map edge (choose()) - instead of ShipDecider. For the self-play harness only (a ladder
+       against "the bot before stage T5"): nothing in the game sets it. */
+    public static $plainFor = array();
 
     //The bot's Movement entries, one per unit it owns. $seat is its DBManager::getCpuSeats row.
     public static function orders(TacGamedata $gamedata, $botId, array $seat)
@@ -27,7 +33,8 @@ class MoveDecider
         $gamedata->prepareForPlayer(); //the mask a human in this seat plays behind
         self::$lastSummary = null;
         FlightDecider::reset();
-        $view = null;
+        ShipDecider::reset();
+        $view = new AIView($gamedata, $botId);
 
         $active = array();
         foreach ($gamedata->getMyActiveShips() as $ship) $active[$ship->id] = true;
@@ -43,23 +50,40 @@ class MoveDecider
             if (isset($active[$ship->id])) {
                 $mover = ShipMover::forShip($ship, $gamedata);
                 if ($mover !== null && $mover->isFlight()) {
-                    if ($view === null) $view = new AIView($gamedata, $botId);
                     $entry['movement'] = FlightDecider::rows($view, $mover, $ship, $blocked, $bounds);
                     $flights++;
+                } else if ($mover !== null && in_array((int)$botId, self::$plainFor, true)) {
+                    $entry['movement'] = self::choose($mover, $blocked, $bounds);
+                } else if ($mover !== null) {
+                    $entry['movement'] = ShipDecider::rows($view, $mover, $ship, $blocked, $bounds);
                 } else {
-                    $entry['movement'] = ($mover !== null) ? self::choose($mover, $blocked, $bounds) : AIFallback::straightRows($ship, $gamedata);
+                    $entry['movement'] = AIFallback::straightRows($ship, $gamedata);
                 }
+                /* Units of the bot that move in the same activation (simultaneous movement) are
+                   decided one after another: each later one sees this one where it is going. */
+                self::standAtEnd($ship, $entry['movement'], $gamedata->turn);
             }
 
             $entries[] = $entry;
         }
 
+        $parts = ShipDecider::$last;
         if ($flights > 0) {
             $f = FlightDecider::$last;
-            self::$lastSummary = $flights . ' flights: ' . $f['strike'] . ' striking, ' . $f['intercept'] . ' intercepting, ' . $f['escort'] . ' escorting; ' . $f['jinking'] . ' jinking';
+            $parts[] = $flights . ' flights: ' . $f['strike'] . ' striking, ' . $f['intercept'] . ' intercepting, ' . $f['escort'] . ' escorting; ' . $f['jinking'] . ' jinking';
         }
+        if (count($parts) > 0) self::$lastSummary = implode(' | ', $parts);
 
         return $entries;
+    }
+
+    //Put a unit at the end of the rows just decided for it, for the decisions that follow (the load is thrown away after).
+    private static function standAtEnd($ship, array $rows, $turn)
+    {
+        if (count($rows) == 0) return;
+        $last = $rows[count($rows) - 1];
+        $position = new OffsetCoordinate((int)$last['position']['q'], (int)$last['position']['r']);
+        $ship->movement[] = new MovementOrder(-1, 'move', $position, 0, 0, (int)$last['speed'], (int)$last['heading'], (int)$last['facing'], false, (int)$turn, 0, 0);
     }
 
     /* The part of score() that is about the board, not the plan's manoeuvres: a blocked hex entered,

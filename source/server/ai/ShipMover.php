@@ -40,8 +40,14 @@
  * (Hunter-Killers - AutomatedMovement may be driving them), bases, OSATs, mines, terrain, gravitic
  * and Mindrider drives, and a unit carrying or riding another.
  *
- * ONE POLICY OF ITS OWN: it never overthrusts. The page lets a thruster carry up to twice its
- * rating at the risk of a critical; a bot's thrusters carry their rating and no more.
+ * ONE POLICY OF ITS OWN: by default it never overthrusts. The page lets a thruster carry up to twice
+ * its rating at the risk of a critical (Criticals: one test per thruster over its rating, the excess
+ * added to the roll); a bot's thrusters carry their rating and no more UNLESS allowOverthrust() says
+ * how many points over it a thruster may go (stage T5b - the user's ruling of 2026-11-13: players
+ * overthrust to make a turn they need, to stay on the map above all). Even then a point goes over a
+ * rating only when no thruster facing the right way can take it within its own, and click() keeps
+ * the page's ceiling of twice the rating. A plan says what it overthrew (overthrust()), so the
+ * decider can weigh the critical it invites.
  */
 class ShipMover
 {
@@ -88,6 +94,8 @@ class ShipMover
     private $flight = false;       //a fighter flight: one pool of thrust, no thrusters
     private $jinkLimit = 0;
     private $jinkCost = 1;
+    private $overthrust = 0;       //points a thruster may carry over its rating (allowOverthrust); 0 = never
+    private $carried = array();    //thruster id => thrust it carried before any row plotted here (Engine Shorted's push)
 
     /* Why this unit is not one ShipMover plots for, or null when it is. Such a unit keeps the
        fallback: straight on (AIFallback::movement). */
@@ -147,6 +155,29 @@ class ShipMover
         }
 
         $this->readSystems();
+        foreach ($this->thrusters as $id => $thruster) $this->carried[$id] = $this->channeledEffective($id);
+    }
+
+    /* Let a thruster carry up to $points over its rating from now on (0 = never, the default), within
+       the page's own ceiling of twice the rating. Returns the mover. */
+    public function allowOverthrust($points)
+    {
+        $this->overthrust = max(0, (int)$points);
+        return $this;
+    }
+
+    /* What the plotted orders have put over the thrusters' ratings: thruster id => points over, for each
+       thruster the orders took over its rating (or further over it - Engine Shorted's push may already
+       be). Each such thruster rolls for a critical at the end of the turn, the excess added to the roll. */
+    public function overthrust()
+    {
+        $over = array();
+        foreach ($this->thrusters as $id => $thruster) {
+            $now = $this->channeledEffective($id) - $thruster['output'];
+            $before = max(0, $this->carried[$id] - $thruster['output']);
+            if ($now > $before) $over[$id] = $now;
+        }
+        return $over;
     }
 
     /* The engine's thrust for the turn, the thrusters and what ails them, and whether the ship
@@ -366,6 +397,20 @@ class ShipMover
         return $this->currentTurnDelay();
     }
 
+    /* The fastest speed at which the ship could still pay for one turn out of a whole turn's thrust
+       (canTurn's price: ceil(speed x turn cost), never under 1, plus the docked-LCV surcharge) - the
+       speed beyond which it can only fly straight, brake or slip. A judgement aid for the deciders
+       (stage T5: a ship that ends faster than this cannot come about at a map edge next turn), not a
+       rule: the thrusters' own ratings are not asked. */
+    public function fastestTurnable()
+    {
+        $thrust = max(0, $this->engineThrust);
+        for ($speed = 30; $speed > 0; $speed--) {
+            if (max(1, (int)ceil($speed * $this->turnCostRate)) + $this->lcvSurcharge <= $thrust) return $speed;
+        }
+        return 0;
+    }
+
     //Where the plotted orders leave the ship.
     public function state()
     {
@@ -433,7 +478,8 @@ class ShipMover
 
     /* Every distinct place the ship can end this turn, each with one way of getting there: the
        candidates MoveDecider scores (stage T5). A plan is array('actions', 'rows', 'path',
-       'position', 'heading', 'facing', 'speed', 'thrustLeft', 'turnDelay').
+       'position', 'heading', 'facing', 'speed', 'thrustLeft', 'turnDelay', 'overthrust' - see
+       overthrust(); always empty unless allowOverthrust() was given).
 
        Bounded: at most $limit plans, PLAINEST FIRST. "Straight on" is always the first; then every
        plan with one manoeuvre (a turn, a slip or a speed change, at each point of the path), then
@@ -501,7 +547,7 @@ class ShipMover
 
         $plans[$key] = array_merge($state, array(
             'actions' => $mover->actions(), 'rows' => $mover->rows(), 'path' => $mover->path(),
-            'thrustLeft' => $mover->thrustLeft(), 'turnDelay' => $mover->turnDelay()
+            'thrustLeft' => $mover->thrustLeft(), 'turnDelay' => $mover->turnDelay(), 'overthrust' => $mover->overthrust()
         ));
     }
 
@@ -802,8 +848,9 @@ class ShipMover
     }
 
     /* One more point on row $index: through a thruster facing $direction, or through any when
-       $direction is null. Sound thrusters before damaged ones, then the one with most to spare;
-       for "any", the thrusters along the line of travel first, as the page's own auto-assign does. */
+       $direction is null. Within ratings before over one (allowOverthrust), sound thrusters before
+       damaged ones, then the one with most to spare; for "any", the thrusters along the line of
+       travel first, as the page's own auto-assign does. */
     private function clickBest($index, $direction)
     {
         $along = $this->isGoingBackwards() ? self::DIR_RETRO : self::DIR_MAIN;
@@ -813,16 +860,18 @@ class ShipMover
             if ($thruster['dead']) continue;
             if ($direction !== null && $thruster['direction'] != $direction) continue;
 
-            $spare = $thruster['output'] - $this->channeledEffective($id);
-            if ($spare < 1) continue; //never beyond its rating
+            $used = $this->channeledEffective($id);
+            $spare = $thruster['output'] + $this->overthrust - $used;
+            if ($spare < 1) continue; //never beyond its rating, or beyond the overthrust allowed
 
+            $over = ($used >= $thruster['output']) ? 1 : 0;
             $damaged = ($thruster['half'] > 0 ? 2 : 0) + ($thruster['fti'] ? 1 : 0);
-            $candidates[] = array($damaged, $thruster['direction'] == $along ? 0 : 1, -$spare, $id);
+            $candidates[] = array($over, $damaged, $thruster['direction'] == $along ? 0 : 1, -$spare, $id);
         }
         sort($candidates);
 
         foreach ($candidates as $candidate) {
-            if ($this->click($index, $candidate[3])) return true;
+            if ($this->click($index, $candidate[4])) return true; //the thruster id: the last of the sort keys
         }
         return false;
     }

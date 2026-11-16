@@ -2993,6 +2993,7 @@ spl_autoload_register(
                 'shipcarriercube' => '/server/model/ships/ipsha/shipCarrierCube.php',
                 'shipcarriercubehvy' => '/server/model/ships/ipsha/shipCarrierCubeHvy.php',
                 'shipcompactor' => '/server/lib/ShipCompactor.php',
+                'shipdecider' => '/server/ai/deciders/ShipDecider.php',
                 'shipdisabled' => '/server/model/cricialClasses.php',
                 'shipdisabledoneturn' => '/server/model/cricialClasses.php',
                 'shipjumpsphere' => '/server/model/ships/ipsha/shipJumpsphere.php',
