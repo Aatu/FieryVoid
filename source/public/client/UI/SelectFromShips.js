@@ -207,6 +207,18 @@ window.SelectFromShips = function () {
                 jQuery(document).off('keydown', this.keyHandler);
                 this.keyHandler = null;
             }
+
+            /* A card docked to this picker (SHIP_TOOLTIP_REDESIGN_PLAN.md Stages 6-7). One inside the
+               sheet lives in the sheet and goes with it. One beside the card drops its dock and returns
+               to its own unit - it is the card's own move (undock), the picker only says it is going. */
+            var tooltip = this.phaseStrategy && this.phaseStrategy.shipTooltip;
+            if (tooltip && tooltip.dock && tooltip.dock.picker === this) {
+                if (tooltip.dock.container && typeof this.phaseStrategy.hideShipTooltip === 'function') {
+                    this.phaseStrategy.hideShipTooltip(tooltip);
+                } else if (typeof tooltip.undock === 'function') {
+                    tooltip.undock();
+                }
+            }
         }
 
         this.element.remove();
@@ -225,6 +237,55 @@ window.SelectFromShips = function () {
             this.phaseStrategy.hideSelectFromShips(this);
         }
         this.destroy();
+    };
+
+    /* The payload a ROW hands the phase strategy (Stages 6-7): the picker's own, plus where the ship
+       card that click or hover opens should go.
+         - desktop: DOCKED beside this card, level with the row (D5) - for a hover always, and for a
+           click only where the picker stays open (keepsSelectFromShipsOpen). In the other phases a
+           selection closes the picker, and a card docked to it would have nothing to stand beside.
+         - the sheet (touch): a TAP in a sticky phase drills down - the card replaces the list inside
+           the sheet (D9). A press is only the preview, which stays where it was.
+       showShipTooltip only honours a dock from the picker that is open right now. */
+    HexPicker.prototype.rowPayload = function (ship, activating) {
+        var keepOpen = !!(this.phaseStrategy && typeof this.phaseStrategy.keepsSelectFromShipsOpen === 'function'
+            && this.phaseStrategy.keepsSelectFromShipsOpen());
+        var dock = { picker: this, shipId: ship.id };
+
+        if (this.sheet) {
+            if (!activating || !keepOpen || !this.cardSlot) return this.payload;
+            dock.container = this.cardSlot;
+        } else if (activating && !keepOpen) {
+            return this.payload;
+        }
+
+        return jQuery.extend({}, this.payload, { dock: dock });
+    };
+
+    //The ship card's half of the sheet drill-down. The card says when it moves in and out; the
+    //picker only shows its list or hides it.
+    HexPicker.prototype.onCardDocked = function (card) {
+        if (this.destroyed || !card.dock || !card.dock.container) return;
+        this.dockedCard = card;
+        this.element.addClass('fv-hexpicker--detail');
+    };
+
+    HexPicker.prototype.onCardGone = function (card) {
+        if (this.dockedCard !== card) return;
+        this.dockedCard = null;
+        this.element.removeClass('fv-hexpicker--detail');
+    };
+
+    //"‹ N units in hex": back from a drilled-down card to the list.
+    HexPicker.prototype.showList = function () {
+        var card = this.dockedCard;
+        if (card && this.phaseStrategy && this.phaseStrategy.shipTooltip === card
+            && typeof this.phaseStrategy.hideShipTooltip === 'function') {
+            this.phaseStrategy.hideShipTooltip(card);
+        } else if (card) {
+            card.destroy();
+        }
+        this.onCardGone(card);
     };
 
     //Unreferenced today, kept as a harmless stub so the public surface is unchanged.
@@ -248,6 +309,13 @@ window.SelectFromShips = function () {
     HexPicker.prototype.refresh = function () {
         if (this.destroyed || !this.listElement) return;
 
+        /* Stage 5 also calls this from onShipEwChanged and onSystemDataChanged - the second fires on
+           every weapon click - so nothing is rebuilt unless a row would actually render differently.
+           Every row's whole rendered content is its descriptor key (the run-collapsing rule), so
+           equal keys mean an identical list: same DOM, same hover, nothing to do. */
+        var model = buildModel.call(this);
+        if (modelSignature(model) === modelSignature(this.model)) return;
+
         var focusedId = null;
         var active = document.activeElement;
         if (active && jQuery.contains(this.listElement[0], active)) {
@@ -256,10 +324,13 @@ window.SelectFromShips = function () {
         var scrollTop = this.listElement[0].scrollTop;
         var before = this.captureBox();
 
-        this.model = buildModel.call(this);
+        this.model = model;
         renderList.call(this);
 
         this.listElement[0].scrollTop = scrollTop;
+        //reflow() below re-places a card docked beside the rows; a still-docked sheet has no box to
+        //hold (captureBox is null) and skips it, so the sheet is handled here.
+        if (!before) this.placeTooltipClear();
         if (focusedId !== null) {
             var row = this.listElement.find('.fv-hexpicker__row').filter(function () {
                 return this.getAttribute('data-ship-id') === focusedId;
@@ -314,6 +385,9 @@ window.SelectFromShips = function () {
         if (!this.dragged) {
             placeCaret.call(this, top, height);
         }
+
+        //A fold, an expanded run or a refresh moved the rows: a card docked beside one follows it.
+        this.placeTooltipClear();
     };
 
     // Keep the caret level with the hex AFTER the clamp; hide it when the anchor ended up
@@ -502,7 +576,10 @@ window.SelectFromShips = function () {
             ini: iniOrderOf(ship),
             //The phase strategy's selected unit (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 1). The picker
             //now stays open after a row selects one of your units, so the list says which one.
-            selected: isSameUnit(ship, selectedShip)
+            selected: isSameUnit(ship, selectedShip),
+            //What the player has DONE with this unit this turn (Stage 5): their OEW on it, or
+            //where it is firing. Rendered as state chips, each in its own colour.
+            badges: stateBadges(ship, selectedShip, category, masked)
         };
 
         // The comparison key is the RENDERED CONTENT, not the ship type or phpclass: two
@@ -515,10 +592,64 @@ window.SelectFromShips = function () {
             descriptor.ini === null ? '-' : descriptor.ini,
             descriptor.count === null ? '-' : descriptor.count,
             masked ? 'MASKED' : (descriptor.art || ''),
-            descriptor.selected ? 'SELECTED' : ''
+            descriptor.selected ? 'SELECTED' : '',
+            descriptor.badges.map(function (badge) { return badge.kind + ':' + badge.text; }).join('|')
         ].join('');
 
         return descriptor;
+    }
+
+    /* The state badges (SHIP_TOOLTIP_REDESIGN_PLAN.md §6.2, Stage 5), Initial Orders, Pre-Firing and
+       Firing only - the phases the picker stays open in, where the player works the stack:
+         - `OEW n` on an enemy row: the SELECTED unit's OEW on it - your own allocation only;
+         - `⌖ ‹target›` / `⌖ N targets` on one of YOUR rows: where its guns point this turn - your
+           own orders only. Interception is not a target.
+       Part of the run key, so two rows only collapse when they would render the same.
+       ⚠️ Null-safe and fail-closed (trap 1): a throw here would take the whole picker down, so any
+       read that fails simply draws no badge. */
+    function stateBadges(ship, selectedShip, category, masked) {
+        var badges = [];
+        var phase = Number(gamedata.gamephase);
+        if (category === 'terrain' || (phase !== 1 && phase !== 3 && phase !== 5)) return badges;
+
+        try {
+            if (selectedShip && !isSameUnit(ship, selectedShip) && !gamedata.isMyorMyTeamShip(ship) && window.ew) {
+                var oew = ew.getOffensiveEW(selectedShip, ship);
+                if (oew > 0) badges.push({ kind: 'oew', text: 'OEW ' + oew });
+            }
+        } catch (e) { /* no badge */ }
+
+        try {
+            if (!masked && gamedata.isMyShip(ship) && window.weaponManager) {
+                var targets = [];
+                weaponManager.getAllFireOrders(ship).forEach(function (fire) {
+                    if (!fire || fire.turn != gamedata.turn) return;
+                    if (String(fire.type || '').toLowerCase().indexOf('intercept') !== -1) return;
+                    var key = (fire.targetid != null && fire.targetid != -1) ? String(fire.targetid) : 'hex';
+                    if (targets.indexOf(key) === -1) targets.push(key);
+                });
+                if (targets.length === 1) {
+                    badges.push({ kind: 'target', text: '\u2316 ' + targetName(targets[0]) });
+                } else if (targets.length > 1) {
+                    badges.push({ kind: 'target', text: '\u2316 ' + targets.length + ' targets' });
+                }
+            }
+        } catch (e) { /* no badge */ }
+
+        return badges;
+    }
+
+    //A fire order's target as this player may name it: a hex, a masked mine as "Mine", a unit they
+    //cannot see as nothing more than "target".
+    function targetName(key) {
+        if (key === 'hex') return 'hex';
+        var target = gamedata.getShip(key);
+        if (!target || shipManager.shouldBeHidden(target)) return 'target';
+        if (target.mine) {
+            var stealthSystem = shipManager.systems.getSystemByName(target, "mineStealth");
+            if (stealthSystem && !stealthSystem.isMineRevealed(target)) return 'Mine';
+        }
+        return target.name;
     }
 
     // Consecutive rows that would render IDENTICALLY are not a choice, they are a
@@ -541,6 +672,16 @@ window.SelectFromShips = function () {
             i = j;
         }
         return items;
+    }
+
+    //Everything the list renders from a model, as one string (see refresh).
+    function modelSignature(model) {
+        if (!model || !model.groups) return '';
+        return (model.showHeaders ? 'H' : '') + model.groups.map(function (group) {
+            return group.category + '#' + group.items.map(function (item) {
+                return item.type === 'row' ? item.descriptor.key : item.id + '*' + item.members.length;
+            }).join('\x02');
+        }).join('\x03');
     }
 
     function buildModel() {
@@ -820,6 +961,18 @@ window.SelectFromShips = function () {
         //}
         header.append(title);
 
+        /* The sheet's way back from a drilled-down ship card (D9, Stage 7) - shown only while one is
+           up (.fv-hexpicker--detail), in the title's place. */
+        if (this.sheet) {
+            header.prepend(jQuery('<button type="button" class="fv-hexpicker__back"></button>')
+                .append(jQuery('<span class="fv-hexpicker__backcaret" aria-hidden="true"></span>').text('‹'))
+                .append(jQuery('<span></span>').text(this.ships.length + ' ' + unitWord + ' in hex'))
+                .on('click', function (e) {
+                    e.stopPropagation();
+                    self.showList();
+                }));
+        }
+
         var close = jQuery('<button type="button" class="fv-hexpicker__close" aria-label="Close">✕</button>')
             .on('click', function (e) {
                 e.stopPropagation();
@@ -856,6 +1009,12 @@ window.SelectFromShips = function () {
         this.listElement = jQuery('<div class="fv-hexpicker__list"></div>');
         this.element.append(this.listElement);
         renderList.call(this);
+
+        // ── The sheet's card slot (D9): a tapped unit's ship card, in the list's place ──
+        if (this.sheet) {
+            this.cardSlot = jQuery('<div class="fv-hexpicker__cardslot"></div>');
+            this.element.append(this.cardSlot);
+        }
 
         // ── Hint footer ──
         //this.element.append(jQuery('<div class="fv-hexpicker__hint"></div>')
@@ -990,6 +1149,11 @@ window.SelectFromShips = function () {
         if (descriptor.selected) {
             meta.append(jQuery('<span class="fv-hexpicker__chip fv-hexpicker__chip--selected"></span>').text('Selected'));
         }
+        //The state badges next (Stage 5), before the class text, so they too sit in one place.
+        (descriptor.badges || []).forEach(function (badge) {
+            meta.append(jQuery('<span class="fv-hexpicker__chip"></span>')
+                .addClass('fv-hexpicker__chip--' + badge.kind).text(badge.text).attr('title', badge.text));
+        });
         if (descriptor.shipClass) {
             meta.append(jQuery('<span class="fv-hexpicker__class"></span>').text(descriptor.shipClass));
         }
@@ -1079,7 +1243,8 @@ window.SelectFromShips = function () {
 
             if (self.hoveredShipId === ship.id) return;
             self.hoveredShipId = ship.id;
-            self.phaseStrategy.onMouseOverShip(ship, self.payload);
+            //rowPayload: the peek this opens docks beside the row (Stage 6)
+            self.phaseStrategy.onMouseOverShip(ship, self.rowPayload(ship, false));
             self.placeTooltipClear();
         });
         row.on('mouseleave', function () {
@@ -1139,7 +1304,8 @@ window.SelectFromShips = function () {
             this.phaseStrategy.selectShip(ship, this.payload);
             this.destroy();
         } else {
-            this.phaseStrategy.onShipClicked(ship, this.payload);
+            //rowPayload: the card this opens docks beside the row, or drills down in the sheet (Stages 6-7)
+            this.phaseStrategy.onShipClicked(ship, this.rowPayload(ship, true));
             //A targeting click has always left the picker open so the player can keep working
             //the stack; it closed only when the click CHANGED the selection. In Initial Orders,
             //Pre-Firing and Firing it now stays open for that too (SHIP_TOOLTIP_REDESIGN_PLAN.md
@@ -1201,6 +1367,17 @@ window.SelectFromShips = function () {
 
         var tooltip = this.phaseStrategy && this.phaseStrategy.shipTooltip;
         if (!tooltip || !tooltip.element || !tooltip.element.length) return;
+
+        /* A card DOCKED to this picker places itself (Stage 6): it reads this card's rectangle and its
+           row's, so it is simply asked to look again - the picker never writes a position onto it
+           (plan trap 7). This is the one seam every picker move already passes through: hover,
+           zoom and scroll (reposition), fold / expand / refresh (reflow) and the header drag. */
+        if (tooltip.dock && tooltip.dock.picker === this) {
+            if (typeof tooltip.place === 'function') tooltip.place();
+            return;
+        }
+        //A card the player dragged is where they put it.
+        if (tooltip.dragged) return;
 
         var node = tooltip.element[0];
         var width = node.offsetWidth;
@@ -1292,7 +1469,7 @@ window.SelectFromShips = function () {
         var origin = null;
 
         handle.on('pointerdown', function (e) {
-            if (jQuery(e.target).closest('.fv-hexpicker__close').length) return;
+            if (jQuery(e.target).closest('.fv-hexpicker__close, .fv-hexpicker__back').length) return;
             var event = e.originalEvent || e;
             var rect = self.element[0].getBoundingClientRect();
             origin = {
@@ -1340,6 +1517,8 @@ window.SelectFromShips = function () {
                 left: clamp(origin.left + dx, EDGE_MARGIN, window.innerWidth - width - EDGE_MARGIN) + 'px',
                 top: clamp(origin.top + dy, EDGE_MARGIN, window.innerHeight - height - EDGE_MARGIN) + 'px'
             });
+            //A card docked beside a row comes along (Stage 6).
+            self.placeTooltipClear();
         });
 
         handle.on('pointerup pointercancel', function (e) {

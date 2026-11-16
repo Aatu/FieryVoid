@@ -1942,7 +1942,18 @@ class Engine extends ShipSystem implements SpecialAbility {
 	        return; // No primary structure found
 	    }   	
 
-    	$damageAble = $this->getOutput(); //Engine output = Damage
+		/* Damage = the thrust the stuck engine will produce NEXT turn, i.e. what Movement::doStuckEngine would have
+		   burned had the ship been able to accelerate. Two things getOutput() got wrong for that:
+		   - $outputMod was summed by effectCriticals() when FireGamePhase::advance loaded the game, so it knows nothing
+		     of criticals added since (id -1, not yet saved) - the Output Reduced that comes with a 28+ roll above all.
+		     Their mods are taken off here by hand.
+		   - it reads 0 for an engine that is offline THIS turn (powered down, or shorted last turn as well), which
+		     says nothing about next turn. */
+		$pendingMod = 0;
+		foreach ($this->criticals as $crit){
+			if ($crit->id < 0) $pendingMod += $crit->outputMod + round($crit->outputModPercentage * $this->output / 100);
+		}
+    	$damageAble = max(0, $this->output + $this->outputMod + $pendingMod); //Engine output = Damage
 		$maxDamagePossible = $primaryStructure->getRemainingHealth(); //Can't do more than structure's current health.
 		$damageCaused = min($damageAble, $maxDamagePossible); //Don't cause more damage than system's health remaining.		
 		

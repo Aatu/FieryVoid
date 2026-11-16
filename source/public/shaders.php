@@ -16,19 +16,13 @@
     uniform vec3 overlayColor;
     uniform float opacity;
 
-    /* DESTROYED SECTIONS (webglSprite.setDamageStamps, placed by ShipIcon.setLostSections). Compiled
+    /* DESTROYED SECTIONS (webglSprite.setDamageMap, drawn by ShipIcon.setLostSections). Compiled
        only into the material a DAMAGED hull switches to - every other sprite runs the shader without
-       this block. Each stamp is a centre in UV plus a 2x2 matrix taking a UV offset into the stamp's
-       own -1..1 square, so ellipse, orientation and spin all arrive pre-multiplied. damageMask's
-       alpha cuts the hull away (the ragged hole), damageScorch's alpha chars what is left round it.
-       The mask textures are unmipmapped, so sampling inside the loop needs no derivatives. */
+       this block. damageMap lies over the hull art one to one and is this one ship's own: red is
+       how much of the hull is torn away, green how charred what is left is, blue where the torn
+       edge is burning. One sample, whatever the number of sections lost. */
     #ifdef SECTION_DAMAGE
-    #define MAX_DAMAGE_STAMPS 8
-    uniform sampler2D damageMask;
-    uniform sampler2D damageScorch;
-    uniform vec4 damageStampA[MAX_DAMAGE_STAMPS]; // xy = centre (uv), zw = first matrix row
-    uniform vec4 damageStampB[MAX_DAMAGE_STAMPS]; // xy = second matrix row
-    uniform float damageStampCount;
+    uniform sampler2D damageMap;
     uniform float damageScorchStrength;
     #endif
 
@@ -38,19 +32,13 @@
         vec4 textureColor = texture2D(spriteTexture, vUv);
 
         #ifdef SECTION_DAMAGE
-        for (int i = 0; i < MAX_DAMAGE_STAMPS; i++) {
-            if (float(i) >= damageStampCount) break;
-            vec4 a = damageStampA[i];
-            vec4 b = damageStampB[i];
-            vec2 off = vUv - a.xy;
-            vec2 st = vec2(a.z * off.x + a.w * off.y, b.x * off.x + b.y * off.y) * 0.5 + 0.5;
-            float inside = step(0.0, st.x) * step(st.x, 1.0) * step(0.0, st.y) * step(st.y, 1.0);
-            st = clamp(st, 0.0, 1.0);
-            float cut = texture2D(damageMask, st).a * inside;
-            float scorch = texture2D(damageScorch, st).a * inside;
-            textureColor.a = min(textureColor.a, 1.0 - cut);
-            textureColor.rgb *= 1.0 - scorch * damageScorchStrength;
-        }
+        vec3 damage = texture2D(damageMap, vUv).rgb;
+        textureColor.a *= 1.0 - damage.r;
+        textureColor.rgb *= 1.0 - damage.g * damageScorchStrength;
+        //dull ember at the edge of a fire, a deeper orange at its heart (linear values: this is before
+        //the output colour-space conversion below)
+        vec3 fire = mix(vec3(0.16, 0.014, 0.001), vec3(0.30, 0.038, 0.002), damage.b);
+        textureColor.rgb = mix(textureColor.rgb, fire, min(1.0, damage.b * 1.5));
         #endif
 
         vec4 finalColor = textureColor;

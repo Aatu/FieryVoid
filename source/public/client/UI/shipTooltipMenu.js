@@ -22,7 +22,15 @@ window.ShipTooltipMenu = function () {
 
     ShipTooltipMenu.buttonTemplate = '<button></button>';
 
-    ShipTooltipMenu.buttons = [{ className: "openSCS", condition: null, action: openSCS, info: "Open ship details" }];
+    /* The ship card's placement fields (SHIP_TOOLTIP_REDESIGN_PLAN.md §5.2) - additive and optional,
+       read only by ShipTooltip renderActions; renderTo ignores them:
+         label             the caption under a tile / on a button (a string, or a function of the menu)
+         kind: 'footer'    the "Ship details" button in the card's footer
+         kind: 'primary'   the full-width Target button under TARGETING
+         kind: 'clear'     "Clear all EW", at the foot of the EW section
+         group + role      one half ('add' / 'remove') of an EW −/+ stepper; group = the EW type
+       Anything without them is drawn as a captioned tile. */
+    ShipTooltipMenu.buttons = [{ className: "openSCS", condition: null, action: openSCS, info: "Open ship details", label: "Show ship details", kind: "footer" }];
 
     ShipTooltipMenu.prototype.renderTo = function (parent, shipTooltip) {
 
@@ -31,30 +39,17 @@ window.ShipTooltipMenu = function () {
         //button can turn into its opposite without the player having to re-click the unit - see
         //cancelJumpGateSignal in shipTooltipInitialOrdersMenu.js. renderTo is called again by
         //update() itself, so this stays pointed at the live tooltip.
+        //(The ship card no longer calls renderTo: it places each button in a slot of its own - see
+        //ShipTooltip renderActions - through getVisibleButtons / bindAction / bindInfo below, which
+        //are this function's own steps, split out. renderTo stays for any other owner.)
         this.shipTooltip = shipTooltip;
 
         var menu = jQuery(ShipTooltipMenu.template);
-        var allButtons = this.getAllButtons();
 
-        allButtons.filter(function (buttonData) {
-            if (!buttonData.condition) {
-                return true;
-            }
-
-            var conditions = [].concat(buttonData.condition);
-            return conditions.every(function (condition) {
-                return condition.call(this);
-            }, this);
-        }, this).forEach(function (buttonData) {
+        this.getVisibleButtons().forEach(function (buttonData) {
             var element = jQuery(ShipTooltipMenu.buttonTemplate);
             element.addClass(buttonData.className);
-            element.css({
-                'touch-action': 'manipulation',
-                '-webkit-touch-callout': 'none',
-                '-webkit-user-select': 'none',
-                'user-select': 'none'
-            });
-            bindButton.call(this, element, shipTooltip, buttonData.action, buttonData.supportsMaxClick);
+            this.bindAction(element, buttonData, shipTooltip);
             /* A button's info line may be a FUNCTION of the menu it is being drawn into, not just
                a fixed string - the same action can mean something different depending on what is
                selected and what was right-clicked. Resolved at render time, with the menu as
@@ -65,13 +60,49 @@ window.ShipTooltipMenu = function () {
                 ? buttonData.info.call(this)
                 : buttonData.info;
 
-            element.on('mouseover', getMouseOver.call(this, menu, info));
-            element.on('mouseout', mouseOut.bind(this, menu));
+            this.bindInfo(element, menu, info);
             jQuery(".action-buttons", menu).append(element);
         }, this);
 
         jQuery(".info", menu).html(this.currentInfo);
         parent.append(menu);
+    };
+
+    /* Which buttons this menu offers right now: every entry whose conditions ALL pass.
+       ⚠️ THIS IS THE FILTER THE HARNESSES LIFT (tests/replay/initialOrdersTooltipHarness.js,
+       lateEwElintHarness.js): [].concat(condition), then .every(c => c.call(menu)). A throwing
+       condition throws out of here and takes the whole card with it - every predicate must be
+       null-safe ([[arch_tooltip_menu_null_selection]]). */
+    ShipTooltipMenu.prototype.getVisibleButtons = function () {
+        return this.getAllButtons().filter(function (buttonData) {
+            if (!buttonData.condition) {
+                return true;
+            }
+
+            var conditions = [].concat(buttonData.condition);
+            return conditions.every(function (condition) {
+                return condition.call(this);
+            }, this);
+        }, this);
+    };
+
+    /* Bind one button exactly as renderTo always has: click, right-click max and the 500ms touch
+       long press (supportsMaxClick), plus the four touch properties. The ship card binds every
+       stepper, tile and button it places through this (SHIP_TOOLTIP_REDESIGN_PLAN.md §5.1). */
+    ShipTooltipMenu.prototype.bindAction = function (element, buttonData, shipTooltip) {
+        element.css({
+            'touch-action': 'manipulation',
+            '-webkit-touch-callout': 'none',
+            '-webkit-user-select': 'none',
+            'user-select': 'none'
+        });
+        bindButton.call(this, element, shipTooltip, buttonData.action, buttonData.supportsMaxClick);
+    };
+
+    //The hover line under the buttons: this button's info while the pointer rests on it.
+    ShipTooltipMenu.prototype.bindInfo = function (element, menuElement, info) {
+        element.on('mouseover', getMouseOver.call(this, menuElement, info));
+        element.on('mouseout', mouseOut.bind(this, menuElement));
     };
 
     ShipTooltipMenu.prototype.getAllButtons = function () {
@@ -179,7 +210,9 @@ window.ShipTooltipMenu = function () {
     }
 
     function openSCS() {
-        webglScene.customEvent("OpenShipWindowFor", {ship: this.targetedShip});
+        //toggle (round 5, user 2026-11-10): a second press closes that ship's window again.
+        //Only this button asks for it - the fleet list's row still always opens.
+        webglScene.customEvent("OpenShipWindowFor", {ship: this.targetedShip, toggle: true});
     }
 
     return ShipTooltipMenu;

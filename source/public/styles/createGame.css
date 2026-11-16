@@ -1658,6 +1658,7 @@ div[data-team-id="2"] .remove-team-btn {
 
 .cg-page .slot input {
   margin-right: 0;
+  top: 0px;  
 }
 
 /* Wraps: in a slot too narrow for the name and both actions, the actions drop to their own line. */
@@ -1687,6 +1688,18 @@ div[data-team-id="2"] .remove-team-btn {
   align-items: center;
   gap: 12px;
   min-height: 36px;
+}
+
+/* CPU opponent: the slot's "CPU player" tick, beside Copy Slot (printed only with the feature on). */
+.cg-slot-cpu {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--fv-text-dim);
+  white-space: nowrap;
+  cursor: pointer;
+  margin-bottom: 0px;  
 }
 
 /* A new copy is scrolled into view; this keeps it clear of the sticky nav bar. */

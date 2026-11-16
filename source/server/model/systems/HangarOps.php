@@ -1528,6 +1528,7 @@ class HangarOps {
 		foreach ($lcv->movement as $move){
 			if ((int)$move->turn !== (int)$gamedata->turn) continue;
 			if (!is_array($move->assignedThrust)) continue;
+			if (!empty($move->preturn) && $move->type === 'speedchange') continue; //Engine Shorted's forced acceleration: paid by the offline engine (as in movement.js)
 			foreach ($move->assignedThrust as $amt){ $rem -= (int)$amt; }
 		}
 		return $rem;

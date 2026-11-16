@@ -104,6 +104,10 @@
      DIRECTLY, which beats an inherited face regardless of specificity. Anything
      below has to be applied to the element itself, not to an ancestor. */
   --fv-mono: Consolas, "Lucida Console", monospace;   /* theme.fonts.mono        */
+  /* The platform's own UI face - the system card's text (theme.fonts.ui) and now the ship card's
+     (SHIP_TOOLTIP_REDESIGN_PLAN.md §4.5). ⚠️ SYNC CONTRACT: this is a TWIN of theme.fonts.ui in
+     client/UI/reactJs/styled/theme.js - the two cards sit side by side, so change both or neither. */
+  --fv-ui: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --fv-display: "Orbitron", sans-serif;               /* @imported by gamesNew.css; theme.fonts.display */
   --fv-hero: "Bruno Ace SC", sans-serif;              /* @imported by gamesNew.css */
 
@@ -173,6 +177,13 @@
   --fv-ok: #427231;                   /* theme.colors.healthOk                   */
   --fv-warn: #e1b000;                 /* theme.colors.warning                    */
   --fv-crit: #ed6738;                 /* theme.colors.healthCrit                 */
+  /* The TARGET hue (SHIP_TOOLTIP_REDESIGN_PLAN.md §11 item 4, §11.1 R2.1): the ship card's Target
+     button - the hue on its border, a dim fill (the hue x0.3 toward black) and light text (the hue
+     45% toward white) - and the hex picker's "⌖ target" chip. Two surfaces, so a token. Retune the
+     three together; the default is --fv-crit's value, by choice rather than by reference. */
+  --fv-target: #ed6738;
+  --fv-target-fill: rgb(71, 31, 17);
+  --fv-target-text: rgb(245, 171, 146);
   --fv-custom: #cccc00;
 
   /* ── The gold set, and the buy dialog's three metals ───────────────────────
@@ -261,7 +272,7 @@
      ⚠️ MUST stay byte-equal to gamedata.teamBaseColors[0..2] — the JS side hands the same
      colours in as inline rgb() on the observer / 3+-team arm, and a drift shows up as a
      2-team game and a 4-team game disagreeing about what "green" is. */
-  --fv-own-bright: #32cd32;
+  --fv-own-bright: #5cce5c;
   --fv-ally-bright: #33adff;
   --fv-enemy-bright: #ff5050;
 

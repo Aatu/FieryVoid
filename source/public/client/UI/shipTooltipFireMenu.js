@@ -11,28 +11,28 @@ window.ShipTooltipFireMenu = function () {
     ShipTooltipFireMenu.prototype = Object.create(ShipTooltipMenu.prototype);
 
     ShipTooltipFireMenu.buttons = [
-		{ className: "targetWeapons", condition: [isTargetable, isEnemy, hasWeaponsSelected], action: targetWeapons, info: "Target Weapons" },
-        { className: "targetWeaponsHex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: hexButtonLabel },
-        { className: "targetSuppWeapons", condition: [isTargetable, hasOrderSource, isFriendly, hasWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target Support Weapons" },//30 June 2024 - DK - Added for Ally targeting.
-        { className: "removeMultiOrder", condition: [isEnemy, hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
-        { className: "launchFighters", condition: [isMine, isFiringPhase, hasLaunchableHangar, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarLaunch, info: "Launch" },
-        { className: "recoverFlights", condition: [isMine, isFiringPhase, hasReceivableFlights, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarRecover, info: "Hangars" },
+		{ className: "targetWeapons", kind: "primary", condition: [isTargetable, isEnemy, hasWeaponsSelected], action: targetWeapons, info: "Target Weapons" },
+        { className: "targetWeaponsHex", label: hexButtonLabel, condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: hexButtonLabel },
+        { className: "targetSuppWeapons", kind: "primary", label: "Target support weapons", condition: [isTargetable, hasOrderSource, isFriendly, hasWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target Support Weapons" },//30 June 2024 - DK - Added for Ally targeting.
+        { className: "removeMultiOrder", label: "Remove order", condition: [isEnemy, hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
+        { className: "launchFighters", label: "Launch", condition: [isMine, isFiringPhase, hasLaunchableHangar, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarLaunch, info: "Launch" },
+        { className: "recoverFlights", label: "Hangars", condition: [isMine, isFiringPhase, hasReceivableFlights, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarRecover, info: "Hangars" },
         //"Enter Hangar" is reused for LCVs: isDockableUnit accepts a flight OR an
         //LCV, and openHangarDock routes an LCV through the LCV-rail dock dialog.
-        { className: "dockFlight", condition: [isMine, isFiringPhase, isDockableUnit, isLaunchEnabledGame, hasEligibleCarrierInHex], action: openHangarDock, info: "Enter Hangar" },
+        { className: "dockFlight", label: "Enter hangar", condition: [isMine, isFiringPhase, isDockableUnit, isLaunchEnabledGame, hasEligibleCarrierInHex], action: openHangarDock, info: "Enter Hangar" },
         /* OFFICERS_PLAN.md Stage 37 - a Lucky Captain's Firing-phase feat (Re-roll Volley, Sure Shot, Dodge, Lucky Escape), armed from his menu
            (LuckyPicker) on his own ship - the Initial Orders menu offers the same button for his Initial Orders feats. A pair, as the toggles below:
            grey while no feat is armed, his green with a glow once one is. Firing phase only. */
-        { className: "luckyCaptain", condition: [isMine, isFiringPhase, canLucky, noLuckyPick], action: openLuckyPicker, info: luckyInfo },
-        { className: "luckyCaptainOn", condition: [isMine, isFiringPhase, canLucky, hasLuckyPick], action: openLuckyPicker, info: luckyInfo },
+        { className: "luckyCaptain", label: "Lucky feat", condition: [isMine, isFiringPhase, canLucky, noLuckyPick], action: openLuckyPicker, info: luckyInfo },
+        { className: "luckyCaptainOn", label: "Lucky feat", condition: [isMine, isFiringPhase, canLucky, hasLuckyPick], action: openLuckyPicker, info: luckyInfo },
         /* OFFICERS_PLAN.md Stages 25 / 28 - an Expert Political Officer's speech and an Expert Warrior's Supreme Anticipation (user request 2026-11-01 -
            they were his C&C's Activate box): plain on/off toggles on his own ship, offered while each is still his to give. Two entries per toggle,
            as the Initial Orders menu's Triad pairs: grey while not ordered, purple (speech) / red (anticipation) with a glow once it is. Firing
            phase only. */
-        { className: "politicalSpeech", condition: [isMine, isFiringPhase, canDeclare('speech'), notDeclared('speech')], action: getToggleDeclaration('speech'), info: getDeclarationInfo('speech') },
-        { className: "politicalSpeechOn", condition: [isMine, isFiringPhase, canDeclare('speech'), isDeclared('speech')], action: getToggleDeclaration('speech'), info: getDeclarationInfo('speech') },
-        { className: "supremeAnticipation", condition: [isMine, isFiringPhase, canDeclare('anticipation'), notDeclared('anticipation')], action: getToggleDeclaration('anticipation'), info: getDeclarationInfo('anticipation') },
-        { className: "supremeAnticipationOn", condition: [isMine, isFiringPhase, canDeclare('anticipation'), isDeclared('anticipation')], action: getToggleDeclaration('anticipation'), info: getDeclarationInfo('anticipation') }
+        { className: "politicalSpeech", label: "Speech", condition: [isMine, isFiringPhase, canDeclare('speech'), notDeclared('speech')], action: getToggleDeclaration('speech'), info: getDeclarationInfo('speech') },
+        { className: "politicalSpeechOn", label: "Speech", condition: [isMine, isFiringPhase, canDeclare('speech'), isDeclared('speech')], action: getToggleDeclaration('speech'), info: getDeclarationInfo('speech') },
+        { className: "supremeAnticipation", label: "Anticipate", condition: [isMine, isFiringPhase, canDeclare('anticipation'), notDeclared('anticipation')], action: getToggleDeclaration('anticipation'), info: getDeclarationInfo('anticipation') },
+        { className: "supremeAnticipationOn", label: "Anticipate", condition: [isMine, isFiringPhase, canDeclare('anticipation'), isDeclared('anticipation')], action: getToggleDeclaration('anticipation'), info: getDeclarationInfo('anticipation') }
 	];
 
     ShipTooltipFireMenu.prototype.getAllButtons = function () {
