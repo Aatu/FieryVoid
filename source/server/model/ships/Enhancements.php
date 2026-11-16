@@ -1104,6 +1104,7 @@ class Enhancements{
 	  
 	  
 	  //REEVALUATION - for official units that got CUSTOM reevaluation
+	  //ENTRIES TO BE DELETED once reevaluation is moved to a separate folder (effectively creating a custom faction alongside official one)
  	  $enhID = 'RE-EVAL';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'CUSTOM price reevaluation';
@@ -1916,7 +1917,7 @@ class Enhancements{
 	  }
 	  
 	  //REEVALUATION - for official units that got CUSTOM reevaluation
-	  //TO BE DELETED once reevaluation is moved to a separate folder (effectively creating a custom faction alongside official one)
+	  //ENTRIES TO BE DELETED once reevaluation is moved to a separate folder (effectively creating a custom faction alongside official one)
  	  $enhID = 'RE-EVAL';
 	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'CUSTOM price reevaluation';
