@@ -58,6 +58,21 @@ window.ShipTooltip = function () {
         return Math.min(Math.max(value, low), high);
     }
 
+    /* 90% opacity on the whole card (user, 2026-11-16), with the player's own switch: the OPTIONS
+       tab's "See-through ship tooltips" (gameOptions.js, on by default). The class goes on the card
+       and on its dock caret, which lives in <body> apart from it; shipTooltip.css holds the number
+       and leaves the in-sheet card solid (there is no map under it). Without gameOptions (a page
+       that does not load it, a harness) the default stands. */
+    var TRANSLUCENT = 'fv-shipcard--translucent';
+
+    function isTranslucent() {
+        try {
+            return !window.gameOptions || gameOptions.get('translucentShipTooltips') !== false;
+        } catch (e) {
+            return true;
+        }
+    }
+
     function ShipTooltip(selectedShip, ships, position, showTargeting, menu, hexagon, ballisticsMenu, options) {
         this.element = jQuery(HTML);
         this.ships = [].concat(ships);
@@ -86,6 +101,8 @@ window.ShipTooltip = function () {
         this.element.on('mousedown mouseup mouseover mousemove mouseout', function (e) {
             e.preventDefault(); e.stopPropagation();
         });
+
+        this.element.toggleClass(TRANSLUCENT, isTranslucent());
 
         if (menu) {
             /* The ✕ is for the PINNED card only - the one a click on a unit leaves standing, which
@@ -281,6 +298,7 @@ window.ShipTooltip = function () {
         this.caretElement
             .toggleClass('fv-shipcard-caret--left', side === 'right')    //card right of the picker: points left
             .toggleClass('fv-shipcard-caret--right', side === 'left')
+            .toggleClass(TRANSLUCENT, this.element.hasClass(TRANSLUCENT))   //the card's own opacity
             .css({
                 left: (side === 'right' ? left - CARET_HALF : left + width) + 'px',
                 top: (caretY - CARET_HALF) + 'px'
@@ -880,7 +898,7 @@ window.ShipTooltip = function () {
         //a flight's fighter mission, for every viewer (missions are always known; the CSP key ship is own team only)
         var missionLine = (ship.flight && window.fighterMissions) ? fighterMissions.tooltipLine(ship) : null;
         if (missionLine) chip(chips, missionLine.text, 'mission', { color: missionLine.color });
-        if (ship.agile) chip(chips, 'Agile', 'neutral');
+        if (ship.agile) chip(chips, 'Agile', 'good');
 
         return chips;
     }
@@ -956,7 +974,36 @@ window.ShipTooltip = function () {
        everything else on the side one - that is the number the card lights up. */
     var SECTION_LABEL = { 1: 'FWD', 2: 'AFT', 3: 'PORT', 4: 'STBD', 31: 'P.FWD', 32: 'P.AFT', 41: 'S.FWD', 42: 'S.AFT', 0: 'PRI' };
 
+    /* A fighter flight's four armour arcs - ⚠️ MIRROR of FighterFlight::getLocations (PHP), which
+       puts every arc on location 0, so fillLocationsGUI sends a flight NO outerSections and
+       getShipHittingSide always answered "nothing" (the card showed no Facing on a flight). The
+       arc still picks the ARMOUR a hit meets (fighter.php getArmourBase), so the card names it as
+       it names a ship's section (user, 2026-11-16). Listed in a ship's section order (FWD, AFT,
+       PORT, STBD - getShipHittingSide sorts by location id) so a boundary reads the same way on
+       both; FWD and AFT bear on the forward profile, as getLocations' `profile` has it. */
+    var FLIGHT_ARCS = [
+        { label: 'FWD', min: 330, max: 30, fwd: true },
+        { label: 'AFT', min: 150, max: 210, fwd: true },
+        { label: 'PORT', min: 210, max: 330, fwd: false },
+        { label: 'STBD', min: 30, max: 150, fwd: false }
+    ];
+
+    function buildFlightFacing(source, ship) {
+        var bearing = readSafely(function () { return mathlib.getCompassHeadingOfShip(ship, source); }, null);
+        var heading = readSafely(function () { return shipManager.getShipHeadingAngle(ship); }, null);
+        if (bearing === null || heading === null) return null;
+        var labels = [];
+        var fwd = false, side = false;
+        FLIGHT_ARCS.forEach(function (arc) {
+            if (!mathlib.isInArc(bearing, mathlib.addToDirection(arc.min, heading), mathlib.addToDirection(arc.max, heading))) return;
+            labels.push(arc.label);
+            if (arc.fwd) fwd = true; else side = true;
+        });
+        return labels.length ? { label: labels.join(' / '), fwd: fwd, side: side } : null;
+    }
+
     function buildFacing(source, ship) {
+        if (ship.flight) return buildFlightFacing(source, ship);
         var sections = readSafely(function () { return weaponManager.getShipHittingSide(source, ship); }, null);
         if (!sections || !sections.length) return null;
         var labels = [];
@@ -1173,7 +1220,7 @@ window.ShipTooltip = function () {
                 { label: 'Pivot', value: movement.pivot, title: 'Pivot cost' }
             );
             spec.push(ship.flight
-                ? { label: 'Cbt piv', value: movement.combatPivot, title: 'Combat pivot cost' }
+                ? { label: 'Combat Pivot', value: movement.combatPivot, title: 'Combat pivot cost' }
                 : { label: 'Roll', value: movement.roll, title: 'Roll cost' });
             model.movementFirst = own && gamedata.gamephase == 2;
             //No heading (round 6, user 2026-11-12) - the rows say what they are.
@@ -1446,7 +1493,8 @@ window.ShipTooltip = function () {
            section for an EW type spent ON this unit, in the EW section for one it spends on itself.
            A row the model did not carry is made here. If only one half passed its conditions, the
            other is drawn DISABLED so the row keeps its shape.
-         - `kind: 'primary'` (Target weapons): the full-width button under TARGETING.
+         - `kind: 'primary'` (Target weapons): the full-width button under TARGETING - only while
+           a row there says a selected weapon can be aimed at this unit (targetableCount).
          - `kind: 'clear'` (Remove All EW): "Clear all EW", at the foot of the EW section.
          - `kind: 'footer'` (Ship details): the footer button.
          - everything else: a captioned tile under Orders.
@@ -1475,7 +1523,10 @@ window.ShipTooltip = function () {
                 steppers[buttonData.group] = steppers[buttonData.group] || {};
                 steppers[buttonData.group][buttonData.role] = buttonData;
             } else if (buttonData.kind === 'primary') {
-                primarySlot.append(primaryButton.call(self, buttonData));
+                //User, 2026-11-16: no Target button while none of the selected weapons can be aimed at
+                //this unit - every TARGETING row says why not (Not in arc, Not in range, …) instead.
+                var targetable = targetableCount.call(self);
+                if (targetable > 0) primarySlot.append(primaryButton.call(self, buttonData, targetable));
             } else if (buttonData.kind === 'clear') {
                 clearButtonSlot.call(self).append(clearButton.call(self, buttonData));
             } else if (buttonData.kind === 'footer') {
@@ -1562,20 +1613,36 @@ window.ShipTooltip = function () {
         return element;
     }
 
-    /* "Target N weapons" (§5.2): N is how many rows of the TARGETING list above carry a hit chance -
-       the weapons weaponManager itself judged able to shoot at this unit (in arc, in range, line of
-       sight, not hex-targeted, not linked away). Counted off that list rather than re-asked, so the
-       button can never promise a weapon the list says cannot fire. */
-    function primaryLabel() {
-        var count = this.element.find('.fire.targeting .tt-row .posHitchange, .fire.targeting .tt-row .negHitchange').length;
+    /* How many selected weapons can be aimed at this unit (§5.2): the TARGETING rows above that carry
+       a hit chance - the weapons weaponManager itself judged able to shoot at it (in arc, in range,
+       line of sight, not hex-targeted, not linked away) - plus a Walker drive's Abduction, which
+       targets the unit without one. Counted off that list rather than re-asked, so the button can
+       never promise a weapon the list says cannot fire. A ≤0% row counts only for a BALLISTIC
+       weapon (user, 2026-11-16) - weaponManager.targetShip launches a ballistic at 0% or less and
+       declares nothing else below 1%; weaponManager marks the row's number `tt-ballistic`. A
+       grouped row counts every weapon in it (data-count).
+       A HIDDEN list counts nothing: refreshTargeting hides it (inline display) without emptying it,
+       so its rows may belong to an older selection. */
+    function targetableCount() {
+        var list = this.element.find('.fire.targeting');
+        if (!list.length || list[0].style.display === 'none') return 0;
+        var count = 0;
+        list.find('.tt-row').each(function () {
+            var row = jQuery(this);
+            if (row.find('.posHitchange, .negHitchange.tt-ballistic, .tt-abduction').length) count += Number(row.attr('data-count')) || 1;
+        });
+        return count;
+    }
+
+    function primaryLabel(count) {
         if (count === 1) return 'Target selected weapon';
         //return count > 1 ? 'Target ' + count + ' weapons' : 'Target weapons';
         return 'Target selected weapons';
     }
 
-    function primaryButton(buttonData) {
+    function primaryButton(buttonData, count) {
         var menu = this.menu;
-        var label = buttonData.label ? captionOf(buttonData, menu) : primaryLabel.call(this);
+        var label = buttonData.label ? captionOf(buttonData, menu) : primaryLabel(count);
         var element = jQuery('<button type="button" class="fv-shipcard__fire"></button>').attr('data-action', buttonData.className);
         element.append(jQuery('<span class="fv-shipcard__well"></span>').append(jQuery('<span class="fv-shipcard__icon"></span>').addClass(buttonData.className)));
         element.append(jQuery('<span class="fv-shipcard__lab"></span>').text(label));
@@ -1939,6 +2006,11 @@ window.ShipTooltip = function () {
     // For node harnesses (plan §7): the model alone, no DOM.
     ShipTooltip.buildModel = buildModel;
     ShipTooltip.EDF_PURPLE = EDF_PURPLE;
+
+    //The OPTIONS tab's switch, for the cards already open (gameOptions.js applyShipTooltipOpacity).
+    ShipTooltip.applyTranslucency = function (on) {
+        jQuery('.shipNameContainer.fv-shipcard, .fv-shipcard-caret').toggleClass(TRANSLUCENT, !!on);
+    };
 
     return ShipTooltip;
 }();

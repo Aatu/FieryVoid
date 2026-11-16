@@ -272,7 +272,7 @@
      ⚠️ MUST stay byte-equal to gamedata.teamBaseColors[0..2] — the JS side hands the same
      colours in as inline rgb() on the observer / 3+-team arm, and a drift shows up as a
      2-team game and a 4-team game disagreeing about what "green" is. */
-  --fv-own-bright: #32cd32;
+  --fv-own-bright: #5cce5c;
   --fv-ally-bright: #33adff;
   --fv-enemy-bright: #ff5050;
 

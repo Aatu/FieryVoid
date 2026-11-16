@@ -756,7 +756,8 @@ window.weaponManager = {
             return;
         }
 
-        /* One weapon per row (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 4): weapon | mode | hit chance,
+        /* One row per weapon - identical ones grouped, see the end of this function
+           (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 4, §14.9): weapon | mode | hit chance,
            with no "Approx:" - every number in the last column is a hit chance. A weapon that cannot
            shoot shows its reason across the last two columns instead; the reason keeps its old
            class, so it keeps its old colour. */
@@ -902,7 +903,8 @@ window.weaponManager = {
                     //Mine's orb - plan 3.10c). Same refusal as Huge terrain, and deliberately in
                     //the same line: what the player needs is one "Cannot Target", not a new reason.
                     if (abductionLine) {
-                        $(row(weapon.displayName, 'hexTargeted', 'Abduction')).appendTo(f);
+                        //tt-abduction: the ship card counts this row as one its Target button can fire
+                        $(row(weapon.displayName, 'hexTargeted tt-abduction', 'Abduction')).appendTo(f);
                     } else if (ship.Huge > 0 || !shipManager.isTargetable(ship) || attachedUnitHidden || attachedWeaponHidden || clawBlindSpot) { //Cannot Target larger terrain or POds that are attached to non-facing sides
                         $(row(weapon.displayName, 'cannotTarget', 'Cannot Target')).appendTo(f);
                     } else if (loSBlocked) {
@@ -930,6 +932,9 @@ window.weaponManager = {
 
                             var tooltipText = weaponManager.buildHitChanceTooltipText(result);
                             var chanceClass = (hitChance <= 0 ? 'negHitchange' : 'posHitchange');
+                            //tt-ballistic: a ballistic launches at 0% or less, anything else does not
+                            //(targetShip) - the ship card's Target button reads it off the row
+                            if (weapon.ballistic) chanceClass += ' tt-ballistic';
                             if (tooltipText) chanceClass += ' hit-chance-tooltip';
                             var dataAttr = tooltipText ? ' data-tooltip="' + tooltipText + '"' : '';
 
@@ -947,6 +952,31 @@ window.weaponManager = {
                 $(row(weapon.displayName, 'notInArc', 'Not In Arc')).appendTo(f);
             }
         }
+
+        /* Identical weapons share one row (user, 2026-11-16): a flight's six guns, a broadside of
+           one weapon type. Two rows group only when their MARKUP is identical - the same name, mode
+           and hit chance, down to the breakdown behind the number - so the same weapon with a range
+           penalty critical, or in another mode, keeps a row of its own. Status rows group the same
+           way (3× … NOT IN ARC). The count goes IN FRONT of the name, where the name's ellipsis can
+           never cut it, and on the row as data-count, which the ship card's Target button counts. */
+        var groups = {};
+        var order = [];
+        f.children('.tt-row').each(function () {
+            var key = this.outerHTML;
+            if (groups[key]) {
+                groups[key].count++;
+                $(this).remove();
+            } else {
+                groups[key] = { row: this, count: 1 };
+                order.push(key);
+            }
+        });
+        order.forEach(function (key) {
+            var group = groups[key];
+            if (group.count < 2) return;
+            $(group.row).attr('data-count', group.count)
+                .find('.weapon').first().prepend($('<span class="tt-count"></span>').text(group.count + '×'));
+        });
 
     },
 

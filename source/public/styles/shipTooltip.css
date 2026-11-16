@@ -8,7 +8,9 @@
  * and the system card's three type sizes ONLY: 10 micro / 12 body / 13 name.
  *
  * ⚠️ NO ELEMENT OPACITY anywhere on this surface (alpha compounding, project_visual_unification):
- * a dim state is a dimmer COLOUR. ⚠️ No Orbitron on game.php: caps + letter-spacing.
+ * a dim state is a dimmer COLOUR. The ONE exception is the whole card at 90% (user, 2026-11-16,
+ * `.fv-shipcard--translucent` below): opacity on the root composites the card as one layer, so
+ * nothing inside it compounds. ⚠️ No Orbitron on game.php: caps + letter-spacing.
  * NO :root block - tokens.css is the only one; component values are scoped to .fv-shipcard.
  *
  * Every block after the head band carries a 1px rule on its TOP, so whichever blocks a card
@@ -649,6 +651,14 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Identical weapons grouped into one row (user, 2026-11-16; weaponManager.targetingShipTooltip):
+   the count leads the name, so the name's ellipsis never reaches it. */
+.fv-shipcard .targeting .tt-row .tt-count {
+    margin-right: 4px;
+    font-family: var(--fv-mono);
+    font-weight: 700;
 }
 
 .fv-shipcard .targeting .tt-row .firingMode {
@@ -1685,6 +1695,15 @@
     margin: 8px;
     overflow: visible;
     box-shadow: none;
+}
+
+/* ── 90% opacity (user, 2026-11-16) ──────────────────────────────────────────
+   The whole card - peek, pinned, stack grid - and its dock caret, so the map shows through. The
+   player's switch is the OPTIONS tab's "See-through ship tooltips" (gameOptions.js; ShipTooltip.js
+   puts the class on). Not the card inside the picker's sheet: there is no map under it. */
+.shipNameContainer.fv-shipcard.fv-shipcard--translucent:not(.fv-shipcard--insheet),
+.fv-shipcard-caret.fv-shipcard--translucent {
+    opacity: 0.85;
 }
 
 .fv-shipcard--insheet .tt-close {
