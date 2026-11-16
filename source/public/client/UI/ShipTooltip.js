@@ -1145,6 +1145,61 @@ window.ShipTooltip = function () {
         return { type: type, value: value };
     }
 
+    /* ── Stats a critical has changed (user request 2026-11-16) ─────────────────────────────────────
+       Drawn in the critical orange (--fv-crit), as the system card does (SystemInfo critStats). The
+       numbers already carry the effects - this only says WHICH ones a critical in force touched. Each
+       list mirrors where its number comes from:
+         Ini Mod  - BaseShip::getCommonIniModifiers: the C&C's crits (none on an OSAT), a flight's on its
+                    first craft. Exact class names: the server's hasCritical matches no subclass (so the
+                    one-turn comms crit is listed by name - the server counts it since 2026-11-16).
+         Thrust   - movement.js getFullEngineThrust: the engines' output (their output crits and drains),
+                    a tractor hold (swtargetheld) on any system; a Shadow's pilot pain (BioDrive output);
+                    a flight's freethrust, less the EDF drain on its first craft (getEffectiveFreeThrust).
+         Defence  - ProfileIncreased on the C&C, which BaseShip::stripForJson adds to the profiles sent.
+         DEW      - ew.getScannerOutput: the scanners' output crits and drains, RestrictedEW /
+                    tmpsensordown on the primary C&C, and a BSG hybrid's SensorLoss.
+       Ships and bases; a flight has Ini and Thrust only. */
+    var INI_CRITS = ['CommunicationsDisrupted', 'CommunicationsDisruptedOneTurn', 'ReducedIniativeOneTurn', 'ReducedIniative', 'swtargetheld', 'tmpinidown',
+        'ShadowPilotPain', 'HangarOperations', 'LCVLaunchedThisTurn', 'EdfIniDrain', 'EMStormInitiative'];
+    var FLIGHT_INI_CRITS = ['tmpinidown', 'LaunchedThisTurn', 'ReducedIniativeOneTurn', 'ReducedIniative', 'Uncontrolled',
+        'EdfIniDrain', 'EMStormInitiative'];
+    var ENGINE_CRIT = /^(Output(Halved|Reduced)\w*|EdfThrustDrain|ForcedOffline(OneTurn|ForTurns))$/;
+    var SCANNER_CRIT = /^(Output(Halved|Reduced)\w*|EdfEwDrain|EMStormSensors|ForcedOffline(OneTurn|ForTurns))$/;
+
+    function critStats(ship) {
+        var criticals = shipManager.criticals;
+        var inForce = function (system) { return system ? criticals.getAllCriticals(system) : []; };
+        var hasAny = function (system, classes) {
+            return inForce(system).some(function (crit) { return classes.indexOf(crit.phpclass) !== -1; });
+        };
+        var matches = function (system, pattern) {
+            return inForce(system).some(function (crit) { return pattern.test(crit.phpclass); });
+        };
+        var stats = { ini: false, thrust: false, defence: false, dew: false };
+
+        if (ship.flight) {
+            var sample = criticals.getSampleCraft(ship);
+            stats.ini = hasAny(sample, FLIGHT_INI_CRITS);
+            stats.thrust = hasAny(sample, ['EdfThrustDrain']);
+            return stats;
+        }
+
+        var cnc = shipManager.systems.getSystemByName(ship, 'cnC');
+        stats.ini = !ship.osat && hasAny(cnc, INI_CRITS);
+        stats.defence = hasAny(cnc, ['ProfileIncreased']);
+        stats.thrust = hasAny(cnc, ['ShadowPilotPain']);
+        stats.dew = hasAny(shipManager.getPrimaryCnC(ship), ['RestrictedEW', 'tmpsensordown'])
+            || hasAny(shipManager.systems.getSystemByName(ship, 'BSGHybrid'), ['SensorLoss']);
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            if (!system) continue;
+            if ((system.name == 'engine' || system.outputType === 'thrust') && matches(system, ENGINE_CRIT)) stats.thrust = true;
+            if (hasAny(system, ['swtargetheld'])) stats.thrust = true;
+            if (system.outputType === 'EW' && matches(system, SCANNER_CRIT)) stats.dew = true;
+        }
+        return stats;
+    }
+
     /* §4.1-§4.2 with §11 / §11.1. Plain data, no DOM. `selectedShip` may be null. */
     function buildModel(ship, selectedShip) {
         var terrain = gamedata.isTerrain(ship.shipSizeClass, ship.userid);
@@ -1157,6 +1212,8 @@ window.ShipTooltip = function () {
         var movement = readSafely(function () { return buildMovement(ship); }, null);
         var defence = readSafely(function () { return buildDefence(ship); }, null);
         var ini = (kind === 'mine') ? null : readSafely(function () { return buildIni(ship); }, null);
+        //the stats a critical in force has changed, drawn in the crit orange (critStats)
+        var critHit = (kind === 'mine' || kind === 'terrain') ? {} : readSafely(function () { return critStats(ship); }, {});
 
         var model = {
             ship: ship,
@@ -1206,7 +1263,9 @@ window.ShipTooltip = function () {
             key: 'defence', label: 'Defence (F-S)',
             fwd: defence.fwd, side: defence.side,
             hot: (model.rel && model.rel.facing) ? model.rel.facing : null,
+            crit: !!critHit.defence,
             title: 'Defence fwd ' + defence.fwd + '% (base ' + defence.baseFwd + '), side ' + defence.side + '% (base ' + defence.baseSide + ')'
+                + (critHit.defence ? ' - profile raised by a critical' : '')
         } : { key: 'defence', label: 'Defence', value: '—' };
 
         var unknownEw = (kind === 'ship' || kind === 'base') && isEwUnknown(ship);
@@ -1214,7 +1273,9 @@ window.ShipTooltip = function () {
         var dewCell = {
             key: 'dew', label: 'DEW',
             value: dewValue === null ? '—' : (unknownEw ? '≤ ' + fmt(dewValue) : fmt(dewValue)),
-            title: unknownEw ? 'Not committed yet: at most ' + fmt(dewValue) : 'Defensive EW'
+            crit: !!critHit.dew,
+            title: (unknownEw ? 'Not committed yet: at most ' + fmt(dewValue) : 'Defensive EW')
+                + (critHit.dew ? ' - sensors reduced by a critical' : '')
         };
         /* Round 3 (user, 2026-11-10, after Stages 2-7): Ini and Speed moved into the Movement section
            on every card, own and enemy alike, so the cells are the two COMBAT numbers - and the card
@@ -1240,7 +1301,9 @@ window.ShipTooltip = function () {
             var rows = [];
             if (own) {
                 //the old DEW/CCEW line, Support DEW, Detect Mines, and ELINT's Detect Stealth / Blanket DEW
-                rows.push(ewRow('DEW', dewValue));
+                var dewRow = ewRow('DEW', dewValue);
+                dewRow.crit = !!critHit.dew; //the same number as the DEW cell, so the same colour
+                rows.push(dewRow);
                 rows.push(ewRow('CCEW', readSafely(function () { return ewValue('CCEW', ship); }, 0)));
                 if (shipManager.isElint(ship)) {
                     rows.push(ewRow('BDEW', readSafely(function () { return ewValue('BDEW', ship); }, 0)));
@@ -1281,10 +1344,12 @@ window.ShipTooltip = function () {
             var spec = [];
             if (ini) {
                 spec.push({ label: 'Ini Base', value: signed(ini.base), title: 'Initiative base ' + ini.base },
-                    { label: 'Ini Mod', value: signed(ini.mod), title: 'Initiative modifier ' + ini.mod });
+                    { label: 'Ini Mod', value: signed(ini.mod), crit: !!critHit.ini,
+                        title: 'Initiative modifier ' + ini.mod + (critHit.ini ? ' - includes critical effects' : '') });
             }
             spec.push(
-                { label: 'Thrust', value: movement.thrustLeft + '/' + movement.thrustFull, title: 'Thrust remaining / full' },
+                { label: 'Thrust', value: movement.thrustLeft + '/' + movement.thrustFull, crit: !!critHit.thrust,
+                    title: 'Thrust remaining / full' + (critHit.thrust ? ' - reduced by a critical' : '') },
                 { label: 'Initiative', value: iniValue, title: (ini && ini.order) ? 'Initiative ' + ini.total + ', order ' + ini.order : 'No initiative order' },
                 { label: 'Speed', value: movement.speed },
                 { label: 'Accel', value: movement.accel, title: 'Acceleration cost' },
@@ -1412,7 +1477,8 @@ window.ShipTooltip = function () {
         var element = jQuery('<div class="fv-shipcard__cell"></div>').attr('data-cell', cell.key);
         if (cell.title) element.attr('title', cell.title);
         element.append(jQuery('<div class="fv-shipcard__cl"></div>').text(cell.label));
-        var value = jQuery('<div class="fv-shipcard__cv"></div>');
+        //a critical changed it: the value in the crit orange (critStats; shipTooltip.css .fv-shipcard__cv--crit)
+        var value = jQuery('<div class="fv-shipcard__cv"></div>').toggleClass('fv-shipcard__cv--crit', !!cell.crit);
         if (cell.key === 'defence' && cell.fwd !== undefined) {
             //F · S, the number on the facing side bright (Stage 3) - both on a boundary
             var hot = cell.hot;
@@ -1483,7 +1549,8 @@ window.ShipTooltip = function () {
             if (item.title) line.attr('title', item.title);
             var label = jQuery('<span></span>').text(item.label);
             if (item.color) label.css('color', item.color);
-            line.append(label, jQuery('<b></b>').text(item.value === undefined || item.value === null ? '—' : String(item.value)));
+            line.append(label, jQuery('<b></b>').toggleClass('fv-shipcard__crit', !!item.crit) //critStats
+                .text(item.value === undefined || item.value === null ? '—' : String(item.value)));
             spec.append(line);
         });
         return spec;
@@ -1501,7 +1568,7 @@ window.ShipTooltip = function () {
         element.append(jQuery('<span class="fv-shipcard__ewl"></span>').text(type.label).attr('title', type.full || type.label));
         element.append(jQuery('<span class="fv-shipcard__vb"></span>')
             .append('<span class="fv-shipcard__sp fv-shipcard__sp--remove"></span>')
-            .append(jQuery('<span class="fv-shipcard__sv"></span>').text(fmt(row.value)))
+            .append(jQuery('<span class="fv-shipcard__sv"></span>').toggleClass('fv-shipcard__sv--crit', !!row.crit).text(fmt(row.value)))
             .append('<span class="fv-shipcard__sp fv-shipcard__sp--add"></span>'));
         return element;
     }

@@ -650,6 +650,19 @@
     filter: grayscale(1) brightness(0.55);
 }
 
+/* A stat a CRITICAL has changed (user request 2026-11-16; ShipTooltip.js critStats) - Ini Mod, Thrust,
+   Defence, DEW - is drawn in the critical orange, as the system card draws its own (SystemCard $crit).
+   It replaces the value's BRIGHT colour only: a Defence number dimmed for facing away from the selected
+   unit stays dim (the facing still reads), as do the cell's separator and an EW row greyed as not open
+   (.fv-shipcard__ewr--off outranks the plain rule). Placed after the cell, spec and EW-row rules it
+   overrides, so a source-order cascade (the jsdom harnesses) agrees with the browser. */
+.fv-shipcard .fv-shipcard__cv--crit,
+.fv-shipcard .fv-shipcard__cv--crit .fv-shipcard__def--hot,
+.fv-shipcard .fv-shipcard__spec b.fv-shipcard__crit,
+.fv-shipcard .fv-shipcard__sv--crit {
+    color: var(--fv-crit);
+}
+
 /* Clear EW: small, in the EW heading's own row (round 3), CENTRED on the column of values below it
    (round 9, user 2026-11-12). The slot is ZERO wide and sits on that column's centre line - the
    value block's centre is max(half, 25% - 4.5px) in from the row's right edge (see .fv-shipcard__vb)

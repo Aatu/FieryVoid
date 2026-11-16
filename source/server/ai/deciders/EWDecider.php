@@ -299,8 +299,8 @@ class EWDecider
     /* The EW points the page gives this ship (ew.getScannerOutput): 0 for a ship adrift, else
        what its sensors put out now, less 2 for each Restricted EW and 1 for each "sensors down" on
        its primary C&C. ⚠️ Not EW::getScannerOutput: the two differ (the server calls a base or an
-       OSAT with a disabled C&C sensorless, the page does not; the page knows "sensors down", the
-       server does not), nothing on the server holds a commit to its own figure, and the row a
+       OSAT with a disabled C&C sensorless, the page does not; "sensors down" the server counts too since
+       2026-11-16), nothing on the server holds a commit to its own figure, and the row a
        player's page writes is the page's. */
     public static function points($ship, $turn)
     {
@@ -314,12 +314,16 @@ class EWDecider
 
         $output = 0;
         $primary = null;
+        $bsgHybrid = null;
         foreach ($ship->systems as $system) {
             if ($system->outputType === 'EW') $output += max(0, (int)$system->getOutput($turn));
             //shipManager.getPrimaryCnC: the C&C with least left of it
             if ($system->displayName === 'C&C' && ($primary === null || $system->getRemainingHealth() < $primary->getRemainingHealth())) $primary = $system;
+            if ($bsgHybrid === null && $system->name === 'BSGHybrid') $bsgHybrid = $system; //the page's getSystemByName: the first by name
         }
         if ($primary) $output -= 2 * PowerDecider::crits($primary, 'RestrictedEW', $turn) + PowerDecider::crits($primary, 'tmpsensordown', $turn);
+        //a BSG hybrid's Sensor Loss, -3 each - the page subtracts it since 2026-11-16 (ew.js; it never did before), as the server does
+        if ($bsgHybrid) $output -= 3 * PowerDecider::crits($bsgHybrid, 'SensorLoss', $turn);
 
         return max(0, $output);
     }
