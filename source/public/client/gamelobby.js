@@ -207,7 +207,10 @@ window.gamedata = {
 				powerRating = 'Tier Ancients';
 				break;
 			case 'Yolu Confederation':
-				powerRating = 'Tier 1; Minor Faction';
+				powerRating = 'Tier Other; Minor Faction';
+				break;
+			case 'Yolu Confederation (reevaluated)':
+				powerRating = 'Tier 1; Minor Custom Faction';
 				break;
 			case 'Barada Imperium':
 				powerRating = 'Tier 3; Minor Custom faction';
