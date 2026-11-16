@@ -264,7 +264,11 @@ class SystemInfo extends React.Component {
         if (has('Damage')) rows.push({ label: 'Damage', value: rangeDash(value('Damage')), big: true });
         //every mode, the one in use bright (a single mode only repeats the damage-type chip)
         const modeKeys = system.firingModes ? Object.keys(system.firingModes) : [];
-        if (modeKeys.length > 1) {
+        if (hidesAmmoModes(ship, system) && modeKeys.length > 0) {
+            //drawn even when the rack holds one type, so whether the row is there says nothing about how many it holds
+            const firstKey = system.firingModes[1] !== undefined ? '1' : modeKeys[0];
+            rows.push({ label: 'Firing mode', modes: [{ name: system.firingModes[firstKey], active: true }] });
+        } else if (modeKeys.length > 1) {
             rows.push({ label: 'Firing mode', modes: modeKeys.map(key => ({
                 name: system.firingModes[key], active: String(key) === String(system.firingMode)
             })) });
@@ -314,6 +318,14 @@ const FIRE_CONTROL = 'Fire control (fighter/med/cap)';
 const PRIORITY = 'Resolution Priority (ship/fighter)';
 const CARD_KEYS = new Set(['Special', 'ID', 'Arc', 'Power Used', 'Damage', 'Damage type', 'Weapon type', 'Range penalty',
     'Range', FIRE_CONTROL, 'Intercept', 'Number of guns', 'Number of shots', PRIORITY]);
+
+/* A magazine-fed weapon's firing modes ARE the ordnance its magazine holds (AmmoMissileRackS / ammoWeapons recompileFiringModes list
+   only the types aboard), and those types are secret from other teams (AmmoMagazine::stripForJson). The payload still carries every
+   mode, so the card lists only mode 1 to a viewer outside the ship's team (user request 2026-11-16). The card's damage, range and fire
+   control already read mode 1 for them: nothing on the client ever switches an enemy weapon's mode.
+   game.php only - gamedata.isMyorMyTeamShip is not defined in the lobby, which shows no other team's ships. */
+const hidesAmmoModes = (ship, system) => system.checkAmmoMagazine === true
+    && typeof gamedata.isMyorMyTeamShip === 'function' && !gamedata.isMyorMyTeamShip(ship);
 
 //the called-shot chance of each selected weapon against this system, or why there is none
 const calledShotRows = (ship, selectedShip, system) => {

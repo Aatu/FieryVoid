@@ -135,6 +135,7 @@ const Card = styled.div`
     background-color: ${theme.colors.panelBg};
     border: 1px solid ${theme.colors.line};
     box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+    border-radius: 4px;
     text-align: left;
     /*A hover card never takes the pointer: it cannot be reached anyway, and it must not swallow clicks. A card
       pinned by touch takes it back, to scroll.*/
