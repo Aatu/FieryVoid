@@ -37,6 +37,14 @@ const PARAM_SUM_CRIT_DESCRIPTIONS = {
     EMStormPower: (total) => `EM storm: power -${total}`,
     EMStormInitiative: (total) => `EM storm: initiative -${total * 5}`,
     EMStormOffensive: (total) => `EM storm: offensive bonus -${total * 5}`,
+    /* The Energy Draining Field's (user, 2026-11-16), worded exactly as their PHP constructors word them when they are
+       given the param (cricialClasses.php) - the text a reload loses. Each param is the RUNNING total for the turn
+       (EdfExposure::accumulate), and only one crit of a class is in force on a turn, so the "sum" is that total. */
+    EdfThrustDrain: (total) => `Engine output drained by ${total}`,
+    EdfPowerDrain: (total) => `Reactor output drained by ${total}`,
+    EdfIniDrain: (total) => `Initiative reduced by ${total * 5}`,
+    EdfEwDrain: (total) => `EW capacity drained by ${total}`,
+    EdfExposed: (total) => total > 1 ? `Caught in an Energy Draining Field (${total} turns running)` : 'Caught in an Energy Draining Field',
 };
 
 export const Entry = styled(TooltipEntry)`
@@ -373,10 +381,13 @@ const cardOfficers = (ship, system) => {
 
 /* The criticals in effect on this system, one line per critical class: { key, count, text, until }. Was getCriticals,
    which drew them itself; the turn and param arithmetic is unchanged. A class with no crit in effect gives no line, so
-   the card shows no empty "Criticals" block (the old one drew the heading anyway). */
-const critLines = (system) => {
+   the card shows no empty "Criticals" block (the old one drew the heading anyway).
+   `keep` (optional): only the crits it passes are counted - ShipInfo's fighter-card hover uses it to leave out the
+   craft-state markers the card draws as overlays. Exported for that hover, so both say an effect in the same words. */
+export const critLines = (system, keep) => {
     const critData = system.critData || {};
-    const criticals = Array.isArray(system.criticals) ? system.criticals : Object.values(system.criticals || {});
+    const allCriticals = Array.isArray(system.criticals) ? system.criticals : Object.values(system.criticals || {});
+    const criticals = keep ? allCriticals.filter(keep) : allCriticals;
     const critKeys = Object.keys(critData).length > 0
         ? Object.keys(critData)
         : [...new Set(criticals.map(c => c.phpclass))];

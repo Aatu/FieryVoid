@@ -158,6 +158,38 @@ window.shipManager.criticals = {
     //it renders a persistent red "CUT OFF" marker (not gated on destroyed).
     isCutOffFighter: function (fighter) {
         return Boolean(shipManager.criticals.hasCritical(fighter, "ShadowFighterCutOff"));
+    },
+
+    /* FIGHTER FLIGHTS (user request 2026-11-16). A flight has no CnC, so an effect on the WHOLE flight is
+       parked on its SAMPLE craft, systems[1] - the server's FighterFlight::getSampleFighter(), alive or not -
+       and read from there: tmpinidown / tmpsensordown / tmphitreduction, LaunchedThisTurn, HK jamming's
+       ReducedIniativeOneTurn and Uncontrolled, the EM storm's EMStormInitiative / EMStormOffensive and the
+       Energy Draining Field's Edf* crits. The classes below are the exception: each says what happened to
+       THAT craft (it left the flight, or was cut off from its carrier), and the fighter card draws each one
+       as its own overlay. A craft's own subsystems carry their own crits too (MissileLost on its magazine). */
+    CRAFT_STATE_CRITICALS: ['DisengagedFighter', 'DockedFighter', 'SplitLaunchedFighter', 'ShadowFighterCutOff'],
+
+    isCraftStateCritical: function (crit) {
+        return Boolean(crit) && shipManager.criticals.CRAFT_STATE_CRITICALS.indexOf(crit.phpclass) !== -1;
+    },
+
+    //The flight's sample craft (systems[1]), or null for anything that is not a flight.
+    getSampleCraft: function (flight) {
+        return (flight && flight.flight && flight.systems && flight.systems[1]) ? flight.systems[1] : null;
+    },
+
+    isSampleCraft: function (flight, craft) {
+        var sample = shipManager.criticals.getSampleCraft(flight);
+        return Boolean(sample && craft) && String(sample.id) === String(craft.id);
+    },
+
+    //The effects in force on the whole flight this turn: the sample craft's current crits, less its own state markers.
+    getFlightCriticals: function (flight) {
+        var sample = shipManager.criticals.getSampleCraft(flight);
+        if (!sample) return [];
+        return shipManager.criticals.getAllCriticals(sample).filter(function (crit) {
+            return !shipManager.criticals.isCraftStateCritical(crit);
+        });
     }
 
 };

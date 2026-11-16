@@ -1071,7 +1071,7 @@
 /* 31px + no rule: the open band less its 1px rule, so the toggle stays on the same line when the
    panel folds (a tab has nothing under it to rule off). */
 .fv-shipcard--side-folded .fv-shipcard__sidehead {
-    height: 31px;
+    height: 28px;
     padding: 0 2px 0 3px;
     border-bottom: 0;
 }
