@@ -373,22 +373,26 @@ const Cell = styled.div`
     & + & { border-left: 1px solid ${theme.colors.rule}; }
 `;
 
+/* $crit (user request 2026-11-16): a critical in force changes this stat (SystemInfo critStats) - its value is drawn
+   in the critical orange (--fv-crit / theme healthCrit, the structure track's crit colour) so the player sees WHAT was
+   affected; the Criticals block above says how. Applies to a cell's value and a profile row's value alike. */
 const CellValue = styled.span`
     max-width: 100%;
     font-size: ${SIZE.body};
-    color: ${theme.colors.text};
+    color: ${props => props.$crit ? theme.colors.healthCrit : theme.colors.text};
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     && { font-family: ${theme.fonts.mono}; }
 `;
 
+//cells: { label, value, crit? }
 export const Cells = ({ cells }) => (
     <CellRow $count={cells.length}>
         {cells.map(cell => (
             <Cell key={cell.label}>
                 <Lab>{cell.label}</Lab>
-                <CellValue title={String(cell.value)}>{String(cell.value)}</CellValue>
+                <CellValue $crit={cell.crit} title={String(cell.value)}>{String(cell.value)}</CellValue>
             </Cell>
         ))}
     </CellRow>
@@ -491,11 +495,11 @@ const ProfLab = styled(Lab)`
     ${props => props.$sub ? "padding-left: 8px;" : ""}
 `;
 
-//$big (the damage figure) is set apart by weight and colour, not size - see SIZE
+//$big (the damage figure) is set apart by weight and colour, not size - see SIZE; $crit: see CellValue
 const ProfVal = styled.span`
     font-size: ${SIZE.body};
     font-weight: ${props => props.$big ? 700 : 400};
-    color: ${props => props.$big ? theme.colors.text : theme.colors.textAccent};
+    color: ${props => props.$crit ? theme.colors.healthCrit : (props.$big ? theme.colors.text : theme.colors.textAccent)};
     ${props => props.$mono ? `&& { font-family: ${theme.fonts.mono}; }` : ""}
 `;
 
@@ -582,8 +586,8 @@ export const FireControl = ({ value }) => {
     );
 };
 
-/* rows: { label, value, big?, aux? }, { label, fc } or { label, modes } - a label starting " - " is a sub-item of the
-   row above */
+/* rows: { label, value, big?, aux?, crit? }, { label, fc } or { label, modes } - a label starting " - " is a sub-item of
+   the row above */
 export const Profile = ({ rows }) => (
     <ProfGrid>
         {rows.map((row, i) => (
@@ -592,7 +596,7 @@ export const Profile = ({ rows }) => (
                 <span>
                     {row.fc !== undefined ? <FireControl value={row.fc} />
                         : row.modes ? <Modes modes={row.modes} />
-                            : <ProfVal $big={row.big} $mono={looksNumeric(row.value)}><RichText text={row.value} /></ProfVal>}
+                            : <ProfVal $big={row.big} $crit={row.crit} $mono={looksNumeric(row.value)}><RichText text={row.value} /></ProfVal>}
                     {row.aux && <Aux>{row.aux}</Aux>}
                 </span>
             </React.Fragment>

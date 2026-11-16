@@ -1,6 +1,6 @@
 import * as React from "react";
 import styled from "styled-components"
-import { Header, Entry, OfficerHeading, OfficerEntry, OfficerName, critLines } from './SystemInfo';
+import { Header, Entry, OfficerHeading, OfficerEntry, OfficerName, critLines, sensorDownObPenalty } from './SystemInfo';
 import theme from "../styled/theme";
 import buildHitChart from "../helpers/buildHitChart";
 
@@ -144,6 +144,8 @@ class ShipInfo extends React.Component {
 		if (nebulaOb) displayOffensiveBonus = nebula.showOffensiveBonus(displayOffensiveBonus);
 		//an EM storm's 1d3 this turn, as the shot takes it (EM_STORM_PLAN.md #2) - window.emStorm is game.php's alone
 		if (ship.flight && window.emStorm && emStorm.isActive()) displayOffensiveBonus = Math.max(0, displayOffensiveBonus - emStorm.offensivePenalty(ship));
+		//...and a tmpsensordown on its first craft, -5 each, as the shot takes it - the system card's figure (user request 2026-11-16)
+		if (ship.flight) displayOffensiveBonus = Math.max(0, displayOffensiveBonus - sensorDownObPenalty(ship));
 		if (ship.flight && gamedata.areMinesPresent) {
 			if(ship.minesweeper){
 				displayOffensiveBonus -= window.ew.getDetectMEW(ship);
