@@ -4,6 +4,7 @@ class YuanReev extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
+		$this->unofficial = true;     //official design with unffofficial price change, to get the faction to proper Tier 1 power
         $this->pointCost = 2400;
         $this->faction = "Yolu Confederation (reevaluated)";
         $this->phpclass = "YuanReev";

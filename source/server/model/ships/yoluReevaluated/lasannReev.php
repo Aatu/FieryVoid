@@ -6,6 +6,7 @@ class LasannReev extends OSAT
 	{
 		parent::__construct($id, $userid, $name,  $slot);
 
+		$this->unofficial = true;     //official design with unffofficial price change, to get the faction to proper Tier 1 power
 		$this->pointCost = 235;
         $this->faction = "Yolu Confederation (reevaluated)";
 	      	$this->variantOf = "Lamassa Destabilizer OSAT";
