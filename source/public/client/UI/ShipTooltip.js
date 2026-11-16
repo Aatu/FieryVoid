@@ -29,7 +29,14 @@ window.ShipTooltip = function () {
     // `.fire` and `.ballistics` are each carried by TWO divs - the heading and the content beneath
     // it - which is why the headings also carry `tt-head`, and why update() clears `.fire.targeting`
     // and never a bare `.fire` (a bare wipe takes the heading's <span> with it, for good).
+    /* Round 12 (user, 2026-11-16): the root is now a bare flex ROW - the card box (`__card`: the
+       border, the rail, the scroll) and, beside it, the ORDERS panel (`__side`). The panel has to be
+       outside the card's scroll box or the card would clip it, and it has to be INSIDE the root so
+       that everything which measures or moves `element` - place, placeDocked, keepInView, the head
+       drag, the picker's placeTooltipClear - takes the panel along without knowing it is there.
+       The constructor moves `.buttons` into the panel (not on the in-sheet card, which keeps it). */
     var HTML = '<div class="shipNameContainer fv-shipcard">'
+        + '<div class="fv-shipcard__card">'
         + '<button type="button" class="tt-close" aria-label="Close" title="Close">✕</button>'
         + '<div class="namecontainer fv-shipcard__head"></div>'
         + '<div class="fv-shipcard__body"></div>'
@@ -40,6 +47,11 @@ window.ShipTooltip = function () {
         + '<div class="ballistics incoming"></div>'
         + '<div class="buttons"></div>'
         + '<div class="fv-shipcard__foot"></div>'
+        + '</div>'
+        + '<div class="fv-shipcard__side">'
+        + '<div class="fv-shipcard__sidehead"><span class="fv-shipcard__sidetitle">Orders</span>'
+        + '<button type="button" class="fv-shipcard__sidetoggle"><span class="fv-shipcard__chev"></span></button></div>'
+        + '</div>'
         + '</div>';
 
     /* The Walkers' Energy Draining Field. The one purple already in the game's UI is
@@ -73,6 +85,26 @@ window.ShipTooltip = function () {
         }
     }
 
+    /* Round 12 (user, 2026-11-16): what is folded away - the ORDERS panel beside the card (`side`),
+       the Movement section (`move`), your own unit's EW section (`ew`) and - round 13 - its Fire
+       orders (`fire`). Every phase STARTS from its defaults: the panel IN (round 13, user 2026-11-16:
+       folded to its tab in every phase; it was out), Movement folded in the Firing phase only (it is
+       the least used there, and TARGETING is the part that grows), EW and Fire orders open. What the
+       player then opens or closes
+       stays that way on every card for the rest of the phase - a card is rebuilt on every EW click
+       and retarget, and the next unit clicked should not undo the choice - and a new phase (or
+       turn) starts from its defaults again. Never stored past the page. */
+    var foldState = null;
+
+    function folds() {
+        var phase = window.gamedata ? gamedata.gamephase : null;
+        var key = (window.gamedata ? gamedata.turn : '') + ':' + phase;
+        if (!foldState || foldState.key !== key) {
+            foldState = { key: key, side: true, move: phase == 3, ew: false, fire: false };
+        }
+        return foldState;
+    }
+
     function ShipTooltip(selectedShip, ships, position, showTargeting, menu, hexagon, ballisticsMenu, options) {
         this.element = jQuery(HTML);
         this.ships = [].concat(ships);
@@ -104,6 +136,21 @@ window.ShipTooltip = function () {
 
         this.element.toggleClass(TRANSLUCENT, isTranslucent());
 
+        /* The ORDERS panel (round 12): the PINNED card's tiles go beside it, in a column that folds
+           in and out. Not on the card inside the picker's sheet - there is no room beside it, and
+           the sheet scrolls the card itself - which keeps its tiles inline as before. The panel is
+           only drawn while there are tiles (renderActions sets fv-shipcard--has-side). */
+        this.cardElement = this.element.children('.fv-shipcard__card');
+        this.sideElement = this.element.children('.fv-shipcard__side');
+        if (menu && !this.inSheet) {
+            this.element.find('.buttons').appendTo(this.sideElement);
+            bindSideToggle.call(this);
+        } else {
+            this.sideElement.remove();
+            this.sideElement = null;
+        }
+        bindFoldToggle.call(this);
+
         if (menu) {
             /* The ✕ is for the PINNED card only - the one a click on a unit leaves standing, which
                sits over the hex you are trying to target or over the movement UI (user report
@@ -114,7 +161,8 @@ window.ShipTooltip = function () {
                 e.stopPropagation();
                 this.close();
             }.bind(this));
-            bindHeadDrag.call(this, this.element.find('.namecontainer'));
+            //The ORDERS panel's head band drags the card the same way as the card's own.
+            bindHeadDrag.call(this, this.element.find('.namecontainer, .fv-shipcard__sidehead'));
         } else {
             /* D8: the peek is click-through. It used to destroy itself on any mouse event inside
                it, because a box under the cursor that swallowed the events was in the way of the
@@ -138,17 +186,23 @@ window.ShipTooltip = function () {
             //D9: the card IS the sheet's content now - no position of its own, no drag, no ✕ (the
             //sheet's own ✕ and "‹ N units in hex" do those jobs). The picker hides its list.
             this.element.addClass('fv-shipcard--insheet').appendTo(this.dock.container);
-            this.element.show();
+            reveal.call(this);
             if (typeof this.dock.picker.onCardDocked === 'function') this.dock.picker.onCardDocked(this);
             //AFTER onCardDocked: until the picker swaps its list for the card, the card is not laid out
             alignEwRows.call(this);
             return;
         }
         this.element.appendTo('body');
-        this.element.show();
+        reveal.call(this);
         alignEwRows.call(this);
         this.place();
     };
+
+    /* NOT jQuery's show(): that writes the TAG's default display (`block` for a div), and the root is
+       a flex row now (the card and its ORDERS panel side by side, round 12). */
+    function reveal() {
+        this.element.css('display', 'flex');
+    }
 
     /* Round 8 (user, 2026-11-12): every EW row's icon starts where "DEFENCE" does in the cell above.
        That label is CENTRED in its cell, so where it starts depends on the font the platform drew it
@@ -159,16 +213,22 @@ window.ShipTooltip = function () {
     function alignEwRows() {
         var node = this.element[0];
         var label = this.element.find('.fv-shipcard__cells--n2 .fv-shipcard__cell[data-cell="defence"] .fv-shipcard__cl')[0];
-        var row = this.element.find('.fv-shipcard__ewr')[0];
+        //The first row that is laid out: a folded EW section's rows have no box (round 12) - the
+        //fold toggle runs this again when it opens.
+        var row = null, rowRect = null;
+        this.element.find('.fv-shipcard__ewr').each(function () {
+            if (row) return;
+            var rect = this.getBoundingClientRect();
+            if (rect.width) { row = this; rowRect = rect; }
+        });
         if (!label || !row || !label.firstChild || !document.createRange) {
-            node.style.removeProperty('--tt-ew-indent');
+            if (!label || !this.element.find('.fv-shipcard__ewr').length) node.style.removeProperty('--tt-ew-indent');
             return;
         }
         var range = document.createRange();
         range.selectNodeContents(label);
         var textRect = range.getBoundingClientRect();
-        var rowRect = row.getBoundingClientRect();
-        if (!rowRect.width || !textRect.width) return; //not laid out (yet)
+        if (!textRect.width) return; //not laid out (yet)
         node.style.setProperty('--tt-ew-indent', Math.max(0, textRect.left - rowRect.left).toFixed(2) + 'px');
     }
 
@@ -226,7 +286,11 @@ window.ShipTooltip = function () {
         }
         this.verticalSide = side;
 
-        var left = point.x - width / 2;
+        //The CARD is centred on its unit; the ORDERS panel (round 12) hangs off its right edge, and
+        //`width` - the whole row - is what the clamp keeps on screen, so near the right edge the
+        //card moves left to make room for the panel.
+        var cardWidth = (this.cardElement && this.cardElement[0] && this.cardElement[0].offsetWidth) || width;
+        var left = point.x - cardWidth / 2;
         var top = side === 'below' ? below : above;
 
         this.element.css({
@@ -282,6 +346,11 @@ window.ShipTooltip = function () {
         var anchorTop = rowRect ? rowRect.top : pickerRect.top;
         var top = clamp(anchorTop - 8, EDGE, viewH - height - EDGE);
 
+        /* Docked on the picker's LEFT, the ORDERS panel (round 12) goes on the card's far side - it
+           would otherwise sit between the card and the picker, and the caret would come out of the
+           panel. `width` is the whole row either way, so the spots above already make room for it.
+           (Set before the caret is placed: it reads the same left / width.) */
+        this.element.toggleClass('fv-shipcard--side-left', side === 'left');
         this.element.addClass('fv-shipcard--docked').css({ left: left + 'px', top: top + 'px' });
 
         /* The caret. A separate element in <body>, because the card is its own scroll container and
@@ -327,7 +396,7 @@ window.ShipTooltip = function () {
     ShipTooltip.prototype.undock = function (quiet) {
         this.dock = null;
         this.dockSide = null;
-        this.element.removeClass('fv-shipcard--docked');
+        this.element.removeClass('fv-shipcard--docked fv-shipcard--side-left');
         if (this.caretElement) {
             this.caretElement.remove();
             this.caretElement = null;
@@ -474,7 +543,8 @@ window.ShipTooltip = function () {
         renderFoot.call(this, this.model);
         renderActions.call(this);
         alignEwRows.call(this);
-        if (this.dock) this.place();
+        //The ORDERS panel can come or go here (round 12), which changes the row's width.
+        if (this.dock) this.place(); else this.keepInView();
     };
 
     ShipTooltip.prototype.isForAnyOf = function (ships) {
@@ -1104,6 +1174,7 @@ window.ShipTooltip = function () {
             rel: null,
             ew: null,
             fire: null,
+            fireAfterMovement: false,
             sections: []
             //footer: Ini base / mod moved to the Movement section's heading (round 5) - see sections[].ini
         };
@@ -1186,7 +1257,9 @@ window.ShipTooltip = function () {
                     if (value > 0) rows.push(ewRow(type, value));
                 });
             }
-            if (rows.length) model.ew = { own: own, rows: rows };
+            //Round 12 (user, 2026-11-16): your own unit's EW section folds; anyone else's is a few
+            //read-only rows and does not.
+            if (rows.length) model.ew = { own: own, rows: rows, fold: own ? 'ew' : null };
         }
 
         // ── Own unit: fire orders ──
@@ -1223,9 +1296,15 @@ window.ShipTooltip = function () {
                 ? { label: 'Combat Pivot', value: movement.combatPivot, title: 'Combat pivot cost' }
                 : { label: 'Roll', value: movement.roll, title: 'Roll cost' });
             model.movementFirst = own && gamedata.gamephase == 2;
-            //No heading (round 6, user 2026-11-12) - the rows say what they are.
-            model.sections.push({ key: 'move', title: null, spec: spec });
+            //No heading (round 6, user 2026-11-12) - the rows say what they are. Round 12 (user,
+            //2026-11-16): the section FOLDS (folded by default in the Firing phase), and a folded
+            //section needs something to say what it is and to open it again - so the heading is
+            //back, as the fold button, as on Electronic warfare and Fire orders.
+            model.sections.push({ key: 'move', title: 'Movement', fold: 'move', spec: spec });
         }
+        //Round 12 (user, 2026-11-16): in the Firing phase your unit's Fire orders sit under Movement;
+        //round 13 (user, 2026-11-16): in Pre-Firing too - so wherever Fire orders show at all.
+        model.fireAfterMovement = gamedata.gamephase == 3 || gamedata.gamephase == 5;
 
         return model;
     }
@@ -1349,10 +1428,52 @@ window.ShipTooltip = function () {
         return element;
     }
 
-    function sectionElement(key, title) {
+    /* `foldKey` (round 12): the heading becomes a button that folds the section away to its heading
+       line - the state is folds()[foldKey], shared by every card for the rest of the phase. The click
+       is delegated from the card (bindFoldToggle), so it survives every re-render. */
+    function sectionElement(key, title, foldKey) {
         var section = jQuery('<div class="fv-shipcard__sec"></div>').addClass('fv-shipcard__sec--' + key);
-        if (title) section.append(jQuery('<div class="fv-shipcard__mh"></div>').append(jQuery('<span></span>').text(title)));
+        if (title && foldKey) {
+            var button = jQuery('<button type="button" class="fv-shipcard__fold"></button>')
+                .append('<span class="fv-shipcard__chev"></span>')
+                .append(jQuery('<span class="fv-shipcard__foldt"></span>').text(title));
+            section.attr('data-fold', foldKey).append(jQuery('<div class="fv-shipcard__mh"></div>').append(button));
+            applyFold(section, !!folds()[foldKey]);
+        } else if (title) {
+            section.append(jQuery('<div class="fv-shipcard__mh"></div>').append(jQuery('<span></span>').text(title)));
+        }
         return section;
+    }
+
+    function applyFold(section, folded) {
+        var button = section.children('.fv-shipcard__mh').children('.fv-shipcard__fold');
+        var title = button.children('.fv-shipcard__foldt').text();
+        section.toggleClass('fv-shipcard__sec--folded', folded);
+        button.attr('aria-expanded', folded ? 'false' : 'true')
+            .attr('title', (folded ? 'Show ' : 'Hide ') + title.toLowerCase());
+    }
+
+    function bindFoldToggle() {
+        var self = this;
+        this.cardElement.on('click', '.fv-shipcard__fold', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var section = jQuery(this).closest('.fv-shipcard__sec');
+            var key = section.attr('data-fold');
+            if (!key) return;
+            var state = folds();
+            state[key] = !state[key];
+            applyFold(section, state[key]);
+            afterResize.call(self);
+        });
+    }
+
+    /* The card changed size under the player (a fold, the panel in or out): re-measure the EW indent
+       (an opened EW section has rows to measure again) and stay on screen the way update() does - a
+       docked card re-derives its place, any other only moves if it now hangs off an edge. */
+    function afterResize() {
+        alignEwRows.call(this);
+        if (this.dock) this.place(); else this.keepInView();
     }
 
     function specElement(items) {
@@ -1434,19 +1555,27 @@ window.ShipTooltip = function () {
 
         var renderSections = function () {
             model.sections.forEach(function (section) {
-                body.append(sectionElement(section.key, section.title).append(specElement(section.spec)));
+                body.append(sectionElement(section.key, section.title, section.fold).append(specElement(section.spec)));
             });
         };
         if (model.movementFirst) renderSections();
 
         if (model.ew) {
-            var ewSection = sectionElement('ew', model.ew.own ? 'Electronic warfare' : 'EW');
+            var ewSection = sectionElement('ew', model.ew.own ? 'Electronic warfare' : 'EW', model.ew.fold);
             model.ew.rows.forEach(function (row) { ewSection.append(ewRowElement(row)); });
             body.append(ewSection);
         }
 
+        //Fire orders: after Movement in Pre-Firing and Firing (rounds 12-13), otherwise after EW.
+        if (!model.fireAfterMovement) renderFire(body, model);
+        if (!model.movementFirst) renderSections();
+        if (model.fireAfterMovement) renderFire(body, model);
+    }
+
+    function renderFire(body, model) {
         if (model.fire) {
-            var fire = sectionElement('fire', 'Fire orders');
+            //Folds (round 13, user 2026-11-16), open by default - folds().fire.
+            var fire = sectionElement('fire', 'Fire orders', 'fire');
             if (!model.fire.targets.length) {
                 fire.append(jQuery('<div class="fv-shipcard__none"></div>').text('None yet'));
             } else {
@@ -1459,8 +1588,6 @@ window.ShipTooltip = function () {
             }
             body.append(fire);
         }
-
-        if (!model.movementFirst) renderSections();
     }
 
     /* The footer holds the Ship details button alone now (renderActions puts it there), full width.
@@ -1497,7 +1624,8 @@ window.ShipTooltip = function () {
            a row there says a selected weapon can be aimed at this unit (targetableCount).
          - `kind: 'clear'` (Remove All EW): "Clear all EW", at the foot of the EW section.
          - `kind: 'footer'` (Ship details): the footer button.
-         - everything else: a captioned tile under Orders.
+         - everything else: a captioned tile in the ORDERS panel beside the card (round 12) - or,
+           on the card inside the picker's sheet, under an Orders heading in the card as before.
        Every button is bound by the menu's own bindAction, so click, right-click max and the 500ms
        long press behave exactly as they did. ⚠️ The menu's conditions are not touched: which
        buttons exist is getVisibleButtons - renderTo's own filter. */
@@ -1545,12 +1673,43 @@ window.ShipTooltip = function () {
         greyUnavailableEwRows.call(this, steppers);
 
         jQuery(".info", menuElement).html(menu.currentInfo);
-        if (tileCount > 0) {
+        if (this.sideElement) {
+            //Round 12: the tiles live in the ORDERS panel beside the card (its head band says
+            //"Orders"), and with no tile there is no panel at all - not even its toggle.
+            if (tileCount > 0) buttonsSlot.append(menuElement);
+            setSide.call(this, tileCount);
+        } else if (tileCount > 0) {
             menuElement.prepend(jQuery('<div class="fv-shipcard__mh"></div>').append(jQuery('<span></span>').text('Orders')));
             buttonsSlot.append(menuElement);
         } else if (menu.currentInfo) {
             buttonsSlot.append(menuElement);
         }
+    }
+
+    /* The ORDERS panel (round 12, user 2026-11-16): beside the card, a column of the tiles, with a
+       small in / out toggle in its head band - IN (folded to its tab) by default since round 13, and
+       the choice kept for the rest of the phase (folds().side). Folded, only the toggle shows, a tab on the card's edge. Drawn
+       only while the menu offers a tile. Round 13: it hangs from the rule under the card's head
+       band (shipTooltip.css), not beside the head band. */
+    function setSide(tileCount) {
+        var has = tileCount > 0;
+        var folded = has && !!folds().side;
+        this.element.toggleClass('fv-shipcard--has-side', has).toggleClass('fv-shipcard--side-folded', folded);
+        var label = (folded ? 'Show orders' : 'Hide orders') + (has ? ' (' + tileCount + ')' : '');
+        this.sideElement.find('.fv-shipcard__sidetoggle')
+            .attr({ 'aria-expanded': folded ? 'false' : 'true', 'aria-label': label, title: label });
+    }
+
+    function bindSideToggle() {
+        var self = this;
+        this.sideElement.find('.fv-shipcard__sidetoggle').on('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var state = folds();
+            state.side = !state.side;
+            setSide.call(self, self.element.find('.buttons .fv-shipcard__tile').length);
+            afterResize.call(self);
+        });
     }
 
     /* Round 4 (user, 2026-11-10): an EW row whose allocation is NOT open right now is greyed out -
@@ -1700,7 +1859,8 @@ window.ShipTooltip = function () {
             anchor = body.find('.fv-shipcard__cells');
             if (!anchor.length) anchor = body.find('.fv-shipcard__sec--rel');
         } else {
-            section = sectionElement('ew', 'Electronic warfare');
+            //Your own unit's folds, as renderBody's does (round 12).
+            section = sectionElement('ew', 'Electronic warfare', (this.model && this.model.own) ? 'ew' : null);
             anchor = body.find('.fv-shipcard__sec--relew');
             if (!anchor.length) anchor = body.find('.fv-shipcard__cells');
             if (!anchor.length) anchor = body.find('.fv-shipcard__sec--rel');
@@ -1773,7 +1933,7 @@ window.ShipTooltip = function () {
 
         handle.on('pointerdown', function (e) {
             if (self.inSheet) return; //the sheet is the thing that moves
-            if (jQuery(e.target).closest('.tt-close').length) return;
+            if (jQuery(e.target).closest('.tt-close, .fv-shipcard__sidetoggle').length) return;
             var event = e.originalEvent || e;
             if (event.button !== undefined && event.button !== 0) return;
             var rect = self.element[0].getBoundingClientRect();
@@ -1795,7 +1955,13 @@ window.ShipTooltip = function () {
                 self.dragged = true;
                 self.element.addClass('fv-shipcard--dragged');
                 //Pulled away from the picker: no longer docked, and its caret would point at nothing.
-                if (self.dock) self.undock(true);
+                //The ORDERS panel stays on the side it was on - flipping it now would jump the card
+                //out from under the pointer.
+                if (self.dock) {
+                    var sideLeft = self.element.hasClass('fv-shipcard--side-left');
+                    self.undock(true);
+                    self.element.toggleClass('fv-shipcard--side-left', sideLeft);
+                }
             }
 
             var node = self.element[0];
