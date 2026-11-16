@@ -968,8 +968,8 @@
     gap: 2px;
     height: 32px;
     padding: 0 2px 0 7px;
-    background: var(--tt-wash);
-    border-bottom: 1px solid var(--tt-rail);
+    /*background: var(--tt-wash);
+    border-bottom: 1px solid var(--tt-rail);*/
     font-size: 10px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -1060,6 +1060,7 @@
 .fv-shipcard .fv-shipcard__side .buttons .menu .info {
     margin-top: 5px;
     overflow-wrap: anywhere;
+    text-align: center;
 }
 
 /* Folded: a tab - the head band's wash and the toggle, nothing else. */
