@@ -2,10 +2,6 @@
 /*custom weapons - from StarWars universe (to keep them separate)
 */
 
-
-
-
-
 /*
 	StarWars Ray Shield: does not affect profile
 	protects vs all weapoon classes except Matter, Ballistic and SW Ion
@@ -1216,7 +1212,8 @@ class SWTractorBeam extends SWDirectWeapon{
 	public $animation = "laser";
         public $animationColor = array(55, 55, 55);
         public $animationExplosionScale = 0.8; //make animation really large!
-	
+
+	 public $uninterceptable = true;
 	
  	protected $possibleCriticals = array( //no point in damage reduced crit
             14=>"ReducedRange"
@@ -1232,6 +1229,7 @@ class SWTractorBeam extends SWDirectWeapon{
       $this->data["Special"] .= "Does no damage, but holds target next turn";      
       $this->data["Special"] .= " limiting its maneuvering options"; 
       $this->data["Special"] .= " (-1 thrust and -20 Initiative next turn).";  
+      $this->data["Special"] .= "Uninterceptable.";    
     }	
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
