@@ -4,6 +4,7 @@ import theme from "../styled/theme";
 import { canApplyPreBattleDamage } from "./SystemInfoButtons";
 import { MENU_CHROME, SECTION_INK } from "./menuControls";
 import { isMenuTarget } from "../helpers/menuTarget";
+import { isCardPinned } from "./SystemCard";
 
 const HealthBar = styled.div`
     position: absolute;
@@ -119,6 +120,12 @@ const MeteorBadge = styled.div`
     line-height: 11px;
     color: #ffd27a;
     text-shadow: black 0 0 3px, black 0 0 3px, black 0 0 3px;
+`;
+
+/* ⚡ - an EM shield under a standing Storm Defence order (EM_STORM_PLAN.md). Same corner as the meteor badge: a shield
+   never carries that one. */
+const StormBadge = styled(MeteorBadge)`
+    color: #9fe3ff;
 `;
 
 const System = styled.div`
@@ -474,6 +481,10 @@ class SystemIcon extends React.Component {
         event.stopPropagation();
         event.preventDefault();
 
+        //Moving between the icon's own parts (its number overlay, health bar, badges) is not a new hover. Without this,
+        //entering one icon fired over/out 2-3 times, and each pair tore the system card down and built it again (2026-11-08).
+        if (event.relatedTarget && event.currentTarget.contains(event.relatedTarget)) return;
+
         let { system, ship } = this.props;
         system = shipManager.systems.initializeSystem(system);
 
@@ -492,6 +503,7 @@ class SystemIcon extends React.Component {
 
         event.stopPropagation();
         event.preventDefault();
+        if (event.relatedTarget && event.currentTarget.contains(event.relatedTarget)) return; //still on the icon - see onSystemMouseOver
         window.uiEvents.relay('SystemMouseOut');
     }
 
@@ -559,8 +571,13 @@ class SystemIcon extends React.Component {
             clearTimeout(this.longPressTimer);
             this.longPressTimer = null;
             // Short tap should not show arcs, clickSystem will handle selection and showing Action Menu.
+        } else if (isCardPinned()) {
+            // Long press, and its system card is up: it stays, pinned and scrollable, until the next tap anywhere
+            // outside it - SystemCard closes it then (user choice 2026-11-08; it used to hide on release).
+            // Restart the ghost-mouse shield from the RELEASE, so a compatibility mouseout fired now cannot close it.
+            window.lastTouchActiveTime = Date.now();
         } else {
-            // Timer already fired (long press). Hide info on release.
+            // Long press with no card up (a click menu holds the tooltip root): clear the hover on release, as before.
             window.uiEvents.relay('SystemMouseOut');
         }
 
@@ -652,6 +669,7 @@ class SystemIcon extends React.Component {
             >
                 {renderBadges(ship, system)}
                 {isMeteorDefence(ship, system) && <MeteorBadge title="Committed to meteor defence this turn">☄</MeteorBadge>}
+                {isStormDefence(system) && <StormBadge title="Storm Defence (until withdrawn): takes an EM storm strike on a side it faces">⚡</StormBadge>}
                 <SystemText>{getText(ship, system)}</SystemText>
                 {/*A destroyed system shows an EMPTY bar, matching the non-interactive
                    render above. It cannot just read getStructureLeft: a system destroyed
@@ -710,6 +728,9 @@ const isIntercepting = (ship, system) => weaponManager.isInterceptOnly(ship, sys
    whole turn all the same - it cannot be selected to fire or intercept - so it gets a state of its own,
    amber with a comet badge. */
 const isMeteorDefence = (ship, system) => Boolean(system.weapon) && weaponManager.hasMeteorDefence(ship, system);
+
+//An EM shield's Storm Defence declaration (EM_STORM_PLAN.md) - window.emStorm is game.php's alone.
+const isStormDefence = (system) => Boolean(window.emStorm) && emStorm.isActive() && emStorm.isEMShield(system) && emStorm.isDeclared(system);
 
 const isCalledShot = (ship, system) => {
     if (!system.weapon || !weaponManager.hasFiringOrder(ship, system)) return false;

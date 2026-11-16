@@ -2,6 +2,8 @@ import * as React from "react";
 import styled from "styled-components"
 import { Tooltip, TooltipHeader, TooltipEntry } from '../common'
 import ShipInfo from "./ShipInfo";
+import SystemCard, { Structure, Cells, Criticals, CalledShot, Profile, SectionLabel, OfficerLine, OfficerLabel, CardNote, minusSign, rangeDash } from "./SystemCard";
+import { canApplyMineDamage } from "./SystemInfoButtons";
 import theme from "../styled/theme";
 
 const InfoHeader = styled(TooltipHeader)`
@@ -20,12 +22,6 @@ const SystemInfoTooltip = styled(Tooltip)`
     opacity:0.8;
 `;
 
-const Divider = styled.div`
-    height: 1px;
-    background: rgba(189, 234, 250, 0.3);
-    margin: 5px 0;
-`;
-
 const CRIT_DESCRIPTIONS = {
     MissileLost: "A missile was lost to damage",
     //OrbitalRepairing: "REGENERATING - orbital and weapon fully restored after 5 docked turns"
@@ -36,6 +32,11 @@ const CRIT_DESCRIPTIONS = {
 //rather than a "(N x)" count, since it's the total that matters. Builder gets the summed param.
 const PARAM_SUM_CRIT_DESCRIPTIONS = {
     DamageReductionReduced: (total) => `Damage reduction reduced by ${total}`,
+    //The EM storm's one-turn effects (EM_STORM_PLAN.md) - a reloaded crit's own description has lost its amount
+    EMStormSensors: (total) => `EM storm: sensors -${total}`,
+    EMStormPower: (total) => `EM storm: power -${total}`,
+    EMStormInitiative: (total) => `EM storm: initiative -${total * 5}`,
+    EMStormOffensive: (total) => `EM storm: offensive bonus -${total * 5}`,
 };
 
 export const Entry = styled(TooltipEntry)`
@@ -57,14 +58,10 @@ const ShipNameHeader = styled.span`
     color: #C6E2FF;
 `;
 
-/* The Officers block (OFFICERS_PLAN.md D12) wears the gold set, like every other enhancement surface.
-   Exported for ShipInfo's flight OFFICERS block, so a craft's officer reads like a system's. The
-   colours are tripled-class (&&&) to win over ShipInfo's compact mode, which recolours every Entry and
-   Header through a descendant selector (two classes). */
-const OfficerHeader = styled(InfoHeader)`
-    color: ${theme.colors.enhTitle};
-`;
-
+/* The Officers lines (OFFICERS_PLAN.md D12) wear the gold set, like every other enhancement surface. ShipInfo's flight
+   OFFICERS block uses these, so a craft's officer reads like a system's; the system card draws its own (SystemCard
+   OfficerLine). The colours are tripled-class (&&&) to win over ShipInfo's compact mode, which recolours every Entry
+   and Header through a descendant selector (two classes). */
 export const OfficerEntry = styled(Entry)`
     &&& { color: ${props => props.$out ? theme.colors.textDim : theme.colors.enhText}; }
 `;
@@ -81,19 +78,11 @@ export const OfficerHeading = styled(Header)`
 class SystemInfo extends React.Component {
 
     render() {
-        const { ship, selectedShip, system, boundingBox, officersOnly, craft } = this.props;
-
-        /* OFFICERS_PLAN.md Stage 19 (user request 2026-10-20): a section's Structure health bar has no tooltip of its own - the
-           bar shows its boxes and armour already - but the Expert Targeter lives in one, so hovering a bar that holds an officer
-           names him "and nothing else" (ShipSection raises it only then, through StructureMouseOver). */
-        if (officersOnly) {
-            return (
-                <SystemInfoTooltip position={getPosition(boundingBox)}>
-                    <InfoHeader>{window.officers ? officers.postName(system) : system.displayName}</InfoHeader>
-                    {getOfficers(ship, system, true)}
-                </SystemInfoTooltip>
-            );
-        }
+        //avoidBox: the ship window the icon sits in, so the system card opens beside it (PhaseStrategy / gamelobby.js)
+        /* structureBar: raised by a section's health bar (ShipSection StructureMouseOver) - the card for that block's Structure
+           (user request 2026-11-08). It replaced the officers-only tooltip a bar used to raise only when it held an officer
+           (OFFICERS_PLAN.md Stage 19): the card names him in its own officers block, so nothing is lost. */
+        const { ship, selectedShip, system, boundingBox, avoidBox, structureBar, craft } = this.props;
 
         //`system === ship` matters in the lobby: bought fleet ships are jQuery.extend
         //clones without the Ship prototype, so instanceof alone missed their
@@ -120,17 +109,13 @@ class SystemInfo extends React.Component {
                 </SystemInfoTooltip>
             );
         }
-        //special treatment for 'Special' entry (due to probable multiline)
-        var specialName = 'Special';
-        var specialEntry = new Array;
-        if (system.data.Special && system.data.Special != "") {
-            //through the same hook as the other rows: an Expert Jump Officer's "within N hexes" in the lobby
-            specialEntry = String(adjustDataDisplay(ship, system, specialName)).split('<br>');
-        }
-        var reactKey = 0; //needed for react so each line has unique key!
-
         //an officer's OB as it is shown (officers.displayStat): an Expert Pilot's in the lobby, an Evade not yet sent in game
         let displayOffensiveBonus = window.officers ? officers.displayStat(ship, 'offensivebonus') : ship.offensivebonus;
+        //a nebula halves it, first, as the shot does (NEBULA_PLAN.md #7) - window.nebula is game.php's alone
+        const nebulaOb = !!(ship.flight && window.nebula && nebula.isActive());
+        if (nebulaOb) displayOffensiveBonus = nebula.showOffensiveBonus(displayOffensiveBonus);
+        //an EM storm's 1d3 this turn, as the shot takes it (EM_STORM_PLAN.md #2) - window.emStorm is game.php's alone
+        if (ship.flight && window.emStorm && emStorm.isActive()) displayOffensiveBonus = Math.max(0, displayOffensiveBonus - emStorm.offensivePenalty(ship));
         if (ship.flight && gamedata.areMinesPresent) {
 			if(ship.minesweeper){
 				displayOffensiveBonus -= window.ew.getDetectMEW(ship);
@@ -141,8 +126,9 @@ class SystemInfo extends React.Component {
         //OFFICERS_PLAN.md Stage 36: an Expert Electrician's shunted power this turn - a direct-fire weapon's only (officers.shuntOb)
         if (ship.flight && window.officers && !system.ballistic) displayOffensiveBonus += officers.shuntOb(ship);
 
-        var systemDisplayName = system.displayName;
-        var firingModeDisplay = system.firingModes ? system.firingModes[system.firingMode] : null;
+        //a section's Structure is named for its section, "Aft Structure" - the officers module's naming, as its posts use
+        const isStructure = system.name === 'structure';
+        var systemDisplayName = (isStructure && window.officers) ? officers.postName(system) : system.displayName;
 
         //Stage S (S-f): the Fighter Bomb draws from a ShadowHangar pool; show the live
         //count of integrated fighters available to launch. Passing `system` scopes the
@@ -199,208 +185,235 @@ class SystemInfo extends React.Component {
             if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
                 isUnrevealedMine = true;
                 systemDisplayName = "Mine";
-                specialEntry = ["No details known, scan with OEW to identify."];
             }
         }
 
+        //a card pinned by touch closes the way its own hover ends (SystemCard): the bar's event also clears the section's wedge
+        const closeEvent = structureBar ? 'StructureMouseOut' : 'SystemMouseOut';
+
+        if (isUnrevealedMine) {
+            return (
+                <SystemCard subject={system} boundingBox={boundingBox} avoidBox={avoidBox} closeEvent={closeEvent} name={systemDisplayName}>
+                    <CardNote>No details known, scan with OEW to identify.</CardNote>
+                </SystemCard>
+            );
+        }
+
+        /* THE DATASHEET CARD (system/SystemCard.js, user choice 2026-11-08). This builds what the card says, in its one
+           section order; SystemCard draws it, places it and handles the rules text. Every data value still goes through
+           adjustDataDisplay, so a weapon's live adjustment and an officer the lobby has not applied yet show as before. */
+        const data = system.data || {};
+        const has = key => data[key] !== undefined;
+        const value = key => adjustDataDisplay(ship, system, key);
+
+        //chips in the class's colour and the damage type's (theme.chips - a name it does not list draws neutral)
+        const chips = [];
+        if (has('Weapon type')) {
+            const weaponClass = String(value('Weapon type'));
+            chips.push({ kind: 'class', label: weaponClass, color: theme.chips.weaponClass[weaponClass] });
+        }
+        if (has('Damage type')) {
+            const damageType = String(value('Damage type'));
+            chips.push({ kind: 'damage', label: damageType, color: theme.chips.damageType[damageType] });
+        }
+        //only on something that deals damage: a jump drive is a Weapon too, and uninterceptable by default
+        if (system.uninterceptable && has('Damage')) chips.push({ kind: 'flag', label: 'Uninterceptable' });
+
+        const crits = critLines(system);
+
+        /* A bulk mine purchase in the lobby keeps its pre-battle damage per copy, outside the blueprint's own damage, and its
+           section bar shows MINE 1 (ShipSection) - the card reads the same numbers, so the two agree. */
+        const bulkMine = isStructure && canApplyMineDamage(ship);
+        const structureMax = bulkMine ? battleDamage.mineMaxHealth(ship) : system.maxhealth;
+        const structureLeft = bulkMine ? battleDamage.mineHealth(ship, 1) : system.maxhealth - damageManager.getDamage(ship, system);
+
+        const arcCell ={ label: 'Arc', value: has('Arc') ? value('Arc') : '—' };
+        const cells = isStructure
+            ? [{ label: 'Armor', value: shipManager.systems.getArmour(ship, system) }, arcCell] //a block draws no power
+            : [
+                ship.flight
+                    ? { label: 'OB', value: adjustObDisplay(system, displayOffensiveBonus * 5) }
+                    : { label: 'Armor', value: shipManager.systems.getArmour(ship, system) },
+                { label: 'Power', value: has('Power Used') ? value('Power Used') : '—' },
+                arcCell
+            ];
+
+        //called shot - the same tests in the same order as before: gamedata.selectedSystems is only read in game
+        const enemyCalledShot = !gamedata.isMyShip(ship) &&
+            (gamedata.gamephase == 3 || gamedata.gamephase == 1) &&
+            gamedata.waiting == false &&
+            gamedata.selectedSystems.length > 0 && selectedShip;
+        const friendlyCalledShot = gamedata.isMyShip(ship) &&
+            gamedata.rules &&
+            gamedata.rules.friendlyFire === 1 &&
+            (gamedata.gamephase == 3 || gamedata.gamephase == 5 || gamedata.gamephase == 1) &&
+            gamedata.waiting == false &&
+            gamedata.selectedSystems.length > 0 && selectedShip;
+        const calledRows = (enemyCalledShot || friendlyCalledShot) ? calledShotRows(ship, selectedShip, system) : null;
+        const ownCalledShot = (gamedata.isMyShip(ship) && system.weapon && weaponManager.hasFiringOrder(ship, system))
+            ? weaponManager.getCalledShotInfo(ship, system) : null;
+
+        //the numbers: live values first, then the weapon's own, then whatever else the system sends, in its order
+        const rows = [];
+        if (shadowBombAvailable !== null) rows.push({ label: 'Fighters available', value: shadowBombAvailable });
+        if (dockedPower) rows.push({ label: 'Shared by docked ships', value: '+' + dockedPower.shared + ' of ' + dockedPower.surplus
+            + ' pooled from ' + dockedPower.donors + (dockedPower.donors === 1 ? ' ship' : ' ships') });
+        if (abductionTarget !== null) rows.push({ label: 'Abduction target', value: abductionTarget });
+        if (laserBoost !== null) rows.push({ label: 'Laser boost', value: laserBoost });
+        if (ionBoost !== null) rows.push({ label: 'Thrust boost', value: ionBoost });
+        if (has('Damage')) rows.push({ label: 'Damage', value: rangeDash(value('Damage')), big: true });
+        //every mode, the one in use bright (a single mode only repeats the damage-type chip)
+        const modeKeys = system.firingModes ? Object.keys(system.firingModes) : [];
+        if (modeKeys.length > 1) {
+            rows.push({ label: 'Firing mode', modes: modeKeys.map(key => ({
+                name: system.firingModes[key], active: String(key) === String(system.firingMode)
+            })) });
+        }
+        if (system.missileArray && Object.keys(system.missileArray).length > 0 && system.missileArray[system.firingMode]) {
+            rows.push({ label: 'Ammo', value: system.missileArray[system.firingMode].amount });
+        }
+        if (has('Range penalty')) rows.push({ label: 'Range penalty', value: value('Range penalty') });
+        if (has('Range')) rows.push({ label: 'Range', value: value('Range') });
+        if (has(FIRE_CONTROL)) rows.push({ label: 'Fire control', fc: value(FIRE_CONTROL) });
+        if (has('Intercept')) rows.push({ label: 'Intercept', value: minusSign(value('Intercept')) });
+        if (has('Number of guns')) rows.push({ label: 'Guns', value: value('Number of guns') });
+        if (has('Number of shots')) rows.push({ label: 'Shots', value: value('Number of shots') });
+        Object.keys(data).forEach(key => {
+            if (CARD_KEYS.has(key)) return;
+            if (key === 'Ammunition' && (system.name === 'GrapplingClaw' || system.name === 'Marines')) return;
+            rows.push({ label: key, value: value(key) });
+        });
+
+        //through the same hook as the other rows: an Expert Jump Officer's "within N hexes" in the lobby
+        const rules = (data.Special && data.Special != "") ? String(value('Special')) : null;
+        const footer = has(PRIORITY) ? 'Resolution priority ' + value(PRIORITY) + ' (ship/fighter)' : null;
+
         return (
-            <SystemInfoTooltip position={getPosition(boundingBox)}>
-                <InfoHeader>{systemDisplayName}</InfoHeader>
-
-                {!ship.flight && !isUnrevealedMine && getEntry('Structure', system.maxhealth - damageManager.getDamage(ship, system) + '/' + system.maxhealth)}
-                {!ship.flight && !isUnrevealedMine && getEntry('Armor', shipManager.systems.getArmour(ship, system))}
-                {ship.flight && !isUnrevealedMine && getEntry('Offensive bonus', adjustObDisplay(system, displayOffensiveBonus * 5))}
-
-                {system.firingModes && !isUnrevealedMine && getEntry('Firing mode', firingModeDisplay)}
-
-                {system.missileArray && Object.keys(system.missileArray).length > 0 && !isUnrevealedMine && getEntry('Ammo Amount', system.missileArray[system.firingMode].amount)}
-
-                {!isUnrevealedMine && Object.keys(system.data).map((key, i) => (key != specialName && !(key === 'Ammunition' && (system.name === 'GrapplingClaw' || system.name === 'Marines')) && getEntry(key, adjustDataDisplay(ship, system, key), 'data' + i)))}
-
-                {shadowBombAvailable !== null && getEntry('Fighters available', shadowBombAvailable)}
-
-                {dockedPower && getEntry('Shared by docked ships',
-                    '+' + dockedPower.shared + ' of ' + dockedPower.surplus + ' pooled from '
-                    + dockedPower.donors + (dockedPower.donors === 1 ? ' ship' : ' ships'))}
-
-                {abductionTarget !== null && getEntry('Abduction target', abductionTarget)}
-
-                {laserBoost !== null && !isUnrevealedMine && getEntry('Laser boost', laserBoost)}
-
-                {ionBoost !== null && !isUnrevealedMine && getEntry('Thrust boost', ionBoost)}
-
-                {Object.keys(specialEntry).length > 0 && <Entry key={`special-${reactKey++}`}><Header>Special: </Header>&nbsp;</Entry>}
-                {Object.keys(specialEntry).length > 0 &&
-                    Object.keys(specialEntry).map(i => <Entry key={`special-${reactKey++}`}>{specialEntry[i]}</Entry>)
-                }
-
-                {!isUnrevealedMine && getOfficers(ship, system)}
-
-                {(Object.keys(system.critData).length > 0 || (system.criticals && system.criticals.length > 0)) && !isUnrevealedMine && getCriticals(system)}
-
-                {(!gamedata.isMyShip(ship) && !isUnrevealedMine &&
-                    (gamedata.gamephase == 3 || gamedata.gamephase == 1) &&
-                    gamedata.waiting == false &&
-                    gamedata.selectedSystems.length > 0 && selectedShip) &&
-                    getCalledShot(ship, selectedShip, system)}
-
-
-                {(gamedata.isMyShip(ship) && !isUnrevealedMine &&
-                    gamedata.rules &&
-                    gamedata.rules.friendlyFire === 1 &&
-                    (gamedata.gamephase == 3 || gamedata.gamephase == 5 || gamedata.gamephase == 1) &&
-                    gamedata.waiting == false &&
-                    gamedata.selectedSystems.length > 0 && selectedShip) &&
-                    getCalledShot(ship, selectedShip, system)}
-
-                {gamedata.isMyShip(ship) && !isUnrevealedMine && system.weapon &&
-                    weaponManager.hasFiringOrder(ship, system) &&
-                    getCalledShotDisplay(ship, system)}
-
-            </SystemInfoTooltip>
-        )
+            <SystemCard subject={system} boundingBox={boundingBox} avoidBox={avoidBox} closeEvent={closeEvent}
+                name={systemDisplayName} id={has('ID') ? value('ID') : system.id}
+                chips={chips} rules={rules} footer={footer}>
+                {!ship.flight && <Structure remaining={structureLeft} max={structureMax} crit={crits.length > 0} />}
+                <Cells cells={cells} />
+                {crits.length > 0 && <Criticals lines={crits} />}
+                {calledRows && <CalledShot title="Called shot, approx. to hit" rows={calledRows} />}
+                {ownCalledShot && (
+                    <CalledShot title="Called shot target" rows={[{
+                        label: ownCalledShot.targetSystem.displayName + ' (ID ' + ownCalledShot.targetSystem.id + ') on '
+                            + ownCalledShot.targetShip.name
+                    }]} />
+                )}
+                {cardOfficers(ship, system)}
+                {rows.length > 0 && <Profile rows={rows} />}
+            </SystemCard>
+        );
     }
 }
 
-const getCalledShot = (ship, selectedShip, system) => {
-    if (weaponManager.canCalledshot(ship, system, selectedShip)) {
-        return [<InfoHeader key="calledHeader">Called shot</InfoHeader>].concat(
-            gamedata.selectedSystems.map((weapon, i) => {
-                if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
-                    if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
-                        var value = weapon.firingMode;
-                        value = weapon.firingModes[value];
-                        if (system.id != null && !weaponManager.canWeaponCall(weapon)) {
-                            return (<Entry key={`called-${i}`}><Header>{weapon.displayName}</Header>: Cannot Called Shot</Entry>);
-                        } else {
-                            return (<Entry key={`called-${i}`}><Header>{weapon.displayName}</Header> - Approx:  {weaponManager.calculateHitChange(selectedShip, ship, weapon, system.id).hitChance}%</Entry>);
-                        }
-                    } else {
-                        return (<Entry key={`called-${i}`}><Header>{weapon.displayName}</Header>: Not in Range</Entry>);
-                    }
-                } else {
-                    return (<Entry key={`called-${i}`}><Header>{weapon.displayName}</Header>: Not in Arc</Entry>);
-                }
-            }))
-    } else {
-        return [<InfoHeader key="calledHeader">Called shot</InfoHeader>].concat(
-            <Entry key="cannotTarget">Cannot Target</Entry>
-        )
-    }
-}
+//data keys the card draws in a place of its own; every other key is printed as a row, in the order it came
+const FIRE_CONTROL = 'Fire control (fighter/med/cap)';
+const PRIORITY = 'Resolution Priority (ship/fighter)';
+const CARD_KEYS = new Set(['Special', 'ID', 'Arc', 'Power Used', 'Damage', 'Damage type', 'Weapon type', 'Range penalty',
+    'Range', FIRE_CONTROL, 'Intercept', 'Number of guns', 'Number of shots', PRIORITY]);
 
-const getCalledShotDisplay = (ship, system) => {
-    var calledInfo = weaponManager.getCalledShotInfo(ship, system);
-    if (!calledInfo) return null;
+//the called-shot chance of each selected weapon against this system, or why there is none
+const calledShotRows = (ship, selectedShip, system) => {
+    if (!weaponManager.canCalledshot(ship, system, selectedShip)) return [{ label: 'Cannot Target' }];
+    return gamedata.selectedSystems.map(weapon => {
+        if (!weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) return { label: weapon.displayName, note: 'Not in Arc' };
+        if (!weaponManager.checkIsInRange(selectedShip, ship, weapon)) return { label: weapon.displayName, note: 'Not in Range' };
+        if (system.id != null && !weaponManager.canWeaponCall(weapon)) return { label: weapon.displayName, note: 'Cannot Called Shot' };
+        return { label: weapon.displayName, pct: weaponManager.calculateHitChange(selectedShip, ship, weapon, system.id).hitChance };
+    });
+};
 
-    return [
-        <Divider key="calledShotDivider" />,
-        <InfoHeader key="calledShotHeader">Called Shot</InfoHeader>,
-        <Entry key="calledShotTarget">
-            <Header>Target: </Header>{calledInfo.targetSystem.displayName} (Id: {calledInfo.targetSystem.id}) on {calledInfo.targetShip.name}
-        </Entry>
-    ];
-}
-
-/* OFFICERS_PLAN.md D12 - one line per officer posted on this system: his name, his one-line effect,
-   and how he left action once he has. Own team only, through officers.listFor (D4). Not system.data:
-   that is rebuilt per turn, replaced wholesale by a server `data`, and shared by reference across
-   same-class systems ([[arch_system_info_tooltip_data_flow]]). */
-const getOfficers = (ship, system, alone = false) => {
+/* OFFICERS_PLAN.md D12 - the card's officers block: one line per officer posted on this system (his name, his one-line
+   effect, and how he left action once he has) plus one per officer moving onto it this turn (Stage 10). Own team only,
+   through officers.listFor (D4). Not system.data: that is rebuilt per turn, replaced wholesale by a server `data`, and
+   shared by reference across same-class systems ([[arch_system_info_tooltip_data_flow]]). A Structure block's card
+   carries its Expert Targeter here (Stage 19) - it replaced the officers-only tooltip the bar used to raise. */
+const cardOfficers = (ship, system) => {
     if (!window.officers || !ship || !system) return null;
     const posted = officers.onPost(ship, system.id);
-    //Stage 10: an officer moving onto this post this turn (ordered now or committed) has a line here too
     const arriving = officers.arrivingAt(ship, system.id);
     if (posted.length === 0 && arriving.length === 0) return null;
     const turn = officers.currentTurn();
-    //`alone` (Stage 19, the Structure bar's tooltip): the block's officers are all there is, so no divider above them
-    return (alone ? [] : [<Divider key="officerDivider" />]).concat([
-        <OfficerHeader key="officerHeader">Officers</OfficerHeader>
-    ]).concat(posted.map((entry, i) => {
-        const state = officers.moveText(ship, entry) || officers.stateText(entry);
-        return (
-            <OfficerEntry key={`officer-${entry.id}-${i}`} $out={!officers.serves(entry, turn) || officers.movingTo(ship, entry) !== null}>
-                <OfficerName>{officers.label(entry.id, ship)}: </OfficerName>
-                {officers.summaryOf(ship, entry)}{state ? ' ' + state : ''}
-            </OfficerEntry>
-        );
-    }), arriving.map((arrival, i) => (
-        <OfficerEntry key={`arriving-${arrival.entry.id}-${i}`} $out>
-            <OfficerName>{officers.label(arrival.entry.id, ship)} </OfficerName>
-            {officers.arrivalText(ship, arrival.entry)}
-        </OfficerEntry>
-    )));
+    return (
+        <div>
+            <SectionLabel $gold>Officers</SectionLabel>
+            {posted.map((entry, i) => {
+                const state = officers.moveText(ship, entry) || officers.stateText(entry);
+                return (
+                    <OfficerLine key={`officer-${entry.id}-${i}`} $out={!officers.serves(entry, turn) || officers.movingTo(ship, entry) !== null}>
+                        <OfficerLabel>{officers.label(entry.id, ship)}: </OfficerLabel>
+                        {officers.summaryOf(ship, entry)}{state ? ' ' + state : ''}
+                    </OfficerLine>
+                );
+            })}
+            {arriving.map((arrival, i) => (
+                <OfficerLine key={`arriving-${arrival.entry.id}-${i}`} $out>
+                    <OfficerLabel>{officers.label(arrival.entry.id, ship)} </OfficerLabel>
+                    {officers.arrivalText(ship, arrival.entry)}
+                </OfficerLine>
+            ))}
+        </div>
+    );
 };
 
-const getCriticals = (system) => {
-    const critKeys = Object.keys(system.critData).length > 0
-        ? Object.keys(system.critData)
-        : [...new Set((system.criticals || []).map(c => c.phpclass))];
+/* The criticals in effect on this system, one line per critical class: { key, count, text, until }. Was getCriticals,
+   which drew them itself; the turn and param arithmetic is unchanged. A class with no crit in effect gives no line, so
+   the card shows no empty "Criticals" block (the old one drew the heading anyway). */
+const critLines = (system) => {
+    const critData = system.critData || {};
+    const criticals = Array.isArray(system.criticals) ? system.criticals : Object.values(system.criticals || {});
+    const critKeys = Object.keys(critData).length > 0
+        ? Object.keys(critData)
+        : [...new Set(criticals.map(c => c.phpclass))];
 
-    if (critKeys.length === 0) return null;
+    const lines = [];
+    critKeys.forEach(phpClass => {
+        let noOfCrits = 0;
+        let paramTotal = 0; //sum of `param` across in-effect crits of this type (param-sum crits)
+        let endEffectMin = 0;
+        let endEffectMax = 0;
+        let infinitePresent = false;
 
-    return [
-        <Divider key="critDivider" />,
-        <InfoHeader key="criticalHeader">Criticals</InfoHeader>
-    ].concat(
-        critKeys.map(phpClass => {
-            let noOfCrits = 0;
-            let paramTotal = 0; //sum of `param` across in-effect crits of this type (param-sum crits)
-            var endEffectMin = 0;
-            var endEffectMax = 0;
-            var infinitePresent = false;
-            var wearsOffText = "";
-            endEffectMin = 0;
-            endEffectMax = 0;
-            infinitePresent = false;
-            wearsOffText = "";
-
-            for (const j in system.criticals) {
-                if (system.criticals[j].phpclass == phpClass) {
-                    if ((system.criticals[j].turn <= gamedata.turn) /*check whether it's actually a current critical*/
-                        && ((system.criticals[j].turnend == 0) || (system.criticals[j].turnend >= gamedata.turn))
-                    ) {
-                        noOfCrits++;
-                        paramTotal += parseInt(system.criticals[j].param, 10) || 0;
-                        if (noOfCrits == 1) {
-                            endEffectMin = system.criticals[j].turnend;
-                            endEffectMax = system.criticals[j].turnend;
-                            infinitePresent = (system.criticals[j].turnend == 0); //0 means infinite
-                        }
-                        if (system.criticals[j].turnend > 0) {
-                            if (system.criticals[j].turnend > endEffectMax) endEffectMax = system.criticals[j].turnend;
-                            if ((system.criticals[j].turnend < endEffectMin) || (endEffectMin == 0)) endEffectMin = system.criticals[j].turnend;
-                        } else infinitePresent = true;
-                    }
-                }
+        criticals.forEach(crit => {
+            if (crit.phpclass != phpClass) return;
+            if (!((crit.turn <= gamedata.turn) /*check whether it's actually a current critical*/
+                && ((crit.turnend == 0) || (crit.turnend >= gamedata.turn)))) return;
+            noOfCrits++;
+            paramTotal += parseInt(crit.param, 10) || 0;
+            if (noOfCrits == 1) {
+                endEffectMin = crit.turnend;
+                endEffectMax = crit.turnend;
+                infinitePresent = (crit.turnend == 0); //0 means infinite
             }
+            if (crit.turnend > 0) {
+                if (crit.turnend > endEffectMax) endEffectMax = crit.turnend;
+                if ((crit.turnend < endEffectMin) || (endEffectMin == 0)) endEffectMin = crit.turnend;
+            } else infinitePresent = true;
+        });
+        if (noOfCrits === 0) return;
 
-            if (endEffectMin > 0) {
-                wearsOffText = " (until end of turn " + endEffectMin;
-                if (infinitePresent) {
-                    wearsOffText = wearsOffText + "+";
-                } else if (endEffectMax > endEffectMin) {
-                    wearsOffText = wearsOffText + "-" + endEffectMax;
-                }
-                wearsOffText = wearsOffText + ")";
+        let until = "";
+        if (endEffectMin > 0) {
+            until = "(until end of turn " + endEffectMin;
+            if (infinitePresent) {
+                until = until + "+";
+            } else if (endEffectMax > endEffectMin) {
+                until = until + "-" + endEffectMax;
             }
+            until = until + ")";
+        }
 
-            //Param-sum crits (e.g. DamageReductionReduced): one line showing the TOTAL reduction, no "(N x)".
-            if (noOfCrits >= 1 && PARAM_SUM_CRIT_DESCRIPTIONS[phpClass]) {
-                const description = PARAM_SUM_CRIT_DESCRIPTIONS[phpClass](paramTotal);
-                return (<Entry key={`critical-${phpClass}`}>{description} {wearsOffText}</Entry>);
-            }
-
-            const description = system.critData[phpClass] || CRIT_DESCRIPTIONS[phpClass] || phpClass;
-
-            if (noOfCrits > 1) {
-                return (<Entry key={`critical-${phpClass}`}>({noOfCrits} x) {description} {wearsOffText}</Entry>);
-            } else if (noOfCrits == 1) {
-                return (<Entry key={`critical-${phpClass}`}>{description} {wearsOffText}</Entry>);
-            }
-            return null;
-        })
-    );
+        //Param-sum crits (e.g. DamageReductionReduced): one line showing the TOTAL reduction, no count.
+        if (PARAM_SUM_CRIT_DESCRIPTIONS[phpClass]) {
+            lines.push({ key: phpClass, count: 1, text: PARAM_SUM_CRIT_DESCRIPTIONS[phpClass](paramTotal), until });
+            return;
+        }
+        lines.push({ key: phpClass, count: noOfCrits, text: critData[phpClass] || CRIT_DESCRIPTIONS[phpClass] || phpClass, until });
+    });
+    return lines;
 };
 
 //Let a weapon fold live state into its displayed stats (e.g. Minor Thought Pulsar's thrust
@@ -419,27 +432,7 @@ const adjustDataDisplay = (ship, system, key) => {
     return window.officers ? officers.adjustDataDisplay(ship, system, key, value) : value;
 };
 
-const getEntry = (header, value, key) => {
-    if (typeof value === 'string' && value.indexOf('<br>') !== -1) {
-        const parts = value.split('<br>');
-        return (
-            <Entry key={key}>
-                <Header>{header}: </Header>
-                {parts.map((part, i) => (
-                    <React.Fragment key={i}>
-                        {i > 0 && <br />}
-                        {part}
-                    </React.Fragment>
-                ))}
-            </Entry>
-        );
-    }
-
-    return (
-        <Entry key={key} ><Header>{header}: </Header>{value}</Entry>
-    )
-}
-
+//the old placement - still used by the ship-level tooltip; the system card uses helpers/placeTooltip
 const getPosition = boundingBox => {
     const position = {};
 

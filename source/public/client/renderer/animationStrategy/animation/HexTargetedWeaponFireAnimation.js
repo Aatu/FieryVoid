@@ -72,7 +72,7 @@ window.HexTargetedWeaponFireAnimation = function () {
         if (shipManager.shouldBeHidden(shooter)) return 0;
 
         var icon = this.shipIconContainer.getByShip(shooter);
-        var startPosition = FireAnimationHelper.getShipPositionForFiring(icon, time, this.movementAnimations, weapon, this.turn);
+        var startPosition = FireAnimationHelper.getShipPositionForFiring(icon, time, this.movementAnimations, weapon, this.turn, fire.fireOrder);
         var endPosition = window.coordinateConverter.fromHexToGame(new hexagon.Offset(fire.fireOrder.x, fire.fireOrder.y));
 
         // Guard: some fire orders (e.g. CaptorMine) store null for x/y because they are

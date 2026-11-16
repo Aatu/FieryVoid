@@ -49,7 +49,10 @@ class DBManager
             throw new Exception("DBManager:query, connection failed");
 
         if (!$answer = mysqli_query($this->connection, $sql)) {
-            throw new Exception("DBManager:query, SQL error: " . mysql_error($this->connection) . "\n sql: $sql error:", mysql_errno($this->connection));
+            //mysqli_*, not the mysql_* functions removed in PHP 7: inside a request the global error handler
+            //throws on the warning before this line, but anywhere else (CLI scripts, tests) the old calls
+            //were a fatal "undefined function" that hid the real SQL error.
+            throw new Exception("DBManager:query, SQL error: " . mysqli_error($this->connection) . "\n sql: $sql error:", mysqli_errno($this->connection));
         }
 
         $result = array();
@@ -1766,7 +1769,11 @@ class DBManager
                 $undes = ($damage->undestroyed) ? 1 : 0;
                 $fireID = $damage->fireorderid;
 
-                if ($fireID < 0){ //Marcin Sawicki: fire order ID not known at the moment of dealing damage!
+                //Only rows that name their shooter AND weapon can be looked up. Every other unlinked row -
+                //regeneration, dissipation, self repair, shield changes, destruction - is unlinked by design,
+                //and querying for it built `shooterid =  and ...`, a syntax error the global error handler
+                //turned into an exception caught below: one wasted query per row, every turn, to keep -1.
+                if ($fireID < 0 && is_numeric($damage->shooterid) && is_numeric($damage->weaponid)){ //Marcin Sawicki: fire order ID not known at the moment of dealing damage!
                     //read it from database by source, target and weapon ID (if multiple ones fit - assign to any of them _that hit_
                     try{
                         $targetid = $damage->shipid;
@@ -2577,7 +2584,8 @@ class DBManager
         $fields    = (isset($r['dustAndMeteors']) && is_array($r['dustAndMeteors'])) ? $r['dustAndMeteors'] : array();
         $fieldCount = (int)($fields['dust'] ?? 0) + (int)($fields['meteors'] ?? 0);
         $layoutCount = (isset($r['terrainLayout']['units']) && is_array($r['terrainLayout']['units'])) ? count($r['terrainLayout']['units']) : 0;
-        if ($asteroids > 0 || $moonCount > 0 || $fieldCount > 0 || $layoutCount > 0) $chips[] = 'TERRAIN';
+        $dustZone = !empty($r['dustZone']); //DustZoneRule: present only when it covers something
+        if ($asteroids > 0 || $moonCount > 0 || $fieldCount > 0 || $layoutCount > 0 || $dustZone) $chips[] = 'TERRAIN';
 
         if (!empty($r['allowMines']))   $chips[] = 'MINES';
         if (!empty($r['allowReinforcements'])) $chips[] = 'REINF';

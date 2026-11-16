@@ -149,18 +149,6 @@ var TrekPlasmaBurst = function TrekPlasmaBurst(json, ship) {
 };
 TrekPlasmaBurst.prototype = Object.create(Weapon.prototype);
 TrekPlasmaBurst.prototype.constructor = TrekPlasmaBurst;
-TrekPlasmaBurst.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-
-            return;
-        }
-    }
-};
 TrekPlasmaBurst.prototype.hasMaxBoost = function () {
     return true;
 };
@@ -557,19 +545,6 @@ var TrekPhaserKelly = function TrekPhaserKelly(json, ship) {
 TrekPhaserKelly.prototype = Object.create(Weapon.prototype);
 TrekPhaserKelly.prototype.constructor = TrekPhaserKelly;
 
-TrekPhaserKelly.prototype.clearBoost = function () {
-	for (var i in system.power) {
-		var power = system.power[i];
-		if (power.turn != gamedata.turn) continue;
-
-		if (power.type == 2) {
-			system.power.splice(i, 1);
-
-			return;
-		}
-	}
-};
-
 TrekPhaserKelly.prototype.hasMaxBoost = function () {
 	return true;
 };
@@ -646,19 +621,6 @@ TrekPhaserKellyType7.prototype.initializationUpdate = function () {
     return this;
 };
 
-TrekPhaserKellyType7.prototype.clearBoost = function () {
-	for (var i in system.power) {
-		var power = system.power[i];
-		if (power.turn != gamedata.turn) continue;
-
-		if (power.type == 2) {
-			system.power.splice(i, 1);
-
-			return;
-		}
-	}
-};
-
 TrekPhaserKellyType7.prototype.hasMaxBoost = function () {
 	return true;
 };
@@ -715,6 +677,23 @@ var TrekPhaserKellyType4 = function TrekPhaserKellyType4(json, ship) {
 TrekPhaserKellyType4.prototype = Object.create(Weapon.prototype);
 TrekPhaserKellyType4.prototype.constructor = TrekPhaserKellyType4;
 
+TrekPhaserKellyType4.prototype.initializationUpdate = function () {
+	switch (this.turnsloaded) {
+		case 0:
+			this.data["Damage"] = '4 - 24';
+			break;
+		case 1:
+			this.data["Damage"] = '2 - 12';
+			break;
+		case 2:
+			this.data["Damage"] = '4 - 24';
+			break;          
+		default:
+			this.data["Damage"] = '4 - 24';
+			break;
+	}
+	return this;
+};
 
 var TrekShieldProjectionKelly = function TrekShieldProjectionKelly(json, ship) {
     ShipSystem.call(this, json, ship);

@@ -788,6 +788,71 @@ class EdfExposed extends Critical{
     }
 }
 
+/* ===================================================================================
+   ELECTROMAGNETIC STORM criticals (EM_STORM_PLAN.md). Applied by EMStorm::resolve().
+
+   The EDF exposure family's shape exactly (read its header above): ALL FOUR ARE `oneturn`,
+   so a crit stamped turn N is reported by hasCritical()/sumCriticalParam() on turn N+1 only -
+   "these effects are temporary and end at the conclusion of the current turn" - and each
+   CARRIES ITS AMOUNT IN `param` (one crit = one whole roll; sum it, never count it).
+
+   ⚠️ Separate classes, not the EDF's: EdfExposure::accumulate() reads last turn's crit of the
+   same class as its running total, so a storm drain filed as an EDF one would inflate the
+   field's escalation.
+   ⚠️ No $outputMod on any of them (effectCriticals sums outputMod with no turn filter). Their
+   readers sit behind TacGamedata::$emStormPresent.
+   =================================================================================== */
+
+/* Sensors. Lands on the ship's Scanner; Scanner::getOutput() subtracts it and publishes it in
+   edfDrain, which the client already subtracts. Not rolled in a nebula (no EW there anyway). */
+class EMStormSensors extends Critical{
+    public $description = "EM storm: sensors reduced";
+    public $oneturn = true;
+    public $repairPriority = 0; //nothing to repair - it lapses on its own
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, $forInfo, $param);
+        if ($param !== null) $this->description = "EM storm: sensors -" . (int)$param;
+    }
+}
+
+/* Power. Lands on the Reactor; Reactor::getOutput() subtracts it and publishes it in edfDrain. */
+class EMStormPower extends Critical{
+    public $description = "EM storm: power reduced";
+    public $oneturn = true;
+    public $repairPriority = 0;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, $forInfo, $param);
+        if ($param !== null) $this->description = "EM storm: power -" . (int)$param;
+    }
+}
+
+/* Initiative. Lands on the CnC (a flight's: its sample fighter, where getCommonIniModifiers reads
+   a flight's initiative crits). ⚠️ param is in TABLETOP points - the reader multiplies by 5.
+   Every unit the storm touches gets one (2d6, or 2d6-1, is never 0), so it doubles as the sweep's
+   "already resolved for this turn" marker - EMStorm::alreadyResolved. */
+class EMStormInitiative extends Critical{
+    public $description = "EM storm: initiative reduced";
+    public $oneturn = true;
+    public $repairPriority = 0;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, $forInfo, $param);
+        if ($param !== null) $this->description = "EM storm: initiative -" . ((int)$param * 5);
+    }
+}
+
+/* A fighter's or shuttle's offensive bonus. Lands on the flight's sample fighter; already capped
+   at half the (nebula-halved) bonus when rolled. ⚠️ MIRROR PAIR: Weapon::calculateHitBase and
+   weaponManager.computeOEW both take it off. */
+class EMStormOffensive extends Critical{
+    public $description = "EM storm: offensive bonus reduced";
+    public $oneturn = true;
+    public $repairPriority = 0;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, $forInfo, $param);
+        if ($param !== null) $this->description = "EM storm: offensive bonus -" . ((int)$param * 5); //x5, as FV shows a bonus
+    }
+}
+
 class Sabotage extends Critical{
 	//Used by Breaching Pods to mark when Marines are trying to sabotage a system / wreck havoc.
     public $description = "Marine are sabotaging this system"; 

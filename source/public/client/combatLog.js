@@ -62,7 +62,9 @@ window.combatLog = {
         'RedlineLanding': true,
         'WarLeader': true,
         'AnalystScan': true,
-        'LuckyCaptain': true
+        'LuckyCaptain': true,
+        'EMStorm': true, //EM_STORM_PLAN.md: one complete sentence per unit, 0 shots
+        'GravityWellPull': true //GRAVITY_WELL_PLAN.md: one sentence per unit pulled, 0 shots
     },
 
     logKindKey: function logKindKey(fire, shooter) {
@@ -348,9 +350,13 @@ window.combatLog = {
         var isAnalyst = fire.damageclass === 'AnalystScan';
         //Stage 37: a Lucky Captain's feat the same way, under "LUCKY CAPTAIN:" - its sentence names his ship
         var isLucky = fire.damageclass === 'LuckyCaptain';
-        var isSpeech = fire.damageclass === 'PoliticalSpeech' || isWarLeader || isAnalyst || isLucky;
+        //EM_STORM_PLAN.md: what an EM storm did to a unit, under "EM STORM:" - its sentence names the unit (EMStorm::logResult)
+        var isStorm = fire.damageclass === 'EMStorm';
+        //GRAVITY_WELL_PLAN.md: a Gravity Well's pull, or a unit falling in, under "GRAVITY WELL:" - its sentence names the unit
+        var isGravity = fire.damageclass === 'GravityWellPull' || fire.damageclass === 'GravityWellCollision';
+        var isSpeech = fire.damageclass === 'PoliticalSpeech' || isWarLeader || isAnalyst || isLucky || isStorm || isGravity;
         var headerLabel = hyperspaceKind ? 'HYPERSPACE: ' : (isWarLeader ? 'WAR LEADER!: ' : (isAnalyst ? 'CARGO SCAN: '
-            : (isLucky ? 'LUCKY CAPTAIN: ' : (isSpeech ? 'SPEECH!: ' : 'FIRE: '))));
+            : (isLucky ? 'LUCKY CAPTAIN: ' : (isStorm ? 'EM STORM: ' : (isGravity ? 'GRAVITY WELL: ' : (isSpeech ? 'SPEECH!: ' : 'FIRE: '))))));
         var headerClass = hyperspaceKind ? 'logheader hyperspace ' + hyperspaceKind : 'logheader fire';
         //The hyperspace colours live in logPanel.css, keyed off the class - an inline literal here
         //would be a fourth copy of two values the stylesheets already own.
@@ -506,8 +512,19 @@ window.combatLog = {
                         shieldAbsorbed += Number(d.damage); // never string-concatenate a JSON value
                         continue;
                     }
+                    // A fighter's Shield Projection (TrekShieldFtr) and diffuser tendril (TendrilFtr) keep
+                    // their capacity in individual notes, so their row is a LOG-ONLY marker: damage 0,
+                    // the absorbed amount carried in `shields` (see their absorbDamage()).
+                    if (d.damageclass === "TrekShieldFtr") {
+                        shieldAbsorbed += Number(d.shields) || 0;
+                        continue;
+                    }
                     if (d.damageclass === "Tendril") {
                         tendrilAbsorbed += Number(d.damage);
+                        continue;
+                    }
+                    if (d.damageclass === "TendrilFtr") {
+                        tendrilAbsorbed += Number(d.shields) || 0;
                         continue;
                     }
 

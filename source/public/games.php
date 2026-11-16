@@ -156,10 +156,11 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates</h3>
       <ul class="updates-list">
         <!--<li style="--update-colour: #e05b52;"><span class="update-title">Merry Christmas from Fiery Void!</span></li>-->
-        <li><span class="update-title">Officers</span>The final Officers types have been added, bringing the total number available to 41, see 'Ship Options' for more info.</li>  
-        <li><span class="update-title">Fighter Missions</span>Fighter units can now select specific missions during Initial Orders phase.</li>                          
-        <li><span class="update-title">Saved Orders</span>Halfway through a big phase and need to stop? The floppy-disk button beside the green Commit tick saves your orders so you can come back later.</li>         
-        <li><span class="update-title">Extended Turns</span>Ships now have the option of making extended turns, where they pay the thrust cost of a turn over two consecutive movement phases.</li>                                   
+        <li><span class="update-title">New Terrain</span>Space just got a little bit more hazardous with Nebulas, Electromagnetic Storms, Gravity Wells and drifting Asteroids / Meteors.</li>
+        <li><span class="update-title">Visible Damage</span>Ships which lose an external structure block will now display visible damage in-game.</li>
+        <li><span class="update-title">System Tooltips</span>Have been redsigned to present their information in a clearer, more modern, style.</li>                              
+        <li><span class="update-title">Officers</span>Over 40 Officers available for selection, see 'Ship Options' for more info.</li>  
+        <li><span class="update-title">Fighter Missions</span>Fighter units can select specific missions during Initial Orders phase to provide some extra depth to fighter combat.</li>                                                                   
         <li><span class="update-title">Discord Notifications</span>You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>
         <!--<li><span class="update-title">General Fixes</span>Many other small bug fixes/updates. Thanks for the reports!</li>-->
       </ul>

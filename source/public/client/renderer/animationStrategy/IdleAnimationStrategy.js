@@ -29,6 +29,8 @@ window.IdleAnimationStrategy = function () {
 
             if (icon instanceof FlightIcon) {
                 icon.hideDestroyedFighters();
+            } else {
+                icon.setLostSections(ShipIcon.getLostSections(ship)); //torn-off sections on the hull art
             }
         }, this);
         return this;

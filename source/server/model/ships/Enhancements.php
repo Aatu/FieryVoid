@@ -75,7 +75,8 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'IMPR_REA'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_SENS'; 
 		$unit->enhancementOptionsDisabled[] = 'JUMP_ACC';
-		$unit->enhancementOptionsDisabled[] = 'MAR_CONT'; 			
+		$unit->enhancementOptionsDisabled[] = 'LOW_TRAIN';
+		$unit->enhancementOptionsDisabled[] = 'MAR_CONT';
 		$unit->enhancementOptionsDisabled[] = 'POOR_CREW'; 
 		$unit->enhancementOptionsDisabled[] = 'SLUGGISH'; 
 		$unit->enhancementOptionsDisabled[] = 'STEALTH_CT';
@@ -135,7 +136,8 @@ class Enhancements{
 		case 'OSAT':
 			//Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsDisabled[] = 'ELITE_CREW';
-			$unit->enhancementOptionsDisabled[] = 'POOR_CREW'; 
+			$unit->enhancementOptionsDisabled[] = 'POOR_CREW';
+			$unit->enhancementOptionsDisabled[] = 'LOW_TRAIN'; //a crew-quality option, kept off OSATs with Elite/Poor Crew
 			$unit->enhancementOptionsDisabled[] = 'MAR_CONT';
 			//$unit->enhancementOptionsDisabled[] = 'SLUGGISH'; 
 			$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
@@ -728,6 +730,21 @@ class Enhancements{
 				  break;
 			  }
 		  }
+	  }
+
+	  /* Low Crew Training (B5W): one penalty from a d6 chart for the whole scenario - see
+	     lowCrewTrainingLabel(). Nothing is rolled at purchase: BuyingGamePhase::process rolls it
+	     ONCE, as the fleet is committed, and stores the result as the row's enhname, so the lobby
+	     shows only the price. Cost -5% of the ship's base cost, rounded up like Poor Crew's -25%;
+	     limit 1. The "10% of the battle force" availability limit is a Fleet Checker line
+	     (gamelobby.js checkChoices), reported, not enforced. Not for bases (user, 2026-11-05). */
+	  $enhID = 'LOW_TRAIN';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled) && !$ship->base){ //option is not disabled, and not a base
+		  $enhName = 'Low Crew Training';
+		  $enhLimit = 1;
+		  $enhPrice = -ceil($ship->pointCost*0.05); //-5%
+		  $enhPriceStep = 0;
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//this is NOT an enhancement - rather an OPTION
 	  }
 
 	  //Markab-specific - Enables 'Religious Fervor' refit to selected vessel which comes with some bonus and some penalties.
@@ -2211,6 +2228,46 @@ class Enhancements{
 		return $enhancementEntry[1];
 	}
 
+	/* ⭐ LOW CREW TRAINING'S d6 CHART: the ONE place a result is named. The d6 is rolled once per ship,
+	   in BuyingGamePhase::process as the fleet is committed (rollLowCrewTraining), and the LABEL is
+	   what tac_enhancements.enhname stores. Every later load turns it back into the roll by asking
+	   this function for each of the six (lowCrewTrainingRoll), so the label is the tooltip line AND
+	   the key: reword one and that result's existing rows stop resolving (no penalty; the stored
+	   label still shows). Result 5's number depends on the hull's size, which cannot change between
+	   the roll and a load. Keep labels within 50 characters (enhname is text(50)). */
+	public static function lowCrewTrainingLabel($ship, $roll){
+		switch($roll){
+			case 1: return 'Low Training: -1 Sensors';
+			case 2: return 'Low Training: -1 Thrust';
+			case 3: return 'Low Training: -20 Initiative'; //FV scale, i.e. B5W -4 (user ruling 2026-11-05)
+			case 4: return 'Low Training: +1 to Crit Rolls';
+			case 5: return 'Low Training: -' . self::lowCrewTrainingPowerLoss($ship) . ' Power';
+			case 6: return 'Low Training: -1 Fire Control';
+		}
+		return '';
+	}
+
+	//Result 5: -4 power, or -2 for medium ships or smaller (shipSizeClass 0 Light, 1 Medium).
+	private static function lowCrewTrainingPowerLoss($ship){
+		return ($ship->shipSizeClass <= 1) ? 2 : 4;
+	}
+
+	//The d6 itself - returns the label BuyingGamePhase::process stores as the row's enhname.
+	public static function rollLowCrewTraining($ship){
+		return self::lowCrewTrainingLabel($ship, Dice::d(6));
+	}
+
+	/* A LOW_TRAIN row back to its roll (1-6), or 0 when its enhname names no result - the lobby's
+	   plain 'Low Crew Training' label, or a row never rolled. 0 means NO penalty. Never roll here:
+	   this runs on every load and must give the same answer every time. */
+	private static function lowCrewTrainingRoll($ship, $entry){
+		$stored = isset($entry[1]) ? (string)$entry[1] : '';
+		for($roll = 1; $roll <= 6; $roll++){
+			if(self::lowCrewTrainingLabel($ship, $roll) === $stored) return $roll;
+		}
+		return 0;
+	}
+
 	/* Stealth Coating's coverage choices, [key, label], index 0 = None. The ONE list the offer, the
 	   stored-name resolver and the tooltip all read (§2.2.1); its order is the numberTaken index.
 	   Keys are words, so JSON_NUMERIC_CHECK leaves them alone. */
@@ -2927,6 +2984,46 @@ class Enhancements{
 						}
 						break;
 
+					case 'LOW_TRAIN': //Low Crew Training: the ONE penalty rolled at fleet commit (lowCrewTrainingLabel), for the whole scenario
+						/* The tooltip needs nothing here: the generic line above prints the stored
+						   enhname, which IS the result ("Low Crew Training: -1 Sensors"). An unrolled
+						   row resolves to 0 and costs the ship nothing. Scanner, Engine and Reactor
+						   pick the same system Poor Crew does. */
+						switch(self::lowCrewTrainingRoll($ship, $entry)){
+							case 1: //-1 Sensors
+								$scanner = self::strongestSystem($ship, 'Scanner', 'output');
+								if($scanner !== null && $scanner->output > 0) $scanner->output -= 1;
+								break;
+							case 2: //-1 free thrust
+								$engine = self::strongestSystem($ship, 'Engine', 'output');
+								if($engine !== null && $engine->output > 0) $engine->output -= 1;
+								break;
+							case 3: //-20 Initiative
+								$ship->iniativebonus -= 20;
+								break;
+							case 4: //+1 to all critical rolls required by the ship
+								$ship->critRollMod += 1;
+								break;
+							case 5: //-4 power (-2 medium or smaller), off the biggest Reactor. May leave the ship short of power.
+								$reactor = self::strongestSystem($ship, 'Reactor', 'maxhealth', -1000);
+								if($reactor !== null) $reactor->output -= self::lowCrewTrainingPowerLoss($ship);
+								break;
+							case 6: //-1 to all weapon fire controls
+								/* A real -1 on each weapon's fire control, NOT the ship-wide toHitBonus Elite/Poor
+								   Crew use: toHitBonus never reaches the weapon tooltip's "Fire control" line, while
+								   this does (isModified - see sysEnhApplyGSGT). Gunsights' own rule run at -1: every
+								   mode, live and per mode, never a null or fixed fire control, and only on the mounts
+								   Gunsights would take (no jump drives or utility mounts). Not on an AoE mine either:
+								   AoE::calculateHitBase fixes its hit chance, so its fire control is never read and a
+								   -1 would only print "-5/-5/-5" on the Energy Mine's tooltip. */
+								foreach ($ship->systems as $system){
+									if ($system instanceof AoE) continue;
+									if (self::sysEnhEligibleGSGT($ship, $system)) self::sysEnhApplyGSGT($ship, $system, -1);
+								}
+								break;
+						}
+						break;
+
 					case 'MARK_FERV': //Markab Religious Fervor: +1 to hit all weapons, +10 Initiative, +2 Defence Profiles
 							$ship->toHitBonus += $enhCount;
 							$ship->iniativebonus += $enhCount*10;
@@ -3377,6 +3474,12 @@ class Enhancements{
 							   the JumpEngine's loadingtime and the Hangar's output by the time
 							   stripForJson runs. */
 							$strippedShip->crewTurnDelayMod = $ship->getCrewTurnDelayModifier();
+							break;
+
+						case 'LOW_TRAIN': //Low Crew Training: result 3 moves a ship-level field the blueprint holds unmodified
+							//(the Scanner/Engine/Reactor outputs of 1, 2 and 5 already travel with every system, and result 6's
+							//fire controls with each weapon, through isModified)
+							$strippedShip->iniativebonus = $ship->iniativebonus;
 							break;
 
 						case 'MARK_FERV': //Markab Religious Fervor: Initiative and Profiles modified

@@ -167,6 +167,14 @@ class EwButtons extends React.Component {
         }
 
         this.setState({ bgToggled: off, originalBgImage: originalImage });
+
+        /* NEBULA_PLAN.md - terrain that covers the WHOLE board (100% dust, a nebula) is part of the backdrop, so it goes
+           with the background (user, play-test game 4545). BallisticIconContainer.onMapBackgroundSet reads the state
+           off #background itself, which is also how a plane built later finds it; this only tells it to look now.
+           Partial dust is NOT tied to this (user ruling 2026-11-05: players must always see where a clump is). */
+        if (window.webglScene && typeof webglScene.customEvent === "function") {
+            webglScene.customEvent("MapBackgroundSet", { off });
+        }
     }
 
     render() {

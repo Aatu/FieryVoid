@@ -1423,7 +1423,8 @@
 }
 
 /* Add to fleet · Show details: the accent blue, as are the fleet rows' Details · Edit · Copy ·
-   Remove (lobby.css .store .ship .clickable) - one colour for every Purchase Fleet action (user). */
+   Remove, which are these buttons too (gamedata.rowActionsHtml) - one colour for every Purchase
+   Fleet action (user). */
 .lb-linkbtn {
   margin: 0;
   padding: 0;
@@ -1474,61 +1475,99 @@
   border-radius: 3px;
 }
 
-/* A bought row in Your Fleet's width (lobby.css draws it; #fleet is right-aligned): the name,
-   then the class with the cost on the right - class and cost (one box, .boughtClassCost) dropping
-   to a line of their own together when they do not fit beside the name - and the enhancements and
-   the actions under them, full width. */
+/* A bought row in Your Fleet (lobby.css draws it; #fleet is right-aligned) - Option A of the
+   2026-11-09 mockup: the name with the cost on the right, the class UNDER the name (so it starts in
+   the same place on every row - the old 150px name column left it ragged) with the actions on the
+   right of that line. A row with enhancements lists them under the class, priced in the cost's
+   column, and its actions drop under them. Class and cost share a wrapper (.boughtClassCost) that
+   the grid sees through. */
+.lb-fleet #fleet {
+  container: fleetlist / inline-size;
+}
+
 .lb-fleet .ship.bought {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name cost"
+    "type acts";
+  column-gap: 16px;
+  row-gap: 1px;
   align-items: baseline;
   text-align: left;
 }
 
+.lb-fleet .ship.bought:has(> .ship-enhancements) {
+  grid-template-areas:
+    "name cost"
+    "type type"
+    "enh  enh"
+    "acts acts";
+}
+
+/* lobby.css's .store span lead-in (5px on every span) is not part of this row. */
+.lb-fleet .ship.bought span {
+  padding-left: 0;
+}
+
+/* lobby.css's .shipname is a 150px inline-block column - the ragged class came from it. */
 .lb-fleet .ship.bought .shipname {
-  margin-right: 10px;
+  grid-area: name;
+  display: block;
+  min-width: 0;
 }
 
 .lb-fleet .ship.bought .boughtClassCost {
-  display: flex;
-  flex: 1 1 auto;
-  align-items: baseline;
-  min-width: 0;
+  display: contents;
 }
 
 .lb-fleet .ship.bought .boughtShiptype {
-  flex: 1 1 auto;
-  margin-left: 0;
-}
-
-.lb-fleet .ship.bought .boughtPointCost {
-  margin-left: auto;
-  padding-left: 10px;
-  white-space: nowrap;
-}
-
-.lb-fleet .ship.bought .ship-enhancements,
-.lb-fleet .ship.bought .ship-actions {
-  flex-basis: 100%;
-}
-
-/* One enhancement line: its name, and its own cost on the right under the row's - the row's cost
-   leaves the enhancements out (gamedata.rowDisplay), so the column adds up. */
-.lb-fleet .ship.bought .ship-enhancement-entry {
-  display: flex;
-  align-items: baseline;
-}
-
-.lb-fleet .ship.bought .ship-enhancement-name {
-  flex: 1 1 auto;
+  grid-area: type;
   min-width: 0;
 }
 
-.lb-fleet .ship.bought .ship-enhancement-cost {
-  margin-left: auto;
-  padding-left: 10px;
-  white-space: nowrap;
-  color: #d0dbec; /* the row cost's colour (lobby.css .boughtPointCost) */
+.lb-fleet .ship.bought .boughtPointCost {
+  grid-area: cost;
+  justify-self: end;
+}
+
+.lb-fleet .ship.bought .ship-enhancements {
+  grid-area: enh;
+}
+
+.lb-fleet .ship.bought .ship-actions {
+  grid-area: acts;
+  justify-self: end;
+}
+
+/* Too narrow for the actions beside the class (the one-column phone layout, and the narrow
+   Your Fleet column between 760 and 1180px): the class takes its own line and the actions the line
+   under it, spread across the row without the dots - each a bigger target, the line no taller. */
+@container fleetlist (max-width: 500px) {
+  .lb-fleet .ship.bought {
+    grid-template-areas:
+      "name cost"
+      "type type"
+      "enh  enh"
+      "acts acts";
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .lb-fleet .ship.bought .ship-actions {
+    justify-self: stretch;
+    justify-content: space-between;
+    margin-top: 3px;
+  }
+
+  .lb-fleet .ship.bought .lb-ship-sep {
+    display: none;
+  }
+
+  .lb-fleet .ship.bought .lb-linkbtn {
+    margin: -7px 0;
+    padding: 7px 0;
+  }
 }
 
 /* Nothing bought yet - and no MAIN FLEET / REINFORCEMENTS headers, which only a game with

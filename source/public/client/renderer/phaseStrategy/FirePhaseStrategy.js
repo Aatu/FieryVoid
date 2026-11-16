@@ -16,6 +16,12 @@ window.FirePhaseStrategy = function () {
 
     FirePhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
 
+    //The hex picker stays open while the player selects stacked units and targets units elsewhere
+    //(SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 1; see PhaseStrategy.keepsSelectFromShipsOpen).
+    FirePhaseStrategy.prototype.keepsSelectFromShipsOpen = function () {
+        return true;
+    };
+
     FirePhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager) {
 
         this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));

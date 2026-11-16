@@ -5561,7 +5561,12 @@ class HangarOps {
 		//freethrust to match a faster one. Per the rules dive: |delta| <= thrust.
 		//A Redline Pilot's afterburners count this turn, and beyond it his landing
 		//holds on a d20 above the excess (OFFICERS_PLAN.md Stage 32).
-		$thrust = (int)($flight->freethrust ?? 0) + Officers::redlineBurnThrust($flight, $gamedata->turn);
+		//The EFFECTIVE thrust - after an Energy Draining Field's drain and a nebula's -1 - which is the figure the client
+		//is sent and offers the Dock option on (shipTooltipFireMenu); the raw freethrust let the server accept one more.
+		$baseThrust = method_exists($flight, 'getEffectiveFreeThrust')
+		            ? (int)$flight->getEffectiveFreeThrust($gamedata->turn)
+		            : (int)($flight->freethrust ?? 0);
+		$thrust = $baseThrust + Officers::redlineBurnThrust($flight, $gamedata->turn);
 		$delta = abs((int)$carrierMove->speed - (int)$flightMove->speed);
 		if ($delta > $thrust && !Officers::redlineLandingHolds($flight, $gamedata)) {
 			$reason = 'speed delta exceeds flight thrust'; return false;

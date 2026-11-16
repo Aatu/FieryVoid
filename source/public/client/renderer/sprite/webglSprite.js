@@ -12,10 +12,38 @@ window.webglSprite = function () {
         transparent: true
     });
 
+    /* DESTROYED-SECTION STAMPS (see setDamageStamps). MAX_DAMAGE_STAMPS must match the shader's
+       #define in shaders.php. The two textures are the original Fiery Void damage art, which the old
+       canvas damageDrawer.js (removed in f05215cbc) stamped onto hull images: damagemask.png is the
+       ragged hole, damage.png the scorch round it - both pure black, all the information in alpha.
+       Loaded plain PNG (appendVersion, not getSmartImagePath): there is no fallback here if a WebP
+       twin were missing, and the pair is only 40KB. */
+    const MAX_DAMAGE_STAMPS = 8;
+    let damageTextures = null;
+
+    function getDamageTextures() {
+        if (damageTextures) return damageTextures;
+        const loader = new THREE.TextureLoader();
+        const load = path => {
+            const texture = loader.load(window.AssetManager.appendVersion(path), () => {
+                if (window.webglScene && window.webglScene.requestRender) window.webglScene.requestRender();
+            });
+            //no mipmaps: the shader samples these inside a loop, where derivatives are undefined
+            texture.generateMipmaps = false;
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+            return texture;
+        };
+        damageTextures = { mask: load('./img/damagemask.png'), scorch: load('./img/damage.png') };
+        return damageTextures;
+    }
+
     function Sprite(image, size, z) {
         this.z = z || 0;
         this.mesh = null;
         this.size = size;
+        this.texturePromise = null; //set by create() for an image path - see whenTextureReady
+        this.damageMaterial = null; //built on the first setDamageStamps with anything to stamp
         this.uniforms = {
             spriteTexture: { type: 't', value: new THREE.DataTexture(null, 0, 0) },
             overlayAlpha: { type: 'f', value: 0.0 },
@@ -72,6 +100,60 @@ window.webglSprite = function () {
 
     Sprite.prototype.destroy = function () {
         this.mesh.material.dispose();
+        if (this.damageMaterial && this.damageMaterial !== this.mesh.material) this.damageMaterial.dispose();
+    };
+
+    /* Calls back with the loaded THREE texture - at once-ish if it is already in, otherwise when it
+       lands. Never for a sprite built from anything but an image path, and never if the load failed. */
+    Sprite.prototype.whenTextureReady = function (callback) {
+        if (this.texturePromise) this.texturePromise.then(callback, function () { });
+    };
+
+    /* Cut destroyed sections out of the hull art (ShipIcon.setLostSections decides where).
+       stamps: [{ u, v, m00, m01, m10, m11 }] - a UV centre and the matrix taking a UV offset from it
+       into the stamp's -1..1 square. Empty or null puts the sprite back on the shared undamaged
+       material, which matters in a replay that is rewound past the shot that took the section.
+
+       The damaged material is a SEPARATE program (the SECTION_DAMAGE define), not a uniform branch in
+       the common one: only a hull that has actually lost a section ever compiles or runs the stamp
+       loop, so the hundreds of other sprites - arrows, markers, every intact ship - are untouched.
+       It shares this.uniforms with the base material, so opacity and the zoom overlay keep working
+       whichever of the two is on the mesh. */
+    Sprite.prototype.setDamageStamps = function (stamps, scorchStrength) {
+        if (!stamps || stamps.length === 0) {
+            if (this.mesh.material !== this.material) this.mesh.material = this.material;
+            return;
+        }
+
+        if (!this.damageMaterial) {
+            const textures = getDamageTextures();
+            this.uniforms.damageMask = { value: textures.mask };
+            this.uniforms.damageScorch = { value: textures.scorch };
+            //Flat arrays, four floats per vec4: THREE uploads a numeric array for a vec4[] as it stands,
+            //and Vector4 is not in the tree-shaken shim (client/lib/three-global-shim.src.js).
+            this.uniforms.damageStampA = { value: new Float32Array(MAX_DAMAGE_STAMPS * 4) };
+            this.uniforms.damageStampB = { value: new Float32Array(MAX_DAMAGE_STAMPS * 4) };
+            this.uniforms.damageStampCount = { value: 0 };
+            this.uniforms.damageScorchStrength = { value: 0 };
+
+            this.damageMaterial = baseMaterial.clone();
+            this.damageMaterial.defines = { SECTION_DAMAGE: '' };
+            this.damageMaterial.uniforms = this.uniforms;
+            this.damageMaterial.depthTest = true;
+        }
+
+        const count = Math.min(stamps.length, MAX_DAMAGE_STAMPS);
+        const a = this.uniforms.damageStampA.value;
+        const b = this.uniforms.damageStampB.value;
+        for (let i = 0; i < count; i++) {
+            const s = stamps[i];
+            a.set([s.u, s.v, s.m00, s.m01], i * 4);
+            b.set([s.m10, s.m11, 0, 0], i * 4);
+        }
+        this.uniforms.damageStampCount.value = count;
+        this.uniforms.damageScorchStrength.value = scorchStrength;
+
+        if (this.mesh.material !== this.damageMaterial) this.mesh.material = this.damageMaterial;
     };
 
     Sprite.prototype.setFacing = function (facing) {
@@ -175,6 +257,8 @@ window.webglSprite = function () {
                     setTimeout(processQueue, 0);
                 });
             }
+
+            this.texturePromise = loadedTextures[image];
 
             loadedTextures[image].then(texture => {
                 setTimeout(() => {
