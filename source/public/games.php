@@ -156,11 +156,11 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates</h3>
       <ul class="updates-list">
         <!--<li style="--update-colour: #e05b52;"><span class="update-title">Merry Christmas from Fiery Void!</span></li>-->
+        <li><span class="update-title">Ship Tooltips</span>Major polish to ship hover and clickable tooltips to imprvove their appearance and function.</li>  
+        <li><span class="update-title">Auto-Deploy Feature</span>Late for a Galactic Council meeting? No time to manually deploy your fleet?  Hit the Auto-Deploy button and it’ll take care of it for you!</li> 
         <li><span class="update-title">New Terrain</span>Space just got a little bit more hazardous with Nebulas, Electromagnetic Storms, Gravity Wells and drifting Asteroids / Meteors.</li>
         <li><span class="update-title">Visible Damage</span>Ships which lose an external structure block will now display visible damage in-game.</li>
-        <li><span class="update-title">System Tooltips</span>Have been redsigned to present their information in a clearer, more modern, style.</li>                              
-        <li><span class="update-title">Officers</span>Over 40 Officers available for selection, see 'Ship Options' for more info.</li>  
-        <li><span class="update-title">Fighter Missions</span>Fighter units can select specific missions during Initial Orders phase to provide some extra depth to fighter combat.</li>                                                                   
+        <li><span class="update-title">System Tooltips</span>Have been redsigned to present their information in a clearer, more modern, style.</li>                                                                                                
         <li><span class="update-title">Discord Notifications</span>You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>
         <!--<li><span class="update-title">General Fixes</span>Many other small bug fixes/updates. Thanks for the reports!</li>-->
       </ul>
