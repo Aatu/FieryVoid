@@ -12,11 +12,11 @@ import buildHitChart from "../helpers/buildHitChart";
 const CritHeading = styled.span`
     font-size: 11px;
     font-weight: bold;
-    color: ${theme.colors.warningSoft};
+    color: ${theme.colors.healthCrit};
 `;
 
 const CritCount = styled.span`
-    color: ${theme.colors.warningSoft};
+    color: ${theme.colors.healthCrit};
     font-weight: bold;
 `;
 
