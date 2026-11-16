@@ -102,19 +102,6 @@ var PsionicTorpedo = function PsionicTorpedo(json, ship) {
 PsionicTorpedo.prototype = Object.create(Weapon.prototype);
 PsionicTorpedo.prototype.constructor = PsionicTorpedo;
 
-PsionicTorpedo.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-
-            return;
-        }
-    }
-}; 
-
 PsionicTorpedo.prototype.hasMaxBoost = function () {
     return true;
 };

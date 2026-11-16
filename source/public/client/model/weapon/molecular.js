@@ -68,19 +68,6 @@ var FusionAgitator = function FusionAgitator(json, ship) {
 FusionAgitator.prototype = Object.create(Molecular.prototype);
 FusionAgitator.prototype.constructor = FusionAgitator;
 
-FusionAgitator.prototype.clearBoost = function () {
-	for (var i in system.power) {
-		var power = system.power[i];
-		if (power.turn != gamedata.turn) continue;
-
-		if (power.type == 2) {
-			system.power.splice(i, 1);
-
-			return;
-		}
-	}
-};
-
 FusionAgitator.prototype.hasMaxBoost = function () {
 	return true;
 };

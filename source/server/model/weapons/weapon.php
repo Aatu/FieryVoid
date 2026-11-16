@@ -594,6 +594,12 @@ class Weapon extends ShipSystem
             $strippedSystem->data = $this->data;
         }
 
+        /* NEBULA_PLAN.md #12 - a missile's launch and distance ranges, HALVED, so every client range check (they all
+           read weapon.range / distanceRange, and shipSystem.js copies the arrays on a mode change) sees the nebula's.
+           Halved in the payload, never in the arrays: an ammo rack rebuilds those from its ammo whenever its magazine
+           changes. Nebula games only. */
+        if (TacGamedata::$nebulaPresent && Nebula::isMissile($this)) Nebula::missileRangesForJson($this, $strippedSystem);
+
 		}
         return $strippedSystem;
     }
@@ -938,6 +944,8 @@ class Weapon extends ShipSystem
         if ($this->ballisticIntercept && (!($interceptedWeapon->ballistic))) return 0;//can't intercept non-ballistic if weapon can intercept only ballistics!
 
         $interceptMod = $this->getInterceptRating($gamedata->turn);
+        //"intercept ratings reduced by 1" in a nebula - taken off the rating every class reports (NEBULA_PLAN.md #8)
+        if (TacGamedata::$nebulaPresent) $interceptMod = Nebula::interceptRating($interceptMod);
 
 // Commenting out this fragmant as it's is duplicated below, and seemed to be causing intercept degradation to apply twice - DK - 4 Jan 24        
  /*       if (!($interceptedWeapon->ballistic || $interceptedWeapon->noInterceptDegradation)) {//target is neither ballistic weapon nor has lifted degradation, so apply degradation!
@@ -2066,7 +2074,7 @@ public function getFullStartLoading()
         }
         $mod += $target->getHitChanceMod($shooter, $posmod, $gamedata->turn, $this);
         $mod += $this->getWeaponHitChanceMod($gamedata->turn);
-		$mod += $shooter->toHitBonus;//Some ships have bonuses or minuses to hit on all weapons e.g. Elite Crew, Poor Crew and Markab Fervor 
+		$mod += $shooter->toHitBonus;//Some ships have bonuses or minuses to hit on all weapons e.g. Elite Crew, Poor Crew and Markab Fervor
 
         $ammo = $this->getAmmo($fireOrder);
         if ($ammo !== null) {
@@ -2086,6 +2094,8 @@ public function getFullStartLoading()
             $mod += $this->getRamProwMod(); //a weapon on a craft with a Ramming Prow
 
             $effectiveOB = $shooter->offensivebonus;
+            //a nebula halves it, rounding up, before anything else (NEBULA_PLAN.md #7). ⚠️ MIRROR PAIR with computeOEW's baseOB (JS).
+            if (TacGamedata::$nebulaPresent) $effectiveOB = Nebula::offensiveBonus($effectiveOB);
             /* FIGHTER MISSIONS (FIGHTER_MISSIONS_PLAN.md D5): the mission's term goes on the bonus BEFORE the crit and
                mine-detection deductions, for the turn the shot belongs to. ⚠️ MIRROR PAIR with weaponManager.computeOEW. */
             if (TacGamedata::$fighterMissionsPresent) $effectiveOB = FighterMissions::adjustOffensiveBonus($shooter, $target, $this, $fireOrder->turn, $effectiveOB);
@@ -2094,6 +2104,9 @@ public function getFullStartLoading()
             if (!$this->ballistic && TacGamedata::$officersPresent) $effectiveOB += Officers::shuntOb($shooter, $fireOrder->turn);
             $firstFighter = $shooter->getSampleFighter();
             $OBcrit = $firstFighter->hasCritical("tmpsensordown");
+            /* EM_STORM_PLAN.md #2 - an EM storm's 1d3, already capped at half the (nebula-halved) bonus when it was rolled,
+               so it comes off with the crit deductions. ⚠️ MIRROR PAIR with weaponManager.computeOEW's stormOB (JS). */
+            if (TacGamedata::$emStormPresent) $OBcrit += (int)$firstFighter->sumCriticalParam("EMStormOffensive", $gamedata->turn);
             $mdew = $shooter->getEWByType("Detect Mines", $gamedata->turn); //-1 OB for each point of Mine Detect
             $effectiveOB = $effectiveOB - $OBcrit - ($mdew * 2); //Every point of mdew costs 2 OB
             
@@ -2276,6 +2289,10 @@ public function getFullStartLoading()
             }
         }
         $firecontrol = $this->fireControl[$fcIndex];
+        /* A nebula halves a fire control bonus (rounding up) and doubles a penalty (NEBULA_PLAN.md #5) - the weapon's
+           own figure only: the Hyach Computer's bonus below is "not affected by ... nebulas" (KS).
+           ⚠️ MIRROR PAIR with weaponManager.computeFireControl (JS), which applies it at the same point. */
+        if (TacGamedata::$nebulaPresent) $firecontrol = Nebula::fireControl($firecontrol);
 
 		if ($shooter->hasSpecialAbility("HyachComputer")) { //Does ship have a Hyach Computer that might add bonus FC?
 			$bonusFireControl = 0; //initialise
@@ -2292,9 +2309,10 @@ public function getFullStartLoading()
                
                 if($losBlocked ){ //Line of Sight is blocked!
                     if($this instanceof AmmoMissileRackS) { //Only zero LAUNCHER FC on AmmoMissileLaunchers, missiles have own guidance e.g. bonus. 
-                        if (property_exists($this, 'basicFC') && is_array($this->basicFC) && !empty($this->basicFC)) {                         
-                            $firecontrol -= $this->basicFC[$target->getFireControlIndex()];
-                        }                       
+                        if (property_exists($this, 'basicFC') && is_array($this->basicFC) && !empty($this->basicFC)) {
+                            $basicFC = $this->basicFC[$target->getFireControlIndex()];
+                            $firecontrol -= TacGamedata::$nebulaPresent ? Nebula::fireControl($basicFC) : $basicFC; //the launcher's share, as halved above
+                        }                     
                     } else { //Everything else e.g. torpedoes, just has it's FC zeroed
                         $firecontrol = 0; //Null weapon firecontrol when no Line of Sight.                       
                     }
@@ -3304,6 +3322,15 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         return $dis;
     }
 
+    /* NEBULA_PLAN.md #11 - "Plasma weapons suffer double the usual heat dissipation per hex of range": the factor
+       every range-damage RATE is multiplied by - here and in the eleven plasma classes that work out their own
+       (plasma.php's bolters, customNexus.php's charges and enhanced plasmas), so a weapon's free range stays free
+       and only the loss per hex doubles. 1 outside a nebula and for any shot that is not Plasma. */
+    protected function getRangeDamageFactor()
+    {
+        return (TacGamedata::$nebulaPresent && $this->weaponClass === 'Plasma') ? 2 : 1;
+    }
+
     /*returns modified damage, NOT damage modifier*/
     /*this is different function that getDamageMod of unit!*/
     protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
@@ -3323,7 +3350,7 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
                classes take; Antimatter's range is untouched. Free when no field is on the board
                - see the gate in getEdfDamageRangeBonus. */
             //$dis += $this->getEdfDamageRangeBonus($shooter, $target, $sourcePos, $gamedata); //Remove EDF penalty for now, can always be re-added.
-            $damage -= round($dis * $this->rangeDamagePenalty); //round to avoid damage loss at minimal ranges!
+            $damage -= round($dis * $this->rangeDamagePenalty * $this->getRangeDamageFactor()); //round to avoid damage loss at minimal ranges!
         }
 
         //for Piercing shots at small targets (MCVs and smaller) - reduce damage by ~10% (by rules: -2 per die)
@@ -3379,18 +3406,29 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         /* An Expert Anticipator (Stage 23): a damage roll of two or more dice rolls one more and drops the lowest (Dice::$extraDie) -
            on a Gunner's weapon too, with his +1 on every die (user ruling 2026-10-21). Set and restored with the per-die bonus. */
         $extraDie = (TacGamedata::$officersPresent && $shooter instanceof BaseShip) ? Officers::extraDamageDie($shooter, $this) : 0;
+        /* NEBULA_PLAN.md #9/#10 - "All weapons suffer -1 on each die of damage they roll. Pulse weapons do -1 point of
+           damage for each pulse that hits." A pulse's damage is flat, so its -1 goes on the result below (this method
+           runs once per pulse hit); everything else loses 1 on each die, on the die (Dice::$perDiePenalty - after
+           Elite Crew's +1, floored at 0). Rams and terrain collisions (dust, meteors, asteroids) are RammingAttack
+           orders, not a weapon's dice (D6). Set and restored with the bonus, for the same reason. */
+        $nebulaDamage = TacGamedata::$nebulaPresent && !$this->isRammingAttack;
+        $nebulaPulse = $nebulaDamage && $this->damageType === 'Pulse';
         $previousDieBonus = Dice::$perDieBonus;
         $previousExtraDie = Dice::$extraDie;
+        $previousDiePenalty = Dice::$perDiePenalty;
         Dice::$perDieBonus = $dieBonus;
         Dice::$extraDie = $extraDie;
+        Dice::$perDiePenalty = ($nebulaDamage && !$nebulaPulse) ? 1 : 0;
         try {
             $damage = $this->getDamage($fireOrder);
         } finally {
             Dice::$perDieBonus = $previousDieBonus;
             Dice::$extraDie = $previousExtraDie;
+            Dice::$perDiePenalty = $previousDiePenalty;
         }
         $rolled = $damage;
-        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);                
+        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+        if ($nebulaPulse) $damage = max(0, $damage - 1);
         /* An Expert Laser Technician's power boost (OFFICERS_PLAN.md Stage 11): +1 per point the player put into this
            laser, at most half of $rolled, from one pool for the turn - added after the weapon's own reductions, as
            getDamageMod adds the flat bonuses. An Expert Plasma Scientist's +1 (+2 for a Fuser, Stage 12) - here, not
@@ -3577,6 +3615,8 @@ full Advanced Armor effects (by rules) for reference:
 			if(!$this->ballistic) return true; //non-ballistic weapons don't risk target moving out of range
             $distanceRange = max($this->range, $this->distanceRange); //just in case distanceRange is not filled! Then it's assumed to be the same as launch range
             if($distanceRange <=0 ) return true; //0 means unlimited range
+            //a missile's range is halved in a nebula (NEBULA_PLAN.md #12) - as the client was sent it, before the officer's bonus
+            if (TacGamedata::$nebulaPresent && Nebula::isMissile($this)) $distanceRange = Nebula::missileRange($distanceRange);
             $distanceRange += Officers::distanceRangeBonus($this); //OFFICERS_PLAN.md Stage 29: an Expert Ballistic Officer's +5 (never the launch range)
 
 

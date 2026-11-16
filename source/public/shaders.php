@@ -16,10 +16,43 @@
     uniform vec3 overlayColor;
     uniform float opacity;
 
+    /* DESTROYED SECTIONS (webglSprite.setDamageStamps, placed by ShipIcon.setLostSections). Compiled
+       only into the material a DAMAGED hull switches to - every other sprite runs the shader without
+       this block. Each stamp is a centre in UV plus a 2x2 matrix taking a UV offset into the stamp's
+       own -1..1 square, so ellipse, orientation and spin all arrive pre-multiplied. damageMask's
+       alpha cuts the hull away (the ragged hole), damageScorch's alpha chars what is left round it.
+       The mask textures are unmipmapped, so sampling inside the loop needs no derivatives. */
+    #ifdef SECTION_DAMAGE
+    #define MAX_DAMAGE_STAMPS 8
+    uniform sampler2D damageMask;
+    uniform sampler2D damageScorch;
+    uniform vec4 damageStampA[MAX_DAMAGE_STAMPS]; // xy = centre (uv), zw = first matrix row
+    uniform vec4 damageStampB[MAX_DAMAGE_STAMPS]; // xy = second matrix row
+    uniform float damageStampCount;
+    uniform float damageScorchStrength;
+    #endif
+
     varying vec2 vUv;
 
     void main() {
         vec4 textureColor = texture2D(spriteTexture, vUv);
+
+        #ifdef SECTION_DAMAGE
+        for (int i = 0; i < MAX_DAMAGE_STAMPS; i++) {
+            if (float(i) >= damageStampCount) break;
+            vec4 a = damageStampA[i];
+            vec4 b = damageStampB[i];
+            vec2 off = vUv - a.xy;
+            vec2 st = vec2(a.z * off.x + a.w * off.y, b.x * off.x + b.y * off.y) * 0.5 + 0.5;
+            float inside = step(0.0, st.x) * step(st.x, 1.0) * step(0.0, st.y) * step(st.y, 1.0);
+            st = clamp(st, 0.0, 1.0);
+            float cut = texture2D(damageMask, st).a * inside;
+            float scorch = texture2D(damageScorch, st).a * inside;
+            textureColor.a = min(textureColor.a, 1.0 - cut);
+            textureColor.rgb *= 1.0 - scorch * damageScorchStrength;
+        }
+        #endif
+
         vec4 finalColor = textureColor;
 
         if (overlayAlpha > 0.0 && textureColor.a > 0.05){

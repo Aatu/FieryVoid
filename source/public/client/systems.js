@@ -102,7 +102,9 @@ shipManager.systems = {
            Engine/Reactor::getOutput() through a TURN-FILTERED param critical - which is why it
            cannot ride outputMod (ShipSystem::effectCriticals sums those with no turn filter at
            all) - and publishes the current turn's figure as edfDrain from those two systems.
-           undefined on every other system, and in every game with no field on the board. */
+           undefined on every other system, and in every game with no field on the board.
+           ⚠️ It is EVERY one-turn drain the server applies: an EM storm's sensor and power losses ride it too
+           (EM_STORM_PLAN.md #1, #4 - published by Scanner and Reactor::stripForJson). */
         if (system.edfDrain) output = Math.max(0, output - system.edfDrain);
 
         return output;
@@ -206,7 +208,9 @@ shipManager.systems = {
         //Mode 1, flagged server-side via the generic isModified flag), the systemInfo tooltip
         //"Fire control" string is normally only rebuilt on a firing-mode change. Rebuild it here
         //on every load so the modified value shows. Server force-sends the modified fireControl.
-        if (system.isModified && system.weapon && typeof system.translateFCtoD100txt === 'function') {
+        //...and in a NEBULA, whose fire control translateFCtoD100txt shows halved / doubled (NEBULA_PLAN.md #5) - the
+        //blueprint's line was written without it.
+        if ((system.isModified || (window.nebula && nebula.isActive())) && system.weapon && typeof system.translateFCtoD100txt === 'function') {
             system.data["Fire control (fighter/med/cap)"] = system.translateFCtoD100txt(system.fireControl);
         }
 

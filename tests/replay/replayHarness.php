@@ -79,6 +79,7 @@ class Dice {
     public static $perDieBonus = 0;
     //An Expert Anticipator's extra damage die (OFFICERS_PLAN.md Stage 23): written by getFinalDamage for every roll, read by keepBest
     public static $extraDie = 0;
+    public static $perDiePenalty = 0; //NEBULA_PLAN.md #9 - mirror of lib/dice.php: -1 a die, after the bonus, floored at 0
 
     public static function d($max, $times = 1) {
         $total = 0;
@@ -96,6 +97,7 @@ class Dice {
     private static function roll($max, $bonus) {
         $roll = mt_rand(1, (int)$max);
         if ($bonus > 0) $roll = min((int)$max, $roll + $bonus);
+        if (self::$perDiePenalty > 0) $roll = max(0, $roll - self::$perDiePenalty);
         return $roll;
     }
     public static function keepBest(array $rolls, $max) {

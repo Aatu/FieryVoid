@@ -13,6 +13,7 @@ window.SystemDestroyedEffect = function () {
         this.fadeOutSpeed = 2000;
         this.velocity = 0.1;
         this.destroyedTexts = [];
+        this.sectionLosses = []; //see getSectionLosses
     }
 
     SystemDestroyedEffect.prototype = Object.create(Animation.prototype);
@@ -33,13 +34,24 @@ window.SystemDestroyedEffect = function () {
         if(type == 'crit') color = 'rgba(255, 129, 33, 0.7)';
 
         names.filter(Boolean).forEach(name => {
+            const textTime = changeTimeIfNeccessary(position, time, this.destroyedTexts);
             this.destroyedTexts.push({
-                time: changeTimeIfNeccessary(position, time, this.destroyedTexts),
+                time: textTime,
                 position: window.coordinateConverter.fromHexToGame(window.coordinateConverter.fromGameToHex(position)),
                 sprite: getSprite(name, position, this.scene, color, type)
             });
+            if (name.section) {
+                this.sectionLosses.push({ shipId: name.section.shipId, location: name.section.location, time: textTime });
+            }
         }, this)
     }
+
+    /* The sections (non-primary structure blocks) this effect announces as destroyed, each with the
+       time its text appears - which is when the killing shot lands, after any nudge to keep texts in
+       the same hex apart. The replay tears the section off the hull art at that same moment. */
+    SystemDestroyedEffect.prototype.getSectionLosses = function () {
+        return this.sectionLosses;
+    };
 
     SystemDestroyedEffect.prototype.render = function (now, total, last, delta, zoom) {
         this.destroyedTexts.forEach( text => {

@@ -587,6 +587,8 @@ window.ew = {
            guard Stage 12 had to add to EW::getDetectorAllowance once one flight class started
            getting one. */
         if (ship.flight && !ew.isFlightEwPool(ship)) return false;
+        //A nebula writes no DEW at all (NEBULA_PLAN.md #4) - and that is not an error, so true. The server strips any EW posted.
+        if (window.nebula && nebula.isActive()) return true;
 
         //var dew = ew.getScannerOutput(ship) - ew.getUsedEW(ship);
         var dew = ship.flight ? ew.getFlightEwLeft(ship) : ew.getEWLeft(ship);
@@ -663,6 +665,8 @@ window.ew = {
            having used any of it. Without this, allocating OEW would silently shrink the flight's
            mine-detection allowance, which is exactly the cross-contamination the two-pool split
            exists to prevent. One property read on every other unit in the game. */
+        //A nebula: no EW of any kind, so none is free - no DEW, and nothing to allocate (NEBULA_PLAN.md #4).
+        if (window.nebula && nebula.isActive()) return 0;
         var isFlightEwUnit = ew.isFlightEwPool(ship);
 
         var usedEW = 0;
@@ -845,8 +849,12 @@ window.ew = {
        standing rule and is left alone.
 
        ⚠️ shipManager.isDockingRider, NOT `ship.attached` - a breaching pod's host wears that too,
-       and a boarded ship's EW is emphatically its own business. */
+       and a boarded ship's EW is emphatically its own business.
+
+       A NEBULA suspends every unit's (NEBULA_PLAN.md #4: "No ships can use EW of any kind") - and unlike
+       a rider, nobody keeps DEW there: getEWLeft answers 0, so there is nothing left to fall into it. */
     isEwSuspended: function isEwSuspended(ship) {
+        if (window.nebula && nebula.isActive()) return true;
         return !!(ship && window.shipManager && shipManager.isDockingRider(ship));
     },
 
@@ -1108,7 +1116,8 @@ window.ew = {
             }    
         }
 
-        if (shooter.faction != target.faction) { //in-faction units ignore jammer (but not stealth!)
+        //A Jammer SYSTEM does not function in a nebula (NEBULA_PLAN.md #13, ruling D2 - stealth below is untouched). ⚠️ MIRROR PAIR with Jammer::getSpecialAbilityValue.
+        if (shooter.faction != target.faction && !(window.nebula && nebula.isActive())) { //in-faction units ignore jammer (but not stealth!)
             jammerSystem = shipManager.systems.getSystemByName(target, "jammer");
             if (jammerSystem != null) {
                 jammerValue = shipManager.systems.getOutput(target, jammerSystem);

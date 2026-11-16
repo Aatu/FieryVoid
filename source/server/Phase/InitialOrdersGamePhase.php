@@ -310,6 +310,11 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
                $ship is the POST-side copy and has no attachment state of its own. */
             EW::stripDockingRiderEw($ship, $gd, $gameData->turn);
 
+            /* NEBULA_PLAN.md #4 - "No ships can use EW of any kind": nothing is written, DEW included. The client
+               allocates none either (ew.js); this is the backstop. With no DEW row, EW::submitLateEw has nothing
+               to spend from in Pre-Firing/Firing, so the late window closes by itself. */
+            if (TacGamedata::$nebulaPresent) $ship->EW = array();
+
             if (EW::validateEW($ship, $gd)){
                 $dbManager->submitEW($gameData->id, $ship->id, $ship->EW, $gameData->turn);
             }else{

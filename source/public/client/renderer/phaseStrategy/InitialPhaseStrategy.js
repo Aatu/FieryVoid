@@ -8,6 +8,12 @@ window.InitialPhaseStrategy = function () {
 
     InitialPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
 
+    //The hex picker stays open while the player selects stacked units and points their EW at units
+    //elsewhere (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 1; see PhaseStrategy.keepsSelectFromShipsOpen).
+    InitialPhaseStrategy.prototype.keepsSelectFromShipsOpen = function () {
+        return true;
+    };
+
     InitialPhaseStrategy.prototype.update = function (gamedata) {
         PhaseStrategy.prototype.update.call(this, gamedata);
         if (this.selectedShip) {

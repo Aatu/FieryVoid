@@ -353,7 +353,8 @@ window.ReplayPhaseStrategy = function () {
             //without needing the user to tab away and back.
             this.allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(this.gamedata.turn, 'ballistic');
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer, this.allBallistics);
-            this.changeAnimationStrategy(new ReplayAnimationStrategy(this.gamedata, this.shipIconContainer, webglScene.scene));
+            this.changeAnimationStrategy(new ReplayAnimationStrategy(this.gamedata, this.shipIconContainer, webglScene.scene,
+                ReplayAnimationStrategy.type.INFORMATIVE, this.ballisticIconContainer)); //the container: drifting terrain's hexes follow it
             this.replayUI.setTurn(this.replayTurn);
         } else {
             if (!this.animationStrategy) {

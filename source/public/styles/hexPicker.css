@@ -387,6 +387,20 @@
     color: var(--fv-text);
 }
 
+/* The SELECTED unit's row (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 1). In Initial Orders, Pre-Firing
+   and Firing the picker now stays open after a row selects one of your units, so the list has to
+   say which one that was. A steady fill one step below the hover fill, plus an accent edge on the
+   side away from the allegiance rail: the hover fill alone would read as "the pointer is here".
+   The accent chip in the meta line (below) says it in words. */
+.fv-hexpicker__row--selected {
+    background: var(--fv-card);
+    box-shadow: inset -2px 0 0 var(--fv-accent);
+}
+
+.fv-hexpicker__row--selected:hover {
+    background: var(--fv-card-hover);
+}
+
 /* 3px allegiance strip. Carries mine/ally/enemy/terrain so allegiance is no longer
    encoded ONLY in text colour — it survives a long name, and it is the one place
    the full-chroma signal colour is allowed to appear. */
@@ -472,7 +486,9 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 1px;
+    /* 2px, was 1px: the chips sat too close under the name (user, 2026-11-09). The chip
+       line-height came down 1px in the same change, so a row is no taller than it was. */
+    gap: 2px;
     padding: 4px 0;
 }
 
@@ -501,14 +517,17 @@
     white-space: nowrap;
 }
 
-/* Chips are STATEMENTS OF FACT, so they are all neutral — DEPLOYS T<N> included
-   (user decision 2026-08-14). That leaves no --fv-warn and no second accent hue
-   anywhere in the card; allegiance is the only colour that carries meaning here. */
+/* FACT chips are neutral — DEPLOYS T<N>, UNREVEALED, TERRAIN (user decision 2026-08-14).
+   STATE chips are the exception the user asked for on 2026-11-09 (SHIP_TOOLTIP_REDESIGN_PLAN.md
+   §11 item 10): they say what the player has DONE in this stack, and each gets its own colour so
+   they can be told apart at a glance - SELECTED below in the accent; the planned OEW (the ship
+   window's OEW green) and fire-target (the Target button's fill) chips follow in Stage 5.
+   line-height 12px, was 13px: pays for the extra 1px gap above it in .fv-hexpicker__text. */
 .fv-hexpicker__chip {
     flex: 0 0 auto;
     padding: 0 3px;
     font-size: 8.5px;
-    line-height: 13px;
+    line-height: 12px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     font-variant: small-caps;
@@ -516,6 +535,11 @@
     color: var(--fv-text-dim);
     border: 1px solid var(--fv-line-soft);
     border-radius: 0;
+}
+
+.fv-hexpicker__chip--selected {
+    color: var(--fv-accent);
+    border-color: var(--fv-accent);
 }
 
 /* Initiative ORDER — the movement-group number the Order of Battle prints down its

@@ -1209,13 +1209,17 @@ public $canOffLine = true;
 		return $this->getTotalDamage();
 	}
 	
-	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
+	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1, $shooterid = null, $weaponid = null){ //or dissipate, with negative value
 		//$fireOrderid ties what the projection soaked to the shot that caused it. The combat log finds
 		//a shot's damage by matching entries on fireorderid (weaponManager.getDamagesCausedBy), so
 		//without it a fully absorbed shot read as "damaged for 0" and looked like nothing happened.
 		//Regeneration from the projectors passes no id and stays unlinked (-1), so it is never
 		//reported as damage from a shot.
-		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "TrekShieldProjection");
+		//$shooterid/$weaponid: an order the SERVER creates mid-resolution (terrain collisions, proximity
+		//mines, auto-rams) has no id yet (-1). DBManager::submitDamages back-fills those from the row's
+		//shooter + weapon, exactly as it does for the hit's own row, so the absorbed amount lands on the
+		//same order as the damage it reduced.
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "TrekShieldProjection", $shooterid, $weaponid);
 		$damageEntry->updated = true;
 		$this->damage[] = $damageEntry;
 	}
@@ -1259,7 +1263,7 @@ public $canOffLine = true;
 			$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
 			$damageToAbsorb += -$absorbedDamage;
 			if($absorbedDamage>0){ //mark!
-				$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id);//link to the shot so the combat log can report it
+				$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id, ($shooter ? $shooter->id : null), ($weapon ? $weapon->id : null));//link to the shot so the combat log can report it
 			}
 			$returnValues['dmg'] = $damageToAbsorb;
 			$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
@@ -1445,9 +1449,23 @@ class TrekShieldFtr extends ShipSystem{
 		return $this->usedCapacityTotal;
 	}
 	
-	public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
+	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1, $shooterid = null, $weaponid = null){ //or dissipate, with negative value
 		$this->usedCapacityTotal += $value; //running count
 		$this->thisTurnEntries[] = $value; //mark for database
+
+		//Capacity lives in the notes above, so on its own a fighter projection left the combat log
+		//nothing to find: the log matches a shot's rows by fireorderid (weaponManager.getDamagesCausedBy),
+		//and a fully absorbed shot against a flight read as if nothing happened. Leave a LOG-ONLY row
+		//linked to the shot: damage 0 (so health, getTotalDamage and every damage sum are untouched) with
+		//the absorbed amount in the otherwise unused `shields` column, which combatLog.js reads for this
+		//damageclass. A server-made order (collision, mine) has no id yet; its shooter + weapon let
+		//DBManager::submitDamages link the row as it does the hit's own. Recharge passes none, so it never
+		//produces one.
+		if ($value > 0 && ($fireOrderid > 0 || $shooterid !== null)) {
+			$logEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, 0, 0, $value, $fireOrderid, false, false, "Absorb!", "TrekShieldFtr", $shooterid, $weaponid);
+			$logEntry->updated = true;
+			$this->damage[] = $logEntry;
+		}
 	}
 
 
@@ -1485,7 +1503,7 @@ class TrekShieldFtr extends ShipSystem{
 			$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
 			$damageToAbsorb += -$absorbedDamage;
 			if($absorbedDamage>0){ //mark!
-				$this->absorbDamage($target,$gamedata,$absorbedDamage);
+				$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id, ($shooter ? $shooter->id : null), ($weapon ? $weapon->id : null));
 			}
 			$returnValues['dmg'] = $damageToAbsorb;
 			$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
@@ -1530,8 +1548,9 @@ class TrekShieldFtr extends ShipSystem{
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
 		$ship = $this->getUnit();
 		switch($gameData->phase){
+				case 5: //pre-firing phase - rams and collisions resolve here, and what they cost the projection must persist too (each phase reloads, so unsaved entries are lost)
 				case 4: //firing phase
-					foreach($this->thisTurnEntries as $tte){					
+					foreach($this->thisTurnEntries as $tte){
 						$notekey = 'absorb';
 						$noteHuman = 'Trek Shield absorbed or dissipated';
 						$noteValue = $tte;
@@ -3697,10 +3716,11 @@ public $name = "TrekShieldProjection";
 		return $this->getTotalDamage();
 	}
 	
-	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
-		//$fireOrderid ties what the projection soaked to the shot that caused it - see the identical
-		//note on TrekShieldProjection::absorbDamage. Regeneration passes no id and stays unlinked (-1).
-		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "TrekShieldProjection");
+	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1, $shooterid = null, $weaponid = null){ //or dissipate, with negative value
+		//$fireOrderid ties what the projection soaked to the shot that caused it, and $shooterid/$weaponid
+		//let submitDamages link it when that order has no id yet - see the identical note on
+		//TrekShieldProjection::absorbDamage. Regeneration passes none of them and stays unlinked (-1).
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "TrekShieldProjection", $shooterid, $weaponid);
 		$damageEntry->updated = true;
 		$this->damage[] = $damageEntry;
 	}
@@ -3739,13 +3759,13 @@ public $name = "TrekShieldProjection";
 			$absorbedFreely = 0;
 			//first, armor takes part
 			//$absorbedFreely = min($this->armour, (floor($damageToAbsorb/2)));
-			$absorbedFreely = $this->armour; //This version CAN absorb more than half of any imapct, so just deduct armour.			
+			$absorbedFreely = $this->armour; //This version CAN absorb more than half of any imapct, so just deduct armour.
 			$damageToAbsorb += -$absorbedFreely;
 			//next, actual absorbtion
 			$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
 			$damageToAbsorb += -$absorbedDamage;
 			if($absorbedDamage>0){ //mark!
-				$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id);//link to the shot so the combat log can report it
+				$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id, ($shooter ? $shooter->id : null), ($weapon ? $weapon->id : null));//link to the shot so the combat log can report it
 			}
 			$returnValues['dmg'] = $damageToAbsorb;
 			$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
@@ -4341,7 +4361,6 @@ class TrekPhaserKellyType4 extends LinkedWeapon{
 								$this->minDamage = 4;
 								break;
 				}
-				$this->minDamageArray[$this->firingMode] = $this->minDamage;
 		}							
 		
 		public function setMaxDamage(){
@@ -4354,16 +4373,13 @@ class TrekPhaserKellyType4 extends LinkedWeapon{
 								$this->maxDamage = 24;
 								break;
 				}
-				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 		}
 		
 		public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
 			$strippedSystem->data = $this->data;
 			$strippedSystem->minDamage = $this->minDamage;
-			$strippedSystem->minDamageArray = $this->minDamageArray;
-			$strippedSystem->maxDamage = $this->maxDamage;
-			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			$strippedSystem->maxDamage = $this->maxDamage;				
 			return $strippedSystem;
 		}			
 }//end of class TrekPhaserKellytype4
