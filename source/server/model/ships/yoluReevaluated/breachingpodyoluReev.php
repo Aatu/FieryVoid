@@ -5,7 +5,7 @@ class breachingpodyoluReev extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
 	        
 		$this->unofficial = true;     //official design with unffofficial price change, to get the faction to proper Tier 1 power
-		$this->pointCost = 50*6;
+		$this->pointCost = 60*6;
 		$this->faction = "Yolu Confederation (reevaluated)";
 		$this->phpclass = "breachingpodyoluReev";
 		$this->shipClass = "Yonor Breaching Pods";
@@ -28,7 +28,7 @@ class breachingpodyoluReev extends FighterFlight{
 		$this->notes = "Bonus to delivery roll for marines.";
 		
 		$this->gravitic = true; //not 100% clear from SCS if these ships are gravitic, but every other Yolu ship is so seems safe to assume.
-//		$this->dropOutBonus = -2; //Less easier to argue they should get the same bonus to dropout rolls that the Utan gets
+		$this->dropOutBonus = -2; //Less easy to argue they should get the same bonus to dropout rolls that the Utan gets - but I am adding it to custom version
 		 
         $this->populate();
     
