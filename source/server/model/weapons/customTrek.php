@@ -2595,6 +2595,57 @@ class TrekLightDisruptor extends Pulse{
 		
     }  //end of class TrekLightDisruptor
 
+class TrekEarlyLightDisruptor extends Pulse{
+        public $name = "TrekEarlyLightDisruptor";
+        public $displayName = "Early Light Disruptor";
+	    public $iconPath = 'TrekLtDisruptor.png';
+
+        public $animation = "bolt";
+        public $animationColor = array(142, 252, 13);
+
+		public $rof = 3;
+        public $grouping = 20;
+        public $maxpulses = 5;
+ 		protected $useDie = 3; //die used for base number of hits
+       
+        public $loadingtime = 1;
+        public $intercept = 2;
+		public $priority = 4; //light 	
+		public $priorityAF = 5; //...Standard vs fighters
+
+    	public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Molecular"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+        
+        public $rangePenalty = 1.32;
+        public $fireControl = array(3, 2, 2); // fighters, <mediums, <capitals
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+        }
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 4;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 2;
+			}		
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(6, 2);   }
+        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+		
+    }  //end of class TrekEarlyLightDisruptor
+
+
 class TrekMedDisruptor extends Pulse{
         public $name = "TrekMedDisruptor";
         public $displayName = "Medium Disruptor";
@@ -2691,6 +2742,81 @@ class TrekMedDisruptor extends Pulse{
 		
     }  //end of class TrekMedDisruptor
 
+
+class TrekEarlyMedDisruptor extends Pulse{
+        public $name = "TrekEarlyMedDisruptor";
+        public $displayName = "Early Medium Disruptor";
+	    public $iconPath = 'TrekMedDisruptor.png';
+
+        public $animation = "bolt";
+        public $animationColor = array(142, 252, 13);
+
+		public $postArmorTotal = 0;
+
+		public $rof = 3;
+        public $grouping = 20;
+        public $maxpulses = 4;
+ 		protected $useDie = 3; //die used for base number of hits
+       
+        public $loadingtime = 2;
+
+		public $reduceFacing = 12; //reduce armor of facing structure (compard with total damage done - Armor reduced if damage exceeds this variable)
+		private $alreadyReduced = false;  //we only want the disruptor to reduce the structure armor once per shot
+
+        public $ballisticIntercept = true;
+        public $intercept = 2;
+		public $priority = 5; //light Raking	
+		public $priorityAF = 5; //...Standard vs fighters
+
+    	public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Molecular"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+        
+        public $rangePenalty = 0.66;
+        public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals
+
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+			if (!$system->advancedArmor){//advanced armor prevents effect
+				if (!$ship instanceof FighterFlight) {
+					if ($system instanceof Structure) return;        // don't apply to structure
+					if (($damage-$armour) > 0) {
+						$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+						$crit->updated = true;
+						$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
+						$system->setCritical($crit); //$system->criticals[] =  $crit;
+					}
+				}
+			}
+		}
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+			$this->data["Special"] .= "-1 armor to every system hit as long as at least 1 damage scored on the system.";
+            $this->data["Special"] .= '<br>Structure armor unaffected.';
+        }
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 6;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 4;
+			}		
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(6, 2) + 2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+		
+    }  //end of class TrekEarlyMedDisruptor
+	
 class TrekDisruptorCannon extends TrekDisruptorBase {
 		public $name = "TrekDisruptorCannon";
         public $displayName = "Disruptor Cannon";
