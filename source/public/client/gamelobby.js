@@ -60,7 +60,7 @@ window.gamedata = {
 				powerRating = 'Tier 3; League Faction';
 				break;
 			case 'Cascor Commonwealth (reevaluated)':
-				powerRating = 'Tier 3; League Custom Faction';
+				powerRating = 'Tier 2; League Custom Faction';
 				break;				
 			case 'Centauri Republic':
 				powerRating = 'Tier 1; Major Faction';
