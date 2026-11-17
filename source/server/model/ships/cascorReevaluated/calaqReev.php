@@ -1,0 +1,55 @@
+<?php
+class CalaqReev extends FighterFlight{
+    
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
+        
+		$this->unofficial = true;     //official design with unofficial price change, to get the faction to balanced Tier 2 power level
+		
+        $this->pointCost = 45*6;
+        $this->faction = "Cascor Commonwealth (reevaluated)";
+        $this->phpclass = "CalaqReev";
+        $this->shipClass = "Calaq Assault Fighters";
+        $this->imagePath = "img/ships/CascorCalaq.png";
+        $this->isd = 2224;
+	    //$this->notes = 'Non-atmospheric.';
+        
+        $this->forwardDefense = 9;
+        $this->sideDefense = 8;
+        $this->freethrust = 10;
+        $this->offensivebonus = 5;
+        $this->jinkinglimit = 6;
+        $this->accelcost = 2;
+        $this->turncost = 0.33;
+        
+    	$this->iniativebonus = 16*5;
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
+            $armour = array(2, 2, 2, 2);
+            $fighter = new Fighter("Calaq", $armour, 10, $this->id);
+            $fighter->displayName = "Calaq";
+            $fighter->imagePath = "img/ships/CascorCalaq.png";
+            $fighter->iconPath = "img/ships/CascorCalaq_Large.png";
+
+            $frontGun = new Ionizer(330, 30, 1);
+            $frontGun->displayName = "Ionizer";
+            $frontGun2 = new IonBolt(330, 30);
+            $frontGun2->displayName = "Ion Bolt";
+            $fighter->addFrontSystem($frontGun);
+            $fighter->addFrontSystem($frontGun2);
+			
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
+            $this->addSystem($fighter);
+       }
+    }
+}
+?>
