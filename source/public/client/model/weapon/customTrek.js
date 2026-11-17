@@ -429,11 +429,23 @@ var TrekLightDisruptor = function TrekLightDisruptor(json, ship) {
 TrekLightDisruptor.prototype = Object.create(Weapon.prototype);
 TrekLightDisruptor.prototype.constructor = TrekLightDisruptor;
 
+var TrekEarlyLightDisruptor = function TrekEarlyLightDisruptor(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekEarlyLightDisruptor.prototype = Object.create(Weapon.prototype);
+TrekEarlyLightDisruptor.prototype.constructor = TrekEarlyLightDisruptor;
+
 var TrekMedDisruptor = function TrekMedDisruptor(json, ship) {
     Weapon.call(this, json, ship);
 };
 TrekMedDisruptor.prototype = Object.create(Weapon.prototype);
 TrekMedDisruptor.prototype.constructor = TrekMedDisruptor;
+
+var TrekEarlyMedDisruptor = function TrekEarlyMedDisruptor(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekEarlyMedDisruptor.prototype = Object.create(Weapon.prototype);
+TrekEarlyMedDisruptor.prototype.constructor = TrekEarlyMedDisruptor;
 
 var TrekDisruptorCannon = function TrekDisruptorCannon(json, ship) {
     Weapon.call(this, json, ship);
