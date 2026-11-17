@@ -45,7 +45,7 @@ class federationHeavyCruiser extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 18, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 16, 6, 8));
         $this->addPrimarySystem(new Engine(4, 20, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(4, 4, 4));
+		$this->addPrimarySystem(new Hangar(4, 8, 6));
         $this->addPrimarySystem(new JumpEngine(5, 15, 4, 30));
         $this->addPrimarySystem(new AmmoMissileRackS(3, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		

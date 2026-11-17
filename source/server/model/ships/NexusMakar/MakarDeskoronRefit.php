@@ -60,7 +60,7 @@ class MakarDeskoronRefit extends MediumShip{
         		),
         		2=> array(
         				4 => "Thruster",
-        				8 => "Light X-Ray Laser ",
+        				8 => "Light X-Ray Laser",
         				17 => "Structure",
         				20 => "Primary",
         		),
