@@ -32,11 +32,18 @@ const HealthBar = styled.div`
     }
 `;
 
+/*The number sits on the health bar, so the text box stops 6.5px above the icon's inner bottom edge (the bar is 7px tall).
+  It was 5px, which put the digits' baseline only ~0.3px above the bar. That held at 100%, but at a fractional scale
+  (110%/125%/150% display or browser zoom, or a ship window resized with its grip) the text and the bar round to device
+  pixels separately, and on some rows the digits dropped a pixel or two under the bar's black top border (user report
+  2026-11-12: a whole row of numbers clipped). Which rows suffer depends on where each row lands on the device-pixel
+  grid, so anything that moves the rows changes it (window position, scale, or what sits above). 6.5px renders exactly like 6px at 100% (a 1px gap) but keeps
+  the digits clear at every scale measured; 6px alone still touched the bar in a shrunk window on a 110% screen.*/
 const SystemText = styled.div`
     width:100%;
-    height: calc(100% - 5px);
+    height: calc(100% - 6.5px);
     color: white;
-    font-family: arial;
+    font-family: tahoma; /* changed form arial*/
     font-size: 10px;
     display: flex;
     align-items: flex-end;
@@ -630,7 +637,9 @@ class SystemIcon extends React.Component {
             && !system.clickableWhenDestroyed
             && !canApplyPreBattleDamage(ship, system)) {
             return (
-                <System $background={getBackgroundImage(system)} $destroyed $mirror={mirror}>
+                /*$scs too: without it a destroyed icon fell back to the non-SCS margin (2px all round instead of
+                  3px 0), so a block shrank 2px per row when it died and everything below it moved.*/
+                <System $scs={scs} $background={getBackgroundImage(system)} $destroyed $mirror={mirror}>
                     {renderBadges(ship, system)}
                     <HealthBar $health="0" />
                 </System>
@@ -879,6 +888,11 @@ const getText = (ship, system) => {
 
         }
     } else if (system.outputType === "thrust") {
+        //A hull with more than one engine: each icon shows that engine's OWN thrust (boost and criticals in, 0 when
+        //offline) - the ship's remaining total on every one of them said nothing about which engine gives what.
+        if (shipManager.systems.getSystemListByName(ship, "engine").length > 1) {
+            return shipManager.systems.getOutput(ship, system);
+        }
         return shipManager.movement.getRemainingEngineThrust(ship);
     } else if (system.outputType === "power") {
         let power = shipManager.power.getReactorPower(ship, system);

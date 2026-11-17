@@ -30,67 +30,67 @@ window.ShipTooltipInitialOrdersMenu = function () {
        level (ShipTooltipFireMenu.getAllButtons), because these objects are SHARED between the two
        menus - pushing a condition into them here would push it into Initial Orders too. */
     ShipTooltipInitialOrdersMenu.ewButtons = [
-        { className: "addCCEW", condition: [isSelf, notFlight, notMine, sourceEwNotSuspended], action: addCCEW, info: "Add CCEW (right-click: max)", supportsMaxClick: true },
-        { className: "removeCCEW", condition: [isSelf, notFlight, notMine, sourceEwNotSuspended], action: removeCCEW, info: "Remove CCEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addCCEW", group: "CCEW", role: "add", condition: [isSelf, notFlight, notMine, sourceEwNotSuspended], action: addCCEW, info: "Add CCEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeCCEW", group: "CCEW", role: "remove", condition: [isSelf, notFlight, notMine, sourceEwNotSuspended], action: removeCCEW, info: "Remove CCEW (right-click: clear)", supportsMaxClick: true },
         /* ⭐ WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12): sourceCanAllocateOEW
            is sourceNotFlight PLUS the one flight class that has an EW pool. These are the only
            two entries in the array that relax for a flight; DIST/SOEW/SDEW/BDEW/Detect Stealth
            are ELINT functions and stay ship-only. */
-        { className: "addOEW", condition: [isTargetable, notSelf, isEnemyEW, sourceCanAllocateOEW, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('OEW'), info: "Add OEW (right-click: max)", supportsMaxClick: true },
-        { className: "removeOEW", condition: [isTargetable,notSelf, isEnemyEW, sourceCanAllocateOEW, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('OEW'), info: "Remove OEW (right-click: clear)", supportsMaxClick: true },
-        { className: "addMDEW", condition: [isSelf, enemyMines, sourceEwNotSuspended], action: addMDEW, info: "Add Mine Detection (right-click: max)", supportsMaxClick: true },
-        { className: "removeMDEW", condition: [isSelf, enemyMines, sourceEwNotSuspended], action: removeMDEW, info: "Remove Mine Detection (right-click: clear)", supportsMaxClick: true },
-        { className: "addDIST", condition: [isTargetable,notSelf, isEnemyEW, isElint, notFlight, notMine, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('DIST'), info: "Add DIST (right-click: max)", supportsMaxClick: true },
-        { className: "removeDIST", condition: [isTargetable,notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('DIST'), info: "Remove DIST (right-click: clear)", supportsMaxClick: true },
+        { className: "addOEW", group: "OEW", role: "add", condition: [isTargetable, notSelf, isEnemyEW, sourceCanAllocateOEW, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('OEW'), info: "Add OEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeOEW", group: "OEW", role: "remove", condition: [isTargetable,notSelf, isEnemyEW, sourceCanAllocateOEW, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('OEW'), info: "Remove OEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addMDEW", group: "Detect Mines", role: "add", condition: [isSelf, enemyMines, sourceEwNotSuspended], action: addMDEW, info: "Add Mine Detection (right-click: max)", supportsMaxClick: true },
+        { className: "removeMDEW", group: "Detect Mines", role: "remove", condition: [isSelf, enemyMines, sourceEwNotSuspended], action: removeMDEW, info: "Remove Mine Detection (right-click: clear)", supportsMaxClick: true },
+        { className: "addDIST", group: "DIST", role: "add", condition: [isTargetable,notSelf, isEnemyEW, isElint, notFlight, notMine, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('DIST'), info: "Add DIST (right-click: max)", supportsMaxClick: true },
+        { className: "removeDIST", group: "DIST", role: "remove", condition: [isTargetable,notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('DIST'), info: "Remove DIST (right-click: clear)", supportsMaxClick: true },
         //Jamming: ELINT disrupts a remote-controlled fighter flight's command link (Orieni Hunter-Killers). Target IS a flight, so no notFlight gate.
-        { className: "addJAM", condition: [isTargetable,notSelf, isEnemyEW, isElint, sourceNotFlight, targetIsRemoteControl, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('JAM'), info: "Add Jamming (right-click: max)", supportsMaxClick: true },
-        { className: "removeJAM", condition: [isTargetable,notSelf, isElint, sourceNotFlight, targetIsRemoteControl, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasJAM, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('JAM'), info: "Remove Jamming (right-click: clear)", supportsMaxClick: true },
-        { className: "addSOEW", condition: [isTargetable,isFriendly, isElint, notFlight, notMine, notSelf, isInElintDistance(30), doesNotHaveBDEW, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('SOEW'), info: "Add SOEW", supportsMaxClick: true },
-        { className: "removeSOEW", condition: [isTargetable,isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('SOEW'), info: "Remove SOEW (right-click: clear)", supportsMaxClick: true },
-        { className: "addSDEW", condition: [isTargetable,isFriendly, isElint, notFlight, notSelf, isInElintDistance(50), /* SDEW reaches 50 (EW::getSupportedDEW) */ doesNotHaveBDEW, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('SDEW'), info: "Add SDEW (right-click: max)", supportsMaxClick: true },
-        { className: "removeSDEW", condition: [isTargetable,isFriendly, isElint, notFlight, notSelf, isInElintDistance(50), doesNotHaveBDEW, hasSDEW, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('SDEW'), info: "Remove SDEW (right-click: clear)", supportsMaxClick: true },
-        { className: "addBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW, sourceEwNotSuspended], action: addBDEW, info: "Add BDEW (right-click: max)", supportsMaxClick: true },
-        { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW, sourceEwNotSuspended], action: removeBDEW, info: "Remove BDEW (right-click: clear)", supportsMaxClick: true },
-        { className: "addDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth, sourceEwNotSuspended], action: addDetectSEW, info: "Add Detect Stealth (right-click: max)", supportsMaxClick: true },
-        { className: "removeDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth, sourceEwNotSuspended], action: removeDetectSEW, info: "Remove Detect Stealth (right-click: clear)", supportsMaxClick: true },
+        { className: "addJAM", group: "JAM", role: "add", condition: [isTargetable,notSelf, isEnemyEW, isElint, sourceNotFlight, targetIsRemoteControl, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('JAM'), info: "Add Jamming (right-click: max)", supportsMaxClick: true },
+        { className: "removeJAM", group: "JAM", role: "remove", condition: [isTargetable,notSelf, isElint, sourceNotFlight, targetIsRemoteControl, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasJAM, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('JAM'), info: "Remove Jamming (right-click: clear)", supportsMaxClick: true },
+        { className: "addSOEW", group: "SOEW", role: "add", condition: [isTargetable,isFriendly, isElint, notFlight, notMine, notSelf, isInElintDistance(30), doesNotHaveBDEW, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('SOEW'), info: "Add SOEW", supportsMaxClick: true },
+        { className: "removeSOEW", group: "SOEW", role: "remove", condition: [isTargetable,isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('SOEW'), info: "Remove SOEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addSDEW", group: "SDEW", role: "add", condition: [isTargetable,isFriendly, isElint, notFlight, notSelf, isInElintDistance(50), /* SDEW reaches 50 (EW::getSupportedDEW) */ doesNotHaveBDEW, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('SDEW'), info: "Add SDEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeSDEW", group: "SDEW", role: "remove", condition: [isTargetable,isFriendly, isElint, notFlight, notSelf, isInElintDistance(50), doesNotHaveBDEW, hasSDEW, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('SDEW'), info: "Remove SDEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addBDEW", group: "BDEW", role: "add", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW, sourceEwNotSuspended], action: addBDEW, info: "Add BDEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeBDEW", group: "BDEW", role: "remove", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW, sourceEwNotSuspended], action: removeBDEW, info: "Remove BDEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addDetectSEW", group: "Detect Stealth", role: "add", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth, sourceEwNotSuspended], action: addDetectSEW, info: "Add Detect Stealth (right-click: max)", supportsMaxClick: true },
+        { className: "removeDetectSEW", group: "Detect Stealth", role: "remove", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth, sourceEwNotSuspended], action: removeDetectSEW, info: "Remove Detect Stealth (right-click: clear)", supportsMaxClick: true },
     ];
 
     ShipTooltipInitialOrdersMenu.buttons = ShipTooltipInitialOrdersMenu.ewButtons.concat([
-        { className: "removeAllEW", condition: [isSelf, notFlight, notMine, sourceEwNotSuspended], action: removeAllEW, info: "Remove All EW" },
+        { className: "removeAllEW", kind: "clear", label: "Clear EW", condition: [isSelf, notFlight, notMine, sourceEwNotSuspended, hasEwToClear], action: removeAllEW, info: "Remove All EW" },
         /* ⭐ TRIAD (TRIAD_ADVANCED_FEATURES_PLAN.md §3, §4) - two per-turn choices made from the ship's own
            tooltip. Deliberately NOT in ewButtons: that subset is reused verbatim in the late-EW window,
            and both of these belong to Initial Orders alone. Every predicate below fails closed on a null
            selection, so a tooltip opened with nothing selected never offers them. */
-        { className: "designateJealousElint", condition: [isSelf, canDesignateJealousElint], action: designateJealousElint, info: jealousElintInfo },
-        { className: "standDownJealousElint", condition: [isSelf, isDesignatedJealousElint], action: standDownJealousElint, info: "Remove ELINT (clears ELINT EW)" },
-        { className: "setCommandNode", condition: [isSelf, canNominateCommandNode], action: setCommandNode, info: "Select Command Node" },
-        { className: "cancelCommandNode", condition: [isSelf, isCommandNode], action: cancelCommandNode, info: "Remove Command Node" },
-        { className: "swapInitiative", condition: [notSelf, canSwapInitiativeWithTarget], action: swapInitiative, info: "Swap Initiative" },
-        { className: "cancelSwapInitiative", condition: [notSelf, isSwappingInitiativeWithTarget], action: cancelSwapInitiative, info: "Cancel Initiative swap" },
+        { className: "designateJealousElint", label: "ELINT", condition: [isSelf, canDesignateJealousElint], action: designateJealousElint, info: jealousElintInfo },
+        { className: "standDownJealousElint", label: "Stand down", condition: [isSelf, isDesignatedJealousElint], action: standDownJealousElint, info: "Remove ELINT (clears ELINT EW)" },
+        { className: "setCommandNode", label: "Command node", condition: [isSelf, canNominateCommandNode], action: setCommandNode, info: "Select Command Node" },
+        { className: "cancelCommandNode", label: "Cancel node", condition: [isSelf, isCommandNode], action: cancelCommandNode, info: "Remove Command Node" },
+        { className: "swapInitiative", label: "Swap ini", condition: [notSelf, canSwapInitiativeWithTarget], action: swapInitiative, info: "Swap Initiative" },
+        { className: "cancelSwapInitiative", label: "Cancel swap", condition: [notSelf, isSwappingInitiativeWithTarget], action: cancelSwapInitiative, info: "Cancel Initiative swap" },
         /* FIGHTER MISSIONS (FIGHTER_MISSIONS_PLAN.md §3.10) - an Initial Orders choice, like the Triad's, so not in
            ewButtons either. The predicate fails closed on a null selection. */
-        { className: "fighterMission", condition: [isSelf, canChooseFighterMission], action: openFighterMissionPicker, info: fighterMissionInfo },
+        { className: "fighterMission", label: "Mission", condition: [isSelf, canChooseFighterMission], action: openFighterMissionPicker, info: fighterMissionInfo },
         /* OFFICERS_PLAN.md Stage 35 - an Expert Analyst's scan: on a unit of another team his selected ship holds OEW on, within 30 hexes, a
            dropdown of his scans (AnalystPicker). An Initial Orders choice, so not in ewButtons. Fails closed on a null selection. */
-        { className: "analystScan", condition: [notSelf, canAnalyse], action: openAnalystPicker, info: analystInfo },
+        { className: "analystScan", label: "Scan", condition: [notSelf, canAnalyse], action: openAnalystPicker, info: analystInfo },
         /* OFFICERS_PLAN.md Stage 36 - an Expert Electrician's split of the power his flight's switched-off weapons give this turn: on his own flight, a
            yellow menu of - / + for its offensive bonus and its thrust (ElectricianPicker). An Initial Orders choice, so not in ewButtons. Fails closed
            on a null selection. */
-        { className: "electricianShunt", condition: [isSelf, canElectrify], action: openElectricianPicker, info: electricianInfo },
+        { className: "electricianShunt", label: "Shunt", condition: [isSelf, canElectrify], action: openElectricianPicker, info: electricianInfo },
         /* OFFICERS_PLAN.md Stage 37 - a Lucky Captain's Initial Orders feat (EW Last, Disengage, Best Initiative): on his own ship, his menu
            (LuckyPicker; the Firing-phase menu offers the same button for his Firing-phase feats). A pair, as the War Leader's below: grey while no
            feat is picked, his green with a glow once one is. Not in ewButtons. Fails closed on a null selection. */
-        { className: "luckyCaptain", condition: [isSelf, canLucky, noLuckyPick], action: openLuckyPicker, info: luckyInfo },
-        { className: "luckyCaptainOn", condition: [isSelf, canLucky, hasLuckyPick], action: openLuckyPicker, info: luckyInfo },
+        { className: "luckyCaptain", label: "Lucky feat", condition: [isSelf, canLucky, noLuckyPick], action: openLuckyPicker, info: luckyInfo },
+        { className: "luckyCaptainOn", label: "Lucky feat", condition: [isSelf, canLucky, hasLuckyPick], action: openLuckyPicker, info: luckyInfo },
         /* OFFICERS_PLAN.md Stage 34 - an Expert War Leader's Taunt or Anticipate (user request 2026-11-01 - it was his C&C's React menu): on his own
            ship, his menu (WarLeaderPicker). Two entries for one button, as the Triad's pairs above: grey while no order is given, his yellow with a
            glow once one is, its line naming it. Not in ewButtons. Fails closed on a null selection. */
-        { className: "warLeaderOrder", condition: [isSelf, canWarLeaderOrder, noWarLeaderOrder], action: openWarLeaderPicker, info: warLeaderInfo },
-        { className: "warLeaderOrderOn", condition: [isSelf, canWarLeaderOrder, hasWarLeaderOrder], action: openWarLeaderPicker, info: warLeaderInfo },
-        { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" },
-        { className: "targetWeaponsHex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
-        { className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
-        { className: "removeMultiOrder", condition: [hasOrderSource, hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
+        { className: "warLeaderOrder", label: "War Leader", condition: [isSelf, canWarLeaderOrder, noWarLeaderOrder], action: openWarLeaderPicker, info: warLeaderInfo },
+        { className: "warLeaderOrderOn", label: "War Leader", condition: [isSelf, canWarLeaderOrder, hasWarLeaderOrder], action: openWarLeaderPicker, info: warLeaderInfo },
+        { className: "targetWeapons", kind: "primary", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" },
+        { className: "targetWeaponsHex", label: "Target hex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
+        { className: "targetSuppWeapons", kind: "primary", label: "Target support weapons", condition: [isFriendly, hasShipWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
+        { className: "removeMultiOrder", label: "Remove order", condition: [hasOrderSource, hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
         /* ⭐ JUMP_GATES_PLAN.md Stage 3 - SIGNALLING A FIXED JUMP GATE, and these two are the ONLY
            entries in this array whose subject is a unit the player does not own.
 
@@ -103,7 +103,7 @@ window.ShipTooltipInitialOrdersMenu = function () {
            NO SHIP NEEDS TO BE SELECTED. Which of my units is within range is never chosen and never
            matters, so every condition below reads the TARGETED ship (the gate) and none of them
            touches this.selectedShip - which is routinely null here. */
-        { className: "signalJumpGate", condition: [isJumpGate, canSignalGate, noGateSignalYet], action: signalJumpGate, info: "Signal Jump Gate for Departure" },
+        { className: "signalJumpGate", label: "Signal gate", condition: [isJumpGate, canSignalGate, noGateSignalYet], action: signalJumpGate, info: "Signal Jump Gate for Departure" },
         /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 8 - THE OTHER DIRECTION, AND IT IS A SECOND BUTTON
            RATHER THAN A TOGGLE INSIDE THE PANEL. A gate holds ONE jump point and it is one-way
            (plan section 2.6), so signalling for departure and signalling for arrival are two
@@ -112,8 +112,8 @@ window.ShipTooltipInitialOrdersMenu = function () {
            A toggle would have to sit there greyed out on every gate in every game without the
            reinforcements rule; this way the feature is invisible until it applies, which is the
            same shape the two mutually-exclusive buttons above already have. */
-        { className: "signalJumpGateArrival", condition: [isJumpGate, canSignalGateForArrival, noGateSignalYet], action: signalJumpGateForArrival, info: "Signal Gate for Arrival" },
-        { className: "cancelJumpGateSignal", condition: [isJumpGate, hasGateSignal], action: cancelJumpGateSignal, info: "Cancel Gate Signal" }
+        { className: "signalJumpGateArrival", label: "Arrival", condition: [isJumpGate, canSignalGateForArrival, noGateSignalYet], action: signalJumpGateForArrival, info: "Signal Gate for Arrival" },
+        { className: "cancelJumpGateSignal", label: "Cancel signal", condition: [isJumpGate, hasGateSignal], action: cancelJumpGateSignal, info: "Cancel Gate Signal" }
     ]);
 
 
@@ -608,6 +608,21 @@ window.ShipTooltipInitialOrdersMenu = function () {
        ⚠️ DEW is NOT suspended - the rider keeps it, and nothing here touches convertUnusedToDEW. */
     function sourceEwNotSuspended() {
         return !ew.isEwSuspended(this.selectedShip);
+    }
+
+    /* Clear EW only when there is something to clear (user, 2026-11-12): a row of this turn's EW other
+       than DEW, with points in it. DEW is the remainder, not an allocation, so a ship with everything
+       still in DEW has nothing for ew.removeEW to give back. Live: every EW change rebuilds the card
+       (PhaseStrategy.onShipEwChanged -> ShipTooltip.update), so the button returns with the first point
+       spent. Null-safe on its own - see arch_tooltip_menu_null_selection. */
+    function hasEwToClear() {
+        var ship = this.selectedShip;
+        if (!ship || !ship.EW) return false;
+        for (var i in ship.EW) {
+            var entry = ship.EW[i];
+            if (entry && entry.turn == gamedata.turn && entry.type !== 'DEW' && Number(entry.amount) > 0) return true;
+        }
+        return false;
     }
 
     function targetEwNotSuspended() {

@@ -5,7 +5,7 @@ class ZUtanor extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
 	        
 		$this->pointCost = 85 *6;
-		$this->faction = "Yolu Confederation";
+		$this->faction = "Yolu Confederation (reevaluated)";
 		$this->phpclass = "ZUtanor";
 		$this->shipClass = "Utanor Heavy Interceptors";
 		  $this->variantOf = "Utan Heavy Fighters";

@@ -57,6 +57,10 @@ window.ShipWindowManager = (function () {
         this.uiManager.renderShipWindows({ ships: this.ships });
     }
 
+    ShipWindowManager.prototype.isOpen = function (ship) {
+        return this.ships.includes(ship);
+    }
+
     ShipWindowManager.prototype.close = function (ship) {
         this.ships = this.ships.filter(function (openShip) {
             return openShip !== ship;

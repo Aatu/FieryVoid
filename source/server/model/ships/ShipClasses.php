@@ -445,6 +445,9 @@ class BaseShip {
                 $CnC = $this->getSystemByName("CnC");
                 if ($CnC){
 			    $mod += -5*($CnC->hasCritical("CommunicationsDisrupted", $gamedata->turn));
+			    //...and its one-turn twin (the CommsFlux roll, CnC::criticalPhaseEffects): "Comms disrupted. -5 Initiative"
+			    //for the turn after it is rolled. hasCritical matches the exact class, so it was never counted (user, 2026-11-16).
+			    $mod += -5*($CnC->hasCritical("CommunicationsDisruptedOneTurn", $gamedata->turn));
 			    $mod += -10*($CnC->hasCritical("ReducedIniativeOneTurn", $gamedata->turn));
 			    $mod += -10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));		    
 				//additional: SWTargetHeld (ship being held by Tractor Beam - reduces Initiative

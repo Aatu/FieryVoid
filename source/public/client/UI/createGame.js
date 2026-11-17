@@ -259,6 +259,13 @@ window.createGame = {
 
         if (!data) return;
 
+        //CPU opponent: the slot's "CPU player" tick (printed only when the feature is on for this player)
+        if (inputname == "cpu") {
+            if (input.is(":checked")) data.cpu = true;
+            else delete data.cpu;
+            return;
+        }
+
         data[inputname] = value;
 
         if (inputname == "deptype") {
@@ -1371,6 +1378,11 @@ window.createGame = {
         slot.find("[name='depwidth']").val(data.depwidth);
         slot.find("[name='depheight']").val(data.depheight);
         slot.find("[name='depavailable']").val(data.depavailable);
+
+        //CPU opponent: never on slot 1 (the creator's own seat), never in a ladder game
+        const cpuAllowed = data.id != 1 && !createGame.rules.ladder;
+        if (!cpuAllowed) delete data.cpu;
+        slot.find(".cg-slot-cpu").toggle(cpuAllowed).find("[name='cpu']").prop("checked", !!data.cpu);
     },
 
     createNewSlot: function createNewSlot(e, explicitDefaults) {
@@ -1958,6 +1970,7 @@ window.createGame = {
             const rows = slots.map(function (slot) {
                 let meta = (unlimited || slot.points == -1) ? "Unlimited" : esc(slot.points) + " pts";
                 if (parseInt(slot.depavailable, 10) > 1) meta += " &middot; deploys turn " + esc(slot.depavailable);
+                if (slot.cpu) meta += " &middot; CPU player";
                 return '<li><span class="cg-sum-slot-name">' + esc(slot.name) + '</span><span class="cg-sum-slot-meta">' + meta + "</span></li>";
             }).join("");
 

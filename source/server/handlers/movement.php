@@ -1634,25 +1634,24 @@
                 $movements[] = new MovementOrder(null, "isRolled", $lastmove->position, 0,0, $lastmove->speed, $lastmove->heading, $lastmove->facing, true, ($turn+1), 0, $ship->iniative);
             }
 			
-			//Find Engine on Ship
-			$engine = $ship->getSystemByName("Engine");
-			
-			if($engine){
-				//Check Engine Crits, if has the ControlsStuck crit on this turn ending, create new Movement Order.
+			//Check EVERY Engine on the ship (a hull can carry more than one) for a ControlsStuck crit from the turn
+			//just ending. Only the engines that carry it are stuck: their thrust alone goes into the one forced
+			//speed change, and any other engine is left to the player as normal.
+			$stuckEngines = array();
+			foreach ($ship->systems as $engine){
+				if (!($engine instanceof Engine) || $engine->isDestroyed()) continue;
 				foreach ($engine->criticals as $critical) {
-					if ($critical->phpclass === "ControlsStuck" && $critical->inEffect) {
-						
-						
-						// Check if it matches the current turn
-						if ($critical->turn == $turn) {		                
-							// Found a matching "Engine Shorted" critical for this turn
-							$movements[] = self::doStuckEngine($ship, $engine, $turn, $lastmove);
-							break;
-						}
+					if ($critical->phpclass === "ControlsStuck" && $critical->inEffect && $critical->turn == $turn) {
+						$stuckEngines[] = $engine;
+						break;
 					}
 				}
 			}
-		
+			if (!empty($stuckEngines)){
+				$stuckMove = self::doStuckEngine($ship, $stuckEngines, $turn, $lastmove);
+				if ($stuckMove !== null) $movements[] = $stuckMove;
+			}
+
             return $movements;
             
         }//endof setPreturnMovementStatusForShip()
@@ -1787,6 +1786,12 @@
 		        return false;
 		    }
 
+		    // A ship still pivoting cannot accelerate even on the hexside where it happens to be back in line with its
+		    // heading (client: shipManager.movement.canAccelerate) - the stuck engine stresses the hull instead.
+		    if (self::isPivoting($ship, $gamedata->turn) != 0) {
+		        return false;
+		    }
+
 		    return true;
 		}//endof canAccelerate()		
 
@@ -1837,15 +1842,31 @@
 
 		
 		//Called from setPreturnMovementStatus above if conditions are met.
-		public static function doStuckEngine($ship, $engine, $turn, $lastmove) {
+		//$engines: the stuck Engine, or an array of them when more than one engine on the hull is stuck this turn.
+		//Only THEIR thrust is used - an engine that is not stuck contributes nothing here and stays the player's to spend.
+		public static function doStuckEngine($ship, $engines, $turn, $lastmove) {
 
 		    $newMovement = null;
-            
-		    // Calculate acceleration from stuck engine
-		    $maxThrust = $engine->getOutputWhenOffline();
-	        foreach ($engine->criticals as $crit){
-	            $maxThrust += $crit->outputMod;//outputMod is negative
-	        }
+		    if (!is_array($engines)) $engines = array($engines);
+
+			//Main thrusters by DIRECTION (as hasMainThruster() does), wherever on the hull they sit - plenty of hulls keep
+			//them outside the aft section, and an aft section can hold side thrusters. Destroyed ones cannot fire.
+			$mainThrusters = array();
+		    foreach($ship->systems as $thruster){
+		    	if($thruster instanceof Thruster && $thruster->direction == 2 && !$thruster->isDestroyed()) $mainThrusters[] = $thruster;
+			}
+			//"If there are no main thrusters, then nothing happens" (the engine is offline regardless). Also keeps
+			//sortThrustersAllocations() from dividing by a count of zero.
+			if (empty($mainThrusters)) return null;
+
+		    // Calculate acceleration from the stuck engine(s).
+		    // getOutputWhenOffline() ALREADY carries every critical's outputMod: this runs on the gamedata Manager::changeTurn
+		    // has just reloaded, and ShipSystem::onConstructed -> effectCriticals() summed them into $outputMod on that load.
+		    // (This used to add each crit's outputMod a second time, so an Output Reduced engine burned 2 short per crit.)
+		    $maxThrust = 0;
+		    foreach ($engines as $engine){
+		        $maxThrust += $engine->getOutputWhenOffline();
+		    }
 //	        $maxThrust += $engine->getBoostLevel($turn); //Actually this si next turns thrust, where there would be no boost as engine offline.
 	        	        		    
     
@@ -1865,13 +1886,6 @@
 
 		    // Create new movement order with updated speed
 		    $newMovement = new MovementOrder(null, "speedchange", $lastmove->position, 0, 0, $newSpeed, $newHeading, $lastmove->facing, true, ($turn+1), $value, $ship->iniative);
-		    			
-			$mainThrusters = array();
-		    $thrusters = $ship->getSystemsByName('Thruster');
-		    		    
-		    foreach($thrusters as $thruster){
-		    	if($thruster->location == 2) $mainThrusters[] = $thruster;
-			}		    	   	
 
 			// Allocate thrust to thrusters
 			$allocatedThrust = self::sortThrustersAllocations($mainThrusters, $maxThrust);

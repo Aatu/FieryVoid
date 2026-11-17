@@ -35,6 +35,12 @@ const EW_LABEL_COLORS = {
     'ELINT': '#9ad4cf',             //soft teal - Kirishiac ELINT module pool (KIRISHIAC_ORBITAL_REFITS_PLAN.md §8.2)
 };
 
+/*⭐ SHARED with the jQuery ship card (client/UI/ShipTooltip.js, SHIP_TOOLTIP_REDESIGN_PLAN.md §11 item 11):
+  its EW rows are labelled in exactly these colours, so it reads THIS map off window rather than keeping a
+  copy that would drift. This file stays the one place to retune them. Published when the bundle loads,
+  which is before any tooltip can be hovered; the card falls back to the accent for a missing label.*/
+if (typeof window !== 'undefined') window.EW_LABEL_COLORS = EW_LABEL_COLORS;
+
 /*OEW is the one CONTEXTUAL label (user request 2026-07-23): it keeps the green while the
   window's ship is yours or a teammate's, and takes the OEW_HOSTILE red on anyone else's
   ship - i.e. that OEW is being pointed at your side. Guarded by isPlayerInGame() because

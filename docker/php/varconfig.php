@@ -21,6 +21,13 @@ $discord_notify_idle_secs = 300;
 // deletes them; locally they are the replay harness corpus. Idle LOBBY games still go after 5 days.
 $keep_idle_games = true;
 
+// Feature flags (Features.php) - LOCAL docker turns part-built features ON; live leaves them out.
+$feature_flags = array(
+    'cpuOpponent' => true,   // CPU-controlled slots (TACTICAL_AI_PLAN.md)
+    'autoDeploy' => true,    // the Deployment phase's Auto-Deploy button (TACTICAL_AI_PLAN.md 5.2)
+);
+$feature_beta_testers = array();
+
 // Local, uncommitted overrides (bot token etc.) — gitignored, never committed.
 $__localVarconfig = __DIR__ . '/varconfig.local.php';
 if (is_file($__localVarconfig)) include $__localVarconfig;

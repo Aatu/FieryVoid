@@ -24,6 +24,11 @@ class Component extends React.Component {
    here, var(--fv-radius-tooltip) there), so a retune of one is a retune of both. If you
    change anything here, change it there.
 
+   ⚠️ NO LONGER TRUE OF THE SHIP TOOLTIP (2026-11-10, SHIP_TOOLTIP_REDESIGN_PLAN.md D7): the
+   jQuery `.shipNameContainer` became the square, opaque ship card in shipTooltip.css, in the
+   family of the hex picker and the system card. This surface keeps its 7px corners on purpose;
+   the only remaining twin in tactical.css is the static #shipNameContainer rule.
+
    ⚠️ The translucency is in the FILL (overlayBgSoft), not in element `opacity`. Opacity
    fades the TEXT along with the panel; the jQuery twin's ship names were coming out
    visibly duller than the identical allegiance tokens in the hex picker beside them, and

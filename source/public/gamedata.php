@@ -43,7 +43,12 @@ if (function_exists('apcu_fetch') && isset($_GET['gameid']) && isset($_GET['last
     // compares timestamps (Manager::getTacGamedataJSON: abs(ts - timestamp) < 0.001).
     // A bare <= here while Manager uses a tolerance window means a change landing
     // within the same millisecond could be classified differently by the two paths.
-    if ($serverTime && $serverTime <= (float)$_GET['last_time'] + 0.001) {
+    // CPU opponent (TACTICAL_AI_PLAN.md section 4): a bot run that ran out of time resumes on a
+    // waiting human's poll, so such a poll must not take the exit below. One array test while the
+    // feature is off; one more APCu read per poll while it is on.
+    $aiPending = Features::reachable('cpuOpponent') && AIDriver::isPending($gameid);
+
+    if (!$aiPending && $serverTime && $serverTime <= (float)$_GET['last_time'] + 0.001) {
          Manager::apcuLog("FAST-POLL EXEMPT game=$gameid serverTime=$serverTime last_time={$_GET['last_time']}");
 
          /*
@@ -114,16 +119,26 @@ try {
             $ships = json_encode($ships);
         }
 
-        $ret = Manager::submitTacGamedata(
-            $gameid,
-            $playerid,
-            $turn,
-            $phase,
-            $activeship,
-            $ships,  // ✅ Manager expects string
-            $status,
-            $slotid
-        );
+        if (!empty($_POST["cpuSlot"]) && Features::reachable('cpuOpponent')) {
+            // CPU opponent: the creator commits the fleet bought for a CPU slot (plan section 8.1).
+            $ret = Manager::submitFleetForCpuSlot($gameid, $playerid, $turn, $phase, $activeship, $ships, $slotid);
+        } else {
+            $ret = Manager::submitTacGamedata(
+                $gameid,
+                $playerid,
+                $turn,
+                $phase,
+                $activeship,
+                $ships,  // ✅ Manager expects string
+                $status,
+                $slotid
+            );
+        }
+
+        // CPU opponent: the human has just submitted, so any bot that now owes the game a
+        // submission answers at once (TACTICAL_AI_PLAN.md section 4). With the feature off this
+        // is one array test and no AI class is loaded; run() itself never throws.
+        if (Features::reachable('cpuOpponent')) AIDriver::run($gameid);
 
     } elseif (isset($_GET["gameid"])) {
         $gameid     = $_GET["gameid"];
@@ -131,6 +146,10 @@ try {
         $phase      = $_GET["phase"] ?? 0;
         $activeship = $_GET["activeship"] ?? [];
         $force      = isset($_GET["force"]);
+
+        // CPU opponent: a player's poll is also what a bot's turn runs on - BEFORE the gamedata
+        // is built, so this reply already shows what the bot did.
+        if ($playerid && Features::reachable('cpuOpponent')) AIDriver::run($gameid);
 
         $ret = Manager::getTacGamedataJSON(
             $gameid,

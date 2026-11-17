@@ -11,7 +11,7 @@ class BrixadiiSentinelPlatformBase extends OSAT{
         $this->shipClass = "Kranixtin Sentinel Platform";
 			$this->canvasSize = 90;
 		$this->unofficial = true;
-		$this->isd = 1960;
+		$this->isd = 2058;
         
         $this->forwardDefense = 8;
         $this->sideDefense = 8;

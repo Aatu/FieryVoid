@@ -1,46 +1,1244 @@
 /*
- * shipTooltip.css — the hover ShipTooltip (client/UI/ShipTooltip.js).
+ * shipTooltip.css — the SHIP CARD (client/UI/ShipTooltip.js; SHIP_TOOLTIP_REDESIGN_PLAN.md).
  *
- * The tooltip's BOX lives in tactical.css (.shipNameContainer, shared with the static
- * #shipNameContainer div in game.php). What follows is everything that used to be written
- * as inline `style="..."` attributes inside ShipTooltip.js's HTML string, plus the stack
- * grid. Values are carried across unchanged unless a comment says otherwise.
+ * Since Stage 2 (2026-11-10) the tooltip is a datasheet card in the family of the hex picker
+ * (hexPicker.css) and the system card: opaque, SQUARE (D7 - this surface only; the React
+ * common/Tooltip.js keeps its 7px), 1px border in the allegiance colour with a 3px rail down the
+ * whole left edge (§11 item 3, §11.1 R2.2), the platform UI face (--fv-ui) and Consolas numbers,
+ * and the system card's three type sizes ONLY: 10 micro / 12 body / 13 name.
+ *
+ * ⚠️ NO ELEMENT OPACITY anywhere on this surface (alpha compounding, project_visual_unification):
+ * a dim state is a dimmer COLOUR. The ONE exception is the whole card at 90% (user, 2026-11-16,
+ * `.fv-shipcard--translucent` below): opacity on the root composites the card as one layer, so
+ * nothing inside it compounds. ⚠️ No Orbitron on game.php: caps + letter-spacing.
+ * NO :root block - tokens.css is the only one; component values are scoped to .fv-shipcard.
+ *
+ * Every block after the head band carries a 1px rule on its TOP, so whichever blocks a card
+ * happens to have, each boundary is drawn exactly once.
  */
 
-/* The rule under the ship name takes the NAME's OWN colour instead of a flat white.
-   ShipTooltip.js writes --tt-name on the root element via getNameColor(), which resolves
-   the same allegiance/team decision the name span itself is painted by, so the line and
-   the text can never disagree.
-   The fallback is what a MULTI-ship stack gets: several allegiances under one cursor have
-   no single answer, and neutral is the honest one. */
-.shipNameContainer .namecontainer {
+.shipNameContainer.fv-shipcard {
+    /* the allegiance rail and border - ShipTooltip.js writes it inline from the same two-arm
+       gate the name is painted by (getRailColor), so the two can never disagree */
+    --tt-rail: var(--fv-line-scs);
+    /* Every dim LABEL on the card - cell and spec labels, section heads, the sub line, the ✕.
+       Round 3 (user, 2026-11-10): the site's --fv-text-dim is a blue-grey, and next to the green /
+       red allegiance colours it did not sit well. A neutral grey here; where color-mix() exists,
+       the @supports rule below tints it 30% toward the card's own allegiance colour, so every
+       label belongs to the card it is on (~6:1 on black even on red). Retune the 30% there. */
+    --tt-dim: #9ea4aa;
+    /* Section HEADINGS (round 13, user 2026-11-16: "brighter text for section headings") - the cell
+       labels (DEFENCE, DEW), the section heads (From, Movement, Electronic warfare, Fire orders),
+       TARGETING / INCOMING and the ORDERS panel's title. The same 30% allegiance tint as --tt-dim on
+       a lighter grey, so a heading sits between the dim row labels and the bright values. Brightened
+       once more the same day (#d4d4d4 -> #e6e6e6 under the tint). */
+    --tt-head: #dadde0;
+    /* The card's own buttons (Clear EW, Ship details - round 4): the label colour on a line and a
+       hover fill tinted the same way, so they belong to the card rather than to the site's blue. */
+    --tt-btn-line: #4b5157;
+    --tt-btn-hover: #15191d;
+    /* The head band and the footer (round 6, user 2026-11-12: --fv-card's blue sat badly on a red
+       or green card): a wash of the card's own rail colour; --tt-wash-hover is the footer button's
+       hover, a step stronger. Without color-mix(), the old --fv-card. Retune the % below. */
+    --tt-wash: var(--fv-card);
+    --tt-wash-hover: var(--fv-card-hover);
+    /* Half of an EW row's [stepper][value][stepper] block, (22 + 36 + 22) / 2 - 70px on touch. Read
+       by the value column (.fv-shipcard__vb) and by Clear EW, which centres on that column. */
+    --tt-vb-half: 40px;
+
+    /* Round 12 (user, 2026-11-16): the root is a bare flex ROW - the card box (.fv-shipcard__card,
+       below: border, rail, scroll) and the ORDERS panel beside it (.fv-shipcard__side). Inside the
+       root, so everything that measures or moves the root takes the panel along. ShipTooltip.js
+       shows it as `display: flex` (not jQuery's show(), which would write `block`). The type and
+       colour stay here and inherit. */
+    z-index: 7001;
+    position: absolute;
+    display: none;
+    flex-direction: row;
+    align-items: flex-start;
+    box-sizing: border-box;
+    padding: 0;
+    color: var(--fv-text);
+    font-family: var(--fv-ui);
+    font-size: 12px;
+    line-height: 1.4;
+    text-align: left;
+    white-space: normal;
+}
+
+.shipNameContainer.fv-shipcard *,
+.shipNameContainer.fv-shipcard *::before,
+.shipNameContainer.fv-shipcard *::after {
+    box-sizing: border-box;
+}
+
+.shipNameContainer .fv-shipcard__card {
+    /* the ✕ is absolute inside it, and rides with its scroll */
+    position: relative;
+    flex: none;
+    /* 300px -> 250px (round 3): Ini and Speed moved into Movement, the header became one row, and
+       the empty space went with them. */
+    width: 250px;
+    max-width: calc(100vw - 16px);
+    max-height: 65vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 0;
+    background: var(--fv-overlay);
+    border: 2px solid var(--tt-rail);
+    border-left-width: 2px;
+    border-radius: 6px;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+}
+
+/* The card's own scrollbar (round 8, user 2026-11-12), for a card taller than its 60vh cap: the
+   thumb wears the head band's dress - the rail-colour wash with a rail-colour border - on the
+   card's black. 8px, the hex picker's list width. Chrome reads the ::-webkit-scrollbar rules and
+   would IGNORE them if scrollbar-color were also set (Chrome 121+), so the standard property is
+   only for browsers without them (Firefox), which cannot draw a bordered thumb. The ORDERS panel's
+   tile column scrolls in the same dress. */
+.shipNameContainer .fv-shipcard__card::-webkit-scrollbar,
+.shipNameContainer .fv-shipcard__side .buttons::-webkit-scrollbar {
+    width: 8px;
+}
+
+.shipNameContainer .fv-shipcard__card::-webkit-scrollbar-track,
+.shipNameContainer .fv-shipcard__side .buttons::-webkit-scrollbar-track {
+    background: var(--fv-overlay);
+}
+
+.shipNameContainer .fv-shipcard__card::-webkit-scrollbar-thumb,
+.shipNameContainer .fv-shipcard__side .buttons::-webkit-scrollbar-thumb {
+    background: var(--tt-wash);
+    border: 1px solid var(--tt-rail);
+}
+
+.shipNameContainer .fv-shipcard__card::-webkit-scrollbar-thumb:hover,
+.shipNameContainer .fv-shipcard__side .buttons::-webkit-scrollbar-thumb:hover {
+    background: var(--tt-wash-hover);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    .shipNameContainer .fv-shipcard__card,
+    .shipNameContainer .fv-shipcard__side .buttons {
+        scrollbar-width: thin;
+        scrollbar-color: var(--tt-rail) var(--fv-overlay);
+    }
+}
+
+/* The label colour, tinted toward the allegiance (see --tt-dim above). --tt-rail is written inline
+   on the card from the two-arm gate, so observers and 3+ teams get their team tint too. */
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+    .shipNameContainer.fv-shipcard {
+        --tt-dim: color-mix(in srgb, var(--tt-rail) 30%, #9a9a9a);
+        --tt-head: color-mix(in srgb, var(--tt-rail) 30%, #e6e6e6);
+        --tt-btn-line: color-mix(in srgb, var(--tt-rail) 40%, #3c3c3c);
+        --tt-btn-hover: color-mix(in srgb, var(--tt-rail) 14%, #000000);
+        --tt-wash: color-mix(in srgb, var(--tt-rail) 16%, #000000);
+        --tt-wash-hover: color-mix(in srgb, var(--tt-rail) 30%, #000000);
+    }
+}
+
+/* D8: the hover peek lets the pointer through to the map. It used to destroy itself on any
+   mouse event inside it, because a box under the cursor that swallowed events was in the
+   way; now it simply is not a target. */
+.shipNameContainer.fv-shipcard--peek {
+    pointer-events: none;
+}
+
+/* The stack grid (several units under one cursor) keeps its own, narrower shape. */
+.shipNameContainer.fv-shipcard--stack .fv-shipcard__card {
+    width: auto;
+    min-width: 0;
+    max-width: 320px;
+}
+
+/* Anything empty takes no room and draws no rule. */
+.fv-shipcard .fv-shipcard__body:empty,
+.fv-shipcard .fv-shipcard__primary:empty,
+.fv-shipcard .fv-shipcard__foot:empty,
+.fv-shipcard .buttons:empty {
+    display: none;
+}
+
+/* ── Head band ───────────────────────────────────────────────────────────────
+   Art (the hover peek only, RIGHT of the name - round 5; the pinned card has none), the name in the allegiance BRIGHT tier (tactical.css .mine/.ally/.enemy .name, or
+   an inline team colour for observers and 3+ teams), and one sub line: the class when the name
+   does not already carry it, or a flight's strength (§11.1 R2.6). Both ellipsise - a long name
+   or class must never wrap the header (§11 item 12). The pinned card is dragged by it (D10). */
+.fv-shipcard .fv-shipcard__head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    /* ONE row (round 3, user 2026-11-10): art, name and the ✕ on the same line, a little padding
+       above and below. 4 + 24 + 4 = 32px, was 58px. */
+    min-height: 32px;
+    padding: 4px 30px 4px 7px;
+    background: var(--tt-wash);
+    /* the strong rule under the head (round 6) - it used to be the cells' top border, until "From"
+       moved above the cells; the first block of the body then draws no rule of its own */
+    border-bottom: 1px solid var(--tt-rail);
+}
+
+.fv-shipcard .fv-shipcard__body > :first-child {
+    border-top: 0;
+}
+
+.fv-shipcard--peek .fv-shipcard__head {
+    padding-right: 8px;
+}
+
+.fv-shipcard--pinned .fv-shipcard__head {
+    /* no art on the pinned card (round 5): the name starts on the sections' own 9px */
+    padding-left: 9px;
+    cursor: grab;
+    /* the head's pointer moves are the drag, not a page pan */
+    touch-action: none;
+}
+
+.fv-shipcard--dragged .fv-shipcard__head {
+    cursor: grabbing;
+}
+
+.fv-shipcard .fv-shipcard__art {
+    display: block;
+    flex: none;
+    position: relative;
+    width: 34px;
+    height: 24px;
+    object-fit: contain;
+}
+
+/* An unrevealed mine (its silhouette names the type the name masking hides) and any art that
+   failed to load: a ring and a dot in the rail colour, as the picker's generic glyph. */
+.fv-shipcard .fv-shipcard__art--generic::before {
+    content: "";
+    position: absolute;
+    inset: 20%;
+    border: 2px solid var(--tt-rail);
+    border-radius: 50%;
+}
+
+.fv-shipcard .fv-shipcard__art--generic::after {
+    content: "";
+    position: absolute;
+    inset: 42%;
+    background: var(--tt-rail);
+    border-radius: 50%;
+}
+
+/* Name and sub line on ONE line: the name keeps its room, the class gives way first (it ellipsises
+   long before the name does); a flight's "4/6" is short and never cut. */
+.fv-shipcard .fv-shipcard__who {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.fv-shipcard .fv-shipcard__who .name {
+    display: block;
+    flex: 0 1 auto;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fv-shipcard .fv-shipcard__sub {
+    display: block;
+    flex: 0 100 auto;
+    min-width: 0;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tt-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* The STACK hover keeps its silhouette grid in the head slot, on the plain card fill. */
+.fv-shipcard .namecontainer--stack {
+    display: block;
+    min-height: 0;
+    padding: 6px;
+    background: var(--fv-overlay);
+    border-bottom: 0;
+    cursor: default;
+}
+
+/* ── Status chips (§4.3) ─────────────────────────────────────────────────────
+   One chip per status line of the old run-on sentence, outlined in its family's colour. The
+   families keep the old inline hues, so no status changed meaning. */
+.fv-shipcard .fv-shipcard__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 6px 10px;
+    border-top: 1px solid var(--fv-rule);
+}
+
+.fv-shipcard .fv-shipcard__chip {
+    max-width: 100%;
+    padding: 1px 5px;
+    border: 1px solid currentColor;
+    font-size: 10px;
+    line-height: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--tt-dim);
+}
+
+.fv-shipcard .fv-shipcard__chip--caution { color: #f39c3d; }      /* was orange: rolled, pivoting, firing modifier */
+.fv-shipcard .fv-shipcard__chip--danger { color: #ff5a5a; }       /* was red: detected, uncontrolled, failed */
+.fv-shipcard .fv-shipcard__chip--good { color: var(--fv-own-bright); } /* was limegreen: undetected, attached */
+.fv-shipcard .fv-shipcard__chip--benign { color: #33c6e6; }       /* was cyan: launched, hangar ops, arrival */
+.fv-shipcard .fv-shipcard__chip--jump,
+.fv-shipcard .fv-shipcard__chip--warn { color: var(--fv-warn); }  /* jumping, command node */
+.fv-shipcard .fv-shipcard__chip--abduct { color: #b36bff; }       /* the abduction marker's purple */
+.fv-shipcard .fv-shipcard__chip--suppressed { color: #d250ff; }   /* EDF_PURPLE / EWIconContainer COLOR_JAM */
+.fv-shipcard .fv-shipcard__chip--accent { color: var(--fv-accent); } /* evasion */
+.fv-shipcard .fv-shipcard__chip--neutral { color: var(--tt-dim); }
+/* --mission takes fighterMissions' own colour inline */
+
+/* ── Key cells ───────────────────────────────────────────────────────────────
+   Four fixed cells, centred (§11 item 5), NUMBERS ONLY (§11.1 R2.5): what a removed sub line
+   used to say is in the cell's title. INI = the rolled total with the order in dim brackets on
+   the same line, hence the wider first and last columns. */
+.fv-shipcard .fv-shipcard__cells {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    /*border-top: 1px solid var(--fv-rule);*/
+    border-top: 1px solid var(--tt-rail);      
+    text-align: center;
+}
+
+.fv-shipcard .fv-shipcard__cells--n3 { grid-template-columns: 1fr 1fr 1fr; }
+/* Two cells are equal halves (round 5, user 2026-11-10; was 1.5fr 1fr). Mindrider decimals
+   ("48.75 · 48.75") still fit the half. */
+.fv-shipcard .fv-shipcard__cells--n2 { grid-template-columns: 1fr 1fr; }
+.fv-shipcard .fv-shipcard__cells--n1 { grid-template-columns: 1fr; }
+
+.fv-shipcard .fv-shipcard__cell {
+    min-width: 0;
+    padding: 4px 4px 5px;
+    /*border-right: 1px solid var(--fv-rule);*/  
+    border-right: 1px solid var(--tt-rail);   
+}
+
+.fv-shipcard .fv-shipcard__cell:last-child {
+    border-right: 0;
+}
+
+.fv-shipcard .fv-shipcard__cl {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tt-head);
+}
+
+.fv-shipcard .fv-shipcard__cv {
+    margin-top: 1px;
+    font-family: var(--fv-mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--fv-text-bright);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fv-shipcard .fv-shipcard__cv i {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--tt-dim);
+}
+
+/* Stage 3: with a unit selected, the profile on the side that FACES it stays bright and the
+   other one dims (both stay bright on a boundary). */
+.fv-shipcard .fv-shipcard__cv--facing .fv-shipcard__def {
+    color: var(--tt-dim);
+    font-weight: 400;
+}
+
+.fv-shipcard .fv-shipcard__cv--facing .fv-shipcard__def--hot {
+    color: var(--fv-text-bright);
+    font-weight: 700;
+}
+
+.fv-shipcard .fv-shipcard__sep {
+    font-weight: 400;
+    color: var(--tt-dim);
+}
+
+/* ── Sections ───────────────────────────────────────────────────────────── */
+.fv-shipcard .fv-shipcard__sec {
+    padding: 5px 9px 6px;
+    /*border-top: 1px solid var(--fv-rule);*/
+    border-top: 1px solid var(--tt-rail);       
+}
+
+.fv-shipcard .fv-shipcard__mh {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
     margin-bottom: 3px;
-    /* Longhands, not the `border-bottom` shorthand: only the COLOUR is dynamic, and
-       saying so keeps the width and style out of var() substitution entirely. */
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    border-bottom-color: var(--tt-name, var(--fv-neutral));
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tt-head);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* ...except on a STACKED hex, where the container holds the silhouette grid and no name
-   at all. A rule under a name reads as an underline; the same rule under a grid of
-   pictures reads as a stray line across the bottom of the tooltip, and there is no name
-   colour to paint it with either (see the --tt-name fallback above). ShipTooltip.js adds
-   this modifier on the multi-ship path only, so the single-ship tooltip is untouched. */
-.shipNameContainer .namecontainer--stack {
-    border-bottom-style: none;
+/* the heading's own text gives way to a button pinned beside it (Clear all EW) */
+.fv-shipcard .fv-shipcard__mh > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* The TARGETING / INCOMING section headings. `.fire` and `.ballistics` are each carried
-   by two divs — this heading and the content beneath it — so the rule above the heading
-   has to key on tt-head, or the content would grow a border of its own.
-   `text-decoration: bold` came across from the inline style and was dropped: `bold` is
-   not a text-decoration value, so it never did anything. */
-.shipNameContainer .tt-head {
-    margin: 3px 0;
-    padding: 2px 0 0 0;
-    border-top: 1px solid white;
-    color: red;
+/* ── Folding sections (round 12, user 2026-11-16) ─────────────────────────────
+   Movement, and your own unit's Electronic warfare and (round 13) Fire orders: the heading is a button - a chevron and the
+   title, in the heading's own dress - that folds the section to its heading line. ShipTooltip.js
+   folds() keeps the state for the phase. The chevron points down when open, right when folded. */
+.fv-shipcard .fv-shipcard__fold {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.fv-shipcard .fv-shipcard__fold:hover {
+    color: var(--fv-text-bright);
+}
+
+.fv-shipcard .fv-shipcard__fold:focus {
+    outline: none;
+}
+
+.fv-shipcard .fv-shipcard__fold:focus-visible {
+    outline: 1px solid var(--fv-accent);
+    outline-offset: 1px;
+}
+
+.fv-shipcard .fv-shipcard__foldt {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* A chevron drawn from two borders of a 5px box, so it centres on geometry rather than on a font's
+   glyph. Rotated about its own middle: 45deg points down, -45deg right, 135deg left. */
+.fv-shipcard .fv-shipcard__chev {
+    display: block;
+    flex: none;
+    width: 5px;
+    height: 5px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: translateY(-1px) rotate(45deg);
+}
+
+.fv-shipcard .fv-shipcard__sec--folded .fv-shipcard__fold .fv-shipcard__chev {
+    transform: rotate(-45deg);
+}
+
+/* (The folded section's own hide rule is after the EW rows below - see "Folded sections".) */
+
+/* Two columns: Movement is five rows of two with no heading (round 6, user 2026-11-12: Ini Base +
+   Ini Mod, Thrust + Initiative, Speed + Accel, Turn + Delay, Pivot + Roll), and "From" is Range +
+   Facing. "From" used to give Facing the wider column
+   (0.8fr / 1.2fr); round 5 (user, 2026-11-10) puts both on these same two equal columns, so
+   Facing starts exactly where Ini does below it. A boundary reads "P.FWD/PORT" to fit. */
+.fv-shipcard .fv-shipcard__spec {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px 14px;
+}
+
+.fv-shipcard .fv-shipcard__spec > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    min-width: 0;
+}
+
+.fv-shipcard .fv-shipcard__spec span {
+    color: var(--tt-dim);
+    white-space: nowrap;
+}
+
+.fv-shipcard .fv-shipcard__spec b {
+    font-family: var(--fv-mono);
+    font-weight: 400;
+    color: var(--fv-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── EW rows (§11 items 1 and 11, §11.1 R2.0 and R2.3) ───────────────────────
+   [icon 20px] LABEL ............ [24px][32px value][24px]. Every row ends in the same block, so
+   DEW's value (with blank slots) lines up with the steppers' values in one column.
+   Everything sits on the row's vertical MIDDLE: a fixed-height flex row, the icon a block, the
+   label and value at line-height 1, the −/+ glyphs flex-centred. MEASURED on the ink (2x
+   headless shot, 2026-11-10), not eyeballed: the −/+ boxes centre exactly on the row, the caps
+   label and value within 0.75px of it, and the user's DEW art centres on it with NO offset. The
+   mockup lifted the icon 1px, which suited its stand-in art; on the real icons that put the DEW
+   ink 2px high. Decorated icons (CCEW's dots, MDEW's star) read higher by their decoration. */
+.fv-shipcard .fv-shipcard__ewr {
+    /* The row's colour (round 3): its label AND its −/+ buttons. ShipTooltip.js writes it from
+       window.EW_LABEL_COLORS (ShipWindowEw.js), the one map the ship window reads too. */
+    --ew-color: var(--fv-text-accent);
+    display: flex;
+    align-items: center;
+    /* 7px -> 5px (round 8): the icon moved in under "DEFENCE" and the labels needed the room */
+    gap: 5px;
+    height: 24px;
+}
+
+.fv-shipcard .fv-shipcard__ewi {
+    display: block;
+    flex: none;
+    width: 20px;
+    height: 20px;
+    /* starts under "DEFENCE" (round 8): ShipTooltip.js alignEwRows measures it. On the ICON, not
+       the row - a row padding would shrink the row the value column's 25% margin is taken from. */
+    margin-left: var(--tt-ew-indent, 0px);
+}
+
+.fv-shipcard .fv-shipcard__ewl {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--ew-color);
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* The value sits in ONE column with the DEW cell's number (round 6, user 2026-11-12). The DEW number
+   is centred in the right half of the cells, which span the card's full inner width W; a row spans
+   W - 18 (the section's 9px padding). So the block's right margin is
+     0.25W - 9 - half the block = 25% of the row + 4.5 - 9 - half = calc(25% - 4.5px - half),
+   which holds at any card width (the in-sheet card is wider). --tt-vb-half is half of
+   [stepper][value][stepper]; where the block is wider than half the card (touch), it just sits
+   right-aligned. Measured: 0.0px off the DEW number on every card. */
+.fv-shipcard .fv-shipcard__vb {
+    display: flex;
+    flex: none;
+    align-items: center;
+    margin-right: max(0px, calc(25% - 4.5px - var(--tt-vb-half)));
+}
+
+.fv-shipcard .fv-shipcard__sp {
+    width: 22px;
+    height: 20px;
+}
+
+.fv-shipcard .fv-shipcard__sv {
+    /* 28px -> 36px (round 4): Blanket DEW's quarters ("1.25", "0.75") were tight */
+    width: 36px;
+    font-family: var(--fv-mono);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    color: var(--fv-text-bright);
+}
+
+/* The −/+ stepper buttons, and Clear all EW in the same dress (§11 item 7). */
+.fv-shipcard .fv-shipcard__sb,
+.fv-shipcard .fv-shipcard__clear,
+.fv-shipcard .fv-shipcard__btn {
+    margin: 0;
+    border: 1px solid var(--fv-line-scs);
+    border-radius: 0;
+    background: var(--fv-card);
+    color: var(--fv-accent);
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.fv-shipcard .fv-shipcard__sb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 20px;
+    padding: 0 0 2px;
+    font-size: 15px;
+    line-height: 1;
+    /* in the row's own colour (round 3, user 2026-11-10) */
+    color: var(--ew-color);
+    border-color: var(--ew-color);
+}
+
+/* Clear EW and Ship details wear the card's own colours (round 4, user 2026-11-10): the label
+   colour on its tinted line, lighting to the card's rail colour on hover. */
+.fv-shipcard .fv-shipcard__clear,
+.fv-shipcard .fv-shipcard__btn {
+    color: var(--fv-text);
+    border-color: var(--tt-btn-line);
+    background: transparent;
+}
+
+.fv-shipcard .fv-shipcard__clear:hover,
+.fv-shipcard .fv-shipcard__btn:hover {
+    color: var(--fv-text-bright);
+    border-color: var(--tt-rail);
+    background: var(--tt-btn-hover);
+}
+
+/* a stepper keeps its colour on hover; the fill and the glyph light up */
+.fv-shipcard .fv-shipcard__sb:hover {
+    color: var(--fv-text-bright);
+    background: var(--fv-card-hover);
+}
+
+/* the other half of a stepper whose conditions did not pass: there, and off (§5.3) */
+.fv-shipcard .fv-shipcard__sb:disabled,
+.fv-shipcard .fv-shipcard__sb:disabled:hover {
+    color: var(--fv-line-soft);
+    border-color: var(--fv-line-soft);
+    background: transparent;
+    cursor: default;
+}
+
+/* An EW row whose allocation is not open right now (round 4, user 2026-11-10) - DIST from an ELINT
+   running Blanket DEW, an ELINT function out of range. Greyed rather than hidden: the value still
+   reads. ShipTooltip.js greyUnavailableEwRows decides; the icon goes grey through a filter, never
+   element opacity (alpha compounding). */
+.fv-shipcard .fv-shipcard__ewr--off {
+    --ew-color: #5e656c;
+}
+
+.fv-shipcard .fv-shipcard__ewr--off .fv-shipcard__sv {
+    color: #5e656c;
+    font-weight: 400;
+}
+
+.fv-shipcard .fv-shipcard__ewr--off .fv-shipcard__ewi {
+    filter: grayscale(1) brightness(0.55);
+}
+
+/* A stat a CRITICAL has changed (user request 2026-11-16; ShipTooltip.js critStats) - Ini Mod, Thrust,
+   Defence, DEW - is drawn in the critical orange, as the system card draws its own (SystemCard $crit).
+   It replaces the value's BRIGHT colour only: a Defence number dimmed for facing away from the selected
+   unit stays dim (the facing still reads), as do the cell's separator and an EW row greyed as not open
+   (.fv-shipcard__ewr--off outranks the plain rule). Placed after the cell, spec and EW-row rules it
+   overrides, so a source-order cascade (the jsdom harnesses) agrees with the browser. */
+.fv-shipcard .fv-shipcard__cv--crit,
+.fv-shipcard .fv-shipcard__cv--crit .fv-shipcard__def--hot,
+.fv-shipcard .fv-shipcard__spec b.fv-shipcard__crit,
+.fv-shipcard .fv-shipcard__sv--crit {
+    color: var(--fv-crit);
+}
+
+/* Clear EW: small, in the EW heading's own row (round 3), CENTRED on the column of values below it
+   (round 9, user 2026-11-12). The slot is ZERO wide and sits on that column's centre line - the
+   value block's centre is max(half, 25% - 4.5px) in from the row's right edge (see .fv-shipcard__vb)
+   - and the button, centred in it, overflows it equally both ways. So the button centres whatever
+   its width, and the heading's text loses no room to a slot. */
+.fv-shipcard .fv-shipcard__clr {
+    display: flex;
+    flex: none;
+    justify-content: center;
+    width: 0;
+    margin-left: auto;
+    margin-right: max(var(--tt-vb-half), calc(25% - 4.5px));
+}
+
+/* on the head band's wash, as Ship details sits on the footer's (round 9) */
+.fv-shipcard .fv-shipcard__clear {
+    flex: none;
+    height: 15px;
+    padding: 0 4px;
+    font-size: 9px;
+    line-height: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    background: var(--tt-wash);
+}
+
+.fv-shipcard .fv-shipcard__clear:hover {
+    background: var(--tt-wash-hover);
+}
+
+/* ── Fire orders (own unit, Pre-Firing / Firing) ─────────────────────────── */
+.fv-shipcard .fv-shipcard__none {
+    color: var(--tt-dim);
+}
+
+.fv-shipcard .fv-shipcard__order {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.fv-shipcard .fv-shipcard__ordername {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fv-shipcard .fv-shipcard__order b {
+    font-family: var(--fv-mono);
+    font-weight: 400;
+    color: var(--fv-text);
+}
+
+/* Folded sections (round 12): the heading line alone. Clear EW stays in it - it is a heading
+   button. Placed AFTER the spec grid, the EW rows and (round 13) the Fire orders rows on purpose:
+   it wins on specificity anyway, and a cascade that only reads source order (jsdom, which the
+   round-12/13 harness checks it in) agrees. Keep it after any new foldable section's rows. */
+.fv-shipcard .fv-shipcard__sec--folded > :not(.fv-shipcard__mh) {
+    display: none;
+}
+
+.fv-shipcard .fv-shipcard__sec--folded > .fv-shipcard__mh {
+    margin-bottom: 0;
+}
+
+/* ── TARGETING / INCOMING ────────────────────────────────────────────────────
+   `.fire` and `.ballistics` are each carried by two divs — the heading and the content beneath
+   it — so the heading's rule keys on tt-head. The heading is a section head now, not pure red
+   under a white rule. */
+.fv-shipcard .tt-head {
+    margin: 0;
+    padding: 5px 9px 0;
+    border-top: 1px solid var(--fv-rule);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tt-head);
+}
+
+.fv-shipcard .fire.targeting,
+.fv-shipcard .ballistics.incoming {
+    padding: 2px 9px 6px;
+}
+
+/* Targeting rows (Stage 4): weapon | mode | hit chance, in a column the eye can run down.
+   A status word (Not in arc, Line of sight blocked, …) takes the last two columns. */
+.fv-shipcard .targeting .tt-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto 44px;
+    gap: 8px;
+    align-items: baseline;
+    min-height: 20px;
+}
+
+.fv-shipcard .targeting .tt-row .weapon {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Identical weapons grouped into one row (user, 2026-11-16; weaponManager.targetingShipTooltip):
+   the count leads the name, so the name's ellipsis never reaches it. */
+.fv-shipcard .targeting .tt-row .tt-count {
+    margin-right: 4px;
+    font-family: var(--fv-mono);
+    font-weight: 700;
+}
+
+.fv-shipcard .targeting .tt-row .firingMode {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--tt-dim);
+    white-space: nowrap;
+}
+
+.fv-shipcard .targeting .tt-row .posHitchange,
+.fv-shipcard .targeting .tt-row .negHitchange {
+    justify-self: end;
+    font-family: var(--fv-mono);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* the dotted "there is a breakdown" cue sits under the NUMBER only (see the INCOMING note below) */
+.fv-shipcard .targeting .tt-row .hit-chance-tooltip {
+    border-bottom: none;
+}
+
+.fv-shipcard .targeting .tt-row .hit-chance-tooltip .hitvalue {
+    border-bottom: 1px dotted green;
+}
+
+.fv-shipcard .targeting .tt-row .negHitchange.hit-chance-tooltip .hitvalue {
+    border-bottom-color: rgba(255, 0, 0, 0.548);
+}
+
+.fv-shipcard .targeting .tt-row .tt-status {
+    grid-column: 2 / 4;
+    justify-self: end;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.fv-shipcard .targeting .tt-line {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--tt-dim);
+}
+
+/* ── The Target button (§11 item 4, §11.1 R2.1) ──────────────────────────────
+   A dim fill with the hue on its border and light text (--fv-target*), a darker well so the
+   green crosshair reads. Not blue - nothing else on the card is this colour. */
+.fv-shipcard .fv-shipcard__primary {
+    padding: 0 9px 7px;
+}
+
+.fv-shipcard .fv-shipcard__fire {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    height: 28px;
+    margin: 2px 0 0;
+    padding: 0;
+    border: 1px solid var(--fv-target);
+    border-radius: 0;
+    background: var(--fv-target-fill);
+    color: var(--fv-target-text);
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.fv-shipcard .fv-shipcard__fire:hover {
+    border-color: var(--fv-target-text);
+}
+
+.fv-shipcard .fv-shipcard__well {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    /*background: rgba(0, 0, 0, 0.45);*/
+    background: transparent;
+}
+
+.fv-shipcard .fv-shipcard__well .fv-shipcard__icon {
+    width: 24px;
+    height: 24px;
+}
+
+.fv-shipcard .fv-shipcard__lab {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+        justify-content: center;
+}
+
+/* ── Orders: captioned tiles (§5.3) ──────────────────────────────────────────
+   The existing PNG at 30px with its caption underneath - the caption is what touch, which has
+   no hover, was missing. The icon keeps its own class, so every icon rule below still paints it. */
+.fv-shipcard .buttons {
+    padding: 5px 9px 6px;
+    border-top: 1px solid var(--fv-rule);
+}
+
+.fv-shipcard .buttons .menu .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+}
+
+.fv-shipcard .fv-shipcard__tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 58px;
+    margin: 0;
+    padding: 3px 2px 2px;
+    border: 1px transparent var(--fv-rule);
+    border-radius: 0;
+    background: transparent;
+    color: var(--fv-text);
+    font-family: inherit;
+    font-size: 10px;
+    line-height: 12px;
+    cursor: pointer;
+}
+
+.fv-shipcard .fv-shipcard__tile:hover {
+    border-color: var(--fv-line-scs);
+    background: var(--fv-card-hover);
+}
+
+.fv-shipcard .fv-shipcard__cap {
+    display: block;
+    max-width: 100%;
+    text-align: center;
+}
+
+/* Every action icon, wherever it sits. The art is the menu's 40x40 PNGs, scaled. */
+.fv-shipcard .fv-shipcard__icon {
+    display: block;
+    flex: none;
+    position: relative;
+    width: 30px;
+    height: 30px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* The hover line under the tiles: a button whose info reports STATE (fighterMissionInfo,
+   luckyInfo, jealousElintInfo, …) writes it here. It must never WIDEN the card (user report
+   2026-10-09: a widening line moved the buttons out from under the pointer) - the card has a
+   fixed width now, which retires that loop by construction. */
+.fv-shipcard .buttons .menu .info {
+    margin-top: 4px;
+    font-size: 10px;
+    color: var(--tt-dim);
+}
+
+.fv-shipcard .buttons .menu .info:empty {
+    display: none;
+}
+
+/* ── The ORDERS panel (round 12, user 2026-11-16) ─────────────────────────────
+   The pinned card's tiles, moved out of the card into a column beside it so a long card does not
+   grow longer: an extension of the card on its right, with a head band of its own (the card's wash,
+   32px, a rail rule under it). Its own full border, laid OVER the card's right border by a 2px
+   negative margin - where the panel is shorter the join is one line, where it is longer its left
+   edge still has a border. Round 13 (user, 2026-11-16): it hangs from the rule under the card's head
+   band - its top border starts on that rule's row (the card's 2px border + the head's 32px less its
+   1px rule = 33px down) - so the card's head band, ✕ and corners stand clear of it. The toggle in
+   its head band folds the column away to a tab of that band alone. Drawn only while the menu offers
+   a tile (ShipTooltip.js setSide → .fv-shipcard--has-side). Docked on the picker's left, the whole
+   thing mirrors (.fv-shipcard--side-left). Not used on the in-sheet card. */
+.shipNameContainer .fv-shipcard__side {
+    display: none;
+    position: relative;     /* paints over the card's border (the card is positioned too) */
+    flex: none;
+    flex-direction: column;
+    width: 78px;
+    /* the card's 65vh less the drop, so the row is never taller than the card can be */
+    max-height: calc(65vh - 33px);
+    margin-top: 33px;
+    margin-left: -2px;
+    background: var(--fv-overlay);
+    border: 2px solid var(--tt-rail);
+    border-radius: 0 6px 6px 0;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+}
+
+.shipNameContainer.fv-shipcard--has-side .fv-shipcard__side {
+    display: flex;
+}
+
+.fv-shipcard .fv-shipcard__sidehead {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 2px;
+    height: 32px;
+    padding: 0 2px 0 7px;
+    /*background: var(--tt-wash);
+    border-bottom: 1px solid var(--tt-rail);*/
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tt-head);
+    white-space: nowrap;
+    cursor: grab;
+    touch-action: none;
+}
+
+.fv-shipcard--dragged .fv-shipcard__sidehead {
+    cursor: grabbing;
+}
+
+.fv-shipcard .fv-shipcard__sidetitle {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* The in / out toggle: the ✕'s dress (transparent until hovered), a chevron pointing the way the
+   panel will go - in (toward the card) while it is out, out while it is folded. */
+.fv-shipcard .fv-shipcard__sidetoggle {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    color: var(--tt-dim);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--fv-radius-modal);
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.fv-shipcard .fv-shipcard__sidetoggle:hover {
+    color: var(--fv-text);
+    border-color: var(--fv-line-soft);
+    background: var(--tt-wash-hover);
+}
+
+.fv-shipcard .fv-shipcard__sidetoggle:focus {
+    outline: none;
+}
+
+.fv-shipcard .fv-shipcard__sidetoggle:focus-visible {
+    outline: 1px solid var(--fv-accent);
+    outline-offset: -1px;
+}
+
+.fv-shipcard .fv-shipcard__sidetoggle .fv-shipcard__chev {
+    width: 6px;
+    height: 6px;
+    transform: translateX(1px) rotate(135deg);    /* points left: in, toward the card */
+}
+
+.fv-shipcard--side-folded .fv-shipcard__sidetoggle .fv-shipcard__chev {
+    transform: translateX(-1px) rotate(-45deg);   /* points right: out */
+}
+
+/* The tiles: one column, the panel's width. */
+.fv-shipcard .fv-shipcard__side .buttons {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 6px;
+    border-top: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.fv-shipcard .fv-shipcard__side .buttons .menu .action-buttons {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 4px;
+}
+
+.fv-shipcard .fv-shipcard__side .fv-shipcard__tile {
+    width: 100%;
+}
+
+.fv-shipcard .fv-shipcard__side .buttons .menu .info {
+    margin-top: 5px;
+    overflow-wrap: anywhere;
+    text-align: center;
+}
+
+/* Folded: a tab - the head band's wash and the toggle, nothing else. */
+.shipNameContainer.fv-shipcard--side-folded .fv-shipcard__side {
+    width: auto;
+}
+
+/* 31px + no rule: the open band less its 1px rule, so the toggle stays on the same line when the
+   panel folds (a tab has nothing under it to rule off). */
+.fv-shipcard--side-folded .fv-shipcard__sidehead {
+    height: 28px;
+    padding: 0 2px 0 3px;
+    border-bottom: 0;
+}
+
+.fv-shipcard--side-folded .fv-shipcard__sidetitle,
+.fv-shipcard--side-folded .fv-shipcard__side .buttons {
+    display: none;
+}
+
+/* Docked on the picker's left (ShipTooltip.js placeDocked): the panel on the card's far side, so the
+   card's edge - and the dock caret - still face the picker. Everything mirrors. */
+.shipNameContainer.fv-shipcard--side-left {
+    flex-direction: row-reverse;
+}
+
+.shipNameContainer.fv-shipcard--side-left .fv-shipcard__side {
+    margin-left: 0;
+    margin-right: -2px;
+    border-radius: 6px 0 0 6px;
+}
+
+.fv-shipcard--side-left .fv-shipcard__sidehead {
+    flex-direction: row-reverse;
+    padding: 0 7px 0 2px;
+}
+
+.fv-shipcard--side-left.fv-shipcard--side-folded .fv-shipcard__sidehead {
+    padding: 0 3px 0 2px;
+}
+
+.fv-shipcard--side-left .fv-shipcard__sidetitle {
+    text-align: right;
+}
+
+.fv-shipcard--side-left .fv-shipcard__sidetoggle .fv-shipcard__chev {
+    transform: translateX(-1px) rotate(-45deg);   /* in, toward the card: right */
+}
+
+.fv-shipcard--side-left.fv-shipcard--side-folded .fv-shipcard__sidetoggle .fv-shipcard__chev {
+    transform: translateX(1px) rotate(135deg);    /* out: left */
+}
+
+/* ── Footer: Ship details, the whole width (round 5, user 2026-11-10 - Ini base · mod moved up to
+   Movement's heading). The peek has no button, so its footer is :empty and not drawn. ──────── */
+.fv-shipcard .fv-shipcard__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 24px;
+    padding: 4px 9px;
+    background: var(--tt-wash);
+    border-top: 1px solid var(--tt-rail);
+}
+
+/* on the washed footer the shared hover fill (--tt-btn-hover, 14%) would be DARKER than the
+   ground, so Ship details lights a step up instead (round 6) */
+.fv-shipcard .fv-shipcard__foot .fv-shipcard__btn:hover {
+    background: var(--tt-wash-hover);
+}
+
+/* Same size and layout as the Target button (user, 2026-11-13): 28px tall, the icon in a 34px
+   well, the label (.fv-shipcard__lab) centred in the rest. Colours stay the footer's own (above). */
+.fv-shipcard .fv-shipcard__btn {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: stretch;
+    height: 28px;
+    padding: 0;
+}
+
+/* ── The hull strip: D4 RULED NO (§11 item 9). Built and NOT rendered - ShipTooltip.js
+   buildHull / renderHull. These rules are what it would wear. ── */
+.fv-shipcard .fv-shipcard__hull {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    padding: 6px 10px;
+    border-top: 1px solid var(--fv-rule);
+}
+
+.fv-shipcard .fv-shipcard__hullbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1 1 40%;
+    font-size: 10px;
+    color: var(--tt-dim);
+}
+
+.fv-shipcard .fv-shipcard__hullt {
+    flex: 1 1 auto;
+    height: 4px;
+    background: var(--fv-well);
+}
+
+.fv-shipcard .fv-shipcard__hullf {
+    display: block;
+    height: 100%;
+    background: var(--fv-ok);
+}
+
+/* ── Touch: 44px targets (the coarse-pointer floor) ───────────────────────── */
+@media (pointer: coarse) {
+    .fv-shipcard .fv-shipcard__ewr {
+        height: 48px;
+    }
+
+    .fv-shipcard .fv-shipcard__clear {
+        height: 32px;
+        padding: 0 8px;
+        line-height: 30px;
+    }
+
+    .fv-shipcard .fv-shipcard__sb,
+    .fv-shipcard .fv-shipcard__sp {
+        width: 48px;
+        height: 44px;
+    }
+
+    .fv-shipcard .fv-shipcard__sb {
+        font-size: 20px;
+    }
+
+    .fv-shipcard .fv-shipcard__sv {
+        width: 44px;
+    }
+
+    .shipNameContainer.fv-shipcard {
+        --tt-vb-half: 70px;   /* (48 + 44 + 48) / 2 */
+    }
+
+    .fv-shipcard .fv-shipcard__btn,
+    .fv-shipcard .fv-shipcard__fire {
+        min-height: 44px;
+    }
+
+    .fv-shipcard .fv-shipcard__tile {
+        min-height: 44px;
+    }
+
+    /* round 12: the fold headings and the ORDERS toggle as touch targets */
+    .fv-shipcard .fv-shipcard__fold {
+        min-height: 32px;
+    }
+
+    .fv-shipcard .fv-shipcard__sidetoggle {
+        width: 30px;
+        height: 30px;
+    }
+
+    .shipNameContainer .fv-shipcard__side {
+        width: 90px;
+    }
 }
 
 /* ── Stack grid ──────────────────────────────────────────────────────────────
@@ -169,36 +1367,30 @@
 }
 
 /* ── Close button ────────────────────────────────────────────────────────────
-   ShipTooltip.js draws this ONLY on the persistent tooltip (the one a click on a unit
-   leaves standing) - a hover tooltip destroys itself the moment the pointer enters it,
-   so an X there could never be reached. It exists because the persistent tooltip sits
-   right under the unit it describes, which is exactly where the hex you want to target
-   and the speed controls you want to press tend to be (user report 2026-08-30).
+   ShipTooltip.js draws this ONLY on the pinned card (the one a click on a unit leaves
+   standing) - the hover peek is click-through, so an ✕ there could never be pressed. It
+   exists because the pinned card sits right under the unit it describes, which is exactly
+   where the hex you want to target and the speed controls you want to press tend to be
+   (user report 2026-08-30).
 
-   Absolute, so it costs the layout nothing and stays out of the centred text flow. It
-   is a child of the SCROLL container (.shipNameContainer is overflow-y:auto), so on the
-   rare tooltip long enough to scroll it rides with the content rather than pinning -
-   acceptable, because it starts at the top where the reader already is.
-
-   Sizing and the transparent-until-hover treatment are the hex picker's close button
-   (.fv-hexpicker__close), one tier smaller: this sits inside a 12px tooltip, not a
-   card header. */
+   Absolute, over the head band's top-right corner (the band reserves 30px for it). It is a
+   child of the SCROLL container (the card is overflow-y:auto), so on the rare card long
+   enough to scroll it rides with the content rather than pinning - acceptable, because it
+   starts at the top where the reader already is. Sizing and the transparent-until-hover
+   treatment are the hex picker's close button (.fv-hexpicker__close). */
 .shipNameContainer .tt-close {
     position: absolute;
-    /* Clear of the 7px --fv-radius-tooltip corner: the container clips to its own rounded
-       padding box (overflow-y:auto makes BOTH axes clip), and 1px/2px put the button's own
-       corner outside the curve, which nicked it on hover. */
-    top: 2px;
-    right: 4px;
+    top: 6px;
+    right: 5px;
     z-index: 1;
-    width: 17px;
-    height: 17px;
+    width: 20px;
+    height: 20px;
     padding: 0;
-    line-height: 15px;
+    line-height: 18px;
     text-align: center;
-    font-size: 11px;
-    font-family: arial;
-    color: var(--fv-text-dim);
+    font-size: 13px;
+    font-family: var(--fv-ui);
+    color: var(--tt-dim);
     background: transparent;
     border: 1px solid transparent;
     border-radius: var(--fv-radius-modal);
@@ -226,52 +1418,11 @@
     outline-offset: -1px;
 }
 
-/* Room for the X at both ends of the name row. Symmetric on purpose: the row is
-   centre-aligned, so padding only the right would shift every name left of centre.
-   Padding is inside the border box, so the rule under the name still spans the full
-   width - only the text is inset. */
-.shipNameContainer--closable .namecontainer {
-    padding-left: 18px;
-    padding-right: 18px;
-}
-
-.shipNameContainer .buttons .menu .action-buttons {
-    display: flex;
-    margin: 10px 0;
-    justify-content: center;
-    max-width: 300px;
-    flex-wrap: wrap;
-}
-
-.shipNameContainer .buttons .menu .action-buttons button {
-    margin: 0 5px;
-    width: 40px;
-    height: 40px;
-    border: none;
-    color: #deebff;
-    font-size: 16px;
-    text-transform: uppercase;
-    cursor: pointer;
-    background-color: transparent;
-    border-radius: 10%;
-}
-
-.shipNameContainer .buttons .menu .action-buttons button:hover {
-    box-shadow: white 0 0 10px, white 0 0 3px;
-    background-color: white;
-}
-
-/* The hover line under the buttons must never WIDEN the tooltip (user report 2026-10-09, game 4453).
-   The box is placed once, centred on the ship, and then keeps its left edge while its width is
-   shrink-to-fit - so a long hover text grew it to the right, the centred buttons slid right by half
-   the growth, the pointer on a button's left edge fell off it, the text cleared, the box shrank and
-   the button slid back under the pointer: a mouseover/mouseout loop that looked like the tooltip
-   re-rendering. width:0 + min-width:100% takes the line out of the width calculation and lets it fill
-   whatever width the rest of the tooltip already has, so a long text wraps instead. */
-.shipNameContainer .buttons .menu .info {
-    width: 0;
-    min-width: 100%;
-}
+/* The old 40x40 icon row (.action-buttons button, white hover glow) and its hover-line
+   width:0 fix went with Stage 4: the ship card draws its buttons as steppers, captioned tiles,
+   the Target button and the footer button (rules above), and its fixed 300px width retires the
+   "hover line widens the tooltip" loop (user report 2026-10-09, game 4453) by construction.
+   ShipTooltipMenu.renderTo still emits that row for any other owner; it has none today. */
 
 .selectShip{
     background-image: url("../img/selectShip.png");
@@ -644,6 +1795,13 @@
     text-align: left;
 }
 
+/* The INCOMING rows were laid out under tactical.css's old `.shipNameContainer span
+   { padding-top: 2px }`, which went with the Stage 2 split. Kept here for this list alone, so
+   its rows are exactly as tall as they were. */
+.shipNameContainer .incoming span {
+    padding-top: 2px;
+}
+
 /* Shooter heading. One per ship, above its shots. */
 .shipNameContainer .incoming .ballship {
     margin-top: 4px;
@@ -811,4 +1969,68 @@
         min-height: 32px;
         line-height: 32px;
     }
+}
+
+/* ── Docked beside the hex picker (D5, Stage 6) ──────────────────────────────
+   ShipTooltip.js placeDocked derives the place from the picker's rectangle and the row's. The
+   caret is a separate element in <body>: the card is its own scroll container and would clip a
+   caret drawn outside its border. It fills the 8px gap, outside the 3px rail (§11.1 R2.2), in
+   the rail's colour, pointing at the row - the picker's own caret recipe. */
+.fv-shipcard-caret {
+    --tt-rail: var(--fv-line-scs);
+    position: absolute;
+    z-index: 7002;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    pointer-events: none;
+}
+
+.fv-shipcard-caret--left {
+    border-right: 8px solid var(--tt-rail);
+}
+
+.fv-shipcard-caret--right {
+    border-left: 8px solid var(--tt-rail);
+}
+
+/* ── Inside the hex picker's sheet (D9, Stage 7) ─────────────────────────────
+   On touch a tapped row's card REPLACES the list inside the sheet; "‹ N units in hex" in the
+   sheet's header goes back. The card is the sheet's content: no position of its own, no drag,
+   no ✕ (the sheet's own does that), and the sheet's slot scrolls it. */
+.shipNameContainer.fv-shipcard.fv-shipcard--insheet {
+    position: static;
+    margin: 8px;
+}
+
+/* the card box fills the sheet (round 12: the box is the root's child now); no ORDERS panel here -
+   the tiles stay in the card */
+.fv-shipcard--insheet .fv-shipcard__card {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+    box-shadow: none;
+}
+
+/* ── 90% opacity (user, 2026-11-16) ──────────────────────────────────────────
+   The whole card - peek, pinned, stack grid - and its dock caret, so the map shows through. The
+   player's switch is the OPTIONS tab's "See-through ship tooltips" (gameOptions.js; ShipTooltip.js
+   puts the class on). Not the card inside the picker's sheet: there is no map under it. */
+.shipNameContainer.fv-shipcard.fv-shipcard--translucent:not(.fv-shipcard--insheet),
+.fv-shipcard-caret.fv-shipcard--translucent {
+    opacity: 0.85;
+}
+
+.fv-shipcard--insheet .tt-close {
+    display: none;
+}
+
+.fv-shipcard--insheet .fv-shipcard__head {
+    padding-right: 8px;
+    cursor: default;
+    touch-action: auto;
 }

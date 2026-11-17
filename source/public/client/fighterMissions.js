@@ -312,7 +312,8 @@ window.fighterMissions = {
 	//the tooltip button's hover line - short, so it never widens the tooltip
 	buttonInfo: function buttonInfo(ship) {
 		if (!ship) return 'Fighter Mission';
-		return this.isFreePick(ship) ? 'Fighter Mission (free this turn)' : 'Fighter Mission (' + this.CHANGE_PENALTY + ' Ini to change)';
+		//return this.isFreePick(ship) ? 'Fighter Mission' : 'Fighter Mission (' + this.CHANGE_PENALTY + ' Ini to change)';
+		return 'Pick Mission';		
 	},
 
 	/* R3 - the CSP flights among `ships` that end their move outside their zone; the Movement commit's passive notice */

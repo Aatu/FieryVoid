@@ -4977,6 +4977,20 @@ class DBManager
                 } catch (Throwable $e) {
                     Debug::error($e);
                 }
+
+                //CPU opponent (TACTICAL_AI_PLAN.md section 4): a bot's plan and its log go with the
+                //game. Only where the feature is reachable - a server with it off has no rows, and
+                //may not have the tables (db/cpuOpponent.sql) - and guarded all the same.
+                if (Features::reachable('cpuOpponent')) {
+                    try {
+                        $stmt = $this->connection->prepare("DELETE FROM tac_ai_state WHERE gameid = ?");
+                        $this->executeGameDeleteStatement($stmt, $ids);
+                        $stmt = $this->connection->prepare("DELETE FROM tac_ai_log WHERE gameid = ?");
+                        $this->executeGameDeleteStatement($stmt, $ids);
+                    } catch (Throwable $e) {
+                        Debug::error($e);
+                    }
+                }
             }
 
         } catch (Exception $e) {
@@ -5800,6 +5814,188 @@ public function setLastTimeChatChecked($userid, $gameid)
                 ORDER BY r.rating DESC";
 
         return $this->query($sql);
+    }
+
+    /* ------------------------------------------------------------------------------------
+       CPU opponent (TACTICAL_AI_PLAN.md sections 3.1 and 4; db/cpuOpponent.sql).
+
+       ⚠️ NOTHING ABOVE THIS BLOCK READS player.is_cpu OR tac_playeringame.cpu, on purpose: the
+       ordinary slot and player queries are untouched, so a database that has not had the
+       migration yet runs every ordinary game exactly as before. Only the callers below need the
+       new columns and tables, and every one of them is reached only with the `cpuOpponent`
+       feature on (AIDriver / AISeats check it first).
+       ------------------------------------------------------------------------------------ */
+
+    /* The CPU seats of a game, keyed by slot: playerid, slot, team, lastturn, lastphase,
+       surrendered, and `cpu` decoded to an array (level, personality, seed). */
+    public function getCpuSeats($gameid)
+    {
+        $seats = array();
+        $stmt = $this->connection->prepare(
+            "SELECT playerid, slot, teamid, lastturn, lastphase, surrendered, cpu
+               FROM tac_playeringame
+              WHERE gameid = ? AND cpu IS NOT NULL AND playerid > 0"
+        );
+        if (!$stmt) return $seats;
+
+        $stmt->bind_param('i', $gameid);
+        $stmt->bind_result($playerid, $slot, $team, $lastturn, $lastphase, $surrendered, $cpu);
+        $stmt->execute();
+        while ($stmt->fetch()) {
+            $settings = json_decode((string)$cpu, true);
+            $seats[(int)$slot] = array(
+                'playerid' => (int)$playerid,
+                'slot' => (int)$slot,
+                'team' => (int)$team,
+                'lastturn' => (int)$lastturn,
+                'lastphase' => (int)$lastphase,
+                'surrendered' => ($surrendered === null) ? null : (int)$surrendered,
+                'cpu' => is_array($settings) ? $settings : array()
+            );
+        }
+        $stmt->close();
+
+        return $seats;
+    }
+
+    //Mark slot $slot as a CPU seat ($cpuJson = its settings) or as a human one again (null).
+    public function setSlotCpu($gameid, $slot, $cpuJson)
+    {
+        $stmt = $this->connection->prepare("UPDATE tac_playeringame SET cpu = ? WHERE gameid = ? AND slot = ?");
+        if (!$stmt) throw new Exception("Prepare failed: " . $this->connection->error);
+        $stmt->bind_param('sii', $cpuJson, $gameid, $slot);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    //Does this player hold any slot of the game?
+    public function holdsSlot($gameid, $playerid)
+    {
+        $rows = $this->query("SELECT COUNT(*) AS n FROM tac_playeringame WHERE gameid = " . (int)$gameid . " AND playerid = " . (int)$playerid);
+        return ($rows && count($rows) > 0 && (int)$rows[0]->n > 0);
+    }
+
+    //The bot accounts, lowest id first.
+    public function getBotIds()
+    {
+        $ids = array();
+        foreach ($this->query("SELECT id FROM player WHERE is_cpu = 1 ORDER BY id") as $row) {
+            $ids[] = (int)$row->id;
+        }
+        return $ids;
+    }
+
+    //The game's own row, light: no ships, no slots. Null when there is no such game.
+    public function getGameRowLight($gameid)
+    {
+        $rows = $this->query("SELECT id, turn, phase, activeship, status, creator, rules FROM tac_game WHERE id = " . (int)$gameid);
+        if (!$rows || count($rows) == 0) return null;
+
+        $row = $rows[0];
+        $active = json_decode((string)$row->activeship, true);
+        if (!is_array($active)) $active = ($active === null) ? array() : array($active);
+
+        return array(
+            'id' => (int)$row->id,
+            'turn' => (int)$row->turn,
+            'phase' => (int)$row->phase,
+            'activeship' => array_map('intval', $active),
+            'activeshipRaw' => (string)$row->activeship,
+            'status' => (string)$row->status,
+            'creator' => (int)$row->creator,
+            'rules' => (string)$row->rules
+        );
+    }
+
+    //Ship id => owning player id, for the given ship ids.
+    public function getShipOwners(array $shipIds)
+    {
+        $owners = array();
+        $ids = array_filter(array_map('intval', $shipIds), function ($id) { return $id > 0; });
+        if (count($ids) == 0) return $owners;
+
+        foreach ($this->query("SELECT id, playerid FROM tac_ship WHERE id IN (" . implode(',', $ids) . ")") as $row) {
+            $owners[(int)$row->id] = (int)$row->playerid;
+        }
+        return $owners;
+    }
+
+    /* One bot run per game at a time (two polling humans must not drive the same bot twice).
+       A named lock rather than a row: it belongs to this CONNECTION, so a request that dies
+       mid-run releases it by dying. The database name is part of the lock's name because named
+       locks are server-wide and the live and test databases share one server. */
+    public function aiTryLock($gameid)
+    {
+        $rows = $this->query("SELECT GET_LOCK(CONCAT('fv_ai_', DATABASE(), '_', " . (int)$gameid . "), 0) AS got");
+        return ($rows && count($rows) > 0 && (int)$rows[0]->got === 1);
+    }
+
+    public function aiUnlock($gameid)
+    {
+        $this->query("SELECT RELEASE_LOCK(CONCAT('fv_ai_', DATABASE(), '_', " . (int)$gameid . ")) AS released");
+    }
+
+    //A bot's stored plan for this game (decoded), or an empty array.
+    public function getAiState($gameid, $playerid)
+    {
+        $stmt = $this->connection->prepare("SELECT turn, data FROM tac_ai_state WHERE gameid = ? AND playerid = ?");
+        if (!$stmt) return array();
+
+        $stmt->bind_param('ii', $gameid, $playerid);
+        $stmt->bind_result($turn, $data);
+        $stmt->execute();
+        $state = array();
+        if ($stmt->fetch()) {
+            $decoded = json_decode((string)$data, true);
+            if (is_array($decoded)) $state = $decoded;
+        }
+        $stmt->close();
+
+        return $state;
+    }
+
+    public function setAiState($gameid, $playerid, $turn, array $state)
+    {
+        $json = json_encode($state);
+        $stmt = $this->connection->prepare(
+            "INSERT INTO tac_ai_state (gameid, playerid, turn, data) VALUES (?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE turn = VALUES(turn), data = VALUES(data)"
+        );
+        if (!$stmt) throw new Exception("Prepare failed: " . $this->connection->error);
+        $stmt->bind_param('iiis', $gameid, $playerid, $turn, $json);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    /* One line of the bot's log. $kind: 'defect' (an order the server refused, or anything else
+       that is an AI bug), 'fallback', 'decision', 'info'. Capped per game at $cap rows so a long
+       game cannot grow the table without bound; a defect is still written past the cap, up to
+       twice it, because it is the one kind somebody will come looking for. */
+    public function aiLog($gameid, $playerid, $turn, $phase, $kind, $message, $cap = 2000)
+    {
+        $rows = $this->query("SELECT COUNT(*) AS n FROM tac_ai_log WHERE gameid = " . (int)$gameid);
+        $count = ($rows && count($rows) > 0) ? (int)$rows[0]->n : 0;
+        if ($count >= $cap && !($kind === 'defect' && $count < $cap * 2)) return;
+
+        $stmt = $this->connection->prepare(
+            "INSERT INTO tac_ai_log (gameid, playerid, turn, phase, kind, message, loggedat) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        );
+        if (!$stmt) return;
+
+        $now = time();
+        $message = (string)$message;
+        $stmt->bind_param('iiiissi', $gameid, $playerid, $turn, $phase, $kind, $message, $now);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    //The log lines of a game, oldest first, optionally of one kind only.
+    public function getAiLog($gameid, $kind = null)
+    {
+        $sql = "SELECT playerid, turn, phase, kind, message FROM tac_ai_log WHERE gameid = " . (int)$gameid;
+        if ($kind !== null) $sql .= " AND kind = '" . $this->DBEscape($kind) . "'";
+
+        return $this->query($sql . " ORDER BY id");
     }
 }
 

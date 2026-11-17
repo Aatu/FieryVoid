@@ -53,7 +53,10 @@
 			}
             		$CnC = $ship->getSystemByName("CnC");
 			if ($CnC && $CnC->hasCritical("RestrictedEW"))
-				$output -= 2*$CnC->hasCritical("RestrictedEW");	
+				$output -= 2*$CnC->hasCritical("RestrictedEW");
+			//"-1 Sensors" (tmpsensordown, a oneturn crit on the C&C): one EW point each, as the page's ew.getScannerOutput
+			//and the bot's EWDecider::points have always taken it - the server never did (user, 2026-11-16).
+			if ($CnC) $output -= $CnC->hasCritical("tmpsensordown");
 //GTS 13Jan22
             		$BSGHybrid = $ship->getSystemByName("BSGHybrid");
 			if ($BSGHybrid && $BSGHybrid->hasCritical("SensorLoss"))
