@@ -52,11 +52,11 @@ class KellyTrekConstitution extends HeavyCombatVessel{
 	$this->addFrontSystem(new TrekPhaserKelly(3, 0, 0, 0, 120));
 	$this->addFrontSystem(new SWTractorBeam(2,0,360,1));
 
-	$warpNacelle = new TrekWarpDrive(4, 24, 0, 4); //armor, structure, power usage, impulse output
+	$warpNacelle = new NacelleKelly(4, 24, 0, 4); //armor, structure, power usage, impulse output
 	//$impulseDrive->addThruster($warpNacelle);
 	$this->addAftSystem($warpNacelle);
 		
-	$warpNacelle = new TrekWarpDrive(4, 24, 0, 4); //armor, structure, power usage, impulse output
+	$warpNacelle = new NacelleKelly(4, 24, 0, 4); //armor, structure, power usage, impulse output
 	//$impulseDrive->addThruster($warpNacelle);
 	$this->addAftSystem($warpNacelle);
 		

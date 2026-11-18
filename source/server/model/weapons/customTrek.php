@@ -4782,7 +4782,7 @@ class TrekPhotonTorpMultiKelly extends Torpedo{
 	//public $iconPath = "engineTechnical.png";
 	public $iconPath = "engine.png";
     public $name = "engine";
-    public $displayName = "Engine";
+    public $displayName = "Impulse Drive";
     public $primary = true;
     public $isPrimaryTargetable = false;
     //public $boostable = false;//CAN boost!
@@ -5271,5 +5271,52 @@ class MicroJumpSystemKelly extends Weapon implements SpecialAbility{
 
 
 }	//endof MicroJumpSystemKelly
+
+class NacelleKelly extends JumpEngine{
+    //public $name = "TrekWarpDrive";
+    public $displayName = "Nacelle";
+    public $iconPath = "WarpDrive.png";
+    public $primary = true;
+	public $repairPriority = 7;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	
+    protected $possibleCriticals = array( //reduced output reduces available thrust
+        12=>"OutputReduced1",
+        24=>"OutputReduced2"
+	);
+	
+    function __construct($armour, $maxhealth, $powerReq, $output){
+        parent::__construct($armour, $maxhealth, $powerReq, $output);
+			$this->output = $output; //as JumpEngine doesn't show output really...
+
+		/* JUMP_POINTS_PLAN.md section 9 - a warp nacelle is NOT a B5 jump engine. Trek ships go to
+		   warp by themselves and leave nothing behind, so all 130-odd hulls in the Trek trees keep
+		   the pre-2026 one-click method: boost in Initial Orders, gone at the end of the turn.
+		   Marked on the CLASS rather than on each ship file because every instance of this class is
+		   a nacelle - see JumpEngine::markLegacy for what it flips and why it is a flag.
+
+		   ⚠️ MUST come after parent::__construct, which reads its 4th argument as a jump DELAY and
+		   sets loadingtime from it. Here that argument is the IMPULSE RATING (TrekImpulseDrive sums
+		   the nacelles' outputs for the ship's sublight thrust), so a nacelle rated 6 was claiming a
+		   6-turn recharge it does not have.
+
+		   ⭐⭐ false = "MY 4th ARGUMENT IS NOT A JUMP DELAY", and this is the ONLY caller in the tree
+		   that passes it (user ruling 2026-08-29: Nacelles are out of scope of the recharge fix).
+		   Up to that date markLegacy() reset the recharge to 1/1 for EVERY legacy drive, which was
+		   right only here - the Shadow Phasing Drive, the Star Wars Hyperdrive and the BSG FTL Drive
+		   all pass a real B5W jump delay and, since Stage 9, all really do spend it phasing in. See
+		   JumpEngine::$hasJumpRecharge. */
+		$this->markLegacy(false);
+    }
+
+     public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		/* Deliberately REPLACES the parent's text rather than appending to it - a nacelle is its own
+		   thing and the generic engine wording does not describe it. The jump instruction is
+		   restated here because of that replacement, not in addition to it. */
+        $this->data["Special"] = "Nacelle is an FTL Drive, boost it in Initial Orders to warp out of game at end of turn.";
+        $this->data["Special"] .= "<br>WARNING - Going to warp REMOVES ship from rest of the battle.";
+        $this->data["Special"] .= "<br>If the Nacelle is damaged, the ship has a % chance of being destroyed instead.";
+    }
+}
 
 ?>
