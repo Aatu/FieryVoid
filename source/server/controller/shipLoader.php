@@ -205,17 +205,30 @@
 
 		   Returns a list of array(phpclass, humanLabel) sorted by phpclass, with index 0 always the
 		   "None" sentinel (empty phpclass) - the default, and the fallback for anything unresolvable.
-		   $excludePhpclass drops the disguising ship's own class (a Dargan cannot disguise as a Dargan).*/
+		   $excludePhpclass drops the disguising ship's own class (a Dargan cannot disguise as a Dargan).
+
+		   $crossFactionDisguises: the explicit exceptions to "same faction only" - a short hand-picked
+		   list of Civilian hulls. They are added to the scan by NAME because getShipClassnames($faction)
+		   only reads the disguising faction's own directories. getDisguiseLabel() honours the same list,
+		   so the offered set and the accepted set stay identical.
+		   ⚠️ Adding a class here shifts the stored INDEX of every later entry (the list is ksorted).*/
+		private static $crossFactionDisguises = array('CivilianFreighter', 'CentauriCivilianFreighter');
+
+		private static function isCrossFactionDisguise($phpclass){
+			return in_array($phpclass, self::$crossFactionDisguises, true);
+		}
+
 		public static function getDisguiseCandidates($faction, $excludePhpclass = null){
 			static $memo = array(); //per-request; the underlying construction is the expensive part
 
 			$key = (string)$faction;
 			if (!isset($memo[$key])){
 				$candidates = array();
-				foreach (self::getShipClassnames($faction) as $name){
+				$names = array_unique(array_merge(self::getShipClassnames($faction), self::$crossFactionDisguises));
+				foreach ($names as $name){
 					if (!class_exists($name)) continue;
 					$ship = new $name(0, 0, "", 0, 0, false, false, array());
-					if ($ship->faction != $faction) continue;
+					if ($ship->faction != $faction && !self::isCrossFactionDisguise($ship->phpclass)) continue;
 					if (!self::isLegalDisguiseTarget($ship)) continue;
 					$candidates[$ship->phpclass] = ($ship->shipClass !== '' ? $ship->shipClass : $ship->phpclass);
 				}
@@ -247,7 +260,8 @@
 				$label = null;
 				if (class_exists($phpclass)){
 					$ship = new $phpclass(0, 0, "", 0, 0, false, false, array());
-					if ($ship->faction == $faction && self::isLegalDisguiseTarget($ship)){
+					if (($ship->faction == $faction || self::isCrossFactionDisguise($ship->phpclass))
+						&& self::isLegalDisguiseTarget($ship)){
 						$label = ($ship->shipClass !== '' ? $ship->shipClass : $ship->phpclass);
 					}
 				}

@@ -33,7 +33,7 @@ class KellyTrekConstitution extends HeavyCombatVessel{
     $this->addPrimarySystem(new Scanner(4, 12, 6, 8));
 	$this->addPrimarySystem(new Hangar(3, 6, 6));
 
-	$impulseDrive = new TrekImpulseDrive(4,24,0,0,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
+	$impulseDrive = new TrekImpulseDriveKelly(4,24,0,8,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		
   
 	$projection = new TrekShieldProjectionKelly(2, 60, 8, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
@@ -53,11 +53,11 @@ class KellyTrekConstitution extends HeavyCombatVessel{
 	$this->addFrontSystem(new SWTractorBeam(2,0,360,1));
 
 	$warpNacelle = new TrekWarpDrive(4, 24, 0, 4); //armor, structure, power usage, impulse output
-	$impulseDrive->addThruster($warpNacelle);
+	//$impulseDrive->addThruster($warpNacelle);
 	$this->addAftSystem($warpNacelle);
 		
 	$warpNacelle = new TrekWarpDrive(4, 24, 0, 4); //armor, structure, power usage, impulse output
-	$impulseDrive->addThruster($warpNacelle);
+	//$impulseDrive->addThruster($warpNacelle);
 	$this->addAftSystem($warpNacelle);
 		
 	$projection = new TrekShieldProjectionKelly(2, 60, 8, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
@@ -82,7 +82,10 @@ class KellyTrekConstitution extends HeavyCombatVessel{
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 45));
         $this->addPrimarySystem(new Structure( 4, 45));
-        // no aft structure, can't fall off and should be safe therefore    
+        // no aft structure, can't fall off and should be safe therefore  
+		
+	$this->addPrimarySystem(new microJumpSystemKelly(3, 8, 0, 330, 30, 30, 3));   //Add last to try and not break current games. 
+			
 	    
         $this->hitChart = array(
             0=> array(
@@ -90,7 +93,7 @@ class KellyTrekConstitution extends HeavyCombatVessel{
 				10 => "Structure",
 				13 => "Hangar",
 				15 => "Scanner",
-				17 => "Engine",
+				17 => "Impulse Drive",
 				19 => "Reactor",
 				20 => "C&C",
             ),
