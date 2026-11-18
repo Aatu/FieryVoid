@@ -377,7 +377,25 @@
 
 .fv-shipcard .fv-shipcard__sep {
     font-weight: 400;
+    margin-left: 2px;
+    margin-right: 2px;    
     color: var(--tt-dim);
+}
+
+/* The base profile (before EW) after each Defence number, in brackets (user 2026-11-18): smaller
+   and dim, so `25 (50) · 30 (55)` fits the half-width cell; never lit by facing or a crit. */
+.fv-shipcard .fv-shipcard__defb {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--tt-dim);
+}
+
+/* ...on a line of their own under decimal profiles, which leave no room beside them */
+.fv-shipcard .fv-shipcard__defbl {
+    font-family: var(--fv-mono);
+    font-size: 10px;
+    line-height: 1.2;
+    white-space: nowrap;
 }
 
 /* ── Sections ───────────────────────────────────────────────────────────── */
