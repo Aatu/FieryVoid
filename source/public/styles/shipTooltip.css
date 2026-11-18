@@ -532,6 +532,16 @@
     margin-left: var(--tt-ew-indent, 0px);
 }
 
+/* The EW the selected unit spends on this one (OEW, DIST): the From section's last rows, under
+   Range / Facing (user 2026-11-18), so flush left with them rather than in under "DEFENCE". */
+.fv-shipcard .fv-shipcard__relew {
+    margin-top: 2px;
+}
+
+.fv-shipcard .fv-shipcard__relew .fv-shipcard__ewi {
+    margin-left: var(--tt-ew-indent, 0px);    
+}
+
 .fv-shipcard .fv-shipcard__ewl {
     flex: 1 1 auto;
     min-width: 0;
@@ -729,13 +739,6 @@
 .fv-shipcard .fv-shipcard__sec--folded > .fv-shipcard__mh {
     margin-bottom: 0;
 }
-
-/* The EW group's second section (user 2026-11-18): it folds under the first one's heading, so
-   folded it is gone altogether - its plain label and rule too. ShipTooltip.js `ewGroupSection`. */
-.fv-shipcard .fv-shipcard__sec--foldtail.fv-shipcard__sec--folded {
-    display: none;
-}
-
 /* ── TARGETING / INCOMING ────────────────────────────────────────────────────
    `.fire` and `.ballistics` are each carried by two divs — the heading and the content beneath
    it — so the heading's rule keys on tt-head. The heading is a section head now, not pure red
