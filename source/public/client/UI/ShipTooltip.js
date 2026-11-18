@@ -1296,8 +1296,10 @@ window.ShipTooltip = function () {
             model.cells.push(defenceCell, dewCell);
         }
 
-        // ── EW ── (not while your own ship is plotting: its DEW is in its cell, and EW is set in Initial Orders)
-        if ((kind === 'ship' || kind === 'base') && !(own && gamedata.gamephase == 2)) {
+        // ── EW ── Every phase, your own unit's too. (It used to be left off while your own ship was
+        // plotting; user 2026-11-18: the Movement card should show the same EW section as Firing does.
+        // Read-only there - EW is set in Initial Orders, so the menu carries no steppers.)
+        if (kind === 'ship' || kind === 'base') {
             var rows = [];
             if (own) {
                 //the old DEW/CCEW line, Support DEW, Detect Mines, and ELINT's Detect Stealth / Blanket DEW
@@ -1332,8 +1334,9 @@ window.ShipTooltip = function () {
 
         /* ── Movement, on EVERY ship, base and flight - own or not (round 3, user 2026-11-10: "it's
            important info"). Four rows of two: Speed + Ini, Thrust + Accel, Turn cost + Turn delay,
-           Pivot + Roll (a flight: Pivot + Combat pivot). The rates are in the titles. While your own
-           ship is plotting it comes straight after the cells.
+           Pivot + Roll (a flight: Pivot + Combat pivot). The rates are in the titles. It sits below
+           Electronic warfare in every phase (user 2026-11-18; while your own ship was plotting it used
+           to come straight after the cells).
            Round 4 (user, 2026-11-10): Speed before Ini, and the order in the brackets is the bare
            movement-order number - `−20 (1)`, not `(1st)` - as the Order of Battle and the picker print it. */
         if (movement && (kind === 'ship' || kind === 'base' || kind === 'flight')) {
@@ -1360,7 +1363,6 @@ window.ShipTooltip = function () {
             spec.push(ship.flight
                 ? { label: 'Combat Pivot', value: movement.combatPivot, title: 'Combat pivot cost' }
                 : { label: 'Roll', value: movement.roll, title: 'Roll cost' });
-            model.movementFirst = own && gamedata.gamephase == 2;
             //No heading (round 6, user 2026-11-12) - the rows say what they are. Round 12 (user,
             //2026-11-16): the section FOLDS (folded by default in the Firing phase), and a folded
             //section needs something to say what it is and to open it again - so the heading is
@@ -1625,17 +1627,16 @@ window.ShipTooltip = function () {
                 body.append(sectionElement(section.key, section.title, section.fold).append(specElement(section.spec)));
             });
         };
-        if (model.movementFirst) renderSections();
 
         if (model.ew) {
-            var ewSection = sectionElement('ew', model.ew.own ? 'Electronic warfare' : 'EW', model.ew.fold);
+            var ewSection = sectionElement('ew', model.ew.own ? 'Electronic warfare' : 'Targets EW', model.ew.fold);
             model.ew.rows.forEach(function (row) { ewSection.append(ewRowElement(row)); });
             body.append(ewSection);
         }
 
         //Fire orders: after Movement in Pre-Firing and Firing (rounds 12-13), otherwise after EW.
         if (!model.fireAfterMovement) renderFire(body, model);
-        if (!model.movementFirst) renderSections();
+        renderSections();
         if (model.fireAfterMovement) renderFire(body, model);
     }
 
