@@ -296,6 +296,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--tt-dim);
+    border-radius: 2px;
 }
 
 .fv-shipcard .fv-shipcard__chip--caution { color: #f39c3d; }      /* was orange: rolled, pivoting, firing modifier */
