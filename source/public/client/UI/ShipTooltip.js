@@ -1263,6 +1263,7 @@ window.ShipTooltip = function () {
         var defenceCell = defence ? {
             key: 'defence', label: 'Defence (F-S)',
             fwd: defence.fwd, side: defence.side,
+            baseFwd: defence.baseFwd, baseSide: defence.baseSide,
             hot: (model.rel && model.rel.facing) ? model.rel.facing : null,
             crit: !!critHit.defence,
             title: 'Defence fwd ' + defence.fwd + '% (base ' + defence.baseFwd + '), side ' + defence.side + '% (base ' + defence.baseSide + ')'
@@ -1488,10 +1489,24 @@ window.ShipTooltip = function () {
         if (cell.key === 'defence' && cell.fwd !== undefined) {
             //F · S, the number on the facing side bright (Stage 3) - both on a boundary
             var hot = cell.hot;
+            //User 2026-11-18: each followed by its base profile (before EW) in brackets - `25 (50)`.
+            //Decimal profiles (Mindrider Constrained EW: `63.75`) do not fit the half cell that way
+            //(measured 141px in 114px) - there the brackets go on a line of their own below.
+            var hasBase = cell.baseFwd !== undefined && cell.baseSide !== undefined;
+            var split = hasBase && (Math.round(cell.fwd) !== cell.fwd || Math.round(cell.side) !== cell.side);
+            var base = function (n) { return jQuery('<span class="fv-shipcard__defb"></span>').text((split ? '' : ' ') + '(' + fmt(n) + ')'); };
             value.append(jQuery('<span class="fv-shipcard__def"></span>').toggleClass('fv-shipcard__def--hot', !!(hot && hot.fwd)).text(fmt(cell.fwd)));
-            value.append(jQuery('<span class="fv-shipcard__sep"></span>').text(' · '));
+            if (hasBase && !split) value.append(base(cell.baseFwd));
+            value.append(jQuery('<span class="fv-shipcard__sep"></span>').text('·'));
             value.append(jQuery('<span class="fv-shipcard__def"></span>').toggleClass('fv-shipcard__def--hot', !!(hot && hot.side)).text(fmt(cell.side)));
+            if (hasBase && !split) value.append(base(cell.baseSide));
             if (hot) value.addClass('fv-shipcard__cv--facing');
+            if (split) {
+                element.append(value);
+                element.append(jQuery('<div class="fv-shipcard__defbl"></div>')
+                    .append(base(cell.baseFwd), jQuery('<span class="fv-shipcard__sep"></span>').text('·'), base(cell.baseSide)));
+                return element;
+            }
         } else {
             value.text(cell.value);
             if (cell.dim) value.append(jQuery('<i></i>').text(' ' + cell.dim));
