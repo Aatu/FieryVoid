@@ -730,6 +730,12 @@
     margin-bottom: 0;
 }
 
+/* The EW group's second section (user 2026-11-18): it folds under the first one's heading, so
+   folded it is gone altogether - its plain label and rule too. ShipTooltip.js `ewGroupSection`. */
+.fv-shipcard .fv-shipcard__sec--foldtail.fv-shipcard__sec--folded {
+    display: none;
+}
+
 /* ── TARGETING / INCOMING ────────────────────────────────────────────────────
    `.fire` and `.ballistics` are each carried by two divs — the heading and the content beneath
    it — so the heading's rule keys on tt-head. The heading is a section head now, not pure red

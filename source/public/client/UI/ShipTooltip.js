@@ -89,7 +89,8 @@ window.ShipTooltip = function () {
        the Movement section (`move`), your own unit's EW section (`ew`) and - round 13 - its Fire
        orders (`fire`). Every phase STARTS from its defaults: the panel IN (round 13, user 2026-11-16:
        folded to its tab in every phase; it was out), Movement folded in the Firing phase only (it is
-       the least used there, and TARGETING is the part that grows), EW and Fire orders open. What the
+       the least used there, and TARGETING is the part that grows), EW folded in Pre-Firing and Firing
+       (user 2026-11-18, every card), Fire orders open. What the
        player then opens or closes
        stays that way on every card for the rest of the phase - a card is rebuilt on every EW click
        and retarget, and the next unit clicked should not undo the choice - and a new phase (or
@@ -100,7 +101,8 @@ window.ShipTooltip = function () {
         var phase = window.gamedata ? gamedata.gamephase : null;
         var key = (window.gamedata ? gamedata.turn : '') + ':' + phase;
         if (!foldState || foldState.key !== key) {
-            foldState = { key: key, side: true, move: phase == 3, ew: false, fire: false };
+            //EW folded in Pre-Firing and Firing (user 2026-11-18), on every card
+            foldState = { key: key, side: true, move: phase == 3, ew: phase == 3 || phase == 5, fire: false };
         }
         return foldState;
     }
@@ -1101,7 +1103,7 @@ window.ShipTooltip = function () {
     // Icons are the user's EW art (§11.1 R2.0, 40x40 shown at 20px). Label colours are the ship
     // window's own map (window.EW_LABEL_COLORS, published by ShipWindowEw.js - one map, two readers).
     var EW_TYPE = {
-        'DEW': { label: 'DEW', icon: 'DEW', color: 'DEW' },
+        /*'DEW': { label: 'DEW', icon: 'DEW', color: 'DEW' },*/
         'CCEW': { label: 'CCEW', icon: 'CCEW', color: 'CCEW', scope: 'self' },
         'BDEW': { label: 'BDEW', icon: 'BDEW', color: 'BDEW', scope: 'self' },
         //Round 8 (user, 2026-11-12): the icons moved in under "DEFENCE", and these three no longer fit -
@@ -1124,7 +1126,7 @@ window.ShipTooltip = function () {
        printed (SDEW). `source` is the unit spending, `target` the unit it is spent on. */
     function ewValue(type, source, target) {
         switch (type) {
-            case 'DEW': return ew.getDefensiveEW(source);
+            /*case 'DEW': return ew.getDefensiveEW(source);*/
             case 'CCEW': return ew.getCCEW(source);
             case 'BDEW': return parseFloat((ew.getEWByType('BDEW', source) * 0.25).toFixed(2));
             case 'Detect Stealth': return ew.getEWByType('Detect Stealth', source);
@@ -1303,9 +1305,9 @@ window.ShipTooltip = function () {
             var rows = [];
             if (own) {
                 //the old DEW/CCEW line, Support DEW, Detect Mines, and ELINT's Detect Stealth / Blanket DEW
-                var dewRow = ewRow('DEW', dewValue);
+                /*var dewRow = ewRow('DEW', dewValue);
                 dewRow.crit = !!critHit.dew; //the same number as the DEW cell, so the same colour
-                rows.push(dewRow);
+                rows.push(dewRow);*/
                 rows.push(ewRow('CCEW', readSafely(function () { return ewValue('CCEW', ship); }, 0)));
                 if (shipManager.isElint(ship)) {
                     rows.push(ewRow('BDEW', readSafely(function () { return ewValue('BDEW', ship); }, 0)));
@@ -1322,9 +1324,9 @@ window.ShipTooltip = function () {
                     if (value > 0) rows.push(ewRow(type, value));
                 });
             }
-            //Round 12 (user, 2026-11-16): your own unit's EW section folds; anyone else's is a few
-            //read-only rows and does not.
-            if (rows.length) model.ew = { own: own, rows: rows, fold: own ? 'ew' : null };
+            //Round 12 (user, 2026-11-16): your own unit's EW section folds. User 2026-11-18: anyone
+            //else's too - together with the OEW / DIST rows above it, under ONE heading (ewGroupSection).
+            if (rows.length) model.ew = { own: own, rows: rows };
         }
 
         // ── Own unit: fire orders ──
@@ -1513,6 +1515,21 @@ window.ShipTooltip = function () {
         return section;
     }
 
+    /* The EW group (user 2026-11-18): the EW spent ON this unit (`relew`: OEW, DIST) and the unit's
+       own EW (`ew`) fold together under ONE "Electronic warfare" heading - on the first of the two
+       present. The second is a TAIL: same fold key, its own plain label ("Target EW" on anyone
+       else's unit), and gone altogether while folded (shipTooltip.css `--foldtail`). */
+    function ewGroupSection(key, isHead, own) {
+        if (isHead) return sectionElement(key, 'Electronic warfare', 'ew');
+        return makeEwTail(sectionElement(key, own ? null : 'Target EW', null));
+    }
+
+    function makeEwTail(section) {
+        section.attr('data-fold', 'ew').addClass('fv-shipcard__sec--foldtail');
+        applyFold(section, !!folds().ew);
+        return section;
+    }
+
     function applyFold(section, folded) {
         var button = section.children('.fv-shipcard__mh').children('.fv-shipcard__fold');
         var title = button.children('.fv-shipcard__foldt').text();
@@ -1531,7 +1548,10 @@ window.ShipTooltip = function () {
             if (!key) return;
             var state = folds();
             state[key] = !state[key];
-            applyFold(section, state[key]);
+            //every section on this card under that key - the EW group is two
+            self.cardElement.find('.fv-shipcard__sec[data-fold="' + key + '"]').each(function () {
+                applyFold(jQuery(this), state[key]);
+            });
             afterResize.call(self);
         });
     }
@@ -1616,8 +1636,9 @@ window.ShipTooltip = function () {
             body.append(cells);
         }
 
-        if (model.rel && model.rel.rows.length) {
-            var relEw = sectionElement('relew', null);
+        var hasRelEw = !!(model.rel && model.rel.rows.length);
+        if (hasRelEw) {
+            var relEw = ewGroupSection('relew', true, model.own);
             model.rel.rows.forEach(function (row) { relEw.append(ewRowElement(row)); });
             body.append(relEw);
         }
@@ -1629,7 +1650,7 @@ window.ShipTooltip = function () {
         };
 
         if (model.ew) {
-            var ewSection = sectionElement('ew', model.ew.own ? 'Electronic warfare' : 'Targets EW', model.ew.fold);
+            var ewSection = ewGroupSection('ew', !hasRelEw, model.own);
             model.ew.rows.forEach(function (row) { ewSection.append(ewRowElement(row)); });
             body.append(ewSection);
         }
@@ -1895,7 +1916,10 @@ window.ShipTooltip = function () {
     //Clear all EW sits small in the EW section's own heading row, pinned right (round 3, user
     //2026-11-10) - it used to take a row of its own under the steppers.
     function clearButtonSlot() {
-        var heading = ensureSection.call(this, 'ew').children('.fv-shipcard__mh').first();
+        ensureSection.call(this, 'ew');
+        //the EW group's heading - on the OEW / DIST section when there is one (ewGroupSection)
+        var heading = this.element.find('.fv-shipcard__body').find('.fv-shipcard__sec[data-fold="ew"]')
+            .not('.fv-shipcard__sec--foldtail').first().children('.fv-shipcard__mh').first();
         var slot = heading.find('.fv-shipcard__clr');
         if (!slot.length) {
             slot = jQuery('<span class="fv-shipcard__clr"></span>');
@@ -1920,15 +1944,24 @@ window.ShipTooltip = function () {
         if (section.length) return section;
 
         var anchor;
+        var own = !!(this.model && this.model.own);
         if (key === 'relew') {
-            //EW spent ON this unit, under the cells (round 6). With no From block above it (no unit
-            //selected) the rows keep the "From" heading they always had.
-            section = sectionElement('relew', body.find('.fv-shipcard__sec--rel').length ? null : 'From');
+            //EW spent ON this unit, under the cells (round 6). It heads the EW group now (user
+            //2026-11-18), so an EW section already drawn below it becomes the group's tail.
+            section = ewGroupSection('relew', true, own);
+            body.find('.fv-shipcard__sec--ew').each(function () {
+                var ewSec = jQuery(this);
+                //a Clear EW already in its heading moves up to the group's
+                section.children('.fv-shipcard__mh').first().append(ewSec.find('.fv-shipcard__clr').detach());
+                ewSec.children('.fv-shipcard__mh').remove();
+                if (!own) ewSec.prepend(jQuery('<div class="fv-shipcard__mh"></div>').append(jQuery('<span></span>').text('Target EW')));
+                makeEwTail(ewSec);
+            });
             anchor = body.find('.fv-shipcard__cells');
             if (!anchor.length) anchor = body.find('.fv-shipcard__sec--rel');
         } else {
-            //Your own unit's folds, as renderBody's does (round 12).
-            section = sectionElement('ew', 'Electronic warfare', (this.model && this.model.own) ? 'ew' : null);
+            //The group's head, or its tail under the OEW / DIST rows (ewGroupSection).
+            section = ewGroupSection('ew', !body.find('.fv-shipcard__sec--relew').length, own);
             anchor = body.find('.fv-shipcard__sec--relew');
             if (!anchor.length) anchor = body.find('.fv-shipcard__cells');
             if (!anchor.length) anchor = body.find('.fv-shipcard__sec--rel');
