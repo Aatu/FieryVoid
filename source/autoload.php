@@ -2215,6 +2215,7 @@ spl_autoload_register(
                 'multiphasedcutter' => '/server/model/weapons/molecular.php',
                 'multiphasedcutterl' => '/server/model/weapons/molecular.php',
                 'munificent' => '/server/model/ships/StarWarsCloneWars/Munificent.php',
+                'nacellekelly' => '/server/model/weapons/customTrek.php',
                 'nakarsa' => '/server/model/ships/abbai/nakarsa.php',
                 'nalor' => '/server/model/ships/centauri_old/nalor.php',
                 'nalor1857' => '/server/model/ships/centauri_old/nalor1857.php',
