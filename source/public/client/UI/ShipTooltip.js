@@ -1040,49 +1040,75 @@ window.ShipTooltip = function () {
     }
 
     /* The facing (Stage 3): which of the target's sections faces the selected unit, from the same
-       helper the TARGETING list's old "-PORT-" line used. FWD/AFT bear on the forward profile,
-       everything else on the side one - that is the number the card lights up. */
+       helper the TARGETING list's old "-PORT-" line used - and which Defence number the shot meets,
+       the one the card lights up. */
     var SECTION_LABEL = { 1: 'FWD', 2: 'AFT', 3: 'PORT', 4: 'STBD', 31: 'P.FWD', 32: 'P.AFT', 41: 'S.FWD', 42: 'S.AFT', 0: 'PRI' };
 
-    /* A fighter flight's four armour arcs - ⚠️ MIRROR of FighterFlight::getLocations (PHP), which
-       puts every arc on location 0, so fillLocationsGUI sends a flight NO outerSections and
-       getShipHittingSide always answered "nothing" (the card showed no Facing on a flight). The
+    /* The four PROFILE arcs: forward profile from 330-30 and 150-210, side profile everywhere else -
+       ⚠️ MIRROR of weaponManager.getShipDefenceFacingFromHeading, the bearing the hit chance reads
+       the profile from. They pick the lit Defence number on EVERY non-base unit (user, 2026-11-19):
+       an MCV's / HCV's FWD section spans 270-90, so a section-based light (the old rule) lit the
+       forward number for a shot from 60° that meets the side profile. A bearing exactly on a
+       boundary lights both, as before.
+       They are also a fighter flight's four armour arcs - ⚠️ MIRROR of FighterFlight::getLocations
+       (PHP), which puts every arc on location 0, so fillLocationsGUI sends a flight NO outerSections
+       and getShipHittingSide always answered "nothing" (the card showed no Facing on a flight). The
        arc still picks the ARMOUR a hit meets (fighter.php getArmourBase), so the card names it as
        it names a ship's section (user, 2026-11-16). Listed in a ship's section order (FWD, AFT,
        PORT, STBD - getShipHittingSide sorts by location id) so a boundary reads the same way on
-       both; FWD and AFT bear on the forward profile, as getLocations' `profile` has it. */
-    var FLIGHT_ARCS = [
+       both. ⚠️ OSAT::getLocations (PHP) is the SAME four arcs and profiles, all on location 0 too,
+       so an OSAT also arrives with no outerSections and is named from this table (user, 2026-11-19). */
+    var PROFILE_ARCS = [
         { label: 'FWD', min: 330, max: 30, fwd: true },
         { label: 'AFT', min: 150, max: 210, fwd: true },
         { label: 'PORT', min: 210, max: 330, fwd: false },
         { label: 'STBD', min: 30, max: 150, fwd: false }
     ];
 
-    function buildFlightFacing(source, ship) {
+    //The PROFILE_ARCS the selected unit sits in (two on a boundary); null when the bearing can't be read.
+    function profileArcsAt(source, ship) {
         var bearing = readSafely(function () { return mathlib.getCompassHeadingOfShip(ship, source); }, null);
         var heading = readSafely(function () { return shipManager.getShipHeadingAngle(ship); }, null);
         if (bearing === null || heading === null) return null;
-        var labels = [];
-        var fwd = false, side = false;
-        FLIGHT_ARCS.forEach(function (arc) {
-            if (!mathlib.isInArc(bearing, mathlib.addToDirection(arc.min, heading), mathlib.addToDirection(arc.max, heading))) return;
-            labels.push(arc.label);
-            if (arc.fwd) fwd = true; else side = true;
+        return PROFILE_ARCS.filter(function (arc) {
+            return mathlib.isInArc(bearing, mathlib.addToDirection(arc.min, heading), mathlib.addToDirection(arc.max, heading));
         });
-        return labels.length ? { label: labels.join(' / '), fwd: fwd, side: side } : null;
+    }
+
+    function buildFlightFacing(source, ship) {
+        var arcs = profileArcsAt(source, ship);
+        if (!arcs || !arcs.length) return null;
+        return {
+            label: arcs.map(function (arc) { return arc.label; }).join(' / '),
+            fwd: arcs.some(function (arc) { return arc.fwd; }),
+            side: arcs.some(function (arc) { return !arc.fwd; })
+        };
     }
 
     function buildFacing(source, ship) {
         if (ship.flight) return buildFlightFacing(source, ship);
+        //An OSAT has only a Primary (see PROFILE_ARCS) - its armour arcs still pick the profile a shot meets.
+        if (ship.osat && !(ship.outerSections && ship.outerSections.length)) return buildFlightFacing(source, ship);
         var sections = readSafely(function () { return weaponManager.getShipHittingSide(source, ship); }, null);
         if (!sections || !sections.length) return null;
+        //An MCV / HCV lists one section once per arc it owns (FWD at 330-30 AND 30-90), so a shot on
+        //that line read "FWD / FWD" - name each section once.
+        var seen = [];
         var labels = [];
-        var fwd = false, side = false;
         sections.forEach(function (location) {
+            if (seen.indexOf(location) >= 0) return;
+            seen.push(location);
             labels.push(SECTION_LABEL[location] || 'OTHER');
-            if (location == 1 || location == 2) fwd = true; else side = true;
         });
-        return { label: labels.join(' / '), fwd: fwd, side: side };
+        //The lit number: a base meets its forward profile from every side (weaponManager.getShipDefenceValue);
+        //anything else the profile of the arc the shot comes from.
+        if (ship.base) return { label: labels.join(' / '), fwd: true, side: false };
+        var arcs = profileArcsAt(source, ship) || [];
+        return {
+            label: labels.join(' / '),
+            fwd: arcs.some(function (arc) { return arc.fwd; }),
+            side: arcs.some(function (arc) { return !arc.fwd; })
+        };
     }
 
     /* Enemy DEW in Initial Orders (D6, §11.1 R2.5): another player's EW for THIS turn is hidden until
