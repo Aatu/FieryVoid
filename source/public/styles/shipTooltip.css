@@ -554,7 +554,7 @@
 /* The EW the selected unit spends on this one (OEW, DIST): the From section's last rows, under
    Range / Facing (user 2026-11-18), so flush left with them rather than in under "DEFENCE". */
 .fv-shipcard .fv-shipcard__relew {
-    margin-top: 2px;
+    margin-top: 3px;
 }
 
 .fv-shipcard .fv-shipcard__relew .fv-shipcard__ewi {
@@ -838,6 +838,7 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
     white-space: nowrap;
+    font-weight: 700;    
 }
 
 .fv-shipcard .targeting .tt-line {
