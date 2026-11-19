@@ -521,6 +521,25 @@
     text-overflow: ellipsis;
 }
 
+/* The base rate before Turn Cost / Turn Delay, in brackets (user 2026-11-19): `(0.66) 4`. At the
+   value's 12px mono it does not fit the half-width row (measured 53-59px into 44px - the VALUE was
+   ellipsised), so it is 11px in the UI face: `(0.66) 12` measures 43px. Should a wider system font
+   still overflow, the brackets shrink and ellipsise - the value never does. */
+.fv-shipcard .fv-shipcard__spec b.fv-shipcard__based {
+    display: flex;
+    align-items: baseline;
+}
+
+.fv-shipcard .fv-shipcard__spec .fv-shipcard__specb {
+    min-width: 0;
+    margin-right: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: var(--fv-ui);
+    font-size: 11px;
+    color: var(--tt-dim);
+}
+
 /* ── EW rows (§11 items 1 and 11, §11.1 R2.0 and R2.3) ───────────────────────
    [icon 20px] LABEL ............ [24px][32px value][24px]. Every row ends in the same block, so
    DEW's value (with blank slots) lines up with the steppers' values in one column.

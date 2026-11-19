@@ -1361,8 +1361,9 @@ window.ShipTooltip = function () {
                 { label: 'Initiative', value: iniValue, title: (ini && ini.order) ? 'Initiative ' + ini.total + ', order ' + ini.order : 'No initiative order' },
                 { label: 'Speed', value: movement.speed },
                 { label: 'Accel', value: movement.accel, title: 'Acceleration cost' },
-                { label: 'Turn Cost', value: movement.turnCost, title: 'Turn cost ' + movement.turnCost + ' (rate ' + movement.turnRate + ')' },
-                { label: 'Turn Delay', value: movement.turnDelay, title: 'Turn delay ' + movement.turnDelay + ' (rate ' + movement.turnDelayRate + ')' },
+                //User 2026-11-19: each led by its base rate in dim brackets - `(0.66) 4`.
+                { label: 'Turn Cost', value: movement.turnCost, base: movement.turnRate, title: 'Turn cost ' + movement.turnCost + ' (rate ' + movement.turnRate + ')' },
+                { label: 'Turn Delay', value: movement.turnDelay, base: movement.turnDelayRate, title: 'Turn delay ' + movement.turnDelay + ' (rate ' + movement.turnDelayRate + ')' },
                 { label: 'Pivot', value: movement.pivot, title: 'Pivot cost' }
             );
             spec.push(ship.flight
@@ -1570,8 +1571,15 @@ window.ShipTooltip = function () {
             if (item.title) line.attr('title', item.title);
             var label = jQuery('<span></span>').text(item.label);
             if (item.color) label.css('color', item.color);
-            line.append(label, jQuery('<b></b>').toggleClass('fv-shipcard__crit', !!item.crit) //critStats
-                .text(item.value === undefined || item.value === null ? '—' : String(item.value)));
+            var value = jQuery('<b></b>').toggleClass('fv-shipcard__crit', !!item.crit) //critStats
+                .text(item.value === undefined || item.value === null ? '—' : String(item.value));
+            //a base rate in dim brackets to the LEFT of the value (Turn Cost / Turn Delay); --based
+            //lets the brackets give way first in a tight cell, never the value itself
+            if (item.base !== undefined && item.base !== null) {
+                value.addClass('fv-shipcard__based')
+                    .prepend(jQuery('<span class="fv-shipcard__specb"></span>').text('(' + fmt(item.base) + ')'));
+            }
+            line.append(label, value);
             spec.append(line);
         });
         return spec;
