@@ -367,7 +367,7 @@
 /* Stage 3: with a unit selected, the profile on the side that FACES it stays bright and the
    other one dims (both stay bright on a boundary). */
 .fv-shipcard .fv-shipcard__cv--facing .fv-shipcard__def {
-    color: var(--tt-dim);
+    color: var(--tt-head);
     font-weight: 400;
 }
 
