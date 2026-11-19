@@ -1528,6 +1528,7 @@ spl_autoload_register(
                 'hastanreev' => '/server/model/ships/yoluReevaluated/hastanReev.php',
                 'haven' => '/server/model/ships/centauri/haven.php',
                 'hawk' => '/server/model/ships/raiders/hawk.php',
+                'hazards' => '/server/ai/Hazards.php',
                 'heavyarray' => '/server/model/weapons/particle.php',
                 'heavybolter' => '/server/model/weapons/particle.php',
                 'heavyburstbeam' => '/server/model/weapons/specialWeapons.php',

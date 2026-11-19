@@ -42,6 +42,7 @@ class AIView
     private $refusal = null;
     private $sent = array();      //cache: weapon object id => array(its public properties, its payload or null)
     private $mountOrder = array(); //cache: unit id => weapon object id => place in mounts()
+    private $worst = array();     //cache: unit id => worstExposure()
 
     //Where TacGamedata::hideStealthShipMovement puts a unit this viewer may not see.
     const HIDDEN_Q = -10000;
@@ -817,8 +818,41 @@ class AIView
     public function exposure($unit, $shooter)
     {
         if ($unit instanceof FighterFlight) return 1.0;
+        return $this->exposureAt($unit, $unit->getBearingOnUnit($shooter));
+    }
 
-        $bearing = $unit->getBearingOnUnit($shooter);
+    /* For an enemy that has yet to move this turn (user, 2026-11-19: an enemy moving after the ship is MORE dangerous - it
+       can "line up better shots / hit a damaged section"). The section it meets leans from the one facing it now towards
+       the ship's worst, by how much of the gap its speed can close: fully when it is within its own speed. */
+    public function exposureUnmoved($unit, $shooter)
+    {
+        if ($unit instanceof FighterFlight) return 1.0;
+        $now = $this->exposure($unit, $shooter);
+        $last = $shooter->getLastMovement();
+        $speed = $last ? max(0, (int)$last->speed) : 0;
+        $distance = $unit->getHexPos()->distanceTo($shooter->getHexPos());
+        $reach = ($distance <= 0) ? 1.0 : min(1.0, $speed / $distance);
+        return $now + $reach * max(0, $this->worstExposure($unit) - $now);
+    }
+
+    //The worst exposure any bearing gives the unit (sampled every 15 degrees - each section, each line between two). Its damage, not its facing, decides it.
+    public function worstExposure($unit)
+    {
+        if ($unit instanceof FighterFlight) return 1.0;
+        $key = (int)$unit->id;
+        if (!isset($this->worst[$key])) {
+            $worst = 1.0;
+            for ($bearing = 0; $bearing < 360; $bearing += 15) $worst = max($worst, $this->exposureAt($unit, $bearing));
+            $this->worst[$key] = $worst;
+        }
+        return $this->worst[$key];
+    }
+
+    //exposure(), for a hit from $bearing - degrees relative to the unit's facing (a drifting field's, say: Hazards).
+    public function exposureAt($unit, $bearing)
+    {
+        if ($unit instanceof FighterFlight) return 1.0;
+
         $weights = 0;
         $total = 0;
         $dead = false;

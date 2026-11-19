@@ -33,12 +33,22 @@
  * flight's jinking limit, 1 thrust a level (2 in a nebula). A jink changes no hex, so enumerate()
  * leaves it out and the caller adds levels to the plan it picks (jinkLevels()).
  *
+ * GRAVITIC DRIVES (stage T5d) are plotted by the same rules with the page's exceptions: a gravitic
+ * hull may turn and change speed while pivoting, rolling or out of alignment, slip while rolling, and
+ * out of alignment its speed changes are paid through the thrusters the pivot has turned to the job
+ * (directionRequired). Bow-first or stern-first and not pivoting or rolling, it is costed exactly as
+ * any other hull. Its gravitic flights are ordinary flights here (the page's "gravitic turn", a
+ * flight's turn that keeps its facing, is an order this class does not give).
+ *
  * WHAT IT DOES NOT: pivots, rolls, a ship's jinking, extended turns, jump-out, half-phasing,
- * contraction. It never orders one. A ship that arrives in such a state (still pivoting or rolling
- * from last turn) is offered only what the page would still allow it, which is usually "straight
- * on". Units it refuses outright are listed in unsupportedReason(): remote-controlled flights
- * (Hunter-Killers - AutomatedMovement may be driving them), bases, OSATs, mines, terrain, gravitic
- * and Mindrider drives, and a unit carrying or riding another.
+ * contraction, an Expert Graviton Controller's rotation. It never orders one. A ship that arrives in
+ * such a state (still pivoting or rolling from last turn, out of alignment) is offered only what the
+ * page would still allow it, which for a plain hull is usually "straight on" - and it must already
+ * carry the forced pivot row the page adds at activation (movement.js doForcedPivot), which this class
+ * does not write. Units it refuses outright are listed in unsupportedReason(): remote-controlled
+ * flights (Hunter-Killers - AutomatedMovement may be driving them), bases, OSATs, mines, terrain,
+ * Mindrider drives, Trek impulse drives (an engine whose thrust the page computes its own way - see
+ * hasTrekImpulseDrive), and a unit carrying or riding another.
  *
  * ONE POLICY OF ITS OWN: by default it never overthrusts. The page lets a thruster carry up to twice
  * its rating at the risk of a critical (Criticals: one test per thruster over its rating, the excess
@@ -85,6 +95,7 @@ class ShipMover
     private $adrift = false;
     private $engineDestroyed = false;
     private $agile = false;
+    private $gravitic = false;      //a gravitic drive (stage T5d): turns and speed changes in any attitude (see directionRequired)
     private $turnCostRate = 0;
     private $turnDelayRate = 0;
     private $accelCost = 0;
@@ -95,7 +106,11 @@ class ShipMover
     private $jinkLimit = 0;
     private $jinkCost = 1;
     private $overthrust = 0;       //points a thruster may carry over its rating (allowOverthrust); 0 = never
+    private $shorten = false;      //enumerate() also tries each turn with all the extra thrust it can take (allowShortening)
     private $carried = array();    //thruster id => thrust it carried before any row plotted here (Engine Shorted's push)
+
+    //apply()'s extra thrust meaning "as much as can be placed" - a turn delay is never bought below 1 (click()).
+    const SHORTEN_MAX = 99;
 
     /* Why this unit is not one ShipMover plots for, or null when it is. Such a unit keeps the
        fallback: straight on (AIFallback::movement). */
@@ -106,8 +121,8 @@ class ShipMover
         if (!empty($ship->base) || !empty($ship->smallBase)) return 'a base';
         if (!empty($ship->osat)) return 'an OSAT';
         if (!empty($ship->mine)) return 'a mine';
-        if (!empty($ship->gravitic)) return 'a gravitic drive';
         if (!empty($ship->mindrider)) return 'a Mindrider drive';
+        if (self::hasTrekImpulseDrive($ship)) return 'a Trek impulse drive';
         if (!empty($ship->attached)) return 'riding another unit';
         if (!empty($ship->hasAttached)) return 'carrying another unit';
         if ($ship->isDestroyed()) return 'destroyed';
@@ -121,6 +136,19 @@ class ShipMover
         }
 
         return null;
+    }
+
+    /* A Trek impulse drive (customTrek.php TrekImpulseDrive - not the Kelly one, which keeps Engine's rules) sends the page its
+       rating plus its nacelles', and the page adds the drive's OWN criticals to that (systems.js getOutput); its server
+       getOutput() leaves them out, so readSystems() would read a damaged drive's thrust too high (stage T5d's sweep: 923 of
+       28,443 plans on the 62 such hulls). Every such hull is gravitic, so all were left to the fallback before T5d - and still
+       are, until a stage mirrors that engine (P4: a special system is left alone, not half used). */
+    private static function hasTrekImpulseDrive($ship)
+    {
+        foreach ($ship->systems as $system) {
+            if ($system instanceof TrekImpulseDrive) return true;
+        }
+        return false;
     }
 
     //The mover for one of the bot's ships in the game as loaded, or null (see unsupportedReason).
@@ -142,6 +170,7 @@ class ShipMover
         $this->loadedCount = count($this->rows);
 
         $this->agile = !empty($ship->agile);
+        $this->gravitic = !empty($ship->gravitic);
         $this->turnCostRate = round((float)$ship->turncost * 100) / 100;            //getTurnCost
         $this->turnDelayRate = round((float)$ship->turndelaycost * 100) / 100;      //getTurnDelayCost
         $this->accelCost = (float)$ship->accelcost;
@@ -163,6 +192,16 @@ class ShipMover
     public function allowOverthrust($points)
     {
         $this->overthrust = max(0, (int)$points);
+        return $this;
+    }
+
+    /* TURN SHORTENING (user, 2026-11-19: "an important ability used by most players to increase their ability to
+       manoeuvre"). From now on enumerate() also tries every turn of a SHIP with all the extra thrust it can take
+       (SHORTEN_MAX - the page's own rule stops it at a delay of 1), so the search reaches the double turns only a
+       shortened delay allows. Off by default: the T1b search is unchanged. A flight pays no extra for a turn. */
+    public function allowShortening($on = true)
+    {
+        $this->shorten = (bool)$on;
         return $this;
     }
 
@@ -404,9 +443,17 @@ class ShipMover
        rule: the thrusters' own ratings are not asked. */
     public function fastestTurnable()
     {
-        $thrust = max(0, $this->engineThrust);
+        return $this->safeSpeed(1.0);
+    }
+
+    /* The fastest speed at which one turn (canTurn's price, docked LCVs included) costs no more than $share of the
+       ship's thrust for a turn - the user's "safe to manoeuvre" (2026-11-19: an Omega, thrust 8, at speed 7-8 is "a bit
+       too fast"; at $share 0.75 its safe speed is 6). A judgement aid like fastestTurnable (= $share 1), not a rule. */
+    public function safeSpeed($share)
+    {
+        $budget = max(0, $this->engineThrust) * $share;
         for ($speed = 30; $speed > 0; $speed--) {
-            if (max(1, (int)ceil($speed * $this->turnCostRate)) + $this->lcvSurcharge <= $thrust) return $speed;
+            if (max(1, (int)ceil($speed * $this->turnCostRate)) + $this->lcvSurcharge <= $budget + 1e-9) return $speed;
         }
         return 0;
     }
@@ -446,6 +493,59 @@ class ShipMover
         return $actions;
     }
 
+    /* The extra thrust each of those orders was given - apply()'s second argument, as the points actually placed: a
+       turn's shortening, 0 for anything else. apply($actions[$i], $extras[$i]) in turn plots the same rows again. */
+    public function extras()
+    {
+        $extras = array();
+        for ($i = $this->loadedCount; $i < count($this->rows); $i++) $extras[] = isset($this->rows[$i]['extra']) ? (int)$this->rows[$i]['extra'] : 0;
+        return $extras;
+    }
+
+    /* The plan again with its LAST turn shortened by whatever thrust is spare within the thrusters' ratings (the user's
+       ruling, 2026-11-19: "shortening turn delay is always useful (since any delay carries over to next turn as well) if
+       you have the spare thrust on that turn, and you won't exceed thruster ratings"). All the thrust the turn can take
+       first; when an order after it (a sideslip) can then no longer be paid, a point less, and so on - the spare thrust
+       goes into the delay and nothing the plan needs is taken from it. Asked of the mover the plan was found from.
+       Returns the mover with the plan plotted that way, or null when there is nothing to gain (no turn, no delay left at
+       the end, no thrust to spare). The end state is the plan's own. */
+    public function shortened(array $plan)
+    {
+        if ($this->flight || empty($plan['actions']) || (int)$plan['turnDelay'] <= 0) return null;
+        $last = null;
+        foreach ($plan['actions'] as $i => $action) {
+            if ($action === self::TURN_LEFT || $action === self::TURN_RIGHT) $last = $i;
+        }
+        if ($last === null) return null;
+
+        $extras = isset($plan['extras']) ? $plan['extras'] : array_fill(0, count($plan['actions']), 0);
+        $already = (int)$extras[$last];
+        for ($extra = self::SHORTEN_MAX; $extra > $already; ) {
+            $try = $extras;
+            $try[$last] = $extra;
+            $mover = clone $this;
+            $mover->overthrust = 0;
+            $placed = null;
+            $paid = true;
+            foreach ($plan['actions'] as $i => $action) {
+                if (!$mover->apply($action, $try[$i])) {
+                    $paid = false;
+                    break;
+                }
+                if ($i == $last) $placed = $mover->lastExtra();
+            }
+            if ($paid) {
+                if (!$mover->isComplete() || $mover->turnDelay() >= (int)$plan['turnDelay']) return null;
+                $state = $mover->state();
+                if (!$state['position']->equals($plan['position']) || $state['heading'] != $plan['heading'] || $state['facing'] != $plan['facing'] || $state['speed'] != $plan['speed']) return null;
+                return $mover;
+            }
+            if ($placed === null) return null; //an order before the turn failed: cannot happen, the plan was found this way
+            $extra = min($extra, $placed) - 1;
+        }
+        return null;
+    }
+
     /* For the harness: the plotted rows as this class holds them, each paid row with the thrusters
        it was paid through in the order the points were placed ('clicks'). */
     public function plotted()
@@ -477,16 +577,18 @@ class ShipMover
     }
 
     /* Every distinct place the ship can end this turn, each with one way of getting there: the
-       candidates MoveDecider scores (stage T5). A plan is array('actions', 'rows', 'path',
-       'position', 'heading', 'facing', 'speed', 'thrustLeft', 'turnDelay', 'overthrust' - see
-       overthrust(); always empty unless allowOverthrust() was given).
+       candidates MoveDecider scores (stage T5). A plan is array('actions', 'extras' - see extras(),
+       'rows', 'path', 'position', 'heading', 'facing', 'speed', 'thrustLeft', 'turnDelay' - left at
+       the end, 'overthrust' - see overthrust(); always empty unless allowOverthrust() was given).
 
        Bounded: at most $limit plans, PLAINEST FIRST. "Straight on" is always the first; then every
        plan with one manoeuvre (a turn, a slip or a speed change, at each point of the path), then
        two, and so on - and among movers with the same number of manoeuvres, the one nearest the
        end of its move, so plans are finished rather than widened. (Working on the fewest hexes
        left alone filled the quota with slowed-down ships before a single turn at cruising speed
-       was tried.) Extra thrust on a turn is not explored. */
+       was tried.) With allowShortening(), each turn is tried a second time with all the extra
+       thrust it can take (stage T5c): a plan records it ('extras'). Two plans that end alike
+       keep the one with less turn delay left among the plainest. */
     public static function plans($ship, TacGamedata $gamedata, $limit = 400)
     {
         $start = self::forShip($ship, $gamedata);
@@ -515,13 +617,17 @@ class ShipMover
 
             foreach ($mover->options() as $action) {
                 if ($action === self::JINK) continue; //no hex changes with it: the caller adds levels to the plan it picks
-                $next = clone $mover;
-                if (!$next->apply($action)) continue;
+                $shortenable = $mover->shorten && !$mover->flight && ($action === self::TURN_LEFT || $action === self::TURN_RIGHT);
+                foreach ($shortenable ? array(0, self::SHORTEN_MAX) : array(0) as $extra) {
+                    $next = clone $mover;
+                    if (!$next->apply($action, $extra)) continue;
+                    if ($extra > 0 && $next->lastExtra() == 0) continue; //no point could be placed: the plain turn is this one
 
-                $key = $next->searchKey();
-                if (isset($seen[$key])) continue;
-                $seen[$key] = true;
-                $queue->insert($next, array(-$next->manoeuvres(), -$next->hexesLeft(), -(++$serial)));
+                    $key = $next->searchKey();
+                    if (isset($seen[$key])) continue;
+                    $seen[$key] = true;
+                    $queue->insert($next, array(-$next->manoeuvres(), -$next->hexesLeft(), -(++$serial)));
+                }
             }
         }
 
@@ -538,17 +644,29 @@ class ShipMover
         return $count;
     }
 
-    //One plan per end state: the first found, which is the one with fewest orders among those tried.
+    /* One plan per end state: the first found, which is the one with fewest orders among those tried - or, among
+       as few orders, the one that leaves less turn delay to start next turn with. */
     private static function keepPlan(array &$plans, ShipMover $mover)
     {
         $state = $mover->state();
         $key = $state['position']->q . ',' . $state['position']->r . ',' . $state['heading'] . ',' . $state['facing'] . ',' . $state['speed'];
-        if (isset($plans[$key])) return;
+        $actions = $mover->actions();
+        if (isset($plans[$key])) {
+            $kept = $plans[$key];
+            if (count($kept['actions']) != count($actions) || $kept['turnDelay'] <= $mover->turnDelay()) return;
+        }
 
         $plans[$key] = array_merge($state, array(
-            'actions' => $mover->actions(), 'rows' => $mover->rows(), 'path' => $mover->path(),
+            'actions' => $actions, 'extras' => $mover->extras(), 'rows' => $mover->rows(), 'path' => $mover->path(),
             'thrustLeft' => $mover->thrustLeft(), 'turnDelay' => $mover->turnDelay(), 'overthrust' => $mover->overthrust()
         ));
+    }
+
+    //The extra thrust the last order was given (see extras()).
+    private function lastExtra()
+    {
+        $row = $this->rows[count($this->rows) - 1];
+        return isset($row['extra']) ? (int)$row['extra'] : 0;
     }
 
     //Two movers with the same key have the same future.
@@ -595,7 +713,8 @@ class ShipMover
         }
 
         $required = array(null, null, null, null, null);
-        $required[$this->flight ? self::DIR_ANY : $this->directionRequired($accel ? self::DIR_MAIN : self::DIR_RETRO)] = $this->speedChangeCost();
+        //(the page asks with its "accel" argument true for BOTH arrows - only a pivot asks with it false)
+        $required[$this->flight ? self::DIR_ANY : $this->directionRequired($accel ? self::DIR_MAIN : self::DIR_RETRO, true, false)] = $this->speedChangeCost();
 
         $this->rows[] = $this->newRow('speedchange', $last['q'], $last['r'], $speed, $heading, $last['facing'], $required, $value) + array('accel' => $accel);
         return $this->payLastRow(0);
@@ -629,7 +748,7 @@ class ShipMover
         $required = array(null, null, null, null, null);
         //slipping to starboard is pushed by the port thrusters; a flight's slip is 1 thrust from its pool
         if ($this->flight) $required[self::DIR_ANY] = 1;
-        else $required[$this->directionRequired($right ? self::DIR_PORT : self::DIR_STBD)] = (int)ceil($this->speed() / 5);
+        else $required[$this->directionRequired($right ? self::DIR_PORT : self::DIR_STBD, false, true)] = (int)ceil($this->speed() / 5);
 
         $this->rows[] = $this->newRow($right ? 'slipright' : 'slipleft', $position->q, $position->r, $last['speed'], $last['heading'], $last['facing'], $required, 0);
         return $this->payLastRow(0);
@@ -686,6 +805,7 @@ class ShipMover
             if (!$row['preturn'] && !$row['forced'] && !in_array($row['type'], array('speedchange', 'redline', 'deploy', 'sync', 'attached', 'detach'), true)) return false;
         }
 
+        if ($this->gravitic) return true; //a gravitic drive with the thrust for it changes speed whatever its attitude
         if ($this->isOutOfAlignment() || $this->isPivoting() !== 'no') return false;
         return true;
     }
@@ -716,11 +836,11 @@ class ShipMover
         return (int)(ceil(($done + 1) * $cost - 1e-9) - ceil($done * $cost - 1e-9));
     }
 
-    //canTurn (either side - the page's test does not depend on it)
+    //canTurn (either side - the page's test does not depend on it). A gravitic drive may turn while rolling, pivoting or out of alignment.
     private function canTurn()
     {
         if ($this->adrift || $this->engineDestroyed) return false;
-        if ($this->isRolling()) return false;
+        if (!$this->gravitic && $this->isRolling()) return false;
 
         if ($this->currentTurnDelay() > 0) {
             //an agile ship's snap turn may follow straight on from a turn
@@ -729,8 +849,8 @@ class ShipMover
         }
 
         if ($this->remainingEngineThrust() < max(1, $this->turnCost()) + $this->lcvSurcharge) return false;
-        if ($this->isPivoting() !== 'no') return false;
-        if (!$this->flight && $this->isOutOfAlignment()) return false;
+        if (!$this->gravitic && $this->isPivoting() !== 'no') return false;
+        if (!$this->gravitic && !$this->flight && $this->isOutOfAlignment()) return false;
 
         return true;
     }
@@ -762,18 +882,18 @@ class ShipMover
 
         $cost = $this->turnCost() + $this->lcvSurcharge;
         $required[self::DIR_ANY] = $cost % 2;
-        $required[$this->directionRequired(self::DIR_MAIN)] = intdiv($cost, 2);
+        $required[$this->directionRequired(self::DIR_MAIN, false, true)] = intdiv($cost, 2);
         //a turn to starboard is pushed by the port thrusters
-        $required[$this->directionRequired($right ? self::DIR_PORT : self::DIR_STBD)] = intdiv($cost, 2);
+        $required[$this->directionRequired($right ? self::DIR_PORT : self::DIR_STBD, false, true)] = intdiv($cost, 2);
 
         return $required;
     }
 
-    //canSlip
+    //canSlip (a gravitic drive may slip while rolling)
     private function canSlip($right)
     {
         if ($this->adrift || $this->engineDestroyed) return false;
-        if ($this->isRolling()) return false;
+        if (!$this->gravitic && $this->isRolling()) return false;
 
         $name = $right ? 'slipright' : 'slipleft';
         $other = $right ? 'slipleft' : 'slipright';
@@ -838,9 +958,12 @@ class ShipMover
         }
 
         if (self::isTurn($this->rows[$index])) {
+            $placed = 0;
             for ($point = 0; $point < $extra; $point++) {
                 if (!$this->clickBest($index, null)) break;
+                $placed++;
             }
+            if ($placed > 0) $this->rows[$index]['extra'] = $placed; //extras(): the replay gives exactly these clicks again
         }
 
         $this->rows[$index]['commit'] = true;
@@ -1171,21 +1294,53 @@ class ShipMover
         return $pivoting;
     }
 
-    /* thrusterDirectionRequired (no gravitic drive): the thrusters that do a job on a ship flying
-       bow-first do the opposite job on one flying stern-first, and a rolled ship's sides are swapped. */
-    private function directionRequired($direction)
+    /* thrusterDirectionRequired: the thrusters that do a job on a ship flying bow-first do the opposite job on one
+       flying stern-first (its heading in the aft half), and a rolled ship's sides are swapped.
+       A GRAVITIC drive (stage T5d) differs only out of alignment - pivoted, flying neither bow- nor stern-first: there a
+       SPEED CHANGE ($turnOrSlip false) is not reversed for the aft half but turned with the pivot (pivoted to port = going
+       starboard-forward: the port thrusters push along the heading, the starboard ones against it); a turn or slip keeps
+       the plain rule. $accel is the page's third argument: true for BOTH speed arrows (changeSpeed), false only for a
+       pivot - which this class never orders. */
+    private function directionRequired($direction, $accel = false, $turnOrSlip = false)
     {
         if ($direction > 2 && $this->isRolled()) $direction = ($direction == self::DIR_PORT) ? self::DIR_STBD : self::DIR_PORT;
 
-        if ($this->isGoingBackwards()) {
+        $outOfAlignment = $this->gravitic && $this->isOutOfAlignment();
+        if ($this->isGoingBackwards() && (!$this->gravitic || $turnOrSlip || !$outOfAlignment)) {
             switch ($direction) {
-                case self::DIR_RETRO: return self::DIR_MAIN;
-                case self::DIR_MAIN: return self::DIR_RETRO;
-                case self::DIR_PORT: return self::DIR_STBD;
-                case self::DIR_STBD: return self::DIR_PORT;
+                case self::DIR_RETRO: $direction = self::DIR_MAIN; break;
+                case self::DIR_MAIN: $direction = self::DIR_RETRO; break;
+                case self::DIR_PORT: $direction = self::DIR_STBD; break;
+                case self::DIR_STBD: $direction = self::DIR_PORT; break;
+            }
+        }
+
+        if ($outOfAlignment && !$turnOrSlip) {
+            if ($this->isPivotedPort()) { //the port thrusters do the main ones' job, the starboard ones the retros'
+                switch ($direction) {
+                    case self::DIR_RETRO: return $accel ? self::DIR_STBD : self::DIR_PORT;
+                    case self::DIR_MAIN: return $accel ? self::DIR_PORT : self::DIR_STBD;
+                    case self::DIR_PORT: return self::DIR_RETRO;
+                    case self::DIR_STBD: return self::DIR_MAIN;
+                }
+            } else { //pivoted to starboard: the starboard thrusters do the main ones' job, the port ones the retros'
+                switch ($direction) {
+                    case self::DIR_RETRO: return $accel ? self::DIR_PORT : self::DIR_STBD;
+                    case self::DIR_MAIN: return $accel ? self::DIR_STBD : self::DIR_PORT;
+                    case self::DIR_PORT: return self::DIR_MAIN;
+                    case self::DIR_STBD: return self::DIR_RETRO;
+                }
             }
         }
 
         return $direction;
+    }
+
+    //isPivotedPort: out of alignment with the heading one or two hex sides to starboard of the bow - the bow turned to port of the course
+    private function isPivotedPort()
+    {
+        if (!$this->isOutOfAlignment()) return false;
+        $last = $this->lastCommitted();
+        return Mathlib::addToHexFacing($last['facing'], 1) == $last['heading'] || Mathlib::addToHexFacing($last['facing'], 2) == $last['heading'];
     }
 }

@@ -2,7 +2,7 @@
 
 Status: **Stage T0 COMPLETE (committed 2026-11-13, 5807979b8, play-tested in game 4568; as-built
 notes: section 10.1). Stage T1a COMPLETE (committed 2026-11-13, 9537a8b72, Auto-Deploy play-tested
-by the user; section 10.2). Stage T1b COMPLETE (2026-11-13, uncommitted; harnesses and self-play green, play-tested by the user in game 4626; section 10.3). Stage T2 COMPLETE (committed 15624ab89; play-tested by the user in game 4679; one part of its "done when" is still open - section 10.4). Stage T3 COMPLETE and Stage T4 COMPLETE (committed together as 501272f04; play-tested by the user in games 4698 and 4701; sections 10.5, 10.6). Stage T5 STARTED 2026-11-16 (section 10.7).** T6 onward not started. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
+by the user; section 10.2). Stage T1b COMPLETE (2026-11-13, uncommitted; harnesses and self-play green, play-tested by the user in game 4626; section 10.3). Stage T2 COMPLETE (committed 15624ab89; play-tested by the user in game 4679; one part of its "done when" is still open - section 10.4). Stage T3 COMPLETE and Stage T4 COMPLETE (committed together as 501272f04; play-tested by the user in games 4698 and 4701; sections 10.5, 10.6). Stage T5 STARTED 2026-11-16: T5a + T5b committed as f1e2739af; T5c BUILT 2026-11-19 (uncommitted) together with the user's feedback on game 4750; T5d (gravitic hulls) BUILT 2026-11-19 (uncommitted) (section 10.7).** T6 onward not started. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
 layer, which uses this for battles against NPCs - see its section 7) and `STRATEGIC_AI_PLAN.md` (what
 NPC empires do on the campaign map).
 
@@ -71,9 +71,11 @@ driver), then the stage you are building in section 10.
   (`client/movement.js`, ~2,700 lines). The server validates a submitted move but cannot generate one
   for a ship. A server-side ship move generator is the largest single piece of new code here.
 
-Out of scope for v1: boarding and marines, ramming as a tactic, mine laying, called shots, hangar
+Out of scope for v1: boarding and marines, ramming as a tactic (but see stage T6: the user's
+"last resort" ramming under the Desperate rule, and units designed to ram), mine laying, called shots, hangar
 recovery mid-battle, jump-point tactics other than leaving, Fighter Missions, extended turns,
-gravitic drive rotation, officers' active abilities, and every faction special not on the readiness
+gravitic drive rotation (an Expert Graviton Controller's - gravitic hulls themselves are plotted since
+stage T5d), officers' active abilities, and every faction special not on the readiness
 list. Each is "leave at default", never "half use".
 
 ---
@@ -340,6 +342,25 @@ Personality is a weight preset (`aggressive`, `balanced`, `cautious`, `skirmishe
 range band and withdrawal threshold. A faction has a default (also used by the strategic AI's
 flavour table). All randomness comes from the seat's seed, so a game is reproducible.
 
+**What tells the levels apart - from the user's notes on game 4750 (2026-11-19, section 10.7).
+ACCEPTED by the user the same day ("Easy/Medium/Hard splits look good" - Medium is the code's
+`normal`).** Each note is a player skill; Normal has those built in T5c (the numbers in brackets are
+the notes), Easy lacks most of them, Hard adds what is still to build. Built at stage T5f.
+
+| Skill (note) | Easy | Normal | Hard |
+|---|---|---|---|
+| 1-point CCEW deterrent, no more than 2 unless fighter-heavy (2) | CCEW only for a gain | yes | yes |
+| Fighters press home, priced from the enemy's real arcs and their own jinking (3) | the old caution (every gun, any arc) | yes | yes, and flights work together |
+| Safe cruising speed (4) | half the overspeed cost | yes | yes |
+| Concentrate the heavy guns (5) | spread (no heavy focus) | in Firing | in Firing, and Movement puts the fleet's heavy guns on one chosen target |
+| Turn shortening (6) - "always useful (since any delay carries over to next turn as well) if you have the spare thrust on that turn, and you won't exceed thruster ratings" (user, 2026-11-19) | skips it | by default: the delay left at the end is always shortened with the thrust to spare within the ratings, and the search finds the double turns a shortened delay allows | the same |
+| Extended turns, where possible (user, 2026-11-19) | - | - | yes - ShipMover must first learn to begin and complete one (EXTENDED_TURNS_PLAN.md; mirror + oracle, as every movement rule) |
+| Slow pulse weapons wait for a better chance (7) | no premium | +10 | +10 |
+| Soft locks and half DEW in close engagement (8) | half OEW on the nearest, half DEW | yes | yes |
+| An enemy moving after you is the more dangerous (9) | half weight (the T5a rule) | yes | yes, plus the one-ply reply |
+| Power: light weapons that cannot reach anything switched off early, the scanner or engine boosted, the weapons back on as the enemy nears (10) | - | - | yes |
+| Ramming (11) | never | last resort under the Desperate rule (T6) | the same |
+
 ---
 
 ## 6. Special systems: the handler registry
@@ -362,7 +383,7 @@ when (a) `shipMoverHarness` is clean for all its hulls, (b) no blocking system l
 (c) 20 self-play games against EA finish with no AI defect logged.
 
 Suggested order, simplest technology first: Earth Alliance, Narn, Centauri, Drazi, Brakiri (gravitic
-drive needs its mover rules), Dilgar, then raiders and civilians (needed by the campaign's Raider
+drive needs its mover rules - built at T5d, section 10.7), Dilgar, then raiders and civilians (needed by the campaign's Raider
 faction - prioritise `raiders` right after EA), then Minbari (jammer, stealth handling), Abbai
 (shields), Vree, and onward. Ancients and custom universes last.
 
@@ -466,9 +487,9 @@ unchanged) and the self-play harness.
 | **T3 EW and power** ✅ BUILT (uncommitted, 10.5) | `EWDecider`, `PowerDecider` (negative-power handling) | Bot EW passes `validateEW` in every self-play turn; hit rates rise measurably versus T2 |
 | **T4 Ballistics and fighters** ✅ COMPLETE (uncommitted, 10.6) | `BallisticDecider`; flight tactics (escort, strike, intercept) - built on `ShipMover`, not `AutomatedMovement`, whose rows the page never checked | Missile and carrier fleets fight sensibly |
 | **T5 Movement search** | `MoveDecider` scoring, range bands, terrain (drifting too) and mine avoidance, pivots and rolls, gravitic hulls; closing with the enemy (the T2 pursuit question, ruled into T5); moving to bring the most direct-fire weapons into arc within the turn AND the most ballistic launchers to bear for next turn's launch (user, game 4701) | Hard beats Normal beats Easy in self-play ladders at >= 60% |
-| **T6 Withdrawal** | posture logic, surrender, jump-out | No game runs past the turn cap for lack of a decision |
+| **T6 Withdrawal** | posture logic, surrender, jump-out; **last-resort ramming** (user, 2026-11-19 - section 10.7, note 11) | No game runs past the turn cap for lack of a decision |
 | **T7 Specials** | handler registry; handlers faction by faction; readiness list grows | Each added faction meets the section 7 criteria |
-| **T8 Skirmish release** | server `FleetChecker` port + parity test; `FleetComposer` (auto-compose as the default for an empty CPU slot); level and personality pickers; lobby and games-list display of CPU seats; docs page | Every auto-composed fleet across all ready factions and a range of point values passes the Fleet Checker; Beta on live via `betaTesters`, then the flag |
+| **T8 Skirmish release** | server `FleetChecker` port + parity test; `FleetComposer` (auto-compose as the default for an empty CPU slot); level and personality pickers; lobby and games-list display of CPU seats; docs page; **a decision-time budget for live** (user, 2026-11-19: "reasonable decision time is important for live server" - section 12) | Every auto-composed fleet across all ready factions and a range of point values passes the Fleet Checker; every decision within the budget on live-sized fleets; Beta on live via `betaTesters`, then the flag |
 | **T9 Campaign wiring** | section 9 | A campaign battle against a Raider fleet is played manually and harvested |
 
 T0-T3 produce an opponent that is already useful for new-player onboarding (a roadmap item in its
@@ -1052,10 +1073,10 @@ never fill.
 |---|---|
 | T5a ✅ BUILT | `ShipDecider`: where a ship goes, scored in "value removed" like `FlightDecider` - this turn's direct fire from the end hex and facing, next turn's launchers from it (the user's 4701 note), the enemy's fire at it (damaged and destroyed sections weighted), next turn's trade a turn straight on, closing when nothing is in reach, loose formation, the T1b hazards. Every end state `ShipMover` finds. |
 | T5b ✅ BUILT | Overthrust allowance (10.3 ruling): `ShipMover` may overthrust when asked, plans carry the excess, the scoring weighs the critical roll it invites. Both harness halves. |
-| T5c | Terrain that drifts (next position predicted) and mines the bot can see, avoided. Drift (`TerrainDrift`): from turn 2, at the START of each turn a one-hex asteroid or meteor swarm stays (25%) or moves one hex straight on or 60 degrees either side (25% each), and a unit in the hex it enters is struck in Pre-Firing - so an end hex in a field's three forward hexes is a 25% overrun each, and next turn's continuation must miss all four of its possible hexes. Mines: read their trigger rules first. |
-| T5d | Gravitic hulls in `ShipMover` (mirror + oracle). |
+| T5c ✅ BUILT | Terrain that drifts (next position predicted) and mines the bot can see, avoided. Drift (`TerrainDrift`): from turn 2, at the START of each turn a one-hex asteroid or meteor swarm stays (25%) or moves one hex straight on or 60 degrees either side (25% each), and a unit in the hex it enters is struck in Pre-Firing - so an end hex in a field's three forward hexes is a 25% overrun each, and next turn's continuation must miss all four of its possible hexes. Mines: read their trigger rules first. **With it, the user's feedback on game 4750 (below).** |
+| T5d ✅ BUILT | Gravitic hulls in `ShipMover` (mirror + oracle). |
 | T5e | Pivots and rolls for the damaged-ship uses above (mirror + oracle). |
-| T5f | Levels (Easy: noise; Hard: one-ply look-ahead, the enemy's best reply) and the ladder harness - the stage's "done when". |
+| T5f | Levels (Easy: noise; Hard: one-ply look-ahead, the enemy's best reply; the skills table of 5.8, from the user's 4750 notes - Hard's power management and extended turns among them) and the ladder harness - the stage's "done when". |
 
 **T5a as built (2026-11-16) - BUILT, uncommitted, not play-tested by the user.**
 No flag, no migration; `source/autoload.php` regenerated for the one new class (phpab in the
@@ -1108,8 +1129,10 @@ No flag, no migration; `source/autoload.php` regenerated for the one new class (
     (cannot brake, cannot pay a turn at 8), a Tethys four thrusters. Exactly the user's pivot use
     (T5e): "pivot to decelerate after retro thrusters are destroyed".
   * `FlightDecider` still prices danger with the uncapped `value / health` - the flaw fixed above for
-    ships. Not seen to misbehave yet; not changed (T4 code).
-  * `EWDecider` still judges the bot's own ships where flying straight on takes them.
+    ships. Not seen to misbehave yet; not changed (T4 code). *(Fixed at T5c, 2026-11-19: it now prices
+    through `ShipDecider::removed` / `lost`.)*
+  * `EWDecider` still judges the bot's own ships where flying straight on takes them. *(T5c: its close-range
+    test takes the nearer of that and where the ship stands.)*
   * Interception is not in the movement scores (it changes how much a volley does far more than where
     it is best fired from).
 * **Performance fix the deployer harness showed:** `deployerHarness` lets `AIDriver::run(gameid, 3600)`
@@ -1149,6 +1172,213 @@ No flag, no migration; `source/autoload.php` regenerated for the one new class (
   hundred points of danger. That is the ruling's trade-off as written; `MOVE_COST_THRUSTER_CRIT` is the
   knob if it should be more conservative.
 
+**The user's feedback on game 4750 (2026-11-19) - human G'Quan x2 + Frazi flight v CPU Omega x2 +
+Aurora x2, 42x30, simultaneous movement (8 initiative categories), turns 1-5 reviewed.** Asked to
+fold it into the bot or the plan, and to help tell Easy, Normal and Hard apart (that table is in
+5.8). The user's four threshold choices were asked and answered the same day (all the recommended
+options). Before changing anything the bot's own turn-5 decisions were replayed with a trace
+(scratch script: the game wound back to each moment from `tac_shipmovement` - the loader keeps turn
+1, N-1 and N - with the active ships set to the movers of that moment, or `hideActiveShipMovement`
+hides the game's CURRENT active ship's rows). What it showed is in the table.
+
+| # | The user's note | What the bot did, and why | Done |
+|---|---|---|---|
+| 1 | Game 4750 is the basis | - | - |
+| 2 | One point of CCEW is a deterrent, even from some distance; more than 2-3 only against a fighter-heavy force or on a ship with a lot of light anti-fighter weaponry | Turn 4: an Omega had CCEW 5, OEW 3, DEW 0. CCEW was bought only for a gain, with no cap | **Built** (`EWDecider`): 1 point whenever an enemy flight could be within CCEW's 10 hexes this turn (10 + its speed) and the ship has a gun that can fire at fighters; never over `EW_CCEW_CAP` (2) unless a third of the enemy's visible value is in flights or at least half the ship's guns are anti-fighter guns (fire control better against fighters than against capitals - a Twin Array 6/5/4 is one, a Standard Particle Beam 4/4/4 is not, an Interceptor has no offensive fire at all) |
+| 3 | Fighters far too cautious: Aurora retreated on turns 4-5 though moving last; parking 3-5 hexes off a G'Quan, or jumping the Frazi, was viable. Weigh nearby CCEW and how many light weapons the flight is in arc of | Replayed: the flight was on an INTERCEPT mission whose ONLY target was the Frazi, out of its reach everywhere, and its danger priced every G'Quan gun whatever its arc (28 expected damage at 2 hexes; 11 once arcs were asked - both G'Quans had moved). Nothing scored, so it fled | **Built** (`FlightDecider` reworked): every enemy is a target, raiders near the bot's ships worth `FLIGHT_INTERCEPT_WEIGHT` (1.5) more; an enemy that has moved fires from its ARCS, one yet to move with every gun; only guns loaded this turn; the enemy's EW is this turn's (in sight since Initial Orders closed - CCEW included); each place is priced as it is and with all the jinking the thrust left allows, the better kept; worth capped per target (`ShipDecider::removed` / `lost`, the T5a fix FlightDecider had lacked); `FLIGHT_DANGER_WEIGHT` 1.0 -> 0.75 as for ships. Replay: Aurora #5 now ends 2-3 hexes from both G'Quans and the Frazi; Aurora #4 (moving last) goes for the crippled G'Quan #1 in its own hex (range 0, where jinking would not help it - 447 offence against 133 danger), parking 1-2 hexes off scoring next. A `$trace` lists its six best places |
+| 4 | The Omegas' speed 7 and 8 on turn 5 is too fast for thrust 8 - a rare move, to finish an opponent or escape certain death | Replayed: speed cost 5 hexes (~20 points) against a danger saving of 211 from running behind G'Quan #1's arcs | **Built** (`ShipDecider`, `ShipMover::safeSpeed`): above the speed at which one turn costs more than `MOVE_SAFE_TURN_SHARE` (0.75, the user's choice) of the ship's thrust - Omega 6, G'Quan 13 - each point of speed costs `MOVE_COST_OVERSPEED` 25 hexes (12.5% of the ship's value; 12 still let Omega #6 run at 7). Replay: Omega #6 holds speed 6 at 4 hexes, Omega #7 goes to 6 |
+| 5 | Concentrate the fleet's heavy firepower to take a ship down rather than spread it | Turn 4: 30 weapons on all three enemies | **Built** (`FireDecider`): a HEAVY gun (loading over a turn, or `FIRE_HEAVY_DAMAGE` 15 a shot) is drawn to a target already booked by `FIRE_FOCUS_HEAVY` (2.5) instead of `FIRE_FOCUS` (0.5); light guns stay free for fighters. **Planned (T5f, Hard):** Movement putting the fleet's heavy guns on one chosen target (the turn plan of section 4) - each ship still moves for its own best trade |
+| 6 | Turn shortening (extra thrust on a turn) is important; rarely overthrusting for it | Never used: ShipMover could shorten (oracle-proven in random walks) but the search did not try it | **Built** (`ShipMover::allowShortening`, `shortened`, plans carry `extras`): the search tries every turn with all the extra thrust it can take - the double turns only a shortened delay allows; an overthrust for it is priced as any other; and the plan chosen gets its LAST turn shortened with thrust that would otherwise go unused, within the ratings, so the next turn starts free to turn. Equally plain plans to one end state keep the one with less delay left. **Ruled the same day:** "always useful (since any delay carries over to next turn as well) if you have the spare thrust on that turn, and you won't exceed thruster ratings" - by default for Normal and Hard, Easy may skip it. So the last-turn shortening was made to hold back only what an order after the turn needs (a sideslip) instead of giving up: of 27,175 plans across the EA and raider hulls ending with a delay left, 2,051 had been left unshortened that a smaller extra could shorten |
+| 7 | Pulse weapons do more at high chances (grouping): a premium on their minimum chance | - | **Built** (`FireDecider::minimumChance`): a slow pulse weapon's floors are `FIRE_PULSE_PREMIUM` (+10, the user's choice) higher - Medium Pulse 35%, Heavy Pulse 44%; one-turn pulse guns keep 5% |
+| 8 | In close engagement players mainly use soft locks and keep a decent amount of DEW | Turn 5: both Omegas 8 OEW on one G'Quan, 0 DEW, at 1-4 hexes (the human: 2 + 2 OEW, 3-4 DEW). Found: a DEW point was valued at a QUARTER - every enemy gun's fire divided by the bot's unit count, its flights included - and every enemy gun counted, reloading or not, against only the bot's loaded ones | **Built** (`EWDecider`): within `EW_CLOSE_RANGE` (10, the user's choice) a lock stays soft (2), and with an enemy SHIP that close at least half the points stay DEW; each enemy gun counts by the share of its fire this ship would draw among the bot's units, and only guns loaded this turn (every player sees an enemy weapon's loading on its ship window). Self-play: 23% of EW offensive with the share fix alone, 32% with loaded guns only, soft locks of 1-2 and DEW 3-7 once engaged; a ship standing off beyond 10 hexes still snipes with a hard lock |
+| 9 | Enemies moving after your ship are MORE dangerous (better shots, a damaged section) | `MOVE_UNMOVED_DANGER` was 0.5 | **Built** (`ShipDecider`, `FlightDecider`, `AIView::exposureUnmoved`): every gun of an enemy yet to move counts at 1.0, and the section it meets leans to the ship's worst one by how much of the distance its speed covers. Next turn's terms keep 0.5 for both sides (`MOVE_UNMOVED_DANGER_NEXT`) - nobody knows next turn's initiative. **Also fixed with it:** this turn's danger counts only enemy guns loaded now (next turn's, those loaded by then) - the Omegas had run from heavy guns that had just fired |
+| 10 | Hard: switch off light weapons out of arc/range on early turns to boost Scanner or Engine; back on as the enemy nears | `PowerDecider` never boosts | **Planned (T5f, Hard only - table in 5.8):** needs the page's boost rules ported to `PowerDecider` and proven by `ordersOracle` like the rest of power; only weapons that reload in a turn (a weapon switched off loses its charge), switched back on a turn before the enemy can be in their reach |
+| 11 | Ram when the Desperate rule applies to the CPU's team, only as a last resort (no weapons left, primary under some %); never as a standard attack except for units like Hunter-Killers marked `$designedToRam` | Never rams (`AIView::weaponBlock`: 'ramming') | **Planned (T6, table in section 10):** the Desperate rule is honour-based - `{"desperate": team or -1}`, `DesperateRule::$appliesToTeams`, nothing in the engine stops a ram - so the bot restrains itself: a unit of a team the rule covers with no usable weapon left, or its primary structure under a threshold, may plan into a target's hex and order its `RammingAttack`; a unit whose ram is `designedToRam` (the Orieni / Makar HKs) may ram in any game, as its own handler (T7) |
+
+**T5c as built (2026-11-19) - BUILT, uncommitted, not play-tested by the user.** No flag, no migration;
+`source/autoload.php` regenerated for the one new class (`fvbuild -Autoload`, one line).
+* **`ai/Hazards.php`** - the BOARD, built once per Movement decision from the bot's masked view and
+  asked for every end state by `ShipDecider` and `FlightDecider` (`MoveDecider::orders` builds it;
+  T1b's `MoveDecider::hazard` / `choose` stay the fallback's). Terms, priced in VALUE (expected damage x
+  what a point of the unit is worth) except the fixed ones:
+  * *board* - T1b's fixed costs exactly (proved below), except that a DRIFTING asteroid on next turn's
+    straight continuation costs `MOVE_COST_NEXT_TURN` x the chance it stands there (25% for each of its
+    four possible hexes the continuation crosses); a static rock (a 2- or 3-hex one, or any rock when
+    the game's rule is off) still costs it all;
+  * *drift* - ending in one of a drifting field's three forward hexes: 25% of its strike - an asteroid
+    d10 x speed (the end speed standing in for next turn's; an Ancient 2 less; nothing at speed 0, as
+    the engine makes no order), a swarm its meteors - weighed by the section facing the field
+    (`AIView::exposureAt`);
+  * *meteors* - a meteor swarm's hex ENTERED this turn (the expectation of
+    `MeteorSwarm::rollMeteorChart`, with its speed modifier - ⚠️ `Hazards::METEOR_CHART` is a copy;
+    the harness rolls the real one against it), and next turn's continuation through one by the chance
+    it is there, at `MOVE_NEXT_TURN_WEIGHT`. Swarms are never blocked hexes (not Enormous) - until now
+    the bot flew straight through them;
+  * *mines* - the trigger rules read in `AoE.php` / `MineControllerDEW`: a Proximity (Pre-Firing,
+    always hits) or Captor (Fire phase, rolled) mine attacks the first unit by initiative whose STARTING
+    hex or any hex it enters is within its range for that kind of unit (its set range, else the full
+    one; halved against a Jammer) with a clear line, then is gone; a DEW mine's guns keep firing. So a
+    path into range pays the attack (`HAZARD_MINE_HIT` 0.75 for a rolled one); a unit that STARTS in
+    range pays nothing more for any plan; a DEW mine also charges ending in range (next turn). Only
+    mines the bot can see (an undetected one sits at -10000 in its view), its own side's only without
+    IFF. A mine is no longer an "enemy gun" in the danger terms or EW's threats.
+* **Gaps, left for later:** dust clouds, gravity wells and the Triad's spawned terrain are not priced
+  (they block no line of fire, so `blockedHexes` never listed them either); the bot sweeps for no mine
+  it cannot see; a mine's choice of the FIRST unit by initiative is not modelled.
+* **A model limit met while tuning (not changed):** since T2 a point of damage is worth a unit's value
+  over what is left of its PRIMARY structure (`AIView::healthLeft`), though most hits land on an outer
+  section first - so offence and danger both read several times high for a fresh ship (turn 5 of 4750:
+  "danger 446" for an Omega worth 802 at 4 hexes from two damaged G'Quans). The two sides inflate alike,
+  but terms in hexes of the ship's own value (speed, closing, formation) look small beside them;
+  `MOVE_COST_OVERSPEED` was set with this in view. A health that counts the sections a hit must go
+  through would be the fix; it moves every weight, so it is for a stage that re-tunes them (T5f).
+* **The rest of the 4750 notes** are in the table above; their code: `AIConfig` (every new weight and
+  threshold, each with the ruling it carries), `ShipMover` (`allowShortening`, `extras`, `shortened`,
+  `safeSpeed`), `ShipDecider` (rewritten around the same terms, `removed` / `lost` public),
+  `FlightDecider` (rewritten), `EWDecider`, `FireDecider` (`isHeavy`, the pulse premium), `AIView`
+  (`exposureAt`, `exposureUnmoved`, `worstExposure`).
+* **Harnesses** (`tests/ai`, gitignored as before):
+  * NEW `hazardsHarness.php` (no database; php container): A - on boards of static rocks every plan
+    the search finds is priced exactly as `MoveDecider::hazard` prices it (4 hulls x 40 random boards);
+    B - drift geometry for all six headings (forward hexes only, nothing at speed 0, the field's own hex
+    blocked, a continuation through two of its hexes 50%, a 2-hex rock 100%); C - `meteorHits` against
+    40,000 rolls of the real chart a column, swarm entry, continuation and overrun; D - mines: unseen ->
+    free, seen -> its attack, start in range -> free, own side by IFF, a Captor's set range, line of
+    sight; E - Omega, Hyperion, Tethys and an Aurora flight steer out of an overrun and out of a mine's
+    range. **14,758 checks at the default 40 rounds.** Mutation pass: 12 broken copies of `Hazards`
+    loaded ahead of it (`php -d auto_prepend_file=...`), **12 caught** (two only after the start-rule
+    and Captor checks were given geometry that tells them apart).
+  * `shipMoverHarness.php`: the search runs with `allowShortening()`, every replayed search plan
+    carries its extras, a shortening plan is always among those replayed, and one plan per situation is
+    replayed with its last turn shortened as `ShipDecider` does it.
+  * `selfPlayHarness.php --terrain=asteroids:12,meteors:6,drift` - random terrain as Create Game places
+    it, and the Drifts boxes.
+* **Gates, 2026-11-19:** ShipMover pair, re-run after the last-turn shortening learned to hold back
+  - **150 hulls, 5,435 situations, 45,890 plans (4,765 shortening a turn in the search; 1,486 with the
+  last turn shortened as ShipDecider does it, 1,187 of them holding thrust back for an order after the
+  turn; 8,616 allowed to overthrust), 347,767 steps replayed through movement.js, 0 differences;
+  810,375 server checks** (slowest search 0.9-1.0 s at the harness's quota of 200, against 0.25 s
+  before shortening); fire pair, phase 3 and phase 1,
+  0 differences; orders pair 0 differences (936 situations; 32 bases / Mag-Grav ships the bot leaves
+  alone that the page would stop, the known gap of 10.5); `hazardsHarness` 14,758 checks;
+  `flagOffHarness`, `cpuLobbyHarness` green; `deployerHarness` 195 green (~30 min: it plays its
+  asteroid scenarios on with the full driver). **Replay check 212 passed / 8 failed** - 4297, 4356, 4357,
+  4359, 4361, 4440, 4456, 4519, every difference `/ships/N/systems/N: added`: the user's Kelly Trek
+  commits of 2026-11-18 (244209010, 10d58637b). **Proved not this stage's by stash-and-compare**: with
+  `source/server/ai`, `autoload.php` and this plan stashed the same eight fail identically. **The user
+  re-recorded the corpus the same day: 228 passed, 0 failed with this stage in place** (the re-record
+  adopted the kept self-play games 4767 and 4768 - deleting them now makes them SKIP).
+* **The cost of turn shortening, measured** (scratch, DB-free, an open board with three enemies at
+  fighting range): one ShipDecider decision takes Omega 0.15 s (39 end states), Hyperion 0.10-0.22 s,
+  Olympus Beta ~0.5 s (120-200), Tethys 1.4-1.9 s (394-510 end states; the search alone 0.4-0.6 s) -
+  roughly twice T5b's figure for the nimble hulls, from the end states only a shortened turn reaches.
+  Fine for play; it matters to live's request budget (`AIConfig::BUDGET_SECONDS` 4 is checked between
+  submissions, and one Movement submission can carry several ships). **Ruled a T8 deliverable by the
+  user (2026-11-19) - section 12 has what to build.**
+* **Self-play, 2026-11-19** (default EA fleets unless named; no refused submission, no defect in any):
+  * T5c against the T1b mover, 24x16, sides swapped: T5c ahead in **4 of 4**, all fought to a finish
+    (33, 28, 11, 22 turns), keeping 48-64% of its value against 0% (T5a/T5b: 6 of 6).
+  * Drifting terrain, 24x16 (`--terrain=asteroids:10,meteors:6,drift` - 15 drifting fields): fought to
+    a finish in 25 turns; mean chance 46%; 32% of EW points offensive (soft locks of 1-2, DEW 3-7 once
+    engaged; one Omega standing off at 13-16 hexes sniped with a hard lock of 8, as allowed beyond close
+    range). Shortened turns used throughout ("turnright (shortened)" in the decision lines).
+  * Carriers v line (Avenger, 3 Aurora flights, Tethys v the default fleet), 24x16, simultaneous movement:
+    fought to a finish in 14 turns.
+  * T5c v T5c, **42x30 with 22 drifting fields and 8 meteor hexes**, simultaneous movement: reached the
+    40-turn cap (44 turns; 33% v 22% left). In its last ten turns one side was down to an Omega duelling
+    the other's Omega at 4-8 hexes, while the other's damaged Hyperion and Tethys stood off 12-23 hexes
+    (fire 0, danger 0): each ship takes its own best trade, and a damaged ship will not walk into an intact
+    Omega's guns to finish it. That is the case for T5f's fleet focus (Movement putting the fleet's guns on
+    one chosen target - the user's note 5) and T6's finishing logic; one game, not tuned around.
+  * No terrain, 24x16: reached the cap with one side at 0% value (crippled hulks the other could not or
+    would not finish) - the T6 case T5a recorded.
+
+**T5d as built (2026-11-19) - BUILT, uncommitted, not play-tested by the user.** Gravitic hulls in
+`ShipMover`. No flag, no migration, no new class (autoload unchanged).
+* **What a gravitic drive changes in the page's rules** (every `ship.gravitic` in `movement.js` read): in
+  four places, and only when the ship is out of alignment (a pivot made earlier: flying neither bow- nor
+  stern-first), pivoting or rolling. `canChangeSpeed` - a gravitic ship may change speed in any attitude;
+  `canTurn` - it may turn while rolling, pivoting or out of alignment; `canSlip` - while rolling;
+  `thrusterDirectionRequired` - out of alignment a SPEED CHANGE is not reversed for a heading in the aft
+  half but paid through the thrusters the pivot turned to the job (pivoted to port = going starboard-forward:
+  port thrusters push along the heading, starboard ones against it), while a turn or slip keeps the plain
+  rule. `assignThrust` and the turn delay have no gravitic rule. **Bow- or stern-first and neither pivoting
+  nor rolling, a gravitic hull's rules are a plain hull's** - which is where the bot's gravitic ships always
+  fly, as it never pivots or rolls them (T5e). The T1b refusal was for the other states.
+* **`ShipMover`**: the refusal ('a gravitic drive') is gone - except for hulls with a Trek impulse drive, now
+  refused for that ('a Trek impulse drive', `hasTrekImpulseDrive` - see the sweep below); `$gravitic`; the three gate exceptions;
+  `directionRequired($direction, $accel, $turnOrSlip)` now takes the page's two arguments (a speed change
+  asks with accel TRUE for both arrows, a turn or slip with turnOrSlip true - a pivot, never ordered here,
+  is the only caller with accel false) and has the gravitic branch, with `isPivotedPort`. Gravitic FLIGHTS
+  (the Brakiri fighters, the Vree Salvage Zorth) are ordinary flights to it: the page's "gravitic turn" (a
+  flight's turn keeping its facing, `canGraviticTurn`) is an order it does not give. Comments in
+  `MoveDecider` / `ShipDecider` updated; no decider change - a gravitic hull is scored like any other.
+* **Harness** (`shipMoverHarness.php`): the page is now told the truth about the drive (`clientShip` sent
+  `gravitic: false` for every hull), about forced rows, and about a system's OUTPUT - what `stripForJson`
+  sends, not the raw property (a Trek impulse drive sends its rating plus its nacelles': 10 where the property
+  says 2; no EA, raider or Brakiri hull has such an engine); 19 new situations, for EVERY hull - pivoted to
+  port / starboard, each with the heading in the aft half, a pivoted ship that turned last turn (shortened
+  too), at a standstill, braking through it, accelerating, slowing, with damaged thrusters; still pivoting
+  WITH the forced pivot the page adds at activation (`doForcedPivot`, client-side), also out of alignment;
+  rolling out of alignment and stern-first; rolled and pivoted - and random situations now start out of
+  alignment, pivoting or rolling some of the time. `--gravitic` (only gravitic hulls), `--part=K/N` (one N-th
+  of the hulls, to run a set in parallel containers), a "gravitic hull is plotted" check and the count in the
+  summary line.
+* **Proved RED first:** against the unchanged ShipMover the harness failed on all 62 gravitic hulls of the
+  Brakiri, Brakiri raider and raider lists (refused); with only the refusal lifted the server half passed
+  (415,787 checks - it can check none of these rules) and the client replay failed **7,943 of 25,126 plans**
+  (the page offered turns while rolling and speed changes while pivoted). The new situations on plain EA
+  hulls passed before any ShipMover change (2,376 plans) - the plain out-of-alignment rules already held.
+* **Gates, 2026-11-19:**
+  * Gravitic hulls (`--factions=brakiri,brakiri_raiders,raiders --gravitic`): **62 hulls, 3,082
+    situations, 27,595 plans, 206,768 steps replayed through movement.js, 0 differences; 458,068 server
+    checks.**
+  * The default set (EA + raiders, all situations, the raiders' 7 gravitic hulls now among them):
+    **157 hulls, 7,917 situations, 64,035 plans (4,945 shortening a turn in the search, 1,534 with the last
+    turn shortened, 1,208 of them holding thrust back; 11,735 allowed to overthrust), 450,770 steps, 0
+    differences; 1,127,242 server checks** (slowest search 1.25 s; 5 parallel containers, 375 s).
+  * Mutation pass: 16 broken copies of the port (each gate exception, the reversal rule, the pivot rotation,
+    port/starboard swapped, the accel / turnOrSlip arguments at each caller, the pivot offsets, the rolled
+    swap, the flag never set, the refusal put back), on ten hulls (Rakarta, Halik, Avioki, Brikorta, Kabrik,
+    Vasy, Jia, Pikitos, Torsha, Vastar): **16 caught, 15 of them ONLY by the client replay**. Two are the same
+    in effect (port/starboard swapped = accel false: a speed change is the only use).
+  * `hazardsHarness` 14,758 checks; `flagOffHarness`, `cpuLobbyHarness` green; **replay check 228 passed,
+    0 failed**. The fire and orders pairs load nothing that changed (no ShipMover).
+  * **Every gravitic hull of every faction** (`--factions=all --gravitic`, informational): 366 hulls, 17,956
+    situations, 155,550 plans, server half clean. **The 304 that are not Star Trek hulls: 0 differences**
+    (Minbari, Vree, Hyach, Drakh, Yolu, Ipsha, Vorlons, Triad, Kirishiac, Walkers, Torvalus, Streib...). The 62
+    Trek hulls differed - first because the harness sent the impulse drive's raw output (fixed, above), then in
+    923 of 28,443 plans, every one with the IMPULSE DRIVE ITSELF damaged: the drive's `getOutput()` is its
+    rating plus its nacelles' and nothing else, and the page adds the drive's own criticals to that
+    (`systems.js getOutput`), so ShipMover read a damaged drive's thrust too high. All 63 impulse-drive hulls
+    are gravitic - lifting the gravitic refusal is what exposed them - so they are refused again, for the
+    engine (P4); the Kelly Constitution's drive keeps Engine's rules and agrees (432 plans, 0 differences).
+    The mirror fix, if Trek is ever wanted: add the drive's `outputMod` (less any one-turn drain) to its
+    `getOutput()` in `readSystems`.
+  * **Seen, not changed (pre-existing since T1b, not gravitic):** the Shadow hulls (`BioDrive`, whose
+    `getOutput()` sums the bio-thrusters and leaves its own criticals to the page) have the same gap - 312 of
+    8,238 plans differ, all with the drive damaged (page 25, ShipMover 27). Shadows are plotted since T1b and
+    were never in the harness; they are late on the readiness list.
+* **Self-play, 24x16** (no refused submission, no defect in any):
+  * Brakiri (Tashkat, Avioki, Halik, Falkosi) moved by ShipDecider against the same fleet moved by the T1b
+    rule (`--plain-move`), both seat orders: **T5 ahead 2 of 2** (51% and 40% of its value kept against 0%,
+    21 and 19 turns) - the movement search does for gravitic hulls what it did for plain ones (T5a 6 of 6).
+  * Brakiri against the default EA fleet (2,303 v 2,347 points), both seat orders: EA ahead both times (45% v
+    0% in 33 turns, 72% v 8% in 28). A raider gravitic fleet (Vastar, Jia, Vasy, Hybrid Saucer - the last is
+    NOT gravitic, its flag is commented out) against Hyperion, Tethys and an Aurora flight, simultaneous
+    movement: 0% v 97% in 24 turns. **Not a movement fault as far as one kept game shows** (4776: every
+    Brakiri hull decided by ShipDecider; the Avioki closed at speed 7 on turn 1 - fire 705 against danger 725,
+    the "best trade" call - and was destroyed): the Brakiri guns are short-ranged (Graviton Pulsar: range
+    penalty 1 a hex) or slow (Graviton Beam: 4 turns to load), and the Tashkat fired each gun only 1-4 times
+    in 16 turns. How the bot fights such a fleet - range, the slow-gun floors - is tuning for T5f, and a
+    faction's readiness (section 7) asks for 20 games against EA without a defect, not wins.
+* **Left for T5e (pivots and rolls):** the bot still never pivots or rolls, so it never puts a gravitic hull
+  out of alignment - the gravitic way of fighting (pivot to keep the guns on the enemy while flying on)
+  waits for T5e and a ruling there on whether gravitic hulls should pivot as a matter of course, beyond the
+  damaged-ship uses ruled for all hulls. And when a bot ship is still pivoting at the start of its move,
+  ShipMover must write the forced pivot row itself: the page adds it at activation (`doForcedPivot`), the
+  server does not.
+
 ---
 
 ## 11. Testing
@@ -1160,7 +1390,8 @@ No flag, no migration; `source/autoload.php` regenerated for the one new class (
   FV bugs; report them, do not fold fixes into AI work without asking.
 * **`shipMoverHarness.php`**: section 5.4 (flights since 10.6). **`fireHarness.php` + `fireOracle.js`**:
   section 10.4; `--phase=1` for launches and magazines, and the interception parity check, 10.6.
-  **`ordersHarness.php` + `ordersOracle.js`**: section 10.5.
+  **`ordersHarness.php` + `ordersOracle.js`**: section 10.5. **`hazardsHarness.php`** (the board: drift,
+  meteors, mines; no database, no oracle - the engine's own rules are the reference): section 10.7, T5c.
 * **Ladder harness**: win rates between levels and against a frozen previous AI version, to catch
   regressions in play strength.
 * **Masking test**: run a decider with the unmasked object swapped in; decisions must not change
@@ -1182,6 +1413,21 @@ No flag, no migration; `source/autoload.php` regenerated for the one new class (
 * Live is lsphp with a memory limit that returns 503 when exceeded: keep per-request work to one
   submission, free the gamedata between loop iterations, and measure memory in the self-play harness.
 * `tac_ai_log` is capped per game and off by default on live.
+* **Decision time - a T8 deliverable (user ruling 2026-11-19: "reasonable decision time is important
+  for live server").** Measured at T5c (10.7): one Movement decision takes 0.1-0.5 s for capital and
+  heavy hulls and up to 1.9 s for a nimble one (Tethys, ~500 end states once turns may be shortened);
+  one Movement submission carries every unit of the bot's activation, and `AIConfig::BUDGET_SECONDS`
+  (4) is only checked BETWEEN submissions. **Turn shortening is not where the time comes back from**
+  (user ruling, same day: "shortening turn delay is always useful (since any delay carries over to next
+  turn as well) if you have the spare thrust on that turn, and you won't exceed thruster ratings. Normal
+  and Hard CPU opponents should do it by default really (easy opponents can skip)") - it stays on for
+  Normal and Hard. To build at T8, after profiling (Tethys: search 0.4-0.6 s, judging the end states the
+  rest): a budget per decision (a ship that runs out takes the best plan scored so far - the
+  plainest-first search order makes that a sound partial answer); the next-turn terms - a whole second
+  board evaluation per end state - asked only of the end states whose this-turn score leaves them within
+  reach of the best; timings taken on the test instance (live is lsphp on shared hosting, not the Docker
+  stack) for fleets of live size, and the self-play harness printing the slowest decision so a regression
+  shows.
 
 ---
 

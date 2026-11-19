@@ -45,7 +45,12 @@ class AIConfig
     const MOVE_HEX_VALUE = 0.005;           //one hex of the shaping terms, as a share of the ship's own value
     const MOVE_DANGER_WEIGHT = 0.75;        //the enemy's fire at the ship, against its own at the enemy: under 1 so a balanced bot leans into a fight
     const MOVE_UNMOVED_OFFENCE = 0.5;       //fire at an enemy that has yet to move this turn: it may turn away
-    const MOVE_UNMOVED_DANGER = 0.5;        //an enemy yet to move: EVERY gun of it counts (it may turn to bring them to bear), at this weight
+    /* An enemy yet to move this turn is MORE dangerous than one that has moved (user, 2026-11-19, game 4750): it sees
+       where the ship ended and lines up its best shot - its guns, and the ship's weakest side. So EVERY gun of it counts at
+       full weight, and the section it hits leans towards the ship's worst one the closer it is (AIView::exposureUnmoved).
+       Next turn's terms keep MOVE_UNMOVED_OFFENCE for both sides: next turn's initiative is not known yet. */
+    const MOVE_UNMOVED_DANGER = 1.0;
+    const MOVE_UNMOVED_DANGER_NEXT = 0.5;   //...a turn on, everybody moves again in an order nobody knows
     const MOVE_LAUNCH_WEIGHT = 0.8;         //next turn's launches from the end hex (the end state decides which launchers bear)
     const MOVE_NEXT_TURN_WEIGHT = 0.5;      //the trade a turn on, everybody flying straight on: keeps a ship from overshooting
     const MOVE_SECTION_DAMAGED = 0.5;       //a hit on a section counts 1 + this x the share of the section already lost
@@ -59,11 +64,38 @@ class AIConfig
     const MOVE_COST_FAST = 1.5;             //each point above the comfortable speed of the ship's size (live data: capital 4.7, heavy 5.2, medium 6.1)
     const MOVE_COMFORT_SPEED = array(3 => 5, 2 => 5, 1 => 6, 0 => 7); //shipSizeClass => speed; a bigger class uses the last
     const MOVE_COST_UNTURNABLE = 5.0;       //each point of speed above the fastest at which a whole turn's thrust still pays for a turn (ShipMover::fastestTurnable)
+    /* SAFE SPEED (user ruling 2026-11-19, game 4750: Omegas, thrust 8, at speed 7 and 8 were "a bit too fast to safely
+       manoeuvre ... a rare move where you might accelerate to that speed to get a great shot in and finish off an opponent,
+       or to escape certain death"). Above the fastest speed at which ONE turn costs no more than this share of the ship's
+       thrust (ShipMover::safeSpeed - Omega 6, G'Quan 13), every point of speed costs MOVE_COST_OVERSPEED hexes: only a kill
+       or escaping heavy damage outweighs it. */
+    const MOVE_SAFE_TURN_SHARE = 0.75;
+    const MOVE_COST_OVERSPEED = 25.0;       //hexes (12.5% of the ship's own value) per point of speed above the safe speed (12 still let game 4750's Omega #6 run at 7)
+    /* TURN SHORTENING (user, 2026-11-19: "an important ability used by most players ... rarely overthrusting to do so";
+       and "always useful (since any delay carries over to next turn as well) if you have the spare thrust on that turn,
+       and you won't exceed thruster ratings" - by default for Normal and Hard, Easy may skip it) has no weight of its own.
+       ShipMover offers each turn a second time with all the extra thrust it can take (allowShortening), so the search
+       finds the double turns only a shortened delay allows - an overthrust for it is priced like any other; and the plan
+       chosen has its LAST turn shortened with the thrust it has to spare within the ratings - all of it, or what an order
+       after the turn leaves (ShipMover::shortened) - so next turn starts free to turn. */
     /* Overthrust (stage T5b; user ruling 2026-11-13 - players overthrust to make a turn they need, to stay on the
        map above all). Plans within the thrusters' ratings are found first; overthrust only adds end states they
        cannot reach, each priced by the critical it invites. */
     const MOVE_OVERTHRUST = 99;             //points over a rating a thruster may carry (the page's own ceiling, twice the rating, still holds); 0 = never
     const MOVE_COST_THRUSTER_CRIT = 10.0;   //hexes per expected thruster critical (1 point over a sound thruster: 35% + 10% = 4.5 hexes)
+    /* THE BOARD, stage T5c (Hazards): terrain that DRIFTS, meteor swarms, and mines the bot can see. Priced in value -
+       expected damage times what a point of the unit is worth, as the fire terms are - except a blocked hex entered and
+       the map edge, which keep the fixed MOVE_COST_* above (they outweigh everything).
+       DRIFT (TerrainDrift, user rulings 2026-11-08): at the START of every turn from turn 2 a one-hex asteroid or a meteor
+       swarm stays put (25%) or moves one hex - straight on, or 60 degrees to either side (25% each) - and a unit standing in
+       the hex it enters is struck in Pre-Firing. So ending in one of a field's three forward hexes is a 25% overrun, and
+       next turn's straight continuation is priced against all four hexes the field may stand in. */
+    const HAZARD_DRIFT_CHANCE = 0.25;
+    /* MINES (AoE.php, read 2026-11-19): a Proximity or Captor mine attacks the first unit, in initiative order, whose
+       starting hex or any hex it ENTERS lies within the mine's range (per kind of unit, halved against a Jammer) with a
+       clear line - once, then it is gone; a DEW mine's guns keep firing at what comes within its range. Only mines the bot
+       can SEE count (P2), and its own side's only when they have no IFF. A Proximity mine always hits; the others roll. */
+    const HAZARD_MINE_HIT = 0.75;
     const MOVE_COST_TURN = 0.2;             //each turn: the plainest plan wins among equals
     const MOVE_COST_SLIP = 0.5;             //each sideslip - dearer, or slips become a cheaper way than braking to give up ground
     const MOVE_COST_SPEED_CHANGE = 0.3;     //each speed change
@@ -72,7 +104,13 @@ class AIConfig
        finds for it. Scores are in "value removed" - expected damage times what a point of the unit
        hit is worth (its value over the damage that finishes it), as FireDecider's worth. */
     const FLIGHT_PLANS = 250;               //plans ShipMover is asked for, per flight
-    const FLIGHT_DANGER_WEIGHT = 1.0;       //what the enemy's guns could do to the flight where it ends, against what it does
+    /* What the enemy's guns could do to the flight where it ends, against what it does. 0.75 as for ships (user, 2026-11-19,
+       game 4750: "fighter flights appear to be behaving far too cautiously" - an Aurora flight moving LAST retreated instead of
+       parking 3-5 hexes off a G'Quan; it priced every gun of every enemy whatever its arc, and only the out-of-reach Frazi
+       counted as a target). Enemies that have moved now fire from their arcs only; the flight is priced at the jinking it
+       would really use. */
+    const FLIGHT_DANGER_WEIGHT = 0.75;
+    const FLIGHT_INTERCEPT_WEIGHT = 1.5;    //an enemy flight near the bot's ships is worth this much more to a flight that can shoot fighters - a priority, no longer the only target
     const FLIGHT_CLOSING_PER_HEX = 2.0;     //each hex between the flight's guns' reach and its target, when nothing is in reach
     const FLIGHT_INTERCEPT_RANGE = 12;      //an enemy flight this close to one of the bot's ships is what the flight goes after first
     const FLIGHT_ESCORT_RANGE = 6;          //with nothing in reach, a flight keeps within this many hexes of the fleet...
@@ -87,6 +125,11 @@ class AIConfig
        longer loading time than the last entry uses the last. FireDecider::minimumChance. */
     const FIRE_MIN_CHANCE_BY_LOAD = array(2 => 25, 3 => 34, 4 => 40);
     const FIRE_MIN_CHANCE_PARTING = 15;     //...but a slow weapon whose target is drawing away takes what it can get, down to this
+    /* PULSE weapons (user ruling 2026-11-19): one roll, one more pulse for every `grouping` it beats the need by, so their
+       damage grows much faster than the hit chance (a Heavy Pulse expects ~0.5 pulses at 34%, ~1.0 at 54%). A SLOW pulse
+       weapon's floors are this many points higher: Medium Pulse (2 turns) 35%, Heavy Pulse (3 turns) 44%. A pulse gun that
+       loads in one turn loses nothing by firing and keeps FIRE_MIN_CHANCE. */
+    const FIRE_PULSE_PREMIUM = 10;
     /* Holding a slow weapon for next turn (FireDecider::holdSlow). The same target is priced again
        where both units will be if they fly straight on; the weapon waits when
        now < next x FIRE_HOLD_CONFIDENCE x (1 - 1 / loading time) - a turn of waiting costs a
@@ -94,6 +137,12 @@ class AIConfig
     const FIRE_HOLD_CONFIDENCE = 0.8;       //what next turn's shot is taken to be worth against this turn's certain one (the target may turn away, the gun may be lost)
     const FIRE_MIN_CHANCE_EDGE = 20;        //...for a shot from exactly between two of the target's sections, which the page may price up to 15 lower (AIView::onEdge)
     const FIRE_FOCUS = 0.5;                 //how much a target already being shot at draws the next gun (0 = spread freely)
+    /* CONCENTRATION (user, 2026-11-19: "it is more effective to concentrate a fleet's heavy firepower to try and take down an
+       enemy ship rather than spread damage"; game 4750 turn 4 put 30 weapons on all 3 enemies). A HEAVY gun - one that takes
+       more than a turn to load, or does FIRE_HEAVY_DAMAGE a shot - is drawn to the target already booked by this much
+       instead; light guns keep FIRE_FOCUS, free to pick off fighters or add to the kill. */
+    const FIRE_FOCUS_HEAVY = 2.5;
+    const FIRE_HEAVY_DAMAGE = 15;
     const FIRE_OVERKILL = 1.5;              //planned damage on one target stops counting past this multiple of what it has left
     const FIRE_THREAT_WEIGHT = 0.5;         //how much the most dangerous enemy is preferred over a harmless one of equal worth
     /* The interception reserve. The server intercepts with every loaded gun that has an intercept
@@ -122,6 +171,23 @@ class AIConfig
        points) on to one that moves after it and may fly out of arc. */
     const EW_SOFT_LOCK = 2;                 //the most OEW a ship puts on an enemy that moves after it
     const EW_MOVES_AFTER_WEIGHT = 0.5;      //how much the fire it hopes to bring on such an enemy counts, against 1 for one that moves first
+    /* CLOSE ENGAGEMENT (user ruling 2026-11-19; game 4750 turn 5 put 16 of 16 points into OEW, 0 DEW, at 1-4 hexes): "once
+       ships are in closer engagement range, it's common for them to mainly use soft locks and retain a decent amount of EW
+       for DEW to protect from return fire". An enemy within EW_CLOSE_RANGE gets a soft lock at most (EW_SOFT_LOCK), and a
+       ship with an enemy SHIP that close keeps at least EW_CLOSE_MIN_DEW of its points in DEW. */
+    const EW_CLOSE_RANGE = 10;
+    const EW_CLOSE_MIN_DEW = 0.5;
+    /* CCEW (user ruling 2026-11-19): "one point of CCEW is often used as a deterrent from even some distance away to prevent
+       fighters from getting too close (or to give the option to punish them if they do). Greater amounts than 2 or 3 are
+       generally only seen when the opponent's force is weighted towards fighters, or by vessels that have a lot of light
+       anti-fighter weaponry." A ship with a gun that can fire at fighters puts up 1 point whenever an enemy flight could be
+       within CCEW's 10 hexes at this turn's Fire phase (10 + the flight's speed); more only while it gains, and never past
+       EW_CCEW_CAP unless the enemy's visible value is EW_FIGHTER_HEAVY or more in flights, or at least half of the ship's
+       guns are anti-fighter guns (fire control better against fighters than against capital ships: a Twin Array 6/5/4
+       is one, a Standard Particle Beam 4/4/4 is not). */
+    const EW_CCEW_REACH = 10;
+    const EW_CCEW_CAP = 2;
+    const EW_FIGHTER_HEAVY = 0.33;
 
     //What a seat may be set to. Levels and personalities do nothing before stage T5 / T8; the
     //seat stores them from the start so that games created now keep their setting.

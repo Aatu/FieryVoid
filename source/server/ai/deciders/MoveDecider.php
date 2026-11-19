@@ -9,8 +9,8 @@
  * FIGHTER FLIGHTS (stage T4) go where FlightDecider sends them - strike, intercept or escort -
  * among the plans ShipMover finds for them.
  *
- * Units ShipMover does not plot for (Hunter-Killers, gravitic hulls, a ship carrying another...)
- * keep the fallback's rows: straight on.
+ * Units ShipMover does not plot for (Hunter-Killers, bases, Mindrider drives, a ship carrying
+ * another...) keep the fallback's rows: straight on. Gravitic hulls are plotted since stage T5d.
  *
  * choose() below is the T1b rule - hold the course unless that flies into terrain or off the map -
  * and is what a decider falls back on when it has no plan to choose from.
@@ -39,8 +39,8 @@ class MoveDecider
         $active = array();
         foreach ($gamedata->getMyActiveShips() as $ship) $active[$ship->id] = true;
 
-        $blocked = self::blockedKeys($gamedata);
-        $bounds = self::mapBounds($gamedata);
+        //The board (stage T5c): terrain, drifting fields, meteor swarms, the mines this bot can see.
+        $hazards = new Hazards($view);
 
         $entries = array();
         $flights = 0;
@@ -50,12 +50,12 @@ class MoveDecider
             if (isset($active[$ship->id])) {
                 $mover = ShipMover::forShip($ship, $gamedata);
                 if ($mover !== null && $mover->isFlight()) {
-                    $entry['movement'] = FlightDecider::rows($view, $mover, $ship, $blocked, $bounds);
+                    $entry['movement'] = FlightDecider::rows($view, $mover, $ship, $hazards);
                     $flights++;
                 } else if ($mover !== null && in_array((int)$botId, self::$plainFor, true)) {
-                    $entry['movement'] = self::choose($mover, $blocked, $bounds);
+                    $entry['movement'] = self::choose($mover, $hazards->blocked, $hazards->bounds);
                 } else if ($mover !== null) {
-                    $entry['movement'] = ShipDecider::rows($view, $mover, $ship, $blocked, $bounds);
+                    $entry['movement'] = ShipDecider::rows($view, $mover, $ship, $hazards);
                 } else {
                     $entry['movement'] = AIFallback::straightRows($ship, $gamedata);
                 }
@@ -72,6 +72,7 @@ class MoveDecider
             $f = FlightDecider::$last;
             $parts[] = $flights . ' flights: ' . $f['strike'] . ' striking, ' . $f['intercept'] . ' intercepting, ' . $f['escort'] . ' escorting; ' . $f['jinking'] . ' jinking';
         }
+        if (count($parts) > 0 && $hazards->describe() !== '') $parts[] = 'board: ' . $hazards->describe();
         if (count($parts) > 0) self::$lastSummary = implode(' | ', $parts);
 
         return $entries;
@@ -87,14 +88,16 @@ class MoveDecider
     }
 
     /* The part of score() that is about the board, not the plan's manoeuvres: a blocked hex entered,
-       ending off the map, and the same on next turn's straight continuation. 0 = nothing wrong. */
+       ending off the map, and the same on next turn's straight continuation. 0 = nothing wrong. The T1b
+       rule's own (choose()); the T5 deciders ask Hazards, which reproduces this and prices what else is
+       on the board. */
     public static function hazard(array $path, OffsetCoordinate $end, $heading, $speed, array $blocked, $bounds)
     {
         $score = 0;
         foreach ($path as $hex) {
             if (isset($blocked[$hex->q . ',' . $hex->r])) $score += AIConfig::MOVE_COST_BLOCKED;
         }
-        $over = self::hexesOffMap($end, $bounds);
+        $over = Hazards::hexesOffMap($end, $bounds);
         if ($over > 0) $score += AIConfig::MOVE_COST_OFF_MAP + $over * AIConfig::MOVE_COST_PER_HEX_OVER;
 
         $ahead = $end;
@@ -104,7 +107,7 @@ class MoveDecider
             if (isset($blocked[$ahead->q . ',' . $ahead->r])) $aheadBlocked = true;
         }
         if ($aheadBlocked) $score += AIConfig::MOVE_COST_NEXT_TURN;
-        $score += self::hexesOffMap($ahead, $bounds) * AIConfig::MOVE_COST_PER_HEX_OVER;
+        $score += Hazards::hexesOffMap($ahead, $bounds) * AIConfig::MOVE_COST_PER_HEX_OVER;
         return $score;
     }
 
@@ -153,30 +156,4 @@ class MoveDecider
         return $score;
     }
 
-    //How far past the map's edge a hex lies (0 = on the map).
-    private static function hexesOffMap(OffsetCoordinate $hex, $bounds)
-    {
-        if ($bounds === null) return 0;
-        return max(0, abs($hex->q) - $bounds[0]) + max(0, abs($hex->r) - $bounds[1]);
-    }
-
-    //Terrain and Enormous units, as the game itself lists them (TacGamedata::setBlockedHexes).
-    private static function blockedKeys(TacGamedata $gamedata)
-    {
-        $keys = array();
-        foreach ($gamedata->blockedHexes ?: array() as $hex) {
-            $offset = new OffsetCoordinate($hex);
-            $keys[$offset->q . ',' . $offset->r] = true;
-        }
-        return $keys;
-    }
-
-    //Half the map's width and height in hexes (the bounds terrain is laid out within), or null for an unlimited map.
-    private static function mapBounds(TacGamedata $gamedata)
-    {
-        $width = 0;
-        $height = 0;
-        if (sscanf((string)$gamedata->gamespace, '%dx%d', $width, $height) !== 2 || $width <= 0 || $height <= 0) return null;
-        return array(intdiv($width, 2), intdiv($height, 2));
-    }
 }

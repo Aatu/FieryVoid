@@ -1,6 +1,6 @@
 <?php
 /**
- * CPU opponent - where a SHIP goes (TACTICAL_AI_PLAN.md sections 5.4 and 10.7, stage T5a).
+ * CPU opponent - where a SHIP goes (TACTICAL_AI_PLAN.md sections 5.4 and 10.7, stages T5a-T5c).
  *
  * The moves are ShipMover's: every plan it offers is one the page accepts (tests/ai/
  * shipMoverHarness.php replays them through movement.js). ShipMover finds every place the ship can
@@ -19,13 +19,17 @@
  *              left the ship, so the end state decides which launchers bear (the user's note on game
  *              4701: a missile cruiser held course with three racks out of arc) - MOVE_LAUNCH_WEIGHT;
  *   danger     the enemy's fire at the ship there, MOVE_DANGER_WEIGHT against its own - "best trade",
- *              the user's ruling of 2026-11-16. A unit that has moved fires with its arcs; one yet to
- *              move with every gun, at MOVE_UNMOVED_DANGER (it may turn to bring them to bear). Each
- *              enemy's fire is weighed by the section it meets (AIView::exposure): a damaged section
- *              counts more, a destroyed one - the hit then goes into the primary structure - far more;
- *   next turn  the same trade a turn on with everybody flying straight on (MOVE_NEXT_TURN_WEIGHT): it
- *              keeps a ship from flying past its enemy for one good volley, and brings it in when this
- *              turn's guns reach nothing. A slow gun that fires this turn is not counted again;
+ *              the user's ruling of 2026-11-16 - from the guns loaded this turn (next turn's terms: by
+ *              then), as the bot's own are counted. A unit that has moved fires with its arcs. One yet to
+ *              move is MORE dangerous (user, 2026-11-19): it sees where the ship ended, so every gun of
+ *              it counts at MOVE_UNMOVED_DANGER and the section it hits leans to the ship's worst
+ *              (AIView::exposureUnmoved). Each enemy's fire is weighed by the section it meets
+ *              (AIView::exposure): a damaged section counts more, a destroyed one - the hit then goes into
+ *              the primary structure - far more. A mine is not an enemy here: Hazards prices it;
+ *   next turn  the same trade a turn on with everybody flying straight on (MOVE_NEXT_TURN_WEIGHT; both
+ *              sides at the same weight - next turn's initiative is unknown): it keeps a ship from flying
+ *              past its enemy for one good volley, and brings it in when this turn's guns reach nothing. A
+ *              slow gun that fires this turn is not counted again;
  * and the SHAPING terms, in hexes, each worth MOVE_HEX_VALUE of the ship's own value - enough to
  * decide where the fire is slight or even, too little to buy a bad trade:
  *   closing    each hex to the nearest enemy (MOVE_CLOSING_PER_HEX) - the pursuit question of stage
@@ -33,18 +37,28 @@
  *              end state with a token shot turned it off for all, and ships drifted away;
  *   formation  each hex beyond MOVE_FORMATION_RANGE from the nearest of the bot's other ships - a loose
  *              formation, the user's ruling;
- *   speed      each point above the comfortable speed of the ship's size, or below MOVE_MIN_SPEED, and
- *              more for each point at which a whole turn's thrust no longer pays for a turn
- *              (ShipMover::fastestTurnable) - such a ship cannot come about at a map edge;
+ *   speed      each point above the comfortable speed of the ship's size, or below MOVE_MIN_SPEED; a
+ *              great deal for each point above the SAFE speed - the fastest at which one turn costs at
+ *              most MOVE_SAFE_TURN_SHARE of the ship's thrust (user, 2026-11-19: Omegas at 7 and 8 were "too
+ *              fast to safely manoeuvre"; only a kill or escaping heavy damage pays for it); more again above
+ *              the speed at which a whole turn's thrust no longer pays for a turn (ShipMover::fastestTurnable);
  *   plainness  a little for each manoeuvre, so the plainest plan wins among equals;
- * and the board's HAZARDS, which outweigh everything: a blocked hex entered, ending off the map or
- * heading off it (MoveDecider::hazard).
+ * and the BOARD (Hazards, stage T5c): a blocked hex entered, ending off the map or heading off it, which
+ * outweigh everything; and, priced in value, a drifting field's overrun at the end hex, meteor swarms
+ * entered, and the mines the bot can see.
+ *
+ * TURN SHORTENING (user, 2026-11-19): ShipMover also offers each turn with all the extra thrust it can
+ * take (the double turns a shortened delay allows); the plan chosen then has its LAST turn shortened with
+ * thrust that would otherwise go unused, within the ratings (ShipMover::shortened).
  *
  * The decision is made on the bot's own MASKED view of the game (principle P2).
  *
- * NOT YET (stage T5's later parts, section 10.7): overthrust (T5b), drifting terrain and mines (T5c),
- * gravitic hulls (T5d), pivots and rolls (T5e), levels (T5f). Interception is not counted here: it
- * changes how much a volley does, hardly where it is best fired from.
+ * GRAVITIC hulls (stage T5d) are scored like any other: ShipMover plots them by the page's gravitic
+ * rules, and as the bot never pivots them (T5e) they fly bow- or stern-first, where those rules are a
+ * plain hull's.
+ *
+ * NOT YET (stage T5's later parts, section 10.7): pivots and rolls (T5e), levels (T5f). Interception is
+ * not counted here: it changes how much a volley does, hardly where it is best fired from.
  */
 class ShipDecider
 {
@@ -57,22 +71,20 @@ class ShipDecider
     }
 
     /* The rows for one ship: the ShipMover plan whose end state scores best. $view is the bot's
-       masked view of the Movement phase; $blocked and $bounds as MoveDecider has them. */
-    public static function rows(AIView $view, ShipMover $mover, $ship, array $blocked, $bounds)
+       masked view of the Movement phase; $hazards the board, built once for the decision. */
+    public static function rows(AIView $view, ShipMover $mover, $ship, Hazards $hazards)
     {
         $plans = self::candidates($mover);
-        if (count($plans) == 0) return MoveDecider::choose($mover, $blocked, $bounds);
+        if (count($plans) == 0) return MoveDecider::choose($mover, $hazards->blocked, $hazards->bounds);
 
-        $context = self::context($view, $ship, $mover->fastestTurnable());
+        $context = self::context($view, $ship, $mover);
+        $start = $ship->getHexPos();
 
         //The fire terms depend only on where the ship ends and which way it points; the look-ahead on its heading and speed too.
-        $judged = $view->atFireTime(function () use ($view, $ship, $plans, $context, $blocked, $bounds) {
+        $judged = $view->atFireTime(function () use ($view, $ship, $plans, $context, $hazards, $start) {
             $out = array();
             $fire = array();
-            foreach ($plans as $index => $plan) {
-                $out[$index] = self::judge($view, $ship, $plan, $context, $fire);
-                $out[$index]['hazard'] = MoveDecider::hazard($plan['path'], $plan['position'], $plan['heading'], $plan['speed'], $blocked, $bounds);
-            }
+            foreach ($plans as $index => $plan) $out[$index] = self::judge($view, $ship, $plan, $context, $fire, $hazards, $start);
             return $out;
         }, array((int)$ship->id));
 
@@ -89,21 +101,30 @@ class ShipDecider
 
         $plan = $plans[$best];
         $j = $judged[$best];
-        self::$last[] = sprintf('%s: %s; fire %.0f, launch %.0f, danger %.0f, next %.0f/%.0f, %d hexes off%s',
-            $ship->name, count($plan['actions']) ? self::describe($plan['actions']) : 'straight on',
+        $rows = $plan['rows'];
+
+        //Thrust left over shortens the last turn's delay (turn shortening): next turn starts free to turn.
+        $shortened = empty($plan['overthrust']) ? $mover->shortened($plan) : null;
+        if ($shortened !== null) $rows = $shortened->rows();
+
+        $hz = $j['board'];
+        self::$last[] = sprintf('%s: %s; fire %.0f, launch %.0f, danger %.0f, next %.0f/%.0f, %d hexes off%s%s%s',
+            $ship->name, count($plan['actions']) ? self::describe($plan['actions'], $plan['extras']) : 'straight on',
             $j['offence'], $j['launch'], $j['danger'], $j['nextOffence'], $j['nextDanger'], $j['nearest'],
-            empty($plan['overthrust']) ? '' : '; OVERTHRUST ' . implode(', ', array_map(function ($id, $x) { return "#$id +$x"; }, array_keys($plan['overthrust']), $plan['overthrust'])));
+            empty($plan['overthrust']) ? '' : '; OVERTHRUST ' . implode(', ', array_map(function ($id, $x) { return "#$id +$x"; }, array_keys($plan['overthrust']), $plan['overthrust'])),
+            $shortened !== null ? '; last turn shortened' : '',
+            ($hz['drift'] + $hz['meteors'] + $hz['mines'] > 0) ? sprintf('; hazards: drift %.0f, meteors %.0f, mines %.0f', $hz['drift'], $hz['meteors'], $hz['mines']) : '');
 
         if (is_array(self::$trace)) {
             uasort($judged, function ($a, $b) { return $b['score'] <=> $a['score']; });
             foreach (array_slice($judged, 0, 5, true) as $index => $t) {
                 self::$trace[] = sprintf('  %8.1f  %-40s fire %.0f launch %.0f danger %.0f next %.0f/%.0f near %d shaping %.1f hazard %.0f',
-                    $t['score'], substr(self::describe($plans[$index]['actions']), 0, 40), $t['offence'], $t['launch'], $t['danger'],
+                    $t['score'], substr(self::describe($plans[$index]['actions'], $plans[$index]['extras']), 0, 40), $t['offence'], $t['launch'], $t['danger'],
                     $t['nextOffence'], $t['nextDanger'], $t['nearest'], $t['shaping'], $t['hazard']);
             }
         }
 
-        return $plan['rows'];
+        return $rows;
     }
 
     /* For the harness and scratch checks only: set to an array and rows() appends its five best
@@ -113,7 +134,7 @@ class ShipDecider
     /* One plan's worth. Fire both ways now and a turn on, next turn's launches; then the shaping
        terms, in hexes of the ship's own value: closing on the nearest enemy (always - enough to bring
        a ship in where the fire is slight, too little to buy a bad trade), formation, speed and
-       manoeuvres; then the board's hazards. */
+       manoeuvres; then the board. */
     private static function score(array $j, $hexValue)
     {
         return $j['offence'] + AIConfig::MOVE_LAUNCH_WEIGHT * $j['launch'] - AIConfig::MOVE_DANGER_WEIGHT * $j['danger']
@@ -125,14 +146,15 @@ class ShipDecider
     /* Every end state the ship can reach this turn: first within its thrusters' ratings, then - with up
        to MOVE_OVERTHRUST points over a rating - the end states only an overthrust reaches (stage T5b; the
        user's ruling of 2026-11-13: within ratings first, over them only where that is worth the critical
-       it invites, which judge() prices). */
+       it invites, which judge() prices). Turns are tried shortened too (allowShortening). */
     private static function candidates(ShipMover $mover)
     {
         $plans = array();
-        foreach ($mover->enumerate(AIConfig::SHIP_PLANS) as $plan) $plans[self::endKey($plan)] = $plan;
+        $search = clone $mover;
+        foreach ($search->allowShortening()->enumerate(AIConfig::SHIP_PLANS) as $plan) $plans[self::endKey($plan)] = $plan;
         if (AIConfig::MOVE_OVERTHRUST > 0) {
             $over = clone $mover;
-            foreach ($over->allowOverthrust(AIConfig::MOVE_OVERTHRUST)->enumerate(AIConfig::SHIP_PLANS) as $plan) {
+            foreach ($over->allowShortening()->allowOverthrust(AIConfig::MOVE_OVERTHRUST)->enumerate(AIConfig::SHIP_PLANS) as $plan) {
                 $key = self::endKey($plan);
                 if (!isset($plans[$key])) $plans[$key] = $plan;
             }
@@ -160,22 +182,23 @@ class ShipDecider
         return $risk;
     }
 
-    //The plan's orders in a few words: "accel, turnright x2, move x5".
-    private static function describe(array $actions)
+    //The plan's orders in a few words: "accel, turnright x2 (shortened), move x5".
+    private static function describe(array $actions, array $extras = array())
     {
         $out = array();
-        foreach ($actions as $action) {
+        foreach ($actions as $i => $action) {
+            $word = $action . (!empty($extras[$i]) ? ' (shortened)' : '');
             $last = count($out) - 1;
-            if ($last >= 0 && $out[$last][0] === $action) $out[$last][1]++;
-            else $out[] = array($action, 1);
+            if ($last >= 0 && $out[$last][0] === $word) $out[$last][1]++;
+            else $out[] = array($word, 1);
         }
         return implode(', ', array_map(function ($a) { return $a[0] . ($a[1] > 1 ? ' x' . $a[1] : ''); }, $out));
     }
 
     /* What does not depend on the plan: the ship's guns and launchers by kind, the enemies with what
        they carry, and the bot's other ships. Asked BEFORE atFireTime() moves anybody, so "has this
-       enemy moved this turn" is read off its own rows. $turnable: ShipMover::fastestTurnable. */
-    private static function context(AIView $view, $ship, $turnable)
+       enemy moved this turn" is read off its own rows. */
+    private static function context(AIView $view, $ship, ShipMover $mover)
     {
         $turn = $view->turn;
 
@@ -209,22 +232,31 @@ class ShipDecider
             $launchers[$key]['count']++;
         }
 
-        //The enemies: moved this turn or not, and their guns - by kind with arcs (fire now from a unit that has moved), and without.
+        /* The enemies: moved this turn or not, and their guns - by kind with arcs (fire now from a unit that has moved), and
+           without; each loaded now (it fires this turn) or by next turn, as the bot counts its own - every player sees an
+           enemy weapon's loading on its ship window (until 2026-11-19 a gun still reloading counted as danger too, and in game
+           4750 the Omegas ran from G'Quans whose heavy guns had just fired). A mine fires by its own rules, which Hazards
+           prices: none of its guns are counted here. */
         $enemies = array();
         foreach ($view->enemies() as $enemy) {
             $moved = !empty($enemy->base) || !empty($enemy->smallBase) || !empty($enemy->osat) || !empty($enemy->mine)
                 || $enemy->getLastTurnMoved() >= $turn;
             $arced = array();
             $any = array();
-            foreach ($view->mounts($enemy) as $mount) {
-                $weapon = $mount['weapon'];
-                if (!$view->plainGun($weapon, $mount['fighter'])) continue;
-                $base = get_class($weapon) . '|' . $weapon->firingMode;
-                $withArc = $base . '|' . $weapon->startArc . '|' . $weapon->endArc;
-                if (!isset($arced[$withArc])) $arced[$withArc] = array('weapon' => $weapon, 'count' => 0);
-                $arced[$withArc]['count']++;
-                if (!isset($any[$base])) $any[$base] = array('weapon' => $weapon, 'count' => 0);
-                $any[$base]['count']++;
+            if (empty($enemy->mine)) {
+                foreach ($view->mounts($enemy) as $mount) {
+                    $weapon = $mount['weapon'];
+                    if (!$view->plainGun($weapon, $mount['fighter'])) continue;
+                    $now = $view->loaded($weapon);
+                    $next = $now || (int)$weapon->getLoadingTime() <= (int)$weapon->turnsloaded + 1;
+                    if (!$now && !$next) continue;
+                    $base = get_class($weapon) . '|' . $weapon->firingMode . '|' . (int)$now . (int)$next;
+                    $withArc = $base . '|' . $weapon->startArc . '|' . $weapon->endArc;
+                    if (!isset($arced[$withArc])) $arced[$withArc] = array('weapon' => $weapon, 'count' => 0, 'now' => $now, 'next' => $next);
+                    $arced[$withArc]['count']++;
+                    if (!isset($any[$base])) $any[$base] = array('weapon' => $weapon, 'count' => 0, 'now' => $now, 'next' => $next);
+                    $any[$base]['count']++;
+                }
             }
             $enemies[] = array('unit' => $enemy, 'moved' => $moved, 'arced' => array_values($arced), 'any' => array_values($any),
                 'health' => $view->healthLeft($enemy), 'worth' => $view->value($enemy) / $view->healthLeft($enemy));
@@ -233,10 +265,12 @@ class ShipDecider
         //What the ship closes on: the enemy's ships - a capital ship does not chase fighters - or its flights when that is all there is.
         $quarry = array();
         foreach ($enemies as $e) {
-            if (!($e['unit'] instanceof FighterFlight)) $quarry[] = $e['unit'];
+            if (!($e['unit'] instanceof FighterFlight) && empty($e['unit']->mine)) $quarry[] = $e['unit'];
         }
         if (count($quarry) == 0) {
-            foreach ($enemies as $e) $quarry[] = $e['unit'];
+            foreach ($enemies as $e) {
+                if (empty($e['unit']->mine)) $quarry[] = $e['unit'];
+            }
         }
 
         $friends = array();
@@ -256,12 +290,13 @@ class ShipDecider
 
         return array('guns' => array_values($guns), 'launchers' => array_values($launchers), 'enemies' => $enemies, 'friends' => $friends, 'quarry' => $quarry,
             'health' => $view->healthLeft($ship), 'worth' => $view->value($ship) / $view->healthLeft($ship), 'comfort' => $comfort,
-            'turnable' => $turnable, 'hexValue' => max(1, $view->value($ship)) * AIConfig::MOVE_HEX_VALUE);
+            'turnable' => $mover->fastestTurnable(), 'safe' => $mover->safeSpeed(AIConfig::MOVE_SAFE_TURN_SHARE),
+            'hexValue' => max(1, $view->value($ship)) * AIConfig::MOVE_HEX_VALUE);
     }
 
     /* Everything one plan is scored by. The ship is put at the plan's end for the asking, and taken
        back. $fire caches the terms that depend only on the end hex and facing. */
-    private static function judge(AIView $view, $ship, array $plan, array $context, array &$fire)
+    private static function judge(AIView $view, $ship, array $plan, array $context, array &$fire, Hazards $hazards, OffsetCoordinate $start)
     {
         $ship->movement[] = new MovementOrder(-1, 'move', $plan['position'], 0, 0, $plan['speed'], $plan['heading'], $plan['facing'], false, $view->turn, 0, 0);
         try {
@@ -272,6 +307,8 @@ class ShipDecider
             $next = $view->ahead(function () use ($view, $ship, $context, $terms) {
                 return self::nextTerms($view, $ship, $context, $terms['firedSlow']);
             });
+
+            $board = $hazards->judge($ship, $start, $plan, $context['worth']);
         } finally {
             array_pop($ship->movement);
         }
@@ -281,17 +318,19 @@ class ShipDecider
         $speed = (int)$plan['speed'];
         if ($speed < AIConfig::MOVE_MIN_SPEED) $shaping += AIConfig::MOVE_COST_SLOW * (AIConfig::MOVE_MIN_SPEED - $speed);
         if ($speed > $context['comfort']) $shaping += AIConfig::MOVE_COST_FAST * ($speed - $context['comfort']);
+        if ($speed > $context['safe']) $shaping += AIConfig::MOVE_COST_OVERSPEED * ($speed - $context['safe']);
         if ($speed > $context['turnable']) $shaping += AIConfig::MOVE_COST_UNTURNABLE * ($speed - $context['turnable']);
         foreach ($plan['actions'] as $action) {
             if ($action === ShipMover::ACCEL || $action === ShipMover::DECEL) $shaping += AIConfig::MOVE_COST_SPEED_CHANGE;
             else if ($action === ShipMover::SLIP_LEFT || $action === ShipMover::SLIP_RIGHT) $shaping += AIConfig::MOVE_COST_SLIP;
             else if ($action !== ShipMover::MOVE) $shaping += AIConfig::MOVE_COST_TURN;
         }
-        if (isset($plan['overthrust'])) $shaping += self::overthrustRisk($ship, $plan['overthrust']);
+        if (!empty($plan['overthrust'])) $shaping += self::overthrustRisk($ship, $plan['overthrust']);
 
         return array('offence' => $terms['offence'], 'launch' => $terms['launch'], 'danger' => $terms['danger'],
             'nextOffence' => $next['offence'], 'nextDanger' => $next['danger'], 'shaping' => $shaping,
-            'nearest' => $terms['nearest'], 'closing' => $terms['nearest'] + AIConfig::MOVE_CLOSING_NEXT_TURN * $next['nearest']);
+            'nearest' => $terms['nearest'], 'closing' => $terms['nearest'] + AIConfig::MOVE_CLOSING_NEXT_TURN * $next['nearest'],
+            'hazard' => $board['total'], 'board' => $board);
     }
 
     /* This turn's fire both ways, next turn's launches, and the distances, with the ship at the end
@@ -319,19 +358,22 @@ class ShipDecider
             }
         }
 
+        //The enemy's fire: from its arcs once it has moved; every gun, and towards the ship's worst side, while it has yet to.
         $inward = self::lines($view, $ship, $context['enemies'], true);
         $incoming = array();
         foreach ($context['enemies'] as $e => $enemy) {
             $d = 0;
             foreach ($enemy['moved'] ? $enemy['arced'] : $enemy['any'] as $kind) {
-                if (!$inward[$e] && !$kind['weapon']->ignoresLoS) continue;
+                if (!$kind['now'] || (!$inward[$e] && !$kind['weapon']->ignoresLoS)) continue;
                 $d += $view->estimate($enemy['unit'], $kind['weapon'], $ship, $enemy['moved']) * $kind['count'];
             }
-            if ($d > 0) $incoming[] = array($d * ($enemy['moved'] ? 1 : AIConfig::MOVE_UNMOVED_DANGER), $view->exposure($ship, $enemy['unit']));
+            if ($d <= 0) continue;
+            if ($enemy['moved']) $incoming[] = array($d, $view->exposure($ship, $enemy['unit']));
+            else $incoming[] = array($d * AIConfig::MOVE_UNMOVED_DANGER, $view->exposureUnmoved($ship, $enemy['unit']));
         }
 
         return array('offence' => self::removed($damage, $context['enemies']), 'launch' => self::removed($launches, $context['enemies']),
-            'danger' => self::lost($incoming, $context), 'firedSlow' => $firedSlow,
+            'danger' => self::lost($incoming, $context['health'], $context['worth']), 'firedSlow' => $firedSlow,
             'nearest' => self::nearest($ship, $context['quarry']), 'friend' => self::nearest($ship, $context['friends']));
     }
 
@@ -339,8 +381,9 @@ class ShipDecider
        and no target counts past the damage that finishes it - a crippled ship is worth its value, no more.
        (Uncapped, worth = value / health made one volley at a near-dead ship score in the tens of thousands,
        and in the first self-play game a ship fled off the map from such "danger" and another chased it
-       there for the kill.) $damage: gun index => enemy index => expected damage. */
-    private static function removed(array $damage, array $enemies)
+       there for the kill.) $damage: gun index => enemy index => expected damage; $enemies: enemy index =>
+       array('health', 'worth'). FlightDecider prices its fire the same way. */
+    public static function removed(array $damage, array $enemies)
     {
         $order = array();
         foreach ($damage as $gun => $row) {
@@ -369,10 +412,10 @@ class ShipDecider
         return $total;
     }
 
-    /* The value the ship should lose to $incoming - a list of (expected damage, exposure) per enemy -
-       counted no further than the damage that finishes it: each enemy's share weighed by the section it
-       meets, the whole scaled down when it is more than the ship has left. */
-    private static function lost(array $incoming, array $context)
+    /* The value a unit should lose to $incoming - a list of (expected damage, exposure) per enemy -
+       counted no further than the damage that finishes it ($health): each enemy's share weighed by the
+       section it meets, the whole scaled down when it is more than the unit has left. */
+    public static function lost(array $incoming, $health, $worth)
     {
         $raw = 0;
         $weighted = 0;
@@ -380,8 +423,8 @@ class ShipDecider
             $raw += $one[0];
             $weighted += $one[0] * $one[1];
         }
-        if ($raw > $context['health']) $weighted *= $context['health'] / $raw;
-        return $weighted * $context['worth'];
+        if ($raw > $health) $weighted *= $health / $raw;
+        return $weighted * $worth;
     }
 
     /* Enemy index => is the line of fire clear - from the ship to the enemy, or ($inward) from the enemy to
@@ -403,7 +446,8 @@ class ShipDecider
 
     /* The trade a turn on, every unit having flown straight on (AIView::ahead): the guns that will be
        loaded then - less a slow one that fires this turn - against every enemy, all of whom move again
-       (so fire at them counts MOVE_UNMOVED_OFFENCE, and their guns bear from any arc at MOVE_UNMOVED_DANGER). */
+       in an order nobody knows yet: fire at them counts MOVE_UNMOVED_OFFENCE, theirs bears from any arc
+       at MOVE_UNMOVED_DANGER_NEXT. */
     private static function nextTerms(AIView $view, $ship, array $context, array $firedSlow)
     {
         $clear = self::lines($view, $ship, $context['enemies']);
@@ -422,13 +466,13 @@ class ShipDecider
         foreach ($context['enemies'] as $e => $enemy) {
             $d = 0;
             foreach ($enemy['any'] as $kind) {
-                if (!$inward[$e] && !$kind['weapon']->ignoresLoS) continue;
+                if (!$kind['next'] || (!$inward[$e] && !$kind['weapon']->ignoresLoS)) continue;
                 $d += $view->estimate($enemy['unit'], $kind['weapon'], $ship, false) * $kind['count'];
             }
-            if ($d > 0) $incoming[] = array($d * AIConfig::MOVE_UNMOVED_DANGER, $view->exposure($ship, $enemy['unit']));
+            if ($d > 0) $incoming[] = array($d * AIConfig::MOVE_UNMOVED_DANGER_NEXT, $view->exposure($ship, $enemy['unit']));
         }
 
-        return array('offence' => self::removed($damage, $context['enemies']), 'danger' => self::lost($incoming, $context),
+        return array('offence' => self::removed($damage, $context['enemies']), 'danger' => self::lost($incoming, $context['health'], $context['worth']),
             'nearest' => self::nearest($ship, $context['quarry']));
     }
 }

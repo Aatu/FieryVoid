@@ -11,13 +11,16 @@
  *           so a cheap kill on a dear ship beats the same damage soaked by a fresh one;
  *   focus   a target already booked for damage draws the next gun (AIConfig::FIRE_FOCUS), until
  *           the plan would kill it FIRE_OVERKILL times over - then further fire counts for nothing
- *           there and the remaining guns look elsewhere;
+ *           there and the remaining guns look elsewhere. A HEAVY gun is drawn far harder
+ *           (FIRE_FOCUS_HEAVY; user, 2026-11-19: concentrate the fleet's heavy firepower to take a
+ *           ship down rather than spread it), light guns stay free for fighters and the rest;
  *   threat  the more an enemy can do to this fleet, the sooner it is shot (FIRE_THREAT_WEIGHT).
  *
  * SLOW WEAPONS (the user's feedback, 2026-11-15). A shot costs a weapon its reload, so a slow one
- * fires only at FIRE_MIN_CHANCE_BY_LOAD or better (minimumChance), and waits when a turn closer
- * is clearly better (holdSlow: the real formula again where both units will be, range penalty and
- * plasma range damage included).
+ * fires only at FIRE_MIN_CHANCE_BY_LOAD or better (minimumChance) - a slow PULSE weapon
+ * FIRE_PULSE_PREMIUM higher still (2026-11-19: its damage grows much faster than its chance) - and
+ * waits when a turn closer is clearly better (holdSlow: the real formula again where both units
+ * will be, range penalty and plasma range damage included).
  *
  * THE ENEMY'S INTERCEPTION (InterceptModel). A shot is worth what it adds to its target's volley
  * once the target's interceptors have been given out as the server gives them - so the bot neither
@@ -119,7 +122,8 @@ class FireDecider
                 }
 
                 $intercept = self::interceptRating($weapon);
-                $unitGuns[] = array('unit' => $unit, 'weapon' => $weapon, 'fighter' => $mount['fighter'], 'options' => $options, 'intercept' => $intercept);
+                $unitGuns[] = array('unit' => $unit, 'weapon' => $weapon, 'fighter' => $mount['fighter'], 'options' => $options, 'intercept' => $intercept,
+                    'heavy' => self::isHeavy($weapon));
             }
 
             $held += self::holdBack($view, $unit, $unitGuns);
@@ -168,7 +172,7 @@ class FireDecider
                         continue;
                     }
 
-                    $score = self::score(array('damage' => $adds) + $shot, $state[$targetId], $maxThreat);
+                    $score = self::score(array('damage' => $adds) + $shot, $state[$targetId], $maxThreat, $gun['heavy']);
                     if ($score > $bestScore) {
                         $bestScore = $score;
                         $bestGun = $index;
@@ -258,13 +262,23 @@ class FireDecider
     {
         $load = (int)$weapon->getLoadingTime();
         if ($load <= 1) return AIConfig::FIRE_MIN_CHANCE;
-        if ($parting) return AIConfig::FIRE_MIN_CHANCE_PARTING;
+        //a slow PULSE weapon's damage grows much faster than its chance: both its floors are higher (user ruling, 2026-11-19)
+        $premium = ($weapon->damageType === 'Pulse') ? AIConfig::FIRE_PULSE_PREMIUM : 0;
+        if ($parting) return AIConfig::FIRE_MIN_CHANCE_PARTING + $premium;
 
         $floor = AIConfig::FIRE_MIN_CHANCE;
         foreach (AIConfig::FIRE_MIN_CHANCE_BY_LOAD as $turns => $chance) {
             if ($load >= $turns) $floor = $chance;
         }
-        return $floor;
+        return $floor + $premium;
+    }
+
+    /* A HEAVY gun (user, 2026-11-19 - "concentrate a fleet's heavy firepower to try and take down an enemy ship"): one
+       that takes more than a turn to load, or does FIRE_HEAVY_DAMAGE a shot in its current mode. */
+    public static function isHeavy(Weapon $weapon)
+    {
+        if ((int)$weapon->getLoadingTime() > 1) return true;
+        return ($weapon->minDamage + $weapon->maxDamage) / 2 >= AIConfig::FIRE_HEAVY_DAMAGE;
     }
 
     /* FIRE NOW, OR A TURN CLOSER? (user, 2026-11-15.) A weapon that loads in one turn loses
@@ -331,15 +345,17 @@ class FireDecider
     }
 
     /* What a shot is worth, given what is already booked on its target. Damage beyond
-       FIRE_OVERKILL times the target's remaining health counts for nothing. */
-    public static function score(array $shot, array $target, $maxThreat)
+       FIRE_OVERKILL times the target's remaining health counts for nothing. A heavy gun is drawn to a
+       target already booked far more than a light one (FIRE_FOCUS_HEAVY): the fleet's heavy fire goes
+       in together, to take a ship down. */
+    public static function score(array $shot, array $target, $maxThreat, $heavy = false)
     {
         $room = $target['health'] * AIConfig::FIRE_OVERKILL - $target['booked'];
         $useful = min($shot['damage'], max(0, $room));
         if ($useful <= 0) return 0;
 
         $worth = $useful / $target['health'] * $target['value'];
-        $focus = 1 + AIConfig::FIRE_FOCUS * min(1, $target['booked'] / $target['health']);
+        $focus = 1 + ($heavy ? AIConfig::FIRE_FOCUS_HEAVY : AIConfig::FIRE_FOCUS) * min(1, $target['booked'] / $target['health']);
         $threat = 1 + ($maxThreat > 0 ? AIConfig::FIRE_THREAT_WEIGHT * $target['threat'] / $maxThreat : 0);
 
         return $worth * $focus * $threat;

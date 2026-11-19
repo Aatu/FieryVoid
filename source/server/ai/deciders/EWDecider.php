@@ -14,8 +14,15 @@
  *
  *   offence  what the ship's loaded guns should do: each gun counted against the enemy it does
  *            most to, with the OEW held on that enemy (CCEW too, on a flight);
- *   defence  what the enemy's guns should do to this ship at its DEW, shared out over the bot's
- *            units - they cannot all be shot at by everything.
+ *   defence  what the enemy's guns should do to this ship at its DEW - each gun by the share of
+ *            its fire this ship would draw among the bot's units (it fires at one of them).
+ *
+ * The user's rulings of 2026-11-19 (game 4750, where both Omegas went to 0 DEW at 1-4 hexes) shape
+ * it further: within EW_CLOSE_RANGE a lock stays soft (EW_SOFT_LOCK) and, with an enemy SHIP that
+ * close, at least EW_CLOSE_MIN_DEW of the points stay in DEW; a ship that can fire at fighters puts
+ * up 1 point of CCEW as a deterrent whenever an enemy flight could come within its 10 hexes this
+ * turn, and no more than EW_CCEW_CAP unless the enemy is fighter-heavy or the ship's guns are mostly
+ * anti-fighter guns.
  *
  * Both are the REAL hit formula (Weapon::calculateHitBase, through AIView::estimate) asked with
  * the EW tried - never a formula of the bot's own. Two things are guessed, as a player guesses them:
@@ -25,7 +32,8 @@
  *   - the enemy's EW, which is hidden until both sides have committed: each enemy is taken to
  *     repeat LAST turn's rows (remembered() - they were public then; the mask wipes them now).
  * And one thing is known and used as a player uses it: the turn's INITIATIVE order. Hard locks go
- * on enemies that move before the ship, soft ones (AIConfig::EW_SOFT_LOCK) on those that move after.
+ * on enemies that move before the ship (beyond close range), soft ones (AIConfig::EW_SOFT_LOCK) on
+ * those that move after.
  *
  * NOT YET: ELINT functions (stage T7 - an ELINT ship just runs OEW / DEW), Detect Stealth / Detect
  * Mines, EW for flights, levels (Easy's "half and half" is stage T8).
@@ -90,10 +98,23 @@ class EWDecider
             }
         }
 
-        //The bot's own units where flying straight on takes them. Taken back below.
+        /* Is the enemy weighted towards fighters (EW_FIGHTER_HEAVY of its visible value in flights)? Then CCEW may go past
+           EW_CCEW_CAP on any ship (the user's ruling, 2026-11-19). */
+        $flightValue = 0;
+        $enemyValue = 0;
+        foreach ($enemies as $enemy) {
+            $value = $view->value($enemy);
+            $enemyValue += $value;
+            if ($enemy instanceof FighterFlight) $flightValue += $value;
+        }
+        $fighterHeavy = $enemyValue > 0 && $flightValue >= AIConfig::EW_FIGHTER_HEAVY * $enemyValue;
+
+        //The bot's own units where flying straight on takes them - and where they stand now. Taken back below.
         $moved = array();
         $mine = $view->myUnits();
+        $now = array();
         foreach ($mine as $unit) {
+            $now[(int)$unit->id] = $unit->getHexPos();
             $row = self::ahead($unit, $turn);
             if ($row === null) continue;
             $unit->movement[] = $row;
@@ -106,7 +127,8 @@ class EWDecider
         try {
             $locked = array();
             foreach ($ships as $ship) {
-                $alloc = self::allocate($view, $ship, $enemies, count($mine));
+                $here = isset($now[(int)$ship->id]) ? $now[(int)$ship->id] : $ship->getHexPos();
+                $alloc = self::allocate($view, $ship, $enemies, $mine, $here, $fighterHeavy);
                 $rows = array();
                 foreach ($alloc['OEW'] as $targetId => $amount) {
                     if ($amount <= 0) continue;
@@ -132,8 +154,9 @@ class EWDecider
         return $plan;
     }
 
-    /* One ship's split: array('points', 'DEW', 'CCEW', 'OEW' => target id => amount). */
-    private static function allocate(AIView $view, $ship, array $enemies, $unitCount)
+    /* One ship's split: array('points', 'DEW', 'CCEW', 'OEW' => target id => amount). $units: the bot's units on the
+       board (where flying straight on takes them); $here: where this ship stands now; $fighterHeavy: see plan(). */
+    private static function allocate(AIView $view, $ship, array $enemies, array $units, OffsetCoordinate $here, $fighterHeavy)
     {
         $turn = $view->turn;
         $points = self::points($ship, $turn);
@@ -150,6 +173,15 @@ class EWDecider
         //ew.checkLCVSensors: all but 2 points go to OEW - CCEW does not count as OEW.
         $lcv = $ship->hasSpecialAbility('LCVSensors') && $points > 2;
 
+        /* How near each enemy is: the nearer of where the ship stands and where flying straight on takes it (the bot has
+           not moved yet), to where the enemy stands. */
+        $ahead = $ship->getHexPos();
+        $near = array();
+        foreach ($enemies as $enemy) {
+            $at = $enemy->getHexPos();
+            $near[(int)$enemy->id] = min($here->distanceTo($at), $ahead->distanceTo($at));
+        }
+
         //nearest first, so that equal gains go to the nearest
         $from = $ship->getHexPos();
         usort($enemies, function ($a, $b) use ($from) {
@@ -165,10 +197,45 @@ class EWDecider
             $guns[] = $weapon;
         }
 
+        /* CCEW (user ruling, 2026-11-19). The deterrent: a ship with a gun that can fire at fighters puts up 1 point when an
+           enemy flight could be within CCEW's reach at this turn's Fire phase (EW_CCEW_REACH + the flight's speed). More only
+           while it gains, and never past EW_CCEW_CAP - unless the enemy is fighter-heavy or most of this ship's guns are
+           anti-fighter guns (fire control against fighters at least as good as against capital ships). */
         $flights = false;
+        $deterrent = false;
         foreach ($enemies as $enemy) {
-            if ($enemy instanceof FighterFlight) $flights = true;
+            if (!($enemy instanceof FighterFlight)) continue;
+            $flights = true;
+            $last = $enemy->getLastMovement();
+            if ($near[(int)$enemy->id] <= AIConfig::EW_CCEW_REACH + ($last ? max(0, (int)$last->speed) : 0)) $deterrent = true;
         }
+        $antiFighter = 0;
+        $plain = 0;
+        foreach ($view->mounts($ship) as $mount) {
+            $weapon = $mount['weapon'];
+            if (!$view->plainGun($weapon) || $weapon->isOfflineOnTurn($turn)) continue;
+            $fc = $weapon->fireControl;
+            if (!isset($fc[0]) && !isset($fc[1]) && !isset($fc[2])) continue; //no offensive fire at all (an Interceptor)
+            $plain++;
+            //an anti-fighter gun aims better at fighters than at capital ships: a Twin Array (6/5/4) is one, a Standard Particle Beam (4/4/4) is not
+            if (isset($fc[0]) && (!isset($fc[2]) || $fc[0] > $fc[2])) $antiFighter++;
+        }
+        $canShootFighters = false;
+        foreach ($guns as $weapon) {
+            if (isset($weapon->fireControl[0])) $canShootFighters = true;
+        }
+        $ccewCap = ($fighterHeavy || ($plain > 0 && 2 * $antiFighter >= $plain)) ? PHP_INT_MAX : AIConfig::EW_CCEW_CAP;
+
+        /* CLOSE ENGAGEMENT (user ruling, 2026-11-19): an enemy within EW_CLOSE_RANGE gets a soft lock at most, and with an
+           enemy SHIP that close at least EW_CLOSE_MIN_DEW of the points stay in DEW. (An LCV has the page's own rule.) */
+        $close = array();
+        $engaged = false;
+        foreach ($enemies as $enemy) {
+            if ($near[(int)$enemy->id] > AIConfig::EW_CLOSE_RANGE) continue;
+            $close[(int)$enemy->id] = true;
+            if (!($enemy instanceof FighterFlight) && empty($enemy->mine)) $engaged = true;
+        }
+        if ($engaged && !$lcv) $minDew = max($minDew, (int)ceil($points * AIConfig::EW_CLOSE_MIN_DEW));
 
         $base = array();
         foreach ($ship->EW as $entry) {
@@ -185,15 +252,22 @@ class EWDecider
             if (!empty($enemy->base) || !empty($enemy->smallBase) || !empty($enemy->osat) || !empty($enemy->mine)) continue;
             if ($enemy->iniative >= $ship->iniative) $soft[(int)$enemy->id] = true;
         }
+        $capped = $soft + $close; //a soft lock at most: moving after the ship, or close
 
         $state = array('view' => $view, 'ship' => $ship, 'base' => $base, 'guns' => $guns, 'enemies' => $enemies,
-            'share' => 1 / max(1, $unitCount), 'threats' => null, 'offence' => array(), 'defence' => array(), 'soft' => $soft);
+            'units' => $units, 'threats' => null, 'offence' => array(), 'defence' => array(), 'soft' => $soft);
+
+        //the CCEW deterrent first: a point of DEW the greedy below does not have to find a gain for
+        if ($deterrent && $canShootFighters && !$lcv && $alloc['DEW'] > $minDew) {
+            $alloc['DEW']--;
+            $alloc['CCEW']++;
+        }
 
         $current = self::score($state, $alloc);
         while ($alloc['DEW'] > $minDew) {
             $best = null;
             $bestScore = $current + AIConfig::EW_MIN_GAIN;
-            foreach (self::moves($alloc, $enemies, $flights && !$lcv, $soft) as $try) {
+            foreach (self::moves($alloc, $enemies, $flights && !$lcv && $alloc['CCEW'] < $ccewCap, $capped) as $try) {
                 $score = self::score($state, $try);
                 if ($score > $bestScore) {
                     $bestScore = $score;
@@ -223,14 +297,14 @@ class EWDecider
         return $alloc;
     }
 
-    /* Every split one point of DEW away from $alloc. $soft: enemy id => true for those a lock stays
+    /* Every split one point of DEW away from $alloc. $capped: enemy id => true for those a lock stays
        soft on (no more than EW_SOFT_LOCK points); empty where the ship has no choice (an LCV). */
-    private static function moves(array $alloc, array $enemies, $ccew, array $soft = array())
+    private static function moves(array $alloc, array $enemies, $ccew, array $capped = array())
     {
         $list = array();
         foreach ($enemies as $enemy) {
             $has = isset($alloc['OEW'][(int)$enemy->id]) ? $alloc['OEW'][(int)$enemy->id] : 0;
-            if (isset($soft[(int)$enemy->id]) && $has >= AIConfig::EW_SOFT_LOCK) continue;
+            if (isset($capped[(int)$enemy->id]) && $has >= AIConfig::EW_SOFT_LOCK) continue;
             $try = $alloc;
             $try['DEW']--;
             $try['OEW'][(int)$enemy->id] = $has + 1;
@@ -272,14 +346,24 @@ class EWDecider
             $offence += $best;
         }
 
-        //The enemy guns that could reach this ship at all (asked once, with no DEW up), then at the DEW tried.
+        /* The enemy guns that could reach this ship at all (asked once, with no DEW up), then at the DEW tried. Each gun
+           fires at one target: it is counted for this ship by the share of what it could do to the bot's units that this
+           ship would take (until 2026-11-19 every gun counted 1 / the number of the bot's units - its fighter flights
+           included - which priced a point of DEW at a quarter in game 4750 and left both Omegas on 0 DEW). Only the guns
+           loaded this turn count, as on the offence side. A mine's guns are not counted (Hazards prices a mine). */
         if ($state['threats'] === null) {
             $state['threats'] = array();
             $ship->EW = $state['base'];
             foreach ($state['enemies'] as $enemy) {
+                if (!empty($enemy->mine)) continue;
                 foreach ($view->mounts($enemy) as $mount) {
-                    if (!$view->plainGun($mount['weapon'], $mount['fighter'])) continue;
-                    if ($view->estimate($enemy, $mount['weapon'], $ship, false) > 0) $state['threats'][] = array($enemy, $mount['weapon']);
+                    //a gun that fires this turn: loaded, as the ship's own are counted (an enemy's loading is on every player's screen)
+                    if (!$view->plainGun($mount['weapon'], $mount['fighter']) || !$view->loaded($mount['weapon'])) continue;
+                    $here = $view->estimate($enemy, $mount['weapon'], $ship, false);
+                    if ($here <= 0) continue;
+                    $all = 0;
+                    foreach ($state['units'] as $unit) $all += ((int)$unit->id === (int)$ship->id) ? $here : $view->estimate($enemy, $mount['weapon'], $unit, false);
+                    $state['threats'][] = array($enemy, $mount['weapon'], $all > 0 ? $here / $all : 1);
                 }
             }
         }
@@ -289,8 +373,8 @@ class EWDecider
             $rows[] = new EWentry(-1, $ship->id, $turn, 'DEW', $dew, -1);
             $ship->EW = $rows;
             $taken = 0;
-            foreach ($state['threats'] as $threat) $taken += $view->estimate($threat[0], $threat[1], $ship, false);
-            $state['defence'][$dew] = $taken * $state['share'];
+            foreach ($state['threats'] as $threat) $taken += $view->estimate($threat[0], $threat[1], $ship, false) * $threat[2];
+            $state['defence'][$dew] = $taken;
         }
 
         return AIConfig::EW_OFFENCE * $offence - AIConfig::EW_DEFENCE * $state['defence'][$dew];
