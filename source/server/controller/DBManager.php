@@ -4801,12 +4801,12 @@ class DBManager
                 p.gameid = g.id
             WHERE
                 $idleRule
-                (DATE_ADD(p.lastactivity, INTERVAL 5 DAY) < NOW()
+                (DATE_ADD(p.lastactivity, INTERVAL 7 DAY) < NOW()
                 AND
                 g.status = 'LOBBY')
 
         ");
-		//28.03.2024: increased delete time for inactive games to 5 days: useful for test games, as well as allows games to be picked up after weekend!
+		//20.11.2026: increased delete time for inactive games to 7 days: since fleet test games cluttering up lobby is no longer a thing!
         if ($stmt) {
             $stmt->bind_result($id);
             $stmt->execute();
