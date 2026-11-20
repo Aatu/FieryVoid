@@ -20,8 +20,9 @@
  *
  * LEGALITY. Every hex returned satisfies DeploymentGamePhase::validateDeploymentArea (the rule
  * that judges the submission) AND the game page's slightly tighter box test, so a player's page
- * accepts the layout for commit. Terrain is never stood on; two ships never share a hex (the
- * page's rule - flights may share). A wanted hex that is not acceptable is replaced by the nearest
+ * accepts the layout for commit. Terrain is never stood on; two ships never share a hex, and since
+ * 2026-11-20 neither does a flight with a ship or with another flight (the page's rule; see
+ * nearestAcceptable). A wanted hex that is not acceptable is replaced by the nearest
  * one that is; a unit with nowhere to go is left OUT of the plan for the caller to deal with.
  *
  * NOT PLACED BY IT: bases, OSATs and mines (mines have their own Deploy Minefield tool), terrain,
@@ -121,6 +122,7 @@ class FleetDeployer
                 $key = $hex->q . ',' . $hex->r;
                 $board['any'][$key] = true;
                 if (!($ship instanceof FighterFlight)) $board['ship'][$key] = true;
+                else $board['flight'][$key] = true; //2026-11-20: nothing may join it any more (nearestAcceptable)
 
                 $plan[] = array(
                     'shipid' => (int)$ship->id,
@@ -379,11 +381,12 @@ class FleetDeployer
     }
 
     /* What already stands where: 'hard' = terrain (nothing may go there), 'ship' = a hull (no second
-       hull), 'any' = anything at all (avoided while there is room). Built from terrain, this
-       team's units already on the board or committed this phase, and the caller's own list. */
+       hull, and no flight), 'flight' = a fighter flight (no hull, no second flight - added 2026-11-20), 'any' = anything
+       at all (avoided while there is room). Built from terrain, this team's units already on the board
+       or committed this phase, and the caller's own list. */
     private static function board(TacGamedata $gamedata, $slot, $occupied)
     {
-        $board = array('hard' => array(), 'ship' => array(), 'any' => array());
+        $board = array('hard' => array(), 'ship' => array(), 'flight' => array(), 'any' => array());
 
         foreach ($gamedata->blockedHexes ?: array() as $hex) {
             $blocked = new OffsetCoordinate($hex);
@@ -409,6 +412,7 @@ class FleetDeployer
             $key = $position->q . ',' . $position->r;
             $board['any'][$key] = true;
             if (!($ship instanceof FighterFlight) && empty($ship->mine)) $board['ship'][$key] = true;
+            else if ($ship instanceof FighterFlight && empty($ship->mine)) $board['flight'][$key] = true;
         }
 
         if (is_array($occupied)) {
@@ -417,6 +421,9 @@ class FleetDeployer
                 $key = (int)$entry['q'] . ',' . (int)$entry['r'];
                 $board['any'][$key] = true;
                 if (empty($entry['flight'])) $board['ship'][$key] = true;
+                //the page's 'flight' flag also covers mines (AutoDeploy.js), so the last-resort search below
+                //steps round a mine it could have shared - harmless, and no new field for it
+                else $board['flight'][$key] = true;
             }
         }
 
@@ -470,10 +477,20 @@ class FleetDeployer
     }
 
     /* $wanted if the unit may stand there, else the nearest hex where it may - first looking for
-       an empty one, then (a hull) one holding only flights, or (a flight) any without terrain. */
+       an empty one, then one holding nothing but this team's mines.
+
+       ⭐ FIGHTERS NO LONGER STACK IN DEPLOYMENT - NOT WITH SHIPS, NOT WITH EACH OTHER (user,
+       2026-11-20). The second pass used to let a hull join flights and a flight join anything but
+       terrain - the page's rule, whose ship half existed so a flight could ESCORT a ship from turn 1
+       (the escort intercept wanted the same hex at the end of the previous turn too, and deployment is
+       the end of turn 0). Defensive Intercept replaced escorting (FIGHTER_MISSIONS_PLAN.md R5) and only
+       asks for the same hex when fire resolves, and the user ruled that flights no longer stack with
+       each other either; the page dropped both (DeploymentPhaseStrategy.onHexClicked) and this follows
+       it, or Auto-Deploy and the CPU could still stack what a player cannot. The old test is kept,
+       commented out, for a rollback. */
     private static function nearestAcceptable(TacGamedata $gamedata, $ship, OffsetCoordinate $wanted, $slot, array $board)
     {
-        $flight = self::isFlight($ship);
+        //$flight = self::isFlight($ship);   //only the old rule below asked it - restore with that line
         $candidates = self::hexesAround($wanted, self::SEARCH_RADIUS);
 
         foreach (array(true, false) as $wantEmpty) {
@@ -481,7 +498,8 @@ class FleetDeployer
                 $key = $hex->q . ',' . $hex->r;
                 if (isset($board['hard'][$key])) continue;
                 if ($wantEmpty && isset($board['any'][$key])) continue;
-                if (!$wantEmpty && !$flight && isset($board['ship'][$key])) continue;
+                //if (!$wantEmpty && !$flight && isset($board['ship'][$key])) continue;   //old rule: a flight could join a hull, a hull could join flights
+                if (!$wantEmpty && (isset($board['ship'][$key]) || isset($board['flight'][$key]))) continue; //nothing joins a hull or a flight
                 if (self::inZone($gamedata, $ship, $hex, $slot)) return $hex;
             }
         }

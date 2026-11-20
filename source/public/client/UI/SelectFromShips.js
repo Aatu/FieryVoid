@@ -741,12 +741,21 @@ window.SelectFromShips = function () {
                the two in step). The vortex it must stand in is terrain, so `hasTerrain` alone would
                hide this button on the only hex the unit is allowed to occupy; and a wave stacks in
                that one hex by rule (§2.4), so the one-ship-per-hex block has to go too. */
+            /* FIGHTERS NO LONGER STACK IN DEPLOYMENT - NOT WITH SHIPS, NOT WITH EACH OTHER (user, 2026-11-20):
+               a ship or a flight needs a hex holding nothing but mines. The escort rule that needed fighters on
+               a ship's hex is gone (Defensive Intercept replaced it); the full rationale is in
+               DeploymentPhaseStrategy.onHexClicked. The old rule is kept, commented out, for a rollback. A flight
+               over a carrier still gets the DOCK button below - only DEPLOY is withheld. */
             if (shipManager.isArrivingReinforcement(this.phaseStrategy.selectedShip)) {
                 isBlocked = false;
             } else if (hasTerrain) {
                 isBlocked = true;
-            } else if (!(this.phaseStrategy.selectedShip.mine || this.phaseStrategy.selectedShip.flight)) {
-                isBlocked = shipsInHex.some(function (s) { return !(s.mine || s.flight); });
+            //} else if (!(this.phaseStrategy.selectedShip.mine || this.phaseStrategy.selectedShip.flight)) {   //old rule: flights and mines stacked with anything
+            //    isBlocked = shipsInHex.some(function (s) { return !(s.mine || s.flight); });
+            } else if (!this.phaseStrategy.selectedShip.mine) {
+                //nothing in the hex but mines - the unit itself aside, which getShipsInSameHex lists too
+                var selectedId = this.phaseStrategy.selectedShip.id;
+                isBlocked = shipsInHex.some(function (s) { return s.id !== selectedId && !s.mine; });
             }
 
             //The LCV dock shortcut surfaces this popup WITHOUT pre-validating the

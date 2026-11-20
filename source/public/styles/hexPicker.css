@@ -996,6 +996,35 @@
     border-radius: 3px;
 }
 
+/* Propagate to all Flights - the icon button on the right of a fighter mission row (user, 2026-11-20). The icon is
+   img/propogateMission.png recoloured to the Fighter Mission button's teal (#0096BC, img/FighterMissions.png); the
+   hover is the header buttons' (solid colours - the alpha-compounding trap). */
+.fv-missionpicker__propagate {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    margin-left: 6px;
+    padding: 0;
+    background: transparent url("../img/propogateMission.png") center / 18px 18px no-repeat;
+    border: 1px solid transparent;
+    border-radius: var(--fv-radius-modal);
+    cursor: pointer;
+}
+
+.fv-missionpicker__propagate:hover {
+    border-color: var(--fv-line-scs);
+    background-color: var(--fv-line-soft);
+}
+
+/* What the last Propagate did, under the list until the next pick or view change. */
+.fv-missionpicker__notice {
+    padding: 5px 10px;
+    border-top: 1px solid var(--fv-rule);
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--fv-text-accent);
+}
+
 /* A one-button footer under the list, the button centred in its row (the Analyst's Cancel scan - user, play tests 4524/4525). */
 .fv-missionpicker__footer {
     display: flex;
@@ -1025,14 +1054,16 @@
 .fv-missionpicker__row:focus,
 .fv-missionpicker__back:focus,
 .fv-missionpicker__close:focus,
-.fv-missionpicker__button:focus {
+.fv-missionpicker__button:focus,
+.fv-missionpicker__propagate:focus {
     outline: none;
 }
 
 .fv-missionpicker__row:focus-visible,
 .fv-missionpicker__back:focus-visible,
 .fv-missionpicker__close:focus-visible,
-.fv-missionpicker__button:focus-visible {
+.fv-missionpicker__button:focus-visible,
+.fv-missionpicker__propagate:focus-visible {
     outline: 1px solid var(--fv-accent);
     outline-offset: -1px;
 }

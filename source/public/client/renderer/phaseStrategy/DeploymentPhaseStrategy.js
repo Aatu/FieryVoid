@@ -254,7 +254,8 @@ window.DeploymentPhaseStrategy = function () {
 
     //Returns TRUE only when the click actually placed the selected unit. onShipClicked uses
     //that so a click which turns out not to be a placement can fall back to the ship tooltip
-    //instead of being silently swallowed. No other caller reads the value.
+    //instead of being silently swallowed. The two Shift+Click shortcuts read it too (2026-11-20):
+    //a drop it refuses falls through to the SelectFromShips popup.
     DeploymentPhaseStrategy.prototype.onHexClicked = function (payload) {
         PhaseStrategy.prototype.onHexClicked.call(this, payload);
         var hex = payload.hex;
@@ -284,7 +285,8 @@ window.DeploymentPhaseStrategy = function () {
             //⚠️ LCVs are NOT exempt from the "no two ships in one hex" block any more (revised
             //2026-09-11, user request, to match the Traveler's Docking Bay): an LCV that is to start
             //the battle aboard docks straight onto a rail from the popup's DOCK button and is never
-            //placed on its carrier's hex. Mines and fighters still stack.
+            //placed on its carrier's hex. Mines still stack; fighters no longer do (2026-11-20 - see
+            //below).
 
             /* REINFORCEMENTS_PLAN.md STAGE 7 - AN ARRIVAL BYPASSES BOTH BLOCKS, and it is not an
                optional nicety either way (plan §2.4).
@@ -297,12 +299,31 @@ window.DeploymentPhaseStrategy = function () {
                doorway and they stack there freely until they separate on their first movement. The
                server has no such rule to relax (validateReinforcementArrival tests the hex and the
                facing and nothing else), so this is the only place it lives. */
+
+            /* ⭐ FIGHTERS NO LONGER STACK IN DEPLOYMENT - NOT WITH SHIPS, NOT WITH EACH OTHER (user, 2026-11-20).
+               A flight used to be allowed onto any hex - a ship's, another flight's - and a ship onto a hex
+               holding only flights. The ship half existed so a flight could ESCORT that ship from turn 1: the
+               escort intercept rule wanted the same hex at the end of the previous turn as well, and deployment
+               is the end of turn 0. Fighter Missions replaced escorting with Defensive Intercept
+               (FIGHTER_MISSIONS_PLAN.md R5 - the escort code is commented out in firing.php and
+               weaponManager.js), which only asks for the same hex when fire resolves, so that had no purpose
+               left; and the user ruled that flights no longer stack with each other at deployment either. The
+               old rule is kept, commented out, for a rollback.
+               So in normal deployment a ship or a flight needs a hex holding nothing but mines. What still
+               stacks: a mine with anything, and an arriving reinforcement wave (above). A flight that is to
+               start the battle aboard a carrier DOCKS into its hangar (the SelectFromShips DOCK button) and is
+               never placed on the carrier's hex.
+               ⚠️ Keep in step with SelectFromShips.buildActions and FleetDeployer::nearestAcceptable. */
             if (shipManager.isArrivingReinforcement(this.selectedShip)) {
                 isBlocked = false;
             } else if (hasTerrain) {
                 isBlocked = true;
-            } else if (!(this.selectedShip.mine || this.selectedShip.flight)) {
-                isBlocked = shipsInHex.some(function (s) { return !(s.mine || s.flight); });
+            //} else if (!(this.selectedShip.mine || this.selectedShip.flight)) {   //old rule: flights and mines stacked with anything
+            //    isBlocked = shipsInHex.some(function (s) { return !(s.mine || s.flight); });
+            } else if (!this.selectedShip.mine) {
+                //nothing in the hex but mines - the unit itself aside, which getShipsInSameHex lists too
+                var selectedId = this.selectedShip.id;
+                isBlocked = shipsInHex.some(function (s) { return s.id !== selectedId && !s.mine; });
             }
 
             if (!isBlocked) {
@@ -325,6 +346,9 @@ window.DeploymentPhaseStrategy = function () {
         // Shift+Click bypass: place directly without showing the SelectFromShips picker when:
         //   - selected unit is a fighter/mine (drops onto stacked ships/mines/fighters), OR
         //   - selected unit is a regular ship and every stacked unit in the hex is a mine/fighter.
+        // Since fighters no longer stack with ships or each other (user, 2026-11-20 - see onHexClicked),
+        // onHexClicked may refuse the drop: the click then falls through to the picker as an ordinary
+        // click would, so a flight shift-clicked onto a carrier still reaches the DOCK button.
         if (payload && payload.shiftKey && this.selectedShip
             && shipManager.getTurnPlaced(this.selectedShip) >= gamedata.turn
             && validateDeploymentPosition(this.selectedShip, payload.hex, this.deploymentSprites)) {
@@ -336,8 +360,9 @@ window.DeploymentPhaseStrategy = function () {
                 return s.id === this.selectedShip.id || s.mine || s.flight;
             }, this);
             if (selIsFighterMine || allStackedFighterMine) {
-                this.onHexClicked(payload);
-                return;
+                //this.onHexClicked(payload);   //before 2026-11-20 this placement could not be refused
+                //return;
+                if (this.onHexClicked(payload)) return;
             }
         }
 
@@ -418,8 +443,19 @@ window.DeploymentPhaseStrategy = function () {
                be placed at all - the stacking bypass in onHexClicked is never even reached. */
             var selIsArrival = shipManager.isArrivingReinforcement(this.selectedShip);
 
+            /* WHICH CLICKS OPEN THE "DEPLOY HERE" POPUP (user, 2026-11-20). It used to open whenever either
+               unit was a fighter or a mine, because fighters stacked with anything. They no longer stack
+               (onHexClicked), so the popup is kept for what it can still offer:
+                 DEPLOY - a mine onto anything, anything onto a mine, an arriving wave onto its doorway;
+                 DOCK   - a fighter selected, clicking a friendly ship (a carrier with room offers it).
+               A ship clicked onto a fighter, or a fighter onto a fighter, can do neither, so it falls through
+               to the plain selection below as a ship clicked onto a ship always has. */
+            //var mayOpenPopup = this.selectedShip.mine || this.selectedShip.flight || ship.mine || ship.flight || selIsArrival;   //old rule
+            var mayOpenPopup = this.selectedShip.mine || ship.mine || selIsArrival
+                || (this.selectedShip.flight && !ship.flight && this.gamedata.isMyShip(ship));
+
             var isTerrain = gamedata.isTerrain(ship.shipSizeClass, ship.userid) || (ship.Huge > 0 && ship.Huge <= 3);
-            if (!isTerrain && isPlacedOnMap && (this.selectedShip.mine || this.selectedShip.flight || ship.mine || ship.flight || selIsArrival)) {
+            if (!isTerrain && isPlacedOnMap && mayOpenPopup) {
                 // Ensure we only ever show the deployment stacking pop-up if the clicked location is actually 
                 // a valid, legal deployment drop for our CURRENTLY selected piece.
                 // This implicitly strips the pop-up out of the "deployment bay" clicking interaction.
@@ -433,9 +469,13 @@ window.DeploymentPhaseStrategy = function () {
                         // Shift+Click: skip the "Deploy here" popup and place directly on this hex.
                         // Allowed when the selected unit is a fighter/mine, or when the only thing in
                         // the hex (other than terrain, already excluded above) is a fighter/mine.
-                        if (payload.shiftKey && (this.selectedShip.mine || this.selectedShip.flight || ship.mine || ship.flight || selIsArrival)) {
-                            this.onHexClicked(payload);
-                            return;
+                        //A drop onHexClicked refuses (a fighter onto a ship - not allowed since
+                        //2026-11-20) falls through to the popup, as an ordinary click would.
+                        //if (payload.shiftKey && (this.selectedShip.mine || this.selectedShip.flight || ship.mine || ship.flight || selIsArrival)) {   //old rule
+                        if (payload.shiftKey && mayOpenPopup) {
+                            //this.onHexClicked(payload);   //before 2026-11-20 this placement could not be refused
+                            //return;
+                            if (this.onHexClicked(payload)) return;
                         }
                         this.showSelectFromShips([ship], payload);
                         return;
