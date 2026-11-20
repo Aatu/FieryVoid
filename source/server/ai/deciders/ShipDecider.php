@@ -54,11 +54,32 @@
  * The decision is made on the bot's own MASKED view of the game (principle P2).
  *
  * GRAVITIC hulls (stage T5d) are scored like any other: ShipMover plots them by the page's gravitic
- * rules, and as the bot never pivots them (T5e) they fly bow- or stern-first, where those rules are a
- * plain hull's.
+ * rules.
  *
- * NOT YET (stage T5's later parts, section 10.7): pivots and rolls (T5e), levels (T5f). Interception is
- * not counted here: it changes how much a volley does, hardly where it is best fired from.
+ * PIVOTS AND ROLLS (stage T5e), by the seat's level - the user's notes of 2026-11-19: rare, advanced moves.
+ * Every level STOPS a pivot or roll carried over from last turn (the search tries the stop; leaving one
+ * running costs MOVE_COST_LEFT_RUNNING). HARD tries, on the end of its best plans, a pivot started and
+ * stopped the same turn either way (an agile hull's single and double pivots) and a roll; NORMAL only the
+ * roll that frees the turn it wants next turn (the thruster swap); EASY neither (variants()). Each is priced
+ * by the engine's -3 on this turn's fire, its cost, ending out of alignment without a gravitic drive (by the
+ * share of the ship expected to survive - never below the share of its combat value it has left: "desperate"
+ * needs damage), next turn with the sides a roll swaps, and the turn it frees. A PIVOT pays for itself this
+ * turn: its next-turn terms are taken from its seed's facing (self-play showed fresh ships pivoting on turn 1
+ * for a straight-on projection's sake).
+ *
+ * LEVELS (stage T5f): the view's skills (AIView::skill, AIConfig::SKILLS) decide what the ship tries and how it weighs it -
+ * turn shortening, the overspeed cost, what an enemy yet to move counts for, the pivots and rolls above, Easy's score noise,
+ * and whether a target's health is its primary alone (Easy) or its primary plus the section the ship's hits go through
+ * (targetsFrom - the user's ruling on game 4774). Since stage T5f-7 an enemy SHIP yet to move stands where the level forecasts it
+ * (EnemyForecast, set on the view by MoveDecider) instead of straight on - for every term, this turn's and next turn's.
+ *
+ * DECISION TIME (stage T5f-8): next turn's terms are asked only of the MOVE_NEXT_TURN_PLANS best end states by this turn's score
+ * (judgeAll's two passes), and each ship has MOVE_DECISION_SECONDS of CPU time - the search, then each pass, stops when its share
+ * is spent, with the plainest plans found and at least one judged whole.
+ *
+ * HARD's fleet focus and the one-ply reply (stage T5f-3; the reply rebuilt both-sided at T5f-6 and off at every level): focusFactor
+ * and the bestReply branch of fireTerms. Interception is not counted here: it changes how much a volley does, hardly where it is
+ * best fired from.
  */
 class ShipDecider
 {
@@ -70,50 +91,100 @@ class ShipDecider
         self::$last = array();
     }
 
-    /* The rows for one ship: the ShipMover plan whose end state scores best. $view is the bot's
-       masked view of the Movement phase; $hazards the board, built once for the decision. */
+    /* Stage T5f-8 (brought forward from T8 - the user, 2026-11-20: "move forward the decision time-improvements currently in Stage
+       T8 to compensate for the increased work"): harness overrides of AIConfig::MOVE_NEXT_TURN_PLANS and MOVE_DECISION_SECONDS -
+       null = AIConfig's; a budget of 0 = none (the levels harness: a plan must not depend on the machine). Nothing in a game sets
+       them. */
+    public static $nextTurnPlans = null;
+    public static $budget = null;
+    /* What the last rows() did: 'plans' found, 'judgedNow' (this turn's terms), 'judgedNext' (next turn's too - judged whole),
+       'variants' judged whole, 'cut' (the budget stopped the search or the judging), 'choice' (the end state chosen, endKey()),
+       'seconds' (CPU). And every rows() of the process by level - the self-play harness reads and empties it. */
+    public static $lastTiming = array();
+    public static $timings = array();
+
+    /* The rows for one ship: the ShipMover plan whose end state scores best. $view is the bot's masked view of the Movement
+       phase - its level's skills (stage T5f: AIView::skill) decide what the ship may try and how it weighs it; $hazards the
+       board, built once for the decision. */
     public static function rows(AIView $view, ShipMover $mover, $ship, Hazards $hazards)
     {
-        $plans = self::candidates($mover);
-        if (count($plans) == 0) return MoveDecider::choose($mover, $hazards->blocked, $hazards->bounds);
+        //Stage T5f-8: the ship's CPU time - the search stops at its MOVE_SEARCH_SHARE, this turn's terms at MOVE_JUDGE_SHARE.
+        $started = AIConfig::cpuSeconds();
+        $budget = self::budgetSeconds();
+        $clock = ($budget > 0) ? array($started + $budget * AIConfig::MOVE_JUDGE_SHARE, $started + $budget) : null;
+        $timing = array('plans' => 0, 'judgedNow' => 0, 'judgedNext' => 0, 'variants' => 0, 'cut' => false, 'choice' => null, 'seconds' => 0.0);
+
+        $plans = self::candidates($mover, $view->skill('shortening'), (bool)$view->skill('extendedTurns'),
+            ($budget > 0) ? $started + $budget * AIConfig::MOVE_SEARCH_SHARE : null, $timing['cut']);
+        $timing['plans'] = count($plans);
+        if (count($plans) == 0) {
+            self::timed($view, $timing, $started);
+            return MoveDecider::choose($mover, $hazards->blocked, $hazards->bounds);
+        }
 
         $context = self::context($view, $ship, $mover);
         $start = $ship->getHexPos();
 
-        //The fire terms depend only on where the ship ends and which way it points; the look-ahead on its heading and speed too.
-        $judged = $view->atFireTime(function () use ($view, $ship, $plans, $context, $hazards, $start) {
-            $out = array();
-            $fire = array();
-            foreach ($plans as $index => $plan) $out[$index] = self::judge($view, $ship, $plan, $context, $fire, $hazards, $start);
-            return $out;
-        }, array((int)$ship->id));
+        //The fire terms depend only on where the ship ends, which way it points, and whether it pivots or rolls on the way.
+        $fire = array();
+        $judged = self::judgeAll($view, $ship, $plans, $context, $fire, $hazards, $start, $clock, $timing);
+        $timing['judgedNext'] = count($judged);
 
+        //Stage T5e: a pivot or a roll on the end of the best of those plans, as the level allows - while there is time.
+        $variants = ($clock === null || AIConfig::cpuSeconds() <= $clock[1]) ? self::variants($mover, $plans, $judged, $context) : array();
+        if (count($variants) > 0) {
+            $first = count($plans);
+            $counts = array('judgedNow' => 0, 'cut' => false);
+            foreach (self::judgeAll($view, $ship, $variants, $context, $fire, $hazards, $start, $clock, $counts) as $index => $j) {
+                $judged[$first + $index] = $j;
+                $timing['variants']++;
+            }
+            if ($counts['cut']) $timing['cut'] = true;
+            foreach ($variants as $variant) $plans[] = $variant;
+        }
+
+        /* Easy's score noise (stage T5f, plan 5.8): each end state judged a little better or worse than it is - a draw fixed by
+           the seat's seed, the ship and the end state, in hexes of the ship's own value. The board's hazards are thousands:
+           noise never takes a ship off the map or into a rock. */
+        $noise = (float)$view->skill('noise') * $context['hexValue'];
         $best = null;
         $bestScore = null;
         foreach ($judged as $index => $j) {
-            $score = self::score($j, $context['hexValue']);
-            $judged[$index]['score'] = $score;
+            $score = $j['score'] + (($noise > 0) ? $noise * $view->noise('move|' . $ship->id . '|' . self::endKey($plans[$index]) . '|' . count($plans[$index]['actions'])) : 0);
             if ($bestScore === null || $score > $bestScore) {
                 $bestScore = $score;
                 $best = $index;
             }
         }
 
+        if (is_array(self::$trace)) { //harness only: every plan judged, a variant with its seed (stage T5e)
+            self::$traceJudged = array();
+            foreach ($judged as $index => $j) {
+                $m = self::manoeuvresOf($plans[$index], $context);
+                self::$traceJudged[] = array('key' => self::endKey($plans[$index]), 'seed' => isset($plans[$index]['seed']) ? $plans[$index]['seed'] : null,
+                    'pivots' => $m['pivotStarts'], 'rolls' => $m['rollStarts'], 'plan' => self::describe($plans[$index]['actions'], $plans[$index]['extras']),
+                    'nextOffence' => $j['nextOffence'], 'nextDanger' => $j['nextDanger'], 'shaping' => $j['shaping'], 'score' => $j['score']);
+            }
+        }
+
         $plan = $plans[$best];
         $j = $judged[$best];
         $rows = $plan['rows'];
+        $timing['choice'] = self::endKey($plan);
 
-        //Thrust left over shortens the last turn's delay (turn shortening): next turn starts free to turn.
-        $shortened = empty($plan['overthrust']) ? $mover->shortened($plan) : null;
+        //Thrust left over shortens the last turn's delay (turn shortening): next turn starts free to turn. Not on Easy.
+        $shortened = (empty($plan['overthrust']) && $view->skill('shortening')) ? $mover->shortened($plan) : null;
         if ($shortened !== null) $rows = $shortened->rows();
+        self::timed($view, $timing, $started);
 
         $hz = $j['board'];
-        self::$last[] = sprintf('%s: %s; fire %.0f, launch %.0f, danger %.0f, next %.0f/%.0f, %d hexes off%s%s%s',
+        self::$last[] = sprintf('%s: %s; fire %.0f, launch %.0f, danger %.0f, next %.0f/%.0f, %d hexes off%s%s%s%s',
             $ship->name, count($plan['actions']) ? self::describe($plan['actions'], $plan['extras']) : 'straight on',
             $j['offence'], $j['launch'], $j['danger'], $j['nextOffence'], $j['nextDanger'], $j['nearest'],
             empty($plan['overthrust']) ? '' : '; OVERTHRUST ' . implode(', ', array_map(function ($id, $x) { return "#$id +$x"; }, array_keys($plan['overthrust']), $plan['overthrust'])),
             $shortened !== null ? '; last turn shortened' : '',
-            ($hz['drift'] + $hz['meteors'] + $hz['mines'] > 0) ? sprintf('; hazards: drift %.0f, meteors %.0f, mines %.0f', $hz['drift'], $hz['meteors'], $hz['mines']) : '');
+            ($hz['drift'] + $hz['meteors'] + $hz['mines'] > 0) ? sprintf('; hazards: drift %.0f, meteors %.0f, mines %.0f', $hz['drift'], $hz['meteors'], $hz['mines']) : '',
+            $timing['cut'] ? sprintf('; OUT OF TIME (%.1f s): %d end states found, %d judged this turn, %d whole', $timing['seconds'], $timing['plans'], $timing['judgedNow'], $timing['judgedNext']) : '');
 
         if (is_array(self::$trace)) {
             uasort($judged, function ($a, $b) { return $b['score'] <=> $a['score']; });
@@ -128,17 +199,18 @@ class ShipDecider
     }
 
     /* For the harness and scratch checks only: set to an array and rows() appends its five best
-       plans, terms and all. Null (the default) in a game. */
+       plans, terms and all - and fills $traceJudged with every plan it judged. Null (the default) in a game. */
     public static $trace = null;
+    public static $traceJudged = array();
 
     /* One plan's worth. Fire both ways now and a turn on, next turn's launches; then the shaping
        terms, in hexes of the ship's own value: closing on the nearest enemy (always - enough to bring
        a ship in where the fire is slight, too little to buy a bad trade), formation, speed and
        manoeuvres; then the board. */
-    private static function score(array $j, $hexValue)
+    private static function score(array $j, $hexValue, $dangerWeight = AIConfig::MOVE_DANGER_WEIGHT)
     {
-        return $j['offence'] + AIConfig::MOVE_LAUNCH_WEIGHT * $j['launch'] - AIConfig::MOVE_DANGER_WEIGHT * $j['danger']
-            + AIConfig::MOVE_NEXT_TURN_WEIGHT * ($j['nextOffence'] - AIConfig::MOVE_DANGER_WEIGHT * $j['nextDanger'])
+        return $j['offence'] + AIConfig::MOVE_LAUNCH_WEIGHT * $j['launch'] - $dangerWeight * $j['danger']
+            + AIConfig::MOVE_NEXT_TURN_WEIGHT * ($j['nextOffence'] - $dangerWeight * $j['nextDanger'])
             - $hexValue * (AIConfig::MOVE_CLOSING_PER_HEX * $j['closing'] + $j['shaping'])
             - $j['hazard'];
     }
@@ -146,25 +218,216 @@ class ShipDecider
     /* Every end state the ship can reach this turn: first within its thrusters' ratings, then - with up
        to MOVE_OVERTHRUST points over a rating - the end states only an overthrust reaches (stage T5b; the
        user's ruling of 2026-11-13: within ratings first, over them only where that is worth the critical
-       it invites, which judge() prices). Turns are tried shortened too (allowShortening). */
-    private static function candidates(ShipMover $mover)
+       it invites, which judge() prices). Turns are tried shortened too (allowShortening) - at a level with the skill.
+       Stage T5f-5 ($extended, Hard's skill 'extendedTurns'): plans that BEGIN an extended turn too - but never one leaving owed
+       more than next turn's engine can pay (thrustNextTurn): the page would cancel it for want of thrust, the thrust paid lost, and
+       the server's tripwire log it as a cancellation nothing forced (EXTENDED_TURNS_PLAN.md D12).
+       Stage T5f-8: the search stops at $deadline (AIConfig::cpuSeconds) with the plainest plans found so far, and sets $cut. */
+    private static function candidates(ShipMover $mover, $shorten = true, $extended = false, $deadline = null, &$cut = false)
     {
-        $plans = array();
-        $search = clone $mover;
-        foreach ($search->allowShortening()->enumerate(AIConfig::SHIP_PLANS) as $plan) $plans[self::endKey($plan)] = $plan;
-        if (AIConfig::MOVE_OVERTHRUST > 0) {
-            $over = clone $mover;
-            foreach ($over->allowShortening()->allowOverthrust(AIConfig::MOVE_OVERTHRUST)->enumerate(AIConfig::SHIP_PLANS) as $plan) {
-                $key = self::endKey($plan);
-                if (!isset($plans[$key])) $plans[$key] = $plan;
+        /* Stage T5e: a roll or pivot carried over from last turn may be STOPPED anywhere in the move (a non-gravitic hull
+           can neither turn nor slip while it rolls) - the search tries the stop. It starts none: variants() does that. */
+        $now = $mover->state();
+        $carried = function (ShipMover $m) use ($now, $extended) {
+            return $m->allowRolls($now['rolling'])->allowPivots($now['pivoting'] !== 'no')->allowExtendedTurns($extended);
+        };
+        $payable = function (array $plan) use ($mover) {
+            if ($plan['extending'] === 'no') return true;
+            foreach ($plan['rows'] as $row) {
+                if ($row['type'] !== ShipMover::EXTEND_LEFT && $row['type'] !== ShipMover::EXTEND_RIGHT) continue;
+                $owed = json_decode((string)$row['value'], true);
+                return is_array($owed) && (int)$owed['any'] + (int)$owed['rear'] + (int)$owed['side'] <= $mover->thrustNextTurn();
             }
+            return false;
+        };
+
+        $plans = array();
+        $search = $carried(clone $mover);
+        foreach ($search->allowShortening($shorten)->enumerate(AIConfig::SHIP_PLANS, $deadline) as $plan) {
+            if ($payable($plan)) $plans[self::endKey($plan)] = $plan;
+        }
+        if ($search->searchCut) {
+            $cut = true;
+            return array_values($plans);
+        }
+        if (AIConfig::MOVE_OVERTHRUST > 0) {
+            $over = $carried(clone $mover);
+            foreach ($over->allowShortening($shorten)->allowOverthrust(AIConfig::MOVE_OVERTHRUST)->enumerate(AIConfig::SHIP_PLANS, $deadline) as $plan) {
+                $key = self::endKey($plan);
+                if (!isset($plans[$key]) && $payable($plan)) $plans[$key] = $plan;
+            }
+            if ($over->searchCut) $cut = true;
         }
         return array_values($plans);
     }
 
+    //Stage T5f-8: a ship's decision budget in CPU seconds (0 = none) and how many plans next turn's terms are asked of.
+    private static function budgetSeconds()
+    {
+        return (self::$budget === null) ? AIConfig::MOVE_DECISION_SECONDS : max(0, (float)self::$budget);
+    }
+
+    private static function nextTurnCap()
+    {
+        return (self::$nextTurnPlans === null) ? AIConfig::MOVE_NEXT_TURN_PLANS : max(1, (int)self::$nextTurnPlans);
+    }
+
+    //Close a decision's $timing: its CPU seconds, kept as $lastTiming and under the level in $timings.
+    private static function timed(AIView $view, array &$timing, $started)
+    {
+        $timing['seconds'] = AIConfig::cpuSeconds() - $started;
+        self::$lastTiming = $timing;
+        self::$timings[$view->level][] = $timing;
+    }
+
     private static function endKey(array $plan)
     {
-        return $plan['position']->q . ',' . $plan['position']->r . ',' . $plan['heading'] . ',' . $plan['facing'] . ',' . $plan['speed'];
+        return $plan['position']->q . ',' . $plan['position']->r . ',' . $plan['heading'] . ',' . $plan['facing'] . ',' . $plan['speed']
+            . ',' . $plan['pivoting'] . ',' . (int)$plan['rolling'] . ',' . (isset($plan['extending']) ? $plan['extending'] : 'no');
+    }
+
+    /* Judge the plans, with everybody else where the Fire phase should find them, and score them - in TWO PASSES since stage T5f-8
+       (plan section 12: "the next-turn terms - a whole second board evaluation per end state - asked only of the end states whose
+       this-turn score leaves them within reach of the best"): this turn's terms and the board for every plan, in the search's order
+       (plainest first), then next turn's only for the MOVE_NEXT_TURN_PLANS best by this turn's score. A plan not judged whole is no
+       candidate: what comes back is the plans judged whole, by index, in the search's order (so the plainest wins a tie).
+       $clock: null, or array(this turn's deadline, next turn's) in AIConfig::cpuSeconds() - each pass judges at least one plan;
+       $counts gets 'judgedNow' and 'cut'. */
+    private static function judgeAll(AIView $view, $ship, array $plans, array $context, array &$fire, Hazards $hazards, OffsetCoordinate $start, $clock = null, array &$counts = array())
+    {
+        $cap = self::nextTurnCap();
+        $cut = false;
+        $judgedNow = 0;
+        $judged = $view->atFireTime(function () use ($view, $ship, $plans, $context, &$fire, $hazards, $start, $clock, $cap, &$cut, &$judgedNow) {
+            $now = array();
+            foreach ($plans as $index => $plan) {
+                if ($clock !== null && count($now) > 0 && AIConfig::cpuSeconds() > $clock[0]) {
+                    $cut = true;
+                    break;
+                }
+                $now[$index] = self::judgeNow($view, $ship, $plan, $context, $fire, $hazards, $start);
+                $now[$index]['score'] = self::score($now[$index], $context['hexValue'], $context['dangerWeight']);
+            }
+            $judgedNow = count($now);
+
+            uasort($now, function ($a, $b) { return $b['score'] <=> $a['score']; }); //stable: the plainest first among equals
+            $out = array();
+            foreach ($now as $index => $j) {
+                if (count($out) >= $cap) break;
+                if ($clock !== null && count($out) > 0 && AIConfig::cpuSeconds() > $clock[1]) {
+                    $cut = true;
+                    break;
+                }
+                $out[$index] = self::judgeNext($view, $ship, $plans[$index], $context, $j);
+            }
+            ksort($out);
+            return $out;
+        }, array((int)$ship->id));
+        foreach ($judged as $index => $j) $judged[$index]['score'] = self::score($j, $context['hexValue'], $context['dangerWeight']);
+        $counts['judgedNow'] = (isset($counts['judgedNow']) ? $counts['judgedNow'] : 0) + $judgedNow;
+        if ($cut) $counts['cut'] = true;
+        return $judged;
+    }
+
+    /* Stage T5e - the user's notes of 2026-11-19: pivots and rolls are rare, advanced moves. HARD tries, on the end of each of
+       its best plans (MOVE_MANOEUVRE_SEEDS, one per end hex, leaving nothing running): a pivot started and stopped the same turn
+       either way - the facing turns a step and the course holds (bringing heavy guns round, hiding a damaged side; a gravitic
+       hull then turns freely while pivoted) - an agile hull's single and double pivots, and a roll (its sides swap at the turn
+       change, it is stopped next turn). NORMAL tries only the roll, and keeps it only where it frees the turn it wants next turn
+       (turnFreed - the thruster swap). EASY tries neither. judge() prices each: the engine's -3 on this turn's fire, the thrust,
+       MOVE_COST_PIVOT / MOVE_COST_ROLL, ending out of alignment without a gravitic drive, and next turn with the sides swapped.
+       Since stage T5f the level's skill 'manoeuvres' says which: 'all' (Hard), 'swap' (Normal), 'none' (Easy). */
+    private static function variants(ShipMover $mover, array $plans, array $judged, array $context)
+    {
+        if ($context['manoeuvres'] === 'none' || (!empty($context['flight']))) return array();
+        $hard = ($context['manoeuvres'] === 'all');
+
+        uasort($judged, function ($a, $b) { return $b['score'] <=> $a['score']; });
+        $seeds = array();
+        $seedNext = array(); //each seed's next-turn offence (a roll leaves it as it is)
+        foreach (array_keys($judged) as $index) {
+            $plan = $plans[$index];
+            if ($plan['pivoting'] !== 'no' || $plan['rolling']) continue;
+            $hex = $plan['position']->q . ',' . $plan['position']->r;
+            if (isset($seeds[$hex])) continue;
+            $seeds[$hex] = $plan;
+            $seedNext[$hex] = $judged[$index]['nextOffence'];
+            if (count($seeds) >= AIConfig::MOVE_MANOEUVRE_SEEDS) break;
+        }
+
+        $tails = array();
+        if ($hard) {
+            $tails = $context['agile']
+                ? array(array(ShipMover::PIVOT_LEFT), array(ShipMover::PIVOT_RIGHT), array(ShipMover::PIVOT_LEFT, ShipMover::PIVOT_LEFT), array(ShipMover::PIVOT_RIGHT, ShipMover::PIVOT_RIGHT))
+                : array(array(ShipMover::PIVOT_LEFT, ShipMover::PIVOT_LEFT), array(ShipMover::PIVOT_RIGHT, ShipMover::PIVOT_RIGHT)); //start, then the same arrow stops it
+        }
+        $tails[] = array(ShipMover::ROLL);
+
+        $out = array();
+        foreach ($seeds as $hex => $seed) {
+            $base = self::replay($mover, $seed, array());
+            if ($base === null) continue;
+            foreach ($tails as $tail) {
+                $grown = self::replay($mover, $seed, $tail);
+                if ($grown === null) continue;
+                $plan = $grown->plan();
+                if ($plan['pivoting'] !== 'no') continue; //never leave a pivot running (a non-agile start the same arrow could not stop)
+                $plan['seed'] = self::endKey($seed);
+                /* A pivot pays for itself THIS turn: next turn's terms - everybody flying straight on - over-credit a facing turned
+                   while the course holds (an aligned ship would simply turn next turn instead). In self-play a fresh Tethys and an
+                   agile Halik pivoted on turn 1 with nothing in reach for them (games 4788, 4795). So next turn is judged with the
+                   seed's facing. A roll's next turn is its whole point (the sides swap then) and keeps its own. */
+                if ($tail !== array(ShipMover::ROLL)) $plan['nextFacing'] = (int)$seed['facing'];
+                /* A roll is judged on PROTECTION (its next-turn danger, the sides swapped) and the thruster swap - never on next
+                   turn's fire from mirrored arcs, which the straight-on projection over-credits as it did a pivot's turned facing
+                   (self-play: fresh Hyperions rolled on turns 1-2). Next turn's fire stays its seed's. */
+                else $plan['nextOffence'] = $seedNext[$hex];
+                $plan['freed'] = ($tail === array(ShipMover::ROLL)) ? self::turnFreed($base, $grown, $plan, $context) : 0;
+                if (!$hard && $plan['freed'] <= 0) continue; //Normal rolls only to swap its side thrusters
+                $out[] = $plan;
+            }
+        }
+        return $out;
+    }
+
+    //$plan's orders again on a copy of $mover, then $tail: the copy, complete - or null when an order cannot be given.
+    private static function replay(ShipMover $mover, array $plan, array $tail)
+    {
+        $copy = clone $mover;
+        foreach ($plan['actions'] as $i => $action) {
+            if (!$copy->apply($action, isset($plan['extras'][$i]) ? $plan['extras'][$i] : 0)) return null;
+        }
+        foreach ($tail as $action) {
+            if (!$copy->apply($action)) return null;
+        }
+        return $copy->isComplete() ? $copy : null;
+    }
+
+    /* The thruster swap (stage T5e, the user's "most common use after hiding damage"): the side the ship wants to turn to next
+       turn - its quarry's side of its heading at the end of the move, more than 30 degrees off - cannot be paid for by its side
+       thrusters as they are, and can once the roll has swapped them (the roll completes at the turn change; it is stopped first
+       thing). MOVE_VALUE_TURN_FREED, or 0. */
+    private static function turnFreed(ShipMover $without, ShipMover $with, array $plan, array $context)
+    {
+        $right = self::wantedSide($plan, $context['quarry']);
+        if ($right === null) return 0;
+        if ($without->turnPayableNextTurn($right, (int)$plan['speed'])) return 0;
+        return $with->turnPayableNextTurn($right, (int)$plan['speed']) ? AIConfig::MOVE_VALUE_TURN_FREED : 0;
+    }
+
+    //true = starboard, false = port, null = no turn wanted: the nearest quarry within 30 degrees of the heading, dead astern, or none.
+    private static function wantedSide(array $plan, array $quarry)
+    {
+        $from = Mathlib::hexCoToPixel($plan['position']);
+        $nearest = null;
+        foreach ($quarry as $unit) {
+            $d = $plan['position']->distanceTo($unit->getHexPos());
+            if ($nearest === null || $d < $nearest[0]) $nearest = array($d, $unit);
+        }
+        if ($nearest === null || $nearest[0] == 0) return null;
+        $bearing = Mathlib::addToDirection(Mathlib::getCompassHeadingOfPoint($from, $nearest[1]->getCoPos()), -60 * (int)$plan['heading']);
+        if ($bearing <= 30 || $bearing >= 330 || abs($bearing - 180) < 1e-6) return null;
+        return $bearing < 180;
     }
 
     /* What a plan's overthrust risks, in hexes: for each thruster it takes over its rating, the end-of-turn
@@ -213,7 +476,8 @@ class ShipDecider
             if (!$now && !$next) continue;
             $slow = (int)$weapon->getLoadingTime() > 1;
             $key = get_class($weapon) . '|' . $weapon->firingMode . '|' . $weapon->startArc . '|' . $weapon->endArc . '|' . (int)$now . (int)$next . '|' . count($weapon->criticals);
-            if (!isset($guns[$key])) $guns[$key] = array('weapon' => $weapon, 'count' => 0, 'now' => $now, 'next' => $next, 'slow' => $slow);
+            if (!isset($guns[$key])) $guns[$key] = array('weapon' => $weapon, 'count' => 0, 'now' => $now, 'next' => $next, 'slow' => $slow,
+                'heavy' => FireDecider::isHeavy($weapon)); //stage T5f-3: Hard's fleet focus draws the heavy guns
             $guns[$key]['count']++;
         }
 
@@ -258,8 +522,11 @@ class ShipDecider
                     $any[$base]['count']++;
                 }
             }
+            $last = $enemy->getLastMovement();
             $enemies[] = array('unit' => $enemy, 'moved' => $moved, 'arced' => array_values($arced), 'any' => array_values($any),
-                'health' => $view->healthLeft($enemy), 'worth' => $view->value($enemy) / $view->healthLeft($enemy));
+                'health' => $view->healthLeft($enemy), 'worth' => $view->value($enemy) / $view->healthLeft($enemy),
+                //where it stands before it moves, and how far it could go towards the ship (Hard's one-ply reply, stage T5f-3)
+                'start' => $enemy->getHexPos(), 'reach' => $last ? max(0, (int)$last->speed) + 1 : 1);
         }
 
         //What the ship closes on: the enemy's ships - a capital ship does not chase fighters - or its flights when that is all there is.
@@ -288,28 +555,92 @@ class ShipDecider
             }
         }
 
+        $now = $mover->state(); //before any order: a pivot or roll carried over from last turn (stage T5e)
         return array('guns' => array_values($guns), 'launchers' => array_values($launchers), 'enemies' => $enemies, 'friends' => $friends, 'quarry' => $quarry,
             'health' => $view->healthLeft($ship), 'worth' => $view->value($ship) / $view->healthLeft($ship), 'comfort' => $comfort,
-            'turnable' => $mover->fastestTurnable(), 'safe' => $mover->safeSpeed(AIConfig::MOVE_SAFE_TURN_SHARE),
-            'hexValue' => max(1, $view->value($ship)) * AIConfig::MOVE_HEX_VALUE);
+            //the level's skills (stage T5f, AIConfig::SKILLS) - and Hard's focus target for the fleet's heavy guns (MoveDecider)
+            'manoeuvres' => $view->skill('manoeuvres'), 'unmovedDanger' => (float)$view->skill('unmovedDanger'),
+            'focus' => $view->focus, 'focusBonus' => (float)$view->skill('fleetFocus'), 'bestReply' => (bool)$view->skill('bestReply'),
+            'dangerWeight' => (float)$view->skill('shipDanger'),
+            'overspeed' => AIConfig::MOVE_COST_OVERSPEED * (float)$view->skill('overspeed'),
+            //judged without this turn's engine boost (Hard's power, stage T5f-4): next turn may not have it
+            'turnable' => $mover->fastestTurnable(false), 'safe' => $mover->safeSpeed(AIConfig::MOVE_SAFE_TURN_SHARE, false),
+            'hexValue' => max(1, $view->value($ship)) * AIConfig::MOVE_HEX_VALUE, 'value' => max(1, $view->value($ship)),
+            'fullValue' => max(1, (int)$ship->pointCost + (int)$ship->pointCostEnh), //AIView::value with all its combat value left
+            'agile' => !empty($ship->agile), 'gravitic' => !empty($ship->gravitic),
+            'pivotingAtStart' => $now['pivoting'], 'rollingAtStart' => $now['rolling'],
+            'alignedAtStart' => ($now['facing'] == $now['heading'] || $now['facing'] == Mathlib::addToHexFacing($now['heading'], 3)));
     }
 
-    /* Everything one plan is scored by. The ship is put at the plan's end for the asking, and taken
-       back. $fire caches the terms that depend only on the end hex and facing. */
-    private static function judge(AIView $view, $ship, array $plan, array $context, array &$fire, Hazards $hazards, OffsetCoordinate $start)
+    /* A plan's pivots and rolls this turn (stage T5e), read off its rows: how many pivot / roll rows (the page's forced pivot is
+       none - it is not an order), and how many of them START one rather than stop one carried over - a non-agile hull starts
+       at most one of each; an agile hull's every pivot and roll is a whole one. */
+    private static function manoeuvresOf(array $plan, array $context)
     {
-        $ship->movement[] = new MovementOrder(-1, 'move', $plan['position'], 0, 0, $plan['speed'], $plan['heading'], $plan['facing'], false, $view->turn, 0, 0);
+        $pivots = 0;
+        $rolls = 0;
+        foreach ($plan['rows'] as $row) {
+            if (!empty($row['forced'])) continue;
+            if ($row['type'] === 'pivotleft' || $row['type'] === 'pivotright') $pivots++;
+            if ($row['type'] === 'roll') $rolls++;
+        }
+        $pivotStarts = $context['agile'] ? $pivots : (($context['pivotingAtStart'] === 'no') ? min(1, $pivots) : 0);
+        $rollStarts = $context['agile'] ? $rolls : ($context['rollingAtStart'] ? 0 : min(1, $rolls));
+        return array('pivots' => $pivots, 'rolls' => $rolls, 'pivotStarts' => $pivotStarts, 'rollStarts' => $rollStarts);
+    }
+
+    //A movement row at the plan's end, standing in for one of its manoeuvres while the engine is asked about its fire.
+    private static function marker($type, $last, $turn, $preturn = false)
+    {
+        return new MovementOrder(-1, $type, new OffsetCoordinate($last->position), 0, 0, (int)$last->speed, (int)$last->heading, (int)$last->facing, $preturn, $turn, 0, 0);
+    }
+
+    /* For next turn's terms after a roll was started (stage T5e): the ship as it will be once the roll completed at the turn
+       change - its sides swapped (Movement::isRolled: an isRolled row in its latest turn; a row of a later turn ends being
+       rolled; an agile hull's every roll row swaps them). Stood at the end of whatever the ship's last row is. */
+    private static function sidesSwapped($ship, $turn, $agile)
+    {
+        $last = $ship->getLastMovement();
+        if ($agile) return self::marker('roll', $last, $turn + 1);
+        if (Movement::isRolled($ship)) return self::marker('move', $last, $turn + 1);
+        return self::marker('isRolled', $last, $turn, true);
+    }
+
+    /* Stage T5f-5: an extended turn begun this turn is completed first thing next turn, in the hex it ends in - next turn starts
+       turned, heading and facing (and so does its straight continuation on the board). The step it turns by, or 0. */
+    private static function extendedStep(array $plan)
+    {
+        $extending = isset($plan['extending']) ? $plan['extending'] : 'no';
+        if ($extending === 'no') return 0;
+        return ($extending === 'right') ? 1 : -1;
+    }
+
+    /* Everything one plan is scored by THIS turn (the first pass of judgeAll): its fire both ways, the board, and the shaping terms
+       - next turn's terms 0 and the closing this turn's distance alone, until judgeNext() adds them. The ship is put at the plan's
+       end for the asking, and taken back. $fire caches the terms that depend only on the end hex and facing. */
+    private static function judgeNow(AIView $view, $ship, array $plan, array $context, array &$fire, Hazards $hazards, OffsetCoordinate $start)
+    {
+        $m = self::manoeuvresOf($plan, $context);
+        $end = new MovementOrder(-1, 'move', $plan['position'], 0, 0, $plan['speed'], $plan['heading'], $plan['facing'], false, $view->turn, 0, 0);
+        $ship->movement[] = $end;
+        $markers = 0;
         try {
-            $key = $plan['position']->q . ',' . $plan['position']->r . ',' . $plan['facing'];
+            /* This turn's fire with the plan's pivots and rolls on the shot (stage T5e): a pivot this turn, or a roll at fire
+               time, takes 3 off every shot of the ship - the engine's own rule (Weapon::calculateHitBase), its rows stood in. */
+            for ($i = 0; $i < $m['pivots']; $i++, $markers++) $ship->movement[] = self::marker('pivotright', $ship->getLastMovement(), $view->turn);
+            for ($i = 0; $i < $m['rolls']; $i++, $markers++) $ship->movement[] = self::marker('roll', $ship->getLastMovement(), $view->turn);
+            $key = $plan['position']->q . ',' . $plan['position']->r . ',' . $plan['facing'] . '|' . $m['pivots'] . '|' . $m['rolls'];
             if (!isset($fire[$key])) $fire[$key] = self::fireTerms($view, $ship, $context);
             $terms = $fire[$key];
+            for (; $markers > 0; $markers--) array_pop($ship->movement);
 
-            $next = $view->ahead(function () use ($view, $ship, $context, $terms) {
-                return self::nextTerms($view, $ship, $context, $terms['firedSlow']);
-            });
-
-            $board = $hazards->judge($ship, $start, $plan, $context['worth']);
+            //the board, next turn's straight continuation included - turned by an extended turn begun now (stage T5f-5)
+            $nextPlan = $plan;
+            $step = self::extendedStep($plan);
+            if ($step != 0) $nextPlan['heading'] = Mathlib::addToHexFacing((int)$plan['heading'], $step);
+            $board = $hazards->judge($ship, $start, $nextPlan, $context['worth']);
         } finally {
+            for (; $markers > 0; $markers--) array_pop($ship->movement);
             array_pop($ship->movement);
         }
 
@@ -318,19 +649,72 @@ class ShipDecider
         $speed = (int)$plan['speed'];
         if ($speed < AIConfig::MOVE_MIN_SPEED) $shaping += AIConfig::MOVE_COST_SLOW * (AIConfig::MOVE_MIN_SPEED - $speed);
         if ($speed > $context['comfort']) $shaping += AIConfig::MOVE_COST_FAST * ($speed - $context['comfort']);
-        if ($speed > $context['safe']) $shaping += AIConfig::MOVE_COST_OVERSPEED * ($speed - $context['safe']);
+        if ($speed > $context['safe']) $shaping += $context['overspeed'] * ($speed - $context['safe']);
         if ($speed > $context['turnable']) $shaping += AIConfig::MOVE_COST_UNTURNABLE * ($speed - $context['turnable']);
         foreach ($plan['actions'] as $action) {
             if ($action === ShipMover::ACCEL || $action === ShipMover::DECEL) $shaping += AIConfig::MOVE_COST_SPEED_CHANGE;
             else if ($action === ShipMover::SLIP_LEFT || $action === ShipMover::SLIP_RIGHT) $shaping += AIConfig::MOVE_COST_SLIP;
+            else if ($action === ShipMover::EXTEND_LEFT || $action === ShipMover::EXTEND_RIGHT) $shaping += AIConfig::MOVE_COST_TURN + AIConfig::MOVE_COST_EXTENDED_TURN;
             else if ($action !== ShipMover::MOVE) $shaping += AIConfig::MOVE_COST_TURN;
         }
         if (!empty($plan['overthrust'])) $shaping += self::overthrustRisk($ship, $plan['overthrust']);
 
+        /* Pivots and rolls (stage T5e): each started (a non-agile pivot's start and its stop), a pivot or roll carried over and
+           left running, ending out of alignment without a gravitic drive - a ship expected to die this turn hardly minds (the
+           "desperate" swing of the guns) - and the thruster swap a roll buys (variants()). */
+        $shaping += AIConfig::MOVE_COST_PIVOT * ($context['agile'] ? $m['pivotStarts'] : 2 * $m['pivotStarts']);
+        $shaping += AIConfig::MOVE_COST_ROLL * $m['rollStarts'];
+        if (($context['pivotingAtStart'] !== 'no' && $plan['pivoting'] !== 'no') || ($context['rollingAtStart'] && $plan['rolling'])) $shaping += AIConfig::MOVE_COST_LEFT_RUNNING;
+        if (!$context['gravitic'] && $plan['facing'] != $plan['heading'] && $plan['facing'] != Mathlib::addToHexFacing($plan['heading'], 3)) {
+            /* A pivot started this turn (the ship began its move aligned): times its survival - the share of the ship expected
+               to outlast this turn's fire, but never below the share of its combat value it still has (the danger term runs high,
+               section 10.7; in self-play a fresh Tethys read "doomed" on turn 1 at 13 hexes: "desperate" needs real damage). A
+               ship that began its move misaligned pays it whole: realigning comes first. */
+            $survival = $context['alignedAtStart'] ? max(1 - min(1, $terms['danger'] / $context['value']), $context['value'] / $context['fullValue']) : 1;
+            $shaping += AIConfig::MOVE_COST_MISALIGNED * $survival;
+        }
+        if (!empty($plan['freed'])) $shaping -= $plan['freed'];
+
         return array('offence' => $terms['offence'], 'launch' => $terms['launch'], 'danger' => $terms['danger'],
-            'nextOffence' => $next['offence'], 'nextDanger' => $next['danger'], 'shaping' => $shaping,
-            'nearest' => $terms['nearest'], 'closing' => $terms['nearest'] + AIConfig::MOVE_CLOSING_NEXT_TURN * $next['nearest'],
-            'hazard' => $board['total'], 'board' => $board);
+            'nextOffence' => 0, 'nextDanger' => 0, 'shaping' => $shaping,
+            'nearest' => $terms['nearest'], 'closing' => $terms['nearest'],
+            'hazard' => $board['total'], 'board' => $board,
+            //for judgeNext(): the slow guns this turn's fire used, and whether a roll begun now swaps the sides by next turn
+            'firedSlow' => $terms['firedSlow'], 'swap' => ($m['rollStarts'] % 2) == 1);
+    }
+
+    /* The second pass of judgeAll: next turn's terms for a plan judgeNow() judged - everybody a turn on, flying straight on
+       (AIView::ahead): no pivot or roll on the shot (the bot stops a roll first thing), the sides as a roll begun now leaves them,
+       a pivot variant's facing as its seed's (variants(): a pivot pays for itself this turn), an extended turn begun now completed
+       (stage T5f-5). Returns $j whole. */
+    private static function judgeNext(AIView $view, $ship, array $plan, array $context, array $j)
+    {
+        $end = new MovementOrder(-1, 'move', $plan['position'], 0, 0, $plan['speed'], $plan['heading'], $plan['facing'], false, $view->turn, 0, 0);
+        if (isset($plan['nextFacing'])) $end->facing = (int)$plan['nextFacing'];
+        $step = self::extendedStep($plan);
+        if ($step != 0) {
+            $end->heading = Mathlib::addToHexFacing((int)$plan['heading'], $step);
+            $end->facing = Mathlib::addToHexFacing((int)$plan['facing'], $step);
+        }
+        $ship->movement[] = $end;
+        try {
+            $next = $view->ahead(function () use ($view, $ship, $context, $j) {
+                if ($j['swap']) $ship->movement[] = self::sidesSwapped($ship, $view->turn, $context['agile']);
+                try {
+                    return self::nextTerms($view, $ship, $context, $j['firedSlow']);
+                } finally {
+                    if ($j['swap']) array_pop($ship->movement);
+                }
+            });
+        } finally {
+            array_pop($ship->movement);
+        }
+        if (isset($plan['nextOffence'])) $next['offence'] = $plan['nextOffence']; //a roll: next turn's fire is its seed's (variants())
+
+        $j['nextOffence'] = $next['offence'];
+        $j['nextDanger'] = $next['danger'];
+        $j['closing'] = $j['nearest'] + AIConfig::MOVE_CLOSING_NEXT_TURN * $next['nearest'];
+        return $j;
     }
 
     /* This turn's fire both ways, next turn's launches, and the distances, with the ship at the end
@@ -344,7 +728,8 @@ class ShipDecider
             if (!$gun['now']) continue;
             foreach ($context['enemies'] as $e => $enemy) {
                 if (!$gun['weapon']->ignoresLoS && !$clear[$e]) continue;
-                $d = $view->estimate($ship, $gun['weapon'], $enemy['unit'], true) * $gun['count'] * ($enemy['moved'] ? 1 : AIConfig::MOVE_UNMOVED_OFFENCE);
+                $d = $view->estimate($ship, $gun['weapon'], $enemy['unit'], true) * $gun['count'] * ($enemy['moved'] ? 1 : AIConfig::MOVE_UNMOVED_OFFENCE)
+                    * self::focusFactor($gun, $enemy, $context);
                 if ($d > 0) $damage[$index][$e] = $d;
             }
             if (isset($damage[$index]) && $gun['slow']) $firedSlow[$index] = true;
@@ -358,21 +743,53 @@ class ShipDecider
             }
         }
 
+        //each target's health from where the ship stands: the section its hits go through (stage T5f - Normal and Hard)
+        $targets = self::targetsFrom($view, $ship, $context['enemies']);
+
         //The enemy's fire: from its arcs once it has moved; every gun, and towards the ship's worst side, while it has yet to.
         $inward = self::lines($view, $ship, $context['enemies'], true);
         $incoming = array();
         foreach ($context['enemies'] as $e => $enemy) {
-            $d = 0;
-            foreach ($enemy['moved'] ? $enemy['arced'] : $enemy['any'] as $kind) {
-                if (!$kind['now'] || (!$inward[$e] && !$kind['weapon']->ignoresLoS)) continue;
-                $d += $view->estimate($enemy['unit'], $kind['weapon'], $ship, $enemy['moved']) * $kind['count'];
+            $d = self::incoming($view, $ship, $enemy, $inward[$e]);
+            /* The one-ply reply, BOTH SIDES (plan 5.8, Hard: "assume each enemy's best reply"; the skill 'bestReply'): an enemy yet
+               to move sees where the ship ended and either flies on or closes as near as its speed and a point allow (replyHex).
+               It takes the one worse for the ship - the ship's fire at it against its fire at the ship, both priced where it would
+               end (worseReply) - and the ship's offence at it and danger from it are then that one's. Stage T5f-3 priced only the
+               enemy's fire from the closer hex, so Hard stood off and lost; this version (T5f-6) prices what closing costs it too. */
+            if (!$enemy['moved'] && $context['bestReply'] && isset($enemy['start'])) {
+                $closer = self::replyHex($enemy, $ship->getHexPos());
+                if ($closer !== null) {
+                    $last = $enemy['unit']->getLastMovement();
+                    $enemy['unit']->movement[] = new MovementOrder(-1, 'move', $closer, 0, 0, (int)$last->speed, (int)$last->heading, (int)$last->facing, false, $view->turn, 0, 0);
+                    $atReply = array();
+                    try {
+                        $dReply = self::incoming($view, $ship, $enemy, $view->clearLine($enemy['unit'], $ship));
+                        $clear = $view->clearLine($ship, $enemy['unit']);
+                        foreach ($context['guns'] as $index => $gun) {
+                            if (!$gun['now'] || (!$gun['weapon']->ignoresLoS && !$clear)) continue;
+                            $x = $view->estimate($ship, $gun['weapon'], $enemy['unit'], true) * $gun['count'] * AIConfig::MOVE_UNMOVED_OFFENCE * self::focusFactor($gun, $enemy, $context);
+                            if ($x > 0) $atReply[$index] = $x;
+                        }
+                    } finally {
+                        array_pop($enemy['unit']->movement);
+                    }
+                    $offStraight = 0;
+                    foreach ($damage as $row) $offStraight += isset($row[$e]) ? $row[$e] : 0;
+                    $exposure = $view->exposureUnmoved($ship, $enemy['unit']) * $context['unmovedDanger'];
+                    if (self::worseReply(array('offence' => $offStraight, 'danger' => $d * $exposure), array('offence' => array_sum($atReply), 'danger' => $dReply * $exposure),
+                        $targets[$e]['worth'], $context['worth'], $context['dangerWeight'])) {
+                        foreach (array_keys($damage) as $index) unset($damage[$index][$e]);
+                        foreach ($atReply as $index => $x) $damage[$index][$e] = $x;
+                        $d = $dReply;
+                    }
+                }
             }
             if ($d <= 0) continue;
             if ($enemy['moved']) $incoming[] = array($d, $view->exposure($ship, $enemy['unit']));
-            else $incoming[] = array($d * AIConfig::MOVE_UNMOVED_DANGER, $view->exposureUnmoved($ship, $enemy['unit']));
+            else $incoming[] = array($d * $context['unmovedDanger'], $view->exposureUnmoved($ship, $enemy['unit']));
         }
 
-        return array('offence' => self::removed($damage, $context['enemies']), 'launch' => self::removed($launches, $context['enemies']),
+        return array('offence' => self::removed($damage, $targets), 'launch' => self::removed($launches, $targets),
             'danger' => self::lost($incoming, $context['health'], $context['worth']), 'firedSlow' => $firedSlow,
             'nearest' => self::nearest($ship, $context['quarry']), 'friend' => self::nearest($ship, $context['friends']));
     }
@@ -456,7 +873,7 @@ class ShipDecider
             if (!$gun['next'] || isset($firedSlow[$index])) continue;
             foreach ($context['enemies'] as $e => $enemy) {
                 if (!$gun['weapon']->ignoresLoS && !$clear[$e]) continue;
-                $d = $view->estimate($ship, $gun['weapon'], $enemy['unit'], true) * $gun['count'] * AIConfig::MOVE_UNMOVED_OFFENCE;
+                $d = $view->estimate($ship, $gun['weapon'], $enemy['unit'], true) * $gun['count'] * AIConfig::MOVE_UNMOVED_OFFENCE * self::focusFactor($gun, $enemy, $context);
                 if ($d > 0) $damage[$index][$e] = $d;
             }
         }
@@ -472,7 +889,70 @@ class ShipDecider
             if ($d > 0) $incoming[] = array($d * AIConfig::MOVE_UNMOVED_DANGER_NEXT, $view->exposure($ship, $enemy['unit']));
         }
 
-        return array('offence' => self::removed($damage, $context['enemies']), 'danger' => self::lost($incoming, $context['health'], $context['worth']),
+        return array('offence' => self::removed($damage, self::targetsFrom($view, $ship, $context['enemies'])), 'danger' => self::lost($incoming, $context['health'], $context['worth']),
             'nearest' => self::nearest($ship, $context['quarry']));
+    }
+
+    //What one enemy's guns loaded now should do to the ship this turn: from their arcs once it has moved, every gun while it has yet to.
+    private static function incoming(AIView $view, $ship, array $enemy, $clear)
+    {
+        $d = 0;
+        foreach ($enemy['moved'] ? $enemy['arced'] : $enemy['any'] as $kind) {
+            if (!$kind['now'] || (!$clear && !$kind['weapon']->ignoresLoS)) continue;
+            $d += $view->estimate($enemy['unit'], $kind['weapon'], $ship, $enemy['moved']) * $kind['count'];
+        }
+        return $d;
+    }
+
+    /* The one-ply reply's choice (stage T5f-6): is $reply worse for the ship than $straight? Each array('offence' => the ship's
+       expected damage at the enemy, 'danger' => the enemy's at the ship, its exposure and weight in) - their net for the ship in
+       value: the ship's fire times what a point of the enemy is worth, less its losses times its own worth and the danger weight.
+       The enemy flies on unless closing is strictly worse for the ship. */
+    private static function worseReply(array $straight, array $reply, $worthEnemy, $worthShip, $dangerWeight)
+    {
+        $net = function (array $option) use ($worthEnemy, $worthShip, $dangerWeight) {
+            return $option['offence'] * $worthEnemy - $dangerWeight * $option['danger'] * $worthShip;
+        };
+        return $net($reply) < $net($straight);
+    }
+
+    /* Where an enemy yet to move would end to shoot at $end best, for the one-ply reply: from where it starts, $enemy['reach']
+       hexes towards $end - its speed and a point it could add - stopping a hex short. Null when that is no nearer than flying
+       straight on takes it. */
+    private static function replyHex(array $enemy, OffsetCoordinate $end)
+    {
+        $at = $enemy['start'];
+        for ($step = 0; $step < $enemy['reach'] && $at->distanceTo($end) > 1; $step++) {
+            $best = null;
+            for ($direction = 0; $direction < 6; $direction++) {
+                $n = $at->moveToDirection($direction);
+                if ($best === null || $n->distanceTo($end) < $best->distanceTo($end)) $best = $n;
+            }
+            $at = $best;
+        }
+        return ($at->distanceTo($end) < $enemy['unit']->getHexPos()->distanceTo($end)) ? $at : null;
+    }
+
+    /* HARD's fleet focus (stage T5f-3, the skill 'fleetFocus'): a heavy gun's fire at the target MoveDecider chose for the
+       fleet counts 1 + the skill - so the fleet's ships each move to bring their heavy guns on the same ship. 1 otherwise. */
+    private static function focusFactor(array $gun, array $enemy, array $context)
+    {
+        if ($context['focusBonus'] <= 0 || $context['focus'] === null || empty($gun['heavy'])) return 1.0;
+        return ((int)$enemy['unit']->id === (int)$context['focus']) ? 1 + $context['focusBonus'] : 1.0;
+    }
+
+    /* The enemies as targets of fire from where $shooter stands now (stage T5f, the user's ruling on game 4774): each one's
+       health and worth from that side - AIView::healthLeft with the shooter, the section its hits go through - at a level
+       with the skill 'sectionHealth'. Any weight already in an enemy's worth (FlightDecider's interception weight) is kept.
+       Without the skill, as they are. FlightDecider asks it too. */
+    public static function targetsFrom(AIView $view, $shooter, array $enemies)
+    {
+        if (!$view->skill('sectionHealth')) return $enemies;
+        foreach ($enemies as $e => $enemy) {
+            $health = $view->healthLeft($enemy['unit'], $shooter);
+            $enemies[$e]['worth'] = $enemy['worth'] * $enemy['health'] / $health;
+            $enemies[$e]['health'] = $health;
+        }
+        return $enemies;
     }
 }

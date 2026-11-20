@@ -35,17 +35,22 @@
  * last, with the Frazi out of its reach, fled from two G'Quans it could have fired on from 2-5 hexes
  * (its danger priced every G'Quan gun whatever its arc).
  *
+ * LEVELS (stage T5f; the user's notes on game 4774): what the flight's own losses count for against the damage it deals
+ * (the skill 'flightDanger' - Easy bold, Normal warier, Hard warier still), Hard pricing every jinking level on its best
+ * places ('jink' = 'any': jinking takes the same 5% off both sides, so the trade turns where one side's chances run out
+ * first), Easy's score noise, and each target's health from the flight's side (ShipDecider::targetsFrom).
+ *
  * NOT YET: pivots and combat pivots, docking and launching (the bot's flights start on the map),
- * Fighter Missions, flights working together, levels (stage T8).
+ * Fighter Missions, the search for the hexes the enemy covers least (T5f-2), flights working together (T5f-3).
  */
 class FlightDecider
 {
     //What the last orders() did, for tac_ai_log: missions given, flights jinking.
-    public static $last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0);
+    public static $last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0, 'searched' => 0, 'found' => 0);
 
     public static function reset()
     {
-        self::$last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0);
+        self::$last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0, 'searched' => 0, 'found' => 0);
     }
 
     //For the harness and scratch checks only: set to an array and rows() appends its six best places, terms and all.
@@ -61,6 +66,9 @@ class FlightDecider
         $context = self::context($view, $flight);
         $start = $flight->getHexPos();
 
+        //Stage T5f-2: the places around the targets the enemy's guns cover least, which the plainest-first search never reaches.
+        foreach (self::coverageSearch($view, $mover, $flight, $plans, $context, $hazards, $start) as $plan) $plans[] = $plan;
+
         /* One estimate per place and facing: that is all fire and danger depend on - and per jinking level. The most a
            place allows is what the plan to it that leaves most thrust can buy. */
         $groups = array();
@@ -74,11 +82,13 @@ class FlightDecider
             $jinkable[$key] = array($pick, self::jinkRoom($mover, $plans[$pick]));
         }
 
+        //Each place, as it is and jinking all the thrust allows: array of jinking levels => its terms.
         $judged = $view->atFireTime(function () use ($view, $flight, $plans, $groups, $jinkable, $context, $hazards, $start) {
             $out = array();
             foreach ($groups as $key => $indexes) {
-                $out[$key] = array(self::judge($view, $flight, $plans[$indexes[0]], 0, $context, $hazards, $start));
-                if ($jinkable[$key][1] > 0) $out[$key][] = self::judge($view, $flight, $plans[$jinkable[$key][0]], $jinkable[$key][1], $context, $hazards, $start);
+                $out[$key] = array(0 => self::judge($view, $flight, $plans[$indexes[0]], 0, $context, $hazards, $start));
+                $room = $jinkable[$key][1];
+                if ($room > 0) $out[$key][$room] = self::judge($view, $flight, $plans[$jinkable[$key][0]], $room, $context, $hazards, $start);
             }
             return $out;
         }, array((int)$flight->id));
@@ -91,17 +101,44 @@ class FlightDecider
         $farOff = ($context['nearest'] > 2 * self::reach($plans, $context['guns']));
         self::$last[!$inReach && $farOff ? 'escort' : $context['mission']]++;
 
+        $score = function (array $j) use ($context, $inReach, $farOff) {
+            $s = $j['offence'] - $context['dangerWeight'] * $j['danger'] - $j['hazard'] - $context['support'] * $j['apart'];
+            if (!$inReach) $s -= $farOff ? AIConfig::FLIGHT_TETHER_PER_HEX * $j['beyondFleet'] : AIConfig::FLIGHT_CLOSING_PER_HEX * $j['short'];
+            return $s;
+        };
+
+        /* HARD jinks at whatever level pays (stage T5f, the user's ruling on game 4774: "balance having reasonable hit chances
+           vs reducing chances of being hit to near 0" - there, 3 hexes off a CCEW ship, jinking 4-6). Jinking takes the same
+           5% off both sides' chances, so the trade turns only where one side's chances run out first: every level between
+           none and the most the thrust allows is priced, on the places that already score best (FLIGHT_JINK_PLACES). */
+        if ($view->skill('jink') === 'any') {
+            $top = array();
+            foreach ($judged as $key => $variants) {
+                $top[$key] = max(array_map($score, $variants));
+            }
+            arsort($top);
+            $view->atFireTime(function () use ($view, $flight, $plans, $jinkable, $context, $hazards, $start, &$judged, $top) {
+                foreach (array_slice(array_keys($top), 0, AIConfig::FLIGHT_JINK_PLACES) as $key) {
+                    for ($level = 1; $level < $jinkable[$key][1]; $level++) $judged[$key][$level] = self::judge($view, $flight, $plans[$jinkable[$key][0]], $level, $context, $hazards, $start);
+                }
+            }, array((int)$flight->id));
+        }
+
+        /* Easy's score noise (stage T5f, plan 5.8): each place judged a little better or worse than it is, a draw fixed by the
+           seat's seed - in hexes of the flight's own value, as a ship's. */
+        $noise = (float)$view->skill('noise') * AIConfig::MOVE_HEX_VALUE * $view->value($flight);
+
         $best = null;
         $bestScore = null;
         $scores = array();
         foreach ($judged as $key => $variants) {
-            foreach ($variants as $v => $j) {
-                $score = $j['offence'] - AIConfig::FLIGHT_DANGER_WEIGHT * $j['danger'] - $j['hazard'];
-                if (!$inReach) $score -= $farOff ? AIConfig::FLIGHT_TETHER_PER_HEX * $j['beyondFleet'] : AIConfig::FLIGHT_CLOSING_PER_HEX * $j['short'];
-                $scores[$key . ($v > 0 ? ' jink ' . $jinkable[$key][1] : '')] = array($score, $j);
-                if ($bestScore === null || $score > $bestScore) {
-                    $bestScore = $score;
-                    $best = array($key, $v);
+            foreach ($variants as $levels => $j) {
+                $s = $score($j);
+                $scores[$key . ($levels > 0 ? ' jink ' . $levels : '')] = array($s, $j);
+                if ($noise > 0) $s += $noise * $view->noise('flight|' . $flight->id . '|' . $key . '|' . $levels);
+                if ($bestScore === null || $s > $bestScore) {
+                    $bestScore = $s;
+                    $best = array($key, $levels);
                 }
             }
         }
@@ -113,15 +150,103 @@ class FlightDecider
         }
 
         //The plan to that place: the plainest, or - when it jinks - the one leaving most thrust.
-        list($key, $v) = $best;
-        $jink = ($v > 0);
+        list($key, $levels) = $best;
+        $jink = ($levels > 0);
         $pick = $jink ? $jinkable[$key][0] : $groups[$key][0];
 
         $plotted = self::replay($mover, $plans[$pick]);
         if ($plotted === null) return MoveDecider::choose($mover, $hazards->blocked, $hazards->bounds); //cannot happen: the plan was found this way
-        if ($jink && $plotted->jinkLevels($jinkable[$key][1]) > 0) self::$last['jinking']++;
+        if ($jink && $plotted->jinkLevels($levels) > 0) self::$last['jinking']++;
 
         return $plotted->rows();
+    }
+
+    /* THE COVERAGE SEARCH (stage T5f-2; the user's note on game 4774: "Hard fighters could also find hexes where there is little
+       or no light weapon coverage from the enemy and try to position themselves there. Normal mode could do a simpler search
+       for this positioning too"). The plainest-first search reaches only the near-straight cone of a fast flight's places (133
+       of the ~550 hexes a speed-9 Aurora can end in). So every hex within FLIGHT_COVERAGE_RANGE of a target the flight could
+       reach, facing that target (a flight's guns bear forward), is judged as if the flight stood there - the real fire both
+       ways, the enemy's arcs where it has moved - and the best of those the search did not reach (the level's skill
+       'coverageGoals': Normal a few, Hard more, Easy none) are asked of ShipMover::enumerateToward. Returns the plans found;
+       rows() judges them again with their real paths, among all the others. */
+    private static function coverageSearch(AIView $view, ShipMover $mover, $flight, array $plans, array $context, Hazards $hazards, OffsetCoordinate $start)
+    {
+        $wanted = (int)$view->skill('coverageGoals');
+        if ($wanted <= 0 || count($context['guns']) == 0) return array();
+
+        $reached = array();
+        $speed = 0;
+        foreach ($plans as $plan) {
+            $reached[$plan['position']->q . ',' . $plan['position']->r . ',' . $plan['facing']] = true;
+            $speed = max($speed, (int)$plan['speed']);
+        }
+        $last = $flight->getLastMovement();
+        $now = $last ? (int)$last->speed : $speed;
+
+        //Each hex near a target in reach, facing it: "q,r,facing" => the place as a plan (no path: the board is asked again later)
+        $candidates = array();
+        foreach ($context['enemies'] as $enemy) {
+            $at = $enemy['unit']->getHexPos();
+            if ($start->distanceTo($at) > $speed + AIConfig::FLIGHT_COVERAGE_RANGE) continue;
+            $toward = Mathlib::hexCoToPixel($at);
+            foreach (self::around($at, AIConfig::FLIGHT_COVERAGE_RANGE) as $hex) {
+                if ($start->distanceTo($hex) > $speed - 1) continue; //further, a plan rarely has the thrust left to turn and face it
+                $facing = ($hex->equals($at)) ? (int)$last->facing
+                    : ((int)round(Mathlib::getCompassHeadingOfPoint(Mathlib::hexCoToPixel($hex), $toward) / 60)) % 6;
+                $key = $hex->q . ',' . $hex->r . ',' . $facing;
+                if (isset($reached[$key]) || isset($candidates[$key])) continue;
+                $candidates[$key] = array('position' => $hex, 'heading' => $facing, 'facing' => $facing, 'speed' => $now, 'path' => array());
+            }
+        }
+        if (count($candidates) == 0) return array();
+
+        $scored = $view->atFireTime(function () use ($view, $flight, $candidates, $context, $hazards, $start) {
+            $out = array();
+            foreach ($candidates as $key => $place) {
+                $j = self::judge($view, $flight, $place, 0, $context, $hazards, $start);
+                $out[$key] = $j['offence'] - $context['dangerWeight'] * $j['danger'] - $j['hazard'];
+            }
+            return $out;
+        }, array((int)$flight->id));
+        arsort($scored);
+
+        //the best places first, until $wanted of them are reached (a place may be out of the thrust's reach: then the next)
+        $found = array();
+        $asked = 0;
+        $reachedGoals = 0;
+        foreach (array_keys($scored) as $key) {
+            if ($reachedGoals >= $wanted || $asked >= 3 * $wanted || $scored[$key] <= 0) break;
+            $asked++;
+            $place = $candidates[$key];
+            $got = $mover->enumerateToward(array($place['position']->q . ',' . $place['position']->r => $place['facing']), 2);
+            foreach ($got as $plan) $found[] = $plan;
+            if (count($got) > 0) $reachedGoals++;
+            if (is_array(self::$trace)) self::$trace[] = sprintf('  coverage goal %-10s %8.1f  %d plans', $key, $scored[$key], count($got));
+        }
+        self::$last['searched'] += $asked;
+        self::$last['found'] += $reachedGoals;
+        return $found;
+    }
+
+    //Every hex within $radius of $center, $center included.
+    private static function around(OffsetCoordinate $center, $radius)
+    {
+        $seen = array($center->q . ',' . $center->r => $center);
+        $frontier = array($center);
+        for ($step = 0; $step < $radius; $step++) {
+            $next = array();
+            foreach ($frontier as $hex) {
+                for ($direction = 0; $direction < 6; $direction++) {
+                    $n = $hex->moveToDirection($direction);
+                    $key = $n->q . ',' . $n->r;
+                    if (isset($seen[$key])) continue;
+                    $seen[$key] = $n;
+                    $next[] = $n;
+                }
+            }
+            $frontier = $next;
+        }
+        return array_values($seen);
     }
 
     //The flight with one of its plans plotted again, or null.
@@ -160,6 +285,9 @@ class FlightDecider
 
         $enemies = array();
         $raiders = array();
+        $pileOn = (float)$view->skill('pileOn');
+        $enemyFlights = false;
+        $enemyFlightsUnmoved = false;
         foreach ($view->enemies() as $enemy) {
             if (!empty($enemy->mine)) continue;
             $moved = !empty($enemy->base) || !empty($enemy->smallBase) || !empty($enemy->osat) || $enemy->getLastTurnMoved() >= $turn;
@@ -189,18 +317,41 @@ class FlightDecider
             }
 
             $health = $view->healthLeft($enemy);
+            /* HARD piles onto a damaged target (stage T5f-3, the skill 'pileOn' - user, 2026-11-19): worth more by the share of
+               its value already lost, and the fleet's focus target (MoveDecider) by half the skill more. */
+            $pile = 1.0;
+            if ($pileOn > 0) {
+                $full = max(1, (int)$enemy->pointCost + (int)$enemy->pointCostEnh);
+                $pile += $pileOn * max(0, 1 - $view->value($enemy) / $full);
+                if ($view->focus !== null && (int)$enemy->id === (int)$view->focus) $pile += $pileOn / 2;
+            }
             $enemies[] = array('unit' => $enemy, 'moved' => $moved, 'arced' => array_values($arced), 'any' => array_values($any),
-                'health' => $health, 'worth' => $view->value($enemy) / $health * ($raider ? AIConfig::FLIGHT_INTERCEPT_WEIGHT : 1));
+                'health' => $health, 'worth' => $view->value($enemy) / $health * ($raider ? AIConfig::FLIGHT_INTERCEPT_WEIGHT : 1) * $pile);
             if ($raider) $raiders[] = $enemy;
+            if ($enemy instanceof FighterFlight) {
+                $enemyFlights = true;
+                if (!$moved) $enemyFlightsUnmoved = true;
+            }
         }
 
         $closing = count($raiders) > 0 ? $raiders : array_map(function ($e) { return $e['unit']; }, $enemies);
         $nearest = PHP_INT_MAX;
         foreach ($closing as $target) $nearest = min($nearest, $flight->getHexPos()->distanceTo($target->getHexPos()));
 
+        /* HARD's mutual support (stage T5f-3, the skill 'support'): a cost in hexes of the flight's own value for each hex beyond
+           FLIGHT_SUPPORT_RANGE of the nearest other flight of the bot, while the enemy has flights - in full while they have yet
+           to move (they could fall on a flight caught alone), a quarter once they have: a flight moving after the enemy's
+           fighters knows where they are, and is the likelier to go for them (the user, 2026-11-19). */
+        $support = 0.0;
+        if ((float)$view->skill('support') > 0 && $enemyFlights) {
+            $support = (float)$view->skill('support') * AIConfig::MOVE_HEX_VALUE * $view->value($flight) * ($enemyFlightsUnmoved ? 1.0 : 0.25);
+        }
+
         $health = $view->healthLeft($flight);
         return array('guns' => $guns, 'enemies' => $enemies, 'closing' => $closing, 'nearest' => $nearest,
-            'mission' => count($raiders) > 0 ? 'intercept' : 'strike', 'health' => $health, 'worth' => $view->value($flight) / $health);
+            'mission' => count($raiders) > 0 ? 'intercept' : 'strike', 'health' => $health, 'worth' => $view->value($flight) / $health,
+            //the level's skills (stage T5f): what the flight's own losses count for, an enemy yet to move, staying together
+            'dangerWeight' => (float)$view->skill('flightDanger'), 'unmovedDanger' => (float)$view->skill('unmovedDanger'), 'support' => $support);
     }
 
     /* The flight's guns that will fire this turn, by kind: a flight's fighters carry the same guns,
@@ -267,24 +418,29 @@ class FlightDecider
                     if (!$inward[$e] && !$kind['weapon']->ignoresLoS) continue;
                     $d += $view->estimate($enemy['unit'], $kind['weapon'], $flight, $enemy['moved']) * $kind['count'];
                 }
-                if ($d > 0) $incoming[] = array($d * ($enemy['moved'] ? 1 : AIConfig::MOVE_UNMOVED_DANGER), 1.0);
+                if ($d > 0) $incoming[] = array($d * ($enemy['moved'] ? 1 : $context['unmovedDanger']), 1.0);
             }
 
-            //escort: how far beyond the fleet
+            //escort: how far beyond the fleet; mutual support (Hard): how far from the nearest other flight of the bot
             $fleet = PHP_INT_MAX;
+            $wing = PHP_INT_MAX;
             foreach ($view->myUnits() as $mine) {
-                if ($mine instanceof FighterFlight || (int)$mine->id === (int)$flight->id) continue;
-                $fleet = min($fleet, $flight->getHexPos()->distanceTo($mine->getHexPos()));
+                if ((int)$mine->id === (int)$flight->id) continue;
+                if ($mine instanceof FighterFlight) $wing = min($wing, $flight->getHexPos()->distanceTo($mine->getHexPos()));
+                else $fleet = min($fleet, $flight->getHexPos()->distanceTo($mine->getHexPos()));
             }
 
             $board = $hazards->judge($flight, $start, $plan, $context['worth']);
+            //each target's health from where the flight stands: the section its hits go through (stage T5f - Normal and Hard)
+            $targets = ShipDecider::targetsFrom($view, $flight, $context['enemies']);
         } finally {
             if ($jink > 0) array_pop($flight->movement);
             array_pop($flight->movement);
         }
 
-        return array('offence' => ShipDecider::removed($damage, $context['enemies']), 'danger' => ShipDecider::lost($incoming, $context['health'], $context['worth']),
+        return array('offence' => ShipDecider::removed($damage, $targets), 'danger' => ShipDecider::lost($incoming, $context['health'], $context['worth']),
             'short' => ($short === PHP_INT_MAX) ? 0 : $short, 'beyondFleet' => ($fleet === PHP_INT_MAX) ? 0 : max(0, $fleet - AIConfig::FLIGHT_ESCORT_RANGE),
+            'apart' => ($wing === PHP_INT_MAX) ? 0 : max(0, $wing - AIConfig::FLIGHT_SUPPORT_RANGE),
             'hazard' => $board['total']);
     }
 }

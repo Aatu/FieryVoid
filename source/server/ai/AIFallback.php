@@ -225,6 +225,20 @@ class AIFallback
         $last = $ship->getLastMovement();
         if (!$last) return $rows;
 
+        /* Stage T5f-5: a ship owing an extended turn (a Hard bot begins them) completes it before anything else - or the page
+           has cancelled it at activation, which ShipMover writes the same way - and only then flies on. */
+        if (Movement::getOwedExtendedTurn($ship->movement, $gamedata->turn)) {
+            try {
+                $mover = ShipMover::forShip($ship, $gamedata);
+                if ($mover !== null) {
+                    $mover->apply(ShipMover::COMPLETE_EXTENDED); //refused when the page has cancelled it (the forced row is already there)
+                    if ($mover->finish()) return $mover->rows();
+                }
+            } catch (Throwable $e) {
+                //the plain rows below
+            }
+        }
+
         $order = AIOrderBuilder::initiativeOrder($ship, $gamedata);
         $position = new OffsetCoordinate($last->position);
         for ($step = 0; $step < (int)$last->speed; $step++) {

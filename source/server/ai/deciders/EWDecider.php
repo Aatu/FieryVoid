@@ -35,8 +35,11 @@
  * on enemies that move before the ship (beyond close range), soft ones (AIConfig::EW_SOFT_LOCK) on
  * those that move after.
  *
+ * LEVELS (stage T5f): Easy splits its points half OEW on the nearest enemy, half DEW, and nothing else (the skill
+ * 'simpleEW'); the CCEW deterrent is a skill of its own ('ccewDeterrent').
+ *
  * NOT YET: ELINT functions (stage T7 - an ELINT ship just runs OEW / DEW), Detect Stealth / Detect
- * Mines, EW for flights, levels (Easy's "half and half" is stage T8).
+ * Mines, EW for flights.
  */
 class EWDecider
 {
@@ -190,6 +193,17 @@ class EWDecider
             return ($da == $db) ? $a->id - $b->id : (($da < $db) ? -1 : 1);
         });
 
+        /* EASY (stage T5f, plan 5.8): half the points OEW on the nearest enemy, half DEW - nothing weighed, no CCEW. The page's
+           own limits still hold: a Restricted EW critical's half stays DEW; an LCV keeps its rule below. */
+        if ($view->skill('simpleEW') && !$lcv) {
+            $oew = max(0, min(intdiv($points, 2), $points - $minDew));
+            if ($oew > 0) {
+                $alloc['OEW'][(int)$enemies[0]->id] = $oew;
+                $alloc['DEW'] -= $oew;
+            }
+            return $alloc;
+        }
+
         $guns = array();
         foreach ($view->mounts($ship) as $mount) {
             $weapon = $mount['weapon'];
@@ -257,8 +271,8 @@ class EWDecider
         $state = array('view' => $view, 'ship' => $ship, 'base' => $base, 'guns' => $guns, 'enemies' => $enemies,
             'units' => $units, 'threats' => null, 'offence' => array(), 'defence' => array(), 'soft' => $soft);
 
-        //the CCEW deterrent first: a point of DEW the greedy below does not have to find a gain for
-        if ($deterrent && $canShootFighters && !$lcv && $alloc['DEW'] > $minDew) {
+        //the CCEW deterrent first: a point of DEW the greedy below does not have to find a gain for (a level's skill, stage T5f)
+        if ($deterrent && $canShootFighters && !$lcv && $alloc['DEW'] > $minDew && $view->skill('ccewDeterrent')) {
             $alloc['DEW']--;
             $alloc['CCEW']++;
         }

@@ -83,7 +83,7 @@ class BallisticDecider
 
                 $options = array();
                 foreach ($enemies as $enemy) {
-                    $minimum = ($enemy instanceof FighterFlight) ? AIConfig::BALLISTIC_MIN_CHANCE_FLIGHT : AIConfig::BALLISTIC_MIN_CHANCE;
+                    $minimum = self::floor($view, $enemy);
                     $shots = array();
                     foreach ($view->modes($weapon) as $mode) {
                         $shot = $view->shot($unit, $weapon, $enemy, $mode);
@@ -154,6 +154,14 @@ class BallisticDecider
         return $plan;
     }
 
+    /* The least chance a launch at $target needs: BALLISTIC_MIN_CHANCE, or _FLIGHT at a flight - or, at a level without the
+       skill 'ballisticFloor' (Easy, stage T5f: "fires ballistics whenever legal"), only the least any order is given at. */
+    private static function floor(AIView $view, $target)
+    {
+        if (!$view->skill('ballisticFloor')) return AIConfig::FIRE_MIN_CHANCE;
+        return ($target instanceof FighterFlight) ? AIConfig::BALLISTIC_MIN_CHANCE_FLIGHT : AIConfig::BALLISTIC_MIN_CHANCE;
+    }
+
     /* The best salvo at one target, or null: array('target', 'launches' => list of array(gun index,
        shot), 'gain', 'perLaunch'). Candidates are the launchers that can reach the target, each
        with the best round its magazine can still give, best first; a salvo is the first k of them
@@ -174,7 +182,7 @@ class BallisticDecider
             return $a[0] - $b[0];
         });
 
-        $floor = ($target instanceof FighterFlight) ? AIConfig::BALLISTIC_MIN_CHANCE_FLIGHT : AIConfig::BALLISTIC_MIN_CHANCE;
+        $floor = self::floor($view, $target);
         $best = null;
         $launches = array();
         $entries = $volley['entries'];

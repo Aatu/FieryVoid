@@ -34,13 +34,18 @@ class MoveDecider
         self::$lastSummary = null;
         FlightDecider::reset();
         ShipDecider::reset();
-        $view = new AIView($gamedata, $botId);
+        //The seat's level and seed (stage T5f): the view answers what the bot is able to do (AIView::skill) for every decider.
+        $view = new AIView($gamedata, $botId, AIConfig::seatLevel($seat), AIConfig::seatSeed($seat));
 
         $active = array();
         foreach ($gamedata->getMyActiveShips() as $ship) $active[$ship->id] = true;
 
         //The board (stage T5c): terrain, drifting fields, meteor swarms, the mines this bot can see.
         $hazards = new Hazards($view);
+        //Stage T5f-7: where each enemy ship yet to move will end (the level's skill 'forecast') - every unit decided below sees it there
+        $view->forecast = EnemyForecast::forView($view, $hazards);
+        //Hard (stage T5f-3): the one enemy ship the fleet's heavy guns go for together.
+        if ((float)$view->skill('fleetFocus') > 0) $view->focus = self::focusTarget($view);
 
         $entries = array();
         $flights = 0;
@@ -70,12 +75,53 @@ class MoveDecider
         $parts = ShipDecider::$last;
         if ($flights > 0) {
             $f = FlightDecider::$last;
-            $parts[] = $flights . ' flights: ' . $f['strike'] . ' striking, ' . $f['intercept'] . ' intercepting, ' . $f['escort'] . ' escorting; ' . $f['jinking'] . ' jinking';
+            $parts[] = $flights . ' flights: ' . $f['strike'] . ' striking, ' . $f['intercept'] . ' intercepting, ' . $f['escort'] . ' escorting; ' . $f['jinking'] . ' jinking'
+                . ($f['searched'] > 0 ? '; ' . $f['found'] . ' of ' . $f['searched'] . ' less covered places reached' : '');
         }
         if (count($parts) > 0 && $hazards->describe() !== '') $parts[] = 'board: ' . $hazards->describe();
+        if (count($parts) > 0 && count(EnemyForecast::$last) > 0) {
+            $turning = 0;
+            $failed = array();
+            foreach (EnemyForecast::$last as $f) {
+                if (isset($f['error'])) $failed[] = $f['error'];
+                else if (count(array_diff($f['actions'], array(ShipMover::MOVE))) > 0) $turning++;
+            }
+            $parts[] = 'forecast: ' . count(EnemyForecast::$last) . ' enemy ships yet to move, ' . $turning . ' of them manoeuvring'
+                . (count($failed) ? '; NOT FORECAST (straight on): ' . implode('; ', $failed) : '');
+        }
         if (count($parts) > 0) self::$lastSummary = implode(' | ', $parts);
 
         return $entries;
+    }
+
+    /* HARD's fleet focus (stage T5f-3; the user's note 5 on game 4750: "it is more effective to concentrate a fleet's heavy
+       firepower to try and take down an enemy ship rather than spread damage"). The enemy SHIP the fleet's heavy guns could most
+       nearly finish where the units stand - every heavy gun's expected damage at it, arcs not asked (facings change in
+       Movement), over what finishing it takes, no more than all of it, times what it is worth. As damage goes in, the same
+       target scores higher, so the choice holds from turn to turn. Null when no heavy gun reaches an enemy ship. */
+    private static function focusTarget(AIView $view)
+    {
+        $heavy = array();
+        foreach ($view->myUnits() as $unit) {
+            if ($unit instanceof FighterFlight) continue;
+            foreach ($view->mounts($unit) as $mount) {
+                if ($view->plainGun($mount['weapon']) && FireDecider::isHeavy($mount['weapon'])) $heavy[] = array($unit, $mount['weapon']);
+            }
+        }
+        $best = null;
+        $bestScore = 0;
+        foreach ($view->enemies() as $enemy) {
+            if ($enemy instanceof FighterFlight || !empty($enemy->mine)) continue;
+            $damage = 0;
+            foreach ($heavy as $gun) $damage += $view->estimate($gun[0], $gun[1], $enemy, false);
+            if ($damage <= 0) continue;
+            $score = min(1, $damage / $view->healthLeft($enemy)) * $view->value($enemy);
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $best = (int)$enemy->id;
+            }
+        }
+        return $best;
     }
 
     //Put a unit at the end of the rows just decided for it, for the decisions that follow (the load is thrown away after).

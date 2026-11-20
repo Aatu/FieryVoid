@@ -2,7 +2,14 @@
 
 Status: **Stage T0 COMPLETE (committed 2026-11-13, 5807979b8, play-tested in game 4568; as-built
 notes: section 10.1). Stage T1a COMPLETE (committed 2026-11-13, 9537a8b72, Auto-Deploy play-tested
-by the user; section 10.2). Stage T1b COMPLETE (2026-11-13, uncommitted; harnesses and self-play green, play-tested by the user in game 4626; section 10.3). Stage T2 COMPLETE (committed 15624ab89; play-tested by the user in game 4679; one part of its "done when" is still open - section 10.4). Stage T3 COMPLETE and Stage T4 COMPLETE (committed together as 501272f04; play-tested by the user in games 4698 and 4701; sections 10.5, 10.6). Stage T5 STARTED 2026-11-16: T5a + T5b committed as f1e2739af; T5c BUILT 2026-11-19 (uncommitted) together with the user's feedback on game 4750; T5d (gravitic hulls) BUILT 2026-11-19 (uncommitted) (section 10.7).** T6 onward not started. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
+by the user; section 10.2). Stage T1b COMPLETE (2026-11-13, uncommitted; harnesses and self-play green, play-tested by the user in game 4626; section 10.3). Stage T2 COMPLETE (committed 15624ab89; play-tested by the user in game 4679; one part of its "done when" is still open - section 10.4). Stage T3 COMPLETE and Stage T4 COMPLETE (committed together as 501272f04; play-tested by the user in games 4698 and 4701; sections 10.5, 10.6). **Stage T5 COMPLETE (marked so by the user 2026-11-20, with T5f; uncommitted from T5e on, not yet play-tested from T5e on)** - started 2026-11-16: T5a + T5b committed as f1e2739af; T5c (with the user's feedback on game 4750) + T5d (gravitic hulls) committed together as 151cf072e; T5e (pivots and rolls) COMPLETE 2026-11-19 (uncommitted; every gate green, not play-tested); T5f (levels, ladder) STARTED 2026-11-19 with the user's feedback on game 4774 - sub-stages T5f-1 to T5f-3 BUILT the same
+day; T5f-4 (Hard's power management) and T5f-5 (Hard's extended turns) BUILT 2026-11-20; T5f-6 (the ladder) run 2026-11-20 -
+Hard leads Normal by ~54% on both EA and Brakiri fleets over 448 games, short of the 60% target; then, at the user's request the
+same day, T5f-7 (the ENEMY FORECAST - Normal and Hard anticipate the moves of enemy ships yet to move) and T5f-8 (decision time,
+brought forward from T8: two-pass judging and a CPU budget per ship) BUILT, and T5f-9 run - the ladder on the standard 42x30 map
+(final build: Hard 50% on EA, 62% on Brakiri over 24 games each) and a forecast audit that changed Hard's forecast; Hard's lead
+ACCEPTED for the first version as the user ruled; T5f COMPLETE (user, 2026-11-20: "let's mark Stage T5f (and Stage T5 overall)
+as complete for now") - uncommitted, not play-tested; section 10.7.** T6 onward not started. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
 layer, which uses this for battles against NPCs - see its section 7) and `STRATEGIC_AI_PLAN.md` (what
 NPC empires do on the campaign map).
 
@@ -350,15 +357,19 @@ the notes), Easy lacks most of them, Hard adds what is still to build. Built at 
 | Skill (note) | Easy | Normal | Hard |
 |---|---|---|---|
 | 1-point CCEW deterrent, no more than 2 unless fighter-heavy (2) | CCEW only for a gain | yes | yes |
-| Fighters press home, priced from the enemy's real arcs and their own jinking (3) | the old caution (every gun, any arc) | yes | yes, and flights work together |
+| Fighters press home, priced from the enemy's real arcs and their own jinking (3) | T5c's pricing with the old damage count - bold (user, 4774: "fine for an Easy CPU"; replaces "the old caution") | yes, and warier (4774: 2 hexes astern of a CCEW ship, not 1) | yes, warier still and jinking at whatever level pays (4774: 3 off, jinking 4-6); flights work together - pile onto a damaged target, mutual support, by initiative (user, 2026-11-19) |
+| A ship's damage counted against its primary structure plus the section a hit goes through (4774; was primary only) | - (bolder fighters, some wasted fire) | yes | yes |
+| Fighters search for the hexes the enemy's guns cover least (4774) | - | a simpler search | the full search |
 | Safe cruising speed (4) | half the overspeed cost | yes | yes |
 | Concentrate the heavy guns (5) | spread (no heavy focus) | in Firing | in Firing, and Movement puts the fleet's heavy guns on one chosen target |
 | Turn shortening (6) - "always useful (since any delay carries over to next turn as well) if you have the spare thrust on that turn, and you won't exceed thruster ratings" (user, 2026-11-19) | skips it | by default: the delay left at the end is always shortened with the thrust to spare within the ratings, and the search finds the double turns a shortened delay allows | the same |
-| Extended turns, where possible (user, 2026-11-19) | - | - | yes - ShipMover must first learn to begin and complete one (EXTENDED_TURNS_PLAN.md; mirror + oracle, as every movement rule) |
+| Extended turns, where possible (user, 2026-11-19) | - (an owed one completed) | - (an owed one completed) | yes - BUILT at T5f-5: ShipMover begins and completes one (mirror + oracle); never one next turn's engine could not complete |
 | Slow pulse weapons wait for a better chance (7) | no premium | +10 | +10 |
 | Soft locks and half DEW in close engagement (8) | half OEW on the nearest, half DEW | yes | yes |
 | An enemy moving after you is the more dangerous (9) | half weight (the T5a rule) | yes | yes, plus the one-ply reply |
-| Power: light weapons that cannot reach anything switched off early, the scanner or engine boosted, the weapons back on as the enemy nears (10) | - | - | yes |
+| Anticipate where an enemy ship yet to move will end (user, 2026-11-20: "both Hard and Normal to have some level of movement predictions (to a simpler extent e.g. Normal might only consider that a ship might turn once)") - BUILT at T5f-7 | - (straight on) | straight on or ONE turn at any point of its move, whichever brings most of its guns' fire on the bot's units | the same measure over a wider set: Normal's plans and 80 of the enemy's own (speed changes, slips, two manoeuvres). (Weighing the enemy's trade instead was built first and dropped: the worst predictor in the T5f-9 audit) |
+| Power: light weapons that cannot reach anything switched off early, the scanner or engine boosted, the weapons back on as the enemy nears (10) | - | - | yes - BUILT at T5f-4 (interceptors the enemy's shots need stay on) |
+| Pivots and rolls (user, 2026-11-19: "still very rare, advanced types of movement ... probably only set Hard opponents to use Pivots or Rolls. Perhaps Normal could in the case of rolling to swap thrusters to turn in a direction it wanted next turn too, but otherwise no") - BUILT at T5e | stops one carried over, starts none | stops one carried over; rolls only to swap its side thrusters for the turn it wants next turn | stops one carried over; pivots (started and stopped the same turn) and rolls where the trade is worth it: hiding a damaged side, swinging guns round, the gravitic pivot, the thruster swap |
 | Ramming (11) | never | last resort under the Desperate rule (T6) | the same |
 
 ---
@@ -486,10 +497,10 @@ unchanged) and the self-play harness.
 | **T2 Firing** ✅ COMPLETE (10.4) | engagement table, `FireDecider`, interception reserve | Bots destroy each other; a human loses to an EA bot by standing still |
 | **T3 EW and power** ✅ BUILT (uncommitted, 10.5) | `EWDecider`, `PowerDecider` (negative-power handling) | Bot EW passes `validateEW` in every self-play turn; hit rates rise measurably versus T2 |
 | **T4 Ballistics and fighters** ✅ COMPLETE (uncommitted, 10.6) | `BallisticDecider`; flight tactics (escort, strike, intercept) - built on `ShipMover`, not `AutomatedMovement`, whose rows the page never checked | Missile and carrier fleets fight sensibly |
-| **T5 Movement search** | `MoveDecider` scoring, range bands, terrain (drifting too) and mine avoidance, pivots and rolls, gravitic hulls; closing with the enemy (the T2 pursuit question, ruled into T5); moving to bring the most direct-fire weapons into arc within the turn AND the most ballistic launchers to bear for next turn's launch (user, game 4701) | Hard beats Normal beats Easy in self-play ladders at >= 60% |
+| **T5 Movement search** ✅ COMPLETE (user, 2026-11-20; from T5e on uncommitted, 10.7) | `MoveDecider` scoring, range bands, terrain (drifting too) and mine avoidance, pivots and rolls, gravitic hulls; closing with the enemy (the T2 pursuit question, ruled into T5); moving to bring the most direct-fire weapons into arc within the turn AND the most ballistic launchers to bear for next turn's launch (user, game 4701) | Hard beats Normal beats Easy in self-play ladders at >= 60% - Normal over Easy met (15 of 16); Hard over Normal a few points (50-62% on 42x30), ACCEPTED by the user for the first version (T5f-9) |
 | **T6 Withdrawal** | posture logic, surrender, jump-out; **last-resort ramming** (user, 2026-11-19 - section 10.7, note 11) | No game runs past the turn cap for lack of a decision |
 | **T7 Specials** | handler registry; handlers faction by faction; readiness list grows | Each added faction meets the section 7 criteria |
-| **T8 Skirmish release** | server `FleetChecker` port + parity test; `FleetComposer` (auto-compose as the default for an empty CPU slot); level and personality pickers; lobby and games-list display of CPU seats; docs page; **a decision-time budget for live** (user, 2026-11-19: "reasonable decision time is important for live server" - section 12) | Every auto-composed fleet across all ready factions and a range of point values passes the Fleet Checker; every decision within the budget on live-sized fleets; Beta on live via `betaTesters`, then the flag |
+| **T8 Skirmish release** | server `FleetChecker` port + parity test; `FleetComposer` (auto-compose as the default for an empty CPU slot); level and personality pickers; lobby and games-list display of CPU seats; docs page; **a decision-time budget for live** (user, 2026-11-19: "reasonable decision time is important for live server" - section 12; the per-ship budget and two-pass judging were BROUGHT FORWARD to T5f-8 on 2026-11-20); **a HOLISTIC REVIEW of decision efficiency** (user, 2026-11-20: "in Stage 8 plan a holistic review of how we can make AI decisions as efficient as possible to keep decisions times reasonable" - the plan for it is in section 12) | Every auto-composed fleet across all ready factions and a range of point values passes the Fleet Checker; every decision within the budget on live-sized fleets, timed on the live host; Beta on live via `betaTesters`, then the flag |
 | **T9 Campaign wiring** | section 9 | A campaign battle against a Raider fleet is played manually and harvested |
 
 T0-T3 produce an opponent that is already useful for new-player onboarding (a roadmap item in its
@@ -1042,7 +1053,7 @@ holding missiles back by level (`BALLISTIC_RESERVE`, T8). Seen in the engine, no
 ballistic's hit LOCATION and its PROFILE come from two separate rolls on an exact section line
 (`calculateHitBase` calls `getHitSectionPos` and `getHitSectionProfilePos` separately).
 
-### 10.7 Stage T5 - movement search (started 2026-11-16)
+### 10.7 Stage T5 - movement search (started 2026-11-16) - COMPLETE (user, 2026-11-20), T5e onward uncommitted
 
 T3 and T4 were committed by the user as 501272f04.
 
@@ -1075,8 +1086,8 @@ never fill.
 | T5b ✅ BUILT | Overthrust allowance (10.3 ruling): `ShipMover` may overthrust when asked, plans carry the excess, the scoring weighs the critical roll it invites. Both harness halves. |
 | T5c ✅ BUILT | Terrain that drifts (next position predicted) and mines the bot can see, avoided. Drift (`TerrainDrift`): from turn 2, at the START of each turn a one-hex asteroid or meteor swarm stays (25%) or moves one hex straight on or 60 degrees either side (25% each), and a unit in the hex it enters is struck in Pre-Firing - so an end hex in a field's three forward hexes is a 25% overrun each, and next turn's continuation must miss all four of its possible hexes. Mines: read their trigger rules first. **With it, the user's feedback on game 4750 (below).** |
 | T5d ✅ BUILT | Gravitic hulls in `ShipMover` (mirror + oracle). |
-| T5e | Pivots and rolls for the damaged-ship uses above (mirror + oracle). |
-| T5f | Levels (Easy: noise; Hard: one-ply look-ahead, the enemy's best reply; the skills table of 5.8, from the user's 4750 notes - Hard's power management and extended turns among them) and the ladder harness - the stage's "done when". |
+| T5e ✅ BUILT | Pivots and rolls for the damaged-ship uses above (mirror + oracle) - and, after the user's notes of 2026-11-19, the gravitic and thruster-swap uses, gated by level (5.8). |
+| T5f (STARTED 2026-11-19 - sub-stages T5f-1..6 below the T5e record) | Levels (Easy: noise; Hard: one-ply look-ahead, the enemy's best reply; the skills table of 5.8, from the user's 4750 notes - Hard's power management and extended turns among them - and the user's 4774 notes: the health fix, warier fighters, the coverage search) and the ladder harness - the stage's "done when". |
 
 **T5a as built (2026-11-16) - BUILT, uncommitted, not play-tested by the user.**
 No flag, no migration; `source/autoload.php` regenerated for the one new class (phpab in the
@@ -1192,10 +1203,10 @@ hides the game's CURRENT active ship's rows). What it showed is in the table.
 | 7 | Pulse weapons do more at high chances (grouping): a premium on their minimum chance | - | **Built** (`FireDecider::minimumChance`): a slow pulse weapon's floors are `FIRE_PULSE_PREMIUM` (+10, the user's choice) higher - Medium Pulse 35%, Heavy Pulse 44%; one-turn pulse guns keep 5% |
 | 8 | In close engagement players mainly use soft locks and keep a decent amount of DEW | Turn 5: both Omegas 8 OEW on one G'Quan, 0 DEW, at 1-4 hexes (the human: 2 + 2 OEW, 3-4 DEW). Found: a DEW point was valued at a QUARTER - every enemy gun's fire divided by the bot's unit count, its flights included - and every enemy gun counted, reloading or not, against only the bot's loaded ones | **Built** (`EWDecider`): within `EW_CLOSE_RANGE` (10, the user's choice) a lock stays soft (2), and with an enemy SHIP that close at least half the points stay DEW; each enemy gun counts by the share of its fire this ship would draw among the bot's units, and only guns loaded this turn (every player sees an enemy weapon's loading on its ship window). Self-play: 23% of EW offensive with the share fix alone, 32% with loaded guns only, soft locks of 1-2 and DEW 3-7 once engaged; a ship standing off beyond 10 hexes still snipes with a hard lock |
 | 9 | Enemies moving after your ship are MORE dangerous (better shots, a damaged section) | `MOVE_UNMOVED_DANGER` was 0.5 | **Built** (`ShipDecider`, `FlightDecider`, `AIView::exposureUnmoved`): every gun of an enemy yet to move counts at 1.0, and the section it meets leans to the ship's worst one by how much of the distance its speed covers. Next turn's terms keep 0.5 for both sides (`MOVE_UNMOVED_DANGER_NEXT`) - nobody knows next turn's initiative. **Also fixed with it:** this turn's danger counts only enemy guns loaded now (next turn's, those loaded by then) - the Omegas had run from heavy guns that had just fired |
-| 10 | Hard: switch off light weapons out of arc/range on early turns to boost Scanner or Engine; back on as the enemy nears | `PowerDecider` never boosts | **Planned (T5f, Hard only - table in 5.8):** needs the page's boost rules ported to `PowerDecider` and proven by `ordersOracle` like the rest of power; only weapons that reload in a turn (a weapon switched off loses its charge), switched back on a turn before the enemy can be in their reach |
+| 10 | Hard: switch off light weapons out of arc/range on early turns to boost Scanner or Engine; back on as the enemy nears | `PowerDecider` never boosts | **Built (T5f-4, Hard only):** `PowerDecider::boost` - one-turn guns that cannot reach anything this turn (and that the enemy's shots do not need for interception) pay for scanner or engine boosts, the page's prices, limits and buttons (proven by `ordersOracle`); "back on as the enemy nears" is this turn's reach test - a one-turn gun is loaded again the turn it is switched back on. Range only: arcs are not modelled |
 | 11 | Ram when the Desperate rule applies to the CPU's team, only as a last resort (no weapons left, primary under some %); never as a standard attack except for units like Hunter-Killers marked `$designedToRam` | Never rams (`AIView::weaponBlock`: 'ramming') | **Planned (T6, table in section 10):** the Desperate rule is honour-based - `{"desperate": team or -1}`, `DesperateRule::$appliesToTeams`, nothing in the engine stops a ram - so the bot restrains itself: a unit of a team the rule covers with no usable weapon left, or its primary structure under a threshold, may plan into a target's hex and order its `RammingAttack`; a unit whose ram is `designedToRam` (the Orieni / Makar HKs) may ram in any game, as its own handler (T7) |
 
-**T5c as built (2026-11-19) - BUILT, uncommitted, not play-tested by the user.** No flag, no migration;
+**T5c as built (2026-11-19) - committed by the user with T5d as 151cf072e, not play-tested.** No flag, no migration;
 `source/autoload.php` regenerated for the one new class (`fvbuild -Autoload`, one line).
 * **`ai/Hazards.php`** - the BOARD, built once per Movement decision from the bot's masked view and
   asked for every end state by `ShipDecider` and `FlightDecider` (`MoveDecider::orders` builds it;
@@ -1293,7 +1304,7 @@ hides the game's CURRENT active ship's rows). What it showed is in the table.
   * No terrain, 24x16: reached the cap with one side at 0% value (crippled hulks the other could not or
     would not finish) - the T6 case T5a recorded.
 
-**T5d as built (2026-11-19) - BUILT, uncommitted, not play-tested by the user.** Gravitic hulls in
+**T5d as built (2026-11-19) - committed by the user with T5c as 151cf072e, not play-tested.** Gravitic hulls in
 `ShipMover`. No flag, no migration, no new class (autoload unchanged).
 * **What a gravitic drive changes in the page's rules** (every `ship.gravitic` in `movement.js` read): in
   four places, and only when the ship is out of alignment (a pivot made earlier: flying neither bow- nor
@@ -1305,8 +1316,7 @@ hides the game's CURRENT active ship's rows). What it showed is in the table.
   rule. `assignThrust` and the turn delay have no gravitic rule. **Bow- or stern-first and neither pivoting
   nor rolling, a gravitic hull's rules are a plain hull's** - which is where the bot's gravitic ships always
   fly, as it never pivots or rolls them (T5e). The T1b refusal was for the other states.
-* **`ShipMover`**: the refusal ('a gravitic drive') is gone - except for hulls with a Trek impulse drive, now
-  refused for that ('a Trek impulse drive', `hasTrekImpulseDrive` - see the sweep below); `$gravitic`; the three gate exceptions;
+* **`ShipMover`**: the refusal ('a gravitic drive') is gone; `$gravitic`; the three gate exceptions;
   `directionRequired($direction, $accel, $turnOrSlip)` now takes the page's two arguments (a speed change
   asks with accel TRUE for both arrows, a turn or slip with turnOrSlip true - a pivot, never ordered here,
   is the only caller with accel false) and has the gravitic branch, with `isPivotedPort`. Gravitic FLIGHTS
@@ -1351,14 +1361,13 @@ hides the game's CURRENT active ship's rows). What it showed is in the table.
     923 of 28,443 plans, every one with the IMPULSE DRIVE ITSELF damaged: the drive's `getOutput()` is its
     rating plus its nacelles' and nothing else, and the page adds the drive's own criticals to that
     (`systems.js getOutput`), so ShipMover read a damaged drive's thrust too high. All 63 impulse-drive hulls
-    are gravitic - lifting the gravitic refusal is what exposed them - so they are refused again, for the
-    engine (P4); the Kelly Constitution's drive keeps Engine's rules and agrees (432 plans, 0 differences).
-    The mirror fix, if Trek is ever wanted: add the drive's `outputMod` (less any one-turn drain) to its
-    `getOutput()` in `readSystems`.
-  * **Seen, not changed (pre-existing since T1b, not gravitic):** the Shadow hulls (`BioDrive`, whose
-    `getOutput()` sums the bio-thrusters and leaves its own criticals to the page) have the same gap - 312 of
-    8,238 plans differ, all with the drive damaged (page 25, ShipMover 27). Shadows are plotted since T1b and
-    were never in the harness; they are late on the readiness list.
+    are gravitic - lifting the gravitic refusal is what exposed them. The Shadow hulls' `BioDrive` (its
+    `getOutput()` sums the bio-thrusters; not gravitic, plotted since T1b and never in the harness) had the
+    same gap: 312 of 8,238 plans, all with the drive damaged (page 25, ShipMover 27).
+  * **Fixed at the user's request (2026-11-19):** `readSystems` now adds a `TrekImpulseDrive`'s or `BioDrive`'s
+    own `outputMod`, less its one-turn drain (`EdfThrustDrain`), to its `getOutput()` - what the page does with
+    the figure it is sent (the Kelly Constitution's drive keeps Engine's rules and needed nothing). **Trek: all
+    63 hulls plotted, 28,429 plans, 0 differences; Shadows + customs: 49 hulls, 19,777 plans, 0 differences.**
 * **Self-play, 24x16** (no refused submission, no defect in any):
   * Brakiri (Tashkat, Avioki, Halik, Falkosi) moved by ShipDecider against the same fleet moved by the T1b
     rule (`--plain-move`), both seat orders: **T5 ahead 2 of 2** (51% and 40% of its value kept against 0%,
@@ -1377,7 +1386,544 @@ hides the game's CURRENT active ship's rows). What it showed is in the table.
   waits for T5e and a ruling there on whether gravitic hulls should pivot as a matter of course, beyond the
   damaged-ship uses ruled for all hulls. And when a bot ship is still pivoting at the start of its move,
   ShipMover must write the forced pivot row itself: the page adds it at activation (`doForcedPivot`), the
-  server does not.
+  server does not. *(Both done at T5e, below.)*
+
+**T5e as built (2026-11-19) - COMPLETE, uncommitted, not play-tested by the user (final gates confirmed the same
+evening, below).** Pivots and rolls. No flag,
+no migration, no new class.
+* **The user's notes, 2026-11-19 (the spec):** "Both are used to hide damaged sides, however there are some
+  other niche uses. For example, a ship might pivot in a situation where it was desperate to bring heavy weapons
+  into arc on an enemy (and perhaps expected to get destroyed next turn). Sometimes, especially Gravitic ships, a
+  player will start and then stop a pivot on the same turn, providing they have enough thrust to do so in order to
+  get an enemy in it's arcs, and then can turn while pivoted on following turns. In the case of rolls, the most
+  common use after hiding damage is to swap side thrusters so you can turn in a desired direction the following
+  turn after the roll completes. Both manoeuvres begin a pivoting / rolling motion and need to be manually stopped
+  ... Otherwise they will simply continue indefinitely ... pivots and rolls are still very rare, advanced types of
+  movement so I would gate them accordingly and probably only set Hard opponents to use Pivots or Rolls. Perhaps
+  Normal could in the case of rolling to swap thrusters to turn in a direction it wanted next turn too, but
+  otherwise no." The 5.8 table has the row.
+* **What the page and server do** (read before building): the PIVOT ARROWS (`canPivot` / `doPivot`) start a
+  pivot, or - while pivoting - STOP it (the same-side arrow writes the opposite pivot, facing unchanged); a non-agile
+  hull starts and stops one a turn, an agile hull's every pivot just turns its facing. A pivot is paid any + rear +
+  side through one of two thruster pairs (`calculateThrustStillReq` drops the other pair once one has a point) and is
+  never auto-paid. The ROLL (`canRoll` / `doRoll`) starts one, or stops one carried over (a roll started this turn
+  cannot be stopped this turn); a non-agile hull's sides swap at the turn change while rolling (the server flips
+  "rolled"). A pivot carried over goes on a step at ACTIVATION - the page's `doForcedPivot`, client-side; the server
+  KEEPS that forced row (only forced jinks are dropped). Fire: a pivot this turn, or rolling at fire time, takes 3 off
+  every shot of the ship (`Weapon::calculateHitBase`); a rolled ship's bearings are mirrored (arcs and hit sections
+  swap sides).
+* **`ShipMover` (mirror + oracle):** orders `pivotleft` / `pivotright` (the arrows - `actions()` names the arrow
+  clicked, which is the opposite of the row's type for a stop) and `roll`; `payPivot` (each pair in turn, its odd
+  point through it too; the pair rule in `stillRequired`, gravitic pivot rotation included); `forcedPivot()` at
+  construction (posted `forced`, not an order); `state()` carries `pivoting` / `rolling` (a pivot left running is part
+  of the end state - the search's and `keepPlan`'s keys too); `allowPivots()` / `allowRolls()` (off by default: the
+  search is otherwise unchanged); `plan()`; `turnPayableNextTurn($right, $speed)` (could next turn's turn to that side
+  be paid, with the sides as a roll leaves them - a judgement aid).
+* **`ShipDecider`, by the seat's level** (`MoveDecider` passes `$seat['cpu']['level']`; every seat is Normal until
+  T8's picker - `selfPlayHarness --levels=hard,normal` sets them):
+  * EVERY level stops a pivot or roll carried over (the search tries the stop; one left running costs
+    `MOVE_COST_LEFT_RUNNING` 40 hexes) - before any turn or slip when the hull has no gravitic drive.
+  * HARD tries, on the end of its 10 best plans (one per end hex, `MOVE_MANOEUVRE_SEEDS`): a pivot started and
+    stopped the same turn either way (an agile hull: single and double pivots), and a roll. NORMAL tries only the roll,
+    and keeps it only where it frees the turn it wants next turn (`turnFreed`: its quarry's side, more than 30 degrees
+    off the bow; its side thrusters cannot pay that turn and can once the roll has swapped them -
+    `MOVE_VALUE_TURN_FREED` 14 hexes). EASY tries neither.
+  * Priced by: the engine's -3 (the plan's pivot / roll rows stood in while this turn's fire is asked);
+    `MOVE_COST_PIVOT` 4 a row (start + stop 8), `MOVE_COST_ROLL` 8; ending out of alignment without a gravitic drive
+    `MOVE_COST_MISALIGNED` **100** hexes - times the survival share only for a pivot started this turn (the "desperate"
+    swing), and that share never below the share of combat value left; next turn with the sides a roll swaps.
+  * **A pivot pays for itself THIS turn** (next turn judged from its seed's facing) and **a roll is judged on
+    protection and the thruster swap** (next turn's fire is its seed's) - see the self-play findings.
+* **Self-play findings that changed the pricing** (24x16, Hard v Normal, EA and Brakiri fleets, seats alternated):
+  * Batch 1 (12 games): a fresh Tethys and an agile Halik pivoted on turn 1 with nothing in reach, and fresh Hyperions
+    rolled on turns 1-2 - all bought by NEXT-turn terms, whose straight-on projection over-credits a turned facing or
+    mirrored arcs (an aligned, unrolled ship would simply turn next turn). The Tethys also had the "desperate" discount
+    because the danger term read it doomed at 13 hexes on turn 1. Fixed as above.
+  * Batch 2 (8 games): game 4796 - a damaged Hard Omega pivoted on turn 19 (hiding a damaged side, sound) and then spent
+    17 turns misaligned, weaving with slips from 22 to 46 hexes off the fight. Replayed (turn 25): 9 hexes off the map,
+    unable to turn; the plans that realigned ended a hex further out and the off-map hazard (100 a hex) outweighed the
+    old 12-hex misalignment. Hence 100, undiscounted for a ship that began its move misaligned.
+  * Every roll was stopped the turn after - except by a ship whose engine died the turn it rolled (game 4785, physics).
+* **Harnesses:**
+  * `shipMoverHarness.php` / `shipMoverOracle.js`: walks use the arrows and the roll; the search with pivots and rolls
+    replays a pivoting and a rolling plan per situation; the page is told each hull's `pivotcost` / `rollcost`; the
+    oracle applies the page's `doForcedPivot` at activation and compares a row's `value` as text when it is not a
+    number; new situations "still rolling, rolled" / "still rolling, turned last turn".
+  * NEW `manoeuvreHarness.php` (DB-free): A/B a roll / pivot carried over is stopped at every level; C Easy and Normal
+    never start a pivot and never roll with sound thrusters (random boards); D the thruster swap (Normal and Hard roll,
+    Easy does not; nobody with sound thrusters); E Hard pivots to turn a destroyed side away (Corumai, no turn possible;
+    danger 136 against Normal's 910); H Hard rolls for the same (Nova Alpha: next danger 519 against 913); F a pivot's
+    next-turn danger is its seed's; G a fresh plain hull pays the whole misalignment; I a misaligned hull realigns, at the
+    map edge too (the 4796 case); J a roll's next-turn fire is its seed's; K a gutted hull (every weapon and two sections
+    gone) that BEGAN misaligned, under the fire of two Omegas that have moved, still pays the whole misalignment on every
+    plan that stays so (added at the final gates: I has nothing in reach, so it could not tell the "desperate" discount's
+    guard from none). **606 checks at the default 12 rounds.**
+  * `selfPlayHarness.php --levels=`.
+* **Gates, 2026-11-19:**
+  * ShipMover pair (before the decision changes): EA + raiders **157 hulls, 79,939 plans (7,158 pivoting and 6,577
+    rolling search plans), 592,371 steps, 0 differences; 1,418,677 server checks**; gravitic set **62 hulls, 33,573
+    plans, 260,841 steps, 0 differences; 562,102 server checks**. The server's own pivot-pair check
+    (`validateThrustPayment`, enforced in the harness) never disagreed with the page.
+  * Mutation pass: mirror **17 of 17 caught** (16 only by the client replay); decisions - see the final figures below.
+* **Final gates, 2026-11-19 (evening, the code as it stands):**
+  * ShipMover pair: EA + raiders **157 hulls, 8,195 situations, 79,939 plans (7,154 pivoting and 6,584 rolling search
+    plans replayed), 589,410 steps through movement.js, 0 differences; 1,419,796 server checks, 0 failed**; gravitic set
+    (Brakiri, Brakiri raiders, raiders, `--gravitic`) **62 hulls, 3,170 situations, 33,573 plans (2,707 / 2,485), 260,841
+    steps, 0 differences; 562,102 server checks, 0 failed**.
+  * Decisions mutation pass (13 broken copies of `ShipDecider` / `ShipMover` loaded ahead of them, `manoeuvreHarness
+    --rounds=4`, 234 checks): **12 of 13 caught**. Survivor: "Normal may pivot too" - equivalent, as Normal's filter keeps
+    only a roll that frees a turn, so a pivot variant is dropped either way. Two needed work first: "a pivot keeps its
+    pivoted facing next turn" (its first copy did not parse - a dangling `else` - and was rebuilt), and "the damage
+    discount for a ship that began misaligned" survived until check K was added.
+  * `manoeuvreHarness` **606 checks, 0 failed**; `flagOffHarness`, `cpuLobbyHarness` green; **replay check 228 passed,
+    0 failed**.
+  * Self-play, final batch (8 games, 24x16, Hard v Normal, EA and Brakiri fleets, seats alternated; no refused submission,
+    no defect): **Hard ahead in 3 of 8** - EA 2 of 4 (4804 53% v 0%, 4810 73% v 10%; lost 4811 0% v 53% and 4808 13% v 22%
+    at the turn cap), Brakiri 1 of 4 (4807 25% v 5%; lost 4806, 4809, 4805). Pivots and rolls are rare and small; telling
+    the levels apart is T5f's job (its ladder), not this sub-stage's. Kept games: 4804-4811 (delete by id, not
+    `--delete=all`: that would also take 4767 / 4768, which the replay corpus has adopted).
+
+**T5f - levels and the ladder (started 2026-11-19; COMPLETE 2026-11-20 - the user: "let's mark Stage T5f (and Stage T5
+overall) as complete for now").** The stage's "done when" (section 10): Hard beats Normal beats Easy in self-play ladders at
+>= 60% - met for Normal over Easy; Hard over Normal reached a few points, which the user accepted for the first version (T5f-9). Its content is the 5.8 skills table, the user's feedback on game 4774 (below), and
+the two things earlier sub-stages parked here: the health model (T5c, "a model limit met while tuning") and Hard's fleet
+focus in Movement (4750 note 5).
+
+**The user's feedback on game 4774 (2026-11-19)** - human G'Quan + Va'Kar Long-Range Scout + Frazi flight v CPU (Normal)
+Omega x2 + Tethys + Aurora and Thunderbolt flights, 42x30, simultaneous movement: "The Aurora Starfuries probably didn't
+respect the CCEW of the Va'Kar enough on Turn 2 and got quite close. This would be fine for an Easy CPU opponent, but a
+Normal one would be slightly more wary (see position of Thunderbolts on the same turn) and a Hard one even more wary
+might also jink to balance having reasonable hit chances vs reducing chances of being hit to near 0. Hard fighters could
+also find hexes where there is little or no light weapon coverage from the enemy and try to position themselves there.
+Normal mode could do a simpler search for this positioning too."
+* **What the bot did, replayed** (scratch: the game wound back to the flights' activation, as for 4750): the Va'Kar
+  (CCEW 6, DEW 3) had moved; the Aurora flight parked 1 hex DEAD ASTERN of it - the blind spot of all three Twin Arrays,
+  where only the two aft Light Pulses bear. So it already used the ship's arcs; what it misjudged was the trade. Its
+  chances (own guns / each Light Pulse at it): 1 hex astern 85 / 80 (chosen); 2 astern 75 / 60; the Thunderbolts' hex,
+  3 off, 65 / 60; every 2 jinking levels take 10 off both (limit 6). Scored: fire 430 against danger 88 at 1 hex, 379
+  against 63 at 2.
+* **Why: the damage model.** Since T2 a point of damage is worth a unit's value over what is left of its PRIMARY
+  structure (`AIView::healthLeft`) - the Va'Kar's 36 of ~213 structure - while a flight's health is every fighter's. So a
+  flight valued its shots at a ship about twice too high against its own losses. The same flaw WASTES FIRE: FireDecider
+  stops counting damage on a target past 1.5 x that health (`FIRE_OVERKILL`), and on turn 2 the Heavy Lasers and the
+  Auroras had booked 53.4 of the Va'Kar's 54 - five of the six Thunderbolt Gatling Pulse Cannons (65% each) were never
+  fired, at a ship that survived the turn and the next. (Replayed exactly: the turn's 22 orders, once the loader's
+  CURRENT-turn weapon loading is put back to turn 2's.)
+* **Flight search breadth:** a speed-9 flight can end in ~550-610 hexes; `FLIGHT_PLANS` (250, plainest first) reaches
+  133 of them - the cone of near-straight paths. An exhaustive search takes 12-17 s. A blind spot that needs an early
+  turn is never seen.
+* **User rulings (asked and answered 2026-11-19):**
+  * In that spot a NORMAL flight goes 2 hexes astern without jinking (75 / 60); a HARD one 3 hexes off, jinking 4-6
+    (own 35-45, Light Pulses 30-40). Easy: today's boldness is fine.
+  * The health fix - a ship's health is its primary structure plus the section a hit must go through - for NORMAL and
+    HARD; EASY keeps the old count (the bolder fighters and some wasted fire are Easy weaknesses).
+  * Hard's "flights work together" = a mix of piling onto a damaged target and mutual support, depending on initiative:
+    a flight that moves after the enemy's fighters is the likelier to go for them.
+
+**T5f plan - sub-stages** (each measured before the next; the ladder is the measure):
+
+| | Deliverable |
+|---|---|
+| T5f-1 | Levels through every decider (a skills profile per level, read through `AIView`); EASY's column of 5.8 (no CCEW deterrent, simple EW, no focus, no shortening, no pulse premium, half the unmoved-enemy and overspeed weights, ballistics at any legal chance, score noise from the seat's seed); the HEALTH fix for Normal / Hard and the re-tune it forces (against a harness-only `legacy` profile = the T5e bot); FIGHTERS by level - Normal and Hard warier, Hard jinking at any level; the LADDER harness (levels alternated by seat, results summed) |
+| T5f-2 | Flight search breadth: a goal-directed search in `ShipMover` towards the hexes around each target the enemy's guns cover least (mirror-safe - every plan is still `apply()`'s; replayed by the oracle) - Normal a few goals, Hard all of them |
+| T5f-3 | HARD: flights work together (pile onto the damaged target, mutual support, by initiative); the fleet's heavy guns put on one chosen target in Movement (4750 note 5); the one-ply look-ahead - an enemy yet to move answered with its best reply |
+| T5f-4 ✅ BUILT | HARD: power management (4750 note 10) - the page's boost rules ported to `PowerDecider`, proven by `ordersOracle` |
+| T5f-5 ✅ BUILT | HARD: extended turns - `ShipMover` begins and completes one (EXTENDED_TURNS_PLAN.md; mirror + oracle) |
+| T5f-6 (run) | The ladder to >= 60% both ways; play-test by the user - Hard ~54% on both fleets over 448 games, 60% not reached (the record below) |
+| T5f-7 ✅ BUILT | The ENEMY FORECAST (user, 2026-11-20): Normal and Hard anticipate where each enemy ship yet to move will end - Normal one turn, Hard a wider set of the enemy's own plans, both by the enemy's fire on the bot's units (`EnemyForecast`) |
+| T5f-8 ✅ BUILT | Decision time, brought forward from T8 to pay for the forecast: next turn's terms only for the best end states by this turn's score (two-pass judging); a CPU budget per ship decision and for the forecast; the self-play harness prints each level's mean and slowest decision |
+| T5f-9 ✅ (run) | The ladder again, on the standard 42x30 map (user: "run on the Standard map size for a better comparison of a normal game"; "If we do the above changes and Hard is still returning the same results I'm ok with that for our first version") - final build: Hard 50% (EA) and 62% (Brakiri); a forecast audit dropped Hard's trade measure; ACCEPTED for v1 (the record below) |
+
+**T5f-1 and T5f-2 as built (2026-11-19) - BUILT, uncommitted, not play-tested by the user.** No flag, no migration, no
+new class (autoload unchanged).
+* **Levels.** `AIConfig::SKILLS` - one row of player skills per level (and a harness-only `legacy` row = the Normal bot as
+  it stood at T5e, which the ladder plays each change against); `AIConfig::seatLevel` / `seatSeed` read a seat. `AIView`
+  takes the level and seed (`skill()`, and `noise()` - a normal draw fixed by seed, turn and key, so a game replays
+  exactly); TacticalAI (Initial Orders), MoveDecider and FireDecider build their view from the seat. ShipDecider::rows lost
+  its `$level` argument - the view carries it (`manoeuvres` replaces the T5e level names). Every T5f change sits behind a
+  skill:
+
+  | Skill | Easy | Normal | Hard | legacy (T5e) |
+  |---|---|---|---|---|
+  | `sectionHealth` - a ship's health is its primary plus the section a hit goes through | - | yes | yes | - |
+  | `ccewDeterrent` / `simpleEW` (half OEW on the nearest, half DEW) | - / yes | yes / - | yes / - | yes / - |
+  | `focus` (share of FIRE_FOCUS) / `heavyFocus` | 0 / - | 1 / yes | 1 / yes | 1 / yes |
+  | `pulsePremium`, `shortening`, `ballisticFloor` | - | yes | yes | yes |
+  | `unmovedDanger` / `overspeed` (share of the cost) | 0.5 / 0.5 | 1 / 1 | 1 / 1 | 1 / 1 |
+  | `flightDanger` - a flight's own losses against the damage it deals | 0.75 | 1.5 | 3.0 | 0.75 |
+  | `jink` | max | max | any | max |
+  | `manoeuvres` (T5e) | none | swap | all | swap |
+  | `noise` (sd, hexes of own value) | 10 | 0 | 0 | 0 |
+  | `coverageGoals` (T5f-2) | 0 | 4 | 12 | 0 |
+* **The health fix** (`AIView::healthLeft($unit, $shooter = null)`): primary structure plus, from a shooter's side, the
+  section(s) its bearing hits shared by profile (as `exposureAt` picks them), else the mean of the outer sections; a
+  destroyed section adds nothing. Movement prices each target from where the unit ends (`ShipDecider::targetsFrom`, asked
+  by FlightDecider too) - so a target's destroyed side is worth more per point, rightly. Fire and launches use the mean.
+  Replayed on 4774 turn 2: the Va'Kar's health 36 -> 80, the G'Quan's 50 -> 113; Normal's plan fires all six Gatlings (27
+  orders, not 22). Easy keeps the old count by ruling.
+* **Fighters (4774):** the danger weight by level; HARD prices every jinking level on its `FLIGHT_JINK_PLACES` (12) best
+  places. Replayed: Easy ends 1 hex astern of the Va'Kar (as it did), Normal 2 astern without jinking (75 / 60 - the
+  ruling), Hard 2 astern jinking 6 (own 45, Light Pulses 30 - the ruling's risk, one hex nearer, as that hex gives better
+  own chances for the same incoming fire; 3 off jinking 6 scored next).
+* **Easy's column** (5.8): EWDecider's half-and-half split (the page's limits kept: a Restricted EW half stays DEW, an LCV
+  keeps its rule), no CCEW deterrent, no focus at all, heavy guns drawn as light ones, no pulse premium, no turn shortening
+  (search or last turn), an enemy yet to move at half, half the overspeed cost, launches at any chance an order is given at,
+  and score noise on every Ship / Flight decision.
+* **T5f-2, the coverage search** (`ShipMover::enumerateToward`, `FlightDecider::coverageSearch`): the plainest-first search
+  reaches 23 of the 36 hexes within 3 of the Va'Kar for the 4774 Aurora; the aimed search - the same search best-first by
+  how well the hexes left fit the goal and how far the heading is off it and off the facing asked - reaches all 13 others,
+  most at every facing, ~10-15 ms a hex and facing. The decider judges every hex within `FLIGHT_COVERAGE_RANGE` (4) of each
+  target in reach, facing it, no further than the flight's speed less 1 (beyond that a plan rarely has the thrust to face
+  it), as if the flight stood there; asks the best for plans until `coverageGoals` are reached (3 x as many tries at most);
+  and judges what it finds with the rest. Replayed on 4774: Normal reached 4 places in 7 tries, Hard 12 in 26, and both
+  went for the G'Quan's blind side (fire ~102, danger ~0 jinking 1-2; it ran no CCEW) rather than the Va'Kar's rear - the
+  plainest search had never seen the G'Quan in reach. The decision line says "N of M less covered places reached".
+
+**T5f-3 as built (2026-11-19) - BUILT, uncommitted, not play-tested.** Hard only, four more skills (Easy, Normal and legacy
+have them off):
+* `pileOn` (1.0) - flights pile onto a damaged target (the user's ruling): a target's worth to a flight x (1 + the share of
+  its value already lost), the fleet's focus target x (1 + half the skill).
+* `support` (2.0) - mutual support, by initiative: hexes of the flight's own value for each hex beyond `FLIGHT_SUPPORT_RANGE`
+  (4) of the nearest other flight of the bot, while the enemy has flights - in full while they have yet to move (they could
+  fall on a flight caught alone), a quarter once they have (a flight moving after the enemy's fighters knows where they are -
+  "and therefore attack them").
+* `fleetFocus` (0.5) - the fleet's heavy guns on one chosen target (4750 note 5): `MoveDecider::focusTarget` picks, each
+  Movement phase, the enemy ship the fleet's heavy guns could most nearly finish as the units stand (expected damage over
+  what finishing it takes, no more than all of it, times its value - damage in raises the same target's score, so the choice
+  holds); a heavy gun's fire at it counts 1.5 in ShipDecider this turn and next (`focusFactor`), and flights pile on it.
+* `bestReply` - the one-ply look-ahead (5.8: "assume each enemy's best reply"): an enemy yet to move is priced from the
+  worse, for the ship, of flying straight on and closing as near as its speed and one more point allow, stopping a hex short
+  (`ShipDecider::replyHex`) - all its guns, as before; the closer hex is the better shot. **Switched OFF at every level after
+  the ladder** (below): it raises what an enemy closing does to the ship and not what the ship then does to it, so Hard
+  stood off. Kept for a version that prices both sides of the reply.
+* Harness tools: `selfPlayHarness --skill=hard:manoeuvres=swap` (`AIView::$overrides`, harness only) asks a tuning
+  question without editing the levels.
+
+**Gates, 2026-11-19 (T5f-1 to T5f-3):**
+* ShipMover pair with the aimed search: EA + raiders **157 hulls, 8,206 situations, 80,619 plans (583 aimed-search plans,
+  of 30,197 random goals asked - most random hexes a ship cannot end in), 595,328 steps, 0 differences; 1,429,124 server
+  checks**; gravitic set **62 hulls, 33,872 plans (342 aimed), 262,127 steps, 0 differences; 565,294 server checks**.
+* Fire pair at Normal and Easy (`fireHarness --level=`), phases 3 and 1: **0 differences** (the harness's own threshold
+  check made level-aware: Easy has no pulse premium and no launch floor). Orders pair (`ordersHarness --level=`): Easy
+  **0 differences** (46% of its EW points offensive - the half-and-half split), Normal 0 differences.
+* NEW `tests/ai/levelsHarness.php` (DB-free): A the health model (Easy primary alone; Normal / Hard the outer mean, or the
+  section facing the shooter, a destroyed one nothing; a flight's health whatever the level), B `targetsFrom` keeps a
+  worth's weight, C Easy's EW (half OEW on the nearest, no CCEW, a Restricted EW half kept), D the coverage search (Easy
+  never; Normal within its 4; Hard beyond it; what it reaches is new), E the overkill fix (Normal books more fire on a scout
+  than Easy), F Easy's noise is the seed's (Normal seed-free), G the fleet focus picks the damaged ship and draws heavy guns
+  only, H the one-ply reply's geometry. **132 checks.** Mutation pass: **13 of 13 caught** (one - Hard held to Normal's 4
+  goals - only after D was given a per-decision check).
+* `manoeuvreHarness` 662, `hazardsHarness` 14,758, `flagOffHarness`, `cpuLobbyHarness`: green; **replay check 228 passed,
+  0 failed**.
+* **The ladder** (`selfPlayHarness --alternate`, 24x16, mirror fleets, the levels swapping seats every other game; no
+  refused submission, no defect in any game):
+
+  | Pairing (code) | Fleets | Result |
+  |---|---|---|
+  | Normal v legacy (T5f-1) | EA default | Normal ahead 5 of 8 |
+  | Normal v legacy (T5f-2) | EA default | Normal 6 of 8 - **11 of 16 overall (69%)** |
+  | Normal v Easy (T5f-1) | EA default | Normal 7 of 8 |
+  | Normal v Easy (T5f-3) | Brakiri | Normal 8 of 8 - **15 of 16 overall (94%)** |
+  | Hard v Normal (T5f-1/2) | EA default | 4 of 8 |
+  | Hard v Normal (T5f-3, no reply) | EA default | 6 of 8, and again 2 of 8 |
+  | Hard v Normal (T5f-3, no reply) | EA, two flights a side | **8 of 8** |
+  | Hard v Normal (T5f-3 with the reply) | EA default / Brakiri | 4 of 8 / 2 of 8 - the reply switched off |
+  | Hard v Normal (T5f-3, no reply) - 12 processes x 3 | EA default | **16 of 33 - even** (3 games lost to a harness deadlock) |
+  | Hard v Normal (T5f-3, no reply) | Brakiri | 2 of 8 |
+  | Hard without pivots / rolls (`--skill=hard:manoeuvres=swap`) v Normal | Brakiri | 5 of 12 |
+  | Hard without the fleet focus (`--skill=hard:fleetFocus=0`) v Normal | Brakiri | 6 of 12 |
+
+  **Where the levels stand:** Normal beats Easy clearly (15 of 16) and the old T5e bot (11 of 16), so the health fix and
+  Easy's column did what they were for. Hard's edge so far is its FIGHTER play (8 of 8 with two flights a side). In fights
+  between ships Hard is level with Normal on EA fleets, and on Brakiri the full Hard (gravitic pivots + fleet focus) lost 4 of
+  16 while either one taken away came out about even - both are suspects, neither proven at these sample sizes. **Batches of
+  8 games are close to coin flips at this gap** (the same Hard code went 6-2 and then 2-6 on EA fleets); T5f-6 needs batches of
+  30 or more. So the stage's "done when" is met for Normal over Easy and not yet for Hard over Normal.
+* **Found on the way:** with 12 harness processes deleting games at once, `DBManager::deleteGames` hit a MariaDB DEADLOCK
+  (40001) and the process died, leaving game 4911's other rows behind (cleaned since). The harness now retries the delete.
+  Not changed in the engine: on live, deletes run one game load at a time (memory: deleteGames runs on every game.php load).
+* `shipDanger` - the ships' danger weight (MOVE_DANGER_WEIGHT 0.75) as a skill, the same at every level: a knob for T5f-6.
+
+**Next (T5f-4 to T5f-6):** Hard's power management - `PowerDecider` boosts the scanner or the engine with the power of
+one-turn weapons that cannot reach anything this turn, switched back on a turn before the enemy can be in their reach (the
+page's boost rules ported and proven by `ordersOracle`, as the deficit rules were at T3); Hard's extended turns (`ShipMover`,
+EXTENDED_TURNS_PLAN.md, mirror + oracle); then the ladder in batches of 30+ - Hard's pivots on gravitic hulls, the fleet
+focus and `shipDanger` first - until Hard leads Normal by 60% on EA and on Brakiri; then the user's play-test.
+*(Done 2026-11-20 - the three records below.)*
+
+**T5f-4 as built (2026-11-20) - Hard's power management (the user's 4750 note 10). BUILT, uncommitted, not play-tested.** No
+flag, no migration, no new class. The skill `powerBoost` (Hard only; Easy, Normal and legacy have it off - their Initial Orders
+are byte-identical: the orders harness writes the same decisions as before, file for file).
+* **`PowerDecider::boost($view, $plan)`**, called by `TacticalAI::initialOrders` after `plan()` (the deficit rules, unchanged),
+  on the MASKED view - it reads where the enemy is (P2) - and BEFORE `EWDecider::plan`, which then spends a boosted scanner. Per
+  ship whose balance the port answers for (`understands()`) and that is not in deficit:
+  * **Reach** (`reaches()`): each pair of the ship and an enemy is asked as close as both could come this turn - each at its
+    speed plus all the acceleration its thrust buys, and `POWER_REACH_SLACK` (2) hexes for what the bot cannot see (an engine
+    boost) - with the real hit formula (`AIView::estimate`, arc-free) and the BEST case for the shooter: every EW point of its
+    ship locked on, no DEW against it. So a gun goes off only when it surely cannot fire this turn.
+  * **Interception kept** (`idle()`): an interceptor stops one ORDER (`InterceptModel`) - one per enemy gun or launcher that
+    could reach the ship (a pulse gun's `defaultShots` is its pulse count, not its orders) - so that many of the ship's one-turn
+    interceptors stay on, the best intercept rating first. Ruled 2026-11-20 by the implementer: the user's note says nothing of
+    interception, but switching off a Standard Particle Beam (intercept 2) that the enemy's shots need would be a Hard player's
+    mistake.
+  * **Idle guns**: every other one-turn gun the page's Off button allows (`canOffline`: drawing power, on, not locked, not
+    boosted, no fire order; and here no ammunition, no compound mount, not overloading) that reaches no enemy. They pay for
+    boosts, least useful first (damage a turn per point of power), only as many as a level needs - a gun is never switched off
+    for nothing - and the reactor's spare power is spent first.
+  * **What it buys**: a level of the SCANNER first while there is a fight this turn (a loaded gun of either side reaches, or a
+    launcher of the ship's could launch), else the ENGINE; whichever cannot be bought, the other; until neither can. Prices and
+    limits are the page's: `power.js countBoostPowerUsed` ('output+1' = output+1, output+2, ...; a number, that much a level - read
+    from the payload, which an Advanced Engine Module changes), `clickPlus`'s limit (a Scanner's `maxBoostLevel` when above 0;
+    an Engine has none), `canBoost` (switched on; a scanner only the highest-rated - `getHighestSensorsId`). Only an ordinary
+    `Scanner` / `ElintScanner` (every EW system of the ship one of those) and an ordinary `Engine` are boosted (P4).
+  * **"Back on as the enemy nears"** needs nothing more, and the horizon is THIS turn, not "a turn before" as the design text
+    above said (ruled 2026-11-20 by the implementer): `Weapon::calculateLoading` gives a one-turn gun switched off at turn N
+    `turnsloaded` 0, the turn change adds 1, so it is loaded again at N+1 when switched back on - nothing is lost by waiting
+    until it can reach. The bot carries no row over: every turn starts with every gun on.
+  * Not modelled: ARCS (a facing changes in Movement - the same guess EWDecider makes), so a gun out of arc but in range stays
+    on; the JUMP ENGINE is not switched off to pay for boosts (the user's note is about light weapons; the deficit rules already
+    shed it first).
+  * The Initial Orders decision line adds `boosts: scanner +n, engine +n (k idle guns switched off)`.
+* **A boost lasts a turn** (`ShipMover::safeSpeed($share, false)`, `fastestTurnable(false)`, `engineBoost`): ShipDecider judges the
+  safe and the turnable speed on the thrust WITHOUT this turn's engine boost - a speed built on a boost must be handled next turn
+  without it. Identical for every other level (no boost, no difference).
+* **Gates:** `levelsHarness` section I (far: one-turn guns off, the engine boosted, never one gun more than the boosts need,
+  the page balance at or above 0; at 55 hexes the Heavy Lasers reach both ways: the Standard Particle Beams go off, the
+  Interceptors stay on, the scanner is boosted and the EW rows spend the boosted output; near nothing goes off; near a fighter
+  flight no gun that reaches it goes off; the scanner chosen is the page's on hulls with two or three - Tonak, Fwellgon; the safe
+  speed without a boost), 175 checks after T5f-4. Orders pair at Hard (`ordersHarness --level=hard` puts every enemy 30-120 hexes
+  off in half its situations; `ordersOracle.js` clicks every boost in with the page's plus button, checks `canBoost` before each
+  click, and lets an "off" row through on a ship not in deficit only when a boost pays for it - never one more than the deficit
+  and the boosts need): **156 hulls, 936 situations, 187 ships boosted, 320 levels clicked in (33 on scanners), 0 differences**.
+  Normal and Easy: **0 differences, and the decision files byte-identical to the previous session's**. Mutation pass: **8 of 8
+  caught** (an over-buy, an extra gun, the lowest scanner, the reach ignored, a reactor "boost", a cheap price, a multi-turn gun,
+  an already-off gun) - two of them (lowest scanner, reach ignored) only once levelsHarness got the flight and two-scanner cases.
+* **Seen in self-play** (42x30, Hard v Normal, default EA fleets, 59 turns): almost no boosts - the fleets start inside each
+  other's Heavy Laser reach (~90 hexes best case), so no light gun idles that the enemy's shots do not need; a damaged Omega
+  late in the game spent the spare power its deficit left on an engine boost. Larger maps and slow fleets are where it shows.
+
+**T5f-5 as built (2026-11-20) - Hard's extended turns (EXTENDED_TURNS_PLAN.md; plan 5.8: "Hard - yes, where possible"). BUILT,
+uncommitted, not play-tested.** No flag, no migration, no new class.
+* **`ShipMover`, a mirror of the page's extended turns** (movement.js "EXTENDED TURNS"): the BEGIN (`EXTEND_LEFT` /
+  `EXTEND_RIGHT`, the row's own type) when `qualifiesForExtendedTurn` says so - canTurn's every condition but the thrust (a new
+  `$ignoreThrust`), the delay met outright (no agile snap, D7), a cost of at least 2 and a quarter of it in engine thrust (D3);
+  the page offers it by its map icon where a whole turn is unaffordable and by the Make Extended Turn box on a turn's panel
+  otherwise - paid as far as the thrusters and engine allow but a point short of the whole (D2: `click()` now refuses the point
+  that would leave nothing owed), at least a quarter, then committed with what is still owed BY ROLE as its value (the page's
+  JSON). After it no turn, pivot, roll or second begin this turn - every gate asks `extendedForbids` with the row type it would
+  create, against the server's own `Movement::$extendedTurnBlockedTypes` (the mirror pair's server half). The NEXT turn:
+  * the page CANCELS it by itself at activation, after the forced pivot (T19), when it can no longer be completed -
+    `forcedExtendedCancel()` at construction writes the same forced `extendTurnCancel` row ('engineShorted' first, D9; else the
+    payability dry run - `canPayRequirement`, the page's greedy `assignThrust` loop, cheapest thrusters first, the page's ceiling
+    of twice a rating - and then 'thrust' or 'thrusters');
+  * otherwise the COMPLETION (`COMPLETE_EXTENDED`) is the only order until it is made: a turn row with value 'extendedTurn',
+    what was owed mapped onto the thrusters doing each job NOW (a roll since swaps the side role), paid within the ratings if it
+    can be and over them up to the page's ceiling if it cannot (it cannot be put off - R6, the page's test matrix #7; `overthrust()`
+    reports it), shortened by extra thrust like any turn (R5);
+  * no speed change all that turn (R4, `canChangeSpeed`).
+  `unsupportedReason` no longer refuses a ship owing a turn; `state()` carries `'extending'` (a plan that begins one ends where
+  flying on does, so the plan keys carry it); `thrustNextTurn()` is the engine's thrust without this turn's boost.
+  **The searches ask only for what they try** (`searchOptions()`): `options()` - the page's whole list, which the harness compares
+  - asked `can()` of every order on every mover, and the searches threw away the jinks, the pivots and rolls they were not
+  allowed and now the begins: a whole begin payment worked out on every mover of every search, at every level. Same plans (a
+  bench of 36 searches - Omega, Tethys, Olympus Beta, Hyperion at speeds 4-8: 6,549 plans either way), **41% less time** (24.9 s
+  -> 14.6 s on a loaded machine) - so faster than before this stage, a down payment on the T8 decision-time deliverable.
+* **`ShipDecider`** (skill `extendedTurns`, Hard only): the search may begin one (`allowExtendedTurns`), but a plan is dropped
+  when what it leaves owed is more than next turn's engine can pay - the page would cancel it for want of thrust, the thrust paid
+  lost, and the server's tripwire log a cancellation nothing forced (EXTENDED_TURNS_PLAN.md D12). A begin's next-turn terms (and
+  its straight continuation on the board) are judged with the ship turned as the completion will turn it; it costs
+  `MOVE_COST_EXTENDED_TURN` (1 hex) more than a turn, for the thrust owed and the speed it locks. Every level completes a turn
+  owed (the page offers nothing else first) - and so does `AIFallback::straightRows`.
+* **Gates:** `levelsHarness` section J (Hard has plans that begin one at speed 10, an Omega that cannot pay a whole turn; none
+  at speed 20, where the remainder would exceed its 8 thrust; Normal never; a begin's next turn is judged turned): **201 checks**.
+  ShipMover pair: the harness meets every hull with a turn OWED from last turn (payable; its side thrusters lost; the engine
+  destroyed; the engine shorted; rolled since; stern first; thrusters damaged), the walks begin turns at random, the search is
+  asked for one, and the server's own `Movement::validateExtendedTurn` runs ENFORCED on every plan (its tripwire is left out only
+  for the situation's constructed history - a quarter paid whatever the engine, which it then rightly calls a cancellation
+  nothing forced); the oracle replays a begin by whichever page path applies and compares the rows the page writes at activation.
+  EA + raiders: **157 hulls, 9,333 situations, 96,389 plans, 729,994 steps replayed, 0 differences - 10,433 begins, 6,660
+  completions, 4,399 page cancellations; 1,812,025 server checks, 0 failed** (the first run's server half also flagged the
+  constructed history's tripwire and the completions' necessary overthrust - harness rules, both settled above). Gravitic set
+  (Brakiri, Brakiri raiders, raiders): **62 hulls, 3,595 situations, 41,265 plans, 326,045 steps, 0 differences - 8,568 begins,
+  2,913 completions, 1,619 page cancellations; 734,785 server checks, 0 failed**. `levelsHarness` **203 checks** (one more: the
+  fallback completes an owed turn first, then flies its whole speed). Mutation pass: **12 of 14 caught** - ShipMover's quarter,
+  speed lock, roll remap, forced cancel, Engine Shorted, blocked list, completion value, roles and delay by the pair; the payable
+  filter, the turned next turn and the fallback by levelsHarness. Equivalent: `click()`'s "never the last point" (beginExtended's
+  own loop stops a point short - the rule is a backstop), and the dry run's cheapest-thruster order (feasibility unchanged on the
+  tested hulls).
+* **Seen in self-play** (the T5f-6 ladder's games): Hard begins one in ~5% of its ship moves, most at the END of a move -
+  "move x3, extendTurnLeft": the facing holds for this turn's fire and the turn is made first thing next turn, which no ordinary
+  turn can do. Legal (the page's box offers it whenever the ship qualifies) and kept as an advanced move.
+
+**T5f-6 - the ladder (2026-11-20).** `selfPlayHarness --alternate`, 24x16, MIRROR fleets (default EA: Omega, Hyperion, Tethys,
+Aurora flight; Brakiri: Tashkat, Avioki, Halik, Falkosi flight), the levels swapping seats every other game, 8 processes x 4 games
+= 32 games a faction a round; knobs asked with `--skill=hard:...` (AIView::$overrides - nothing in a game sets them). The user,
+2026-11-20: EA and Brakiri are in different power tiers (EA the stronger) - so the two factions are separate targets, never pooled;
+a mirror match cancels the tier itself. No refused submission and no AI defect in any round.
+* **A seat effect** (reported, not investigated - outside this stage): on EA, SLOT 2 won 23 of 32 games of the first round
+  whichever level sat in it (Hard 5 of 16 from slot 1, 12 of 16 from slot 2); on Brakiri 18 of 32. The deployment zones are mirror
+  images (x = -12 facing east, +12 facing west); candidates are the order the bots deploy and submit in, initiative ties, and the
+  hex rows' offset. The alternation cancels it; the tables below also give Hard's rate from each seat and their mean.
+
+  | Round | Hard as | EA (Hard of games, from slot 1 / slot 2) | Brakiri |
+  |---|---|---|---|
+  | A | built (T5f-1..5) | 17 of 32 (53%; 5/16, 12/16) | 18 of 32 (56%; 8/16, 10/16) |
+  | B | `shipDanger` 1.0 (Normal 0.75) - trades only for a profit | 13 of 32 (41%) | 6 of 21 (29% - stopped: clearly worse) |
+  | C | `shipDanger` 0.6 - leans further into a fight | 17 of 32 (53%; 8/16, 9/16) | 19 of 32 (59%; 10/16, 9/16) |
+  | D | C, and no pivots or rolls beyond Normal's swap (`manoeuvres` swap), no fleet focus | 15 of 32 (47%) | 17 of 32 (53%) |
+  | E | C, and fire focus doubled (`focus` 2) | 17 of 32 (53%) | 19 of 32 (59%) |
+  | F | C, and the one-ply reply priced BOTH sides (`bestReply`, rebuilt below) | 13 of 32 (41%) | 16 of 32 (50%) |
+  | G | `shipDanger` 0.45 | **21 of 32 (66%; 11/16, 10/16)** | 18 of 32 (56%) |
+  | H1 | G, and the fleet focus doubled (`fleetFocus` 1.0) | - | 18 of 32 (56%) |
+  | H2 | G, and bolder Hard fighters (`flightDanger` 2.0; Normal 1.5, Hard 3.0) | - | 17 of 32 (53%) |
+  | I | `shipDanger` 0.45 set in AIConfig (G again, no override) - the confirmation | 16 of 32 (50%) | 14 of 32 (44%) |
+
+* **The one-ply reply, rebuilt BOTH sides** (`ShipDecider::worseReply` and its branch in `fireTerms`, the skill `bestReply` -
+  still OFF at every level): an enemy yet to move flies on or closes as near as its speed and a point allow (`replyHex`), whichever
+  is worse for the ship - the ship's fire at it (times what a point of it is worth) against its fire at the ship (times the danger
+  weight and the ship's own worth), BOTH priced where it would end; flying on on a tie; the ship's offence at it and danger from it
+  are then that one's. The T5f-3 version priced only the enemy's fire from the closer hex. `levelsHarness` section K (the rule, a
+  flight that would fly into an Omega's anti-fighter guns flies on - its danger and the ship's offence as without the reply; an
+  Omega closing on the ship's beam gains by it - the danger the reply's) - mutants caught: the T5f-3 rule and an inverted one.
+  Round F: worse than without it (EA 41%, Brakiri 50%) - kept off, the code kept for whoever revisits it.
+* **What the rounds say.** Only one setting is clearly WORSE - Hard trading only for a profit (`shipDanger` 1.0: EA 41%, Brakiri
+  29%) - and the both-sided reply (F) looks worse too. Everything else is one plateau: the danger weight at 0.45 / 0.6 / 0.75
+  gives **54% / 56% / 55%** over 128 / 128 / 64 games; round G's 66% on EA did not repeat in round I (50%) - a 32-game round
+  wanders by about 9 points either way. Over every round but B and F, **Hard won 103 of 192 games on EA (54%) and 140 of 256 on
+  Brakiri (55%) - 243 of 448 together (54%), a lead about two standard errors from even**: Hard IS better than Normal, by a few
+  points, on both fleets. Neither pivots, the fleet focus (0, 0.5, 1), doubled fire focus, bolder fighters nor the reply moved it.
+  The plan's suspects (gravitic pivots, the fleet focus) were not what held Hard back: taking them away cost a little on both.
+* **The stage's "done when" is NOT met** (at T5f-6 - T5f-9 below closes it: the user accepted Hard's lead for the first version and
+  marked T5f and T5 complete): 60% is not reached on either fleet by tuning. Hard and Normal share almost all of their
+  decision code, and Hard's own skills - fighter teamwork, the coverage search, power management, extended turns, pivots - each
+  change few decisions in a 24x16 fight between ships. A real gap needs a decision Normal does not make at all (candidates: the
+  enemy's own decider used to predict where it ends, instead of "straight on"; larger maps, where positioning and power count for
+  more) - a question for the user. **Nothing was changed in the levels by the ladder:** `shipDanger` was set to 0.45 for round I,
+  and set back to 0.75 when round I did not bear it out.
+
+* **Found on the way (reported, not fixed):** `yoluReevaluated/lacannaReev.php` declares `class LacannReeva` but sets `phpclass =
+  "LacannaReev"`, a class that does not exist - so `ShipPayload::buildShip` dies on it (the orders harness with every faction, at
+  every level; a game would too). The all-factions orders pair was run without that faction.
+
+**T5f-7 as built (2026-11-20) - the ENEMY FORECAST. BUILT, uncommitted, not play-tested.** The user, after the T5f-6 report: "I
+would actually love for both Hard and Normal to have some level of movement predictions (to a simpler extent e.g. Normal might only
+consider that a ship might turn once) to anticipate Enemy movement in the way players would to an extent. Also ofc, we only have to
+anticipate enemy ships that come after the ship in Initiative Order (or in same bracket if Sim. Move rule is in place) since we
+already know where ships that moved before us will be." One new class, `EnemyForecast` (autoload regenerated - one line).
+* **Who is forecast:** every enemy SHIP of the bot's masked view that has yet to move this turn (`getLastTurnMoved() < turn`, the
+  test `AIView::atFireTime` uses - one that moved before the bot's ship in initiative stands where it ended; under simultaneous
+  movement one in the same bracket has not moved) and that ShipMover plots. Flights keep "straight on" (FlightDecider's own model
+  of them is unchanged); bases, OSATs, Mindrider drives stay where they are.
+* **How, by the level's new skill `forecast`:** Easy `none` (straight on, as before); Normal `turn` - straight on, or ONE turn
+  either way before any hex of its move or after the last (1 + 2 x (speed + 1) plans, built directly: ShipMover's plainest-first
+  search does not list every one-turn plan before two-manoeuvre ones), whichever brings most of its loaded guns' fire on the bot's
+  units (each gun at the unit it does most to - the real formula, `AIView::estimate`, arcs asked); Hard `full` - the same measure
+  over a wider set: Normal's plans and the first 80 end states of the enemy's own ShipMover search (speed changes, slips, two
+  manoeuvres). Never into a blocked hex or off the map while a plan avoids it (T1b's `MoveDecider::hazard`); ties keep the plainest,
+  straight on first. An owed extended turn is completed first in every plan. `legacy` (the T5e bot) none. Each end hex and facing
+  is priced once. **Hard's measure was first the enemy's TRADE** (its fire less MOVE_DANGER_WEIGHT of the bot's at it, as the bot
+  weighs a move of its own): the T5f-9 audit found it the worst predictor of all and it was dropped - see T5f-9.
+* **Where it is used:** `MoveDecider::orders` builds it once per Movement decision and sets `AIView::$forecast`; `atFireTime`
+  stands each forecast ship at its forecast end instead of straight on - so this turn's fire both ways and next turn's straight
+  continuation (`AIView::ahead` goes on from the forecast end) see it, for every unit the bot moves in that decision. An enemy yet
+  to move still fires with EVERY gun at the ship (ruling 9) - the forecast says from WHERE. The decision line adds "forecast: N
+  enemy ships yet to move, k of them manoeuvring".
+* **An enemy is any hull a player brings** - ShipMover was proven on the bot's own (ready) factions. One it throws on keeps straight
+  on and the others are still forecast (the forecast is advice: before this, an exception anywhere in MoveDecider sent the whole
+  activation to the fallback); the decision line then says "NOT FORECAST (straight on): <hull>: <exception>".
+* **What it does, seen on the test boards:** an enemy that can come about into the bot's own hex is forecast there, for point-blank
+  fire; out of a passing enemy's reach both levels forecast a turn that brings its guns round - Hard, with a slip the one-turn set
+  lacks, more of them.
+* **Tests:** `levelsHarness` section L (Easy and legacy none; Normal and Hard forecast the ship yet to move but not a flight, an
+  enemy that has moved or their own; Normal straight on or one turn, 15 plans for a speed-6 Omega, a turn that brings more fire than
+  flying on; the forecast end blocked - elsewhere; Hard weighs more plans than Normal, finds more fire on the passing board and no
+  less on the point-blank one (no stand-off - RED on the trade build); an enemy ShipMover throws on is left straight on; atFireTime
+  uses it and puts it back) - mutants: the "has moved" test is equivalent (ShipMover refuses a ship with orders this turn,
+  atFireTime asks the same); summing a gun over targets instead of its best one survives (it shows only with two of the bot's
+  ships in reach - a known gap).
+* **Time:** ~0.01 s an enemy ship yet to move at Normal, ~0.1 s at Hard (plan generation 0.05 s, then each end hex priced) - once
+  per Movement decision. T5f-8 bounds it.
+
+**T5f-8 as built (2026-11-20) - decision time, BROUGHT FORWARD from T8. BUILT, uncommitted.** The user, the same day: "Can we add
+Predict enemy AND move forward the decision time-improvements currently in Stage T8 to compensate for the increased work." What
+section 12 had for T8, built:
+* **Profiled first** (Docker, one ship on a battle board with three enemies yet to move): capital hulls 0.2-0.5 s, an Olympus
+  0.6-0.9 s, a Tethys 2.1 s at Normal (492 end states) and 3.4 s at Hard (840): the SEARCH 1.2 / 2.1 s of it (the overthrust
+  search costs as much as the first for 2-35 end states more), this turn's terms 0.4 s, next turn's - a second board - 0.9 s.
+  Next-turn positions are only 17-26% shared between end states, so caching them was not worth it.
+* **Two-pass judging** (`ShipDecider::judgeAll` -> `judgeNow` + `judgeNext`): this turn's terms and the board for every end state,
+  in the search's order; next turn's only for the `MOVE_NEXT_TURN_PLANS` (100) best by this turn's score; an end state not judged
+  whole is no candidate (ties still go to the plainest). Measured on 36 boards (Tethys, Olympus, Hyperion x Normal, Hard x 6): a cap
+  of 20 changed 2 choices (one by 17 hexes of the ship's value), 40, 60 and 100 none; judging time -18% at 100.
+* **A CPU budget per ship decision** (`MOVE_DECISION_SECONDS` 2.5, CPU time by `getrusage` - `AIConfig::cpuSeconds()` - so a
+  process waiting for a CPU is not charged; SMT siblings and all-core clocks still slow its work - see the ladder below): the search
+  stops at 60% of it (`ShipMover::enumerate($limit, $deadline)`, `searchCut` - the
+  plainest plans are found first, straight on always), this turn's terms at 90%, next turn's at 100% - every pass judges at least
+  one plan. A decision cut says so in its tac_ai_log line ("OUT OF TIME (2.1 s): ..."). Hard Tethys 3.4 -> 2.1 s with the same
+  choice (cut at 809 of 840 end states), Normal Tethys 2.1 -> 1.8 s.
+* **The forecast's budget** (`MOVE_FORECAST_SECONDS` 1.0): enemies nearest the bot's units first; once Hard has spent it the rest get
+  Normal's forecast; the first always the level's own.
+* **The self-play harness** prints, per game and level, the ship decisions' count, mean and slowest CPU seconds, how many ran out of
+  time, and the forecasts' mean and slowest. First game on 42x30 (EA, Hard v Normal): Normal 71 decisions, mean 0.74 s, slowest
+  2.10 s (4 cut), forecast mean 0.01 s; Hard 81, mean 0.67 s, slowest 2.16 s (14 cut), forecast mean 0.18 s, slowest 0.35 s.
+* **Harness overrides only:** `ShipDecider::$budget` / `$nextTurnPlans`, `EnemyForecast::$budget` (null = AIConfig's; a budget of 0
+  = none - `levelsHarness` runs without one, so its plans do not depend on the machine).
+* **Tests:** `levelsHarness` section M (a Tethys judged two-pass, an Omega under the cap judged whole as before, two-pass agreeing
+  with judging everything on 24 boards and never a hex below it, a microsecond budget still gives a plan, judging out of time
+  judges the first plan whole, a search out of time offers straight on, the forecast's budget nearest-first) - 8 mutants, all
+  caught. ShipMover pair (Omega, Hyperion, Tethys): 2,140 plans, 0 differences; replay check: 226 passed, 0 failed (2 SKIPPED:
+  games 4752 and 4753 were surrendered by their creator since the record - re-record them to bring them back).
+* **Ruled by the implementer:** the cap at 100, not 60 (every cap of 40 or more agreed on every board; 100 keeps a margin for ~25 ms
+  a decision); CPU time, not wall time (time spent waiting for a CPU is not the decision's); the budget is per SHIP decision
+  (section 12's "a budget per decision") - a simultaneous-movement activation of many ships still adds them up, which T8's review
+  takes on.
+* **Gravitic hulls are the budget's real customers:** alone on the dev machine a Brakiri Tashkat's decision takes 4.0 s at Normal
+  (767 end states) and 6.0 s at Hard (1,110), the search 3.5 / 5.5 s of it - so in a game the budget cuts EVERY Brakiri ship
+  decision, and it flies on its plainest plans. Making the search cheaper is the first item of T8's review (section 12).
+* **A LADDER RUNS WITHOUT THE BUDGET** (`selfPlayHarness --budget=0`, new). The first 42x30 round ran 16 processes on the dev
+  machine (Ryzen 3700X: 8 cores, 16 SMT threads): CPU time per decision rose ~3x (Hard mean 1.8 s against 0.67 s alone) and the
+  budget cut nearly every decision (one game: Hard 57 of 60, Normal 49 of 53; alone: 14 of 81 and 4 of 71) - a starved bot, not the
+  one a game gets. It was stopped after 20 games and discarded. A ladder measures play; the budget's own effect on choices is
+  measured on its own (a Tethys cut at 809 of 840 end states chose as uncut).
+
+**T5f-9 - the ladder on the standard map, and a forecast audit (2026-11-20).** The user: "run on the Standard map size for a better
+comparison of a normal game ... ok to reduce the number you are running as long as the result is still fairly indicative ... If we
+do the above changes and Hard is still returning the same results I'm ok with that for our first version." 42x30, mirror fleets,
+the levels swapping seats, `--budget=0`, 24-32 games a round:
+
+  | Round | Hard as | EA (Hard of games; from slot 1 / slot 2) | Brakiri |
+  |---|---|---|---|
+  | J | T5f-7 + T5f-8 as first built (Hard forecasts the enemy's TRADE) | 17 of 32 (53%; 7/16, 10/16) | 12 of 32 (38%; 6/16, 6/16) |
+  | K | J, Hard forecasting as Normal does (`forecast` turn) | - | 12 of 24 (50%) |
+  | L | J, no forecast at either level | - | 12 of 24 (50%) |
+  | M | the final build: Hard's wider forecast by the enemy's FIRE | 12 of 24 (50%; 8/16, 4/8) | **15 of 24 (62%; 10/16, 5/8)** |
+
+  12 of J's 32 EA games and 6 of its Brakiri ones reached the 40-turn cap (a 42x30 approach is long); no defect in any round.
+* **The forecast audit** (`tests/ai/forecastAudit.php`, DB-free - J's Brakiri drop was under one standard error, and more rounds
+  would not settle it cheaply): 40 random 3-a-side battle boards a faction; each enemy ship's ACTUAL move is its own side's
+  ShipDecider at its level, with its own forecast of ours; our side predicts it straight on, as Normal and as Hard. Mean error of
+  the predicted end hex, over 120 predictions a cell:
+
+  | | straight on | Normal (`turn`) | Hard as first built (trade) | Hard as built (fire, wider set) |
+  |---|---|---|---|---|
+  | Brakiri, Hard's moves | 5.0 | 2.99 (2.81 *) | 3.01 | **2.72** |
+  | Brakiri, Normal's moves | 4.9 | 2.98 | 3.03 | **2.77** |
+  | EA, Hard's moves | 4.5 | 4.19 (3.81 *) | 5.27 - worse than straight on | 3.84 |
+  | EA, Normal's moves | 4.2 | **4.00** | 4.71 | 4.04 |
+
+  (* the second run: Hard's own moves change with its forecast.) Within one hex: straight on 8-19%, Normal 32-39%, the trade
+  22-25%, the final Hard 33-37%. **The trade was the worst predictor of all** - at 9-15 hexes real moves are shaped by closing in
+  and next turn's terms, and the trade prefers stand-offs - so it was dropped; Hard keeps its wider set (the user's "Hard fuller")
+  scored by the enemy's own fire, as accurate as Normal's or better. `levelsHarness` L: "no stand-off" (RED on the trade build) and
+  "the wider set finds more fire than one turn"; mutants of the new scoring caught. The audit predicts the BOT's moves, not a
+  player's - but a player turning to bring guns to bear is what Normal's measure models.
+* **Outcome (the user's bar: "still ... the same results ... ok for our first version"):** with the final build Hard is where it
+  was - **ahead of Normal by a few points, 60% not reliably reached**: EA 50% (M) and 53% (J), Brakiri 62% (M) - its first 60%+ on
+  Brakiri, but one 24-game round wanders by ~10 points (K and L, the same fleets, 50%). The forecast did not cost Hard anything
+  once it predicted by the enemy's fire. Accepted for the first version, as the user ruled; Hard stays apart from Normal by what
+  Normal does not do at all (power, extended turns, pivots, fighter teamwork, the fleet focus, a wider forecast). Decision time in
+  these rounds (CPU, 16 processes, no budget - ~3x a decision alone): EA ships mean 1.1-1.8 s, slowest 6.9 s; Brakiri mean
+  2.8-7.7 s, slowest 17.8 s - the case for T8's search work (section 12).
 
 ---
 
@@ -1427,7 +1973,41 @@ hides the game's CURRENT active ship's rows). What it showed is in the table.
   board evaluation per end state - asked only of the end states whose this-turn score leaves them within
   reach of the best; timings taken on the test instance (live is lsphp on shared hosting, not the Docker
   stack) for fleets of live size, and the self-play harness printing the slowest decision so a regression
-  shows.
+  shows. **BUILT at T5f-8 (2026-11-20, brought forward to pay for the enemy forecast - section 10.7):** the
+  per-ship CPU budget, two-pass judging, the forecast's budget and the harness's timing line. Still for T8:
+  the timings on the test instance for live-sized fleets.
+* **T8: a HOLISTIC REVIEW of decision efficiency** (user, 2026-11-20: "in Stage 8 plan a holistic review
+  of how we can make AI decisions as efficient as possible to keep decisions times reasonable"). The plan:
+  1. **Measure before cutting.** A decision benchmark (DB-free, like `levelsHarness`'s boards) per phase -
+     Deployment, Initial Orders (power, EW, ballistics), Movement (forecast, search, judging), Firing - per
+     level and for live-sized fleets of every ready faction, run on the Docker stack AND the live host
+     (lsphp; its CPU and its 503 memory limit), with a baseline table in this section and a target per
+     phase. Profile with a sampling profiler (xdebug or excimer in a throwaway container), not guesses.
+  2. **Whole-turn cost, not one ship.** What a player waits for is a SUBMISSION: under simultaneous movement
+     one carries every ship of the bot's activation, and each ship has its own budget today. Give the
+     submission a budget and share it between its ships (the T5f-8 per-ship budget is the floor); check
+     `AIConfig::BUDGET_SECONDS` against live's request limits, and wall time against CPU time there.
+  3. **The movement search - FIRST** (the largest single cost for nimble hulls - Tethys 1.2-2.1 s - and above
+     all for GRAVITIC ones: alone on the dev machine a Brakiri Tashkat searches 3.5 s at Normal (767 end
+     states) and 5.5 s at Hard (1,110), a Halik 2.9 / 5.0 s - 85-90% of their decision, so the T5f-8 budget
+     cuts EVERY Brakiri ship decision at 1.5 s of search and the bot flies them on their plainest plans):
+     the overthrust search repeats the whole within-ratings search for 2-35 end states more - one search
+     that carries both, or an overthrust search only from states where a rating stopped a move (mirror-
+     safe, proven by the ShipMover pair); why a gravitic hull's search costs ~2x a plain hull's per end
+     state (the expansion cap, `limit x 12`, may be what bounds it); cheaper mover copies (clone and apply
+     dominate); dominance pruning of end states that are the same but for more delay or less thrust left.
+  4. **Judging and the hit formula:** cheap geometry first (range, arc) and `AIView::estimate` only where it
+     can be non-zero; one cache of hit chances per (shooter position and facing, weapon kind, target
+     position and facing) shared by every ship of a decision and by the forecast, which prices the same
+     enemy guns at the same bot units again and again.
+  5. **The forecast across a turn:** the enemies yet to move are forecast again at every bot activation;
+     keep a forecast until something it priced has moved (the bot's own ships move between activations).
+  6. **The other phases:** FireDecider's engagement table, InterceptModel, EWDecider and PowerDecider's
+     reach test, BallisticDecider - profiled the same way; most were sized for small fleets.
+  7. **Gamedata:** loading is per-ship CPU and the driver loads once per submission - measure the share it
+     takes on live, and whether the AI can work on one load across submissions of the same request.
+  8. **Guard it:** the self-play harness's timing line gets thresholds (the slowest decision over budget, a
+     level's mean over its target) that fail a run, so a regression shows in every ladder.
 
 ---
 

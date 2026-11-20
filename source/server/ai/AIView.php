@@ -47,7 +47,14 @@ class AIView
     //Where TacGamedata::hideStealthShipMovement puts a unit this viewer may not see.
     const HIDDEN_Q = -10000;
 
-    public function __construct(TacGamedata $gamedata, $botId)
+    /* The seat's level and seed (stage T5f): what the bot is able to do (skill()) and what its random choices are drawn
+       from (noise()). A view made without them plays Normal. */
+    public $level = AIConfig::DEFAULT_LEVEL;
+    private $seed = 0;
+    //The enemy unit id the fleet's heavy guns go for this Movement phase (stage T5f-3, the skill 'fleetFocus'), or null.
+    public $focus = null;
+
+    public function __construct(TacGamedata $gamedata, $botId, $level = AIConfig::DEFAULT_LEVEL, $seed = 0)
     {
         $this->gamedata = $gamedata;
         $this->botId = (int)$botId;
@@ -55,6 +62,29 @@ class AIView
         $this->ballistics = ((int)$gamedata->phase === 1);
         $this->team = $gamedata->getPlayerTeam();
         $this->blocked = is_array($gamedata->blockedHexes) ? $gamedata->blockedHexes : array();
+        $this->level = isset(AIConfig::SKILLS[$level]) ? $level : AIConfig::DEFAULT_LEVEL;
+        $this->seed = (int)$seed;
+    }
+
+    /* For the ladder harness only (selfPlayHarness --skill=hard:manoeuvres=swap): level => skill => value, read before
+       AIConfig::SKILLS - a tuning question asked without editing the levels. Nothing in a game sets it. */
+    public static $overrides = array();
+
+    //One of the level's player skills (AIConfig::SKILLS).
+    public function skill($name)
+    {
+        if (isset(self::$overrides[$this->level]) && array_key_exists($name, self::$overrides[$this->level])) return self::$overrides[$this->level][$name];
+        return AIConfig::SKILLS[$this->level][$name];
+    }
+
+    /* A draw from the standard normal distribution, fixed by the seat's seed, the turn and $key - the same question gets
+       the same answer, so a game replays exactly (plan 5.8). The global generators are left alone. */
+    public function noise($key)
+    {
+        $words = unpack('N2', hash('sha256', $this->seed . '|' . $this->turn . '|' . $key, true));
+        $u1 = ($words[1] + 1) / 4294967297;
+        $u2 = ($words[2] + 1) / 4294967297;
+        return sqrt(-2 * log($u1)) * cos(2 * M_PI * $u2);
     }
 
     // ------------------------------------------------------------------ units
@@ -768,9 +798,13 @@ class AIView
         return $cost * max(0, min(100, (float)$unit->calculateCombatValue())) / 100;
     }
 
-    /* The damage that would finish a unit. A flight: every surviving craft. A ship: what is left
-       of its primary structure - the box whose loss destroys it. */
-    public function healthLeft($unit)
+    /* The damage that would finish a unit. A flight: every surviving craft. A ship: what is left of its primary structure -
+       the box whose loss destroys it - and, at a level with the skill 'sectionHealth' (stage T5f; the user's ruling on game
+       4774), the structure of the section a hit goes through first. From $shooter's side when that is given (the sections
+       its bearing hits, shared out by profile as the engine picks among them), else the mean of the outer sections. A
+       destroyed section adds nothing: a hit there goes into the primary. Without the skill - Easy - the primary alone, which
+       made a flight value its shots at a ship about twice too high and left guns unfired at a ship "dead on paper". */
+    public function healthLeft($unit, $shooter = null)
     {
         $left = 0;
         if ($unit instanceof FighterFlight) {
@@ -780,8 +814,42 @@ class AIView
         } else {
             $primary = $unit->getStructureSystem(0);
             if ($primary) $left = $primary->getRemainingHealth();
+            if ($this->skill('sectionHealth')) {
+                $left += ($shooter === null) ? $this->outerStructure($unit) : $this->sectionStructureAt($unit, $unit->getBearingOnUnit($shooter));
+            }
         }
         return max(1, $left);
+    }
+
+    //The mean of what is left of a ship's outer sections' structure, a destroyed one counting 0.
+    private function outerStructure($unit)
+    {
+        $sum = 0;
+        $count = 0;
+        foreach ($unit->systems as $system) {
+            if (!($system instanceof Structure) || (int)$system->location === 0) continue;
+            $count++;
+            if (!$system->isDestroyed()) $sum += $system->getRemainingHealth();
+        }
+        return ($count > 0) ? $sum / $count : 0;
+    }
+
+    /* The outer structure a hit from $bearing (degrees from the ship's facing) goes through: the entries of its hit table
+       whose arc holds the bearing, shared out by profile (exposureAt's choice), each its section's structure left - 0 for a
+       destroyed section, or for an entry the primary takes itself. */
+    private function sectionStructureAt($unit, $bearing)
+    {
+        $weights = 0;
+        $total = 0;
+        foreach ($unit->getLocations() as $loc) {
+            if (!Mathlib::isInArc($bearing, $loc['min'], $loc['max'])) continue;
+            $profile = max(1, (float)$loc['profile']);
+            $weights += $profile;
+            if ((int)$loc['loc'] === 0) continue;
+            $structure = $unit->getStructureSystem($loc['loc']);
+            if ($structure && !$structure->isDestroyed()) $total += $profile * $structure->getRemainingHealth();
+        }
+        return ($weights > 0) ? $total / $weights : $this->outerStructure($unit);
     }
 
     /* How dangerous an enemy is to this fleet where it stands: the most each of its plain guns
@@ -997,16 +1065,20 @@ class AIView
         return new MovementOrder(-1, 'move', $position, 0, 0, $last->speed, $last->heading, $last->facing, false, $turn, 0, 0);
     }
 
+    /* Stage T5f-7: unit id => MovementOrder - where an enemy ship yet to move is FORECAST to end this turn (EnemyForecast, the
+       level's skill 'forecast'), set by MoveDecider for its decision. atFireTime() stands it there instead of straight on. */
+    public $forecast = array();
+
     /* Run $work with the board as it should stand at THIS turn's Fire phase, as seen from the
        Movement phase: a unit that has moved this turn where it ended, any other (but $except) where
-       flying straight on takes it. Put back afterwards, whatever happens; only estimate() may be
-       asked inside. */
+       flying straight on takes it - or, an enemy ship with a forecast, where it is forecast to end
+       (stage T5f-7). Put back afterwards, whatever happens; only estimate() may be asked inside. */
     public function atFireTime(callable $work, array $except = array())
     {
         $moved = array();
         foreach (array_merge($this->myUnits(), $this->enemies()) as $unit) {
             if (in_array((int)$unit->id, $except, true) || $unit->getLastTurnMoved() >= $this->turn) continue;
-            $row = self::straightOn($unit, $this->turn);
+            $row = isset($this->forecast[(int)$unit->id]) ? $this->forecast[(int)$unit->id] : self::straightOn($unit, $this->turn);
             if ($row === null) continue;
             $unit->movement[] = $row;
             $moved[] = $unit;

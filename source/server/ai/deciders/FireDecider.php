@@ -48,7 +48,7 @@ class FireDecider
     {
         $gamedata->prepareForPlayer(); //the mask a human in this seat plays behind; also fills what the page reads
 
-        $view = new AIView($gamedata, $botId);
+        $view = new AIView($gamedata, $botId, AIConfig::seatLevel($seat), AIConfig::seatSeed($seat));
         return self::entries($view, self::plan($view));
     }
 
@@ -107,7 +107,7 @@ class FireDecider
             foreach ($view->weapons($unit) as $mount) {
                 $weapon = $mount['weapon'];
                 $options = array();
-                $minimum = self::minimumChance($weapon, true); //the least it is ever fired at; holdSlow() asks for more
+                $minimum = self::minimumChance($weapon, true, $view->skill('pulsePremium')); //the least it is ever fired at; holdSlow() asks for more
                 $modes = $view->modes($weapon);
 
                 foreach ($enemies as $enemy) {
@@ -123,7 +123,7 @@ class FireDecider
 
                 $intercept = self::interceptRating($weapon);
                 $unitGuns[] = array('unit' => $unit, 'weapon' => $weapon, 'fighter' => $mount['fighter'], 'options' => $options, 'intercept' => $intercept,
-                    'heavy' => self::isHeavy($weapon));
+                    'heavy' => self::isHeavy($weapon) && $view->skill('heavyFocus')); //Easy draws its heavy guns as light ones (stage T5f)
             }
 
             $held += self::holdBack($view, $unit, $unitGuns);
@@ -172,7 +172,7 @@ class FireDecider
                         continue;
                     }
 
-                    $score = self::score(array('damage' => $adds) + $shot, $state[$targetId], $maxThreat, $gun['heavy']);
+                    $score = self::score(array('damage' => $adds) + $shot, $state[$targetId], $maxThreat, $gun['heavy'], (float)$view->skill('focus'));
                     if ($score > $bestScore) {
                         $bestScore = $score;
                         $bestGun = $index;
@@ -257,13 +257,14 @@ class FireDecider
 
     /* The least hit chance (percent) a weapon is fired at. A shot costs the weapon its reload, so
        a slow weapon asks for more (AIConfig::FIRE_MIN_CHANCE_BY_LOAD). $parting: the floor for a
-       slow weapon whose target is drawing away - nothing better is coming. */
-    public static function minimumChance(Weapon $weapon, $parting = false)
+       slow weapon whose target is drawing away - nothing better is coming. $pulsePremium: the level's skill (stage T5f - Easy
+       fires slow pulse weapons at the plain floors). */
+    public static function minimumChance(Weapon $weapon, $parting = false, $pulsePremium = true)
     {
         $load = (int)$weapon->getLoadingTime();
         if ($load <= 1) return AIConfig::FIRE_MIN_CHANCE;
         //a slow PULSE weapon's damage grows much faster than its chance: both its floors are higher (user ruling, 2026-11-19)
-        $premium = ($weapon->damageType === 'Pulse') ? AIConfig::FIRE_PULSE_PREMIUM : 0;
+        $premium = ($pulsePremium && $weapon->damageType === 'Pulse') ? AIConfig::FIRE_PULSE_PREMIUM : 0;
         if ($parting) return AIConfig::FIRE_MIN_CHANCE_PARTING + $premium;
 
         $floor = AIConfig::FIRE_MIN_CHANCE;
@@ -322,7 +323,7 @@ class FireDecider
         foreach ($slow as $index) {
             $weapon = $guns[$index]['weapon'];
             $wait = AIConfig::FIRE_HOLD_CONFIDENCE * (1 - 1 / max(1, (int)$weapon->getLoadingTime()));
-            $floor = self::minimumChance($weapon);
+            $floor = self::minimumChance($weapon, false, $view->skill('pulsePremium'));
 
             foreach ($guns[$index]['options'] as $targetId => $shot) {
                 $a = $now[$index][$targetId];
@@ -347,15 +348,15 @@ class FireDecider
     /* What a shot is worth, given what is already booked on its target. Damage beyond
        FIRE_OVERKILL times the target's remaining health counts for nothing. A heavy gun is drawn to a
        target already booked far more than a light one (FIRE_FOCUS_HEAVY): the fleet's heavy fire goes
-       in together, to take a ship down. */
-    public static function score(array $shot, array $target, $maxThreat, $heavy = false)
+       in together, to take a ship down. $focusShare: the level's (stage T5f - Easy has no focus-fire bonus at all). */
+    public static function score(array $shot, array $target, $maxThreat, $heavy = false, $focusShare = 1.0)
     {
         $room = $target['health'] * AIConfig::FIRE_OVERKILL - $target['booked'];
         $useful = min($shot['damage'], max(0, $room));
         if ($useful <= 0) return 0;
 
         $worth = $useful / $target['health'] * $target['value'];
-        $focus = 1 + ($heavy ? AIConfig::FIRE_FOCUS_HEAVY : AIConfig::FIRE_FOCUS) * min(1, $target['booked'] / $target['health']);
+        $focus = 1 + $focusShare * ($heavy ? AIConfig::FIRE_FOCUS_HEAVY : AIConfig::FIRE_FOCUS) * min(1, $target['booked'] / $target['health']);
         $threat = 1 + ($maxThreat > 0 ? AIConfig::FIRE_THREAT_WEIGHT * $target['threat'] / $maxThreat : 0);
 
         return $worth * $focus * $threat;
