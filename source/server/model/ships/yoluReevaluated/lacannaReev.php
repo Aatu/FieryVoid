@@ -1,5 +1,5 @@
 <?php
-class LacannReeva extends OSAT
+class LacannaReeva extends OSAT
 {
 
 	function __construct($id, $userid, $name,  $slot)
