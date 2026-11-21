@@ -271,7 +271,12 @@ class AIView
         if ($weapon->isOfflineOnTurn($this->turn)) return 'offline';
         if ($weapon->stowed) return 'stowed';
         if ($weapon->hasRamProw()) return 'ramming prow';
-        if ($weapon->exclusive || $weapon->linkedFiringGroup !== null) return 'linked firing';
+        if ($weapon->exclusive) return 'exclusive weapon';
+        /* A firing link (weaponManager.getLinkedFiringBlock). The SAME-TARGET kind (no spread: the Thunderbolt's and the Armed
+           Missile Shuttle's twin racks - both missiles of one craft at one unit) is kept by BallisticDecider (linkKey); before
+           stage T6a it was refused here, and the Thunderbolts of game 4774 never launched a missile. An angular spread (the Vree
+           turrets) is not modelled. */
+        if ($weapon->linkedFiringGroup !== null && $weapon->linkedFiringSpread !== null) return 'linked firing';
         if ($weapon->firedOnTurn($this->turn) || count($this->ordersThisTurn($weapon)) > 0) return 'already has an order this turn';
         if (!$this->loaded($weapon)) return 'not loaded';
         if (count($this->modes($weapon)) == 0) return 'no round the bot uses';
@@ -1022,23 +1027,9 @@ class AIView
        question Initial Orders asks (EWDecider): a facing changes in Movement, a distance much less. */
     public function estimate($shooter, Weapon $weapon, $target, $needArc = true)
     {
-        //⚠️ see the header: with officers aboard, pricing a Piercing shot may spend an Expert Gunner's bonus
-        if (TacGamedata::$officersPresent && $weapon->damageType === 'Piercing') return 0;
-
-        $fc = $weapon->fireControl;
-        $index = ($target instanceof FighterFlight) ? 0 : (($target->shipSizeClass < 2) ? 1 : 2);
-        if (!isset($fc[$index])) return 0;
-
-        $distance = $shooter->getHexPos()->distanceTo($target->getHexPos());
-        if ($weapon->range != 0 && $distance > $weapon->range) return 0;
-        if ($needArc && !$this->onArc($shooter, $weapon, $target)) return 0;
-
-        $order = new FireOrder(-1, 'normal', $shooter->id, $target->id, $weapon->id, -1, $this->turn, $weapon->firingMode, 0, 0, $weapon->defaultShots, 0, 0, null, null, null);
-        try {
-            $answers = $this->hitBase($weapon, $shooter, $target, $order);
-        } catch (Throwable $e) {
-            return 0;
-        }
+        $found = $this->hitAnswers($shooter, $weapon, $target, $needArc);
+        if ($found === null) return 0;
+        list($answers, $distance) = $found;
 
         $total = 0;
         foreach ($answers as $answer) {
@@ -1046,6 +1037,45 @@ class AIView
             if ($chance > 0) $total += $answer['weight'] * $this->expected($weapon, $shooter, $target, $chance, $answer['loc'], $distance);
         }
         return $total;
+    }
+
+    /* The chance to hit $target with $weapon from where $shooter stands now - the hit table's entries weighed as estimate() weighs
+       them; 0 where estimate() finds no shot at all. Stage T6g: a flight that must fire this turn (FlightDecider) needs a place
+       where a gun of it reaches FireDecider's floor, which an expected damage above 0 does not say. (shot() cannot answer this:
+       it is cached by unit, gun and target, not by where the unit stands.) */
+    public function chanceOf($shooter, Weapon $weapon, $target, $needArc = true)
+    {
+        $found = $this->hitAnswers($shooter, $weapon, $target, $needArc);
+        if ($found === null) return 0;
+        $chance = 0;
+        $weights = 0;
+        foreach ($found[0] as $answer) {
+            $chance += $answer['weight'] * max(0, min(100, $answer['needed']));
+            $weights += $answer['weight'];
+        }
+        return ($weights > 0) ? $chance / $weights : 0;
+    }
+
+    //estimate()'s and chanceOf()'s tests and the server's hit table for the pairing: array(answers, distance), or null for no shot.
+    private function hitAnswers($shooter, Weapon $weapon, $target, $needArc)
+    {
+        //⚠️ see the header: with officers aboard, pricing a Piercing shot may spend an Expert Gunner's bonus
+        if (TacGamedata::$officersPresent && $weapon->damageType === 'Piercing') return null;
+
+        $fc = $weapon->fireControl;
+        $index = ($target instanceof FighterFlight) ? 0 : (($target->shipSizeClass < 2) ? 1 : 2);
+        if (!isset($fc[$index])) return null;
+
+        $distance = $shooter->getHexPos()->distanceTo($target->getHexPos());
+        if ($weapon->range != 0 && $distance > $weapon->range) return null;
+        if ($needArc && !$this->onArc($shooter, $weapon, $target)) return null;
+
+        $order = new FireOrder(-1, 'normal', $shooter->id, $target->id, $weapon->id, -1, $this->turn, $weapon->firingMode, 0, 0, $weapon->defaultShots, 0, 0, null, null, null);
+        try {
+            return array($this->hitBase($weapon, $shooter, $target, $order), $distance);
+        } catch (Throwable $e) {
+            return null;
+        }
     }
 
     // ------------------------------------------------------------------ next turn

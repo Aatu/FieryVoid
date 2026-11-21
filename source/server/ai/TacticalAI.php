@@ -63,12 +63,39 @@ class TacticalAI
            own player, which is why the fallback below reads nothing a mask touches). */
         $entries = null;
         $summary = null;
+        $status = '';
+        $posture = null; //stage T6b: this turn's count of turns in a row the side could not fight, to keep once the submission is in
+
+        /* Stage T6g: the turn each of the bot's flights on the board last fired (tac_ai_state 'shots' - the load brings back this
+           turn's fire orders only), and so the ones that must fire this turn should the side be down to its fighters. Read before
+           the deciders run (they read Posture::$mustShoot) and kept with this phase's orders once the submission is in. */
+        $flights = array();
+        foreach (AIFallback::ownUnits($gamedata, $botId) as $unit) {
+            if ($unit instanceof FighterFlight && !$unit->isDestroyed() && $unit->getTurnDeployed($gamedata) <= (int)$turn) $flights[] = (int)$unit->id;
+        }
+        $shotsBefore = (isset($state['shots']) && is_array($state['shots'])) ? $state['shots'] : array();
+        $shots = Posture::shots($shotsBefore, $flights, array(), $turn);
+        Posture::$mustShoot = Posture::mustShoot($shots, $turn);
         if ($refusals == 0 && !in_array((int)$phase, self::$without, true)) {
             try {
                 if ($phase == -1) $entries = DeployDecider::orders($gamedata, $botId, $seat);
                 else if ($phase == 1) {
+                    Posture::$last = null;
                     $entries = self::initialOrders($gamedata, $botId, $seat);
                     $summary = self::$lastSummary;
+                    /* SURRENDER (stage T6b - the user's ruling of 2026-11-21): none of the side's units can damage any enemy for
+                       the second turn running, while it is behind on value, from turn 3 on. The ordinary surrender path, as a
+                       player's; the orders just decided are not needed. */
+                    if (Posture::$last !== null) {
+                        $run = (isset($state['posture']['turn']) && (int)$state['posture']['turn'] === (int)$turn - 1) ? (int)$state['posture']['run'] : 0;
+                        $posture = array('turn' => (int)$turn, 'run' => Posture::run(Posture::$last, $run));
+                        $summary .= '; ' . Posture::describe(Posture::$last);
+                        if (Posture::surrender(Posture::$last, $turn, $run)) {
+                            $entries = array_map(array('AIOrderBuilder', 'entry'), AIFallback::ownUnits($gamedata, $botId));
+                            $status = 'SURRENDERED';
+                            $summary = 'SURRENDERED: no unit could damage an enemy for ' . $posture['run'] . ' turns, ' . Posture::describe(Posture::$last);
+                        }
+                    }
                 }
                 else if ($phase == 2) {
                     $entries = MoveDecider::orders($gamedata, $botId, $seat);
@@ -86,18 +113,21 @@ class TacticalAI
             }
         }
         if ($entries === null) $entries = AIFallback::orders($gamedata, $botId);
+        $shots = Posture::shots($shots, $flights, Posture::firing($entries), $turn); //stage T6g: a launch or a shot this phase
         $ships = AIOrderBuilder::build($entries);
         unset($gamedata, $entries); //the load is the big thing in memory, and process() makes its own
 
-        $error = self::submit($gameid, $botId, $turn, $phase, $activeship, $ships, '');
+        $error = self::submit($gameid, $botId, $turn, $phase, $activeship, $ships, $status);
 
         if ($error === null) {
             if ($summary !== null) $db->aiLog($gameid, $botId, $turn, $phase, 'decision', $summary, AIConfig::LOG_CAP);
-            if ($refusals > 0) {
+            if ($refusals > 0 || $posture !== null || $shots != $shotsBefore) {
                 unset($state['stall']);
+                if ($posture !== null) $state['posture'] = $posture;
+                $state['shots'] = $shots;
                 $db->setAiState($gameid, $botId, $turn, $state);
             }
-            return self::result('submitted');
+            return self::result($status === 'SURRENDERED' ? 'surrendered' : 'submitted');
         }
 
         $state['stall'] = array('at' => $at, 'n' => $refusals + 1);
@@ -121,6 +151,13 @@ class TacticalAI
 
         $gamedata->prepareForPlayer();
         $view = new AIView($gamedata, $botId, AIConfig::seatLevel($seat), AIConfig::seatSeed($seat));
+        //Can the side still fight (stage T6b)? Asked first, on the masked view; play() keeps the count of turns and surrenders
+        Posture::assess($view);
+        /* Stage T6c: ships that leave the battle - their jump points declared now, flown into this turn, left through next turn.
+           Before Hard's boosts, EW and launches: a ship in a power deficit keeps its jump engine on by switching something else off
+           (PowerDecider::keepOn, which balances the books without boosts - so none may have been bought yet), and what follows must
+           see that. */
+        $jumps = JumpDecider::plan($view, new Hazards($view), $power);
         //Hard's boosts (stage T5f-4): on the masked view, as they depend on where the enemy is - and before EW, which spends a boosted scanner
         $power = PowerDecider::boost($view, $power);
         $ew = EWDecider::plan($view, $remembered);
@@ -144,6 +181,10 @@ class TacticalAI
         foreach (AIFallback::ownUnits($gamedata, $botId) as $unit) {
             $entry = AIOrderBuilder::entry($unit);
             $id = (int)$unit->id;
+            if (isset($jumps[$id])) {
+                $engineId = (int)$jumps[$id]['engine']->id;
+                $entry['systems'][$engineId] = array('id' => $engineId, 'fireOrders' => array(JumpDecider::declaration($unit, $jumps[$id], $gamedata->turn)));
+            }
             if (isset($ew[$id])) $entry['EW'] = $ew[$id];
             if (isset($power[$id])) {
                 foreach ($power[$id] as $row) {
@@ -166,7 +207,8 @@ class TacticalAI
             . ($p['off'] > 0 ? '; power: ' . $p['off'] . ' systems switched off' : '')
             . ($p['short'] > 0 ? ', ' . $p['short'] . ' ships still short' : '')
             . ($p['scanner'] + $p['engine'] > 0 ? '; boosts: scanner +' . $p['scanner'] . ', engine +' . $p['engine'] . ' (' . $p['idle'] . ' idle guns switched off)' : '')
-            . ($b['launches'] > 0 ? '; ballistics: ' . $b['launches'] . ' launchers at ' . $b['targets'] . ' enemies' : '');
+            . ($b['launches'] > 0 ? '; ballistics: ' . $b['launches'] . ' launchers at ' . $b['targets'] . ' enemies' : '')
+            . (count(JumpDecider::$last) > 0 ? '; ' . implode('; ', JumpDecider::$last) : '');
 
         return $entries;
     }

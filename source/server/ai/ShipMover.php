@@ -58,7 +58,12 @@
  * activation (extendTurnCancel, forced - written here at construction, after the forced pivot); either way no speed change
  * all that turn. The search tries a begin only when asked (allowExtendedTurns); an owed completion always comes first.
  *
- * WHAT IT DOES NOT: a ship's jinking, turning into a pivot, an emergency roll, jump-out,
+ * JUMPING OUT (stage T6c) as the page's Jump Out button gives it (canJumpOut / doJumpOut): standing in an open vortex's hex,
+ * having entered it through its mouth (the step that put the unit there, earlier turns included), the JUMP_OUT row ends the
+ * move - every gate refuses after it, and nothing is left to travel. Only for the vortex the caller names (vortexForJumpOut);
+ * the search never tries it.
+ *
+ * WHAT IT DOES NOT: a ship's jinking, turning into a pivot, an emergency roll,
  * half-phasing, contraction, an Expert Graviton Controller's rotation. It never orders one. Units it
  * refuses outright are listed in unsupportedReason(): remote-controlled flights (Hunter-Killers -
  * AutomatedMovement may be driving them), bases, OSATs, mines, terrain, Mindrider drives, and a unit
@@ -93,6 +98,9 @@ class ShipMover
     const EXTEND_LEFT = 'extendTurnLeft';
     const EXTEND_RIGHT = 'extendTurnRight';
     const COMPLETE_EXTENDED = 'completeExtendedTurn';
+    /* Stage T6c: the page's Jump Out button (movement.js canJumpOut / doJumpOut) - leave the battle through the vortex the caller
+       names (vortexForJumpOut), standing in its hex having entered it through its mouth. The row's own type. */
+    const JUMP_OUT = 'jumpout';
 
     //Thruster directions, as Thruster::$direction and a row's requiredThrust index them.
     const DIR_ANY = 0;
@@ -138,6 +146,7 @@ class ShipMover
     private $pivotCost = 0;
     private $rollCost = 0;
     private $carried = array();    //thruster id => thrust it carried before any row plotted here (Engine Shorted's push)
+    private $vortex = null;        //the jump vortex (SpawnJumpPoint) a JUMP_OUT leaves through (vortexForJumpOut, stage T6c)
 
     //apply()'s extra thrust meaning "as much as can be placed" - a turn delay is never bought below 1 (click()).
     const SHORTEN_MAX = 99;
@@ -248,6 +257,14 @@ class ShipMover
         $row['forced'] = true;
         $row['commit'] = true;
         $this->rows[] = $row;
+    }
+
+    /* Stage T6c: the vortex a JUMP_OUT would leave through - a unit of the board (the bot's own jump point, which MoveDecider
+       finds), or null. The search never tries a jump-out; only a caller that names the vortex and asks for it gets one. */
+    public function vortexForJumpOut($vortex)
+    {
+        $this->vortex = $vortex;
+        return $this;
     }
 
     /* Stage T5e: enumerate() also tries the pivot arrows / a roll from now on. Off by default - the search is otherwise
@@ -410,7 +427,7 @@ class ShipMover
     {
         $options = array();
         foreach (array(self::ACCEL, self::DECEL, self::TURN_LEFT, self::TURN_RIGHT, self::SLIP_LEFT, self::SLIP_RIGHT, self::MOVE, self::JINK,
-            self::PIVOT_LEFT, self::PIVOT_RIGHT, self::ROLL, self::EXTEND_LEFT, self::EXTEND_RIGHT, self::COMPLETE_EXTENDED) as $action) {
+            self::PIVOT_LEFT, self::PIVOT_RIGHT, self::ROLL, self::EXTEND_LEFT, self::EXTEND_RIGHT, self::COMPLETE_EXTENDED, self::JUMP_OUT) as $action) {
             if ($this->can($action)) $options[] = $action;
         }
         return $options;
@@ -493,6 +510,8 @@ class ShipMover
             $offers[self::EXTEND_RIGHT] = $this->qualifiesExtended(true);
             $offers[self::COMPLETE_EXTENDED] = $this->canCompleteExtended();
         }
+        //stage T6c: canJumpOut - for the vortex this mover was given (the harness gives the page the same board)
+        $offers[self::JUMP_OUT] = $this->canJumpOut();
         return $offers;
     }
 
@@ -516,6 +535,7 @@ class ShipMover
             case self::EXTEND_LEFT: return $this->beginExtended(false);
             case self::EXTEND_RIGHT: return $this->beginExtended(true);
             case self::COMPLETE_EXTENDED: return $this->completeExtended((int)$extraThrust);
+            case self::JUMP_OUT: return $this->jumpOut();
         }
         return false;
     }
@@ -1169,6 +1189,7 @@ class ShipMover
     //canChangeSpeed
     private function canChangeSpeed()
     {
+        if ($this->hasJumpedOut()) return false; //stage T6c: a jump-out ends the move (every gate of the page asks)
         //EXTENDED TURNS (R4, D6): no speed change at all the turn after a begin - completed, cancelled or not yet either
         if ($this->owedExtended() !== null) return false;
         if ($this->adrift || $this->engineDestroyed) return false;
@@ -1216,6 +1237,7 @@ class ShipMover
        argument, which qualifiesForExtendedTurn asks with. */
     private function canTurn($ignoreThrust = false)
     {
+        if ($this->hasJumpedOut()) return false;
         if ($this->extendedForbids('turnleft')) return false; //(both sides are on the list: the answer is the same for either)
         if ($this->adrift || $this->engineDestroyed) return false;
         if (!$this->gravitic && $this->isRolling()) return false;
@@ -1254,9 +1276,83 @@ class ShipMover
         return $this->isExtendedOutstanding() && $this->extendedCancelReason() === null;
     }
 
+    // --------------------------------------------------------------- jumping out (stage T6c)
+
+    //hasJumpedOut: a jump-out ordered this turn - it ends the unit's movement (getRemainingMovement, every manoeuvre gate)
+    public function hasJumpedOut()
+    {
+        foreach ($this->rows as $row) {
+            if ($row['turn'] == $this->turn && $row['type'] === self::JUMP_OUT) return true;
+        }
+        return false;
+    }
+
+    /* canJumpOut, for the vortex this mover was given (the page asks every vortex on the board - getVortexInHex; the bot names
+       its own). What unsupportedReason refuses (destroyed, terrain, a mine, riding or carrying another unit) never gets a mover;
+       checkHasUncommitted is never true here - every row this class plots is paid and committed. */
+    private function canJumpOut()
+    {
+        if ($this->vortex === null) return false;
+        if ($this->hasJumpedOut()) return false;
+        if ($this->extendedForbids(self::JUMP_OUT)) return false; //an extended turn owed is completed first
+        return $this->usableVortex();
+    }
+
+    /* getUsableVortex: the unit stands in an OPEN vortex's hex (getVortexInHex: a SpawnJumpPoint - never the blue exit - spawned
+       no later than this turn (it forms on the turn it is declared), not closed, with a deploy row to stand in), and the step that
+       put it there was travelling into the vortex's mouth: (the vortex's facing + 3) % 6. */
+    private function usableVortex()
+    {
+        $vortex = $this->vortex;
+        if (!($vortex instanceof SpawnJumpPoint) || $vortex instanceof SpawnJumpPointExit) return false;
+        if ($vortex->spawned !== null && (int)$vortex->spawned !== -1 && (int)$vortex->spawned > $this->turn) return false; //still forming
+        if (!empty($vortex->removed) && $vortex->removedTurn !== null && $this->turn >= (int)$vortex->removedTurn) return false; //closed
+        $move = $vortex->getLastMovement();
+        if (!$move || !$move->position) return false;
+        $at = Movement::toOffset($move->position);
+        $last = $this->rows[count($this->rows) - 1];
+        if ((int)$at->q !== (int)$last['q'] || (int)$at->r !== (int)$last['r']) return false;
+
+        $entry = self::entryDirectionOf($this->rows);
+        return $entry !== null && $entry === (((int)$move->facing + 3) % 6);
+    }
+
+    /* getEntryDirection: the direction of the step that last carried a path INTO the hex it ends in - walking back through every
+       row, earlier turns included (a unit already sitting in the hex is judged on the step that put it there); null when there is
+       none, or the hex before it is not a neighbour (it was put there). $rows: arrays with 'q' and 'r', oldest first. */
+    public static function entryDirectionOf(array $rows)
+    {
+        $rows = array_values($rows);
+        $count = count($rows);
+        if ($count < 2) return null;
+        $here = new OffsetCoordinate((int)$rows[$count - 1]['q'], (int)$rows[$count - 1]['r']);
+        for ($i = $count - 1; $i > 0; $i--) {
+            $from = new OffsetCoordinate((int)$rows[$i - 1]['q'], (int)$rows[$i - 1]['r']);
+            if ($from->equals($here)) continue;
+            for ($direction = 0; $direction < 6; $direction++) {
+                if ($from->moveToDirection($direction)->equals($here)) return $direction;
+            }
+            return null;
+        }
+        return null;
+    }
+
+    /* doJumpOut: a row that marks the unit as leaving - position, facing, heading and speed copied from the row before it, the
+       vortex's id as its value (what the server re-validates against). It moves nothing and costs nothing. */
+    private function jumpOut()
+    {
+        if (!$this->canJumpOut()) return false;
+        $last = $this->rows[count($this->rows) - 1];
+        $row = $this->newRow(self::JUMP_OUT, $last['q'], $last['r'], $last['speed'], $last['heading'], $last['facing'], array(null, null, null, null, null), (int)$this->vortex->id);
+        $row['commit'] = true;
+        $this->rows[] = $row;
+        return true;
+    }
+
     //canJink, a flight adding a level: the thrust for it, and the jinking limit
     private function canJink()
     {
+        if ($this->hasJumpedOut()) return false;
         if ($this->extendedForbids('jink')) return false;
         if (!$this->flight || $this->adrift) return false;
         if ($this->remainingEngineThrust() < $this->jinkCost) return false;
@@ -1326,6 +1422,7 @@ class ShipMover
        after turning into a pivot; not while rolling unless gravitic; the pivot's cost in thrust left. */
     private function canPivot($right)
     {
+        if ($this->hasJumpedOut()) return false;
         if ($this->flight) return false; //a flight's pivots are the Fire phase's (combat pivots): not plotted here
         if ($this->extendedForbids($right ? 'pivotright' : 'pivotleft')) return false;
         if ($this->adrift || $this->engineDestroyed) return false;
@@ -1346,6 +1443,7 @@ class ShipMover
        unless gravitic. */
     private function canRoll()
     {
+        if ($this->hasJumpedOut()) return false;
         if ($this->flight) return false;
         if ($this->extendedForbids('roll')) return false;
         if ($this->adrift || $this->engineDestroyed) return false;
@@ -1718,6 +1816,7 @@ class ShipMover
     //getRemainingMovement
     private function remainingMovement()
     {
+        if ($this->hasJumpedOut()) return 0; //stage T6c: ordering a jump-out really does end the move
         $used = 0;
         foreach ($this->rows as $row) {
             if ($row['turn'] != $this->turn || !$row['commit']) continue;

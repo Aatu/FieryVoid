@@ -107,6 +107,16 @@ class AIOrderBuilder
         );
     }
 
+    /* A jump point declared with a Jump Engine (stage T6c), as weaponManager.createJumpPointOrder builds it: a ballistic order at
+       no unit, the hex in x / y, and the FACING of the vortex's mouth in the firing mode (mode = facing + 1). */
+    public static function jumpPoint($shooterid, $weaponid, $turn, $facing, OffsetCoordinate $hex, $shots, $damageclass)
+    {
+        $order = self::fire($shooterid, -1, $weaponid, $turn, (int)$facing + 1, $shots, $damageclass, 'ballistic');
+        $order['x'] = (int)$hex->q;
+        $order['y'] = (int)$hex->r;
+        return $order;
+    }
+
     //The entries -> the ship array a Phase::process() takes.
     public static function build(array $entries)
     {

@@ -13,7 +13,9 @@
  *
  * WHAT IT LAUNCHES (principle P4):
  *   - missile racks fed from an Ammunition Magazine (AmmoMissileRackS and everything built on it,
- *     a fighter's rack included), with the plain damaging rounds only (AIConfig::BALLISTIC_ROUNDS);
+ *     a fighter's rack included), with the plain damaging rounds only (AIConfig::BALLISTIC_ROUNDS) -
+ *     twin racks bound by a same-target firing link (a Thunderbolt's two missiles go at one unit,
+ *     weaponManager.getLinkedFiringBlock) since stage T6a: linkKey keeps every launch of a link on one target;
  *   - any other ballistic weapon with nothing special about it (an Ion Torpedo).
  *   Left alone: hex-targeted ballistics (Energy Mines), the old missile launchers that carry their
  *   own rounds (FighterMissileRack), jump engines, and every special round.
@@ -73,6 +75,7 @@ class BallisticDecider
         //Every launcher's legal launches: per target, one per usable round, best first.
         $ledger = array();
         $guns = array();
+        $linked = array(); //firing link (linkKey) => the target its group is committed to this turn
         foreach ($view->myUnits() as $unit) {
             foreach ($view->weapons($unit) as $mount) {
                 $weapon = $mount['weapon'];
@@ -99,7 +102,11 @@ class BallisticDecider
                     $options[$enemy->id] = $shots;
                 }
 
-                if (count($options) > 0) $guns[] = array('unit' => $unit, 'weapon' => $weapon, 'fighter' => $mount['fighter'], 'magazine' => $magazine, 'options' => $options);
+                if (count($options) == 0) continue;
+                /* No order of this turn stands on a twin to bind it: TacGamedata::hideSystemFireOrders strips every launch of
+                   the current turn from Initial Orders, the owner's own included - the links start free, as on the page. */
+                $guns[] = array('unit' => $unit, 'weapon' => $weapon, 'fighter' => $mount['fighter'], 'magazine' => $magazine, 'options' => $options,
+                    'link' => self::linkKey($unit, $weapon, $mount['fighter']));
             }
         }
 
@@ -119,7 +126,7 @@ class BallisticDecider
         while (count($guns) > 0) {
             $best = null;
             foreach ($enemies as $enemy) {
-                $salvo = self::bestSalvo($model, $view, $enemy, $guns, $ledger, $volleys[$enemy->id], $state[$enemy->id], $maxThreat);
+                $salvo = self::bestSalvo($model, $view, $enemy, $guns, $ledger, $volleys[$enemy->id], $state[$enemy->id], $maxThreat, $linked);
                 if ($salvo !== null && ($best === null || $salvo['perLaunch'] > $best['perLaunch'])) $best = $salvo;
             }
             if ($best === null) break;
@@ -130,6 +137,7 @@ class BallisticDecider
             foreach ($best['launches'] as $launch) {
                 list($index, $shot) = $launch;
                 $gun = $guns[$index];
+                if ($gun['link'] !== null) $linked[$gun['link']] = $targetId; //its twin may now launch at this unit only
                 self::draw($ledger, $gun['magazine'], $shot);
                 $volleys[$targetId]['entries'][] = array('unit' => $gun['unit'], 'weapon' => $gun['weapon'], 'shot' => $shot, 'ballistic' => true);
                 $plan[] = array(
@@ -166,12 +174,14 @@ class BallisticDecider
        shot), 'gain', 'perLaunch'). Candidates are the launchers that can reach the target, each
        with the best round its magazine can still give, best first; a salvo is the first k of them
        that the magazines can all supply together. */
-    private static function bestSalvo(InterceptModel $model, AIView $view, $target, array $guns, array $ledger, array $volley, array $state, $maxThreat)
+    private static function bestSalvo(InterceptModel $model, AIView $view, $target, array $guns, array $ledger, array $volley, array $state, $maxThreat, array $linked = array())
     {
         $targetId = (int)$target->id;
         $candidates = array();
         foreach ($guns as $index => $gun) {
             if (!isset($gun['options'][$targetId])) continue;
+            //a launcher whose firing link is committed to another unit (its twin launched there) may not launch here
+            if ($gun['link'] !== null && isset($linked[$gun['link']]) && $linked[$gun['link']] !== $targetId) continue;
             $candidates[] = array($index, $gun['options'][$targetId]);
         }
         if (count($candidates) == 0) return null;
@@ -258,6 +268,17 @@ class BallisticDecider
             }
         }
         return $out;
+    }
+
+    // ------------------------------------------------------------------ firing links (stage T6a)
+
+    /* The firing link a launcher shares with its twins, or null: the craft (a flight's - each fighter's group is its own) or
+       the ship, and the group's name - weaponManager.getLinkedFiringBlock's scope. Only the same-target kind gets this far
+       (AIView::rackBlock): every launch of one link goes at one unit. */
+    private static function linkKey($unit, Weapon $weapon, $fighter)
+    {
+        if ($weapon->linkedFiringGroup === null) return null;
+        return ($fighter !== null ? 'craft ' . spl_object_id($fighter) : 'unit ' . (int)$unit->id) . ':' . $weapon->linkedFiringGroup;
     }
 
     // ------------------------------------------------------------------ the magazine ledger

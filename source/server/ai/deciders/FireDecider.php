@@ -20,7 +20,9 @@
  * fires only at FIRE_MIN_CHANCE_BY_LOAD or better (minimumChance) - a slow PULSE weapon
  * FIRE_PULSE_PREMIUM higher still (2026-11-19: its damage grows much faster than its chance) - and
  * waits when a turn closer is clearly better (holdSlow: the real formula again where both units
- * will be, range penalty and plasma range damage included).
+ * will be, range penalty and plasma range damage included). A target drawing away lowers the floor
+ * to FIRE_MIN_CHANCE_PARTING - by loading time too since stage T6a (game 4774: never under 34% for a
+ * 3- or 4-turn gun).
  *
  * THE ENEMY'S INTERCEPTION (InterceptModel). A shot is worth what it adds to its target's volley
  * once the target's interceptors have been given out as the server gives them - so the bot neither
@@ -28,10 +30,11 @@
  * chance it keeps after interception.
  *
  * THE INTERCEPTION RESERVE - its own. A gun with an intercept rating that is given no order is used
- * by the server to intercept (Firing::automateIntercept), so holding one back is simply not ordering it:
- *   - a unit with ballistics coming at it holds back its best interceptors, FIRE_RESERVE_PER_BALLISTIC
- *     for each incoming shot;
- *   - any interceptor with no offensive shot of FIRE_INTERCEPTOR_MIN_CHANCE or better stays on defence.
+ * by the server to intercept (Firing::automateIntercept), so holding one back is simply not ordering it.
+ * Since stage T6a (the user's notes on game 4774, holdBack): a gun with an offensive shot of
+ * FIRE_INTERCEPTOR_MIN_CHANCE (15%) or better always fires; one under it stays on defence only while
+ * interceptable enemy fire can reach its unit (a laser cannot be intercepted) - one for each such order
+ * it could stop from its arc, the unit's interceptors with no offensive shot at all covering first.
  *
  * Ballistics are BallisticDecider's (Initial Orders). NOT YET: called shots, and every weapon
  * AIView::weaponBlock turns away.
@@ -102,6 +105,7 @@ class FireDecider
         //Every gun's legal shots, best mode against each target.
         $guns = array();
         $held = 0;
+        $lastStand = Posture::lastStand($view); //stage T6g: a flight that must fire this turn keeps no gun back to intercept
         foreach ($view->myUnits() as $unit) {
             $unitGuns = array();
             foreach ($view->weapons($unit) as $mount) {
@@ -126,7 +130,7 @@ class FireDecider
                     'heavy' => self::isHeavy($weapon) && $view->skill('heavyFocus')); //Easy draws its heavy guns as light ones (stage T5f)
             }
 
-            $held += self::holdBack($view, $unit, $unitGuns);
+            if (!($lastStand && isset(Posture::$mustShoot[(int)$unit->id]))) $held += self::holdBack($view, $unit, $unitGuns);
             foreach ($unitGuns as $gun) {
                 if (count($gun['options']) > 0) $guns[] = $gun;
             }
@@ -201,6 +205,30 @@ class FireDecider
             unset($guns[$bestGun]);
         }
 
+        /* Stage T6g: a flight that must fire this turn (the side down to its fighters, Posture::$mustShoot) fires every gun it has a
+           shot for, at the target it would do most to - into the interceptors too, which the greedy pick above declines (a shot they
+           swallow adds nothing): the turn must not go by without a shot. Its guns were kept back for none above either. */
+        $forced = 0;
+        if ($lastStand && count(Posture::$mustShoot) > 0) {
+            foreach ($guns as $index => $gun) {
+                if (!isset(Posture::$mustShoot[(int)$gun['unit']->id])) continue;
+                $pick = null;
+                foreach ($gun['options'] as $targetId => $shot) {
+                    if ($pick === null || $shot['damage'] > $gun['options'][$pick]['damage']) $pick = $targetId;
+                }
+                if ($pick === null) continue;
+                $shot = $gun['options'][$pick];
+                $plan[] = array(
+                    'unit' => $gun['unit'], 'weapon' => $gun['weapon'], 'fighter' => $gun['fighter'],
+                    'target' => $view->gamedata->getShipById($pick),
+                    'mode' => $shot['mode'], 'chance' => $shot['chance'], 'orders' => $shot['orders'], 'shots' => $shot['shots'],
+                    'damageclass' => $shot['damageclass'], 'damage' => 0, 'score' => 0
+                );
+                unset($guns[$index]);
+                $forced++;
+            }
+        }
+
         //each weapon back in the mode its order is in: the volleys were valued with every candidate in turn
         foreach ($plan as $shot) {
             if ((int)$shot['weapon']->firingMode !== (int)$shot['mode']) $shot['weapon']->changeFiringMode((int)$shot['mode']);
@@ -214,7 +242,8 @@ class FireDecider
         }
         self::$lastSummary = count($plan) . ' weapons at ' . count($targets) . ' of ' . count($enemies) . ' enemies; ' . $held . ' held to intercept'
             . ($kept > 0 ? '; ' . $kept . ' slow weapons kept for a better shot' : '')
-            . ($intercepted > 0 ? '; ' . $intercepted . ' slow weapons not fired into the interceptors' : '');
+            . ($intercepted > 0 ? '; ' . $intercepted . ' slow weapons not fired into the interceptors' : '')
+            . ($forced > 0 ? '; ' . $forced . ' fired by flights that must fire (the side down to its fighters)' : '');
 
         return $plan;
     }
@@ -265,10 +294,10 @@ class FireDecider
         if ($load <= 1) return AIConfig::FIRE_MIN_CHANCE;
         //a slow PULSE weapon's damage grows much faster than its chance: both its floors are higher (user ruling, 2026-11-19)
         $premium = ($pulsePremium && $weapon->damageType === 'Pulse') ? AIConfig::FIRE_PULSE_PREMIUM : 0;
-        if ($parting) return AIConfig::FIRE_MIN_CHANCE_PARTING + $premium;
 
+        //the parting floors by loading time too (stage T6a, game 4774: never below the user's line for a slow gun)
         $floor = AIConfig::FIRE_MIN_CHANCE;
-        foreach (AIConfig::FIRE_MIN_CHANCE_BY_LOAD as $turns => $chance) {
+        foreach (($parting ? AIConfig::FIRE_MIN_CHANCE_PARTING : AIConfig::FIRE_MIN_CHANCE_BY_LOAD) as $turns => $chance) {
             if ($load >= $turns) $floor = $chance;
         }
         return $floor + $premium;
@@ -333,7 +362,7 @@ class FireDecider
                 else $hold = ($shot['chance'] < $floor && $b >= $a);            //a poor shot that is not getting worse
                 if ($hold) unset($guns[$index]['options'][$targetId]);
                 //the floor the shot was let through on, which plan() holds a slow gun to again once interception is counted
-                else $guns[$index]['options'][$targetId]['floor'] = ($shot['chance'] < $floor) ? AIConfig::FIRE_MIN_CHANCE_PARTING : $floor;
+                else $guns[$index]['options'][$targetId]['floor'] = ($shot['chance'] < $floor) ? self::minimumChance($weapon, true, $view->skill('pulsePremium')) : $floor;
             }
 
             if (count($guns[$index]['options']) == 0) {
@@ -373,57 +402,101 @@ class FireDecider
     }
 
     /* The interception reserve for one unit: empties the offensive options of the guns it holds
-       back (by reference). Returns how many were held. */
+       back (by reference). Returns how many were held.
+
+       Stage T6a (the user's notes on game 4774, AIConfig::FIRE_INTERCEPTOR_MIN_CHANCE): a gun with an offensive shot of
+       FIRE_INTERCEPTOR_MIN_CHANCE or better always fires it, against missiles too - "where Defensive and Offensive priorities are
+       relatively balanced, choose offence". A gun under that stays on defence only while there is something for it to stop:
+       one interceptor for each interceptable enemy order that can reach the unit (interceptableIncoming) - the unit's
+       interceptors with no offensive shot at all cover what they can first (they are on defence anyway: an Omega's
+       Interceptors before any of its Particle Beams), then the guns under the bar, best intercept rating first, each one only
+       for an order it could really stop: a shot from inside its arc (the server's own test, Firing::isLegalIntercept - a port
+       battery cannot help against fire from starboard). */
     private static function holdBack(AIView $view, $unit, array &$unitGuns)
     {
-        $held = 0;
-
-        //no offensive shot good enough: stay on defence
+        $idle = array();       //interceptors with no offensive shot: they intercept whatever is decided here
+        $candidates = array();
         foreach ($unitGuns as $index => $gun) {
-            if ($gun['intercept'] <= 0 || count($gun['options']) == 0) continue;
+            if ($gun['intercept'] <= 0) continue;
+            if (count($gun['options']) == 0) {
+                $idle[] = $gun['weapon'];
+                continue;
+            }
             $bestChance = 0;
             foreach ($gun['options'] as $shot) $bestChance = max($bestChance, $shot['chance']);
-            if ($bestChance < AIConfig::FIRE_INTERCEPTOR_MIN_CHANCE) {
-                $unitGuns[$index]['options'] = array();
-                $held++;
-            }
+            if ($bestChance < AIConfig::FIRE_INTERCEPTOR_MIN_CHANCE) $candidates[] = $index;
         }
+        if (count($candidates) == 0) return 0;
 
-        //ballistics on their way to this unit: its best interceptors wait for them
-        $incoming = self::incomingBallistics($view, $unit);
-        $want = (int)ceil($incoming * AIConfig::FIRE_RESERVE_PER_BALLISTIC);
-        if ($want <= 0) return $held;
-
-        $interceptors = array();
-        foreach ($unitGuns as $index => $gun) {
-            if ($gun['intercept'] > 0) $interceptors[] = $index;
+        $open = self::interceptableIncoming($view, $unit); //the orders nothing covers yet
+        if (count($open) == 0) return 0;
+        foreach ($idle as $weapon) {
+            for ($gun = 0; $gun < max(1, (int)$weapon->guns) && count($open) > 0; $gun++) self::cover($view, $weapon, $open);
         }
-        usort($interceptors, function ($a, $b) use ($unitGuns) {
+        if (count($open) == 0) return 0;
+
+        usort($candidates, function ($a, $b) use ($unitGuns) {
             if ($unitGuns[$a]['intercept'] !== $unitGuns[$b]['intercept']) return $unitGuns[$b]['intercept'] - $unitGuns[$a]['intercept'];
             return $a - $b;
         });
-
-        foreach ($interceptors as $index) {
-            if ($want <= 0) break;
-            $want--;
-            if (count($unitGuns[$index]['options']) == 0) continue; //already on defence, and counted
+        $held = 0;
+        foreach ($candidates as $index) {
+            if (count($open) == 0) break;
+            $weapon = $unitGuns[$index]['weapon'];
+            if (!self::cover($view, $weapon, $open)) continue; //nothing it could stop: it fires
+            for ($gun = 1; $gun < max(1, (int)$weapon->guns) && count($open) > 0; $gun++) self::cover($view, $weapon, $open);
             $unitGuns[$index]['options'] = array();
             $held++;
         }
-
         return $held;
     }
 
-    //Ballistic shots launched this turn at $unit, as far as this viewer is shown them.
-    private static function incomingBallistics(AIView $view, $unit)
+    //Take the first order of $open that $weapon could intercept off the list (by reference); false when there is none.
+    private static function cover(AIView $view, Weapon $weapon, array &$open)
     {
-        $count = 0;
+        foreach ($open as $key => $order) {
+            if (!Firing::isLegalIntercept($view->gamedata, $weapon, $order)) continue;
+            unset($open[$key]);
+            return true;
+        }
+        return false;
+    }
+
+    /* The enemy ORDERS this Fire phase that $unit's interceptors could stop - what a player looks at before keeping a gun
+       back: every gun of a visible enemy that is loaded, can be intercepted (a laser cannot: Weapon::$uninterceptable, nor a
+       ram or a field: $doNotIntercept), and has a shot at the unit as both stand (arc, range and the real formula -
+       AIView::estimate), as a throwaway order a gun; and every ballistic launched at the unit this turn that can be
+       intercepted, the order itself. Fire is simultaneous, so whom each enemy gun will choose is not known: any gun that could
+       is counted. A list of FireOrders. */
+    public static function interceptableIncoming(AIView $view, $unit)
+    {
+        $orders = array();
+        foreach ($view->enemies() as $enemy) {
+            foreach ($view->mounts($enemy) as $mount) {
+                $weapon = $mount['weapon'];
+                if (!$view->plainGun($weapon, $mount['fighter']) || !$view->loaded($weapon)) continue;
+                if (!self::interceptable($weapon)) continue;
+                if ($view->estimate($enemy, $weapon, $unit, true) <= 0) continue;
+                for ($gun = 0; $gun < max(1, (int)$weapon->guns); $gun++) {
+                    $orders[] = new FireOrder(-1, 'normal', $enemy->id, $unit->id, $weapon->id, -1, $view->turn, $weapon->firingMode, 0, 0, $weapon->defaultShots, 0, 0, null, null, null);
+                }
+            }
+        }
         foreach ($view->gamedata->ships as $shooter) {
             if ($shooter->team == $unit->team) continue;
             foreach ($shooter->getAllFireOrders($view->turn) as $fire) {
-                if ($fire->type === 'ballistic' && (int)$fire->targetid === (int)$unit->id) $count += max(1, (int)$fire->shots);
+                if ($fire->type !== 'ballistic' || (int)$fire->targetid !== (int)$unit->id) continue;
+                $weapon = $shooter->getSystemById($fire->weaponid);
+                if ($weapon instanceof Weapon && !self::interceptable($weapon)) continue;
+                for ($shot = 0; $shot < max(1, (int)$fire->shots); $shot++) $orders[] = $fire;
             }
         }
-        return $count;
+        return $orders;
+    }
+
+    //Can a shot of this weapon, in its current mode, be intercepted at all (Firing::isLegalIntercept's first tests)?
+    private static function interceptable(Weapon $weapon)
+    {
+        return !$weapon->doNotIntercept && !$weapon->uninterceptable && !$weapon->hextarget;
     }
 }

@@ -9,7 +9,11 @@ same day, T5f-7 (the ENEMY FORECAST - Normal and Hard anticipate the moves of en
 brought forward from T8: two-pass judging and a CPU budget per ship) BUILT, and T5f-9 run - the ladder on the standard 42x30 map
 (final build: Hard 50% on EA, 62% on Brakiri over 24 games each) and a forecast audit that changed Hard's forecast; Hard's lead
 ACCEPTED for the first version as the user ruled; T5f COMPLETE (user, 2026-11-20: "let's mark Stage T5f (and Stage T5 overall)
-as complete for now") - uncommitted, not play-tested; section 10.7.** T6 onward not started. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
+as complete for now") - committed by the user as 074e28ff1; section 10.7.** **Stage T6 STARTED 2026-11-21** with the user's
+feedback on turns 3-4 of game 4774 and their rulings on surrender, jumping out and ramming: T6a (the 4774 notes), T6b (surrender),
+T6c (jumping out), T6e (Hard sheds a drive past half its boxes) and T6g (a side down to its fighters must keep shooting) BUILT,
+uncommitted, not play-tested; T6d (ramming) and T6f (the done-when) to come; section 10.8.
+T7 onward not started. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
 layer, which uses this for battles against NPCs - see its section 7) and `STRATEGIC_AI_PLAN.md` (what
 NPC empires do on the campaign map).
 
@@ -330,8 +334,13 @@ Nothing in v1 (fallback). Systems that act in phase 5 get handlers with their fa
 
 ### 5.7 Withdrawal and surrender
 
-* When the bot's remaining fleet value falls below `WITHDRAW_RATIO` of the enemy's and the trend is
-  negative, posture becomes withdraw: open range, keep firing. v1 then surrenders through the
+*Superseded by the user's rulings of 2026-11-21 (section 10.8): no fleet-wide withdrawal posture in v1 - "most ships fight until
+they are destroyed or the game is won". A side surrenders only when none of its units can damage any enemy for 2 turns running
+while it is behind on value (never on turns 1-2); a ship jumps out when it is expected to be destroyed next turn and its own fire
+can't change that, has no usable weapon, or cannot get back into the fight (never with a Jump Engine more than 50% damaged).*
+
+* ~~When the bot's remaining fleet value falls below `WITHDRAW_RATIO` of the enemy's and the trend is
+  negative, posture becomes withdraw: open range, keep firing.~~ v1 then surrenders through the
   ordinary surrender path once out of effective range or when nothing can still fight.
 * Stage T6 adds leaving by jump point for jump-capable ships (the existing jump-out flow), which is
   what the campaign prefers (survivors return to the map).
@@ -370,7 +379,7 @@ the notes), Easy lacks most of them, Hard adds what is still to build. Built at 
 | Anticipate where an enemy ship yet to move will end (user, 2026-11-20: "both Hard and Normal to have some level of movement predictions (to a simpler extent e.g. Normal might only consider that a ship might turn once)") - BUILT at T5f-7 | - (straight on) | straight on or ONE turn at any point of its move, whichever brings most of its guns' fire on the bot's units | the same measure over a wider set: Normal's plans and 80 of the enemy's own (speed changes, slips, two manoeuvres). (Weighing the enemy's trade instead was built first and dropped: the worst predictor in the T5f-9 audit) |
 | Power: light weapons that cannot reach anything switched off early, the scanner or engine boosted, the weapons back on as the enemy nears (10) | - | - | yes - BUILT at T5f-4 (interceptors the enemy's shots need stay on) |
 | Pivots and rolls (user, 2026-11-19: "still very rare, advanced types of movement ... probably only set Hard opponents to use Pivots or Rolls. Perhaps Normal could in the case of rolling to swap thrusters to turn in a direction it wanted next turn too, but otherwise no") - BUILT at T5e | stops one carried over, starts none | stops one carried over; rolls only to swap its side thrusters for the turn it wants next turn | stops one carried over; pivots (started and stopped the same turn) and rolls where the trade is worth it: hiding a damaged side, swinging guns round, the gravitic pivot, the thruster swap |
-| Ramming (11) | never | last resort under the Desperate rule (T6) | the same |
+| Ramming (11) | never | last resort under the Desperate rule (T6): no usable weapon OR primary structure at or below 25%, only at a target it can reach this turn (user, 2026-11-21) | the same |
 
 ---
 
@@ -498,7 +507,7 @@ unchanged) and the self-play harness.
 | **T3 EW and power** ✅ BUILT (uncommitted, 10.5) | `EWDecider`, `PowerDecider` (negative-power handling) | Bot EW passes `validateEW` in every self-play turn; hit rates rise measurably versus T2 |
 | **T4 Ballistics and fighters** ✅ COMPLETE (uncommitted, 10.6) | `BallisticDecider`; flight tactics (escort, strike, intercept) - built on `ShipMover`, not `AutomatedMovement`, whose rows the page never checked | Missile and carrier fleets fight sensibly |
 | **T5 Movement search** ✅ COMPLETE (user, 2026-11-20; from T5e on uncommitted, 10.7) | `MoveDecider` scoring, range bands, terrain (drifting too) and mine avoidance, pivots and rolls, gravitic hulls; closing with the enemy (the T2 pursuit question, ruled into T5); moving to bring the most direct-fire weapons into arc within the turn AND the most ballistic launchers to bear for next turn's launch (user, game 4701) | Hard beats Normal beats Easy in self-play ladders at >= 60% - Normal over Easy met (15 of 16); Hard over Normal a few points (50-62% on 42x30), ACCEPTED by the user for the first version (T5f-9) |
-| **T6 Withdrawal** | posture logic, surrender, jump-out; **last-resort ramming** (user, 2026-11-19 - section 10.7, note 11) | No game runs past the turn cap for lack of a decision |
+| **T6 Withdrawal** (STARTED 2026-11-21, 10.8 - T6a/b/c/e BUILT) | surrender, jump-out (the user's rulings of 2026-11-21 - no fleet-wide withdrawal posture in v1); **last-resort ramming** (user, 2026-11-19 - section 10.7, note 11); the user's notes on game 4774 turns 3-4 (T6a) | No game runs past the turn cap for lack of a decision |
 | **T7 Specials** | handler registry; handlers faction by faction; readiness list grows | Each added faction meets the section 7 criteria |
 | **T8 Skirmish release** | server `FleetChecker` port + parity test; `FleetComposer` (auto-compose as the default for an empty CPU slot); level and personality pickers; lobby and games-list display of CPU seats; docs page; **a decision-time budget for live** (user, 2026-11-19: "reasonable decision time is important for live server" - section 12; the per-ship budget and two-pass judging were BROUGHT FORWARD to T5f-8 on 2026-11-20); **a HOLISTIC REVIEW of decision efficiency** (user, 2026-11-20: "in Stage 8 plan a holistic review of how we can make AI decisions as efficient as possible to keep decisions times reasonable" - the plan for it is in section 12) | Every auto-composed fleet across all ready factions and a range of point values passes the Fleet Checker; every decision within the budget on live-sized fleets, timed on the live host; Beta on live via `betaTesters`, then the flag |
 | **T9 Campaign wiring** | section 9 | A campaign battle against a Raider fleet is played manually and harvested |
@@ -1924,6 +1933,291 @@ the levels swapping seats, `--budget=0`, 24-32 games a round:
   Normal does not do at all (power, extended turns, pivots, fighter teamwork, the fleet focus, a wider forecast). Decision time in
   these rounds (CPU, 16 processes, no budget - ~3x a decision alone): EA ships mean 1.1-1.8 s, slowest 6.9 s; Brakiri mean
   2.8-7.7 s, slowest 17.8 s - the case for T8's search work (section 12).
+
+### 10.8 Stage T6 - withdrawal (started 2026-11-21)
+
+T5e and T5f were committed by the user as 074e28ff1. The stage's "done when" (section 10): **no game runs past the turn cap for
+lack of a decision**. Begun at the user's request together with their feedback on turns 3-4 of game 4774.
+
+**The user's notes on game 4774, turns 3-4 (2026-11-21)** - human G'Quan + Va'Kar + Frazi v CPU (Normal) Omega x2 + Tethys +
+Aurora and Thunderbolt flights; turns 3-4 were played on 2026-11-19 by the T5e / early-T5f bot. The user's "Turn 4" is turn 3's
+Fire phase, which the page shows at the start of turn 4. Every point was replayed against the CURRENT code before anything changed
+(scratch `g4774_fire.php` / `g4774_io.php`: the game wound back to the phase, each weapon's reload rebuilt from `tac_fireorder` -
+the loader brings back only the turns it is asked for).
+
+| # | The user's note | What the bot did, and why | Done |
+|---|---|---|---|
+| 1 | Game 4774 is the basis | - | - |
+| 2 | The Thunderbolts didn't launch their missiles on turn 3 though they had the chance at the Va'Kar | Turns 3 and 4: 3-4 hexes off the Va'Kar, in arc, 2 Basic missiles a craft - and `AIView::rackBlock` answered "linked firing" for every rack: the Thunderbolt's twin racks share a `linkedFiringGroup` (both missiles of one craft at one unit - weaponManager.getLinkedFiringBlock), and the bot left every linked weapon alone (P4). BallisticDecider never saw them | **Built (T6a)**: a SAME-TARGET link (no `linkedFiringSpread`: the Thunderbolt and the Armed Missile Shuttle) is offered; `BallisticDecider::linkKey` keeps every launch of one craft's link on one unit. An angular-spread link (the Vree turrets) is still left alone. Replayed: turn 3, all 12 missiles at the Va'Kar |
+| 3 | Omega #2 fired a Heavy Laser at 20% - lower than a 4-turn weapon should normally fire. Why? | Turn 3 Omega #2 at the G'Quan 20%, turn 4 Omega #1 at the Va'Kar 24%: `FireDecider::holdSlow` judged each target to be DRAWING AWAY (a turn on, the same shot worse), and a slow gun's floor then dropped to a flat `FIRE_MIN_CHANCE_PARTING` 15 - against the user's ruling of 2026-11-15 ("1-33% for a 3 or 4 turn recharge would be unwise") | **Built (T6a)**: the parting floor goes by loading time like the plain one - 2 turns 20%, 3 or more 34% (a slow pulse gun +10 on both, as before). Replayed: both Heavy Lasers hold |
+| 4 | Only 2 of 12 Standard Particle Beams fired at the Va'Kar on turn 4 (turn 3); too many held for interception though the danger was low - lasers can't be intercepted; humans fire 1-turn weapons at 15%+ | Two causes. (a) Omega #2 fired 2 of its 6 port beams: the Va'Kar was "dead on paper" under the old primary-only health - **already fixed by T5f's health fix** (all 6 fire when replayed). (b) Omega #1's 6 beams (25%) and the Tethys's 2 Light Pulses (25%) were held by a flat `FIRE_INTERCEPTOR_MIN_CHANCE` 30, whatever was coming | **Built (T6a)**: 15% (the user's figure) - a gun with a shot that good always fires, missiles coming or not ("where Defensive and Offensive priorities are relatively balanced, choose offence"); a gun under it is held only for interceptable enemy fire that can reach its unit (`FireDecider::interceptableIncoming`: loaded guns in arc and range that are not `uninterceptable` / `doNotIntercept`, and ballistics launched at it), one gun per order it could stop from its arc (`Firing::isLegalIntercept`), the unit's interceptors with no shot covering first. Replayed: turn 3, 24 weapons, 0 held |
+
+**The user's notes on jumping out (2026-11-21):** "Ships should jump to hyperspace when they can no longer contribute to the battle
+effectively (e.g. lost all weapons or are so damaged they can easily be destroyed) to preserve their remaining points value, this is
+however quite rare and most ships fight until they are destroyed or the game is won. A damaged Jump Engine trying to open a jump
+point can also destroy the ship, so if more than 50% damage is taken the Jump should not be attempted and Jump Engine can be
+deactivated for extra power by Hard CPU opponents." (The failure chance IS the share of the drive's boxes lost -
+`JumpEngine::getJumpFailureChance`.)
+
+**User rulings, 2026-11-21 (asked, all the recommended options):**
+* **Surrender only when it can't fight:** a CPU side surrenders when none of its units can damage any enemy (no usable weapon, or
+  nothing can get within reach) for 2 turns running, while it is behind on fleet value. Never on turns 1-2. Otherwise it fights
+  on to the last unit.
+* **Jump out on "expected kill next turn":** a ship leaves when the enemy guns that can reach it are expected to deal more than
+  what is left of it (primary + the section facing them) and its own fire can't change that - or it has no usable weapon, or it
+  cannot get back into the fight (off the map, cannot brake or turn). Never with a Jump Engine more than 50% damaged; Hard may
+  switch such a drive off for power.
+* **Ram (Desperate rule, Normal and Hard; Easy never) when it has no usable weapon OR its primary structure is at or below 25%** -
+  and only at a target it can reach this turn.
+* **No fleet-wide withdrawal posture in v1** (section 5.7's "open range, keep firing" is dropped): each ship keeps its own best
+  trade; hopeless ships jump out one by one; a side that cannot fight surrenders.
+
+**Seen first (self-play game 5749, kept; EA mirror with Thunderbolts on both sides, 24x16):** both flights launched all 12 missiles
+on turn 2 through the real server path; the game PASSED but ran to the 40-turn cap. The losing side's Omega (primary 6 of 60, a
+section gone, its forward thrusters destroyed so it could not brake, Jump Engine intact) was 190 hexes off the map at speed 6; its
+Thunderbolts (2 craft, missiles spent) sat 10 hexes from the winner, jinking too hard for any of its guns (every chance under 1%),
+for 20 turns, neither side firing. The engine's own end (every pair of enemies 100+ hexes apart, `TacGamedata::isFinished`) never
+came: the flight was close. Exactly the case this stage is for.
+
+**T6 sub-stages:**
+
+| | Deliverable |
+|---|---|
+| T6a ✅ BUILT | The user's 4774 notes: twin racks (same-target firing links), parting floors by loading time, the interception reserve at 15% and only against interceptable fire it can stop |
+| T6b ✅ BUILT | "Can it still fight?" per unit and side (`Posture` - the best-case reach of every usable gun, as PowerDecider's reach test); SURRENDER by the ruling above, through the ordinary surrender path (`TacticalAI::submit` with 'SURRENDERED'), counted across turns in `tac_ai_state` |
+| T6c ✅ BUILT | JUMPING OUT by the ruling above: the decision in Initial Orders (JumpDecider); the vortex declared where a legal plan of this turn ends within the drive's 4 hexes, entered through its mouth (the page's vortex rules, ported and oracle-proven); that plan flown in Movement; the jump-out order first thing next turn (`ShipMover` mirrors the page's Jump Out button) |
+| T6d | LAST-RESORT RAMMING under the Desperate rule by the ruling above (ShipDecider plans into the target's hex, FireDecider orders the RammingAttack; oracle-proven) |
+| T6e ✅ BUILT | Hard: a Jump Engine more than 50% damaged switched off for power (PowerDecider::boost) |
+| T6f | The done-when: self-play batches on 24x16 and 42x30 - no game at the turn cap for lack of a decision; any cap that remains read and explained |
+| T6g ✅ BUILT | The user's ruling on 5749 (2026-11-21): a side down to its fighters - no flight goes three turns without a shot, and none flies further off than it must |
+
+**T6a as built (2026-11-21) - BUILT, uncommitted, not play-tested.** No flag, no migration, no new class.
+* `AIView::rackBlock`: an exclusive rack is "exclusive weapon"; a firing link with an angular spread is still "linked firing"; a
+  same-target link passes. `BallisticDecider`: each launcher carries `linkKey` (the craft, or the ship, and the group's name); a
+  salvo leaves out a launcher whose link is already committed to another unit, and booking a launch commits it. No order of this
+  turn ever stands on a twin when the bot plans: `TacGamedata::hideSystemFireOrders` strips EVERY current-turn launch from Initial
+  Orders, the owner's own included (so the page's "a sibling's standing order binds the rest" never arises for the bot).
+* `AIConfig::FIRE_MIN_CHANCE_PARTING` is a table by loading time (2 => 20, 3 => 34); `FireDecider::minimumChance` reads it, and the
+  floor holdSlow stamps on a parting shot now carries the slow-pulse premium too (it did not).
+* `AIConfig::FIRE_INTERCEPTOR_MIN_CHANCE` 15; `FIRE_RESERVE_PER_BALLISTIC` gone. `FireDecider::holdBack`: candidates are the guns
+  with an intercept rating and no shot of 15%+; `interceptableIncoming` lists the orders that could reach the unit (throwaway
+  orders, one a gun; the real ballistic orders); the unit's idle interceptors cover what they legally can first (`cover`, the
+  server's `Firing::isLegalIntercept`), then candidates, best rating first, each only for an order it can stop.
+* Every level, `legacy` included: these are corrections, not skills.
+* **Gates, 2026-11-21:** fire pair (EA + raiders, 179 hulls, 716 situations a run) at Easy, Normal and Hard, phases 3 and 1: **0
+  differences in all six** - in Initial Orders 13 (Normal, Hard) and 28 (Easy) launches on a firing link, each committed with its
+  twin through the page; the oracle now fails a planned launch the page will not make once the launches before it are in
+  (`fireOracle.js commitLaunches`), and the PHP half checks every link keeps one target. NEW `tests/ai/fireRulesHarness.php`
+  (DB-free): A twin racks (4774's board at every level; 24 random two-target boards; the Vree turret still left alone), B the
+  parting floor (the table for every Omega / Va'Kar / Tethys gun; Heavy Lasers drawing away fire at 34-39% and never under 34;
+  closing they wait for 40), C the reserve (lasers alone: nothing held; the Interceptors facing the fire cover first; no
+  Interceptors: a beam for each order; reloading guns not counted; ballistics counted unless uninterceptable; a 15%+ shot always
+  fired) - **296 checks**. Mutation pass **8 of 8 caught** (after one fix to the harness: it had split its boards by the very
+  constant the mutant changed - it now uses the user's 15). A mutant BallisticDecider ignoring the link is caught by both fire-pair
+  halves. `levelsHarness` 236, `hazardsHarness` 14,758: green. `manoeuvreHarness` 522 passed / **2 failed - the same 2 on HEAD's AI
+  code** (section D: with its port thrusters dead a Hard ship now begins an extended turn, T5f-5, where the check expects the
+  thruster-swap roll) - pre-existing, not this stage's; reported.
+* Self-play 5749 (above): no refused submission, no defect; the Thunderbolts' launches went through `Phase::process`.
+  `selfPlayHarness` now buys a flight with a missile magazine two Basic missiles a craft (AMMO_FB, as players do) - its
+  magazine is empty otherwise.
+
+**T6b as built (2026-11-21) - SURRENDER. BUILT, uncommitted, not play-tested.** No flag, no migration (the count rides
+`tac_ai_state`'s JSON).
+* NEW `source/server/ai/Posture.php`. `assess($view)` runs in Initial Orders on the bot's masked view: each own unit (mines
+  left out either way) is asked `canFight` - not destroyed or disabled, at least one usable gun, and some visible enemy it could
+  damage this turn with both as close as they could come (`PowerDecider::nearer` over `maxMove` both ways +
+  `POWER_REACH_SLACK`), every EW point of its ship locked on: `AIView::estimate > 0`, or a launcher with fire control for the
+  target's size and the target in launch range. `usableGuns`: not destroyed (nor its craft), not forced off by the game (one the
+  bot switches off itself still counts), with ammunition or a plain round in its magazine, with fire control for some size of
+  unit (a pure interceptor is not a gun); no jump engine, ram, hex-targeted or Support weapon. A gun counts whatever its loading -
+  it fights again soon. Fleet value both ways (`AIView::value`).
+* `Posture::surrender`: turn >= `SURRENDER_EARLIEST_TURN` 3, an enemy in sight, no unit can fight, behind on value, and the
+  `SURRENDER_TURNS_UNABLE` 2nd turn running. `Posture::run`: a turn with no enemy in sight neither counts nor breaks the run (a
+  cloaked enemy is not a beaten one).
+* `TacticalAI::play` (phase 1) reads the run from `tac_ai_state['posture']` (`turn`, `run` - only if it is last turn's) and keeps
+  the new one once the submission is in. A surrender submits every own unit's bare entry with status 'SURRENDERED' through the
+  ordinary `Manager::submitShipsForPlayer` path; the result is 'surrendered', the log line `SURRENDERED: no unit could damage an
+  enemy for N turns, ...`. Every Initial Orders line now ends `N of M units can damage an enemy; fleet value X against Y`.
+* Gates: NEW `tests/ai/withdrawalHarness.php` (DB-free) A - can it fight (an armed Omega in reach can; every gun gone cannot;
+  400 hexes off cannot; a reloading Heavy Laser counts; forced off by a critical does not, switched off by the bot does;
+  disabled cannot; a Thunderbolt flight with its guns gone can only with missiles and a target in launch range), B - the rule
+  (the second turn, behind, turn 3+; no enemy in sight neither counts nor breaks), C - the side (mines left out).
+  `selfPlayHarness` accepts a CPU surrender as a finished game ("ended by a CPU surrender on turn N").
+
+**T6c as built (2026-11-21) - JUMPING OUT. BUILT, uncommitted, not play-tested.** No flag, no migration.
+* NEW `source/server/ai/deciders/JumpDecider.php`. `plan($view, $hazards, &$power)` in Initial Orders, for each own ship (not
+  a flight, mine or terrain; not disabled):
+  * `engine()`: a vortex drive (not legacy, not a gate), not destroyed, not forced off (switched off only by the bot's own
+    deficit rows is allowed - see keepOn below), holding no jump point, charged (`getVortexRechargeLoad >= getLoadingTime` - the
+    page's isLoaded reads the same two numbers), no more than `JUMP_MAX_DRIVE_DAMAGE` 0.5 of its boxes lost.
+  * `reason()`: 'no usable weapon' (`Posture::usableGuns`), 'cannot get back into the fight' (`!Posture::canFight`), or
+    'expected to be destroyed' - the enemies' LOADED plain guns, each enemy turned to the facing that brings most to bear where
+    it stands, half its EW locked on and half the ship's own as DEW, are expected to deal at least what is left of the ship
+    (`AIView::healthLeft`: primary + the section facing the worst of them); the ship is already "so damaged" - its PRIMARY
+    structure down to `JUMP_DAMAGED_SHARE` 0.5 of its boxes (asked first; see the self-play batches below); and the ship's own
+    loaded guns (best facing) would remove less than it is worth (`ShipDecider::removed`). (A full lock and no DEW called a fresh
+    Omega facing one other doomed.)
+  * The site: `ShipDecider::rows` with NEW `ShipDecider::$planFilter` (a filter on the candidates; null = as before) - the plans
+    of this turn that END within the drive's range of where the ship stands, with an entry direction
+    (`ShipMover::entryDirectionOf` over its earlier rows and the plan's), on a hex `legalSite()` allows with the mouth facing back
+    along that entry: the drive's range, line of sight (`Mathlib::isLoSBlocked` unless `ignoresLoS`) and the server's own
+    `Firing::getVortexDeclarationBlock` (no terrain footprint, no Enormous unit, charged, one a ship...) asked on a throwaway
+    order through a bound closure. The best of them gives the hex and the mouth; log `NAME: JUMPING OUT (reason) - jump point
+    at q,r, mouth facing f`. ShipDecider's log line and timings are put back after the question.
+* The declaration (`JumpDecider::declaration` -> NEW `AIOrderBuilder::jumpPoint`) is the order
+  `weaponManager.createJumpPointOrder` builds - ballistic, target -1, mode = facing + 1, x / y the hex, defaultShots,
+  damageclass 'jumppoint' - posted on the engine's own system row (`TacticalAI::initialOrders`).
+* POWER: the deficit rules shed a drive first (T3), so a leaving ship in deficit keeps it on: NEW `PowerDecider::keepOn`
+  takes the drive's off row back and switches off the next `sheddable()` systems until `balance() >= 0`, returning an undo
+  (used when no site is found); none -> "would jump out (...), but cannot spare the power". `JumpDecider::plan` runs BEFORE
+  `PowerDecider::boost` - balance() counts no boosts; the other order failed 15 Hard orders-pair boards ("still -N power").
+* MOVEMENT (`MoveDecider`, ships): the turn it is declared (`pending()`: the engine's `activeVortexId`, the vortex not open yet)
+  `approachRows` flies the best plan ending in the vortex hex through the mouth (none -> "cannot reach its jump point through
+  the mouth any more - the jump is off", and the ship decides as usual); the next turn, the vortex open, `jumpOutRows` is the
+  jump-out first thing (an owed extended turn completed before it, as the page insists). A ship with a reason and a usable drive
+  but no jump point (too fast to end within range) `brakeRows`: its slowest plans, so it can declare next turn - unless it
+  cannot slow down.
+* `ShipMover::JUMP_OUT` ('jumpout') mirrors the page's Jump Out button: `canJumpOut` = the vortex given (`vortexForJumpOut`),
+  the ship standing in it, entered through the mouth (`entryDirectionOf(rows) === (facing + 3) % 6` - judged on the step that
+  put it there, earlier turns included), extended turns allowing, the vortex open and not closed. After it nothing more (no
+  speed change, turn, jink, pivot or roll; remaining movement 0). Offered by `options` / `clientOffers`, NOT searched
+  (`searchOptions`) - only `jumpOutRows` applies it.
+* Gates:
+  * withdrawalHarness D: D1 the drive (40% lost usable, 60% not, destroyed, recharging); D2 the reasons (and "so damaged": an
+    Omega sound, 40% lost, or with its forward section shot away and its primary whole fights on, 60% lost leaves - four fresh
+    Omegas' fire lethal on paper on every board; a mutant without the gate fails all three); D3 a disarmed Omega
+    declares at a legal site, the order exactly the page's, kept by `Firing::validateFireOrders`; D4 the approach through the
+    mouth; D5 the jump-out at all six headings, kept by `Movement::validateJumpOutSubmission`; D6 entered from the wrong side:
+    none; D7 too fast to declare: it brakes; D8 a deficit: the drive kept on, something else off, no off row for the drive.
+  * ShipMover pair (157 hulls, 5 parts): 10,224 situations, 106,818 plans, 794,823 steps through movement.js, 2,005,483 server
+    checks; 582 jump-out plans replayed and 1,456 jump-outs clicked through the page's Jump Out button: **0 differences**;
+    mutants 4 of 4 caught by both halves.
+  * Fire pair, NEW jump-point boards (`fireHarness.php --phase=1`, built after the Fire boards so their random sequence is
+    unchanged; `fireOracle.js replayVortex`): a board per hull with a vortex drive - two pieces of terrain near it (rotated
+    multi-hex asteroids, a moon's disc, dust clouds and meteor swarms, which are terrain but not Enormous), now and then a rock,
+    the drive now and then switched off, shot away, recharging or hit - and EVERY hex within the drive's range + 1 selected,
+    clicked (`weaponManager.targetHex`) and confirmed in the facing dialog (`VortexFacingRequested` -> onConfirm). EA + raiders,
+    each level: 220 boards, 20,020 hexes, **6,779 declarations the page builds field for field as the bot does, all kept by
+    `Firing::validateFireOrders`**; 5,506 hexes both refuse (range 4,050, line of sight 981, terrain 473, an Enormous unit 2);
+    none the server alone refuses. Every faction but yoluReevaluated, one round: 533 boards, 62,231 hexes, 24,485 identical
+    declarations, 0 differences on the jump points.
+  * Orders pair Hard / Normal / Easy: 0 differences.
+
+**T6e as built (2026-11-21) - HARD SHEDS A DRIVE PAST HALF ITS BOXES. BUILT, uncommitted, not play-tested.**
+* `PowerDecider::idle` (what pays for Hard's boosts, least useful first): a jump engine past `JUMP_MAX_DRIVE_DAMAGE` that draws
+  power, is on, not boosted, not power-locked and has no order this turn goes FIRST, ahead of the idle guns. A boost still takes
+  idle systems only when the budget falls short. A drive the bot would jump with is never past half (`JumpDecider::engine`), so
+  the two rules cannot meet. The Trek warp nacelles (JumpEngine subclasses whose rating feeds impulse thrust) all draw 0 power,
+  so they are never shed.
+* Gates: withdrawalHarness E (E1 Hard, the drive 60% lost: a boost bought and the drive switched off first - without the rule
+  this Omega could buy none; E2 40% lost: it stays on; E3 Normal: no boost, nothing off); mutants 2 of 2 caught
+  (the drive never offered; offered at any damage). `ordersHarness` now hits the drive 60% on its untouched boards (round % 6 ==
+  0 - no draw on the random sequence) and checks every drive switched off outside a deficit is past half and pays for a boost: at
+  Hard 45 drives switched off for a boost (168 in all, the rest the deficit rules'), each committed through power.js - **0
+  differences** at Hard, Normal and Easy.
+
+**Re-run after T6b-T6e and the "so damaged" gate (2026-11-21):** withdrawalHarness **85** (A-E), fireRulesHarness 296,
+levelsHarness 236, hazardsHarness 14,758 - green; manoeuvreHarness 522 / the 2 pre-existing section-D failures (T6a above).
+Fire pair 6 of 6 and orders pair 3 of 3 at 0 differences. Replay check **241 passed, 0 failed** (the corpus now holds 241 games,
+kept self-play games 4810, 4811, 4845, 5641, 5743 and 5748 among them - never delete those).
+
+**Self-play, T6 batch 1 (2026-11-21, BEFORE the "so damaged" gate):** EA mirror with Thunderbolts (Omega, Hyperion, Tethys,
+Aurora, Thunderbolt a side), `--budget=0`, 2 games each of 24x16 Normal, 24x16 Hard, 42x30 Normal and 42x30 Hard v Normal: **8 of 8
+PASS, 8 of 8 FINISHED (10-48 turns), none at the turn cap, no surrender, no defect.** But about 19 jump points were declared and
+15 ships jumped out - nearly every game, several on turn 3 or 4. Replayed (scratch `g_jump.php`): game 5761's Hyperion at 88%
+of its value (primary 54/54) left on turn 3 because the five enemy units' expected fire - every gun at that one ship - was 142
+against 96 left of its primary and forward section; its Omega (primary 56/60, forward section 17/60) the same. Not the user's
+"quite rare ... so damaged they can easily be destroyed": a `JUMP_DAMAGED_SHARE` gate was added (the user's own words), its
+value 0.5 for the user to confirm.
+
+**T6 batch 2 (the gate asked of the primary OR primary + the section facing the enemy):** 8 of 8 PASS; 7 FINISHED (17-55 turns),
+1 ended at the turn cap (5764, 24x16 Normal: the loser down to 6% of its value). Still ~18 declared, 12 jumped out, one on turn 2.
+Replayed: three of four had a WHOLE or nearly whole primary (78-100%) and had lost the one section facing the enemy (5771's
+Hyperion: primary 54/54, starboard 0/60) - a ship that can turn a fresh side, not one "so damaged". The gate now asks the
+PRIMARY alone (the boxes whose loss destroys a ship): of the four replayed, only the Omega at primary 60% / value 48% came near,
+and it fights on too.
+
+**T6 batch 3 (the gate as built - the primary alone):** **8 of 8 PASS, 7 FINISHED (18-34 turns), no defect.** 7 jump points
+declared (4 "expected to be destroyed", 2 "cannot get back into the fight", from turn 5 on), **2 ships jumped out** - against 15
+and 12 in batches 1 and 2: rare, as the user asked. One game at the turn cap (5775, 42x30 Hard v Normal) was NOT a stalemate:
+the Hard side went on fighting and losing units (4 units, value 870 on turn 30; 1 unit, 205 on turn 46), and its last unit -
+an Omega that wanted to leave from turn 38 but could reach no jump point - read "0 of 1 units can damage an enemy" on turn 46,
+the first of the two turns the surrender rule asks: the cap came one turn before the bot's own surrender. (All three batches'
+games deleted; the harness's cap is checked between driver runs, so a game may overrun turn 40 before it is applied.)
+
+**Open (T6b-T6e):**
+* ~~A unit that can still fight but never comes in blocks the surrender.~~ **Ruled 2026-11-21 and built as T6g** (below).
+* A ship that should leave but can neither slow down nor turn (5749's Omega: forward thrusters gone, 190 hexes off) can
+  neither declare nor brake: it flies on, counted as unable to fight (it surrenders with its side).
+* "Expected to be destroyed" measures the enemy where it stands (turned, not closing) - errs toward fighting on, as asked.
+* A jump point is declared only where a plan of this turn ENDS, within range of where the ship stands at Initial Orders. The
+  Jump Accelerator doubles the failure chance on opening; the 50% bar is the user's on DAMAGE, and is kept as ruled.
+* Fire pair over every faction (outside the EA + raiders gate): 11 failures on exotic hulls, the same 11 on HEAD's AI code -
+  9 the oracle's sandbox (`playerManager` not defined on the Walkers of Sigma hulls, a null `active` on BlackDagger), 2 a Qom
+  Yomin Aux Minesweeper Refit weapon id AIView and the page disagree on. Pre-existing; not this stage's.
+* Ship data (not AI code): `yoluReevaluated/lacannaReev.php` declares `class LacannReeva` while its `phpclass` says
+  `LacannaReev`, so ShipPayload cannot rebuild it from a posted order (the every-faction fire run stops on it).
+
+**T6g - A SIDE DOWN TO ITS FIGHTERS. The user's ruling, 2026-11-21:** "Yes let's tone down AI fighters that stay too far away when
+they are the only unit left for the AI player, as this will frustrate players. E.g. can't go three turns without firing a shot, and
+maybe don't run as far way from the enemy."
+
+**T6g as built (2026-11-21) - BUILT, uncommitted, not play-tested.** No flag, no migration (the count rides `tac_ai_state`).
+* "The only unit left" = `Posture::lastStand($view)`: every unit of the bot that can still damage an enemy (`Posture::canFight`, the
+  surrender rule's test) is a fighter flight, and there is one. A ship that can no longer fight does not count against it - 5749's
+  losing side still had its Omega on the board, useless 190 hexes off the map. Once a view (a `WeakMap`).
+* THREE TURNS WITHOUT A SHOT (`AIConfig::FLIGHT_MAX_IDLE_TURNS` 3): `TacticalAI::play` keeps the turn each flight on the board last
+  fired or launched (`tac_ai_state['shots']`; the load brings back this turn's fire orders only) - `Posture::shots` (a flight first
+  seen counts from the turn before; one gone is forgotten), updated from each phase's orders (`Posture::firing`: any fire order on
+  the unit or one of its fighters) - and before the deciders run `Posture::$mustShoot` = the flights whose last shot is 3 turns back
+  (turns T-2 and T-1 without one: turn T must not be a third).
+* MOVEMENT (`FlightDecider`), while the side is down to its fighters - each rule ranked above every other term (`self::MUST`, 10^6):
+  * "DON'T RUN AS FAR AWAY" - THE LEASH: the flight ends within `FLIGHT_LEASH` 10 hexes of the nearest target it closes on (where it
+    will be at the Fire phase) whenever it can, else as near as it gets. Each hex short of its guns' reach and each point of speed
+    past the CHASE SPEED (the target's speed + `FLIGHT_CHASE_MARGIN` 6) also cost `FLIGHT_CLOSING_PER_HEX`, at every distance.
+  * A flight that MUST fire goes to the best place (usual terms) with a SOLID shot - `FLIGHT_MUST_CHANCE` 20% at the Fire phase as
+    foreseen, its jinking counted; else any shot FireDecider takes (its floor, the 20% edge floor `AIView::onEdge`); else as near
+    as it can get without outrunning the chase. NEW `AIView::chanceOf` (the hit table's weighted chance from where the unit
+    stands; `estimate()` and it share `hitAnswers()`, `estimate()` unchanged) - `AIView::shot` cannot answer it, being cached by
+    unit, gun and target, not position.
+  * Why each piece (the T6g self-play batches below): plain "a shot over the 5% floor" had forced flights jink their chances down to
+    the floor and lose them to enemies moving after them; plain "as near as it can get" ran flights up to speed 16-17 after a
+    Hyperion doing 2, overshooting it far off the map; and a cost of 2 points a hex let the flights, between forced turns, fly 28-42
+    hexes off a lone Hyperion to be safe from its guns.
+* FIRE (`FireDecider`): a flight that must fire keeps no gun back to intercept (`holdBack` skipped) and fires every gun it has a
+  shot for at the target it would do most to - into the interceptors too, which the greedy pick declines (a shot they swallow adds
+  nothing). Logged: Movement "N MUST FIRE this turn (no shot for 2 turns, the side down to its fighters)", Fire "N fired by flights
+  that must fire".
+* Gates: withdrawalHarness F (DB-free) - F1 the last stand (flights alone yes; a ship that can fight no; a disarmed one doesn't
+  count; no flight no), F2 the count (first seen; the third turn; reset by a shot; a new flight; one gone), F3 what fired (a
+  fighter's order marks its flight), F4a made to fire, 2 Thunderbolts or 6 Auroras against 3 Omegas at Normal and Hard, moved or yet
+  to move, it ends with a solid shot (20%+, jinking counted, at the Fire phase); F4b out of reach this turn, it ends as near as any
+  plan can take it without outrunning the chase; F4c a ship of the bot still fighting: not made to; F4d left to itself it ends
+  within the leash; F5a 10% shots into the Omega's Interceptors: left to itself none, made to fire all 6; F5b a torpedo coming: left
+  to itself its guns are kept back, made to fire none is - **111 checks**. Mutants: 3 of 6 caught (FireDecider's forced shots, the
+  kept-back guns, the count off by one); FlightDecider's must-fire term, its edge floor and the leash survive - on these small
+  boards a lone flight left to itself already closes and shoots (30-75%, jinking counted), so those terms change nothing there.
+  **On the real games** (scratch `g_flight.php GAME BOT`): 5749 (turn 41) - the losing side reads as down to its fighters; its
+  Thunderbolts left to themselves stay at speed 0, jinking 6, 9 hexes off, best chance 0% (the hiding); made to fire they close to
+  6 hexes, jinking 0, 25%. 5807 (a capped batch game, below) - left to themselves its flights flew 28-42 hexes off the Hyperion;
+  with the leash 10-14. levels 236, hazards 14,758, fireRules 296, manoeuvre (the 2 known), fire pair 6 of 6 at 0 differences,
+  orders pair 3 of 3 at 0 differences (before the flight terms, which it does not reach).
+* **Self-play, a side down to its fighters from turn 1** (Omega + Hyperion against 2 Thunderbolts + 2 Aurora flights; 24x16 and
+  42x30, Normal and Hard; `--budget=0`), each batch's games deleted after reading (scratch `g_idle.php`: each flight's longest run of
+  turns without a shot, interception aside):
+
+  | Batch | Rule as it stood | Games | Ended on their own | Turn cap |
+  |---|---|---|---|---|
+  | 1 | forced shot at the floor; closing cost | 8 | 8 | 0 |
+  | 2 | + the solid shot (20%) | 8 | 6 | 2 (both 42x30 Hard: the off-map chase, 5795) |
+  | 3 | + the chase speed | 12 | 10 | 2 (both 42x30 Hard: flights fleeing 28-42 hexes between forced turns, 5807) |
+  | 4 | + the leash (as built) | 12 | 11 (one by the bot's own surrender) | 1 (5814, 42x30 Normal: NOT hiding - its last Aurora flight circled a Hyperion at speed 0, 4-8 hexes off, firing on turns 37 and 40 while the Hyperion fired every turn; both sides down to 10-18%) |
+
+  The longest runs without a shot stay noisy (batch 4: 16 of 48 flights never more than 2 turns, 12 three, 20 four or more - most
+  long runs a flight out of reach, chasing, or crippled and destroyed before it got its shot): **no flight ever hides as 5749's
+  did, but "never three turns" is not a guarantee** - the enemy moving after a flight, or a flight out of reach, can take its shot
+  away. Batch 1's rule had no cap in 8 games; its flights hid between forced turns as far as they liked - the leash is the user's
+  "don't run as far away".
 
 ---
 

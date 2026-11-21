@@ -167,7 +167,11 @@ class AIConfig
        3 or 4 turn recharge would be unwise"). Loading time => the least chance it fires at; a
        longer loading time than the last entry uses the last. FireDecider::minimumChance. */
     const FIRE_MIN_CHANCE_BY_LOAD = array(2 => 25, 3 => 34, 4 => 40);
-    const FIRE_MIN_CHANCE_PARTING = 15;     //...but a slow weapon whose target is drawing away takes what it can get, down to this
+    /* ...but a slow weapon whose target is drawing away (FireDecider::holdSlow: a turn on, the same shot is worse) settles for
+       less - never below the user's line for a slow gun, though. Same layout as above. Stage T6a, the user's notes on game 4774
+       (2026-11-21): a flat 15 here let two Heavy Lasers fire at 20% and 24% - "lower hit chance odds than a 4-turn weapon should
+       normally fire" - against the ruling of 2026-11-15 ("1-33% for a 3 or 4 turn recharge would be unwise"). */
+    const FIRE_MIN_CHANCE_PARTING = array(2 => 20, 3 => 34);
     /* PULSE weapons (user ruling 2026-11-19): one roll, one more pulse for every `grouping` it beats the need by, so their
        damage grows much faster than the hit chance (a Heavy Pulse expects ~0.5 pulses at 34%, ~1.0 at 54%). A SLOW pulse
        weapon's floors are this many points higher: Medium Pulse (2 turns) 35%, Heavy Pulse (3 turns) 44%. A pulse gun that
@@ -190,9 +194,17 @@ class AIConfig
     const FIRE_THREAT_WEIGHT = 0.5;         //how much the most dangerous enemy is preferred over a harmless one of equal worth
     /* The interception reserve. The server intercepts with every loaded gun that has an intercept
        rating, was given no order and loads in one turn (Firing::automateIntercept). So a gun is
-       "held back" simply by not being given an order. */
-    const FIRE_RESERVE_PER_BALLISTIC = 1.0; //interceptors a unit holds back for each ballistic shot coming at it
-    const FIRE_INTERCEPTOR_MIN_CHANCE = 30; //an interceptor with no shot at least this good stays on defence
+       "held back" simply by not being given an order.
+       Stage T6a, the user's notes on game 4774 (2026-11-21): "Human players almost always opt to fire offensively with 1 turn
+       weapon instead of saving them for intercept if the odds are 15% or greater" - and only fire that CAN be intercepted is a
+       reason to hold one at all ("Lasers are uninterceptable, and these types of weapons should not factor into what's likely
+       incoming fire"); "where Defensive and Offensive priorities are relatively balanced, choose offence". Turn 3 had held six
+       Particle Beams and two Light Pulses with 25% shots at a Va'Kar under the old flat 30%. So a gun whose best shot is under
+       FIRE_INTERCEPTOR_MIN_CHANCE stays on defence only while interceptable enemy fire can reach its unit this Fire phase (loaded
+       guns in arc and range, ballistics launched at it): one interceptor for each such order it could really stop (a shot from
+       inside its arc), the unit's interceptors with no offensive shot at all covering what they can first (they are on defence
+       anyway); every other gun fires (FireDecider::holdBack). */
+    const FIRE_INTERCEPTOR_MIN_CHANCE = 5; //an interceptor with a shot at least this good always fires it
 
     /* Ballistics, stage T4 (BallisticDecider): launched in Initial Orders, before anybody has
        moved and before the enemy's EW is known. */
@@ -324,6 +336,46 @@ class AIConfig
        best case, so a gun goes off only when it surely cannot fire). A one-turn gun switched off at turn N is loaded again at
        N+1 when switched back on (Weapon::calculateLoading), so "back on as the enemy nears" is simply this turn's test. */
     const POWER_REACH_SLACK = 2;
+
+    /* SURRENDER (stage T6b, the user's ruling of 2026-11-21 - plan 10.8): a side gives up only when none of its units can damage
+       any enemy - "no usable weapon, or nothing can get within reach" (Posture::canFight, the reach above) - for this many turns
+       in a row, while it is behind on fleet value, and never before this turn. Otherwise it fights on to the last unit. */
+    const SURRENDER_TURNS_UNABLE = 2;
+    const SURRENDER_EARLIEST_TURN = 5;
+
+    /* JUMPING OUT (stage T6c, the user 2026-11-21: "A damaged Jump Engine trying to open a jump point can also destroy the ship, so if
+       more than 50% damage is taken the Jump should not be attempted"). The share of a drive's boxes lost is also its failure chance
+       (JumpEngine::getJumpFailureChance). JumpDecider has the rest of the ruling. */
+    const JUMP_MAX_DRIVE_DAMAGE = 0.5;
+    /* "EXPECTED TO BE DESTROYED" ONLY FOR A SHIP ALREADY SO DAMAGED - the user: ships jump out when "so damaged they can easily be
+       destroyed ... this is however quite rare and most ships fight until they are destroyed". Its PRIMARY structure (the boxes whose
+       loss destroys it) must be down to this share. The T6 self-play batches (2026-11-21): without it ships left on turn 3 at 88% of
+       their value (the enemy fleet's whole fire, every gun at that one ship, is more than most ships' primary and one section); with
+       the share asked of primary + the section facing the enemy instead, ships left with a whole primary and one section lost - a
+       ship that can turn a fresh side. The value is for the user to confirm. */
+    const JUMP_DAMAGED_SHARE = 0.5;
+
+    /* A SIDE DOWN TO ITS FIGHTERS (stage T6g, the user 2026-11-21: "tone down AI fighters that stay too far away when they are the
+       only unit left for the AI player, as this will frustrate players. E.g. can't go three turns without firing a shot, and maybe
+       don't run as far away from the enemy" - self-play game 5749: two Thunderbolts jinked 10 hexes off the winner for 20 turns).
+       While the bot's only units that can still fight are flights (Posture::lastStand), a flight that has fired nothing for this many
+       turns less one must get a shot off this turn (Posture::mustShoot; FlightDecider flies it where a gun of it reaches FireDecider's
+       floor, jinking counted, or as near as it can get; FireDecider keeps none of its guns back to intercept and fires every one it
+       has a shot for, into the interceptors too), and no flight flies further from the enemy than it must (the closing cost always). */
+    const FLIGHT_MAX_IDLE_TURNS = 4;
+    /* ...and where it can, it goes for a shot of at least this chance at the Fire phase as the bot foresees it, its jinking counted:
+       enemies that move after it end elsewhere than foreseen, and a shot planned at the 5% floor was then lost - the first T6g
+       self-play batch's forced flights jinked their chances down to the floor and went 3-7 turns without a shot. */
+    const FLIGHT_MUST_CHANCE = 20;
+    /* ...and closing in it does not build up more speed than the target's this much over: each point beyond costs as a hex short of
+       it. Without it the second T6g batch's flights, always ending as near as they could, ran up to speed 16-17 after a Hyperion
+       doing 2, overshot it turn after turn far off the map, and the game reached the turn cap with them 7-47 hexes off. */
+    const FLIGHT_CHASE_MARGIN = 6;
+    /* "Don't run as far away from the enemy": while the side is down to its fighters, a flight ends no further than this many hexes
+       from the nearest enemy it closes on whenever it can (before any other term - as a flight that must fire goes for its shot).
+       A cost of a few points a hex was not enough: in the T6g batches the flights, on the turns they were not made to fire, flew
+       28-42 hexes off a lone Hyperion to be safe from its guns, and every forced turn had that gap to make up. */
+    const FLIGHT_LEASH = 11;
 
     //A seat's level (DBManager::getCpuSeats row): one SKILLS knows - a harness may seat 'legacy' - else the default.
     public static function seatLevel(array $seat)

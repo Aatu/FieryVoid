@@ -225,8 +225,20 @@ class PowerDecider
         $turn = $view->turn;
         $guns = array();
         $interceptors = array();
+        $drives = array();
         foreach ($ship->systems as $system) {
-            if (!($system instanceof Weapon) || $system instanceof JumpEngine || $system instanceof DualWeapon || $system instanceof DuoWeapon) continue;
+            /* Stage T6e (the user, 2026-11-21): a jump engine with more than half its boxes lost is not used to jump (JumpDecider - its
+               failure chance is the share lost) and "can be deactivated for extra power by Hard CPU opponents": it pays first. */
+            if ($system instanceof JumpEngine) {
+                if (!$system->isDestroyed() && $system->powerReq > 0 && JumpDecider::driveDamage($system) > AIConfig::JUMP_MAX_DRIVE_DAMAGE
+                    && !self::isOff($system, $turn) && !self::hasRow($system, $turn, 2) && empty($system->stripForJson()->powerLocked)) {
+                    $ordered = false;
+                    foreach ($system->fireOrders as $fire) if ((int)$fire->turn === (int)$turn) $ordered = true;
+                    if (!$ordered) $drives[] = $system;
+                }
+                continue;
+            }
+            if (!($system instanceof Weapon) || $system instanceof DualWeapon || $system instanceof DuoWeapon) continue;
             if ($system->powerReq <= 0 || $system->isDestroyed() || self::isOff($system, $turn) || self::hasRow($system, $turn, 2)) continue;
             if ($system->ballistic || (int)$system->loadingtime != 1 || (int)$system->getNormalLoad() > 1 || !$view->loaded($system)) continue;
             if ($system->alwaysoverloading || $system->isOverloadingOnTurn($turn) || !empty($system->checkAmmoMagazine)) continue;
@@ -257,7 +269,7 @@ class PowerDecider
         usort($list, function ($a, $b) {
             return ($a[0] != $b[0]) ? (($a[0] < $b[0]) ? -1 : 1) : $a[1] - $b[1];
         });
-        return array_map(function ($row) { return $row[2]; }, $list);
+        return array_merge($drives, array_map(function ($row) { return $row[2]; }, $list));
     }
 
     /* The system a boost of $kind would go on, or null: 'scanner' - the one the page lets a player boost, its highest-rated
@@ -316,8 +328,9 @@ class PowerDecider
     }
 
     /* The most hexes a unit could cover this turn: its speed and all the acceleration its thrust buys (an Engine's output, a
-       flight's free thrust, over the unit's acceleration cost). A unit that does not move by thrust covers none. */
-    private static function maxMove($unit)
+       flight's free thrust, over the unit's acceleration cost). A unit that does not move by thrust covers none.
+       (Public since stage T6b: Posture's "can it still fight" asks the same reach.) */
+    public static function maxMove($unit)
     {
         if (!empty($unit->base) || !empty($unit->smallBase) || !empty($unit->osat) || !empty($unit->mine) || $unit->isTerrain()) return 0;
         $last = $unit->getLastMovement();
@@ -334,8 +347,8 @@ class PowerDecider
     }
 
     /* Run $work with $ship standing $steps hexes nearer $target (never past it) - a movement row of this turn on top of its
-       list, taken off again whatever happens. */
-    private static function nearer($ship, $target, $steps, $turn, callable $work)
+       list, taken off again whatever happens. (Public since stage T6b, for Posture.) */
+    public static function nearer($ship, $target, $steps, $turn, callable $work)
     {
         $last = $ship->getLastMovement();
         $position = $ship->getHexPos();
@@ -390,6 +403,46 @@ class PowerDecider
         return $output;
     }
 
+    /* Stage T6c: keep a system on that plan() switched off for a deficit - a ship leaving the battle needs its jump engine, which
+       plan() sheds first - by switching off the next systems in sheddable()'s order instead. $plan is plan()'s (by reference). Returns
+       a function that puts everything back, or null (nothing changed) when the system was not switched off by plan() this turn, or
+       the rest of the ship cannot pay for it. */
+    public static function keepOn($ship, $system, array &$plan, $turn)
+    {
+        $id = (int)$ship->id;
+        if (self::forcedOff($system, $turn) || !self::hasRow($system, $turn, 1)) return null;
+
+        $savedPlan = isset($plan[$id]) ? $plan[$id] : null;
+        $savedPower = array();
+        foreach ($ship->systems as $other) $savedPower[spl_object_id($other)] = array($other, $other->power);
+        $undo = function () use (&$plan, $id, $savedPlan, $savedPower) {
+            foreach ($savedPower as $saved) $saved[0]->power = $saved[1];
+            if ($savedPlan === null) unset($plan[$id]);
+            else $plan[$id] = $savedPlan;
+        };
+
+        $system->power = array_values(array_filter($system->power, function ($power) use ($turn) { return !((int)$power->turn === (int)$turn && (int)$power->type === 1); }));
+        $rows = array();
+        foreach (($savedPlan === null ? array() : $savedPlan) as $row) {
+            if ((int)$row['systemid'] === (int)$system->id && (int)$row['type'] === 1) continue;
+            $rows[] = $row;
+        }
+        $balance = self::balance($ship, $turn);
+        foreach (self::sheddable($ship, $turn) as $other) {
+            if ($balance >= 0) break;
+            if ($other === $system) continue;
+            $rows[] = self::switchOff($ship, $other, $turn);
+            $balance += $other->powerReq;
+        }
+        if ($balance < 0) {
+            $undo();
+            return null;
+        }
+        if (count($rows) > 0) $plan[$id] = $rows;
+        else unset($plan[$id]);
+        return $undo;
+    }
+
     /* The systems a deficit may switch off, in the order they go. What the page's Off button
        allows (SystemInfoButtons canOffline): a system that draws power, is on, and is not locked on. */
     public static function sheddable($ship, $turn)
@@ -431,7 +484,8 @@ class PowerDecider
         return self::forcedOff($system, $turn) || self::hasRow($system, $turn, 1);
     }
 
-    private static function forcedOff($system, $turn)
+    //Forced off by the game (a ForcedOffline critical) - not by a player's own row. Public since stage T6b (Posture).
+    public static function forcedOff($system, $turn)
     {
         return self::crits($system, 'ForcedOfflineOneTurn', $turn) > 0 || self::crits($system, 'ForcedOfflineForTurns', $turn) > 0;
     }

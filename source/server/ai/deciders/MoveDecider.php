@@ -34,6 +34,7 @@ class MoveDecider
         self::$lastSummary = null;
         FlightDecider::reset();
         ShipDecider::reset();
+        JumpDecider::reset();
         //The seat's level and seed (stage T5f): the view answers what the bot is able to do (AIView::skill) for every decider.
         $view = new AIView($gamedata, $botId, AIConfig::seatLevel($seat), AIConfig::seatSeed($seat));
 
@@ -60,7 +61,14 @@ class MoveDecider
                 } else if ($mover !== null && in_array((int)$botId, self::$plainFor, true)) {
                     $entry['movement'] = self::choose($mover, $hazards->blocked, $hazards->bounds);
                 } else if ($mover !== null) {
-                    $entry['movement'] = ShipDecider::rows($view, $mover, $ship, $hazards);
+                    /* Stage T6c - a ship leaving the battle through its own jump point: on the turn it forms, into its hex through
+                       its mouth; the turn after, standing in it, out (JumpDecider). Anything else, or a jump that no longer works: as usual. */
+                    $rows = null;
+                    $jump = JumpDecider::pending($view, $ship);
+                    if ($jump !== null && $jump['open']) $rows = JumpDecider::jumpOutRows($mover, $ship, $jump);
+                    else if ($jump !== null) $rows = JumpDecider::approachRows($view, $mover, $ship, $hazards, $jump);
+                    else $rows = JumpDecider::brakeRows($view, $mover, $ship, $hazards); //too fast to reach a jump point this turn
+                    $entry['movement'] = ($rows !== null) ? $rows : ShipDecider::rows($view, $mover, $ship, $hazards);
                 } else {
                     $entry['movement'] = AIFallback::straightRows($ship, $gamedata);
                 }
@@ -72,11 +80,12 @@ class MoveDecider
             $entries[] = $entry;
         }
 
-        $parts = ShipDecider::$last;
+        $parts = array_merge(ShipDecider::$last, JumpDecider::$last);
         if ($flights > 0) {
             $f = FlightDecider::$last;
             $parts[] = $flights . ' flights: ' . $f['strike'] . ' striking, ' . $f['intercept'] . ' intercepting, ' . $f['escort'] . ' escorting; ' . $f['jinking'] . ' jinking'
-                . ($f['searched'] > 0 ? '; ' . $f['found'] . ' of ' . $f['searched'] . ' less covered places reached' : '');
+                . ($f['searched'] > 0 ? '; ' . $f['found'] . ' of ' . $f['searched'] . ' less covered places reached' : '')
+                . ($f['forced'] > 0 ? '; ' . $f['forced'] . ' MUST FIRE this turn (no shot for ' . (AIConfig::FLIGHT_MAX_IDLE_TURNS - 1) . ' turns, the side down to its fighters)' : '');
         }
         if (count($parts) > 0 && $hazards->describe() !== '') $parts[] = 'board: ' . $hazards->describe();
         if (count($parts) > 0 && count(EnemyForecast::$last) > 0) {

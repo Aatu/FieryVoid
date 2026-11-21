@@ -97,6 +97,9 @@ class ShipDecider
        them. */
     public static $nextTurnPlans = null;
     public static $budget = null;
+    /* Stage T6c: null, or callable(array $plan): bool - the only plans rows() may choose from (a jump: JumpDecider). rows() returns
+       null when the filter leaves none. Set around one rows() call and cleared again. */
+    public static $planFilter = null;
     /* What the last rows() did: 'plans' found, 'judgedNow' (this turn's terms), 'judgedNext' (next turn's too - judged whole),
        'variants' judged whole, 'cut' (the budget stopped the search or the judging), 'choice' (the end state chosen, endKey()),
        'seconds' (CPU). And every rows() of the process by level - the self-play harness reads and empties it. */
@@ -116,6 +119,15 @@ class ShipDecider
 
         $plans = self::candidates($mover, $view->skill('shortening'), (bool)$view->skill('extendedTurns'),
             ($budget > 0) ? $started + $budget * AIConfig::MOVE_SEARCH_SHARE : null, $timing['cut']);
+        /* Stage T6c: only the plans a caller allows (JumpDecider - the end states where a jump vortex can be declared, then the
+           one that ends in it through its mouth). None left: null, and the caller decides without the filter. */
+        if (self::$planFilter !== null) {
+            $plans = array_values(array_filter($plans, self::$planFilter));
+            if (count($plans) == 0) {
+                self::timed($view, $timing, $started);
+                return null;
+            }
+        }
         $timing['plans'] = count($plans);
         if (count($plans) == 0) {
             self::timed($view, $timing, $started);

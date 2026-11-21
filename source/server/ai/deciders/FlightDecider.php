@@ -45,12 +45,15 @@
  */
 class FlightDecider
 {
-    //What the last orders() did, for tac_ai_log: missions given, flights jinking.
-    public static $last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0, 'searched' => 0, 'found' => 0);
+    //What the last orders() did, for tac_ai_log: missions given, flights jinking, flights that had to fire (stage T6g).
+    public static $last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0, 'searched' => 0, 'found' => 0, 'forced' => 0);
+
+    //Stage T6g: what a place where a flight that must fire cannot is marked down by - more than any other term can make up.
+    const MUST = 1.0e6;
 
     public static function reset()
     {
-        self::$last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0, 'searched' => 0, 'found' => 0);
+        self::$last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0, 'searched' => 0, 'found' => 0, 'forced' => 0);
     }
 
     //For the harness and scratch checks only: set to an array and rows() appends its six best places, terms and all.
@@ -99,11 +102,32 @@ class FlightDecider
             foreach ($variants as $j) if ($j['offence'] > 0) $inReach = true;
         }
         $farOff = ($context['nearest'] > 2 * self::reach($plans, $context['guns']));
-        self::$last[!$inReach && $farOff ? 'escort' : $context['mission']]++;
+        self::$last[!$inReach && $farOff && !$context['lastStand'] ? 'escort' : $context['mission']]++;
 
-        $score = function (array $j) use ($context, $inReach, $farOff) {
+        /* A SIDE DOWN TO ITS FIGHTERS (stage T6g, AIConfig::FLIGHT_MAX_IDLE_TURNS): with no fleet to keep with, each hex short of
+           the target costs at every distance - the flight does not fly further off than it must; and a flight that MUST fire this
+           turn goes where a gun of it has a solid shot (FLIGHT_MUST_CHANCE, its jinking counted: an enemy moving after it must not
+           take the shot away - the first self-play batch's forced flights jinked their chances down to the 5% floor and lost them),
+           else where it has any shot FireDecider takes, else as near as it can get - the best such place by the usual terms. */
+        $must = $context['mustShoot'];
+        $tier = 0; //2: a solid shot can be had this turn; 1: only a shot over the floor; 0: none
+        $leashed = false; //a place within FLIGHT_LEASH of the target can be reached this turn
+        foreach ($judged as $variants) {
+            foreach ($variants as $j) {
+                if ($must) $tier = max($tier, ($j['shoots'] >= AIConfig::FLIGHT_MUST_CHANCE) ? 2 : (($j['shoots'] > 0) ? 1 : 0));
+                if ($j['leash'] == 0) $leashed = true;
+            }
+        }
+        if ($must) self::$last['forced']++;
+        $score = function (array $j) use ($context, $inReach, $farOff, $must, $tier, $leashed) {
             $s = $j['offence'] - $context['dangerWeight'] * $j['danger'] - $j['hazard'] - $context['support'] * $j['apart'];
-            if (!$inReach) $s -= $farOff ? AIConfig::FLIGHT_TETHER_PER_HEX * $j['beyondFleet'] : AIConfig::FLIGHT_CLOSING_PER_HEX * $j['short'];
+            //down to its fighters: within FLIGHT_LEASH of the target where it can be, else as near as it gets - before anything else
+            if ($context['lastStand']) $s -= $leashed ? (($j['leash'] > 0) ? self::MUST : 0) : self::MUST * $j['leash'];
+            if ($context['lastStand']) $s -= AIConfig::FLIGHT_CLOSING_PER_HEX * ($j['short'] + $j['fast']);
+            else if (!$inReach) $s -= $farOff ? AIConfig::FLIGHT_TETHER_PER_HEX * $j['beyondFleet'] : AIConfig::FLIGHT_CLOSING_PER_HEX * $j['short'];
+            if ($must && $tier == 2) $s -= ($j['shoots'] >= AIConfig::FLIGHT_MUST_CHANCE) ? 0 : self::MUST;
+            else if ($must && $tier == 1) $s -= ($j['shoots'] > 0) ? 0 : self::MUST;
+            else if ($must) $s -= self::MUST * ($j['short'] + $j['fast']); //as near as it can get - without outrunning the chase
             return $s;
         };
 
@@ -336,7 +360,14 @@ class FlightDecider
 
         $closing = count($raiders) > 0 ? $raiders : array_map(function ($e) { return $e['unit']; }, $enemies);
         $nearest = PHP_INT_MAX;
-        foreach ($closing as $target) $nearest = min($nearest, $flight->getHexPos()->distanceTo($target->getHexPos()));
+        $chase = PHP_INT_MAX; //stage T6g: the speed closing in may build up to - the nearest target's, FLIGHT_CHASE_MARGIN over
+        foreach ($closing as $target) {
+            $d = $flight->getHexPos()->distanceTo($target->getHexPos());
+            if ($d >= $nearest) continue;
+            $nearest = $d;
+            $last = $target->getLastMovement();
+            $chase = ($last ? max(0, (int)$last->speed) : 0) + AIConfig::FLIGHT_CHASE_MARGIN;
+        }
 
         /* HARD's mutual support (stage T5f-3, the skill 'support'): a cost in hexes of the flight's own value for each hex beyond
            FLIGHT_SUPPORT_RANGE of the nearest other flight of the bot, while the enemy has flights - in full while they have yet
@@ -348,7 +379,9 @@ class FlightDecider
         }
 
         $health = $view->healthLeft($flight);
-        return array('guns' => $guns, 'enemies' => $enemies, 'closing' => $closing, 'nearest' => $nearest,
+        $lastStand = Posture::lastStand($view); //stage T6g: the side down to its fighters
+        return array('guns' => $guns, 'enemies' => $enemies, 'closing' => $closing, 'nearest' => $nearest, 'chase' => $chase,
+            'lastStand' => $lastStand, 'mustShoot' => $lastStand && isset(Posture::$mustShoot[(int)$flight->id]),
             'mission' => count($raiders) > 0 ? 'intercept' : 'strike', 'health' => $health, 'worth' => $view->value($flight) / $health,
             //the level's skills (stage T5f): what the flight's own losses count for, an enemy yet to move, staying together
             'dangerWeight' => (float)$view->skill('flightDanger'), 'unmovedDanger' => (float)$view->skill('unmovedDanger'), 'support' => $support);
@@ -410,6 +443,30 @@ class FlightDecider
                 foreach ($context['closing'] as $target) $short = min($short, $flight->getHexPos()->distanceTo($target->getHexPos()));
             }
 
+            /* Stage T6g: a flight that must fire this turn needs a place where a gun of it would really be fired - at or above
+               FireDecider's floor (an expected damage above 0 may come from a 1% chance FireDecider never takes), and its higher
+               floor for a shot from exactly between two of the target's sections (AIView::onEdge, FIRE_MIN_CHANCE_EDGE). */
+            //stage T6g: how many hexes beyond FLIGHT_LEASH of the nearest target it closes on (where they will be at the Fire phase)
+            $leash = 0;
+            if ($context['lastStand']) {
+                $apart = PHP_INT_MAX;
+                foreach ($context['closing'] as $target) $apart = min($apart, $flight->getHexPos()->distanceTo($target->getHexPos()));
+                $leash = ($apart === PHP_INT_MAX) ? 0 : max(0, $apart - AIConfig::FLIGHT_LEASH);
+            }
+
+            $shoots = 0; //the best chance at the Fire phase of a shot FireDecider would take from here (its jinking counted), or 0
+            if ($context['mustShoot']) {
+                foreach ($context['guns'] as $gun) {
+                    $floor = FireDecider::minimumChance($gun['weapon'], true, $view->skill('pulsePremium'));
+                    foreach ($context['enemies'] as $e => $enemy) {
+                        if (!$gun['weapon']->ignoresLoS && !$outward[$e]) continue;
+                        $need = $view->onEdge($flight, $enemy['unit']) ? max($floor, AIConfig::FIRE_MIN_CHANCE_EDGE) : $floor;
+                        $chance = $view->chanceOf($flight, $gun['weapon'], $enemy['unit'], true);
+                        if ($chance >= $need) $shoots = max($shoots, $chance);
+                    }
+                }
+            }
+
             //danger: an enemy that has moved from its arcs; one yet to move with every gun
             $incoming = array();
             foreach ($context['enemies'] as $e => $enemy) {
@@ -441,6 +498,6 @@ class FlightDecider
         return array('offence' => ShipDecider::removed($damage, $targets), 'danger' => ShipDecider::lost($incoming, $context['health'], $context['worth']),
             'short' => ($short === PHP_INT_MAX) ? 0 : $short, 'beyondFleet' => ($fleet === PHP_INT_MAX) ? 0 : max(0, $fleet - AIConfig::FLIGHT_ESCORT_RANGE),
             'apart' => ($wing === PHP_INT_MAX) ? 0 : max(0, $wing - AIConfig::FLIGHT_SUPPORT_RANGE),
-            'hazard' => $board['total']);
+            'hazard' => $board['total'], 'shoots' => $shoots, 'fast' => max(0, (int)$plan['speed'] - $context['chase']), 'leash' => $leash);
     }
 }
