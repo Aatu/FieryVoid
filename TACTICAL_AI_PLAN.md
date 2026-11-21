@@ -9,11 +9,16 @@ same day, T5f-7 (the ENEMY FORECAST - Normal and Hard anticipate the moves of en
 brought forward from T8: two-pass judging and a CPU budget per ship) BUILT, and T5f-9 run - the ladder on the standard 42x30 map
 (final build: Hard 50% on EA, 62% on Brakiri over 24 games each) and a forecast audit that changed Hard's forecast; Hard's lead
 ACCEPTED for the first version as the user ruled; T5f COMPLETE (user, 2026-11-20: "let's mark Stage T5f (and Stage T5 overall)
-as complete for now") - committed by the user as 074e28ff1; section 10.7.** **Stage T6 STARTED 2026-11-21** with the user's
-feedback on turns 3-4 of game 4774 and their rulings on surrender, jumping out and ramming: T6a (the 4774 notes), T6b (surrender),
-T6c (jumping out), T6e (Hard sheds a drive past half its boxes) and T6g (a side down to its fighters must keep shooting) BUILT,
-uncommitted, not play-tested; T6d (ramming) and T6f (the done-when) to come; section 10.8.
-T7 onward not started. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
+as complete for now") - committed by the user as 074e28ff1; section 10.7.** **Stage T6 COMPLETE (marked so by the user 2026-11-21:
+"I think it is now for v1 of CPU opponents"; committed by the user as 442121f12, with their own tuning of four constants)** - T6a (the
+4774 notes), T6b (surrender), T6c (jumping out), T6e (Hard sheds a drive past half its boxes) and T6g (a side down to its fighters must
+keep shooting) built; T6d (last-resort ramming) NOT built - deferred past v1; T6f's done-when met by the T6 batches; section 10.8.
+**Stage T7 STARTED 2026-11-21**: T7a (the readiness list in the lobby - only Earth Alliance and Raiders offered for a CPU slot, the
+units the CPU cannot fly hidden, a CPU fleet with either refused on Ready), T7b (EA Interceptors fire offensively only when boosted;
+Hard boosts the spare ones against a fighter-heavy enemy) and T7b-2 (only Interceptors whose arc faces the fighters) BUILT, uncommitted,
+not play-tested; section 10.9.
+T8 onward not started; **stage T9 (more factions - section 10.10) PLANNED 2026-11-22** at the user's request, with the campaign paused;
+the campaign wiring is now T10. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
 layer, which uses this for battles against NPCs - see its section 7) and `STRATEGIC_AI_PLAN.md` (what
 NPC empires do on the campaign map).
 
@@ -379,7 +384,8 @@ the notes), Easy lacks most of them, Hard adds what is still to build. Built at 
 | Anticipate where an enemy ship yet to move will end (user, 2026-11-20: "both Hard and Normal to have some level of movement predictions (to a simpler extent e.g. Normal might only consider that a ship might turn once)") - BUILT at T5f-7 | - (straight on) | straight on or ONE turn at any point of its move, whichever brings most of its guns' fire on the bot's units | the same measure over a wider set: Normal's plans and 80 of the enemy's own (speed changes, slips, two manoeuvres). (Weighing the enemy's trade instead was built first and dropped: the worst predictor in the T5f-9 audit) |
 | Power: light weapons that cannot reach anything switched off early, the scanner or engine boosted, the weapons back on as the enemy nears (10) | - | - | yes - BUILT at T5f-4 (interceptors the enemy's shots need stay on) |
 | Pivots and rolls (user, 2026-11-19: "still very rare, advanced types of movement ... probably only set Hard opponents to use Pivots or Rolls. Perhaps Normal could in the case of rolling to swap thrusters to turn in a direction it wanted next turn too, but otherwise no") - BUILT at T5e | stops one carried over, starts none | stops one carried over; rolls only to swap its side thrusters for the turn it wants next turn | stops one carried over; pivots (started and stopped the same turn) and rolls where the trade is worth it: hiding a damaged side, swinging guns round, the gravitic pivot, the thruster swap |
-| Ramming (11) | never | last resort under the Desperate rule (T6): no usable weapon OR primary structure at or below 25%, only at a target it can reach this turn (user, 2026-11-21) | the same |
+| Ramming (11) | never | last resort under the Desperate rule (T6): no usable weapon OR primary structure at or below 25%, only at a target it can reach this turn (user, 2026-11-21) - **NOT built: T6d deferred past v1** (the user marked T6 complete without it, 2026-11-21) | the same (not built) |
+| EA Interceptors fired offensively - only when boosted, their fire control null against everything until then (user, 2026-11-21: "It's important that the AI follows this rule too") - BUILT at T7b | never boosts one, so never fires one | never boosts one, so never fires one | against a FIGHTER-HEAVY enemy (the CCEW rule's measure) with a flight in reach: one kept on interception per interceptable enemy-ship shot that could reach the ship, the rest boosted - never more than half, and only those whose arc faces a flight at the start of the turn, the most flights first (T7b-2) |
 
 ---
 
@@ -409,6 +415,16 @@ faction - prioritise `raiders` right after EA), then Minbari (jammer, stealth ha
 
 The Create Game dialog offers only ready factions for a CPU slot; the campaign asks the same list
 (section 9).
+
+**As built (T7a, 2026-11-21 - section 10.9):** the list is `AIConfig::READY_FACTIONS` = **Earth Alliance, Raiders** (the user: "just
+show EA and Raiders atm and add more as we tackle Stage T7"), spelt as the classes spell `$faction` - the factions the ShipMover, fire
+and orders pairs were proven on by directory (EA, raiders; the other factions those directories hold are not on it). A faction is
+chosen per slot in the lobby, not in Create Game: while a CPU player's slot is selected the Faction Picker lists only these, its
+randomiser rolls only from them, the Store hides every unit ShipMover never plots for (bases, OSATs, mines, terrain, remote-controlled
+flights, Mindrider drives - `ShipMover::unsupportedHullReason`), a saved fleet loads without the units a CPU cannot field, and the
+server refuses a CPU fleet with any such unit when the slot is readied (`AIConfig::cpuUnitBlock`). Adding a faction = one string in
+`READY_FACTIONS`, once it meets the criteria above - **stage T9 (section 10.10) is the plan for growing the list**, with the criteria
+made a concrete gate and every faction's standing surveyed.
 
 ---
 
@@ -471,7 +487,7 @@ ship array a lobby submit produces.
 
 ---
 
-## 9. Campaign wiring (stage T9)
+## 9. Campaign wiring (stage T10 - was T9 until 2026-11-22, when "more factions" took T9)
 
 The campaign needs four things from this plan, and nothing else:
 
@@ -507,10 +523,11 @@ unchanged) and the self-play harness.
 | **T3 EW and power** ✅ BUILT (uncommitted, 10.5) | `EWDecider`, `PowerDecider` (negative-power handling) | Bot EW passes `validateEW` in every self-play turn; hit rates rise measurably versus T2 |
 | **T4 Ballistics and fighters** ✅ COMPLETE (uncommitted, 10.6) | `BallisticDecider`; flight tactics (escort, strike, intercept) - built on `ShipMover`, not `AutomatedMovement`, whose rows the page never checked | Missile and carrier fleets fight sensibly |
 | **T5 Movement search** ✅ COMPLETE (user, 2026-11-20; from T5e on uncommitted, 10.7) | `MoveDecider` scoring, range bands, terrain (drifting too) and mine avoidance, pivots and rolls, gravitic hulls; closing with the enemy (the T2 pursuit question, ruled into T5); moving to bring the most direct-fire weapons into arc within the turn AND the most ballistic launchers to bear for next turn's launch (user, game 4701) | Hard beats Normal beats Easy in self-play ladders at >= 60% - Normal over Easy met (15 of 16); Hard over Normal a few points (50-62% on 42x30), ACCEPTED by the user for the first version (T5f-9) |
-| **T6 Withdrawal** (STARTED 2026-11-21, 10.8 - T6a/b/c/e BUILT) | surrender, jump-out (the user's rulings of 2026-11-21 - no fleet-wide withdrawal posture in v1); **last-resort ramming** (user, 2026-11-19 - section 10.7, note 11); the user's notes on game 4774 turns 3-4 (T6a) | No game runs past the turn cap for lack of a decision |
-| **T7 Specials** | handler registry; handlers faction by faction; readiness list grows | Each added faction meets the section 7 criteria |
+| **T6 Withdrawal** ✅ COMPLETE (user, 2026-11-21: "for v1 of CPU opponents"; committed 442121f12; 10.8) | surrender, jump-out (the user's rulings of 2026-11-21 - no fleet-wide withdrawal posture in v1); ~~last-resort ramming~~ (T6d - NOT built, deferred past v1); the user's notes on game 4774 turns 3-4 (T6a); a side down to its fighters keeps shooting (T6g) | No game runs past the turn cap for lack of a decision - met by the T6 batches (10.8) |
+| **T7 Specials** (STARTED 2026-11-21, 10.9 - T7a/T7b/T7b-2 BUILT) | the readiness list in the lobby and on the server (T7a); the EA Interceptors' offensive mode (T7b, T7b-2). Since 2026-11-22 the faction-by-faction work - handlers, the weapon families new factions need, the readiness list growing - is stage T9 | T7a and T7b play-tested by the user |
 | **T8 Skirmish release** | server `FleetChecker` port + parity test; `FleetComposer` (auto-compose as the default for an empty CPU slot); level and personality pickers; lobby and games-list display of CPU seats; docs page; **a decision-time budget for live** (user, 2026-11-19: "reasonable decision time is important for live server" - section 12; the per-ship budget and two-pass judging were BROUGHT FORWARD to T5f-8 on 2026-11-20); **a HOLISTIC REVIEW of decision efficiency** (user, 2026-11-20: "in Stage 8 plan a holistic review of how we can make AI decisions as efficient as possible to keep decisions times reasonable" - the plan for it is in section 12) | Every auto-composed fleet across all ready factions and a range of point values passes the Fleet Checker; every decision within the budget on live-sized fleets, timed on the live host; Beta on live via `betaTesters`, then the flag |
-| **T9 Campaign wiring** | section 9 | A campaign battle against a Raider fleet is played manually and harvested |
+| **T9 More factions** (PLANNED 2026-11-22, 10.10 - the user, with the campaign paused) | the factions beyond EA and Raiders, group by group in the user's order: Major, League, Minor, Ancients, Custom - the gate tooling (T9a), the cross-faction enablers each group needs (E1-E8: split-shot arrays, ammunition weapons, special rounds, special hit chance, hex-targeted weapons, Pre-Firing, power models, system handlers - the section 6 registry is built with the first handler), and each faction's gate | Each faction released meets the 10.10 gate (the section 7 criteria made concrete) and is play-tested by the user before its string joins `READY_FACTIONS` |
+| **T10 Campaign wiring** (was T9 until 2026-11-22) | section 9 | A campaign battle against a Raider fleet is played manually and harvested |
 
 T0-T3 produce an opponent that is already useful for new-player onboarding (a roadmap item in its
 own right: a first game with no human needed).
@@ -1934,10 +1951,24 @@ the levels swapping seats, `--budget=0`, 24-32 games a round:
   these rounds (CPU, 16 processes, no budget - ~3x a decision alone): EA ships mean 1.1-1.8 s, slowest 6.9 s; Brakiri mean
   2.8-7.7 s, slowest 17.8 s - the case for T8's search work (section 12).
 
-### 10.8 Stage T6 - withdrawal (started 2026-11-21)
+### 10.8 Stage T6 - withdrawal (started 2026-11-21) - COMPLETE (user, 2026-11-21), committed 442121f12
 
 T5e and T5f were committed by the user as 074e28ff1. The stage's "done when" (section 10): **no game runs past the turn cap for
 lack of a decision**. Begun at the user's request together with their feedback on turns 3-4 of game 4774.
+
+**Marked COMPLETE by the user, 2026-11-21** ("Please also mark Stage 6 as completed as I think it is now for v1 of CPU opponents"),
+after committing T6a-T6c, T6e and T6g as 442121f12. **T6d (last-resort ramming under the Desperate rule) was never built and is
+deferred past v1** - the rulings for it (Normal and Hard, no usable weapon or primary at or below 25%, a target it can reach this turn)
+stand in the table below and in section 5.8 for whenever it is taken up. T6f's done-when is met by the batches recorded below (batch 3:
+8 of 8 games ended on their own but one, which was the bot's own surrender due the next turn; the T6g batches: the one capped game a
+fight, not a stalemate).
+**The user's tuning at the commit** (the values below read as built before it): `FIRE_INTERCEPTOR_MIN_CHANCE` 5 (was 15 - so every gun
+with a shot fires and only a gun with none stays on defence), `SURRENDER_EARLIEST_TURN` 5 (was 3), `FLIGHT_MAX_IDLE_TURNS` 4 (was 3),
+`FLIGHT_LEASH` 11 (was 10); and, after it the same day, `JUMP_DAMAGED_SHARE` **0.15** (was the implementer's 0.5, "for the user to
+confirm"): a ship jumps out as "expected to be destroyed" only with its primary down to 15% (withdrawalHarness D2 now follows it). Twelve harness checks still asserted the old figures (fireRules C2/C3, withdrawal B2/C2/F2/F5a/F5b); at
+T7 they were brought to the committed ones - the surrender turn and idle turns now follow AIConfig, the interception bar is pinned to the
+user's 5 (fireRulesHarness `USER_INTERCEPT_BAR`), and the two checks that need a bar above the floor (C's boards under it, F5b's guns
+kept back) apply only when it is.
 
 **The user's notes on game 4774, turns 3-4 (2026-11-21)** - human G'Quan + Va'Kar + Frazi v CPU (Normal) Omega x2 + Tethys +
 Aurora and Thunderbolt flights; turns 3-4 were played on 2026-11-19 by the T5e / early-T5f bot. The user's "Turn 4" is turn 3's
@@ -1986,9 +2017,9 @@ came: the flight was close. Exactly the case this stage is for.
 | T6a ✅ BUILT | The user's 4774 notes: twin racks (same-target firing links), parting floors by loading time, the interception reserve at 15% and only against interceptable fire it can stop |
 | T6b ✅ BUILT | "Can it still fight?" per unit and side (`Posture` - the best-case reach of every usable gun, as PowerDecider's reach test); SURRENDER by the ruling above, through the ordinary surrender path (`TacticalAI::submit` with 'SURRENDERED'), counted across turns in `tac_ai_state` |
 | T6c ✅ BUILT | JUMPING OUT by the ruling above: the decision in Initial Orders (JumpDecider); the vortex declared where a legal plan of this turn ends within the drive's 4 hexes, entered through its mouth (the page's vortex rules, ported and oracle-proven); that plan flown in Movement; the jump-out order first thing next turn (`ShipMover` mirrors the page's Jump Out button) |
-| T6d | LAST-RESORT RAMMING under the Desperate rule by the ruling above (ShipDecider plans into the target's hex, FireDecider orders the RammingAttack; oracle-proven) |
+| T6d ⏸ NOT BUILT (deferred past v1 - the user marked T6 complete without it, 2026-11-21) | LAST-RESORT RAMMING under the Desperate rule by the ruling above (ShipDecider plans into the target's hex, FireDecider orders the RammingAttack; oracle-proven) |
 | T6e ✅ BUILT | Hard: a Jump Engine more than 50% damaged switched off for power (PowerDecider::boost) |
-| T6f | The done-when: self-play batches on 24x16 and 42x30 - no game at the turn cap for lack of a decision; any cap that remains read and explained |
+| T6f ✅ MET | The done-when: self-play batches on 24x16 and 42x30 - no game at the turn cap for lack of a decision; any cap that remains read and explained (batch 3 and the T6g batches below) |
 | T6g ✅ BUILT | The user's ruling on 5749 (2026-11-21): a side down to its fighters - no flight goes three turns without a shot, and none flies further off than it must |
 
 **T6a as built (2026-11-21) - BUILT, uncommitted, not play-tested.** No flag, no migration, no new class.
@@ -2218,6 +2249,281 @@ maybe don't run as far way from the enemy."
   did, but "never three turns" is not a guarantee** - the enemy moving after a flight, or a flight out of reach, can take its shot
   away. Batch 1's rule had no cap in 8 games; its flights hid between forced turns as far as they liked - the leash is the user's
   "don't run as far away".
+
+### 10.9 Stage T7 - specials (started 2026-11-21)
+
+Begun with T6 marked complete. **The user's request (2026-11-21):**
+1. "Hide Factions not cleared for CPU use in gamelobby Faction Picker when the player is manually selecting ships for CPU to use.
+   Also, prevent CPU auto-choosing from uncleared factions when it auto-picks e.g. just show EA and Raiders atm and add more as we
+   tackle Stage T7 in time. Hide any ships that are currently listed in unsupportedReason()."
+2. "To make sure that EA interceptors systems can only be fired offensively by CPU players when boosted (their fire control against
+   everything is null until then, preventing players from targeting a shot in the client). It's important that the AI follows this
+   rule too. We can make it so only a Hard opponent boosts some Interceptors when facing a lot of enemy fighters, Easy and Normal just
+   skip this mechanic."
+
+**User rulings, 2026-11-21 (asked):**
+* SAVED FLEETS (the gap in 1 - the saved-fleet list carries no faction): refuse such units on load AND on Ready - the readiness list
+  is a server rule as well as a picker filter.
+* WHEN HARD BOOSTS: the enemy is FIGHTER-HEAVY - EW_FIGHTER_HEAVY (a third) of its visible value in flights, the measure the CCEW rule
+  uses - and some of its flights can reach the ship this turn.
+* HOW MANY: one Interceptor kept on interception for each interceptable shot the enemy SHIPS could put on the ship this turn, the best
+  ratings first; the rest boosted, but never more than half of the ship's Interceptors.
+
+| | Deliverable |
+|---|---|
+| T7a ✅ BUILT | The readiness list in the lobby and on the server (section 7 "as built") |
+| T7b ✅ BUILT | EA Interceptors: the fire-control rule pinned by harnesses; Hard's offensive boost against a fighter-heavy enemy |
+| T7b-2 ✅ BUILT | The user, after 5824 (2026-11-21): "It is actually quite rare in practice to fire interceptors at fighters, but if we can prioritise Interceptors likely to have arcs for boost, that would be good" - boost only Interceptors with a flight in their arc |
+| (next) | The handler registry (section 6) and further factions on the list (section 7) - not started |
+
+**T7a as built (2026-11-21) - BUILT, uncommitted, not play-tested.** No new flag (all behind `cpuOpponent`), no migration.
+* Server: `AIConfig::READY_FACTIONS` (Earth Alliance, Raiders) and `AIConfig::cpuUnitBlock($unit)` - "X is not a CPU faction yet", or
+  `ShipMover::unsupportedHullReason` (extracted from `unsupportedReason`, which now asks it first: a remote-controlled flight, terrain,
+  a base, an OSAT, a mine, a Mindrider drive). `Manager::addCpuSlots` sends `cpuFactions` beside `cpuSlots`, under the same gate
+  (feature reachable, LOBBY, a CPU seat) - every other payload is unchanged (P6). `Manager::submitFleetForCpuSlot` refuses a fleet with
+  any unit `cpuUnitBlock` names, each named: "The CPU player cannot use Babylon4 2 (a base), Gquan 3 (Narn Regime is not a CPU faction
+  yet). Remove them from its fleet first."
+* Lobby (`gamelobby.js`, `gamelobby.php`): `parseServerData` copies `cpuFactions` by name; `cpuSlotSelected`, `cpuFactionReady`,
+  `cpuHullBlock` (⚠️ MIRROR of `unsupportedHullReason`) and `cpuUnitBlock` (the page's half of AIConfig's, same wording).
+  `applyCpuSlotFilters` runs from `selectSlot` - which every poll repeats, so it acts only when the choice moves to or from a CPU slot:
+  * the Faction Picker (`filterFactionList`) lists only ready factions while a CPU slot is selected, with a one-line note
+    (`#factionListCpu`); its randomiser (`rollFaction`) and Enter-to-pick draw from the rows it shows, so they cannot suggest another;
+  * a Store left on a faction the CPU cannot play goes back to "No faction chosen" (`clearStoreFaction`);
+  * each Store row carries `data-cpu` (`cpuHullBlock`) and `applyCustomShipFilter` hides the false ones; `applyStoreCategory` treats a
+    category with nothing a CPU can fly (Immobile Structures, Mines) as absent, so its chip is disabled like a faction's empty one;
+  * `doLoadFleet` leaves out each unit a CPU player cannot field, as it leaves out mines and late ISDs, and `showLeftOutNotice` lists
+    each with why; a fleet with no unit left loads nothing.
+* **Ruling (implementer, for the user to confirm):** the saved-fleet refusal is PER UNIT, not the whole fleet (the asked option read
+  "the lobby won't load such a fleet") - per unit is how `doLoadFleet` has treated mines and the ISD since the user's 2026-09-25 request.
+  Five lines in `doLoadFleet` turn it into a whole-fleet refusal.
+* "Prevent CPU auto-choosing from uncleared factions" is the picker's randomiser: nothing on the server picks a faction before T8's
+  `FleetComposer`, which must draw from `READY_FACTIONS` when it is built.
+* Gates: `cpuLobbyHarness` 29 of 29 (new: `cpuFactions` sent in the lobby, not in play, not with the flag off; a Narn unit refused and
+  named; a base and a Narn unit refused, both named; nothing bought); `flagOffHarness` all passed. The mirror pair - `gamelobby.js`'s
+  real `cpuHullBlock` (node) against `unsupportedHullReason` (PHP) over every static blueprint of every faction: **2,902 agree, 0
+  differ** (2,368 flyable; 388 OSATs, 106 bases, 8 mines, 24 terrain, 5 Mindrider drives, 3 remote-controlled flights hidden - a
+  scratch script, not kept in tests/). The picker and Store were not browser-tested: the user's play-test.
+
+**T7b as built (2026-11-21) - BUILT, uncommitted, not play-tested.**
+* THE RULE: an Interceptor (`InterceptorMkI` and its family - Interceptor II, Prototype, Heavy Interceptor Battery) has fire control
+  null against everything until boosted; boosted (free, one level) its own `setSystemDataWindow` gives it 6 / 8 / 10 against fighters
+  and takes its intercept rating away - run by prepareForPlayer's beforeTurn sweep, so it is what the page is sent and what AIView
+  reads. **The bot already obeyed it** (`AIView::shot` refuses on fire control, 'fc', as the page refuses the click); nothing changed in
+  the Fire phase. Now PINNED: `fireRulesHarness` D - unboosted, no shot at a flight or a ship (refused on 'fc') and no FireDecider order,
+  at every level, an Omega (Interceptor IIs) and a Hyperion (Interceptor Is) 1-3 hexes from an Aurora flight; boosted, fire control for
+  fighters alone and rating 0, no shot at a ship, and it fires at the flight. And the fire pair: one Fire-phase board in four boosts the
+  hull's Interceptors (no draw - the other boards unchanged); the PHP half fails any Interceptor order that is not boosted or not at a
+  flight; the page agrees on 43 boosted shots a level.
+* HARD'S BOOST: `PowerDecider::interceptors($view, $plan)`, after `boost()` and before EW (`TacticalAI::initialOrders`), skill
+  `interceptorBoost` (Hard only); `EWDecider::lockable` / `fighterHeavy` extracted (one measure for CCEW and this), and
+  `FireDecider::interceptable` public. Candidates: an `InterceptorMkI` the page's plus button takes (boostable, not switched off, under
+  its maxBoostLevel), loaded, with a rating, fire control null now and some once boosted (asked of a CLONE's `setSystemDataWindow` - it
+  also rebuilds damage arrays and the firing mode, which the live weapon must not have done twice). Boosted: min(half the candidates,
+  candidates - ship shots), the lowest ratings (equal ratings: the highest ids), where SHIP SHOTS = the enemy ships' loaded guns that can
+  be intercepted and would have a chance at the ship, and their loaded launchers in range, both as close as they could come (boost()'s
+  reach) - and only when a boosted candidate would have a chance at some enemy flight from as close as both could come. Only on a ship
+  `understands()` answers for (P4) - the scanner and engine rows `boost()` just bought do not count against it (`$ownBoosts`). Each
+  boost: the row, and the boosted fire control and rating written on the system so EW sees the ship's anti-fighter guns as they will be.
+  The Initial Orders line: "N Interceptors boosted to fire at fighters".
+* Gates: `levelsHarness` N (28 checks; 264 in all, 0 failed): a fighter strike - Hard boosts 3 of 6, Easy and Normal none; the server's
+  offensive mode on each boosted one, the rest unchanged; flights 120 hexes off - none; one flight beside a whole Omega - not
+  fighter-heavy, none; an enemy Omega with K interceptable guns - min(3, 6 - K) for K = 0, 2, 4, 5, 6, 9 (its Heavy Lasers and unboosted
+  Interceptors not counted); two lost - 2; five lost - none; direct calls isolating the reach and fighter-heavy tests. Mutation pass:
+  PowerDecider 10 of 10 caught; AIView's fire-control refusal 2 of 2 caught by fireRules D, the flight one by both fire-pair halves too
+  (the page makes 0 orders of an unboosted Interceptor's shot). Orders pair: a third of Hard's boards (troubles 2 and 3) face their
+  flights alone (the warships taken off after every draw, four Aurora flights 3-6 hexes off) - **228 Interceptor boosts on 123 hulls
+  clicked in through power.js, 0 differences**; Easy and Normal 0 boosts, 0 differences.
+* Self-play, through the real server path (24x16, `--budget=0`, both games deleted after reading): **5823** - Hard Omega + Hyperion v
+  Normal Omega + four Aurora flights (fighter-heavy): PASS, 11 turns, NO boost - the enemy Omega's 14 interceptable guns are always in
+  reach on that board, more than the six Interceptors, so every one stays on defence (the ruling, working as asked). **5824** - the same
+  Hard fleet v four Aurora flights alone: PASS, 20 turns, Hard 88% of its value left v 0%; 4-5 Interceptors boosted every turn while a
+  flight lived (the Omega 3, the Hyperion 2; 79 boost rows, every one a single level), none once the flights were gone; **11 offensive
+  Interceptor orders, every one boosted and at a flight** (5 hit, 40% needed on average); 12 interceptions, all by unboosted
+  Interceptors; no unboosted Interceptor ever fired offensively; no AI defect.
+* Found and fixed in `ordersHarness` (a harness bug, not the game's): `unit()` never loaded a flight's guns (they sit in its craft), so
+  Hard's `boost()` counted none of their shots and switched every Interceptor off as idle. In a real game the guns are loaded: `boost()`
+  keeps the Interceptors for the fighters' shots, and `interceptors()` then boosts the spare half.
+
+**T7b-2 as built (2026-11-21) - WHICH Interceptors. BUILT, uncommitted, not play-tested.** The user, after 5824: "It is actually quite
+rare in practice to fire interceptors at fighters, but if we can prioritise Interceptors likely to have arcs for boost, that would be
+good." `PowerDecider::interceptors` now asks which enemy flights a boosted Interceptor could reach (`flightsInReach`, was a yes/no) and
+boosts ONLY Interceptors whose arc holds one of them - `AIView::onArc`, the ship at its facing of the start of the turn (the likeliest
+it will have; arcs are not known before Movement) and the flight where it stands - those holding the most flights first, then the
+lowest ratings (the best stay on interception), then the highest ids. **Ruling (implementer):** "prioritise" was built as "only those
+with a flight in their arc, best first" - an Interceptor with none is never boosted, since that boost could only cost its interception
+(cost if wrong: one line lets the rest fill the half after them). The count rule is unchanged.
+* Gates: `levelsHarness` N 274 (0 failed): every boosted Interceptor holds a flight and none left unboosted holds more (judged with the
+  relative bearing and the weapon's own arc numbers - `getBearingOnUnit`, `Mathlib::isInArc` - not the decider's onArc); flights astern
+  (never a forward Interceptor), off either beam, split two ahead and one astern; the forward pair shot away with the flights just off
+  the bow: one Interceptor holds them, one boosted. Mutants: arc filter dropped and coverage order dropped both caught; the rating
+  tie-break reversed survives - equivalent on these boards (every Interceptor II is rated 4). Orders pair: 227 Interceptor boosts on 122
+  hulls clicked in through power.js, 0 differences at all three levels.
+* Self-play **5825** (the 5824 board again, deleted after reading): PASS, 17 turns, Hard 89% v 0%; 71 boosted Interceptor-turns, **13
+  offensive shots** (8 hit, 31% needed on average) - every one boosted and at a flight - against 5824's 79 and 11: ~18% of boosts
+  become a shot (was ~14%). The volume barely moved, for a plain reason: any bearing lies in at least three of an Omega's six 180-degree
+  Interceptor arcs (two of a Hyperion's four), so the half is usually filled with Interceptors that do face the fighters. Making the
+  boost itself RARER (the user: "quite rare in practice") would need a stricter trigger - see Open.
+
+**Open (T7):**
+* The boost is decided in Initial Orders with arcs unknown (a facing changes in Movement) and on the best-case reach. T7b-2 boosts only
+  Interceptors whose arc faces the flights now; still ~4-5 a turn against four flights (5825). If the boost should be RARER, the
+  trigger is the place: flights within a few hexes at the start of the turn rather than "could reach", or at most one Interceptor per
+  flight in arc - for the user to rule.
+* How the bot sees an enemy player's boosted Interceptors depends on what the mask shows of enemy power this turn - not examined.
+* The handler registry and further factions: moved to stage T9 (section 10.10).
+
+### 10.10 Stage T9 - more factions (PLANNED 2026-11-22)
+
+**The user (2026-11-21):** "now that we have a method of restricting CPU factions, how do we go about expanding this to factions beyond
+EA and Raiders? Campaign work is paused at the moment, so can you make a realistic plan to add more factions as a new Stage T9 (push
+current Stage T9 to T10). The preferred order is Major Factions->League of Non-Aligned Worlds->Minor Factions->Ancients->Custom."
+
+T9 takes over T7's "handlers faction by faction; readiness list grows" (T7 keeps the readiness mechanism and EA's Interceptors). It
+does not depend on T8; T8's `FleetComposer` must compose only from `READY_FACTIONS`, and T8's decision-time review should be run on the
+factions T9 has added by then.
+
+**How a faction is added - the gate (the section 7 criteria made concrete).** A faction's string joins `READY_FACTIONS` only when:
+1. **Survey.** `tests/ai/factionSurvey.php` (T9a) lists, for every hull of the faction the lobby offers: the weapons the bot leaves
+   alone and why (AIView's own gates), the systems that are not plain hull, the hulls whose power PowerDecider does not model. Every item
+   is either HANDLED (an enabler below) or RULED harmless here, by family. **The bar (D1, ruled by the user 2026-11-22):** the bot can use at least 85% of the
+   faction's weapon mounts (boarding parties and weapons that fire by themselves not counted - EA stands at 95%, Raiders at 88%), and no
+   hull class is left with no usable direct-fire weapon.
+2. **The three oracle pairs at 0 differences over EVERY class of the faction** - by faction STRING, not by directory (factions span
+   directories: Raiders five, Custom Ships nine, Civilians twenty-six): ShipMover (default and gravitic situations), fire (phases 3 and
+   1, every level, with boards for each weapon family an enabler added), orders (every level). This is what finds a BLOCKING system
+   the survey cannot see: run on Abbai and Brakiri (2026-11-22) it found their shields stop the page's commit.
+3. **Self-play:** 20 games (section 7) - the faction against EA, at Normal and at Hard, on 24x16 and 42x30, `--budget=0`: every game
+   PASS, no AI defect, none at the turn cap for lack of a decision; two of them read in replay.
+4. **The user's play-test** - one game - then the one-line change to `READY_FACTIONS`, and the lobby offers it.
+
+**Where every faction stands (survey of 2026-11-22 - scratch `faction_survey.php`, to become `tests/ai/factionSurvey.php` in T9a).**
+Every class the lobby offers (not `variantOf` NONE), of all 92 factions, on a small board (the hull at the origin, an enemy Omega 8
+hexes off), asked through AIView's own gates. "Left alone" = weapon mounts the bot never gives an order today, by AIView's reason:
+split = split-shot weapons (`canSplitShots`: the Twin Array family), ammo = an ammunition count without a magazine, rounds = a magazine
+whose rounds are all outside `BALLISTIC_ROUNDS` (⚠️ for fighter racks this is mostly the survey board's doing - a flight bought without
+missiles carries none; players buy them), special hit = a page-side hit-chance formula AIView has not ported, hex = hex-targeted,
+pre-fire = a Pre-Firing (phase 5) weapon, exclusive = a fighter weapon that excludes its craft's others, turret link = an angular-spread
+firing link, sustained = overload / sustained fire, auto = fires by itself (the server does it - nothing to add), boarding = left alone
+on purpose, as for EA. "Needs" = the enablers below.
+
+| Major Factions | Hulls flown | Weapons usable | Left alone (mounts) | Systems / power | Needs |
+|---|---|---|---|---|---|
+| Earth Alliance ✅ | 67 | 901/951 (95%) | rounds 42 (fighter racks), boarding 6, split 2 | DiffuserTendril 2, EnergyDiffuser 2 | (E1 E3 E8 polish) |
+| Raiders ✅ | 101 (9 gravitic) | 582/665 (88%) | split 45, special hit 18, boarding 8, exclusive 6, rounds 6 | TractorBeam 1 | (E1 E4 E9 polish) |
+| Dilgar Imperium | 46 | 413/436 (95%) | ammo 7, boarding 6, rounds 6, split 4 | - | gate (E1 E2 E3 polish) |
+| Centauri Republic (WotCR) | 60 | 565/586 (96%) | split 9, exclusive 6, ammo 6 | - | gate (E1 E2 E9 polish) |
+| Earth Alliance (Early) | 35 | 271/301 (90%) | rounds 24 (fighter racks), ammo 6 | - | gate (E2 E3 polish) |
+| Minbari Federation | 36 (36 gravitic) | 407/434 (94%) | special hit 11, pre-fire 10 (Gravity Net), boarding 6 | TractorBeam 11, EMShield 2, AdaptiveArmorController 2, SelfRepair 1 | E8 rulings (E4 E6 later) |
+| Orieni Imperium | 56 | 598/657 (91%) | ammo 53 (gatlings, missile racks), rounds 6 | HkControlNodeOrieni 16 (HK flights are not flown) | E2, E8 ruling |
+| Narn Regime | 57 | 332/470 (71%) | split 106 (Twin Arrays), hex 12 (Energy Mine), boarding 12, ammo 6, pre-fire 2 | - | **E1** (E5 E6 later) |
+| Centauri Republic | 51 | 182/413 (44%) | split 201 (Twin Arrays 184), ammo 12, exclusive 12, boarding 6 | TractorBeam 2, ChameleonSensors 1, Stealth 1 | **E1**, E8 rulings |
+
+| League of Non-Aligned Worlds | Hulls flown | Weapons usable | Left alone (mounts) | Systems / power | Needs |
+|---|---|---|---|---|---|
+| Torata Regency | 15 | 112/112 (100%) | - | - | gate only |
+| Drazi Freehold (WotCR) | 27 | 143/143 (100%) | - | - | gate only |
+| Abbai Matriarchate (WotCR) | 28 | 205/223 (92%) | rounds 18 (mine launchers - D4) | ShieldGenerator 27, GraviticShield 27 | **E8 (shields - BLOCKING)** |
+| Brakiri Syndicracy | 51 (50 gravitic) | 329/362 (91%) | pre-fire 8, hex 7, boarding 6, split 6, exclusive 6 | ShieldGenerator 16, GraviticShield 16 | **E8 (shields - BLOCKING)** |
+| Hurr Republic | 15 | 114/126 (90%) | rounds 6, ammo 6 | - | gate (E2 E3 polish) |
+| Cascor Commonwealth | 14 | 123/145 (85%) | ammo 12, exclusive 6, hex 4 | - | gate (E2 E5 E9 polish) |
+| Drazi Freehold | 30 | 189/243 (78%) | rounds 30 (fighter racks), split 10, boarding 8, sustained 6 | - | E1, E3 check |
+| Abbai Matriarchate | 20 | 86/151 (57%) | split 59 (Quad Arrays 47) | ShieldGenerator 18, GraviticShield 18 | **E1**, E8 |
+| Grome Autocracy | 11 | 89/153 (58%) | ammo 64 (their rail guns) | AntiquatedScanner, ConnectionStrut | **E2** |
+| Gaim Intelligence | 47 | 178/361 (49%) | split 92, special hit 60 (Packet Torpedo), ammo 12, rounds 12 | Bulkhead | **E1 E4** |
+| Hyach Gerontocracy | 19 (19 gravitic) | 126/176 (72%) | auto 38 (Interdictors - fine), hex 6, boarding 6 | HyachComputer 12, HyachSpecialists 12, Stealth 3 (2 stealth units) | **E8** (E5) |
+| Ipsha Baronies | 15 (15 gravitic) | 209/225 (93%) | hex 16 (Spark Field) | Mag-Grav reactor 13 | **E7** (E5) |
+| Pak'ma'ra Confederacy | 18 | 88/137 (64%) | hex 43 (Plasma Web) | Plasma Battery 14 | **E5 E7** |
+| Kor-Lyan Kingdoms | 24 | 122/258 (47%) | rounds 102 (D-racks 62, mine launchers 10), hex 16, special targeting 8 | - | **E3 E5** |
+| Vree Conglomerate | 22 (22 gravitic) | 36/167 (22%) | special hit 104 (antimatter), turret link 16, hex 5 | - | **E4 E10** (E5) |
+
+| Minor Factions | Hulls flown | Weapons usable | Left alone (mounts) | Systems / power | Needs |
+|---|---|---|---|---|---|
+| Usuuth Coalition | 10 | 75/75 (100%) | - | - | gate only |
+| Descari Committees | 21 | 195/201 (97%) | boarding 6 | - | gate only |
+| Balosian Underdwellers | 20 | 153/159 (96%) | boarding 6 | - | gate only |
+| Yolu Confederation | 15 (15 gravitic) | 183/195 (94%) | exclusive 6, boarding 6 | - | gate (E9 polish) |
+| Markab Theocracy | 13 | 86/92 (93%) | boarding 6 | - | gate only |
+| Minbari Protectorate | 18 (18 gravitic) | 185/203 (91%) | pre-fire 8, special hit 4 | TractorBeam 3 | E8 ruling |
+| Small Races | 18 | 141/161 (88%) | ammo 14, rounds 6 | - | gate (E2 polish) |
+| Llort | 19 | 119/139 (86%) | split 8, rounds 6 | - | gate (E1 polish) |
+| Belt Alliance | 23 | 137/161 (85%) | ammo 12, rounds 12 | - | gate (E2 E3 polish) |
+| Alacan Republic | 7 | 48/64 (75%) | ammo 16 | - | **E2** |
+| Rogolon Dynasty | 8 | 69/93 (74%) | ammo 12, rounds 12 | - | **E2** E3 |
+| Corillani Theocracy | 18 | 84/145 (58%) | split 55 | - | **E1** |
+| Deneth Tribes | 10 | 23/58 (40%) | split 35 | - | **E1** |
+
+| Ancients | Hulls flown | Weapons usable | Left alone (mounts) | Systems / power | Needs |
+|---|---|---|---|---|---|
+| Torvalus Speculators | 7 (7 gravitic) | 25/30 (83%) | pre-fire 4, hex 1 | ShadingField 6, SelfRepair 5 - **6 stealth units: the bot never fires one today** (firing reveals it) | E8 (stealth), E6 |
+| Vorlon Empire | 14 (14 gravitic) | 39/56 (70%) | split 16 | power capacitor 12, AdaptiveArmorController 14, SelfRepair 12, EMShield 12, petals | E1 E7 E8 |
+| The Triad | 14 (13 gravitic) | 49/88 (56%) | split 29, hex 6, special hit 4 | SelfRepair 11, StructureSelfRepair 6, CoopStructureSelfRepair 5 | E1 E8 (E4 E5) |
+| Walkers of Sigma-957 | 7 (7 gravitic) | 14/41 (34%) | turret link 12, hex 9, split 6 | SelfRepair 6, Energy Draining Field / Net | E1 E5 E8 E10 |
+| Kirishiac Lords | 7 (7 gravitic) | 20/65 (31%) | split 35, exclusive 6, pre-fire 4 | orbitals (dock and deploy), SelfRepair 6 | E1 E8 (E6) |
+| Shadow Association | 13 | 10/40 (25%) | hex 15, split 15 | EnergyDiffuser 13, DiffuserTendril 12, ShadowPilot 12, SelfRepair 12 | E1 E5 E8 |
+| Mindriders | 0 of 5 | - | - | the Mindrider drive - ShipMover does not fly it | never, unless ShipMover learns the drive |
+
+**Custom Factions (44)** - one line each (usable weapons, needs): gate only - Terran Federation 100%, Escalation Wars Support Units 100%,
+Escalation Wars Kastan Monarchy 97%, Nexus Polaren Confederacy (early) 97%, Nexus Sal-bez Coalition 97% / (early) 96%, Escalation Wars
+Blood Sword Raiders 92%; near-ready - Barada Imperium 99% (E1), Great Crusade Orieni Imperium 98% (E2, E8), Escalation Wars Circasian
+Empire 97% (E2), StarTrek (early) Federation 95% (E11), The System 95% (E1 E8), Ch'Lonas Cooperative 94% (E2 E11), Yolu Confederation
+(reevaluated) 94% (E9), StarTrek (TOS) Federation 93% (E2), Nexus Support Units 91% (E2 E5), BSG Colonials 90% (E2 E3), Escalation Wars
+Sshel'ath Alliance 90% (E2 E4 E5), Nexus Brixadii Clans 89-90% (E2), Nexus Craytan Union 88-90% (E2), Escalation Wars Chouka Raider 86%
+(E3), StarTrek Klingon 86% (E4 E6), 12 Colonies of Kobol 85% (E2 E9), Escalation Wars Chouka Theocracy 85% (E2 E3 E5 E6), StarWars 85%
+(E2 E9), Star Wars Clone Wars 83% (E2 E8), Nexus Makar Federation 81-83% (E4 E5), Cascor Commonwealth (reevaluated) 82% (E2 E5 E9),
+Custom Ships 80% (E1 E2 E5 E8), Drakh 100% but absorption shields and raider controllers (E8); far - Nexus Dalithorn 69-77%, Nexus
+Velrax 70-77%, Trek Playtest 77%, StarTrek (early) Suliban 75%, Star Trek (Kelly) 73%, What If 62%, BSG Cylons 58%, Thirdspace 58% (E7),
+House Valheru 46%.
+
+**Other Factions** (not in the user's order - D5): Civilians 84% over 26 directories (E1 E2 E3 E4 E5 E7 E8 - one or two hulls each),
+Streib 88% (E8 tractor beams). Data quirks seen, not fixed: one hull in `civilians/` declares faction "EA" (not "Earth Alliance"); a few
+orphan static files ("Escalation Warss ...", "ZStarTrek ...") still list factions.
+
+**The enablers** - cross-faction work, each its own sub-stage with harness boards, the page as oracle and a mutation pass, as every stage
+before. Ordered by what they unlock in the user's order:
+
+| # | Enabler | Mounts left alone today (Major, League, Minor) | The work |
+|---|---|---|---|
+| E1 | **Split-shot weapons** - the Twin Array family | Centauri 201, Narn 106, Gaim 92, Abbai 59 (Quad Arrays), Corillani 55, Raiders 45 (**already released: today their Twin Arrays never fire**), Deneth 35, Drazi 10, Centauri (WotCR) 9, Llort 8, Brakiri 6 (Gravitic Lance), Dilgar 4 | Port the page's split-shot orders (weaponManager) into AIView / FireDecider - every shot at one target first, splitting between targets later; fire-pair boards for them. The single largest unlock |
+| E2 | **Ammunition weapons** (a count, no magazine) | Grome 64 (their rail guns), Orieni 53 (gatlings, SO racks), Alacan 16, Small Races 14, Centauri / Cascor / Gaim / Belt / Rogolon 12, Dilgar 7, fighters' torpedo and missile launchers everywhere | Track the count as the page does, never fire past it; the page as oracle |
+| E3 | **Magazine rounds outside `BALLISTIC_ROUNDS`** | Kor-Lyan 102 (D-racks 62, mine launchers 10); fighter racks elsewhere (mostly the survey's empty magazines - first CHECK with missiles bought) | Model each round's rules (interceptor, multiwarhead, mines...) or rule it left alone |
+| E4 | **Special hit chance** (`specialHitChanceCalculation`) | Vree 104 (antimatter - their arsenal), Gaim 60 (Packet Torpedo), Raiders 18 (Antiproton Defender), Minbari 11, Minbari Protectorate 4 | Port each family's page formula into AIView - the server's own `calculateHitBase`, as always - and an oracle board per family |
+| E5 | **Hex-targeted weapons** | Pak'ma'ra 43 (Plasma Web), Ipsha 16 (Spark Field), Kor-Lyan 16 (Proximity Laser), Narn 12 (Energy Mine), Brakiri 7 (Gravitic Mine), Hyach 6, Vree 5, Cascor 4 | A hex-choice per family; fire-pair hex boards on T6c's vortex pattern (every hex clicked through the page) |
+| E6 | **A Pre-Firing decider** (phase 5 - "nothing in v1", 5.5) | Minbari 10 (Gravity Net), Brakiri 8 (Gravitic Shifter), Minbari Protectorate 8, Narn 2 (Pulsar Mine) | A new decider and a phase-5 oracle - or rule them left alone for v1 (D4) |
+| E7 | **Power models** PowerDecider leaves alone | Pak'ma'ra 14 hulls (Plasma Battery), Ipsha 13 (Mag-Grav), Vorlons 12 (Power Capacitor) | Port each balance into PowerDecider; the orders oracle |
+| E8 | **System handlers** - the section 6 registry, built with the first | shield generators and gravitic shields (Abbai 45 hulls, Brakiri 16) - **BLOCKING: the orders pair over abbai, abbai_old and brakiri (2026-11-22) fails ~400 of 756 situations at every level, every one listed on the page's commit gate "too many active shields" - a CPU fleet would commit a state no player can; a handler must choose the active shields** -, Hyach Computer and Specialists (12), tractor beams (Minbari 11, Streib 5), adaptive armour (Minbari 2, Vorlons 14), self-repair (Ancients), stealth units (Hyach 2, Torvalus 6), HK control nodes (Orieni 16), diffusers (EA 2, Shadows) | For each: a RULING "the default is fine" (most passive ones) or a small handler. Stealth needs a real decision (firing reveals the unit) |
+| E9 | **Exclusive fighter weapons** | Centauri 12, Raiders / Brakiri / Cascor / Centauri (WotCR) / Yolu 6 | Choose one of a craft's exclusive weapons (weaponManager.checkConflictingFireOrder) |
+| E10 | **Angular-spread turret links** | Vree 16, Walkers 12 | The page's linked-turret rule (getLinkedFiringBlock) - with E4, the Vree project |
+| E11 | Odds and ends | Drazi Particle Cutter (sustained) 6, Kor-Lyan Limpet Bore (special targeting) 8, Gaim 1 special arc | One by one, when a faction needs them |
+
+Not needed: boarding (Marines, grappling claws), weapons that fire by themselves (Hyach Interdictors: the server fires them), jammers and
+other passive defences (the hit formula the bot asks already counts them), bases and OSATs (not offered for a CPU slot).
+
+**The sub-stages, in the user's order** (quick releases first within a group - D2):
+
+| | Deliverable |
+|---|---|
+| T9a | TOOLING and the two released factions finished: `tests/ai/factionSurvey.php` (from the scratch survey) and its report; a `--faction="Name"` filter on the ShipMover, fire, orders and self-play harnesses (classes by faction string); `selfPlayHarness --random-fleet=Faction:points` (a random pick of the faction's flyable hulls - `FleetComposer` stays T8); one gate script. **"Raiders" proven on all five of its directories - DONE 2026-11-22** (brakiri_, centauri_, drazi_, narn_raiders: 24 hulls - ShipMover 15,230 plans and 1,062 gravitic plans, fire phases 3 and 1 at every level (309 legal shots, 133 planned), orders at every level: 0 differences; the T7a lobby had offered them unproven); a self-play batch with those hulls still to run. EA's 42 fighter-rack rounds checked with missiles bought |
+| T9b | MAJOR: Dilgar (95%), Centauri (WotCR) (96%), Earth Alliance (Early) (90%), Minbari Federation (94% - gravitic flown since T5d; rulings for tractor beams, adaptive armour, self-repair; Gravity Nets left alone until E6) - each through the gate. **Already at 0 differences in the fire and orders pairs** (2026-11-22, over dilgar, centauri_old, minbari, EA_old - 223 hulls: fire phase 3 at Normal and Hard and phase 1 at Normal, 4,365 legal shots and 1,998 planned; orders at Normal and Hard, 197 hulls, 1,182 situations, 28 Interceptor boosts at Hard): left for these four - the ShipMover pair, the rulings, the self-play batch and the play-test. Then **E1** (it also wakes the Raiders' Twin Arrays) -> Narn (71% -> ~93%, Energy Mines left alone until E5) and Centauri (44% -> ~93%). **E2** -> Orieni (91%; HK flights never flown) |
+| T9c | LEAGUE: Torata (100%), Drazi (WotCR) (100%), Hurr (90%), Cascor (85%) - gate only; Brakiri (91%) and Abbai (WotCR) (92%) once E8's shield handler exists (their shields are BLOCKING - above); after E1 - Drazi (78%), Abbai (57%, shields too); after E2 - Grome (58%); E4 + E1 - Gaim (49%); E8 - Hyach; E7 (+E5) - Ipsha, Pak'ma'ra; E3 + E5 - Kor-Lyan; E4 + E10 - Vree (22%) last |
+| T9d | MINOR: Usuuth (100%), Descari (97%), Balosian (96%), Yolu (94%), Markab (93%), Minbari Protectorate (91%), Small Races (88%), Llort (86%), Belt Alliance (85%) - gate only; Corillani (58%) and Deneth (40%) after E1; Alacan (75%) and Rogolon (74%) after E2 |
+| T9e | ANCIENTS - each its own project (stealth for Torvalus; capacitor power, adaptive armour and petals for the Vorlons; orbitals for the Kirishiac; diffusers and phasing for the Shadows; the Walkers' everything); Mindriders never unless ShipMover learns their drive. Proposed: none in v1, then one at a time, the user choosing (D6) |
+| T9f | CUSTOM - the user's choice of factions, the same gate; the near-ready ones above are quick once E1 / E2 exist |
+
+**Effort - from the pace of T5-T7** (one session builds and proves one mechanism: harness boards, the page as oracle, mutants): T9a one
+session; a gate-only faction about half a session (its gate runs in parallel in well under an hour; whatever it finds is fixed and
+rerun); each enabler one or two sessions - E4 and E5 by family, so more. Roughly: Major 5-7 sessions (with E1, E2); League 8-12 (most of
+E3-E8 land there); Minor 3-4; each Ancient 2-4; Custom per faction, mostly quick once E1 and E2 exist.
+
+**Decisions - ALL RULED by the user 2026-11-22: "Yes to all these decision defaults."**
+
+| # | Question | Ruling |
+|---|---|---|
+| D1 | The release bar | At least 85% of a faction's weapon mounts usable (boarding and auto-firing weapons not counted), and no hull class without a usable direct-fire weapon |
+| D2 | Order within a group | Quick releases first (gate-only factions), then the ones an enabler unlocks, in the order the table lists |
+| D3 | The variant factions (WotCR, Early, reevaluated) | Separate strings, each through its own gate |
+| D4 | Weapon families a released faction may leave idle in v1 | Boarding; mines and Pre-Firing weapons until E5 / E6 exist |
+| D5 | Civilians and Streib ("Other") | When the campaign needs them (neutrals) or the user asks |
+| D6 | Ancients in v1 | None; after T9d, one at a time |
 
 ---
 

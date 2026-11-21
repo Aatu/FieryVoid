@@ -155,12 +155,8 @@ class ShipMover
        fallback: straight on (AIFallback::movement). */
     public static function unsupportedReason($ship, $turn)
     {
-        if ($ship instanceof FighterFlight && !empty($ship->remoteControl)) return 'a remote-controlled flight';
-        if ($ship->isTerrain()) return 'terrain';
-        if (!empty($ship->base) || !empty($ship->smallBase)) return 'a base';
-        if (!empty($ship->osat)) return 'an OSAT';
-        if (!empty($ship->mine)) return 'a mine';
-        if (!empty($ship->mindrider)) return 'a Mindrider drive';
+        $hull = self::unsupportedHullReason($ship);
+        if ($hull !== null) return $hull;
         if (!empty($ship->attached)) return 'riding another unit';
         if (!empty($ship->hasAttached)) return 'carrying another unit';
         if ($ship->isDestroyed()) return 'destroyed';
@@ -173,6 +169,21 @@ class ShipMover
             if (!$move->preturn && empty($move->forced) && $move->type != 'start' && $move->type != 'deploy') return 'already has orders this turn';
         }
 
+        return null;
+    }
+
+    /* The KINDS of unit ShipMover never plots for, whatever the game - unsupportedReason's first answers, which a class's blueprint
+       can give as well as a ship in play. Stage T7 (the user, 2026-11-21: "Hide any ships that are currently listed in
+       unsupportedReason()"): the lobby hides them for a CPU slot and the server refuses them in a CPU fleet (AIConfig::cpuUnitBlock).
+       ⚠️ MIRROR: gamelobby.js gamedata.cpuHullBlock asks the same of the lobby's blueprints - add a kind here, add it there. */
+    public static function unsupportedHullReason($ship)
+    {
+        if ($ship instanceof FighterFlight && !empty($ship->remoteControl)) return 'a remote-controlled flight';
+        if ($ship->isTerrain()) return 'terrain';
+        if (!empty($ship->base) || !empty($ship->smallBase)) return 'a base';
+        if (!empty($ship->osat)) return 'an OSAT';
+        if (!empty($ship->mine)) return 'a mine';
+        if (!empty($ship->mindrider)) return 'a Mindrider drive';
         return null;
     }
 

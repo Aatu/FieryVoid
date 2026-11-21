@@ -735,7 +735,7 @@ runs the replay harness.
 | **10 Lanes and upgrades** | jump lanes (2 Q-40), system upgrades, bases and defences, defence caps | Lane movement at 3 hexes works; upgrades change growth and build rate |
 | **11 NPCs** | `STRATEGIC_AI_PLAN.md` stages S0-S6: Raiders, bounty, tribute, neutral systems, favour, CPU empires. Manual battles against NPCs if the tactical AI is live, AutoCombat otherwise | A single-player campaign is playable end to end |
 | **12 Polish** | animated icons, read-only SSD, victory screens, rules document, phone pass | - |
-| (parallel) **Tactical CPU** | `TACTICAL_AI_PLAN.md`, its own stages T0-T9; independent of the campaign and may ship first. T9 is the campaign wiring | - |
+| (parallel) **Tactical CPU** | `TACTICAL_AI_PLAN.md`, its own stages T0-T10; independent of the campaign and may ship first. T10 is the campaign wiring (T9 until 2026-11-22, when "more factions" took T9 while the campaign is paused) | - |
 
 Stages 0-7 are the minimum playable campaign. Stage 1 is first on purpose: if fleets cannot be
 injected and harvested cleanly through the existing buying path, the design changes, and it is

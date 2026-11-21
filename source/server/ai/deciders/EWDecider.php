@@ -66,6 +66,33 @@ class EWDecider
         return $rows;
     }
 
+    //Whom the page lets a ship lock on to: a targetable enemy that is not riding a docking bay.
+    public static function lockable(AIView $view)
+    {
+        $enemies = array();
+        foreach ($view->enemies() as $enemy) {
+            if (HangarOps::bayCarrierAttachedTo($enemy, $view->gamedata) !== null) continue;
+            $enemies[] = $enemy;
+        }
+        return $enemies;
+    }
+
+    /* Is the enemy weighted towards fighters - EW_FIGHTER_HEAVY or more of its visible value in flights? $enemies: the enemy units to
+       weigh (plan(): every one the page lets a ship lock on to). The CCEW rule's measure (the user, 2026-11-19), and since stage T7 the
+       trigger of Hard's Interceptor boost too (PowerDecider::interceptors - the user's ruling of 2026-11-21: "the measure the CCEW
+       rule uses"). */
+    public static function fighterHeavy(AIView $view, array $enemies)
+    {
+        $flightValue = 0;
+        $enemyValue = 0;
+        foreach ($enemies as $enemy) {
+            $value = $view->value($enemy);
+            $enemyValue += $value;
+            if ($enemy instanceof FighterFlight) $flightValue += $value;
+        }
+        return $enemyValue > 0 && $flightValue >= AIConfig::EW_FIGHTER_HEAVY * $enemyValue;
+    }
+
     /* The bot's EW rows for this turn: ship id => list of AIOrderBuilder::ew rows, DEW last, as
        the page posts them. $view is the bot's MASKED load. */
     public static function plan(AIView $view, array $remembered = array())
@@ -86,12 +113,7 @@ class EWDecider
         }
         if (count($ships) == 0) return $plan;
 
-        //Whom the page lets a ship lock on to: a targetable enemy that is not riding a docking bay.
-        $enemies = array();
-        foreach ($view->enemies() as $enemy) {
-            if (HangarOps::bayCarrierAttachedTo($enemy, $gamedata) !== null) continue;
-            $enemies[] = $enemy;
-        }
+        $enemies = self::lockable($view);
 
         //The enemy's EW as it was last turn, stood in for this turn's.
         foreach ($enemies as $enemy) {
@@ -103,14 +125,7 @@ class EWDecider
 
         /* Is the enemy weighted towards fighters (EW_FIGHTER_HEAVY of its visible value in flights)? Then CCEW may go past
            EW_CCEW_CAP on any ship (the user's ruling, 2026-11-19). */
-        $flightValue = 0;
-        $enemyValue = 0;
-        foreach ($enemies as $enemy) {
-            $value = $view->value($enemy);
-            $enemyValue += $value;
-            if ($enemy instanceof FighterFlight) $flightValue += $value;
-        }
-        $fighterHeavy = $enemyValue > 0 && $flightValue >= AIConfig::EW_FIGHTER_HEAVY * $enemyValue;
+        $fighterHeavy = self::fighterHeavy($view, $enemies);
 
         //The bot's own units where flying straight on takes them - and where they stand now. Taken back below.
         $moved = array();

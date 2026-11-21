@@ -2209,13 +2209,19 @@ class Manager{
             $botId = $seats[$slotid]['playerid'];
 
             $fleet = array();
+            $unusable = array(); //stage T7: units a CPU player cannot field (AIConfig::cpuUnitBlock), named in the refusal
             foreach (self::getShipsFromJSON($ships) as $key => $ship) {
                 if ((int)$ship->slot !== $slotid) continue;
+                $block = AIConfig::cpuUnitBlock($ship);
+                if ($block !== null) $unusable[] = $ship->name . ' (' . $block . ')';
                 $ship->userid = $botId;
                 $fleet[$key] = $ship;
             }
             if (count($fleet) == 0)
                 throw new Exception("Buy at least one unit for the CPU player first.");
+            if (count($unusable) > 0)
+                throw new Exception("The CPU player cannot use " . implode(', ', $unusable) . ". Remove "
+                    . (count($unusable) == 1 ? "it" : "them") . " from its fleet first.");
         } catch (Exception $e) {
             return json_encode(array("error" => $e->getMessage()));
         }
@@ -2270,7 +2276,9 @@ class Manager{
        them from humans and let the creator select one. Added to the payload only while the
        feature is on, the game is in its lobby and it has a CPU seat - every other payload is
        left exactly as it was (plan principle P6). Level only: personality and seed stay here.
-       ⚠️ gamelobby.js parseServerData copies it BY NAME. */
+       With it, `cpuFactions` (stage T7): the readiness list, AIConfig::READY_FACTIONS - the only
+       factions the page offers while a CPU slot is selected.
+       ⚠️ gamelobby.js parseServerData copies both BY NAME. */
     public static function addCpuSlots($data, $gameid){
         if (!Features::reachable('cpuOpponent')) return;
         if (!is_object($data) || !isset($data->status) || $data->status !== 'LOBBY') return;
@@ -2280,7 +2288,10 @@ class Manager{
         foreach (self::getDBManager()->getCpuSeats((int)$gameid) as $slot => $seat) {
             $list[$slot] = array('level' => isset($seat['cpu']['level']) ? $seat['cpu']['level'] : AIConfig::DEFAULT_LEVEL);
         }
-        if (count($list) > 0) $data->cpuSlots = (object)$list;
+        if (count($list) > 0) {
+            $data->cpuSlots = (object)$list;
+            $data->cpuFactions = array_values(AIConfig::READY_FACTIONS);
+        }
     }
 
     private static function submitForPlayer($gameid, $userid, $turn, $phase, $activeship, $ships, $status, $slotid, $shipsAreBuilt){

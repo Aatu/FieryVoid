@@ -251,6 +251,26 @@ class AIConfig
     const PERSONALITIES = array('balanced');
     const DEFAULT_PERSONALITY = 'balanced';
 
+    /* THE READINESS LIST (plan section 7, stage T7 - the user, 2026-11-21: "Hide Factions not cleared for CPU use in gamelobby
+       Faction Picker ... just show EA and Raiders atm and add more as we tackle Stage T7 in time"). The factions a CPU player may
+       field, spelt as their ship classes spell $faction. The lobby offers only these for a CPU slot (its `cpuFactions` key,
+       Manager::addCpuSlots), leaves any other unit out of a saved fleet loaded into one, and the server refuses any other unit when
+       the slot is readied (Manager::submitFleetForCpuSlot - the user's ruling of 2026-11-21). A faction joins when it meets section
+       7: every hull clean in the ShipMover pair, no blocking system without a handler, self-play against EA with no AI defect.
+       Both were proven by directory (EA, raiders) - the other factions those directories hold (EA's defences and early ships,
+       Civilians, Custom Ships) are not on it. */
+    const READY_FACTIONS = array('Earth Alliance', 'Raiders');
+
+    /* Why a CPU player cannot field $unit (a ship or a blueprint), or null when it can: its faction is not on READY_FACTIONS, or it is
+       a kind of unit ShipMover never plots for (ShipMover::unsupportedHullReason - "Hide any ships that are currently listed in
+       unsupportedReason()", the user, 2026-11-21). ⚠️ MIRROR: gamelobby.js gamedata.cpuUnitBlock asks the same of the lobby's
+       blueprints; a drift shows as a refusal when the slot is readied, never as a CPU fleet the bot cannot fly. */
+    public static function cpuUnitBlock($unit)
+    {
+        if (!in_array($unit->faction, self::READY_FACTIONS, true)) return $unit->faction . ' is not a CPU faction yet';
+        return ShipMover::unsupportedHullReason($unit);
+    }
+
     /* LEVELS (stage T5f - plan 5.8, built from the user's notes on games 4750 and 4774; the split was accepted 2026-11-19).
        A level is a set of player SKILLS, and a decider asks AIView::skill() for the one it needs - never the level's name.
        'legacy' is not a seat's choice (AISeats takes only LEVELS): it is the Normal bot as it stood at stage T5e, which the
@@ -310,24 +330,34 @@ class AIConfig
                         before; 'turn': straight on or ONE turn, whichever brings most of its fire on the bot's units; 'full': the
                         same measure over a wider set - those plans and EnemyForecast::FULL_PLANS of the enemy's own (speed changes,
                         slips, two manoeuvres). AIView::atFireTime then stands it there (EnemyForecast). Not the enemy's TRADE: the
-                        T5f-9 audit found that the worst predictor of all (plan 10.7) */
+                        T5f-9 audit found that the worst predictor of all (plan 10.7)
+         interceptorBoost  Interceptors switched to offensive mode (T7; the user, 2026-11-21: "only a Hard opponent boosts some
+                        Interceptors when facing a lot of enemy fighters, Easy and Normal just skip this mechanic"). A boosted
+                        Interceptor (free) gets fire control against fighters for the turn and loses its intercept rating; without the
+                        boost its fire control is null against everything, so neither a player nor the bot can aim it
+                        (PowerDecider::interceptors has the rule). Only Interceptors whose arc faces a flight are boosted (T7b-2,
+                        the user: "prioritise Interceptors likely to have arcs") */
     const SKILLS = array(
         'easy' => array('sectionHealth' => false, 'ccewDeterrent' => false, 'simpleEW' => true, 'focus' => 0.0, 'heavyFocus' => false,
             'pulsePremium' => false, 'shortening' => false, 'unmovedDanger' => 0.5, 'overspeed' => 0.5, 'ballisticFloor' => false,
             'flightDanger' => 0.75, 'jink' => 'max', 'manoeuvres' => 'none', 'noise' => 10.0, 'coverageGoals' => 0,
-            'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none'),
+            'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none',
+            'interceptorBoost' => false),
         'normal' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 1.5, 'jink' => 'max', 'manoeuvres' => 'swap', 'noise' => 0.0, 'coverageGoals' => 4,
-            'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'turn'),
+            'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'turn',
+            'interceptorBoost' => false),
         'hard' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 3.0, 'jink' => 'any', 'manoeuvres' => 'all', 'noise' => 0.0, 'coverageGoals' => 12,
-            'pileOn' => 1.0, 'support' => 2.0, 'fleetFocus' => 0.5, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => true, 'extendedTurns' => true, 'forecast' => 'full'),
+            'pileOn' => 1.0, 'support' => 2.0, 'fleetFocus' => 0.5, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => true, 'extendedTurns' => true, 'forecast' => 'full',
+            'interceptorBoost' => true),
         'legacy' => array('sectionHealth' => false, 'ccewDeterrent' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 0.75, 'jink' => 'max', 'manoeuvres' => 'swap', 'noise' => 0.0, 'coverageGoals' => 0,
-            'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none')
+            'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none',
+            'interceptorBoost' => false)
     );
 
     /* POWER MANAGEMENT (skill 'powerBoost', stage T5f-4). A gun "reaches" an enemy when, with the units as close as both could
@@ -352,8 +382,8 @@ class AIConfig
        loss destroys it) must be down to this share. The T6 self-play batches (2026-11-21): without it ships left on turn 3 at 88% of
        their value (the enemy fleet's whole fire, every gun at that one ship, is more than most ships' primary and one section); with
        the share asked of primary + the section facing the enemy instead, ships left with a whole primary and one section lost - a
-       ship that can turn a fresh side. The value is for the user to confirm. */
-    const JUMP_DAMAGED_SHARE = 0.5;
+       ship that can turn a fresh side. 0.5 was the implementer's pick; the user set 0.15 (2026-11-21, after committing T6). */
+    const JUMP_DAMAGED_SHARE = 0.15;
 
     /* A SIDE DOWN TO ITS FIGHTERS (stage T6g, the user 2026-11-21: "tone down AI fighters that stay too far away when they are the
        only unit left for the AI player, as this will frustrate players. E.g. can't go three turns without firing a shot, and maybe

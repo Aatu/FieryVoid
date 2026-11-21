@@ -2875,12 +2875,15 @@ window.gamedata = {
 		var showCustom = $("#toggleCustom").is(":checked");
 		var onlyCustom = showCustom && $("#customSelect").val() === "showOnlyCustom";
 		var search = String($("#factionSearch").val() || "").trim().toLowerCase();
+		//Stage T7: buying for a CPU player, only the factions it can play (applyCpuSlotFilters) - the randomiser rolls from these rows too
+		var cpu = gamedata.cpuSlotSelected();
 
 		list.find(".lb-faction").each(function () {
 			var isCustom = this.getAttribute("data-custom") === "true";
 			var visible = tiers.indexOf(this.getAttribute("data-tier")) !== -1
 				&& (showCustom ? (!onlyCustom || isCustom) : !isCustom)
-				&& (search === "" || this.getAttribute("data-faction").toLowerCase().indexOf(search) !== -1);
+				&& (search === "" || this.getAttribute("data-faction").toLowerCase().indexOf(search) !== -1)
+				&& (!cpu || gamedata.cpuFactionReady(this.getAttribute("data-faction")));
 			this.hidden = !visible;
 		});
 
@@ -3031,6 +3034,17 @@ window.gamedata = {
 		gamedata.updateStoreBar();
 	},
 
+	//Back to "No faction chosen" (stage T7: a CPU player's slot selected while the Store shows a faction it cannot play).
+	//The faction's loaded ships are kept, hidden, as on any switch of faction.
+	clearStoreFaction: function clearStoreFaction() {
+		gamedata.storeFaction = null;
+		$("#store").children(".lb-store-faction").each(function () {
+			this.hidden = true;
+		});
+		gamedata.markStoreFaction();
+		gamedata.updateStoreBar();
+	},
+
 	//The bar over the Store: the faction's name, its power rating and, once loaded, its ship count.
 	updateStoreBar: function updateStoreBar() {
 		var bar = $("#lbStoreBar");
@@ -3076,7 +3090,10 @@ window.gamedata = {
 		var node = gamedata.storeFaction ? gamedata.storeFactionNode(gamedata.storeFaction, true) : null;
 		var loaded = !!node && node.getAttribute("data-state") === "loaded";
 		var present = {};
+		//Stage T7: for a CPU player's slot a category with nothing it can fly (Immobile Structures, Mines) is not there either
+		var cpu = gamedata.cpuSlotSelected();
 		$(node).find(".lb-cat").each(function () {
+			if (cpu && !$(this).find('.ship[data-cpu="true"]').length) return;
 			present[this.getAttribute("data-cat")] = true;
 		});
 		if (loaded && gamedata.storeCategory !== null && !present[gamedata.storeCategory]) gamedata.storeCategory = null;
@@ -3544,9 +3561,10 @@ window.gamedata = {
 		var sizeTag = isFighter ? this.getFighterSizeTag(ship) : '';
 
 		//data-cost is the BASE point cost the Cost filter reads (for a flight,
-		//the full-flight price shown in the row, not the per-craft one).
+		//the full-flight price shown in the row, not the per-craft one). data-cpu: a CPU player could fly
+		//it (stage T7, cpuHullBlock) - the filter hides the rest while a CPU player's slot is selected.
 		var h = $('<div oncontextmenu="return false;" class="ship lb-ship ' + rowClass + '" data-custom="' + isCustomShip
-			+ '" data-isd="' + ship.isd + '" data-cost="' + ship.pointCost + '">'
+			+ '" data-isd="' + ship.isd + '" data-cost="' + ship.pointCost + '" data-cpu="' + (gamedata.cpuHullBlock(ship) === null) + '">'
 			+ '<span class="lb-ship-name"><span class="shiptype' + customShipHighlight + '">' + this.prepareClassName(ship) + '</span>'
 			+ (sizeTag ? ' <span class="fightersize">' + sizeTag + '</span>' : '') + '</span>'
 			+ '<span class="lb-ship-cost">' + pointCostFull + '</span>'
@@ -3680,6 +3698,8 @@ window.gamedata = {
 		//outside the per-ship loop, like the other two.
 		const costValue = parseInt($("#costFilter").val(), 10);
 		const nameFilter = $("#nameFilter").val().toLowerCase().trim();
+		//Stage T7: a CPU player's slot - the units a CPU cannot fly are left out (data-cpu, storeShipRow)
+		const cpu = gamedata.cpuSlotSelected();
 
 		//Every faction the Store has loaded, shown or not, so a switch back finds it filtered.
 		$("#store .lb-store-faction").each(function () {
@@ -3693,6 +3713,7 @@ window.gamedata = {
 
 				let visible = true;
 
+				if (cpu && this.getAttribute("data-cpu") === "false") visible = false;
 				if (!showCustom && isCustom) visible = false;
 				if (!isNaN(isdValue) && shipISD > isdValue) visible = false;
 				if (!isNaN(costValue) && !isNaN(shipCost) && shipCost > costValue) visible = false;
@@ -3738,8 +3759,10 @@ window.gamedata = {
 		gamedata.status = serverdata.status;
 		gamedata.gamespace = serverdata.gamespace;
 		gamedata.rules = serverdata.rules;
-		//CPU opponent (TACTICAL_AI_PLAN.md 8.1): {slot: {level}}, sent only when the game has a CPU seat
+		//CPU opponent (TACTICAL_AI_PLAN.md 8.1): {slot: {level}}, sent only when the game has a CPU seat -
+		//with the factions a CPU player may field (stage T7, AIConfig::READY_FACTIONS)
 		gamedata.cpuSlots = serverdata.cpuSlots || null;
+		gamedata.cpuFactions = serverdata.cpuFactions || null;
 		gamedata.isCreator = serverdata.creator == serverdata.forPlayer;
 
 		//REINFORCEMENTS_PLAN.md §4 Stage 1 - the buy-mode toggle ships hidden in the markup and
@@ -3816,6 +3839,54 @@ window.gamedata = {
 		if (!slot) return false;
 		if (slot.playerid == gamedata.thisplayer) return true;
 		return gamedata.isCreator === true && gamedata.isCpuSlot(slot);
+	},
+
+	/* WHAT A CPU PLAYER MAY FIELD (TACTICAL_AI_PLAN.md stage T7 - the user, 2026-11-21). While the selected slot is a CPU
+	   player's, the Faction Picker lists only the factions it can play (the server's readiness list, cpuFactions), its
+	   randomiser rolls only from those, the Store hides the units it cannot fly, and a saved fleet loads without them. The
+	   server refuses the same units when the slot is readied (Manager::submitFleetForCpuSlot). */
+	cpuSlotSelected: function cpuSlotSelected() {
+		return !!(window.playerManager && gamedata.isCpuSlot(playerManager.getSlotById(gamedata.selectedSlot)));
+	},
+
+	cpuFactionReady: function cpuFactionReady(faction) {
+		return !!(gamedata.cpuFactions && gamedata.cpuFactions.indexOf(faction) !== -1);
+	},
+
+	/* Why a CPU player cannot fly a unit of this blueprint, or null - the kinds ShipMover never plots for.
+	   ⚠️ MIRROR PAIR with ShipMover::unsupportedHullReason (source/server/ai/ShipMover.php): add a kind there, add it here. */
+	cpuHullBlock: function cpuHullBlock(ship) {
+		if (ship.flight && ship.remoteControl) return "a remote-controlled flight";
+		if (ship.shipSizeClass == 5) return "terrain";
+		if (ship.base || ship.smallBase) return "a base";
+		if (ship.osat) return "an OSAT";
+		if (ship.mine) return "a mine";
+		if (ship.mindrider) return "a Mindrider drive";
+		return null;
+	},
+
+	//Why a CPU player cannot field this unit, or null - the page's half of AIConfig::cpuUnitBlock (same wording).
+	cpuUnitBlock: function cpuUnitBlock(ship) {
+		if (!gamedata.cpuFactionReady(ship.faction)) return ship.faction + " is not a CPU faction yet";
+		return gamedata.cpuHullBlock(ship);
+	},
+
+	/* A slot was selected (selectSlot, which every poll repeats): when that changes between a CPU player's slot and any
+	   other, the picker and the Store are filtered afresh, and a Store left on a faction a CPU cannot play is emptied. */
+	cpuFilterState: null,
+
+	applyCpuSlotFilters: function applyCpuSlotFilters() {
+		var cpu = gamedata.cpuSlotSelected();
+		if (cpu === gamedata.cpuFilterState) return;
+		gamedata.cpuFilterState = cpu;
+
+		$("#factionListCpu").prop("hidden", !cpu);
+		gamedata.filterFactionList();
+		if (cpu && gamedata.storeFaction && !gamedata.cpuFactionReady(gamedata.storeFaction)) gamedata.clearStoreFaction();
+		if ($("#store").length) {
+			gamedata.applyCustomShipFilter();
+			gamedata.applyStoreCategory();
+		}
 	},
 
 	createSlots: function createSlots() {
@@ -5351,8 +5422,18 @@ window.gamedata = {
 		var minesBarred = !!(gamedata.rules && !gamedata.rules.allowMines && !gamedata.rules.fleetTest);
 		var minesLeftOut = false;
 		var tooLate = [];
+		/* - Stage T7 (the user, 2026-11-21): loaded into a CPU player's slot, a unit the CPU cannot field (cpuUnitBlock - a
+		     faction not on the readiness list, a base, an OSAT, a mine...) is left out the same way; the server would refuse
+		     it when the slot is readied. */
+		var forCpu = gamedata.cpuSlotSelected();
+		var cpuLeftOut = [];
 		fleet = fleet.filter(function (listShip) {
 			if (!listShip) return true; // holes are skipped below
+			var cpuBlock = forCpu ? gamedata.cpuUnitBlock(listShip) : null;
+			if (cpuBlock !== null) {
+				cpuLeftOut.push({ ship: listShip, reason: cpuBlock });
+				return false;
+			}
 			if (minesBarred && listShip.mine) {
 				minesLeftOut = true;
 				return false;
@@ -5364,9 +5445,9 @@ window.gamedata = {
 			return true;
 		});
 
-		if (minesLeftOut || tooLate.length) {
+		if (minesLeftOut || tooLate.length || cpuLeftOut.length) {
 			var loadsNothing = !fleet.some(function (listShip) { return !!listShip; });
-			gamedata.showLeftOutNotice(minesLeftOut, tooLate, loadsNothing);
+			gamedata.showLeftOutNotice(minesLeftOut, tooLate, loadsNothing, cpuLeftOut);
 			if (loadsNothing) return;
 		}
 
@@ -5501,12 +5582,31 @@ window.gamedata = {
 	/* doLoadFleet's one window for the units it left out of a saved fleet: mines as a single
 	   sentence (a mine fleet can carry dozens), units past the In-Service Date as a list (.fleetNotice*
 	   in confirm.css). The names are the player's own text, so they are escaped. */
-	showLeftOutNotice: function showLeftOutNotice(minesLeftOut, tooLate, loadsNothing) {
+	showLeftOutNotice: function showLeftOutNotice(minesLeftOut, tooLate, loadsNothing, cpuLeftOut) {
 		var esc = scenarioCard.escapeHtml;
 		var html = "";
+		cpuLeftOut = cpuLeftOut || [];
 
 		if (loadsNothing) {
-			html += '<p class="fleetNoticeLead">Nothing was loaded: no unit in this fleet is allowed in this scenario.</p>';
+			html += (cpuLeftOut.length && !minesLeftOut && !tooLate.length)
+				? '<p class="fleetNoticeLead">Nothing was loaded: a CPU player can use none of this fleet\'s units.</p>'
+				: '<p class="fleetNoticeLead">Nothing was loaded: no unit in this fleet is allowed in this scenario.</p>';
+		}
+		//Stage T7: units a CPU player cannot field (cpuUnitBlock), each with why
+		if (cpuLeftOut.length) {
+			html += '<p class="fleetNoticeReason">A CPU player cannot use these units, so they were not loaded:</p>'
+				+ '<ul class="fleetNoticeList">'
+				+ cpuLeftOut.map(function (entry) {
+					var shipClass = String(entry.ship.shipClass || "");
+					var name = String(entry.ship.name || shipClass);
+					return '<li class="fleetNoticeItem">'
+						+ '<span class="fleetNoticeName">' + esc(name)
+						+ (shipClass && shipClass !== name ? '<span class="fleetNoticeClass">' + esc(shipClass) + "</span>" : "")
+						+ "</span>"
+						+ '<span class="fleetNoticeMeta">' + esc(entry.reason) + "</span>"
+						+ "</li>";
+				}).join("")
+				+ "</ul>";
 		}
 		if (minesLeftOut) {
 			html += '<p class="fleetNoticeReason">Mines were not loaded with this fleet, as mines are not allowed in this scenario.</p>';
@@ -5603,6 +5703,7 @@ window.gamedata = {
 
 		gamedata.selectedSlot = slot.slot;
 		this.constructFleetList();
+		gamedata.applyCpuSlotFilters(); //stage T7: what a CPU player may field, when the choice moves to or from one's slot
 
 		// Re-populate dropdown (filters by points) but do NOT re-fetch from server
 		if (window.cachedFleets && window.cachedFleets.length > 0) {

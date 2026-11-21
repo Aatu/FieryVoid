@@ -160,6 +160,9 @@ class TacticalAI
         $jumps = JumpDecider::plan($view, new Hazards($view), $power);
         //Hard's boosts (stage T5f-4): on the masked view, as they depend on where the enemy is - and before EW, which spends a boosted scanner
         $power = PowerDecider::boost($view, $power);
+        /* Hard's Interceptors turned to offence against a fighter-heavy enemy (stage T7): after boost() - a boost row would make its
+           understands() refuse the ship - and before EW, which then sees them as the anti-fighter guns they will be this turn. */
+        $power = PowerDecider::interceptors($view, $power);
         $ew = EWDecider::plan($view, $remembered);
 
         /* Ballistics (stage T4) last: a launch is priced with the EW just decided, so that split
@@ -207,6 +210,7 @@ class TacticalAI
             . ($p['off'] > 0 ? '; power: ' . $p['off'] . ' systems switched off' : '')
             . ($p['short'] > 0 ? ', ' . $p['short'] . ' ships still short' : '')
             . ($p['scanner'] + $p['engine'] > 0 ? '; boosts: scanner +' . $p['scanner'] . ', engine +' . $p['engine'] . ' (' . $p['idle'] . ' idle guns switched off)' : '')
+            . ($p['interceptors'] > 0 ? '; ' . $p['interceptors'] . ' Interceptors boosted to fire at fighters' : '')
             . ($b['launches'] > 0 ? '; ballistics: ' . $b['launches'] . ' launchers at ' . $b['targets'] . ' enemies' : '')
             . (count(JumpDecider::$last) > 0 ? '; ' . implode('; ', JumpDecider::$last) : '');
 

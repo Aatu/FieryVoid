@@ -31,9 +31,10 @@
  */
 class PowerDecider
 {
-    /* What the last plan did, for tac_ai_log: 'off' systems switched off for a deficit, 'short' ships still in deficit; and
-       what boost() did: 'idle' guns switched off to pay for boosts, 'scanner' / 'engine' boost levels bought. */
-    public static $last = array('off' => 0, 'short' => 0, 'idle' => 0, 'scanner' => 0, 'engine' => 0);
+    /* What the last plan did, for tac_ai_log: 'off' systems switched off for a deficit, 'short' ships still in deficit; what
+       boost() did: 'idle' guns switched off to pay for boosts, 'scanner' / 'engine' boost levels bought; and what interceptors()
+       did: 'interceptors' Interceptors boosted to fire at fighters (stage T7). */
+    public static $last = array('off' => 0, 'short' => 0, 'idle' => 0, 'scanner' => 0, 'engine' => 0, 'interceptors' => 0);
 
     //Systems the bot never switches off: the page ties other rules to them.
     const KEEP_ON = array('reactor', 'cnC', 'shieldGenerator');
@@ -45,7 +46,7 @@ class PowerDecider
     {
         $turn = (int)$gamedata->turn;
         $plan = array();
-        self::$last = array('off' => 0, 'short' => 0, 'idle' => 0, 'scanner' => 0, 'engine' => 0);
+        self::$last = array('off' => 0, 'short' => 0, 'idle' => 0, 'scanner' => 0, 'engine' => 0, 'interceptors' => 0);
 
         foreach (AIFallback::ownUnits($gamedata, $botId) as $ship) {
             if ($ship instanceof FighterFlight || $ship->isTerrain() || $ship->isDestroyed()) continue;
@@ -157,6 +158,191 @@ class PowerDecider
         }
 
         return $plan;
+    }
+
+    /* HARD's INTERCEPTORS IN OFFENSIVE MODE (stage T7, the skill 'interceptorBoost'). The user, 2026-11-21: "To make sure that EA
+       interceptors systems can only be fired offensively by CPU players when boosted (their fire control against everything is null
+       until then, preventing players from targeting a shot in the client). It's important that the AI follows this rule too. We can
+       make it so only a Hard opponent boosts some Interceptors when facing a lot of enemy fighters, Easy and Normal just skip this
+       mechanic."
+       THE RULE needs nothing here: an Interceptor (InterceptorMkI and its family) has fire control null against everything until it
+       is boosted, so AIView::shot refuses it ('fc') exactly as the page refuses the click. Boosted in Initial Orders - free, one
+       level - its own setSystemDataWindow gives it fire control against fighters for the turn (6, 8 or 10, what the page is then
+       sent) and takes its intercept rating away (its Energy Web stays).
+       WHEN AND HOW MANY (the user's rulings of 2026-11-21, asked):
+         - the enemy is FIGHTER-HEAVY - EW_FIGHTER_HEAVY of its visible value in flights, the CCEW rule's measure
+           (EWDecider::fighterHeavy) - and an enemy flight can reach the ship this turn: a boosted Interceptor of it would have a
+           chance at the flight with both as close as they could come (boost()'s reach: maxMove both ways and POWER_REACH_SLACK,
+           every EW point locked on);
+         - one Interceptor stays on interception for each interceptable shot the enemy SHIPS could put on the ship this turn (a
+           loaded gun in reach that can be intercepted - a laser cannot - or a loaded launcher in range: one a gun), the best
+           intercept ratings first; the rest are boosted, but never more than half of the ship's Interceptors.
+       WHICH ONES (stage T7b-2 - the user, 2026-11-21, after self-play 5824's 79 boosted Interceptor-turns gave 11 shots: "It is
+       actually quite rare in practice to fire interceptors at fighters, but if we can prioritise Interceptors likely to have arcs for
+       boost, that would be good"): only an Interceptor whose arc covers one of the flights in reach, the ship at its facing of the start
+       of the turn (the likeliest it will have - arcs are not known before Movement) and the flight where it stands; those covering the
+       most flights first, then the lowest ratings (the best stay on interception), then the highest ids. One with no flight in its arc
+       is never boosted: that boost could only cost its interception.
+       Only an Interceptor the page's plus button takes (boostable, not switched off, under its maxBoostLevel - power.js clickPlus;
+       tests/ai/ordersOracle.js clicks every one in), loaded, with fire control null against everything now and some once boosted.
+       Each is written onto its system with the fire control and rating the server will give it, so what is decided next sees the
+       ship's anti-fighter guns as they will be. Only on a ship whose power this class answers for (understands(), principle P4 -
+       the boost costs no power, so no budget). Runs after boost(): before it, an Interceptor's boost row would make boost()'s
+       understands() refuse the ship; here the scanner and engine boosts boost() just bought are the bot's own and do not count. */
+    public static function interceptors(AIView $view, array $plan)
+    {
+        self::$last['interceptors'] = 0;
+        if (!$view->skill('interceptorBoost')) return $plan;
+        $turn = $view->turn;
+
+        $enemies = EWDecider::lockable($view);
+        if (!EWDecider::fighterHeavy($view, $enemies)) return $plan;
+        $flights = array();
+        $ships = array();
+        foreach ($enemies as $enemy) {
+            if (!empty($enemy->mine)) continue;
+            if ($enemy instanceof FighterFlight) $flights[] = $enemy;
+            else $ships[] = $enemy;
+        }
+        if (count($flights) == 0) return $plan;
+
+        foreach (AIFallback::ownUnits($view->gamedata, $view->botId) as $ship) {
+            if ($ship instanceof FighterFlight || $ship->isTerrain() || $ship->isDestroyed() || !empty($ship->mine)) continue;
+            if ($ship->getTurnDeployed($view->gamedata) > $turn || $view->unitBlock($ship) !== null) continue;
+            //principle P4, as for every power row: a ship whose power the port does not answer for gets none (powerless, a capacitor...)
+            if (!self::understands($ship, $turn, true)) continue;
+
+            $interceptors = self::offensiveInterceptors($view, $ship, $turn);
+            $most = intdiv(count($interceptors), 2);
+            if ($most < 1) continue;
+
+            //the flights a boosted Interceptor of this ship could reach this turn (its boosted fire control: one family, one figure a class)
+            $reached = self::flightsInReach($view, $ship, $flights, $interceptors[0]['gun'], $interceptors[0]['boosted']['fireControl']);
+            if (count($reached) == 0) continue;
+            $count = min($most, count($interceptors) - self::shipShots($view, $ship, $ships));
+            if ($count <= 0) continue;
+
+            //only those with a flight in reach in their arc as the units stand now: the most flights covered, then the lowest ratings, first
+            $arced = array();
+            foreach ($interceptors as $entry) {
+                $entry['covers'] = 0;
+                foreach ($reached as $flight) if ($view->onArc($ship, $entry['gun'], $flight)) $entry['covers']++;
+                if ($entry['covers'] > 0) $arced[] = $entry;
+            }
+            usort($arced, function ($a, $b) {
+                if ($a['covers'] !== $b['covers']) return $b['covers'] - $a['covers'];
+                if ((int)$a['gun']->intercept !== (int)$b['gun']->intercept) return (int)$a['gun']->intercept - (int)$b['gun']->intercept;
+                return (int)$b['gun']->id - (int)$a['gun']->id;
+            });
+
+            $rows = array();
+            foreach (array_slice($arced, 0, $count) as $entry) {
+                $gun = $entry['gun'];
+                $gun->power[] = new PowerManagementEntry(-1, $ship->id, $gun->id, 2, $turn, 1);
+                $gun->fireControl = $entry['boosted']['fireControl'];
+                $gun->intercept = $entry['boosted']['intercept'];
+                $rows[] = AIOrderBuilder::power($ship->id, $gun->id, $turn, 2, 1);
+                self::$last['interceptors']++;
+            }
+            $plan[(int)$ship->id] = array_merge(isset($plan[(int)$ship->id]) ? $plan[(int)$ship->id] : array(), $rows);
+        }
+
+        return $plan;
+    }
+
+    /* $ship's Interceptors that a boost would turn to offence, each as array('gun' => the weapon, 'boosted' => array('fireControl',
+       'intercept') as the server will set them): fire control null against everything now and some once boosted, an intercept rating
+       now and none then; loaded; and a boost the page's plus button takes (power.js clickPlus: boostable, not switched off -
+       canBoost - and under the maxBoostLevel hasMaxBoost() holds it to). */
+    private static function offensiveInterceptors(AIView $view, $ship, $turn)
+    {
+        $list = array();
+        foreach ($ship->systems as $system) {
+            if (!($system instanceof InterceptorMkI) || $system->isDestroyed() || empty($system->boostable)) continue;
+            if (self::isOff($system, $turn) || self::hasRow($system, $turn, 2) || (int)$system->maxBoostLevel < 1) continue;
+            if ((int)$system->intercept <= 0 || !$view->loaded($system)) continue;
+            $fc = $system->fireControl;
+            if (isset($fc[0]) || isset($fc[1]) || isset($fc[2])) continue;
+            $boosted = self::boostedState($system, $turn);
+            if (!isset($boosted['fireControl'][0]) || $boosted['intercept'] > 0) continue;
+            $list[] = array('gun' => $system, 'boosted' => $boosted);
+        }
+        return $list;
+    }
+
+    /* The fire control and intercept rating the server gives $gun boosted this turn - its OWN setSystemDataWindow (what
+       prepareForPlayer's beforeTurn sweep runs, and so what the page is sent), on a copy: that method also rebuilds the damage
+       arrays and firing mode, which the live weapon must not have done twice. */
+    private static function boostedState(Weapon $gun, $turn)
+    {
+        $copy = clone $gun;
+        $copy->power[] = new PowerManagementEntry(-1, 0, $gun->id, 2, $turn, 1);
+        $copy->setSystemDataWindow($turn);
+        return array('fireControl' => $copy->fireControl, 'intercept' => (int)$copy->intercept);
+    }
+
+    /* Which of these enemy flights $gun, given fire control $fireControl (its boosted one), could hit this turn - both as close as they
+       could come, every EW point of the ship locked on (boost()'s reach test). The arcs are asked separately (interceptors()). */
+    private static function flightsInReach(AIView $view, $ship, array $flights, Weapon $gun, $fireControl)
+    {
+        $turn = $view->turn;
+        $points = EWDecider::points($ship, $turn);
+        $own = self::maxMove($ship);
+        $reached = array();
+        foreach ($flights as $flight) {
+            $steps = $own + self::maxMove($flight) + AIConfig::POWER_REACH_SLACK;
+            $inReach = self::nearer($ship, $flight, $steps, $turn, function () use ($view, $ship, $flight, $gun, $fireControl, $points, $turn) {
+                $keptEW = $ship->EW;
+                $keptFc = $gun->fireControl;
+                if ($points > 0) $ship->EW[] = new EWentry(-1, $ship->id, $turn, 'OEW', $points, $flight->id);
+                $gun->fireControl = $fireControl;
+                try {
+                    return $view->estimate($ship, $gun, $flight, false) > 0;
+                } finally {
+                    $ship->EW = $keptEW;
+                    $gun->fireControl = $keptFc;
+                }
+            });
+            if ($inReach) $reached[] = $flight;
+        }
+        return $reached;
+    }
+
+    /* How many interceptable shots these enemy SHIPS could put on $ship this turn: one per loaded gun that can be intercepted
+       (FireDecider::interceptable - a laser cannot) and would have a chance at the ship, and per loaded launcher in range - each with
+       both as close as they could come and every EW point of the enemy locked on (boost()'s reach test). An interceptor stops one
+       ORDER, so a gun counts once whatever its shots or pulses. */
+    private static function shipShots(AIView $view, $ship, array $ships)
+    {
+        $turn = $view->turn;
+        $own = self::maxMove($ship);
+        $shots = 0;
+        foreach ($ships as $enemy) {
+            $steps = $own + self::maxMove($enemy) + AIConfig::POWER_REACH_SLACK;
+            $enemyPoints = EWDecider::points($enemy, $turn);
+            $shots += self::nearer($ship, $enemy, $steps, $turn, function () use ($view, $ship, $enemy, $enemyPoints, $turn) {
+                $kept = $enemy->EW;
+                if ($enemyPoints > 0) $enemy->EW[] = new EWentry(-1, $enemy->id, $turn, 'OEW', $enemyPoints, $ship->id);
+                try {
+                    $distance = $ship->getHexPos()->distanceTo($enemy->getHexPos());
+                    $count = 0;
+                    foreach ($view->mounts($enemy) as $mount) {
+                        $gun = $mount['weapon'];
+                        if ($gun->isDestroyed() || !$view->loaded($gun) || !FireDecider::interceptable($gun)) continue;
+                        if ($gun->ballistic) {
+                            if ($gun instanceof JumpEngine || ((int)$gun->range > 0 && $distance > (int)$gun->range)) continue;
+                        } else if (!$view->plainGun($gun) || $view->estimate($enemy, $gun, $ship, false) <= 0) {
+                            continue;
+                        }
+                        $count += max(1, (int)$gun->guns);
+                    }
+                    return $count;
+                } finally {
+                    $enemy->EW = $kept;
+                }
+            });
+        }
+        return $shots;
     }
 
     /* Which of $ship's guns could fire at an enemy this turn, and what the enemy could fire at it: array('guns' => weapon id
@@ -369,8 +555,10 @@ class PowerDecider
         }
     }
 
-    //Is this a ship whose balance the port below answers for?
-    public static function understands($ship, $turn)
+    /* Is this a ship whose balance the port below answers for? $ownBoosts (stage T7, interceptors()): this turn's boost rows are the
+       bot's own, just bought by boost() - not "a ship that somehow carries a boost", so they do not count against it (a bot's load
+       carries no power row of the turn it is deciding). */
+    public static function understands($ship, $turn, $ownBoosts = false)
     {
         if (!empty($ship->base) || !empty($ship->smallBase)) return false;
 
@@ -380,7 +568,7 @@ class PowerDecider
 
         foreach ($ship->systems as $system) {
             if ($system->name === 'powerCapacitor' || $system->name === 'PlasmaBattery') return false;
-            if (self::hasRow($system, $turn, 2) || self::hasRow($system, $turn, 3)) return false;
+            if ((!$ownBoosts && self::hasRow($system, $turn, 2)) || self::hasRow($system, $turn, 3)) return false;
         }
         return true;
     }

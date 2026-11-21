@@ -494,8 +494,9 @@ class FireDecider
         return $orders;
     }
 
-    //Can a shot of this weapon, in its current mode, be intercepted at all (Firing::isLegalIntercept's first tests)?
-    private static function interceptable(Weapon $weapon)
+    /* Can a shot of this weapon, in its current mode, be intercepted at all (Firing::isLegalIntercept's first tests)? Public since
+       stage T7: Hard's Interceptor boost keeps Interceptors for the enemy ships' interceptable fire (PowerDecider::interceptors). */
+    public static function interceptable(Weapon $weapon)
     {
         return !$weapon->doNotIntercept && !$weapon->uninterceptable && !$weapon->hextarget;
     }
