@@ -73,7 +73,9 @@
     --row-bar: var(--fv-line-soft);
 
     position: absolute;
-    z-index: 7001;
+    /* 7001 -> 10010 (user, 2026-11-21): level with the ship card (shipTooltip.css), above the ship
+       windows (10001) - the card docks beside this picker and, on touch, opens INSIDE its sheet. */
+    z-index: 10010;
     box-sizing: border-box;
     width: var(--hp-card-w);
     max-width: calc(100vw - 16px);
@@ -808,7 +810,7 @@
    a hover tooltip. Fixed to the viewport (the JS clamps it 8px inside), above the ship tooltip it opens from. */
 .fv-missionpicker {
     position: fixed;
-    z-index: 7002;
+    z-index: 10011;    /* one above the ship card (10010) it opens from */
     box-sizing: border-box;
     width: 330px;
     max-width: calc(100vw - 16px);
@@ -1642,13 +1644,24 @@
     line-height: 1;
 }
 
+/* 70vh -> 50vh (user, 2026-11-21: the card in the sheet was too large in portrait AND landscape - with
+   the header and grab bar the sheet covered ~77% of a portrait phone and ~85% of a landscape one). The
+   card scrolls inside this slot past that; landscape gets its own cap below. */
 .fv-hexpicker__cardslot {
     display: none;
     flex: 1 1 auto;
     min-height: 0;
-    max-height: 70vh;
+    max-height: 50vh;
     overflow-y: auto;
     overscroll-behavior: contain;
+}
+
+/* Landscape phone: 58vh is ~210px on a 360px-tall screen, about the height of the free-standing card
+   there (65vh, which the user found fine) once the sheet's header is added. */
+@media (orientation: landscape) and (max-height: 500px) {
+    .fv-hexpicker__cardslot {
+        max-height: 58vh;
+    }
 }
 
 .fv-hexpicker--detail .fv-hexpicker__back {
@@ -1665,7 +1678,13 @@
     display: block;
 }
 
-/* The sheet's header holds the way back now - a real tap target (the 44px floor). */
+/* The sheet's header holds the way back now - a real tap target. 44px -> 34px (user, 2026-11-21, with
+   the card's own touch targets in shipTooltip.css): the "‹ N units in hex" button is the whole header
+   width, so the height alone was never what made it easy to hit.
+   And the sheet narrows to the free-standing card's 250px (+ the card's 8px margins and the sheet's
+   1px borders) while it shows one (user's S21 screenshots, 2026-11-21): stretched to the sheet's full
+   width the card was ~385px wide in portrait and ~445px in landscape. The list gets its width back. */
 .fv-hexpicker--sheet.fv-hexpicker--detail {
-    --hp-header-h: 44px;
+    --hp-header-h: 34px;
+    --hp-sheet-max-w: 268px;
 }

@@ -901,7 +901,15 @@ const getText = (ship, system) => {
         }
         return power;
     } else {
-        return shipManager.systems.getOutput(ship, system);
+        const output = shipManager.systems.getOutput(ship, system);
+        /*A thruster RATED 99 is the ship files' convention for unlimited thrust: show ∞ rather than a
+          number nobody could spend (user request 2026-11-21). Keyed on the rating, so a critical that
+          trims it still reads ∞; a destroyed or offline one (output 0) still shows its 0. Every
+          Thruster subclass shares the name "thruster" (BioThruster is its own system and is left alone).*/
+        if (system.name === "thruster" && parseInt(system.output, 10) === 99 && output > 0) {
+            return "∞";
+        }
+        return output;
     }
 }
 /*

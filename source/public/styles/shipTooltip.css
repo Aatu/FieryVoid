@@ -42,16 +42,29 @@
        hover, a step stronger. Without color-mix(), the old --fv-card. Retune the % below. */
     --tt-wash: var(--fv-card);
     --tt-wash-hover: var(--fv-card-hover);
-    /* Half of an EW row's [stepper][value][stepper] block, (22 + 36 + 22) / 2 - 70px on touch. Read
+    /* Half of an EW row's [stepper][value][stepper] block, (22 + 36 + 22) / 2 - 49px on touch. Read
        by the value column (.fv-shipcard__vb) and by Clear EW, which centres on that column. */
     --tt-vb-half: 40px;
+    /* THE TONING KNOBS (user, 2026-11-21: the allegiance colours read "a bit rich"). ShipTooltip.js
+       toned() mixes every allegiance colour it hands the card - the rail/border it writes inline as
+       --tt-rail (so everything derived from it below: wash, tinted labels, button lines), the name and
+       other units' names - as --tt-chroma of itself and the rest of --tt-grey, a neutral grey of about
+       the palette's lightness. 100% turns the toning off; lower is greyer. The caret carries the same
+       pair (bottom of this file). */
+    --tt-chroma: 80%;
+    --tt-grey: #8f969d;
 
     /* Round 12 (user, 2026-11-16): the root is a bare flex ROW - the card box (.fv-shipcard__card,
        below: border, rail, scroll) and the ORDERS panel beside it (.fv-shipcard__side). Inside the
        root, so everything that measures or moves the root takes the panel along. ShipTooltip.js
        shows it as `display: flex` (not jQuery's show(), which would write `block`). The type and
        colour stay here and inherit. */
-    z-index: 7001;
+    /* 7001 -> 10010 (user, 2026-11-21): above the ship windows (ShipWindow.js, 10001), which it used to
+       open underneath. The hex picker it docks beside moved with it (hexPicker.css), and everything that
+       must stay ABOVE the card moved too: its dock caret and the officer / mission pickers its tiles open
+       (10011), the movement thrust ring (ShipThrust.js, 10012) and the movement button hints
+       (tactical.css .fv-movetooltip, 10013). */
+    z-index: 10010;
     position: absolute;
     display: none;
     flex-direction: row;
@@ -1235,57 +1248,93 @@
     background: var(--fv-ok);
 }
 
-/* ── Touch: 44px targets (the coarse-pointer floor) ───────────────────────── */
+/* ── Touch: larger targets than the mouse gets, but not 44px ─────────────────
+   They were the 44px coarse-pointer floor (48px EW rows, 48x44 steppers, 44px Target / Ship details):
+   on a phone that made the card most of the screen. User, 2026-11-21: "buttons are too large in all
+   instances" (Galaxy S21, portrait, landscape and inside the hex picker's sheet). Now 26-32px, still
+   above WCAG 2.2's 24px minimum target. */
 @media (pointer: coarse) {
     .fv-shipcard .fv-shipcard__ewr {
-        height: 48px;
+        height: 30px;
     }
 
     .fv-shipcard .fv-shipcard__clear {
-        height: 32px;
-        padding: 0 8px;
-        line-height: 30px;
+        height: 22px;
+        padding: 0 6px;
+        line-height: 20px;
     }
 
     .fv-shipcard .fv-shipcard__sb,
     .fv-shipcard .fv-shipcard__sp {
-        width: 48px;
-        height: 44px;
+        width: 30px;
+        height: 26px;
     }
 
     .fv-shipcard .fv-shipcard__sb {
-        font-size: 20px;
+        font-size: 17px;
     }
 
     .fv-shipcard .fv-shipcard__sv {
-        width: 44px;
+        width: 38px;
     }
 
     .shipNameContainer.fv-shipcard {
-        --tt-vb-half: 70px;   /* (48 + 44 + 48) / 2 */
+        --tt-vb-half: 49px;   /* (30 + 38 + 30) / 2 */
+    }
+
+    /* The card's scrollbar, 8px -> 3px (user, 2026-11-21). A card long enough to scroll (landscape phones,
+       65vh) lost the 8px to its contents, and the Defence half-cell ellipsised: "50 (55) · 50 (55)" is
+       ~111px on the user's S21 (measured on a screenshot), the half-cell holds 114px with no bar, 110 with
+       8px, 112.5 with 3px. At 3px a bordered thumb is all border, so it is a plain rail-colour thumb. A
+       touch user scrolls by dragging the card, not the bar - this is only an indicator. */
+    .shipNameContainer .fv-shipcard__card::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    .shipNameContainer .fv-shipcard__card::-webkit-scrollbar-thumb,
+    .shipNameContainer .fv-shipcard__card::-webkit-scrollbar-thumb:hover {
+        background: var(--tt-rail);
+        border: 0;
     }
 
     .fv-shipcard .fv-shipcard__btn,
     .fv-shipcard .fv-shipcard__fire {
-        min-height: 44px;
+        min-height: 32px;
     }
 
-    .fv-shipcard .fv-shipcard__tile {
-        min-height: 44px;
+    /* the tile art a step down from the mouse's 30px; the caption keeps its size */
+    .fv-shipcard .fv-shipcard__tile .fv-shipcard__icon {
+        width: 26px;
+        height: 26px;
     }
 
     /* round 12: the fold headings and the ORDERS toggle as touch targets */
     .fv-shipcard .fv-shipcard__fold {
-        min-height: 32px;
+        min-height: 24px;
     }
 
     .fv-shipcard .fv-shipcard__sidetoggle {
-        width: 30px;
-        height: 30px;
+        width: 26px;
+        height: 26px;
+    }
+
+    /* 90 -> 86px: no narrower - the "ORDERS" title measures 43px, beside the 26px toggle, the head's
+       9px padding and the panel's 2px borders (74px cut it to "ORD…") */
+    .shipNameContainer .fv-shipcard__side {
+        width: 86px;
+    }
+}
+
+/* Portrait phone (user, 2026-11-21): the card and its ORDERS panel span nearly the whole width, so it
+   gives back height instead - half the screen at most, not 65% (it scrolls past that). Landscape keeps
+   65vh, which the user found fine. */
+@media (pointer: coarse) and (orientation: portrait) {
+    .shipNameContainer .fv-shipcard__card {
+        max-height: 50vh;
     }
 
     .shipNameContainer .fv-shipcard__side {
-        width: 90px;
+        max-height: calc(50vh - 33px);
     }
 }
 
@@ -2000,22 +2049,23 @@
     color: var(--fv-own-mid);
 }
 
-/* Coarse pointers need a real target on both controls. */
+/* Coarse pointers need a real target on both controls - 26px since 2026-11-21, with the card's other
+   touch targets (see "Touch" above; was 32px). */
 @media (pointer: coarse) {
     .shipNameContainer .incoming .ballrow {
         gap: 6px;
     }
 
     .shipNameContainer .incoming .ballexpand {
-        flex: 0 0 32px;
-        min-height: 32px;
-        line-height: 32px;
+        flex: 0 0 26px;
+        min-height: 26px;
+        line-height: 26px;
         text-align: center;
     }
 
     .shipNameContainer .incoming .hitchange.intercept-ready {
-        min-height: 32px;
-        line-height: 32px;
+        min-height: 26px;
+        line-height: 26px;
     }
 }
 
@@ -2026,8 +2076,12 @@
    the rail's colour, pointing at the row - the picker's own caret recipe. */
 .fv-shipcard-caret {
     --tt-rail: var(--fv-line-scs);
+    /* the card's toning knobs (top of this file): the caret copies the card's inline --tt-rail,
+       whose color-mix() reads these where it lands - keep the two pairs equal */
+    --tt-chroma: 80%;
+    --tt-grey: #8f969d;
     position: absolute;
-    z-index: 7002;
+    z-index: 10011;    /* one above the card (10010) */
     width: 0;
     height: 0;
     border-top: 8px solid transparent;

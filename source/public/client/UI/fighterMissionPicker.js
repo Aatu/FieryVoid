@@ -202,7 +202,8 @@ window.FighterMissionPicker = (function () {
     /* Under the anchor (or above it when there is no room), clamped into the viewport. A menu already on screen whose
        anchor is gone stays where it is (clamped again for its new height): since a pick no longer closes the menu, the
        tooltip redraw after it replaces the button it was anchored to, and the key ship list opened after that would
-       otherwise jump to the middle of the screen. */
+       otherwise jump to the middle of the screen.
+       While the card's ORDERS panel is on its LEFT (the card docked left of the hex picker), clearSpot() places it. */
     function position(el, anchor) {
         var vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
         var w = el.offsetWidth, h = el.offsetHeight;
@@ -212,6 +213,11 @@ window.FighterMissionPicker = (function () {
             left = r.left;
             top = r.bottom + 4;
             if (top + h > vh - INSET) top = r.top - h - 4;
+            var spot = (anchor.closest && anchor.closest('.fv-shipcard--side-left')) ? clearSpot(anchor, r, w, h, vw, vh) : null;
+            if (spot) {
+                left = spot.left;
+                top = spot.top;
+            }
         } else if (el.style.left && el.style.top) {
             left = parseFloat(el.style.left);
             top = parseFloat(el.style.top);
@@ -223,6 +229,49 @@ window.FighterMissionPicker = (function () {
         top = Math.max(INSET, Math.min(top, vh - h - INSET));
         el.style.left = Math.round(left) + 'px';
         el.style.top = Math.round(top) + 'px';
+    }
+
+    function box(node) {
+        var b = node.getBoundingClientRect();
+        return { l: b.left, t: b.top, r: b.right, b: b.bottom };
+    }
+
+    /* The ORDERS panel on the card's LEFT - the card docked left of the hex picker (.fv-shipcard--side-left). Opened
+       under the tile and running right, the menu lay across the card and the picker (user, 2026-11-21). Tried in order,
+       each clamped into the viewport: running LEFT from the tile (over the panel's own column only, as a right-hand
+       panel's menu runs over its column); right of the card and picker; below them; above them. The first spot that
+       then covers neither the card nor the picker wins; null (no clear spot) keeps the old placement. */
+    function clearSpot(anchor, r, w, h, vw, vh) {
+        var avoid = [];
+        var root = anchor.closest('.shipNameContainer');
+        var card = root && root.querySelector('.fv-shipcard__card');
+        if (card) avoid.push(box(card));
+        var pickers = document.querySelectorAll('.fv-hexpicker');
+        for (var i = 0; i < pickers.length; i++) {
+            if (pickers[i].getClientRects().length) avoid.push(box(pickers[i]));
+        }
+        if (!avoid.length) return null;
+        var all = avoid.reduce(function (u, b) {
+            return { l: Math.min(u.l, b.l), t: Math.min(u.t, b.t), r: Math.max(u.r, b.r), b: Math.max(u.b, b.b) };
+        });
+        var GAP = 8;
+        var underTile = (r.bottom + 4 + h <= vh - INSET) ? r.bottom + 4 : r.top - h - 4;
+        var tries = [
+            { left: r.right - w, top: underTile },
+            { left: all.r + GAP, top: r.top },
+            { left: r.left, top: all.b + GAP },
+            { left: r.left, top: all.t - GAP - h }
+        ];
+        for (var j = 0; j < tries.length; j++) {
+            var left = Math.max(INSET, Math.min(tries[j].left, vw - w - INSET));
+            var top = Math.max(INSET, Math.min(tries[j].top, vh - h - INSET));
+            var menu = { l: left, t: top, r: left + w, b: top + h };
+            var clear = avoid.every(function (b) {
+                return menu.r <= b.l || menu.l >= b.r || menu.b <= b.t || menu.t >= b.b;
+            });
+            if (clear) return { left: left, top: top };
+        }
+        return null;
     }
 
     function open(ship, anchor, onDone) {

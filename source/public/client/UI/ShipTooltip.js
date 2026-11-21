@@ -2220,14 +2220,29 @@ window.ShipTooltip = function () {
         return 'rgb(' + Math.round(rgb[0]) + ',' + Math.round(rgb[1]) + ',' + Math.round(rgb[2]) + ')';
     }
 
+    // TONED (user, 2026-11-21: the card's colours read "a bit rich", and should blend with the
+    // page): every allegiance colour the card paints - its rail and border (and so the head
+    // wash, the tinted labels and button lines, which shipTooltip.css derives from the rail),
+    // the name, and other units' names in From / Fire orders - is mixed a step toward grey, on
+    // BOTH arms of the gate alike. The knobs, --tt-chroma and --tt-grey, are in shipTooltip.css
+    // on the card and its caret. Card-only: the map, fleet list, combat log, hex picker rows
+    // and the stack grid keep the team palette as it is. Without color-mix() nothing changes.
+    var CAN_TONE = !!(window.CSS && CSS.supports && CSS.supports('color', 'color-mix(in srgb, red 50%, blue)'));
+
+    function toned(color) {
+        return CAN_TONE ? 'color-mix(in srgb, ' + color + ' var(--tt-chroma), var(--tt-grey))' : color;
+    }
+
     // Inline colour for the ship name. Empty string on the class path — the CSS class
-    // from getAllyClass is already carrying it, and returning nothing is what lets it.
+    // from getAllyClass is already carrying it, and returning nothing is what lets it -
+    // unless the colour is toned (above): a class cannot be toned for one surface, so then
+    // both arms take the inline colour.
     // The two arms agree on BRIGHTNESS as well as on scheme (2026-08-20): keep them level.
     function getNameStyle(ship) {
-        if (!usesTeamColor(ship)) {
+        if (!usesTeamColor(ship) && !CAN_TONE) {
             return '';
         }
-        return ' style="color:' + teamRgb(ship) + ';"';
+        return ' style="color:' + getNameColor(ship) + ';"';
     }
 
     // The colour the name will ACTUALLY render in — the same decision as getNameStyle,
@@ -2235,19 +2250,19 @@ window.ShipTooltip = function () {
     // name with it.
     function getNameColor(ship) {
         if (!usesTeamColor(ship)) {
-            return ALLEGIANCE_NAME[getAllyClass(ship)] || 'var(--fv-text)';
+            return toned(ALLEGIANCE_NAME[getAllyClass(ship)] || 'var(--fv-text)');
         }
-        return teamRgb(ship);
+        return toned(teamRgb(ship));
     }
 
     // The rail and border colour - the same gate again. The raw team colour on the team arm, as
     // the picker's rows put it on their rail (getTeamColorVars): a full-chroma value reads as a
-    // signal precisely because there is so little of it.
+    // signal precisely because there is so little of it. Toned since 2026-11-21 (above).
     function getRailColor(ship) {
         if (!usesTeamColor(ship)) {
-            return ALLEGIANCE_RAIL[getAllyClass(ship)] || 'var(--fv-line-scs)';
+            return toned(ALLEGIANCE_RAIL[getAllyClass(ship)] || 'var(--fv-line-scs)');
         }
-        return teamRgb(ship);
+        return toned(teamRgb(ship));
     }
 
     // The stack grid's two per-cell channels, for the observer / 3+-team case only.
