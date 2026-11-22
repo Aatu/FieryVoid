@@ -17,11 +17,11 @@ keep shooting) built; T6d (last-resort ramming) NOT built - deferred past v1; T6
 units the CPU cannot fly hidden, a CPU fleet with either refused on Ready), T7b (EA Interceptors fire offensively only when boosted;
 Hard boosts the spare ones against a fighter-heavy enemy) and T7b-2 (only Interceptors whose arc faces the fighters) BUILT - committed
 by the user as 56b03b2d3; section 10.9.
-**Stage T8 (the skirmish release) BUILT 2026-11-22, uncommitted, not play-tested** - decision time first, as the user asked (a
+**Stage T8 (the skirmish release) COMPLETE (the user, 2026-11-22), uncommitted** - decision time first, as the user asked (a
 live-sized Movement activation 1.5-1.6x faster with the same decisions, a CPU budget per submission and request slicing for live), the
 deferred T6d ramming, auto-compose (`FleetComposer`, proven against the REAL Fleet Checker under node - the port re-scoped to T10 by
-the user), the level picker, CPU seats in the lobby and games list, the user's lobby extras, and a FAQ entry; the timing on the live
-host (`aiBenchmark.php`) and the Beta are the user's; section 10.11.
+the user), the level picker, CPU seats in the lobby and games list, the user's lobby extras, and a FAQ entry; timed on the live host by the
+user (about twice the dev box's speed: a live-sized EA Movement 4.0 s Normal, 5.3 s Hard); the Beta is the user's; section 10.11.
 **Stage T9 (more factions - section 10.10) PLANNED 2026-11-22** at the user's request, with the campaign paused;
 the campaign wiring is now T10. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
 layer, which uses this for battles against NPCs - see its section 7) and `STRATEGIC_AI_PLAN.md` (what
@@ -530,7 +530,7 @@ unchanged) and the self-play harness.
 | **T5 Movement search** ✅ COMPLETE (user, 2026-11-20; from T5e on uncommitted, 10.7) | `MoveDecider` scoring, range bands, terrain (drifting too) and mine avoidance, pivots and rolls, gravitic hulls; closing with the enemy (the T2 pursuit question, ruled into T5); moving to bring the most direct-fire weapons into arc within the turn AND the most ballistic launchers to bear for next turn's launch (user, game 4701) | Hard beats Normal beats Easy in self-play ladders at >= 60% - Normal over Easy met (15 of 16); Hard over Normal a few points (50-62% on 42x30), ACCEPTED by the user for the first version (T5f-9) |
 | **T6 Withdrawal** ✅ COMPLETE (user, 2026-11-21: "for v1 of CPU opponents"; committed 442121f12; 10.8) | surrender, jump-out (the user's rulings of 2026-11-21 - no fleet-wide withdrawal posture in v1); ~~last-resort ramming~~ (T6d - deferred past v1, then BUILT at T8 at the user's request, 10.11); the user's notes on game 4774 turns 3-4 (T6a); a side down to its fighters keeps shooting (T6g) | No game runs past the turn cap for lack of a decision - met by the T6 batches (10.8) |
 | **T7 Specials** (STARTED 2026-11-21, 10.9 - T7a/T7b/T7b-2 BUILT; committed by the user as 56b03b2d3) | the readiness list in the lobby and on the server (T7a); the EA Interceptors' offensive mode (T7b, T7b-2). Since 2026-11-22 the faction-by-faction work - handlers, the weapon families new factions need, the readiness list growing - is stage T9 | T7a and T7b play-tested by the user |
-| **T8 Skirmish release** (BUILT 2026-11-22, uncommitted, 10.11 - the live timing and Beta are the user's; the `FleetChecker` port re-scoped to T10 by the user) | server `FleetChecker` port + parity test; `FleetComposer` (auto-compose as the default for an empty CPU slot); level and personality pickers; lobby and games-list display of CPU seats; docs page; **a decision-time budget for live** (user, 2026-11-19: "reasonable decision time is important for live server" - section 12; the per-ship budget and two-pass judging were BROUGHT FORWARD to T5f-8 on 2026-11-20); **a HOLISTIC REVIEW of decision efficiency** (user, 2026-11-20: "in Stage 8 plan a holistic review of how we can make AI decisions as efficient as possible to keep decisions times reasonable" - the plan for it is in section 12) | Every auto-composed fleet across all ready factions and a range of point values passes the Fleet Checker; every decision within the budget on live-sized fleets, timed on the live host; Beta on live via `betaTesters`, then the flag |
+| **T8 Skirmish release** ✅ COMPLETE (user, 2026-11-22; uncommitted, 10.11 - timed on the live host; the Beta is the user's; the `FleetChecker` port re-scoped to T10 by the user) | server `FleetChecker` port + parity test; `FleetComposer` (auto-compose as the default for an empty CPU slot); level and personality pickers; lobby and games-list display of CPU seats; docs page; **a decision-time budget for live** (user, 2026-11-19: "reasonable decision time is important for live server" - section 12; the per-ship budget and two-pass judging were BROUGHT FORWARD to T5f-8 on 2026-11-20); **a HOLISTIC REVIEW of decision efficiency** (user, 2026-11-20: "in Stage 8 plan a holistic review of how we can make AI decisions as efficient as possible to keep decisions times reasonable" - the plan for it is in section 12) | Every auto-composed fleet across all ready factions and a range of point values passes the Fleet Checker; every decision within the budget on live-sized fleets, timed on the live host; Beta on live via `betaTesters`, then the flag |
 | **T9 More factions** (PLANNED 2026-11-22, 10.10 - the user, with the campaign paused) | the factions beyond EA and Raiders, group by group in the user's order: Major, League, Minor, Ancients, Custom - the gate tooling (T9a), the cross-faction enablers each group needs (E1-E8: split-shot arrays, ammunition weapons, special rounds, special hit chance, hex-targeted weapons, Pre-Firing, power models, system handlers - the section 6 registry is built with the first handler), and each faction's gate | Each faction released meets the 10.10 gate (the section 7 criteria made concrete) and is play-tested by the user before its string joins `READY_FACTIONS` |
 | **T10 Campaign wiring** (was T9 until 2026-11-22) | section 9 | A campaign battle against a Raider fleet is played manually and harvested |
 
@@ -2530,7 +2530,7 @@ E3-E8 land there); Minor 3-4; each Ancient 2-4; Custom per faction, mostly quick
 | D5 | Civilians and Streib ("Other") | When the campaign needs them (neutrals) or the user asks |
 | D6 | Ancients in v1 | None; after T9d, one at a time |
 
-### 10.11 Stage T8 - the skirmish release (started 2026-11-22) - BUILT, uncommitted, not play-tested
+### 10.11 Stage T8 - the skirmish release (2026-11-22) - COMPLETE (user, 2026-11-22), uncommitted
 
 **The user's request (2026-11-22):** "Please begin implementing Stage T8 of the Tactical AI Plan - I'd like to include the following
 other improvements in this Stage alongside the currently planned features:
@@ -2673,9 +2673,25 @@ pass, node: `lobbyAutoCompose.js` 19, `lobbyLeaveCpu.js` 7, `createGamePresetCpu
 failed, 2 skipped (5641 and 5743 - the user's own test games, which need the user to re-record). Self-play: sliced and Desperate games
 clean.
 
+#### Timed on the live host (the user, 2026-11-22, `aiBenchmark.php`, board 1) - and COMPLETE
+
+| Movement decision | CPU | wall | slowest ship | cut by the budget |
+|---|---|---|---|---|
+| EA live (10 a side), Normal | 4.02 / 3.89 s | 4.05 / 3.91 s | 0.78 / 0.76 s | 0 |
+| EA live, Hard | 5.30 s | 5.33 s | 1.03 s | 0 |
+| Raiders live, Hard | 3.95 s | 3.98 s | 0.74 s | 0 |
+| Raiders large (16 a side), Hard, game budget | 7.60 s | 7.66 s | 0.55 s | 3 of 12 |
+| Raiders large, Hard, no budget | 8.97 s | 9.03 s | 1.00 s | 0 |
+
+The live host is about TWICE as fast as the dev box, wall equals CPU (no throttling), and memory is no concern: PHP 8.4.28
+(litespeed), memory_limit 2048M, max_execution_time 120 s; the large Hard decision peaked at 22 MB in PHP, 66.5 MB resident. The
+benchmark runs a whole activation in one call; in a game a request stops at `BUDGET_SECONDS` (4 s) and the next poll finishes it,
+with a fresh submission budget for the units left - so the three cut ships above are fewer in play. The user played a Normal game
+and found it plays fine. **Stage T8 marked COMPLETE by the user, 2026-11-22: "I think that concludes Stage T8."**
+
 #### Open
 
-* The timing on the live host (`aiBenchmark.php?key=`) and the Beta via `betaTesters` - the user's.
+* The Beta via `betaTesters` (db/cpuOpponent.sql on the live DB first), then the flag - the user's.
 * Play-testing: a Desperate-rule game, an auto-composed slot, a sliced Movement on live.
 * The `FleetChecker` port - T10.
 
