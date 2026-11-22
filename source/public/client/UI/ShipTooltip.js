@@ -1521,7 +1521,7 @@ window.ShipTooltip = function () {
             //(measured 141px in 114px) - there the brackets go on a line of their own below.
             var hasBase = cell.baseFwd !== undefined && cell.baseSide !== undefined;
             var split = hasBase && (Math.round(cell.fwd) !== cell.fwd || Math.round(cell.side) !== cell.side);
-            var base = function (n) { return jQuery('<span class="fv-shipcard__defb"></span>').text((split ? '' : ' ') + '(' + fmt(n) + ')'); };
+            var base = function (n) { return jQuery('<span class="fv-shipcard__defb"></span>').text((split ? '' : '') + '(' + fmt(n) + ')'); };
             value.append(jQuery('<span class="fv-shipcard__def"></span>').toggleClass('fv-shipcard__def--hot', !!(hot && hot.fwd)).text(fmt(cell.fwd)));
             if (hasBase && !split) value.append(base(cell.baseFwd));
             value.append(jQuery('<span class="fv-shipcard__sep"></span>').text('·'));
