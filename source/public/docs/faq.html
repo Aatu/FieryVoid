@@ -477,17 +477,34 @@
     open to everyone, the option appears in Create Game only for the players taking part.</div>
 
   <h3>Setting up a game</h3>
+  <figure class="fvd-fig fvd-fig--side">
+    <img src="img/docViewer/cpu-create-game.png" alt="A Create Game slot with CPU player ticked and its level list open: Easy, Normal, Hard">
+    <figcaption>Tick CPU player, then pick its level.</figcaption>
+  </figure>
   <ol class="fvd-steps">
-    <li>In <b>Create Game</b>, tick <b>CPU player</b> on each slot a computer should take, and choose its level beside it.
-      The slot you take yourself always stays yours.</li>
-    <li>In the lobby, select a CPU slot and give it a fleet exactly as you would your own: buy units, or load a saved fleet.
-      Press <b>Ready</b> with the CPU slot selected to confirm it.</li>
+    <li>In <b>Create Game</b>, tick <b>CPU player</b> on each slot a computer should take. A level list appears beside it -
+      <b>Easy</b>, <b>Normal</b> (the default) or <b>Hard</b>; see <a href="#cpu-levels">Levels</a> below. The slot you
+      take yourself (Team 1's first slot) always stays yours, so it has no CPU tick.</li>
+    <li>Set the slot's points and deployment zone as usual, then create the game. The CPU player is seated in its slot
+      straight away - you will find it there, already named, when the lobby opens.</li>
+    <li>In the lobby, click <b>Select</b> on the CPU slot and give it a fleet exactly as you would your own: buy units, or
+      load a saved fleet. Press <b>Ready</b> with the CPU slot selected to confirm it. Click <b>Select</b> on your own slot
+      to go back to your fleet.</li>
     <li>Or leave it empty: pressing <b>Ready</b> on it, or readying your own fleet, gives it a fleet built for its points
-      (see below).</li>
+      (see <a href="#cpu-autofleet">below</a>).</li>
   </ol>
+  <figure class="fvd-fig fvd-fig--side">
+    <img src="img/docViewer/cpu-lobby-slot.png" alt="The lobby's Teams panel: the creator ready in Team 1, CPU Alpha (Easy) seated in Team 2 with a Select button">
+    <figcaption>In the lobby, the CPU player already holds its slot, its level beside its name.</figcaption>
+  </figure>
   <p>Only the game's creator can buy for a CPU player. Other players see the slot as a CPU player with its level, and its
     fleet stays hidden from them until the game starts, as any opponent's would - an auto-composed fleet is hidden from you
     too. A CPU game with no slot left for another player is not listed under Join Games.</p>
+  <p>CPU players can share a game with other people, on either team - including yours, as an ally. A CPU ally plays its own
+    game, though: it does not coordinate with you beyond tending to engage the enemies nearest it. CPU players cannot take
+    part in a <a href="#ladder">Ladder</a> game - the CPU tick disappears while Ladder Game is ticked.</p>
+  <p>New to Fiery Void? The Starter Guide walks through <a href="starterGuide.php#practice-game">a practice game against
+    the CPU</a>.</p>
 
   <h3>What a CPU player can field</h3>
   <p>For now a CPU player fields <b>Earth Alliance</b> or <b>Raiders</b> units only; more factions will follow. While a CPU
@@ -495,7 +512,7 @@
     it cannot. Bases, OSATs, mines and a few other special units are left out too. You may buy enhancements and options for
     its units; it simply ignores any it has no use for.</p>
 
-  <h3>An auto-composed fleet</h3>
+  <h3 data-anchor="cpu-autofleet">An auto-composed fleet</h3>
   <p>A CPU slot left empty gets a fleet built for it: plain units (no enhancements), common and uncommon variants only, in
     service by the game's In-Service Date, with fighters for its carriers, spending as much of its points as the units allow
     - and always a fleet the Fleet Checker passes. Press <b>Ready</b> on the CPU slot itself while the Store shows a faction it
@@ -503,7 +520,7 @@
     have no legal fleet at all (the Fleet Checker
     always wants a jump engine, for one); the lobby then says so, and you buy the CPU player's fleet by hand.</p>
 
-  <h3>Levels</h3>
+  <h3 data-anchor="cpu-levels">Levels</h3>
   <dl class="fvd-defs">
     <dt>Easy</dt><dd>Plays loosely: simple EW, no focus fire, no pivots or rolls, no reading of where you may move, and its
       manoeuvres are not always the best ones.</dd>
