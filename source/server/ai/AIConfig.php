@@ -160,6 +160,17 @@ class AIConfig
     const FLIGHT_DANGER_WEIGHT = 0.75;      //stage T5f: by level now - AIConfig::SKILLS 'flightDanger' (this is Easy's and legacy's)
     const FLIGHT_JINK_PLACES = 12;          //Hard prices every jinking level (skill 'jink' = 'any') on this many of its best places
     const FLIGHT_COVERAGE_RANGE = 4;        //the coverage search (stage T5f-2) looks at the hexes within this many of each target in reach
+    /* ...asks ShipMover::enumerateToward for up to FLIGHT_COVERAGE_PLANS plans to each such place (so it looks at that many x
+       ShipMover::GOAL_EXPANSIONS movers, 160), the best-scored places first, and gives up after FLIGHT_COVERAGE_TRIES x the level's
+       'coverageGoals' places. It was 2 plans and 3x until the user's notes on game 5826 (2026-11-22): an Aurora moving LAST at speed
+       9, heading away from all three enemies, needed a wide loop to come back to them; it asked 12 places and reached none (80 movers
+       were too few for the loop; and on a board like it with the enemy facing the flight, the 12 best-scored places all lay beyond
+       the enemy, facing back - a second turn-about no plan has) and flew on to 9-11 hexes off with no shot (score 17; places scoring
+       150-194 were within reach). Measured (scratch flightsim.php, 5826 and four boards like it): 20 plans x 3 still failed one
+       board and cost 0.95-1.0 s a Normal decision; 4 x 6 reached a good place on all of them at 0.59-0.60 s (HEAD 0.42). The search
+       also stops asking once the flight's search time is spent (FlightDecider::coverageSearch). */
+    const FLIGHT_COVERAGE_PLANS = 4;
+    const FLIGHT_COVERAGE_TRIES = 6;
     const FLIGHT_SUPPORT_RANGE = 4;         //Hard's mutual support (skill 'support', T5f-3): within this many hexes of another flight is together
     const FLIGHT_INTERCEPT_WEIGHT = 1.5;    //an enemy flight near the bot's ships is worth this much more to a flight that can shoot fighters - a priority, no longer the only target
     const FLIGHT_CLOSING_PER_HEX = 2.0;     //each hex between the flight's guns' reach and its target, when nothing is in reach
@@ -237,9 +248,17 @@ class AIConfig
     /* CLOSE ENGAGEMENT (user ruling 2026-11-19; game 4750 turn 5 put 16 of 16 points into OEW, 0 DEW, at 1-4 hexes): "once
        ships are in closer engagement range, it's common for them to mainly use soft locks and retain a decent amount of EW
        for DEW to protect from return fire". An enemy within EW_CLOSE_RANGE gets a soft lock at most (EW_SOFT_LOCK), and a
-       ship with an enemy SHIP that close keeps at least EW_CLOSE_MIN_DEW of its points in DEW. */
+       ship with an enemy SHIP that close keeps at least EW_CLOSE_MIN_DEW of its points in DEW. And (the user's notes on game
+       5826, 2026-11-22: "both Omegas should have soft-locked the Gquan at these ranges") every enemy SHIP that close which a
+       loaded gun of the ship could reach gets at least one point (the skill 'closeLocks'). */
     const EW_CLOSE_RANGE = 10;
     const EW_CLOSE_MIN_DEW = 0.5;
+    /* MEDIUM RANGE (the user's ruling on game 5826, 2026-11-22: "At range 10-20 hexes I think we should not go full EW with Normal or
+       Hard CPU players, unless the danger of return fire is very low. 50% EW max lock would be more appropriate"). An enemy beyond
+       EW_CLOSE_RANGE and within EW_MEDIUM_RANGE gets a lock of at most EW_MEDIUM_LOCK_SHARE of the ship's points - unless no enemy gun
+       or launcher could reach the ship this turn at all, both closing as fast as they can (PowerDecider::reaches). Skill 'mediumLocks'. */
+    const EW_MEDIUM_RANGE = 20;
+    const EW_MEDIUM_LOCK_SHARE = 0.5;
     /* CCEW (user ruling 2026-11-19): "one point of CCEW is often used as a deterrent from even some distance away to prevent
        fighters from getting too close (or to give the option to punish them if they do). Greater amounts than 2 or 3 are
        generally only seen when the opponent's force is weighted towards fighters, or by vessels that have a lot of light
@@ -291,8 +310,22 @@ class AIConfig
          sectionHealth  a ship's health is its primary structure plus the section a hit goes through, not the primary alone
                         (user ruling 2026-11-19, game 4774: the primary alone priced a flight's shots at a ship twice too high
                         and left five Gatlings unfired at a Va'Kar "dead on paper"; Easy keeps that miscount)
-         ccewDeterrent  1 point of CCEW whenever an enemy flight may come within 10 hexes (4750 note 2)
-         simpleEW       half the points OEW on the nearest enemy, half DEW - nothing else (5.8, Easy)
+         ccewDeterrent  1 point of CCEW whenever an enemy flight may come within 10 hexes (4750 note 2) - Easy's too since the
+                        user's ruling on game 5826 ("Easy should just follow the same CCEW rule as Normal")
+         closeLocks     a soft lock (1 point, before the search adds any more) on every enemy SHIP within EW_CLOSE_RANGE that a
+                        loaded gun could reach, nearest first, while DEW keeps its close-range floor (the user's notes on game
+                        5826: the split is priced with every gun at the one enemy it does most to, arcs unknown before Movement,
+                        so the second ship up close never seemed to need a lock - 13 Omega guns then fired at the G'Quan with
+                        none). Easy's simpleEW never gets this far; legacy stays as it was
+         mediumLocks    at 10-20 hexes no lock over half the points unless no return fire could reach the ship (the user's ruling
+                        on game 5826 - see EW_MEDIUM_RANGE). Easy and legacy as they were
+         noFlightOEW    no OEW on a fighter flight - CCEW covers them - unless the enemy has no ship left and the flight is more
+                        than 10 hexes off, out of CCEW's reach (the user's ruling on game 5826: "As a rule OEW should never be used
+                        on fighter flights, CCEW is generally enough by itself"); Easy as well ("and not put OEW on fighters ever").
+                        Legacy as it was
+         simpleEW       half the points offensive, half DEW - nothing weighed (5.8, Easy): the CCEW deterrent first, the rest OEW on
+                        the nearest enemy that may take a lock (noFlightOEW), or CCEW when there is none - since 5826 (it was the
+                        whole half as OEW on the nearest enemy, a flight included)
          focus          the share of FIRE_FOCUS / FIRE_FOCUS_HEAVY used (Easy: "no focus-fire bonus")
          heavyFocus     heavy guns drawn to a booked target harder than light ones (4750 note 5)
          pulsePremium   a slow pulse weapon's floors FIRE_PULSE_PREMIUM higher (4750 note 7)
@@ -352,22 +385,22 @@ class AIConfig
          ram            last-resort ramming under the Desperate rule (T6d, built at T8 - the user's ruling of 2026-11-21: Normal and
                         Hard, Easy never): see RAM_PRIMARY_SHARE and Posture::rammer */
     const SKILLS = array(
-        'easy' => array('sectionHealth' => false, 'ccewDeterrent' => false, 'simpleEW' => true, 'focus' => 0.0, 'heavyFocus' => false,
+        'easy' => array('sectionHealth' => false, 'ccewDeterrent' => true, 'closeLocks' => false, 'mediumLocks' => false, 'noFlightOEW' => true, 'simpleEW' => true, 'focus' => 0.0, 'heavyFocus' => false,
             'pulsePremium' => false, 'shortening' => false, 'unmovedDanger' => 0.5, 'overspeed' => 0.5, 'ballisticFloor' => false,
             'flightDanger' => 0.75, 'jink' => 'max', 'manoeuvres' => 'none', 'noise' => 10.0, 'coverageGoals' => 0,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none',
             'interceptorBoost' => false, 'ram' => false),
-        'normal' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
+        'normal' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'closeLocks' => true, 'mediumLocks' => true, 'noFlightOEW' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 1.5, 'jink' => 'max', 'manoeuvres' => 'swap', 'noise' => 0.0, 'coverageGoals' => 4,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'turn',
             'interceptorBoost' => false, 'ram' => true),
-        'hard' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
+        'hard' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'closeLocks' => true, 'mediumLocks' => true, 'noFlightOEW' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 3.0, 'jink' => 'any', 'manoeuvres' => 'all', 'noise' => 0.0, 'coverageGoals' => 12,
             'pileOn' => 1.0, 'support' => 2.0, 'fleetFocus' => 0.5, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => true, 'extendedTurns' => true, 'forecast' => 'full',
             'interceptorBoost' => true, 'ram' => true),
-        'legacy' => array('sectionHealth' => false, 'ccewDeterrent' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
+        'legacy' => array('sectionHealth' => false, 'ccewDeterrent' => true, 'closeLocks' => false, 'mediumLocks' => false, 'noFlightOEW' => false, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 0.75, 'jink' => 'max', 'manoeuvres' => 'swap', 'noise' => 0.0, 'coverageGoals' => 0,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none',

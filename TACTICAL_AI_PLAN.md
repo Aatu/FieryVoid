@@ -360,7 +360,7 @@ can't change that, has no usable weapon, or cannot get back into the fight (neve
 
 | Level | Behaviour |
 |---|---|
-| Easy | score noise high; no focus-fire bonus; simple EW (half OEW on nearest, half DEW); fires ballistics whenever legal |
+| Easy | score noise high; no focus-fire bonus; simple EW (half offensive - since 5826 the CCEW deterrent and OEW on the nearest ship - half DEW); fires ballistics whenever legal |
 | Normal | as designed above |
 | Hard | one-ply look-ahead in movement (assume each enemy's best reply), EW optimised per point, ammunition discipline, target priority by value x vulnerability, withdraws in good order |
 
@@ -375,7 +375,9 @@ the notes), Easy lacks most of them, Hard adds what is still to build. Built at 
 
 | Skill (note) | Easy | Normal | Hard |
 |---|---|---|---|
-| 1-point CCEW deterrent, no more than 2 unless fighter-heavy (2) | CCEW only for a gain | yes | yes |
+| 1-point CCEW deterrent, no more than 2 unless fighter-heavy (2) | yes, out of its offensive half (user, 5826: "Easy should just follow the same CCEW rule as Normal"; it put up none before) | yes | yes |
+| No OEW on fighter flights unless only fighters are left beyond 10 hexes (user, 5826) | yes | yes | yes |
+| No lock over half the points at 10-20 hexes unless no return fire can reach (user, 5826) | - (its lock is half its points anyway) | yes | yes |
 | Fighters press home, priced from the enemy's real arcs and their own jinking (3) | T5c's pricing with the old damage count - bold (user, 4774: "fine for an Easy CPU"; replaces "the old caution") | yes, and warier (4774: 2 hexes astern of a CCEW ship, not 1) | yes, warier still and jinking at whatever level pays (4774: 3 off, jinking 4-6); flights work together - pile onto a damaged target, mutual support, by initiative (user, 2026-11-19) |
 | A ship's damage counted against its primary structure plus the section a hit goes through (4774; was primary only) | - (bolder fighters, some wasted fire) | yes | yes |
 | Fighters search for the hexes the enemy's guns cover least (4774) | - | a simpler search | the full search |
@@ -384,7 +386,7 @@ the notes), Easy lacks most of them, Hard adds what is still to build. Built at 
 | Turn shortening (6) - "always useful (since any delay carries over to next turn as well) if you have the spare thrust on that turn, and you won't exceed thruster ratings" (user, 2026-11-19) | skips it | by default: the delay left at the end is always shortened with the thrust to spare within the ratings, and the search finds the double turns a shortened delay allows | the same |
 | Extended turns, where possible (user, 2026-11-19) | - (an owed one completed) | - (an owed one completed) | yes - BUILT at T5f-5: ShipMover begins and completes one (mirror + oracle); never one next turn's engine could not complete |
 | Slow pulse weapons wait for a better chance (7) | no premium | +10 | +10 |
-| Soft locks and half DEW in close engagement (8) | half OEW on the nearest, half DEW | yes | yes |
+| Soft locks and half DEW in close engagement (8) | half offensive (the deterrent, OEW on the nearest ship), half DEW | yes, and a soft lock on every enemy ship in reach (user, 5826) | yes, the same |
 | An enemy moving after you is the more dangerous (9) | half weight (the T5a rule) | yes | yes, plus the one-ply reply |
 | Anticipate where an enemy ship yet to move will end (user, 2026-11-20: "both Hard and Normal to have some level of movement predictions (to a simpler extent e.g. Normal might only consider that a ship might turn once)") - BUILT at T5f-7 | - (straight on) | straight on or ONE turn at any point of its move, whichever brings most of its guns' fire on the bot's units | the same measure over a wider set: Normal's plans and 80 of the enemy's own (speed changes, slips, two manoeuvres). (Weighing the enemy's trade instead was built first and dropped: the worst predictor in the T5f-9 audit) |
 | Power: light weapons that cannot reach anything switched off early, the scanner or engine boosted, the weapons back on as the enemy nears (10) | - | - | yes - BUILT at T5f-4 (interceptors the enemy's shots need stay on) |
@@ -2694,6 +2696,69 @@ and found it plays fine. **Stage T8 marked COMPLETE by the user, 2026-11-22: "I 
 * The Beta via `betaTesters` (db/cpuOpponent.sql on the live DB first), then the flag - the user's.
 * Play-testing: a Desperate-rule game, an auto-composed slot, a sliced Movement on live.
 * The `FleetChecker` port - T10.
+
+### 10.12 Play-test 5826 - the user's notes (2026-11-22) - BUILT, uncommitted
+
+Game 5826, Normal: Omega x2, Tethys, Aurora and Thunderbolt flights against the user's G'Quan, Va'Kar and Frazi (played with the T8
+tree). The user: "Overall recent Stages have made a big improvement to CPU behaviour, since my last test game, 4774. Feels a lot more
+like a real opponent." Three notes. Each decision was replayed from the database first and reproduced exactly (EW of turns 3-5, the
+Aurora's turn-4 move). ⚠️ To rewind a past turn: a `tac_systemdata` loading row for turn t holds the loading AFTER turn t's Fire phase,
+so the loading DURING turn T is row T-1's - re-apply those rows over the load.
+
+| # | The user's note | Why the bot did it | Built |
+|---|---|---|---|
+| 1 | Turn 3: both Omegas had heavy guns ready but put no OEW on either Narn ship; CCEW (correct), and OEW on the Frazi. "A human player would likely have soft-locked both ships and allocated 1 CCEW on each Omega." | The enemy is taken to repeat last turn's EW, and on turn 2 the Va'Kar put DIST 3 on each Omega: one point of disruption, which the engine shares over ALL of a ship's OEW and CCEW rows (`EW::getDistruptionEW` divides by `getOEWTargetNum`). `EWDecider::score` priced each enemy with only its own row on the ship, so a lone first point on the G'Quan met the whole point (no lock, gain 0 - Heavy Laser 3.7 / 3.7 / 6.1 at OEW 0 / 1 / 2) and the point-at-a-time search stopped there. The Frazi was priced with its CCEW row beside its OEW (disruption halved), so it alone looked lockable. Omega #2: OEW 2 Frazi, CCEW 2, DEW 4; Omega #1: CCEW 1, DEW 7. (DEW was worth nothing: the only Narn guns in reach were ballistic - the Va'Kar's Ion Torpedo - which DEW's pricing leaves out; the two Heavy Lasers were reloading) | `score()` prices a split with every row of it on the ship. Where an enemy ELINT disrupts the ship, a step of the search may move 1 + that disruption's points onto one enemy at once (`lockStep`, the engine's own sum), judged by gain per point; with nothing disrupting it the search is exactly as before (orders harness: 936 situations a level, every row identical to HEAD with `closeLocks` off). Replay: Omega #2 OEW 2 G'Quan + 1 Va'Kar + 1 Frazi, CCEW 1, DEW 3; Omega #1 OEW 7 G'Quan, CCEW 1, DEW 0 - a hard lock: it moves after the G'Quan, 17 hexes off (the 2026-11-15 ruling). Superseded by the user's rulings below |
+| 2 | Turn 4: both Omegas should have soft-locked the G'Quan "at these ranges" | Both put 2 (the close-range cap) on the Va'Kar and kept DEW 5 (floor 4). `score()` counts every gun against the ONE enemy it does most to, arcs unknown before Movement; with the Va'Kar (moving first, full weight) locked, no gun was ever expected to fire at the G'Quan (moving last, half weight), so a point there gained nothing. In the Fire phase 13 Omega guns fired at the G'Quan, none with a lock | Within `EW_CLOSE_RANGE`, before the search, one point on every enemy SHIP a loaded gun could reach, nearest first, while DEW keeps its close-range floor; the search adds the second point where it pays (skill `closeLocks`: Normal and Hard; Easy's simple split never reaches it, `legacy` stays as it was). Replay: both Omegas OEW 2 Va'Kar + 1 G'Quan, CCEW 1, DEW 4. Turn 5 unchanged |
+| 3 | Turn 4: the Auroras flew far too far from the battle despite moving last; 4 or 5 hexes off and firing would have been better | Heading away from all three enemies at speed 9, all 250 of the flight's plainest plans flew on (230 of its 1,956 places, none near). The coverage search picked good places (scores 126-167; plans to them existed) but reached none: 80 movers a place were too few for the loop back, and on boards like it with the enemy facing the flight the best-scored places all lie beyond the enemy, facing back - a second turn-about no plan has - and those used up its 12 tries. Ended 9-11 hexes off, no shot (score 17) | `FLIGHT_COVERAGE_PLANS` 4 (160 movers a place, was 2) and `FLIGHT_COVERAGE_TRIES` 6 (places asked = 6 x `coverageGoals`, was 3); no place is asked once the flight's search time is spent. Measured on 5826 and four boards like it (scratch `flightsim.php`): 20 plans x 3 still failed one board at 0.95-1.0 s a Normal decision; 4 x 6 reached a good place on all at 0.59-0.60 s (HEAD 0.42). Replay: ends at (-7,0) facing the enemy - 2 hexes from the Va'Kar, 4 from the G'Quan, fire 272 against danger 81 |
+
+**The user's rulings on the first fix (2026-11-22, asked).** The first fix left Omega #1 on turn 3 with all 7 points on the G'Quan and
+DEW 0 (a hard lock: it moves after the G'Quan, 17 hexes off), Omega #2 with one OEW point on the Frazi, and the Aurora 2 hexes from the
+Va'Kar rather than 4-5. Ruled:
+* *"At range 10-20 hexes I think we should not go full EW with Normal or Hard CPU players, unless the danger of return fire is very low.
+  50% EW max lock would be more appropriate."* Built (skill `mediumLocks`, Normal and Hard): an enemy beyond `EW_CLOSE_RANGE` and
+  within `EW_MEDIUM_RANGE` (20) gets a lock of at most `EW_MEDIUM_LOCK_SHARE` (0.5) of the ship's points - per lock, as "max lock" reads
+  (several locks may still add up past half). Implementer's reading of "very low": no loaded gun or launcher of any enemy could reach
+  the ship this turn at all, both closing as fast as they can and the enemy's every point locked on - `PowerDecider::reaches`, Hard's
+  power test (now public), not the threats DEW is priced against: those stand the enemy still and leave ballistics out, and on turn 3
+  they were empty (the Narn Heavy Lasers reloading) though the Va'Kar's Medium Pulses and Ion Torpedo would reach a closing Omega.
+* *"As a rule OEW should never be used on fighter flights, CCEW is generally enough by itself. The only caveat would be if there were only
+  enemy fighters left and they are likely to be more than 10 hexes away."* Built (skill `noFlightOEW`, Normal and Hard): a flight takes
+  OEW only when the enemy has no ship left and the flight is more than `EW_CCEW_REACH` from where the ship stands and where it flies
+  straight on - its distance now standing in for "likely" (implementer's reading). An LCV, which the page makes put all but 2 points
+  into OEW, may still lock a flight when nothing else can take them. Easy was left as it was at first (half OEW on the nearest
+  enemy, a flight included - it never put up CCEW); the user ruled: *"Easy should just follow the same CCEW rule as Normal and not put
+  OEW on fighters ever."* Built: Easy has `ccewDeterrent` and `noFlightOEW` (Normal's caveat included); its simple split is still half
+  offensive, half DEW, nothing weighed, but the offensive half is now the CCEW deterrent first and the rest OEW on the nearest SHIP -
+  or, with only fighters left within CCEW's reach, CCEW (no further than Normal's cap). 5826 at Easy, turn 3: each Omega OEW 3 G'Quan,
+  CCEW 1, DEW 4 (was OEW 4 on the Frazi).
+* *"Go with the more efficient route for now. But note the decision in the plan."* **Decision (the user's, 2026-11-22): the coverage
+  search keeps 4 plans x 6 tries.** The 4-hexes-off place in 5826, (-8,-1) facing the enemy (score 155.3 against the 150.0 of the
+  (-7,0) chosen), is reached only with 20 plans a place - about five times the search (0.95 s against 0.60 s a Normal decision on the
+  dev box). Revisit if flights are seen parking closer than players would.
+
+Turn 3 after the rulings (Normal and Hard alike): Omega #2 OEW 2 G'Quan + 1 Va'Kar, CCEW 1, DEW 4 (the user's "soft-locked both ships and
+allocated 1 CCEW"); Omega #1 OEW 4 G'Quan (half its 8) + 1 Va'Kar, CCEW 1, DEW 2; the Tethys OEW 3 G'Quan (half its 6), CCEW 1, DEW 2
+(was 5, DEW 0). Turn 4: the Omegas as above (OEW 2 Va'Kar + 1 G'Quan, CCEW 1, DEW 4); the Tethys's Frazi point goes to the G'Quan.
+Turn 5 unchanged. Not built (too small to matter here): DEW's value leaves this turn's ballistic launches out (the Ion Torpedo: 0.13 a
+DEW point).
+
+**Gates (2026-11-22, final - the HEAD snapshot first):** levels 324 (50 new or rewritten: section O, and section C for Easy's new
+split; on HEAD they fail as the game did - DEW 8 with no lock; OEW 2 Frazi, CCEW 2, DEW 4, 5826's turn-3 Omega #2 row for row; only the
+Va'Kar locked up close; the Aurora 9 hexes off; Easy's whole half on the Frazi. Mutants, each caught by its own check: the lock step, the
+whole-split pricing, `closeLocks`, the tries, `mediumLocks`, the danger test always on and always off, the band past 20 hexes,
+`noFlightOEW`, the fighters-only caveat, Easy's old skills; 4 plans against 2 is a quality knob these boards do not pin). Orders pair
+3/3 0 differences: Normal 677 -> 1,091 offensive EW points, Hard 867 -> 1,031, Easy the same 1,671 points split anew in 386 of 936
+situations (598 -> 917 offensive rows: the deterrent, the ships); with the three Normal/Hard skills off, every one of 936 situations a
+level is identical to HEAD (the pricing and the step change nothing where nothing disrupts), and Easy's change left Normal and Hard
+untouched (936 of 936 identical to the run before it).
+Fire pair 6/6 0 differences; fireRules 392, hazards 14,758, withdrawal 114; manoeuvre 522 with HEAD's 2 known failures.
+`decisionBench` (live size, game budgets, against the HEAD snapshot): Initial Orders EA 0.28 / 0.35 s Normal / Hard (HEAD 0.27 / 0.33),
+Raiders 0.19 / 0.25 s (HEAD 0.17 / 0.23); Movement (before the rulings, which touch only Initial Orders) EA 6.97 / 7.99 s (HEAD 7.12 /
+8.00), the same ship decisions cut. Self-play on 24x16, all PASS - before the rulings: EA mirror with both flights, Normal v Normal (5870,
+5872 - 41 and 35 turns) and 5826's own fleets, the bot flying the Narn side too (5869, 5871); after them: the mirror again (5873 - 29
+turns, ended by a CPU surrender; 5876 - 17 turns; ship decisions mean 0.29-0.35 s, slowest 1.27 s) and EA Hard v Narn Normal (5874,
+5875 - 9 turns each, EA keeping 95-96% of its value; Hard decisions mean 0.47-0.48 s, slowest 1.61 s); after the Easy ruling: Easy v
+Normal, seats alternated (5877, 5878 - 15 and 17 turns, Normal ahead in both). The replay corpus was not re-run: no engine code changed.
 
 ---
 

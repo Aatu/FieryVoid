@@ -350,8 +350,9 @@ class PowerDecider
        loaded gun or launcher - an interceptor stops one order), 'fight' => a LOADED gun of either side reaches - EW has a use
        this turn). Each pair
        is asked with the ship as close to the enemy as both could come (maxMove, both ways) and the best case for the shooter:
-       every EW point of its ship locked on to the other, no DEW against it (this turn's is not set yet). */
-    private static function reaches(AIView $view, $ship, array $enemies)
+       every EW point of its ship locked on to the other, no DEW against it (this turn's is not set yet). (Public since the user's
+       ruling on game 5826: EWDecider asks it whether any return fire could reach a ship at all.) */
+    public static function reaches(AIView $view, $ship, array $enemies)
     {
         $turn = $view->turn;
         $result = array('guns' => array(), 'shots' => 0, 'fight' => false);

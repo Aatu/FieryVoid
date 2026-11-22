@@ -79,16 +79,17 @@ class FlightDecider
            start, and the judging stops at the end with at least one place judged. No share: as before, unbounded. */
         $started = AIConfig::cpuSeconds();
         $deadline = (self::$share !== null) ? $started + max(0.001, (float)self::$share) : null;
+        $searchEnd = ($deadline === null) ? null : $started + (float)self::$share * AIConfig::MOVE_SEARCH_SHARE;
         self::$lastShare = self::$share;
-        $plans = $mover->enumerate(AIConfig::FLIGHT_PLANS, ($deadline === null) ? null : $started + (float)self::$share * AIConfig::MOVE_SEARCH_SHARE);
+        $plans = $mover->enumerate(AIConfig::FLIGHT_PLANS, $searchEnd);
         if (count($plans) == 0) return MoveDecider::choose($mover, $hazards->blocked, $hazards->bounds);
 
         $context = self::context($view, $flight);
         $start = $flight->getHexPos();
 
         //Stage T5f-2: the places around the targets the enemy's guns cover least, which the plainest-first search never reaches.
-        if ($deadline === null || AIConfig::cpuSeconds() < $started + (float)self::$share * AIConfig::MOVE_SEARCH_SHARE) {
-            foreach (self::coverageSearch($view, $mover, $flight, $plans, $context, $hazards, $start) as $plan) $plans[] = $plan;
+        if ($searchEnd === null || AIConfig::cpuSeconds() < $searchEnd) {
+            foreach (self::coverageSearch($view, $mover, $flight, $plans, $context, $hazards, $start, $searchEnd) as $plan) $plans[] = $plan;
         }
 
         /* One estimate per place and facing: that is all fire and danger depend on - and per jinking level. The most a
@@ -212,8 +213,13 @@ class FlightDecider
        reach, facing that target (a flight's guns bear forward), is judged as if the flight stood there - the real fire both
        ways, the enemy's arcs where it has moved - and the best of those the search did not reach (the level's skill
        'coverageGoals': Normal a few, Hard more, Easy none) are asked of ShipMover::enumerateToward. Returns the plans found;
-       rows() judges them again with their real paths, among all the others. */
-    private static function coverageSearch(AIView $view, ShipMover $mover, $flight, array $plans, array $context, Hazards $hazards, OffsetCoordinate $start)
+       rows() judges them again with their real paths, among all the others.
+       Each place gets an aimed search of AIConfig::FLIGHT_COVERAGE_PLANS, and up to FLIGHT_COVERAGE_TRIES x 'coverageGoals' places
+       are asked (the user's notes on game 5826: with 2 and 3x an Aurora moving last, heading away from all three enemies, reached
+       none of its 12 places - the loop back needed a longer search, and the best-scored places can all lie beyond the enemy, out of
+       any plan's reach - and ended 9-11 hexes off with no shot). $until (CPU seconds, null = no budget): no place is asked once the
+       flight's search time is spent. */
+    private static function coverageSearch(AIView $view, ShipMover $mover, $flight, array $plans, array $context, Hazards $hazards, OffsetCoordinate $start, $until = null)
     {
         $wanted = (int)$view->skill('coverageGoals');
         if ($wanted <= 0 || count($context['guns']) == 0) return array();
@@ -259,10 +265,11 @@ class FlightDecider
         $asked = 0;
         $reachedGoals = 0;
         foreach (array_keys($scored) as $key) {
-            if ($reachedGoals >= $wanted || $asked >= 3 * $wanted || $scored[$key] <= 0) break;
+            if ($reachedGoals >= $wanted || $asked >= AIConfig::FLIGHT_COVERAGE_TRIES * $wanted || $scored[$key] <= 0) break;
+            if ($until !== null && AIConfig::cpuSeconds() > $until) break;
             $asked++;
             $place = $candidates[$key];
-            $got = $mover->enumerateToward(array($place['position']->q . ',' . $place['position']->r => $place['facing']), 2);
+            $got = $mover->enumerateToward(array($place['position']->q . ',' . $place['position']->r => $place['facing']), AIConfig::FLIGHT_COVERAGE_PLANS);
             foreach ($got as $plan) $found[] = $plan;
             if (count($got) > 0) $reachedGoals++;
             if (is_array(self::$trace)) self::$trace[] = sprintf('  coverage goal %-10s %8.1f  %d plans', $key, $scored[$key], count($got));

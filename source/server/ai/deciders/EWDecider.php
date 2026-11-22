@@ -24,6 +24,18 @@
  * turn, and no more than EW_CCEW_CAP unless the enemy is fighter-heavy or the ship's guns are mostly
  * anti-fighter guns.
  *
+ * The user's notes on game 5826 (2026-11-22) - two Omegas with heavy guns ready locked no Narn ship on turn 3 and only the
+ * Va'Kar on turn 4 - shape it further:
+ *   - a split is priced as the engine will see it, every OEW and CCEW row of it on the ship at once: an enemy ELINT's
+ *     disruption is shared over all of them (EW::getDistruptionEW), so a lone point on a ship can buy no lock where the
+ *     same point beside a CCEW row buys half of one (score());
+ *   - where an enemy ELINT disrupts the ship, a step may move several points onto one enemy at once - enough to get past
+ *     the disruption - so the lock behind a first point that buys nothing is still found (lockStep());
+ *   - within EW_CLOSE_RANGE every enemy SHIP a loaded gun could reach gets a soft lock (the level's skill 'closeLocks');
+ *   - and the user's rulings on those notes (same day): at 10-20 hexes no lock over half the points unless no return fire could
+ *     reach the ship at all (skill 'mediumLocks'); no OEW on a fighter flight - CCEW covers them - unless the enemy has no ship left
+ *     and the flight is beyond CCEW's reach (skill 'noFlightOEW').
+ *
  * Both are the REAL hit formula (Weapon::calculateHitBase, through AIView::estimate) asked with
  * the EW tried - never a formula of the bot's own. Two things are guessed, as a player guesses them:
  *   - where the units will be when the guns fire: the bot's ships are looked at where flying
@@ -35,8 +47,9 @@
  * on enemies that move before the ship (beyond close range), soft ones (AIConfig::EW_SOFT_LOCK) on
  * those that move after.
  *
- * LEVELS (stage T5f): Easy splits its points half OEW on the nearest enemy, half DEW, and nothing else (the skill
- * 'simpleEW'); the CCEW deterrent is a skill of its own ('ccewDeterrent').
+ * LEVELS (stage T5f): Easy splits its points half offensive, half DEW, and weighs nothing (the skill 'simpleEW') - since game
+ * 5826 its offensive half is the CCEW deterrent and OEW on the nearest SHIP, as Normal would lock fighters and ships; the CCEW
+ * deterrent is a skill of its own ('ccewDeterrent').
  *
  * NOT YET: ELINT functions (stage T7 - an ELINT ship just runs OEW / DEW), Detect Stealth / Detect
  * Mines, EW for flights.
@@ -208,17 +221,6 @@ class EWDecider
             return ($da == $db) ? $a->id - $b->id : (($da < $db) ? -1 : 1);
         });
 
-        /* EASY (stage T5f, plan 5.8): half the points OEW on the nearest enemy, half DEW - nothing weighed, no CCEW. The page's
-           own limits still hold: a Restricted EW critical's half stays DEW; an LCV keeps its rule below. */
-        if ($view->skill('simpleEW') && !$lcv) {
-            $oew = max(0, min(intdiv($points, 2), $points - $minDew));
-            if ($oew > 0) {
-                $alloc['OEW'][(int)$enemies[0]->id] = $oew;
-                $alloc['DEW'] -= $oew;
-            }
-            return $alloc;
-        }
-
         $guns = array();
         foreach ($view->mounts($ship) as $mount) {
             $weapon = $mount['weapon'];
@@ -281,10 +283,69 @@ class EWDecider
             if (!empty($enemy->base) || !empty($enemy->smallBase) || !empty($enemy->osat) || !empty($enemy->mine)) continue;
             if ($enemy->iniative >= $ship->iniative) $soft[(int)$enemy->id] = true;
         }
-        $capped = $soft + $close; //a soft lock at most: moving after the ship, or close
+        //enemy id => the most OEW it may get: a soft lock at most when it moves after the ship, or is close
+        $caps = array();
+        foreach ($soft + $close as $id => $yes) $caps[$id] = AIConfig::EW_SOFT_LOCK;
 
+        /* MEDIUM RANGE (the user's ruling on game 5826, 2026-11-22: "At range 10-20 hexes I think we should not go full EW with
+           Normal or Hard CPU players, unless the danger of return fire is very low. 50% EW max lock would be more appropriate").
+           Beyond EW_CLOSE_RANGE and within EW_MEDIUM_RANGE, a lock holds at most EW_MEDIUM_LOCK_SHARE of the points - unless no
+           enemy gun or launcher could reach this ship this turn at all, both closing as fast as they can (PowerDecider::reaches,
+           Hard's power test). On 5826's turn 3 Omega #1 had put all 7 points on the G'Quan, 17 hexes off: the threats DEW is priced
+           against were empty (the Heavy Lasers reloading, the pulse guns short of reach where the Narn ships stood), yet once both
+           closed the Va'Kar's Medium Pulses and Ion Torpedo reached it. (A level's skill.) */
+        if ($view->skill('mediumLocks') && $points > 1) {
+            $medium = array();
+            foreach ($enemies as $enemy) {
+                $d = $near[(int)$enemy->id];
+                if ($d > AIConfig::EW_CLOSE_RANGE && $d <= AIConfig::EW_MEDIUM_RANGE) $medium[] = (int)$enemy->id;
+            }
+            if (count($medium) > 0 && !self::unthreatened($view, $ship, $enemies)) {
+                $half = max(1, (int)floor($points * AIConfig::EW_MEDIUM_LOCK_SHARE));
+                foreach ($medium as $id) $caps[$id] = isset($caps[$id]) ? min($caps[$id], $half) : $half;
+            }
+        }
+
+        /* NO OEW ON FIGHTERS (the user's ruling on game 5826: "As a rule OEW should never be used on fighter flights, CCEW is generally
+           enough by itself. The only caveat would be if there were only enemy fighters left and they are likely to be more than 10
+           hexes away"). A flight may take OEW only when the enemy has no ship left and it is further than CCEW's reach from where the
+           ship stands and from where it flies straight on (EW_CCEW_REACH). On 5826's turn 3 Omega #2 had put 2 points on the Frazi.
+           (A level's skill - Easy's too, since the user's ruling below.) */
+        $lockable = $enemies;
+        if ($view->skill('noFlightOEW')) {
+            $shipsLeft = false;
+            foreach ($enemies as $enemy) {
+                if (!($enemy instanceof FighterFlight) && empty($enemy->mine)) $shipsLeft = true;
+            }
+            $lockable = array();
+            foreach ($enemies as $enemy) {
+                if ($enemy instanceof FighterFlight && ($shipsLeft || $near[(int)$enemy->id] <= AIConfig::EW_CCEW_REACH)) continue;
+                $lockable[] = $enemy;
+            }
+        }
+
+        /* EASY (stage T5f, plan 5.8): half the points offensive, half DEW - nothing weighed. Since the user's ruling on game 5826
+           (2026-11-22: "Easy should just follow the same CCEW rule as Normal and not put OEW on fighters ever") the offensive half
+           is the CCEW deterrent first, where Normal would put it up, and the rest OEW on the nearest enemy that may take a lock -
+           a ship, as for Normal (noFlightOEW); with nothing to lock (only fighters left, within CCEW's reach) the rest goes to CCEW
+           as well, no further than Normal's cap. Until then it put its whole half on the nearest enemy, a flight included, and
+           never put up CCEW. The page's own limits still hold: a Restricted EW critical's half stays DEW; an LCV keeps its rule below. */
+        if ($view->skill('simpleEW') && !$lcv) {
+            $half = max(0, min(intdiv($points, 2), $points - $minDew));
+            $easy = array('points' => $points, 'DEW' => $points, 'CCEW' => 0, 'OEW' => array());
+            $ccewOk = $deterrent && $canShootFighters && $view->skill('ccewDeterrent');
+            if ($half > 0 && $ccewOk) $easy['CCEW'] = 1;
+            $rest = $half - $easy['CCEW'];
+            if ($rest > 0 && count($lockable) > 0) $easy['OEW'][(int)$lockable[0]->id] = $rest;
+            else if ($rest > 0 && $ccewOk) $easy['CCEW'] += min($rest, $ccewCap - $easy['CCEW']);
+            $easy['DEW'] = $points - $easy['CCEW'] - array_sum($easy['OEW']);
+            return $easy;
+        }
+
+        //(game 5826) how many points one step of the search may move onto an enemy: 1 unless an enemy ELINT disrupts this ship
+        $step = self::lockStep($view, $ship, $base);
         $state = array('view' => $view, 'ship' => $ship, 'base' => $base, 'guns' => $guns, 'enemies' => $enemies,
-            'units' => $units, 'threats' => null, 'offence' => array(), 'defence' => array(), 'soft' => $soft);
+            'units' => $units, 'threats' => null, 'offence' => array(), 'defence' => array(), 'soft' => $soft, 'disrupted' => ($step > 1));
 
         //the CCEW deterrent first: a point of DEW the greedy below does not have to find a gain for (a level's skill, stage T5f)
         if ($deterrent && $canShootFighters && !$lcv && $alloc['DEW'] > $minDew && $view->skill('ccewDeterrent')) {
@@ -292,27 +353,56 @@ class EWDecider
             $alloc['CCEW']++;
         }
 
+        /* CLOSE ENGAGEMENT, A SOFT LOCK ON EVERY SHIP (the user's notes on game 5826, 2026-11-22: "both Omegas should have
+           soft-locked the Gquan at these ranges"). The search below prices every gun at the one enemy it does most to, arcs
+           not asked - a facing changes in Movement - so with the Va'Kar locked no Omega gun was ever expected to fire at the
+           G'Quan beside it, and a point there gained nothing; up close, though, a ship's guns end up on different targets
+           (turn 4's Fire phase: 13 Omega guns at the G'Quan, all without a lock). So before the search, one point on every enemy
+           SHIP within EW_CLOSE_RANGE that a loaded gun of this ship could reach, nearest first, while DEW stays above its floor;
+           the search then adds the second point where it pays. (A level's skill: Easy's simpleEW never gets here.) */
+        if ($engaged && !$lcv && $view->skill('closeLocks')) {
+            foreach ($enemies as $enemy) {
+                if ($alloc['DEW'] <= $minDew) break;
+                if (!isset($close[(int)$enemy->id]) || $enemy instanceof FighterFlight || !empty($enemy->mine)) continue;
+                if (isset($alloc['OEW'][(int)$enemy->id]) || !self::reaches($view, $ship, $guns, $enemy, $base)) continue;
+                $alloc['DEW']--;
+                $alloc['OEW'][(int)$enemy->id] = 1;
+            }
+        }
+
+        /* The search: a step at a time, the one that gains most for each point it moves, while that is at least EW_MIN_GAIN a
+           point. Every step is one point unless an enemy ELINT disrupts the ship (lockStep) - then a step may also move up to
+           $step points onto one enemy at once, its gain counted per point, so it is taken only when it pays better than the
+           single points beside it. */
         $current = self::score($state, $alloc);
         while ($alloc['DEW'] > $minDew) {
             $best = null;
-            $bestScore = $current + AIConfig::EW_MIN_GAIN;
-            foreach (self::moves($alloc, $enemies, $flights && !$lcv && $alloc['CCEW'] < $ccewCap, $capped) as $try) {
+            $bestTotal = null;
+            $bestScore = $current + AIConfig::EW_MIN_GAIN; //what a 1-point step must beat - exactly the rule before game 5826
+            $bestRate = AIConfig::EW_MIN_GAIN;            //...and a step of more points, a point at a time
+            $ccewRoom = ($flights && !$lcv) ? $ccewCap - $alloc['CCEW'] : 0;
+            foreach (self::moves($alloc, $lockable, $ccewRoom, $caps, min($step, $alloc['DEW'] - $minDew)) as $try) {
                 $score = self::score($state, $try);
-                if ($score > $bestScore) {
-                    $bestScore = $score;
+                $spent = $alloc['DEW'] - $try['DEW'];
+                $rate = ($score - $current) / $spent;
+                if ($spent == 1 ? $score > $bestScore : $rate > $bestRate) {
                     $best = $try;
+                    $bestTotal = $score;
+                    $bestRate = $rate;
+                    $bestScore = ($spent == 1) ? $score : $current + $rate;
                 }
             }
             if ($best === null) break;
             $alloc = $best;
-            $current = $bestScore;
+            $current = $bestTotal;
         }
 
-        //An LCV has no choice: what is left above 2 goes to OEW, wherever it does most (the nearest, when nothing does anything).
+        /* An LCV has no choice: what is left above 2 goes to OEW, wherever it does most (the nearest, when nothing does anything) -
+           on a flight only when nothing else may take it (the page's LCV rule comes before the fighter rule). */
         while ($lcv && $alloc['DEW'] > 2) {
             $best = null;
             $bestScore = null;
-            foreach (self::moves($alloc, $enemies, false) as $try) {
+            foreach (self::moves($alloc, count($lockable) > 0 ? $lockable : $enemies, 0) as $try) {
                 $score = self::score($state, $try);
                 if ($bestScore === null || $score > $bestScore) {
                     $bestScore = $score;
@@ -326,26 +416,72 @@ class EWDecider
         return $alloc;
     }
 
-    /* Every split one point of DEW away from $alloc. $capped: enemy id => true for those a lock stays
-       soft on (no more than EW_SOFT_LOCK points); empty where the ship has no choice (an LCV). */
-    private static function moves(array $alloc, array $enemies, $ccew, array $capped = array())
+    /* Every split one point of DEW away from $alloc - and, with $step over 1, every split moving 2..$step points of it onto one
+       enemy (or into CCEW) at once, listed after the single points so that a tie goes to the single point. $enemies: those that
+       may take OEW. $ccewRoom: how many more CCEW points may go up (0: none). $caps: enemy id => the most OEW it may hold (a soft
+       lock, EW_SOFT_LOCK; half the points at medium range); empty where the ship has no choice (an LCV). */
+    private static function moves(array $alloc, array $enemies, $ccewRoom, array $caps = array(), $step = 1)
     {
         $list = array();
-        foreach ($enemies as $enemy) {
-            $has = isset($alloc['OEW'][(int)$enemy->id]) ? $alloc['OEW'][(int)$enemy->id] : 0;
-            if (isset($capped[(int)$enemy->id]) && $has >= AIConfig::EW_SOFT_LOCK) continue;
-            $try = $alloc;
-            $try['DEW']--;
-            $try['OEW'][(int)$enemy->id] = $has + 1;
-            $list[] = $try;
-        }
-        if ($ccew) {
-            $try = $alloc;
-            $try['DEW']--;
-            $try['CCEW']++;
-            $list[] = $try;
+        for ($points = 1; $points <= max(1, (int)$step); $points++) {
+            foreach ($enemies as $enemy) {
+                $has = isset($alloc['OEW'][(int)$enemy->id]) ? $alloc['OEW'][(int)$enemy->id] : 0;
+                if (isset($caps[(int)$enemy->id]) && $has + $points > $caps[(int)$enemy->id]) continue;
+                $try = $alloc;
+                $try['DEW'] -= $points;
+                $try['OEW'][(int)$enemy->id] = $has + $points;
+                $list[] = $try;
+            }
+            if ($points <= $ccewRoom) {
+                $try = $alloc;
+                $try['DEW'] -= $points;
+                $try['CCEW'] += $points;
+                $list[] = $try;
+            }
         }
         return $list;
+    }
+
+    /* How many points one step of the search may move onto one enemy (the user's notes on game 5826): 1 - the search as it always
+       was - unless an enemy ELINT disrupts this ship; then 1 more than the disruption a lone lock would meet, by the engine's own
+       sum (EW::getDistruptionEW: each ELINT in range and in sight, DIST / 3, shared over the ship's lock rows). On turn 3 the
+       Va'Kar's remembered DIST 3 on each Omega ate a lone first point whole, so that point gained nothing and the point-at-a-time
+       search never reached the lock behind it - both Omegas, heavy guns ready, stayed on DEW. */
+    private static function lockStep(AIView $view, $ship, array $base)
+    {
+        $ship->EW = array_merge($base, array(new EWentry(-1, $ship->id, $view->turn, 'OEW', 1, -1)));
+        $disruption = EW::getDistruptionEW($view->gamedata, $ship);
+        $ship->EW = $base;
+        return ($disruption > 0) ? 1 + (int)ceil($disruption) : 1;
+    }
+
+    /* Is the danger of return fire "very low" (the user's ruling on game 5826)? Only when no loaded gun or launcher of any enemy
+       (mines left to Hazards) could reach $ship this turn at all, with both closing as fast as they can and the enemy's every EW
+       point locked on - the reach test of Hard's power management (PowerDecider::reaches), not the threats DEW is priced against,
+       which stand the enemy still and leave ballistics out. */
+    private static function unthreatened(AIView $view, $ship, array $enemies)
+    {
+        $armed = array();
+        foreach ($enemies as $enemy) {
+            if (empty($enemy->mine)) $armed[] = $enemy;
+        }
+        $reach = PowerDecider::reaches($view, $ship, $armed);
+        return $reach['shots'] == 0;
+    }
+
+    //Could a loaded gun of $ship do anything to $enemy with a point locked on it? Arcs not asked, as score() does not.
+    private static function reaches(AIView $view, $ship, array $guns, $enemy, array $base)
+    {
+        $ship->EW = array_merge($base, array(new EWentry(-1, $ship->id, $view->turn, 'OEW', 1, $enemy->id)));
+        $reach = false;
+        foreach ($guns as $weapon) {
+            if ($view->estimate($ship, $weapon, $enemy, false) > 0) {
+                $reach = true;
+                break;
+            }
+        }
+        $ship->EW = $base;
+        return $reach;
     }
 
     //What a split is worth to the ship: expected damage dealt less expected damage taken.
@@ -355,18 +491,37 @@ class EWDecider
         $ship = $state['ship'];
         $turn = $view->turn;
 
+        /* The split as the engine will see it (the user's notes on game 5826): every OEW and CCEW row of it on the ship at once.
+           An enemy ELINT's disruption is shared over all of them (EW::getDistruptionEW divides it by getOEWTargetNum), so what a
+           lock is worth depends on how many the ship holds. Until then each enemy was priced with its own row alone: a lone
+           point on the G'Quan met the Va'Kar's whole disruption, where the CCEW row beside it would have halved it, while a
+           point on the Frazi was priced beside that CCEW row - so the Omegas locked the fighters and no ship. Nothing else the
+           hit formula asks of the shooter's EW depends on its other rows: where nothing disrupts the ship ($state['disrupted']
+           false) every answer, and its cache, is what it always was. */
+        $rows = $state['base'];
+        $locks = 0;
+        foreach ($alloc['OEW'] as $targetId => $amount) {
+            if ($amount <= 0) continue;
+            $rows[] = new EWentry(-1, $ship->id, $turn, 'OEW', $amount, $targetId);
+            $locks++;
+        }
+        if ($alloc['CCEW'] > 0) {
+            $rows[] = new EWentry(-1, $ship->id, $turn, 'CCEW', $alloc['CCEW'], -1);
+            $locks++;
+        }
+        $standing = false;
         $offence = 0;
         foreach ($state['guns'] as $weapon) {
             $best = 0;
             foreach ($state['enemies'] as $enemy) {
                 $oew = isset($alloc['OEW'][(int)$enemy->id]) ? $alloc['OEW'][(int)$enemy->id] : 0;
                 $ccew = ($enemy instanceof FighterFlight) ? $alloc['CCEW'] : 0;
-                $key = $weapon->id . ':' . $enemy->id . ':' . $oew . ':' . $ccew;
+                $key = $weapon->id . ':' . $enemy->id . ':' . $oew . ':' . $ccew . ($state['disrupted'] ? ':' . $locks : '');
                 if (!isset($state['offence'][$key])) {
-                    $rows = $state['base'];
-                    if ($oew > 0) $rows[] = new EWentry(-1, $ship->id, $turn, 'OEW', $oew, $enemy->id);
-                    if ($ccew > 0) $rows[] = new EWentry(-1, $ship->id, $turn, 'CCEW', $ccew, -1);
-                    $ship->EW = $rows;
+                    if (!$standing) {
+                        $ship->EW = $rows;
+                        $standing = true;
+                    }
                     $state['offence'][$key] = $view->estimate($ship, $weapon, $enemy, false)
                         * (isset($state['soft'][(int)$enemy->id]) ? AIConfig::EW_MOVES_AFTER_WEIGHT : 1);
                 }
