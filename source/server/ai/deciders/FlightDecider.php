@@ -59,18 +59,37 @@ class FlightDecider
     //For the harness and scratch checks only: set to an array and rows() appends its six best places, terms and all.
     public static $trace = null;
 
+    /* Stage T8 (decision time): the flight's guns' expected damage at each enemy from one hex at one jinking level, arcs left out
+       (AIView::estimate, $needArc false) - per flight decision. As for a ship (ShipDecider::$arcFree): what a gun does from a hex
+       does not depend on which way the flight points or how fast it goes (checked over 4,752 gun / target pairs, flights jinking
+       included), only whether the arc holds the target - and a flight's places are judged once per facing. */
+    private static $arcFree = array();
+
+    //Stage T8: this flight's share of its submission's CPU time (set by MoveDecider around each unit, then cleared); null = no budget.
+    public static $share = null;
+    public static $lastShare = null; //...the share the last rows() had (for the harnesses)
+
     /* The rows for one flight: a ShipMover plan, with jinking levels after it. $view is the bot's
        masked view of the Movement phase; $hazards the board, built once for the decision. */
     public static function rows(AIView $view, ShipMover $mover, $flight, Hazards $hazards)
     {
-        $plans = $mover->enumerate(AIConfig::FLIGHT_PLANS);
+        self::$arcFree = array();
+        /* Stage T8: the flight's share of its submission's CPU time, when MoveDecider gives one (AIConfig::MOVE_SUBMISSION_SECONDS) -
+           the search stops at MOVE_SEARCH_SHARE of it (plainest plans first), the coverage search is not begun past MOVE_JUDGE_SHARE's
+           start, and the judging stops at the end with at least one place judged. No share: as before, unbounded. */
+        $started = AIConfig::cpuSeconds();
+        $deadline = (self::$share !== null) ? $started + max(0.001, (float)self::$share) : null;
+        self::$lastShare = self::$share;
+        $plans = $mover->enumerate(AIConfig::FLIGHT_PLANS, ($deadline === null) ? null : $started + (float)self::$share * AIConfig::MOVE_SEARCH_SHARE);
         if (count($plans) == 0) return MoveDecider::choose($mover, $hazards->blocked, $hazards->bounds);
 
         $context = self::context($view, $flight);
         $start = $flight->getHexPos();
 
         //Stage T5f-2: the places around the targets the enemy's guns cover least, which the plainest-first search never reaches.
-        foreach (self::coverageSearch($view, $mover, $flight, $plans, $context, $hazards, $start) as $plan) $plans[] = $plan;
+        if ($deadline === null || AIConfig::cpuSeconds() < $started + (float)self::$share * AIConfig::MOVE_SEARCH_SHARE) {
+            foreach (self::coverageSearch($view, $mover, $flight, $plans, $context, $hazards, $start) as $plan) $plans[] = $plan;
+        }
 
         /* One estimate per place and facing: that is all fire and danger depend on - and per jinking level. The most a
            place allows is what the plan to it that leaves most thrust can buy. */
@@ -85,10 +104,11 @@ class FlightDecider
             $jinkable[$key] = array($pick, self::jinkRoom($mover, $plans[$pick]));
         }
 
-        //Each place, as it is and jinking all the thrust allows: array of jinking levels => its terms.
-        $judged = $view->atFireTime(function () use ($view, $flight, $plans, $groups, $jinkable, $context, $hazards, $start) {
+        //Each place, as it is and jinking all the thrust allows: array of jinking levels => its terms. (Stage T8: until the share is spent.)
+        $judged = $view->atFireTime(function () use ($view, $flight, $plans, $groups, $jinkable, $context, $hazards, $start, $deadline) {
             $out = array();
             foreach ($groups as $key => $indexes) {
+                if ($deadline !== null && count($out) > 0 && AIConfig::cpuSeconds() > $deadline) break;
                 $out[$key] = array(0 => self::judge($view, $flight, $plans[$indexes[0]], 0, $context, $hazards, $start));
                 $room = $jinkable[$key][1];
                 if ($room > 0) $out[$key][$room] = self::judge($view, $flight, $plans[$jinkable[$key][0]], $room, $context, $hazards, $start);
@@ -135,7 +155,7 @@ class FlightDecider
            vs reducing chances of being hit to near 0" - there, 3 hexes off a CCEW ship, jinking 4-6). Jinking takes the same
            5% off both sides' chances, so the trade turns only where one side's chances run out first: every level between
            none and the most the thrust allows is priced, on the places that already score best (FLIGHT_JINK_PLACES). */
-        if ($view->skill('jink') === 'any') {
+        if ($view->skill('jink') === 'any' && ($deadline === null || AIConfig::cpuSeconds() <= $deadline)) {
             $top = array();
             foreach ($judged as $key => $variants) {
                 $top[$key] = max(array_map($score, $variants));
@@ -431,10 +451,17 @@ class FlightDecider
             //offence: each kind of gun at every enemy, then given out as ShipDecider gives a ship's guns
             $damage = array();
             $short = PHP_INT_MAX;
+            //(each pair priced once a hex and jinking level - $arcFree - and this facing asks only the arcs: estimate() with the arc is
+            //exactly onArc ? the arc-free answer : 0; its range test asked first, the cheaper)
+            $hexKey = $plan['position']->q . ',' . $plan['position']->r . '|' . (int)$jink;
+            $from = $flight->getHexPos();
             foreach ($context['guns'] as $g => $gun) {
                 foreach ($context['enemies'] as $e => $enemy) {
                     if (!$gun['weapon']->ignoresLoS && !$outward[$e]) continue;
-                    $d = $view->estimate($flight, $gun['weapon'], $enemy['unit'], true) * $gun['count'] * ($enemy['moved'] ? 1 : AIConfig::MOVE_UNMOVED_OFFENCE);
+                    if ($gun['weapon']->range != 0 && $from->distanceTo($enemy['unit']->getHexPos()) > $gun['weapon']->range) continue;
+                    if (!$view->onArc($flight, $gun['weapon'], $enemy['unit'])) continue;
+                    if (!isset(self::$arcFree[$hexKey][$g][$e])) self::$arcFree[$hexKey][$g][$e] = (float)$view->estimate($flight, $gun['weapon'], $enemy['unit'], false);
+                    $d = self::$arcFree[$hexKey][$g][$e] * $gun['count'] * ($enemy['moved'] ? 1 : AIConfig::MOVE_UNMOVED_OFFENCE);
                     if ($d > 0) $damage[$g][$e] = $d;
                 }
                 foreach ($context['closing'] as $target) $short = min($short, max(0, $flight->getHexPos()->distanceTo($target->getHexPos()) - (float)$gun['weapon']->range));

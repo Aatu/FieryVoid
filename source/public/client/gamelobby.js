@@ -3853,6 +3853,68 @@ window.gamedata = {
 		return !!(gamedata.cpuFactions && gamedata.cpuFactions.indexOf(faction) !== -1);
 	},
 
+	/* AUTO-COMPOSE (TACTICAL_AI_PLAN.md 8.1 / 8.2, stage T8): a CPU slot left EMPTY gets a plain fleet the server builds to pass the
+	   Fleet Checker (Manager::autoComposeCpuSlot) - when the creator presses Ready on it with nothing bought, and when the creator
+	   readies their own fleet. Pressing Ready on the CPU slot itself, the Store's open faction is the CPU's when a CPU player can field
+	   it; from the creator's own Ready the Store shows THEIR faction, so none is named and the server draws one. Like a human
+	   opponent's fleet it stays hidden until play (plan A4). A CPU slot with units bought is never composed over. */
+	cpuComposeFaction: function cpuComposeFaction() {
+		return (gamedata.storeFaction && gamedata.cpuFactionReady(gamedata.storeFaction)) ? gamedata.storeFaction : null;
+	},
+
+	//A slot's name for a confirm (which renders HTML), escaped.
+	cpuSlotLabel: function cpuSlotLabel(slot) {
+		return $("<div>").text(slot.name || ("Slot " + slot.slot)).html();
+	},
+
+	//The CPU slots the creator's Ready would auto-compose: not readied, and nothing bought for them in the page.
+	emptyCpuSlots: function emptyCpuSlots() {
+		if (gamedata.isCreator !== true || !gamedata.slots) return [];
+		var empty = [];
+		for (var i in gamedata.slots) {
+			var slot = gamedata.slots[i];
+			if (!gamedata.isCpuSlot(slot) || Number(slot.lastphase) >= -2) continue;
+			var bought = false;
+			for (var s in gamedata.ships) {
+				if (gamedata.ships[s].slot == slot.slot) { bought = true; break; }
+			}
+			if (!bought) empty.push(slot);
+		}
+		return empty;
+	},
+
+	//Compose and commit each slot in turn (of faction, or null for one the server draws); a refusal is shown, with the slot's name,
+	//once the rest are done.
+	autoComposeCpuSlots: function autoComposeCpuSlots(slots, faction) {
+		var refusals = [];
+		var next = function (index) {
+			if (index >= slots.length) {
+				ajaxInterface.startPollingGamedata();
+				if (refusals.length > 0) window.confirm.error(refusals.join("<br>"), function () { });
+				return;
+			}
+			ajaxInterface.autoComposeCpuFleet(slots[index].slot, faction, function (error) {
+				if (error === null) {
+					slots[index].lastphase = -2;
+					$('.slot.slotid_' + slots[index].slot).addClass("ready");
+				} else {
+					refusals.push(gamedata.cpuSlotLabel(slots[index]) + ": " + $("<div>").text(error).html());
+				}
+				next(index + 1);
+			});
+		};
+		next(0);
+	},
+
+	//The creator pressed Ready on a CPU slot with nothing bought: offer to auto-compose it.
+	offerAutoCompose: function offerAutoCompose(slot) {
+		var faction = gamedata.cpuComposeFaction();
+		confirm.confirm("This CPU player has no fleet yet. Auto-compose one and ready it?"
+			+ '<span class="prebattle-note">It gets a plain ' + (faction ? faction + " " : "") + "fleet for its points, built to pass the"
+			+ " Fleet Checker" + (faction ? "" : ", of a faction drawn at random") + " - you will see it when the game starts.</span>",
+			function () { gamedata.autoComposeCpuSlots([slot], faction); });
+	},
+
 	/* Why a CPU player cannot fly a unit of this blueprint, or null - the kinds ShipMover never plots for.
 	   ⚠️ MIRROR PAIR with ShipMover::unsupportedHullReason (source/server/ai/ShipMover.php): add a kind there, add it here. */
 	cpuHullBlock: function cpuHullBlock(ship) {
@@ -3913,6 +3975,12 @@ window.gamedata = {
 				slotElement.data("playerid", player.id);
 				slotElement.addClass("taken");
 				$(".playername", slotElement).html(player.name);
+				//CPU opponent (TACTICAL_AI_PLAN.md stage T8): a CPU player's level beside its name - "CPU Alpha (Hard)"
+				if (gamedata.isCpuSlot(slot)) {
+					var cpuSeat = gamedata.cpuSlots[slot.slot];
+					var cpuLevel = (cpuSeat && cpuSeat.level) ? String(cpuSeat.level) : "normal";
+					$(".playername", slotElement).append($('<span class="lb-slot-cpu-level"></span>').text(" (" + cpuLevel.charAt(0).toUpperCase() + cpuLevel.slice(1) + ")"));
+				}
 
 				//Only show select button if it's a viable option
 				if (gamedata.canEditSlot(slot) && slot.slot !== gamedata.selectedSlot) $(".selectslot", slotElement).show();
@@ -3936,7 +4004,7 @@ window.gamedata = {
 				$(".leaveslot, .leaveslot-label", slotElement).hide();
 
 				slotElement.attr("data-playerid", "");
-				slotElement.removeClass("taken");
+				slotElement.removeClass("taken lb-slot--cpu");
 				$(".playername", slotElement).html("");
 
 				slotElement.removeClass("ready");
@@ -5087,7 +5155,11 @@ window.gamedata = {
 		}
 
 		if (points == 0) {
-			window.confirm.error(forCpu ? "Buy at least one ship for the CPU player first!" : "You have to buy at least one ship!", function () { });
+			if (forCpu) { //stage T8: an empty CPU slot is auto-composed (plan 8.2)
+				gamedata.offerAutoCompose(selectedSlot);
+				return;
+			}
+			window.confirm.error("You have to buy at least one ship!", function () { });
 			return;
 		}
 
@@ -5115,12 +5187,22 @@ window.gamedata = {
 		//client cannot see one (it is served no ships at all).
 		readyMessage += gamedata.readyReinforcementWarning();
 
+		//Stage T8 (plan 8.1): the creator's own Ready also readies every CPU slot left EMPTY, auto-composed - named here first
+		var emptyCpu = forCpu ? [] : gamedata.emptyCpuSlots();
+		if (emptyCpu.length > 0) {
+			readyMessage += '<span class="prebattle-note">'
+				+ emptyCpu.map(gamedata.cpuSlotLabel).join(", ")
+				+ (emptyCpu.length == 1 ? " (a CPU player) has" : " (CPU players) have")
+				+ " no fleet: " + (emptyCpu.length == 1 ? "it" : "each") + " gets a plain one, built to pass the Fleet Checker.</span>";
+		}
+
 		// Pass the submission function as a callback, not invoke it immediately
 		confirm.confirm(readyMessage, function () {
 			selectedSlot.lastphase = -2;
 			ajaxInterface.submitGamedata();
 			slotElement.addClass("ready");
 			ajaxInterface.startPollingGamedata();
+			if (emptyCpu.length > 0) gamedata.autoComposeCpuSlots(emptyCpu, null); //queued behind the submit (ajaxWithRetry); the Store shows the creator's faction, not the CPU's
 		});
 
 	},
@@ -5129,9 +5211,12 @@ window.gamedata = {
 
 		var safeToLeave = true;
 
+		/* Another PLAYER in the game keeps a readied fleet from leaving - a CPU player does not (TACTICAL_AI_PLAN.md stage T8, the
+		   user 2026-11-22: "shouldn't apply when the only other 'players' in the gamelobby are AI opponents"). Leaving takes the CPU
+		   players with it once no human who could ready them is left (AISeats::releaseAbandoned). */
 		for (var i in gamedata.slots) {
 			var slot = gamedata.slots[i];
-			if (slot.playerid !== null && slot.playerid !== gamedata.thisplayer) safeToLeave = false;
+			if (slot.playerid !== null && slot.playerid !== gamedata.thisplayer && !gamedata.isCpuSlot(slot)) safeToLeave = false;
 		}
 
 		if (!safeToLeave) {

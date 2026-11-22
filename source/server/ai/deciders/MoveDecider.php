@@ -27,11 +27,25 @@ class MoveDecider
        against "the bot before stage T5"): nothing in the game sets it. */
     public static $plainFor = array();
 
-    //The bot's Movement entries, one per unit it owns. $seat is its DBManager::getCpuSeats row.
-    public static function orders(TacGamedata $gamedata, $botId, array $seat)
+    /* Stage T8 - a Movement submission decided over SEVERAL requests (AIConfig::BUDGET_SECONDS): unit id => rows, every unit of this
+       activation decided so far (the ones handed in as $resume and the ones decided now) - and the ids of those still to decide,
+       when the request's $deadline came first (empty = complete: the entries can be submitted). TacticalAI keeps $decided in
+       tac_ai_state between requests. */
+    public static $decided = array();
+    public static $pending = array();
+    //Harness override of AIConfig::MOVE_SUBMISSION_SECONDS (null = AIConfig's). Nothing in a game sets it.
+    public static $submissionSeconds = null;
+
+    /* The bot's Movement entries, one per unit it owns. $seat is its DBManager::getCpuSeats row.
+       Stage T8: $resume - unit id => rows decided by an earlier request in this same activation (stood where they go, not decided
+       again); $deadline - a microtime() past which no further unit is begun once one has been decided in this call (null = none).
+       Units are given CPU time out of the submission's AIConfig::MOVE_SUBMISSION_SECONDS as they come (ShipDecider::$share). */
+    public static function orders(TacGamedata $gamedata, $botId, array $seat, array $resume = array(), $deadline = null)
     {
         $gamedata->prepareForPlayer(); //the mask a human in this seat plays behind
         self::$lastSummary = null;
+        self::$decided = array();
+        self::$pending = array();
         FlightDecider::reset();
         ShipDecider::reset();
         JumpDecider::reset();
@@ -40,6 +54,10 @@ class MoveDecider
 
         $active = array();
         foreach ($gamedata->getMyActiveShips() as $ship) $active[$ship->id] = true;
+        //Stage T8: the submission's CPU time, from here (the forecast inside it) - when there is a decision budget at all
+        $clockEnd = ShipDecider::budgetOn() ? AIConfig::cpuSeconds() + ((self::$submissionSeconds === null) ? AIConfig::MOVE_SUBMISSION_SECONDS : (float)self::$submissionSeconds) : null;
+        $left = 0;
+        foreach (array_keys($active) as $id) if (!isset($resume[$id])) $left++;
 
         //The board (stage T5c): terrain, drifting fields, meteor swarms, the mines this bot can see.
         $hazards = new Hazards($view);
@@ -50,34 +68,40 @@ class MoveDecider
 
         $entries = array();
         $flights = 0;
-        foreach (AIFallback::ownUnits($gamedata, $botId) as $ship) {
-            $entry = AIOrderBuilder::entry($ship);
+        $decidedNow = 0;
+        try {
+            foreach (AIFallback::ownUnits($gamedata, $botId) as $ship) {
+                $entry = AIOrderBuilder::entry($ship);
 
-            if (isset($active[$ship->id])) {
-                $mover = ShipMover::forShip($ship, $gamedata);
-                if ($mover !== null && $mover->isFlight()) {
-                    $entry['movement'] = FlightDecider::rows($view, $mover, $ship, $hazards);
-                    $flights++;
-                } else if ($mover !== null && in_array((int)$botId, self::$plainFor, true)) {
-                    $entry['movement'] = self::choose($mover, $hazards->blocked, $hazards->bounds);
-                } else if ($mover !== null) {
-                    /* Stage T6c - a ship leaving the battle through its own jump point: on the turn it forms, into its hex through
-                       its mouth; the turn after, standing in it, out (JumpDecider). Anything else, or a jump that no longer works: as usual. */
-                    $rows = null;
-                    $jump = JumpDecider::pending($view, $ship);
-                    if ($jump !== null && $jump['open']) $rows = JumpDecider::jumpOutRows($mover, $ship, $jump);
-                    else if ($jump !== null) $rows = JumpDecider::approachRows($view, $mover, $ship, $hazards, $jump);
-                    else $rows = JumpDecider::brakeRows($view, $mover, $ship, $hazards); //too fast to reach a jump point this turn
-                    $entry['movement'] = ($rows !== null) ? $rows : ShipDecider::rows($view, $mover, $ship, $hazards);
-                } else {
-                    $entry['movement'] = AIFallback::straightRows($ship, $gamedata);
+                if (isset($active[$ship->id])) {
+                    $id = (int)$ship->id;
+                    if (isset($resume[$id])) {
+                        $entry['movement'] = $resume[$id]; //decided by an earlier request of this activation
+                    } else if ($deadline !== null && $decidedNow > 0 && microtime(true) >= $deadline) {
+                        self::$pending[] = $id; //this request's time is spent: the next one decides it
+                        $entries[] = $entry;
+                        continue;
+                    } else {
+                        if ($clockEnd !== null) { //its share of what is left of the submission's CPU time
+                            $share = min(AIConfig::MOVE_DECISION_SECONDS, max(AIConfig::MOVE_UNIT_FLOOR_SECONDS, ($clockEnd - AIConfig::cpuSeconds()) / max(1, $left)));
+                            ShipDecider::$share = $share;
+                            FlightDecider::$share = $share;
+                        }
+                        $entry['movement'] = self::unitRows($view, $gamedata, $botId, $ship, $hazards, $flights);
+                        $decidedNow++;
+                        $left--;
+                    }
+                    self::$decided[$id] = $entry['movement'];
+                    /* Units of the bot that move in the same activation (simultaneous movement) are
+                       decided one after another: each later one sees this one where it is going. */
+                    self::standAtEnd($ship, $entry['movement'], $gamedata->turn);
                 }
-                /* Units of the bot that move in the same activation (simultaneous movement) are
-                   decided one after another: each later one sees this one where it is going. */
-                self::standAtEnd($ship, $entry['movement'], $gamedata->turn);
-            }
 
-            $entries[] = $entry;
+                $entries[] = $entry;
+            }
+        } finally {
+            ShipDecider::$share = null;
+            FlightDecider::$share = null;
         }
 
         $parts = array_merge(ShipDecider::$last, JumpDecider::$last);
@@ -98,9 +122,30 @@ class MoveDecider
             $parts[] = 'forecast: ' . count(EnemyForecast::$last) . ' enemy ships yet to move, ' . $turning . ' of them manoeuvring'
                 . (count($failed) ? '; NOT FORECAST (straight on): ' . implode('; ', $failed) : '');
         }
+        if (count($resume) > 0) $parts[] = count($resume) . ' units decided in earlier requests of this activation';
         if (count($parts) > 0) self::$lastSummary = implode(' | ', $parts);
 
         return $entries;
+    }
+
+    //One active unit's rows (orders()' loop): a flight by FlightDecider, a ship by ShipDecider - or JumpDecider when it is leaving.
+    private static function unitRows(AIView $view, TacGamedata $gamedata, $botId, $ship, Hazards $hazards, &$flights)
+    {
+        $mover = ShipMover::forShip($ship, $gamedata);
+        if ($mover !== null && $mover->isFlight()) {
+            $flights++;
+            return FlightDecider::rows($view, $mover, $ship, $hazards);
+        }
+        if ($mover !== null && in_array((int)$botId, self::$plainFor, true)) return self::choose($mover, $hazards->blocked, $hazards->bounds);
+        if ($mover === null) return AIFallback::straightRows($ship, $gamedata);
+
+        /* Stage T6c - a ship leaving the battle through its own jump point: on the turn it forms, into its hex through
+           its mouth; the turn after, standing in it, out (JumpDecider). Anything else, or a jump that no longer works: as usual. */
+        $jump = JumpDecider::pending($view, $ship);
+        if ($jump !== null && $jump['open']) $rows = JumpDecider::jumpOutRows($mover, $ship, $jump);
+        else if ($jump !== null) $rows = JumpDecider::approachRows($view, $mover, $ship, $hazards, $jump);
+        else $rows = JumpDecider::brakeRows($view, $mover, $ship, $hazards); //too fast to reach a jump point this turn
+        return ($rows !== null) ? $rows : ShipDecider::rows($view, $mover, $ship, $hazards);
     }
 
     /* HARD's fleet focus (stage T5f-3; the user's note 5 on game 4750: "it is more effective to concentrate a fleet's heavy

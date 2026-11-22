@@ -119,6 +119,8 @@ class ShipMover
        list, so this does too. */
     private $rows = array();
     private $loadedCount = 0;
+    private $turnStart = 0;         //stage T8: index of the first row of this turn (see the constructor)
+    private $owedMemo = false;      //stage T8: owedExtended()'s answer once worked out (it reads last turn's rows, which never change)
 
     //id => array('id', 'direction', 'output', 'half', 'fti', 'dead')
     private $thrusters = array();
@@ -204,6 +206,15 @@ class ShipMover
 
         foreach ($ship->movement as $move) $this->rows[] = self::rowFromOrder($move);
         $this->loadedCount = count($this->rows);
+        /* Stage T8: the first row of THIS turn - every row before it belongs to an earlier turn (turn 1 and last turn, as the loader
+           brings them), so a walk over this turn's rows starts here (rows plotted later are this turn's and come after it). */
+        $this->turnStart = $this->loadedCount;
+        foreach ($this->rows as $index => $row) {
+            if ($row['turn'] == $this->turn) {
+                $this->turnStart = $index;
+                break;
+            }
+        }
 
         $this->agile = !empty($ship->agile);
         $this->gravitic = !empty($ship->gravitic);
@@ -444,20 +455,22 @@ class ShipMover
         return $options;
     }
 
-    /* options() less the orders a search would throw away untried - so it never asks for them (stage T5f-5: each extended-turn
-       begin it asked for was a whole payment worked out on every mover of every search, at every level). The same filter the
-       searches applied after asking: no jink; pivots, rolls and begins only when allowed - and none of them in an aimed search. */
-    private function searchOptions($aimed = false)
+    /* The orders a search tries from a mover, in order: options() less those it would throw away untried (stage T5f-5: each
+       extended-turn begin it asked for was a whole payment worked out on every mover of every search, at every level) - no jink;
+       pivots, rolls and begins only when allowed, and none of them in an aimed search. Stage T8: NOT asked whether each can be
+       given - the search gives it on a copy and drops the copy when apply() refuses, which is exactly what can() did first, on a
+       copy of its own (every legal order was worked out twice). */
+    private function searchActions($aimed = false)
     {
-        $options = array();
+        $actions = array();
         foreach (array(self::ACCEL, self::DECEL, self::TURN_LEFT, self::TURN_RIGHT, self::SLIP_LEFT, self::SLIP_RIGHT, self::MOVE,
             self::PIVOT_LEFT, self::PIVOT_RIGHT, self::ROLL, self::EXTEND_LEFT, self::EXTEND_RIGHT, self::COMPLETE_EXTENDED) as $action) {
             if (($action === self::PIVOT_LEFT || $action === self::PIVOT_RIGHT) && ($aimed || !$this->pivots)) continue;
             if ($action === self::ROLL && ($aimed || !$this->rolls)) continue;
             if (($action === self::EXTEND_LEFT || $action === self::EXTEND_RIGHT) && ($aimed || !$this->extendedTurns)) continue;
-            if ($this->can($action)) $options[] = $action;
+            $actions[] = $action;
         }
-        return $options;
+        return $actions;
     }
 
     public function isFlight()
@@ -771,11 +784,12 @@ class ShipMover
     //Set by the last enumerate(): its $deadline stopped it before the search was done.
     public $searchCut = false;
 
-    public function enumerate($limit = 400, $deadline = null)
+    /* $seeds (stage T8): pass an array and it collects, as array(mover, order), every order the page offers a mover of the search
+       that apply() could not PAY within this mover's overthrust allowance - what enumerateOverthrust() starts from. */
+    public function enumerate($limit = 400, $deadline = null, ?array &$seeds = null)
     {
         $plans = array();
         $seen = array();
-        $expanded = 0;
         $serial = 0;
         $this->searchCut = false;
 
@@ -784,7 +798,42 @@ class ShipMover
 
         $queue = new SplPriorityQueue();
         $queue->insert($this, array(0, -$this->hexesLeft(), 0));
+        $this->search($queue, $plans, $seen, $serial, $limit, $deadline, $seeds);
 
+        return array_values($plans);
+    }
+
+    /* Stage T8 - THE OVERTHRUST SEARCH (stage T5b's end states only an overthrust reaches), from where the search within the ratings
+       found an order it could not pay: each of $seeds (enumerate()'s) given again with up to $points over a rating, and the movers
+       that makes searched on as enumerate() searches, the allowance theirs. Until T8 a whole second enumerate() with the allowance
+       did this - and spent most of its time finding again every plan the first one had (the within-ratings orders are paid the same
+       way whatever the allowance: clickBest takes a thruster over its rating only when none within its own can take the point),
+       which was half the search for 2-35 end states more. Plans as enumerate()'s, at most $limit; $searchCut as enumerate() sets it. */
+    public function enumerateOverthrust(array $seeds, $points, $limit = 400, $deadline = null)
+    {
+        $plans = array();
+        $seen = array();
+        $serial = 0;
+        $this->searchCut = false;
+
+        $queue = new SplPriorityQueue();
+        foreach ($seeds as $seed) {
+            $from = clone $seed[0];
+            $from->overthrust = max(0, (int)$points);
+            //only a child the allowance really pays over a rating: one that does not is a mover the first search has had already
+            //(an extended turn's begin paid no further), and its whole subtree would be searched a second time
+            $from->children($seed[1], $queue, $seen, $serial, true);
+        }
+        $none = null;
+        $this->search($queue, $plans, $seen, $serial, $limit, $deadline, $none);
+
+        return array_values($plans);
+    }
+
+    //The plainest-first search of enumerate() and enumerateOverthrust(): $queue's movers, and every mover they lead to, until done.
+    private function search(SplPriorityQueue $queue, array &$plans, array &$seen, &$serial, $limit, $deadline, ?array &$seeds)
+    {
+        $expanded = 0;
         while (!$queue->isEmpty() && count($plans) < $limit && $expanded < $limit * 12) {
             if ($deadline !== null && ($expanded % 16) == 0 && AIConfig::cpuSeconds() > $deadline) {
                 $this->searchCut = true;
@@ -797,22 +846,62 @@ class ShipMover
             if ($mover->isComplete()) self::keepPlan($plans, $mover);
 
             //(no jink - no hex changes with it: the caller adds levels to the plan it picks; pivots, rolls, begins only when allowed)
-            foreach ($mover->searchOptions() as $action) {
-                $shortenable = $mover->shorten && !$mover->flight && ($action === self::TURN_LEFT || $action === self::TURN_RIGHT || $action === self::COMPLETE_EXTENDED);
-                foreach ($shortenable ? array(0, self::SHORTEN_MAX) : array(0) as $extra) {
-                    $next = clone $mover;
-                    if (!$next->apply($action, $extra)) continue;
-                    if ($extra > 0 && $next->lastExtra() == 0) continue; //no point could be placed: the plain turn is this one
-
-                    $key = $next->searchKey();
-                    if (isset($seen[$key])) continue;
-                    $seen[$key] = true;
-                    $queue->insert($next, array(-$next->manoeuvres(), -$next->hexesLeft(), -(++$serial)));
-                }
+            foreach ($mover->searchActions() as $action) {
+                $given = $mover->children($action, $queue, $seen, $serial);
+                if ($seeds === null) continue;
+                /* A seed: an order the ratings could not pay - or an extended turn's BEGIN, which is paid as far as it can be (D2): an
+                   allowance pays it further, and leaves less owed next turn (a begin whose remainder next turn's engine could not pay
+                   may be one it can - ShipDecider's payable test). */
+                if ($given ? ($action === self::EXTEND_LEFT || $action === self::EXTEND_RIGHT) : $mover->unpaid($action)) $seeds[] = array($mover, $action);
             }
         }
+    }
 
-        return array_values($plans);
+    /* $action given to copies of this mover - and a ship's turn, with shortening allowed, once more with all the extra thrust it can
+       take - each new mover queued (plainest first). False when apply() refuses the order: then it is not tried at all, shortened or
+       not (stage T8: what asking can() first did, on a copy of its own). */
+    private function children($action, SplPriorityQueue $queue, array &$seen, &$serial, $overOnly = false)
+    {
+        $plain = clone $this;
+        if (!$plain->apply($action, 0)) return false;
+        $shortenable = $this->shorten && !$this->flight && ($action === self::TURN_LEFT || $action === self::TURN_RIGHT || $action === self::COMPLETE_EXTENDED);
+        foreach ($shortenable ? array(0, self::SHORTEN_MAX) : array(0) as $extra) {
+            if ($extra == 0) {
+                $next = $plain;
+            } else {
+                $next = clone $this;
+                if (!$next->apply($action, $extra)) continue;
+                if ($next->lastExtra() == 0) continue; //no point could be placed: the plain turn is this one
+            }
+            if ($overOnly && count($next->overthrust()) == 0) continue; //(enumerateOverthrust's seeds: see there)
+
+            $key = $next->searchKey();
+            if (isset($seen[$key])) continue;
+            $seen[$key] = true;
+            $queue->insert($next, array(-$next->manoeuvres(), -$next->hexesLeft(), -(++$serial)));
+        }
+        return true;
+    }
+
+    /* Stage T8: apply() refused $action although the page offers it - so the THRUST is what it could not place (each order's gate
+       below is the one apply() asks first; past it only the payment can fail). What an overthrust allowance may yet pay. A plain
+       step never needs thrust, and an owed extended turn is already paid over the ratings when it must be (completeExtended). */
+    private function unpaid($action)
+    {
+        if ($this->flight) return false; //one pool of thrust, no thrusters to take over a rating
+        switch ($action) {
+            case self::ACCEL: return $this->canChangeSpeed() && !$this->speedClickWouldUndo(true);
+            case self::DECEL: return $this->canChangeSpeed() && !$this->speedClickWouldUndo(false);
+            case self::TURN_LEFT: case self::TURN_RIGHT: return $this->canTurn();
+            case self::SLIP_LEFT: return $this->canSlip(false);
+            case self::SLIP_RIGHT: return $this->canSlip(true);
+            case self::PIVOT_LEFT: return $this->canPivot(false);
+            case self::PIVOT_RIGHT: return $this->canPivot(true);
+            case self::ROLL: return $this->canRoll();
+            case self::EXTEND_LEFT: return $this->qualifiesExtended(false);
+            case self::EXTEND_RIGHT: return $this->qualifiesExtended(true);
+        }
+        return false;
     }
 
     /* Stage T5f-2 - plans that END on chosen hexes (the user's note on game 4774: fighters should "find hexes where there is
@@ -853,7 +942,7 @@ class ShipMover
             }
 
             //(no jink, pivot, roll or begin in an aimed search; an owed completion is still made - nothing else is offered first)
-            foreach ($mover->searchOptions(true) as $action) {
+            foreach ($mover->searchActions(true) as $action) {
                 $next = clone $mover;
                 if (!$next->apply($action)) continue;
                 $key = $next->searchKey();
@@ -983,8 +1072,16 @@ class ShipMover
             if ($type === 'slipleft' || $type === 'slipright') $slip = $type . ($i == count($this->rows) - 1 ? '!' : '');
             if ($type === 'speedchange') $speedChanges++;
         }
+        //each thruster's channeledReal($id, false), in thruster order - summed in one pass over this turn's rows (stage T8: was a pass a thruster)
         $channeled = array();
-        foreach ($this->thrusters as $id => $thruster) $channeled[] = $this->channeledReal($id, false);
+        foreach ($this->thrusters as $id => $thruster) $channeled[$id] = 0;
+        for ($i = $this->turnStart, $n = count($this->rows); $i < $n; $i++) {
+            $row = $this->rows[$i];
+            if ($row['turn'] != $this->turn) continue;
+            foreach ($row['assignedThrust'] as $id => $amount) {
+                if (isset($channeled[$id]) && $amount !== null) $channeled[$id] += (int)$amount;
+            }
+        }
 
         //(the thrust left too: a flight has no thrusters to tell two movers' spending apart; and - stage T5e - the pivots and rolls made or running)
         $pivoted = $this->hasPivoted();
@@ -1292,7 +1389,8 @@ class ShipMover
     //hasJumpedOut: a jump-out ordered this turn - it ends the unit's movement (getRemainingMovement, every manoeuvre gate)
     public function hasJumpedOut()
     {
-        foreach ($this->rows as $row) {
+        for ($i = $this->turnStart, $n = count($this->rows); $i < $n; $i++) {
+            $row = $this->rows[$i]; //(stage T8: this turn's rows only - see turnStart)
             if ($row['turn'] == $this->turn && $row['type'] === self::JUMP_OUT) return true;
         }
         return false;
@@ -1516,11 +1614,17 @@ class ShipMover
         }
 
         if (self::isTurn($this->rows[$index])) {
+            /* Turn shortening is bought within the thrusters' ratings only, whatever the overthrust allowance (stage T8 - the user's
+               ruling of 2026-11-19: shorten "if you have the spare thrust on that turn, and you won't exceed thruster ratings"; an
+               allowance is for an order the ratings cannot pay at all, as shortened() and completeExtended already had it). */
+            $allowance = $this->overthrust;
+            $this->overthrust = 0;
             $placed = 0;
             for ($point = 0; $point < $extra; $point++) {
                 if (!$this->clickBest($index, null)) break;
                 $placed++;
             }
+            $this->overthrust = $allowance;
             if ($placed > 0) $this->rows[$index]['extra'] = $placed; //extras(): the replay gives exactly these clicks again
         }
 
@@ -1641,7 +1745,8 @@ class ShipMover
     private function channeledReal($id, $committedOnly)
     {
         $used = 0;
-        foreach ($this->rows as $row) {
+        for ($i = $this->turnStart, $n = count($this->rows); $i < $n; $i++) {
+            $row = $this->rows[$i];
             if ($row['turn'] != $this->turn) continue;
             if ($committedOnly && !$row['commit']) continue;
             if (isset($row['assignedThrust'][$id])) $used += (int)$row['assignedThrust'][$id];
@@ -1811,11 +1916,11 @@ class ShipMover
     //getLastCommitedMove
     private function lastCommitted()
     {
-        $found = null;
-        foreach ($this->rows as $row) {
-            if ($row['commit']) $found = $row;
+        //the LAST committed row: found from the end (stage T8: was a walk of every row, keeping the last)
+        for ($i = count($this->rows) - 1; $i >= 0; $i--) {
+            if ($this->rows[$i]['commit']) return $this->rows[$i];
         }
-        return $found !== null ? $found : $this->rows[0];
+        return $this->rows[0];
     }
 
     //getSpeed
@@ -1829,7 +1934,8 @@ class ShipMover
     {
         if ($this->hasJumpedOut()) return 0; //stage T6c: ordering a jump-out really does end the move
         $used = 0;
-        foreach ($this->rows as $row) {
+        for ($i = $this->turnStart, $n = count($this->rows); $i < $n; $i++) {
+            $row = $this->rows[$i];
             if ($row['turn'] != $this->turn || !$row['commit']) continue;
             if ($row['type'] === 'move' || $row['type'] === 'slipleft' || $row['type'] === 'slipright') $used++;
         }
@@ -1840,7 +1946,8 @@ class ShipMover
     private function remainingEngineThrust()
     {
         $left = $this->engineThrust;
-        foreach ($this->rows as $row) {
+        for ($i = $this->turnStart, $n = count($this->rows); $i < $n; $i++) {
+            $row = $this->rows[$i];
             if ($row['turn'] != $this->turn) continue;
             if ($row['preturn'] && $row['type'] === 'speedchange') continue; //Engine Shorted's push is the shorted engine's own
             foreach ($row['assignedThrust'] as $amount) $left -= (int)$amount;
@@ -1869,7 +1976,8 @@ class ShipMover
     {
         if ($this->agile) return false;
         $rolling = false;
-        foreach ($this->rows as $row) {
+        for ($i = $this->turnStart, $n = count($this->rows); $i < $n; $i++) {
+            $row = $this->rows[$i];
             if ($row['turn'] != $this->turn) continue;
             if ($row['type'] === 'isRolling') $rolling = true;
             if ($row['type'] === 'roll' && $row['commit']) $rolling = !$rolling;
@@ -1900,7 +2008,8 @@ class ShipMover
     {
         if ($this->agile) return 'no';
         $pivoting = 'no';
-        foreach ($this->rows as $row) {
+        for ($i = $this->turnStart, $n = count($this->rows); $i < $n; $i++) {
+            $row = $this->rows[$i];
             if ($row['turn'] != $this->turn || !$row['commit']) continue;
             if ($row['type'] === 'isPivotingLeft') $pivoting = 'left';
             if ($row['type'] === 'isPivotingRight') $pivoting = 'right';
@@ -1919,7 +2028,8 @@ class ShipMover
     private function hasPivoted()
     {
         $has = array('left' => false, 'right' => false);
-        foreach ($this->rows as $row) {
+        for ($i = $this->turnStart, $n = count($this->rows); $i < $n; $i++) {
+            $row = $this->rows[$i];
             if ($row['turn'] != $this->turn || $row['preturn']) continue;
             if ($row['type'] === 'pivotleft') $has['left'] = true;
             if ($row['type'] === 'pivotright') $has['right'] = true;
@@ -1953,7 +2063,8 @@ class ShipMover
     //hasRolled: a roll row of this turn, or rolling as it began
     private function hasRolled()
     {
-        foreach ($this->rows as $row) {
+        for ($i = $this->turnStart, $n = count($this->rows); $i < $n; $i++) {
+            $row = $this->rows[$i];
             if ($row['turn'] == $this->turn && ($row['type'] === 'roll' || $row['type'] === 'isRolling')) return true;
         }
         return false;
@@ -1976,7 +2087,8 @@ class ShipMover
     //getExtendedTurnStart: this turn's begin row, or null
     private function extendedStart()
     {
-        foreach ($this->rows as $row) {
+        for ($i = $this->turnStart, $n = count($this->rows); $i < $n; $i++) {
+            $row = $this->rows[$i];
             if ($row['turn'] == $this->turn && self::isExtendedStartRow($row)) return $row;
         }
         return null;
@@ -1985,18 +2097,21 @@ class ShipMover
     //getOwedExtendedTurn: LAST turn's begin row (the last of them), or null - the loaded rows hold turn N-1's (Movement's load window)
     private function owedExtended()
     {
+        //(stage T8: worked out once - last turn's rows are all loaded ones and never change; a copy keeps the answer)
+        if ($this->owedMemo !== false) return $this->owedMemo;
         $owed = null;
         foreach ($this->rows as $row) {
             if ($row['turn'] == $this->turn - 1 && self::isExtendedStartRow($row)) $owed = $row;
         }
-        return $owed;
+        return $this->owedMemo = $owed;
     }
 
     //isExtendedTurnOutstanding: a turn owed, and this turn has neither a cancellation nor a COMMITTED completion
     private function isExtendedOutstanding()
     {
         if ($this->owedExtended() === null) return false;
-        foreach ($this->rows as $row) {
+        for ($i = $this->turnStart, $n = count($this->rows); $i < $n; $i++) {
+            $row = $this->rows[$i];
             if ($row['turn'] != $this->turn) continue;
             if ($row['type'] === 'extendTurnCancel') return false;
             if ($row['commit'] && self::isTurn($row) && $row['value'] === 'extendedTurn') return false;

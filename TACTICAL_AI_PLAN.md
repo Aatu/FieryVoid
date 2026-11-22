@@ -15,9 +15,14 @@ as complete for now") - committed by the user as 074e28ff1; section 10.7.** **St
 keep shooting) built; T6d (last-resort ramming) NOT built - deferred past v1; T6f's done-when met by the T6 batches; section 10.8.
 **Stage T7 STARTED 2026-11-21**: T7a (the readiness list in the lobby - only Earth Alliance and Raiders offered for a CPU slot, the
 units the CPU cannot fly hidden, a CPU fleet with either refused on Ready), T7b (EA Interceptors fire offensively only when boosted;
-Hard boosts the spare ones against a fighter-heavy enemy) and T7b-2 (only Interceptors whose arc faces the fighters) BUILT, uncommitted,
-not play-tested; section 10.9.
-T8 onward not started; **stage T9 (more factions - section 10.10) PLANNED 2026-11-22** at the user's request, with the campaign paused;
+Hard boosts the spare ones against a fighter-heavy enemy) and T7b-2 (only Interceptors whose arc faces the fighters) BUILT - committed
+by the user as 56b03b2d3; section 10.9.
+**Stage T8 (the skirmish release) BUILT 2026-11-22, uncommitted, not play-tested** - decision time first, as the user asked (a
+live-sized Movement activation 1.5-1.6x faster with the same decisions, a CPU budget per submission and request slicing for live), the
+deferred T6d ramming, auto-compose (`FleetComposer`, proven against the REAL Fleet Checker under node - the port re-scoped to T10 by
+the user), the level picker, CPU seats in the lobby and games list, the user's lobby extras, and a FAQ entry; the timing on the live
+host (`aiBenchmark.php`) and the Beta are the user's; section 10.11.
+**Stage T9 (more factions - section 10.10) PLANNED 2026-11-22** at the user's request, with the campaign paused;
 the campaign wiring is now T10. Companion plans: `CAMPAIGN_PLAN.md` (the campaign
 layer, which uses this for battles against NPCs - see its section 7) and `STRATEGIC_AI_PLAN.md` (what
 NPC empires do on the campaign map).
@@ -523,9 +528,9 @@ unchanged) and the self-play harness.
 | **T3 EW and power** ✅ BUILT (uncommitted, 10.5) | `EWDecider`, `PowerDecider` (negative-power handling) | Bot EW passes `validateEW` in every self-play turn; hit rates rise measurably versus T2 |
 | **T4 Ballistics and fighters** ✅ COMPLETE (uncommitted, 10.6) | `BallisticDecider`; flight tactics (escort, strike, intercept) - built on `ShipMover`, not `AutomatedMovement`, whose rows the page never checked | Missile and carrier fleets fight sensibly |
 | **T5 Movement search** ✅ COMPLETE (user, 2026-11-20; from T5e on uncommitted, 10.7) | `MoveDecider` scoring, range bands, terrain (drifting too) and mine avoidance, pivots and rolls, gravitic hulls; closing with the enemy (the T2 pursuit question, ruled into T5); moving to bring the most direct-fire weapons into arc within the turn AND the most ballistic launchers to bear for next turn's launch (user, game 4701) | Hard beats Normal beats Easy in self-play ladders at >= 60% - Normal over Easy met (15 of 16); Hard over Normal a few points (50-62% on 42x30), ACCEPTED by the user for the first version (T5f-9) |
-| **T6 Withdrawal** ✅ COMPLETE (user, 2026-11-21: "for v1 of CPU opponents"; committed 442121f12; 10.8) | surrender, jump-out (the user's rulings of 2026-11-21 - no fleet-wide withdrawal posture in v1); ~~last-resort ramming~~ (T6d - NOT built, deferred past v1); the user's notes on game 4774 turns 3-4 (T6a); a side down to its fighters keeps shooting (T6g) | No game runs past the turn cap for lack of a decision - met by the T6 batches (10.8) |
-| **T7 Specials** (STARTED 2026-11-21, 10.9 - T7a/T7b/T7b-2 BUILT) | the readiness list in the lobby and on the server (T7a); the EA Interceptors' offensive mode (T7b, T7b-2). Since 2026-11-22 the faction-by-faction work - handlers, the weapon families new factions need, the readiness list growing - is stage T9 | T7a and T7b play-tested by the user |
-| **T8 Skirmish release** | server `FleetChecker` port + parity test; `FleetComposer` (auto-compose as the default for an empty CPU slot); level and personality pickers; lobby and games-list display of CPU seats; docs page; **a decision-time budget for live** (user, 2026-11-19: "reasonable decision time is important for live server" - section 12; the per-ship budget and two-pass judging were BROUGHT FORWARD to T5f-8 on 2026-11-20); **a HOLISTIC REVIEW of decision efficiency** (user, 2026-11-20: "in Stage 8 plan a holistic review of how we can make AI decisions as efficient as possible to keep decisions times reasonable" - the plan for it is in section 12) | Every auto-composed fleet across all ready factions and a range of point values passes the Fleet Checker; every decision within the budget on live-sized fleets, timed on the live host; Beta on live via `betaTesters`, then the flag |
+| **T6 Withdrawal** ✅ COMPLETE (user, 2026-11-21: "for v1 of CPU opponents"; committed 442121f12; 10.8) | surrender, jump-out (the user's rulings of 2026-11-21 - no fleet-wide withdrawal posture in v1); ~~last-resort ramming~~ (T6d - deferred past v1, then BUILT at T8 at the user's request, 10.11); the user's notes on game 4774 turns 3-4 (T6a); a side down to its fighters keeps shooting (T6g) | No game runs past the turn cap for lack of a decision - met by the T6 batches (10.8) |
+| **T7 Specials** (STARTED 2026-11-21, 10.9 - T7a/T7b/T7b-2 BUILT; committed by the user as 56b03b2d3) | the readiness list in the lobby and on the server (T7a); the EA Interceptors' offensive mode (T7b, T7b-2). Since 2026-11-22 the faction-by-faction work - handlers, the weapon families new factions need, the readiness list growing - is stage T9 | T7a and T7b play-tested by the user |
+| **T8 Skirmish release** (BUILT 2026-11-22, uncommitted, 10.11 - the live timing and Beta are the user's; the `FleetChecker` port re-scoped to T10 by the user) | server `FleetChecker` port + parity test; `FleetComposer` (auto-compose as the default for an empty CPU slot); level and personality pickers; lobby and games-list display of CPU seats; docs page; **a decision-time budget for live** (user, 2026-11-19: "reasonable decision time is important for live server" - section 12; the per-ship budget and two-pass judging were BROUGHT FORWARD to T5f-8 on 2026-11-20); **a HOLISTIC REVIEW of decision efficiency** (user, 2026-11-20: "in Stage 8 plan a holistic review of how we can make AI decisions as efficient as possible to keep decisions times reasonable" - the plan for it is in section 12) | Every auto-composed fleet across all ready factions and a range of point values passes the Fleet Checker; every decision within the budget on live-sized fleets, timed on the live host; Beta on live via `betaTesters`, then the flag |
 | **T9 More factions** (PLANNED 2026-11-22, 10.10 - the user, with the campaign paused) | the factions beyond EA and Raiders, group by group in the user's order: Major, League, Minor, Ancients, Custom - the gate tooling (T9a), the cross-faction enablers each group needs (E1-E8: split-shot arrays, ammunition weapons, special rounds, special hit chance, hex-targeted weapons, Pre-Firing, power models, system handlers - the section 6 registry is built with the first handler), and each faction's gate | Each faction released meets the 10.10 gate (the section 7 criteria made concrete) and is play-tested by the user before its string joins `READY_FACTIONS` |
 | **T10 Campaign wiring** (was T9 until 2026-11-22) | section 9 | A campaign battle against a Raider fleet is played manually and harvested |
 
@@ -2525,6 +2530,155 @@ E3-E8 land there); Minor 3-4; each Ancient 2-4; Custom per faction, mostly quick
 | D5 | Civilians and Streib ("Other") | When the campaign needs them (neutrals) or the user asks |
 | D6 | Ancients in v1 | None; after T9d, one at a time |
 
+### 10.11 Stage T8 - the skirmish release (started 2026-11-22) - BUILT, uncommitted, not play-tested
+
+**The user's request (2026-11-22):** "Please begin implementing Stage T8 of the Tactical AI Plan - I'd like to include the following
+other improvements in this Stage alongside the currently planned features:
+* Give CPU player cards their own neutral colour border and background colours in gamelobby page (instead of the mix of red and green
+  they have atm). Maybe one tone we use in the buyShip menu like the gunmetal etc.
+* Don't show CPU games in the 'Join Games' section of the lobby if there are no actual slots for other players. E.g. a game with its
+  creator and one AI slot currently appears in games.php screen under Join Games and it shouldn't.
+* Using the 'Save Settings' button in Create Game and reloading those settings is not remembering when a Team was selected as a CPU
+  player, it should.
+* Build ramming (T6d) stage that was previously deferred.
+* The most important part of this stage will likely be the optimisation of decision time, as the success of the CPU player project is
+  based on it being functional on a live server, which I will test myself after this stage."
+
+And later the same day: "The block to Leave Game when you've readied a fleet in gamelobby shouldn't apply when the only other
+'players' in the gamelobby are AI opponents. E.g. if I've readied but the CPU players haven't I should be able to leave the game even
+after I've readied a fleet."
+
+**The user's ruling (asked 2026-11-22) on the Fleet Checker:** the server `FleetComposer` is built TO the checker's rules and proven
+by a harness that runs the REAL client checker (`gamelobby.js checkChoices`) under node on every composed fleet across factions, points
+and in-service dates - the oracle pattern of T1b-T7. **No PHP port of the checker now**: the campaign (T10), which must check fleets
+it did not build, is where one is needed.
+
+The as-built record. The ledger (`.superpowers/sdd/TACTICAL_AI_PLAN/progress.md`) holds every sub-stage and ruling in order.
+
+#### Decision time (section 12's review - "the most important part")
+
+* **Measured first** (12, item 1): `tests/ai/decisionBench.php` - DB-free boards of live size (the live export: median side 10
+  units, 75th percentile 16), every phase and level, with `--budget=0` decision FINGERPRINTS so a speed-up is proven to choose the
+  same orders as a snapshot of HEAD; a sampling profiler (excimer, in a throwaway `fv-phpprof` image). Movement was the whole cost
+  (an EA live-size simultaneous activation: Easy ~8.8 s, Normal ~11.7 s, Hard ~15.5 s of CPU unbudgeted; Initial Orders 0.05-0.5 s;
+  Firing under 0.1 s). Of a Movement decision, `AIView::estimate` took 55% (this turn's fire, the incoming fire, the next-turn terms,
+  the flights) and `ShipMover::enumerate` 38% (its `can()` pre-checks 29% of that, `searchKey` 19%).
+* **The search** (item 3, mirror-safe): no `can()` before an `apply()` (`searchActions` filters by the allow flags; an illegal step
+  simply fails to apply); ONE search for the within-ratings and the overthrust plans - the overthrust search is seeded only from the
+  states where a rating stopped an order (and from extended-turn begins), and a seed's child is kept only when it really overthrusts;
+  `searchKey`'s thrust channels in one pass; every walk over this turn's movement rows starts at `turnStart`. Turn shortening is
+  never bought over a rating, overthrust allowance or not (the user's ruling of 2026-11-19).
+* **Judging** (item 4): a gun's fire at a target is priced ONCE PER HEX - `estimate` never depends on the shooter's facing, heading
+  or speed (checked first, on 4,752 gun / target pairs), so the arc-free figure is cached per hex and the arc applied per facing
+  (`onArc`), after a line-of-sight and range pre-check; flights the same, per hex and jinking level.
+* **The engine, result-identical:** `BaseShip::getLastMovement` / `getCoPos` / `getHexPos` / `getFacingAngle` and
+  `FighterFlight::getFacingAngle` in O(1) (`array_key_last`), `getStructureSystem` by a table (integer locations; anything else keeps
+  the walk), `AIView::rolledSections` fills its table only for a bearing two entries share.
+* **A whole turn, not one ship** (item 2): a Movement SUBMISSION has a CPU budget (`AIConfig::MOVE_SUBMISSION_SECONDS` 8), shared out
+  between the units still to decide (each `min(MOVE_DECISION_SECONDS, max(MOVE_UNIT_FLOOR_SECONDS 0.3, left / units))`); flights are
+  budgeted as well (search, coverage goals, judging). **REQUEST SLICING:** once a unit is decided and the request's wall deadline
+  (`AIConfig::BUDGET_SECONDS`) has passed, `MoveDecider` stops; `TacticalAI::play` returns 'pending' with the decided rows kept in
+  `tac_ai_state['moving']`, and the next request - any player's poll - decides the rest and submits. A live request is never held
+  for a whole activation.
+* **Guarded** (item 8): `selfPlayHarness --slice=S` (each driver run gets S seconds of wall, as a request does), `--max-decision`
+  and `--mean-target` (a game FAILS past them); `tests/ai/budgetHarness.php`.
+* **For the live host:** `AIBenchmark` + `public/aiBenchmark.php` (behind the maintenance gate, `?key=`) - one decision on a board in
+  memory, its CPU and wall time, memory, RSS and the host's limits. The user's step.
+* Not built: items 5-7 (the forecast across activations, the other phases, one gamedata load across submissions). Initial Orders and
+  Firing take well under a second and the forecast 0.01-0.12 s a ship in self-play; the live timing will show whether loading needs it.
+
+**Results** (dev box, one process, quiet, `--budget=0`, the same boards and the SAME decisions - every fingerprint identical; the one
+exception, a Brakiri Hard board where the wider overthrust search found a better extended turn, was a superset effect, kept):
+
+| Live-size simultaneous activation (10 units a side), CPU | HEAD 56b03b2d3 | T8 | | slowest ship HEAD -> T8 |
+|---|---|---|---|---|
+| EA (7 ships + flights), Normal | 13.05 s | 8.12 s | 1.61x | 3.05 -> 1.66 s |
+| EA, Hard | 17.76 s | 10.84 s | 1.64x | 4.10 -> 2.11 s |
+| Raiders (8 ships + flights), Normal | 8.36 s | 5.61 s | 1.49x | 2.00 -> 1.13 s |
+| Raiders, Hard | 12.15 s | 7.96 s | 1.53x | 2.66 -> 1.51 s |
+
+24 decision fingerprints (3 boards x 2 levels x 2 fleets x Movement and Firing) identical to HEAD.
+
+With the budget on, no submission takes more than 8 s of CPU and no request more than `BUDGET_SECONDS` of wall. Self-play with
+`--slice=0.5` (games 5847, 5848 and 5868, simultaneous): every game clean; in 5868, 18 Movement activations were finished across
+requests ("N units decided in earlier requests of this activation").
+
+#### The user's lobby extras
+
+* **CPU cards:** `.lb-slot--cpu` in gunmetal (`gameLobby.css`, from `--fv-gunmetal`), the class taken off a freed slot.
+* **Join Games:** `DBManager::getLobbyGames` leaves out a CPU game with no free slot for anyone not in it; its creator still finds it
+  there (lobby games are listed only there, as Fleet Test games are). Ruled by the implementer - cost if wrong: one condition.
+* **Save Settings:** Create Game's presets keep each slot's CPU tick and level (`readSettings`, `presetSlots`).
+* **Leave Game:** `onLeaveClicked` no longer counts CPU slots as players a readied fleet would strand.
+
+#### T6d - last-resort ramming
+
+A ship of a team the **Desperate** rule covers (`Posture::desperate`) rams when it has no usable gun or its PRIMARY structure is down to
+`AIConfig::RAM_PRIMARY_SHARE` (0.25) - Normal and Hard only (skill `ram`; Easy and the frozen 'legacy' never). `ShipDecider` scores a
+ram term (`Posture::ramValue`: the damage it deals, capped at the target's health and priced at its worth, against the return damage
+x its own worth x the danger weight) for end hexes holding an enemy SHIP whose Fire-phase hex is known (moved this turn, or never
+moves); when a ram is worth making the rammer chooses among its ramming plans only (they are always judged whole). `FireDecider` then
+orders the `RammingAttack` at the best enemy ship in its hex. Flights do not ram. Rulings (implementer): a ram only when its own trade
+is positive (the "best trade" ruling of 2026-11-16), then committed to; ram targets only where their hex is known. Proven:
+`tests/ai/ramHarness.php` (27 checks); self-play `--desperate`: in game 5849 a crippled Omega rammed on turns 8 and 9, both orders
+resolved by the server (needed 65 / 55, rolled 100 / 81).
+
+#### Levels, and CPU seats on the pages
+
+* Create Game: a level picker beside each CPU tick (Easy / Normal / Hard, hidden until the tick is set; presets and the summary carry
+  it). No personality picker - `AIConfig::PERSONALITIES` has one entry, and options nobody can take are not shown (the user's rule).
+* The lobby card reads "CPU Alpha (Hard)"; the games list tags a CPU game "vs CPU" (`Manager::getTacGames`, `AISeats::gameHasCpu`).
+
+#### Auto-compose (8.2)
+
+* **`FleetComposer::compose($faction, $points, $isd, $seed)`** reads the faction's catalogue (`static/json/<faction>.json`, what the
+  lobby's Store and checker read) and buys plain combat units: common and uncommon only, official, in service by the game's date, no
+  base / OSAT / mine / out-of-tier / custom unit, no craft needing a hangar other than a fighter's, no hull whose hangars carry a
+  minimum it would not fill (Fighter Squadrons, Mapmaker Probes), nothing `AIConfig::cpuUnitBlock` refuses; fighters in flights of six;
+  no enhancements, refits or officers. Capital ships first (one per 5,000 points from 3,000) with a jump engine among them, ships to a
+  share of the points drawn from the seed, flights until every carrier's hangars are at least half full (a carrier the points cannot
+  fill goes), the dearest that still fits, then a bounded trade-up pass while under 98% of the points. `problems()` holds the
+  checker's rules such a fleet can break; it returns the clean attempt spending most. Its own generator: a seed gives one fleet.
+* **Proven against the real checker:** `tests/ai/fleetComposerHarness.php` composes for every ready faction x 14 point values
+  (500-15,000) x 8 in-service dates x 8 seeds; `tests/ai/fleetCheckOracle.js` loads the real `gamelobby.js` (with `systems.js` and
+  `hangarShared.js`), puts each fleet in `gamedata.ships` as the lobby's own rows and runs `checkChoices`. **All 1,490 fleets the
+  composer called clean passed, with no caution** (EA 600, Raiders 890); 6 deliberately broken control fleets were all caught. 302
+  could not be composed - EA by 2180 or 2200 (no jump-engine ship in service), EA at 500-1500 points by 2215, and some seeds at 500
+  points - and are refused (nothing either faction fields is that cheap below ~450 points). Spending: 44
+  of the 1,490 under 98% of their points (EA at 750: 86.7%, the catalogue's granularity; one EA 1000 at 95.7%; three Raiders 500).
+* **The server:** `Manager::autoComposeCpuSlot` (the guards of `submitFleetForCpuSlot`; `gamedata.php`'s `autoCompose`) composes for
+  the slot's points (`AIConfig::COMPOSE_UNLIMITED_POINTS` 3500 when unlimited) and the game's In-Service Date, of the Store's open
+  faction when the creator readies the CPU slot itself and a CPU can field it (from the creator's own Ready the Store shows THEIR
+  faction, so none is named), else of one drawn from the game and slot - trying the other ready factions before it refuses, naming
+  why (the creator then buys by hand) - and commits it as the bot.
+* **The lobby:** Ready on an EMPTY CPU slot offers to auto-compose it (it used to refuse); the creator's own Ready names every CPU slot
+  still empty in its confirm and composes them after the submit (plan 8.1). A CPU slot with units bought still takes its own Ready (the
+  2026-11-13 deviation stands). Like any opponent's, an auto-composed fleet is hidden until play (A4).
+* Rulings (implementer, 2026-11-22): the creator's Ready composes EMPTY CPU slots only; the faction rule above; 3500 points for an
+  unlimited slot.
+
+#### Docs
+
+A FAQ entry, **Playing Against the CPU** (`faq.php#cpu`), worded for the Beta: setting up, what a CPU player can field, auto-compose,
+the levels, the game, leaving. Ruled by the implementer: a FAQ entry rather than a sixth DATA ARCHIVE document for a flag-gated
+feature - cost if wrong: moving the section into its own document.
+
+#### Gates (2026-11-22)
+
+ShipMover pair on the final engine (EA + raiders): 2,005,468 PHP checks, **106,817 plans agreed with `movement.js`, 0 differed**
+(22,210 overthrust plans; 1,456 jump-outs). DB-free: levels 274, withdrawal 114, hazards 14,758, fireRules 392, budget 30, ram 27 -
+all pass; manoeuvre 522 with the same 2 failures as HEAD ("D ... port thrusters dead (hard): rolls" - pre-existing, not T8's).
+`cpuLobbyHarness` all pass (with 15 auto-compose checks - a composed game starts and both CPU fleets deploy), `flagOffHarness` all
+pass, node: `lobbyAutoCompose.js` 19, `lobbyLeaveCpu.js` 7, `createGamePresetCpu.js` 10 (HEAD fails each). Replay: 239 passed, 0
+failed, 2 skipped (5641 and 5743 - the user's own test games, which need the user to re-record). Self-play: sliced and Desperate games
+clean.
+
+#### Open
+
+* The timing on the live host (`aiBenchmark.php?key=`) and the Beta via `betaTesters` - the user's.
+* Play-testing: a Desperate-rule game, an auto-composed slot, a sliced Movement on live.
+* The `FleetChecker` port - T10.
+
 ---
 
 ## 11. Testing
@@ -2608,6 +2762,8 @@ E3-E8 land there); Minor 3-4; each Ancient 2-4; Custom per faction, mostly quick
      takes on live, and whether the AI can work on one load across submissions of the same request.
   8. **Guard it:** the self-play harness's timing line gets thresholds (the slowest decision over budget, a
      level's mean over its target) that fail a run, so a regression shows in every ladder.
+  **Done at T8 (2026-11-22) - section 10.11:** items 1-4 and 8 built (a live-size Movement activation 1.5-1.6x faster with the same
+  decisions, a submission budget and request slicing); 5-7 not needed on the dev-box figures; the live-host timing is the user's.
 
 ---
 

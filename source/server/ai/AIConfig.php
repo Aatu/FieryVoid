@@ -9,7 +9,9 @@ class AIConfig
     //The feature flag (Features.php). Off = none of source/server/ai/ is reachable.
     const FLAG = 'cpuOpponent';
 
-    //Seconds one request may spend driving bots. A longer CPU turn carries on at the next poll.
+    /* Seconds (wall time) one request may spend driving bots. A longer CPU turn carries on at the next poll - since stage T8 a
+       Movement submission too: its units are decided one at a time, and once this is spent the ones decided are kept (tac_ai_state)
+       and the rest decided on the next request, always at least one a request (MoveDecider::orders, TacticalAI 'pending'). */
     const BUDGET_SECONDS = 4.0;
 
     //Hard stop on submissions in one run, whatever the clock says (the self-play harness has no clock).
@@ -56,6 +58,12 @@ class AIConfig
     const MOVE_DECISION_SECONDS = 2.5;
     const MOVE_SEARCH_SHARE = 0.6;
     const MOVE_JUDGE_SHARE = 0.9;
+    /* THE WHOLE SUBMISSION (stage T8, plan section 12 item 2 - what a player waits for is a SUBMISSION, and under simultaneous
+       movement one carries every unit of the bot's activation): its units share this much CPU time, each given what is left over
+       the units still to decide - never more than MOVE_DECISION_SECONDS, never less than MOVE_UNIT_FLOOR_SECONDS (every unit still
+       finds its plainest plans and judges at least one whole). A lone unit's activation is unchanged. The forecast is inside it. */
+    const MOVE_SUBMISSION_SECONDS = 8.0;
+    const MOVE_UNIT_FLOOR_SECONDS = 0.3;
     /* The enemy forecast (EnemyForecast, stage T5f-7) - once per Movement decision, ~0.01 s an enemy ship yet to move at Normal,
        ~0.1 s at Hard (its own plans too, each end priced). Nearest enemy first; once Hard has spent this much CPU time the rest
        get Normal's forecast. */
@@ -251,6 +259,10 @@ class AIConfig
     const PERSONALITIES = array('balanced');
     const DEFAULT_PERSONALITY = 'balanced';
 
+    /* AUTO-COMPOSE (stage T8, plan 8.2): the points an empty CPU slot's fleet is composed for when the slot's points are unlimited
+       (FleetComposer needs a figure; the lobby's default game size). */
+    const COMPOSE_UNLIMITED_POINTS = 3500;
+
     /* THE READINESS LIST (plan section 7, stage T7 - the user, 2026-11-21: "Hide Factions not cleared for CPU use in gamelobby
        Faction Picker ... just show EA and Raiders atm and add more as we tackle Stage T7 in time"). The factions a CPU player may
        field, spelt as their ship classes spell $faction. The lobby offers only these for a CPU slot (its `cpuFactions` key,
@@ -336,28 +348,30 @@ class AIConfig
                         Interceptor (free) gets fire control against fighters for the turn and loses its intercept rating; without the
                         boost its fire control is null against everything, so neither a player nor the bot can aim it
                         (PowerDecider::interceptors has the rule). Only Interceptors whose arc faces a flight are boosted (T7b-2,
-                        the user: "prioritise Interceptors likely to have arcs") */
+                        the user: "prioritise Interceptors likely to have arcs")
+         ram            last-resort ramming under the Desperate rule (T6d, built at T8 - the user's ruling of 2026-11-21: Normal and
+                        Hard, Easy never): see RAM_PRIMARY_SHARE and Posture::rammer */
     const SKILLS = array(
         'easy' => array('sectionHealth' => false, 'ccewDeterrent' => false, 'simpleEW' => true, 'focus' => 0.0, 'heavyFocus' => false,
             'pulsePremium' => false, 'shortening' => false, 'unmovedDanger' => 0.5, 'overspeed' => 0.5, 'ballisticFloor' => false,
             'flightDanger' => 0.75, 'jink' => 'max', 'manoeuvres' => 'none', 'noise' => 10.0, 'coverageGoals' => 0,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none',
-            'interceptorBoost' => false),
+            'interceptorBoost' => false, 'ram' => false),
         'normal' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 1.5, 'jink' => 'max', 'manoeuvres' => 'swap', 'noise' => 0.0, 'coverageGoals' => 4,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'turn',
-            'interceptorBoost' => false),
+            'interceptorBoost' => false, 'ram' => true),
         'hard' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 3.0, 'jink' => 'any', 'manoeuvres' => 'all', 'noise' => 0.0, 'coverageGoals' => 12,
             'pileOn' => 1.0, 'support' => 2.0, 'fleetFocus' => 0.5, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => true, 'extendedTurns' => true, 'forecast' => 'full',
-            'interceptorBoost' => true),
+            'interceptorBoost' => true, 'ram' => true),
         'legacy' => array('sectionHealth' => false, 'ccewDeterrent' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 0.75, 'jink' => 'max', 'manoeuvres' => 'swap', 'noise' => 0.0, 'coverageGoals' => 0,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none',
-            'interceptorBoost' => false)
+            'interceptorBoost' => false, 'ram' => false)
     );
 
     /* POWER MANAGEMENT (skill 'powerBoost', stage T5f-4). A gun "reaches" an enemy when, with the units as close as both could
@@ -384,6 +398,11 @@ class AIConfig
        the share asked of primary + the section facing the enemy instead, ships left with a whole primary and one section lost - a
        ship that can turn a fresh side. 0.5 was the implementer's pick; the user set 0.15 (2026-11-21, after committing T6). */
     const JUMP_DAMAGED_SHARE = 0.15;
+
+    /* LAST-RESORT RAMMING (stage T6d, built at T8 - the user's ruling of 2026-11-21): a ship of a team the Desperate rule covers rams
+       when it has no usable weapon, or its PRIMARY structure is down to this share of its boxes - Normal and Hard (skill 'ram'), only
+       at an enemy ship it can reach this turn (Posture::rammer / ramValue; ShipDecider plans into its hex, FireDecider orders the ram). */
+    const RAM_PRIMARY_SHARE = 0.25;
 
     /* A SIDE DOWN TO ITS FIGHTERS (stage T6g, the user 2026-11-21: "tone down AI fighters that stay too far away when they are the
        only unit left for the AI player, as this will frustrate players. E.g. can't go three turns without firing a shot, and maybe

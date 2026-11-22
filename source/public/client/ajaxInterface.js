@@ -364,6 +364,38 @@ window.ajaxInterface = {
         gamedata.goToWaiting();
     },
 
+    /* CPU opponent, stage T8 (TACTICAL_AI_PLAN.md 8.2): AUTO-COMPOSE the fleet of an EMPTY CPU slot - gamedata.php's autoCompose
+       route, Manager::autoComposeCpuSlot, which builds a plain Fleet Checker clean fleet and commits it as the bot. faction: the
+       Store's open faction when a CPU player can field it, else null (the server draws one). done(error): error is null on
+       success, else the server's reason. Lobby only.
+       ⚠️ No `submiting` guard, on purpose: the creator's own Ready sends this straight after submitGamedata (gamedata.
+       autoComposeCpuSlots), and ajaxWithRetry's request queue already runs the two in order - the guard would drop it (or drop it
+       behind an in-flight poll). A second press is stopped by the confirm and by the server ("already submitted"). */
+    autoComposeCpuFleet: function autoComposeCpuFleet(slotid, faction, done) {
+        ajaxInterface.showBlockingOverlay();
+
+        var gd = { turn: gamedata.turn, phase: gamedata.gamephase, activeship: gamedata.activeship, gameid: gamedata.gameid,
+            playerid: gamedata.thisplayer, slotid: slotid, status: gamedata.status, ships: '[]', autoCompose: 1 };
+        if (faction) gd.faction = faction;
+
+        ajaxInterface.ajaxWithRetry({
+            type: 'POST',
+            url: 'gamedata.php',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            data: JSON.stringify(gd),
+            timeout: 30000,
+            success: function (response) {
+                ajaxInterface.hideBlockingOverlay();
+                done((response && response.error) ? String(response.error) : null);
+            },
+            error: function (xhr, status, error) {
+                ajaxInterface.hideBlockingOverlay();
+                done(String(error || status || "The server did not answer."));
+            }
+        });
+    },
+
     submitSavedFleet: function submitSavedFleet(fleetname, isPublic, callback, opts) {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;

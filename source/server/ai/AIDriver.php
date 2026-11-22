@@ -73,11 +73,17 @@ class AIDriver
                     break;
                 }
 
-                $result = TacticalAI::play($gameid, $seat);
+                $result = TacticalAI::play($gameid, $seat, $deadline);
 
                 if ($result['status'] === 'idle') {
                     $idle[$seat['playerid']] = true;
                     continue;
+                }
+                /* Stage T8: the bot's Movement activation was too big for this request's budget - the units it decided are kept,
+                   and the next request (a waiting human's poll: the pending flag gets it past the fast-poll exit) decides the rest. */
+                if ($result['status'] === 'pending') {
+                    $pending = true;
+                    break;
                 }
                 if ($result['status'] === 'submitted') $submitted++;
 

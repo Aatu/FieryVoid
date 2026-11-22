@@ -133,6 +133,62 @@ class Posture
         return $guns;
     }
 
+    // ------------------------------------------------------------------ stage T6d: last-resort ramming
+
+    /* The ship's RammingAttack when it may and should ram this turn, else null - the user's ruling of 2026-11-21 (built at stage T8):
+       "RAM (Desperate rule teams, Normal and Hard; Easy never) when it has no usable weapon OR its primary structure is at or below
+       25% - and only at a target it can reach this turn" (the target is ShipDecider's and FireDecider's to find). The Desperate rule is
+       honour-based - nothing in the engine stops a ram - so this is the bot keeping it. A SHIP only (a ship cannot ram a fighter, and a
+       flight's ram is not built); not a base, OSAT, mine or terrain, whose ram is there "for technical purposes" (autoFireOnly). */
+    public static function rammer(AIView $view, $unit)
+    {
+        if (!$view->skill('ram')) return null;
+        if ($unit instanceof FighterFlight || !empty($unit->base) || !empty($unit->smallBase) || !empty($unit->osat) || !empty($unit->mine)) return null;
+        if ($unit->isTerrain() || $unit->isDestroyed() || $unit->isDisabled()) return null;
+        if (!self::desperate($view->gamedata, $unit->team)) return null;
+
+        $ram = null;
+        foreach ($unit->systems as $system) {
+            if ($system instanceof RammingAttack && !$system->isDestroyed() && !$system->autoFireOnly) {
+                $ram = $system;
+                break;
+            }
+        }
+        if ($ram === null) return null;
+
+        if (count(self::usableGuns($view, $unit)) == 0) return $ram;
+        $primary = $unit->getStructureSystem(0);
+        if ($primary && $primary->getRemainingHealth() <= AIConfig::RAM_PRIMARY_SHARE * (int)$primary->maxhealth) return $ram;
+        return null;
+    }
+
+    //Does the game's Desperate rule cover $team? Its value is one team, or -1 for every team (Create Game's Desperate Rules box).
+    public static function desperate(TacGamedata $gamedata, $team)
+    {
+        $rule = $gamedata->rules->getRuleByName('desperate');
+        if ($rule === null) return false;
+        $teams = (int)$rule->jsonSerialize();
+        return $teams === -1 || $teams === (int)$team;
+    }
+
+    /* What ramming $target from where $unit now stands should be worth, in value (stage T6d): the ram's own expected damage (AIView -
+       the engine's ram hit chance, the weapon's damage range) no further than what finishes the target, times what a point of it is
+       worth, less what the ram does back to $unit (the target's ramming factor, on a hit) times $unit's own worth and the danger weight.
+       0 when there is no ram to be had (a fighter, another hex, no chance). $worth: array(target health, target worth, own health,
+       own worth, danger weight). */
+    public static function ramValue(AIView $view, $unit, RammingAttack $ram, $target, array $worth)
+    {
+        if ($target instanceof FighterFlight) return 0;
+        if ($unit->getHexPos()->distanceTo($target->getHexPos()) != 0) return 0;
+        $chance = $view->chanceOf($unit, $ram, $target, false) / 100;
+        if ($chance <= 0) return 0;
+        $dealt = min($view->estimate($unit, $ram, $target, false), $worth[0]) * $worth[1];
+        $back = $target->getSystemByName('RammingAttack');
+        $factor = $back ? $back->getBaseRammingFactor() : $target->getRammingFactor();
+        $taken = min($chance * 0.625 * $factor, $worth[2]) * $worth[3] * $worth[4]; //(0.625: the mean of a ram's quarter-to-whole factor, as its damage range)
+        return $dealt - $taken;
+    }
+
     // ------------------------------------------------------------------ stage T6g: a side down to its fighters
 
     /* The flights that must get a shot off this turn (AIConfig::FLIGHT_MAX_IDLE_TURNS): unit id => true. TacticalAI::play sets it

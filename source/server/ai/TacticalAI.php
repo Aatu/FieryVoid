@@ -28,8 +28,10 @@ class TacticalAI
          'idle'         nothing owed (not its turn, already submitted, game not running)
          'submitted'    one submission accepted
          'rejected'     the server refused the submission; logged, and counted towards the stall guard
-         'surrendered'  the stall guard gave the seat up */
-    public static function play($gameid, array $seat)
+         'surrendered'  the stall guard gave the seat up
+         'pending'      stage T8: a Movement submission not finished by $deadline (a microtime(), null = none) - the units decided
+                        so far are kept in tac_ai_state and the next play() of the same activation decides the rest and submits */
+    public static function play($gameid, array $seat, $deadline = null)
     {
         $gameid = (int)$gameid;
         $botId = (int)$seat['playerid'];
@@ -98,8 +100,17 @@ class TacticalAI
                     }
                 }
                 else if ($phase == 2) {
-                    $entries = MoveDecider::orders($gamedata, $botId, $seat);
+                    /* Stage T8: an activation too big for one request is decided over several - the units an earlier request of this
+                       same activation decided are handed back; when this request's time runs out first, the ones decided are kept and
+                       nothing is submitted ('pending': the driver stops, and the next request carries on). */
+                    $resume = (isset($state['moving']['at']) && $state['moving']['at'] === $at && is_array($state['moving']['rows'])) ? $state['moving']['rows'] : array();
+                    $entries = MoveDecider::orders($gamedata, $botId, $seat, $resume, $deadline);
                     $summary = MoveDecider::$lastSummary; //null unless a flight was moved
+                    if (count(MoveDecider::$pending) > 0) {
+                        $state['moving'] = array('at' => $at, 'rows' => MoveDecider::$decided);
+                        $db->setAiState($gameid, $botId, $turn, $state);
+                        return self::result('pending');
+                    }
                 }
                 else if ($phase == 3) {
                     $entries = FireDecider::orders($gamedata, $botId, $seat);
@@ -121,8 +132,8 @@ class TacticalAI
 
         if ($error === null) {
             if ($summary !== null) $db->aiLog($gameid, $botId, $turn, $phase, 'decision', $summary, AIConfig::LOG_CAP);
-            if ($refusals > 0 || $posture !== null || $shots != $shotsBefore) {
-                unset($state['stall']);
+            if ($refusals > 0 || $posture !== null || $shots != $shotsBefore || isset($state['moving'])) {
+                unset($state['stall'], $state['moving']); //(stage T8: a Movement activation decided over several requests is in)
                 if ($posture !== null) $state['posture'] = $posture;
                 $state['shots'] = $shots;
                 $db->setAiState($gameid, $botId, $turn, $state);
@@ -131,6 +142,7 @@ class TacticalAI
         }
 
         $state['stall'] = array('at' => $at, 'n' => $refusals + 1);
+        unset($state['moving']); //the retry plays the fallback, from scratch
         $db->setAiState($gameid, $botId, $turn, $state);
         $db->aiLog($gameid, $botId, $turn, $phase, 'defect', 'Submission refused: ' . $error, AIConfig::LOG_CAP);
 

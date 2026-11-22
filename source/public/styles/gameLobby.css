@@ -369,6 +369,26 @@
   border-color: var(--greenBorder);
 }
 
+/* A CPU player's slot (TACTICAL_AI_PLAN.md stage T8 - the user, 2026-11-22: "their own neutral colour border and background
+   colours ... instead of the mix of red and green they have atm", in the buy dialog's gunmetal). Steel whatever its team and
+   whether the creator has it selected or not: the team's rail beside it still says whose side it is on, and the selected
+   slot's green border over a red team tint was the clash. */
+.lb-slot.lb-slot--cpu {
+  background: color-mix(in srgb, var(--fv-gunmetal) 12%, #081420);
+  border: 1px solid rgba(142, 154, 166, 0.55);
+}
+
+.lb-slot.lb-slot--cpu.selected {
+  background: color-mix(in srgb, var(--fv-gunmetal) 22%, #081420);
+  border: 2px solid var(--fv-gunmetal);
+}
+
+/* ...and its level after its name (gamelobby.js createSlots): quieter than the name. */
+.lb-slot .lb-slot-cpu-level {
+  font-weight: 400;
+  color: var(--fv-text-dim);
+}
+
 .lb-slot span {
   padding-right: 0;
 }

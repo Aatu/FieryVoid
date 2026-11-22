@@ -229,6 +229,30 @@ class FireDecider
             }
         }
 
+        /* Stage T6d (built at T8): LAST-RESORT RAMMING - a ship Posture::rammer lets ram (the Desperate rule; no usable weapon, or its
+           primary down to RAM_PRIMARY_SHARE) rams the enemy SHIP in its own hex it does most to (Posture::ramValue: the ram's damage
+           against what comes back), when that is worth anything. Its guns have fired above as any ship's do. */
+        $rams = 0;
+        foreach ($view->myUnits() as $unit) {
+            $ram = Posture::rammer($view, $unit);
+            if ($ram === null) continue;
+            $worth = $view->value($unit) / $view->healthLeft($unit);
+            $best = null;
+            foreach ($enemies as $enemy) {
+                if ($enemy instanceof FighterFlight || !empty($enemy->mine) || $enemy->isTerrain()) continue;
+                $value = Posture::ramValue($view, $unit, $ram, $enemy, array($state[$enemy->id]['health'], $state[$enemy->id]['value'] / $state[$enemy->id]['health'],
+                    $view->healthLeft($unit), $worth, (float)$view->skill('shipDanger')));
+                if ($value > 0 && ($best === null || $value > $best[1])) $best = array($enemy, $value);
+            }
+            if ($best === null) continue;
+            $plan[] = array(
+                'unit' => $unit, 'weapon' => $ram, 'fighter' => null, 'target' => $best[0],
+                'mode' => 1, 'chance' => (int)round($view->chanceOf($unit, $ram, $best[0], false)), 'orders' => 1, 'shots' => 1,
+                'damageclass' => strtolower((string)$ram->weaponClass), 'damage' => $best[1], 'score' => $best[1]
+            );
+            $rams++;
+        }
+
         //each weapon back in the mode its order is in: the volleys were valued with every candidate in turn
         foreach ($plan as $shot) {
             if ((int)$shot['weapon']->firingMode !== (int)$shot['mode']) $shot['weapon']->changeFiringMode((int)$shot['mode']);
@@ -243,7 +267,8 @@ class FireDecider
         self::$lastSummary = count($plan) . ' weapons at ' . count($targets) . ' of ' . count($enemies) . ' enemies; ' . $held . ' held to intercept'
             . ($kept > 0 ? '; ' . $kept . ' slow weapons kept for a better shot' : '')
             . ($intercepted > 0 ? '; ' . $intercepted . ' slow weapons not fired into the interceptors' : '')
-            . ($forced > 0 ? '; ' . $forced . ' fired by flights that must fire (the side down to its fighters)' : '');
+            . ($forced > 0 ? '; ' . $forced . ' fired by flights that must fire (the side down to its fighters)' : '')
+            . ($rams > 0 ? '; ' . $rams . ' RAMMING (last resort, Desperate rule)' : '');
 
         return $plan;
     }

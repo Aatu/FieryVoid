@@ -43,6 +43,7 @@ class AIView
     private $sent = array();      //cache: weapon object id => array(its public properties, its payload or null)
     private $mountOrder = array(); //cache: unit id => weapon object id => place in mounts()
     private $worst = array();     //cache: unit id => worstExposure()
+    private $overlaps = array();  //cache (stage T8): unit id => whole bearing => do 2+ entries of its hit table hold it ('locations': the table)
 
     //Where TacGamedata::hideStealthShipMovement puts a unit this viewer may not see.
     const HIDDEN_Q = -10000;
@@ -590,6 +591,10 @@ class AIView
 
         $valid = array();
         $bearing = $this->launchBearing($weapon, $shooter, $target, $order);
+        /* Stage T8: a whole-degree bearing that only one entry of the table holds is never rolled for - known without filling the
+           table (asked for every hit chance the bot prices; the arcs of a unit's table do not change in a decision). */
+        //(the bearing as it is - 360 included, which the engine gives for dead ahead and which isInArc need not read as 0)
+        if ((float)$bearing == floor((float)$bearing) && $bearing >= 0 && $bearing <= 360 && !$this->overlapAt($target, (int)$bearing)) return array();
         foreach ($target->getLocations() as $loc) {
             if (Mathlib::isInArc($bearing, $loc['min'], $loc['max'])) $valid[] = $loc;
         }
@@ -604,6 +609,22 @@ class AIView
             if ($structure->getRemainingHealth() - $expected > 0) $live[] = $loc;
         }
         return $live;
+    }
+
+    /* Do two or more entries of $target's hit table hold this whole bearing (Mathlib::isInArc, the test rolledSections makes)? Only
+       around a line between two sections. Remembered per unit and bearing for the view (the arcs of a table do not change in it). */
+    private function overlapAt($target, $bearing)
+    {
+        $id = (int)$target->id;
+        if (!isset($this->overlaps[$id][$bearing])) {
+            if (!isset($this->overlaps[$id])) $this->overlaps[$id] = array('locations' => $target->getLocations());
+            $holding = 0;
+            foreach ($this->overlaps[$id]['locations'] as $loc) {
+                if (Mathlib::isInArc($bearing, $loc['min'], $loc['max'])) $holding++;
+            }
+            $this->overlaps[$id][$bearing] = ($holding >= 2);
+        }
+        return $this->overlaps[$id][$bearing];
     }
 
     //The bearing the engine picks a section by: the shooter's, or a ballistic's launch hex's.
