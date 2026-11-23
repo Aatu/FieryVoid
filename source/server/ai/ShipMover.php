@@ -1019,8 +1019,31 @@ class ShipMover
     {
         return array_merge($this->state(), array(
             'actions' => $this->actions(), 'extras' => $this->extras(), 'rows' => $this->rows(), 'path' => $this->path(),
-            'thrustLeft' => $this->thrustLeft(), 'turnDelay' => $this->turnDelay(), 'overthrust' => $this->overthrust()
+            'thrustLeft' => $this->thrustLeft(), 'turnDelay' => $this->turnDelay(), 'overthrust' => $this->overthrust(),
+            'extendedPayable' => $this->extendedPayableNextTurn()
         ));
+    }
+
+    /* Stage T9 (the Hard extended-turn loop found at M8 - self-play 6149: an Omega with two thrusters lost began a left extended turn every
+       turn from 10 to 35 and cancelled it for 'thrusters' the next, its facing stuck). Would the extended turn these orders BEGIN be
+       completed first thing next turn - or would the page cancel it? The page's own test at activation (forcedExtendedCancel ->
+       extendedCancelReason: the engine shorted since, then the owed remainder put on the thrusters that must pay each role - the side role
+       on the side the turn needs - and paid greedily within the page's ceiling, criticals included, then the engine's total), asked of a
+       copy of this mover moved on to next turn: no thrust spent yet, the engine without this turn's boost (thrustNextTurn), the thrusters as
+       they stand. Until then ShipDecider compared the remainder with the engine's TOTAL alone, which a lost side thruster never fails.
+       A judgement aid, as turnPayableNextTurn: next turn's forced pivot (doForcedPivot, before the cancel) is not played. True when no
+       extended turn is begun. */
+    public function extendedPayableNextTurn()
+    {
+        if ($this->flight || $this->extendedStart() === null) return true;
+        $next = clone $this;
+        $next->turn = $this->turn + 1;
+        $next->turnStart = count($next->rows);
+        $next->engineThrust = $this->thrustNextTurn();
+        $next->engineBoost = 0;
+        $next->owedMemo = false;
+        foreach (array_keys($next->carried) as $id) $next->carried[$id] = 0;
+        return $next->extendedCancelReason() === null;
     }
 
     /* Could the ship pay for a turn to that side NEXT turn, at $speed, from the attitude the plotted orders leave it in -

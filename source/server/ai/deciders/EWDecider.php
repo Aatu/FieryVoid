@@ -605,7 +605,7 @@ class EWDecider
         }
         /* (Stage T9, M8) the ship's torpedo launchers: each its volley at the one enemy it does most to, launched now - the arc as the ship
            stands, the launch is before Movement (AIView::torpedoEstimate). Not weighted by who moves first: a torpedo follows its target. */
-        foreach ($state['launchers'] as $weapon) {
+        foreach (isset($state['launchers']) ? $state['launchers'] : array() as $weapon) {
             $best = 0;
             foreach ($state['enemies'] as $enemy) {
                 $oew = isset($alloc['OEW'][(int)$enemy->id]) ? $alloc['OEW'][(int)$enemy->id] : 0;

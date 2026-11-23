@@ -182,8 +182,8 @@ class BallisticDecider
            while the one added keeps the floor;
          - Hard (2): a torpedo at a time at whichever unit it adds most to, up to two units - so a second unit is opened only where a
            torpedo there is worth more than one more at the first.
-       Limits: what the launcher holds; AIConfig::TORPEDO_SHIP_VOLLEY at ships, the level's torpedoFlightVolley at a flight and never more
-       than its craft (AIView::torpedoCap). $volleys / $state: plan()'s - the salvos' entries and booked damage, brought up to date.
+       Limits: what the launcher holds; AIConfig::TORPEDO_SHIP_VOLLEY at ships, the level's torpedoFlightVolley at a flight - and no launcher more
+       than the flight's live craft (AIView::torpedoCap; the user, 2026-11-23: each launcher on its own - launchers do not work together). $volleys / $state: plan()'s - the salvos' entries and booked damage, brought up to date.
        Returns plan rows, one per launcher and unit ('orders' = its torpedoes there, one shot each, as the page's clicks make them). */
     private static function torpedoes(AIView $view, InterceptModel $model, array $launchers, array $enemies, array &$volleys, array &$state, $maxThreat)
     {

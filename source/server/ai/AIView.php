@@ -384,7 +384,8 @@ class AIView
     /* How many torpedoes of a launcher holding $held the bot sends at $target in a turn, at most (the user's ruling, 2026-11-23: "2-3
        torpedoes at one or two ships, or 3-6 at a fighter flight ... Easy and Normal may simply fire 1-3 a turn at one target, Hard can
        consider splitting a bit more"): AIConfig::TORPEDO_SHIP_VOLLEY at ships, the level's 'torpedoFlightVolley' at a flight - and no
-       more than the flight has craft left (each torpedo meets a fighter of its own). */
+       more than the flight has craft left (each torpedo meets a fighter of its own) - per launcher (the user, 2026-11-23: "launchers shouldn't
+       work together. As long as each individual launcher doesn't launch more torpedoes than a fighter flights has that's fine"). */
     public function torpedoCap($target, $held)
     {
         if ($target instanceof FighterFlight) {

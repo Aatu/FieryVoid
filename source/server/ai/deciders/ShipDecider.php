@@ -253,9 +253,11 @@ class ShipDecider
        to MOVE_OVERTHRUST points over a rating - the end states only an overthrust reaches (stage T5b; the
        user's ruling of 2026-11-13: within ratings first, over them only where that is worth the critical
        it invites, which judge() prices). Turns are tried shortened too (allowShortening) - at a level with the skill.
-       Stage T5f-5 ($extended, Hard's skill 'extendedTurns'): plans that BEGIN an extended turn too - but never one leaving owed
-       more than next turn's engine can pay (thrustNextTurn): the page would cancel it for want of thrust, the thrust paid lost, and
-       the server's tripwire log it as a cancellation nothing forced (EXTENDED_TURNS_PLAN.md D12).
+       Stage T5f-5 ($extended, Hard's skill 'extendedTurns'): plans that BEGIN an extended turn too - but never one the page would
+       cancel next turn (the thrust paid lost, and the server's tripwire logging a cancellation nothing forced - EXTENDED_TURNS_PLAN.md
+       D12): since stage T9 the page's own completion test, asked of next turn (ShipMover::extendedPayableNextTurn - the remainder on
+       the thrusters that must pay it); until then only the engine's total (thrustNextTurn), which let a ship with a side thruster
+       lost begin and cancel the same turn every turn (self-play 6149, turns 10-35).
        Stage T5f-8: the search stops at $deadline (AIConfig::cpuSeconds) with the plainest plans found so far, and sets $cut. */
     private static function candidates(ShipMover $mover, $shorten = true, $extended = false, $deadline = null, &$cut = false)
     {
@@ -265,14 +267,8 @@ class ShipDecider
         $carried = function (ShipMover $m) use ($now, $extended) {
             return $m->allowRolls($now['rolling'])->allowPivots($now['pivoting'] !== 'no')->allowExtendedTurns($extended);
         };
-        $payable = function (array $plan) use ($mover) {
-            if ($plan['extending'] === 'no') return true;
-            foreach ($plan['rows'] as $row) {
-                if ($row['type'] !== ShipMover::EXTEND_LEFT && $row['type'] !== ShipMover::EXTEND_RIGHT) continue;
-                $owed = json_decode((string)$row['value'], true);
-                return is_array($owed) && (int)$owed['any'] + (int)$owed['rear'] + (int)$owed['side'] <= $mover->thrustNextTurn();
-            }
-            return false;
+        $payable = function (array $plan) {
+            return $plan['extending'] === 'no' || !empty($plan['extendedPayable']);
         };
 
         $plans = array();
