@@ -778,9 +778,14 @@ body {
    The 7px radius is kept ROUNDED on purpose while the rest of the screen goes square
    at Stage 4: tooltips are transient and float over the map rather than docking to
    chrome, and both stacks already agreed on 7px. Retune --fv-radius-tooltip if that
-   judgement changes. */
-#shipNameContainer,
-.shipNameContainer {
+   judgement changes.
+
+   ⚠️ SPLIT 2026-11-10 (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 2): `.shipNameContainer` - the jQuery
+   ShipTooltip - is now the square, opaque SHIP CARD, and its frame lives in shipTooltip.css
+   (`.shipNameContainer.fv-shipcard`). D7 ended the 7px exception for that surface ONLY:
+   common/Tooltip.js keeps its corners. What is left here is the static #shipNameContainer div in
+   game.php, which no script reads (it looks dead; left alone, plan §13). */
+#shipNameContainer {
 
     z-index: 7001;
     position: absolute;
@@ -809,13 +814,11 @@ body {
     display: none;
 }
 
-#shipNameContainer span,
-.shipNameContainer span {
+#shipNameContainer span {
     padding-top: 2px;
 }
 
-#shipNameContainer .name,
-.shipNameContainer .name {
+#shipNameContainer .name {
     font-size: 16px;
     font-style: normal;
 
@@ -1525,13 +1528,41 @@ body {
 
 /* ─── Mine Deployment Mode ─────────────────────────────────────────────────── */
 
-/* Deploy Mines button — sits at the bottom of #iniGui panel content */
-#mineDeployBtn {
+/* The drawer's button footer (gamedata.drawIniGUI): Deploy Minefield, Auto-Deploy and Manage
+   Reinforcements. STICKY to the bottom of #iniGui, so a long initiative list scrolls behind it
+   and the buttons never need scrolling to. It covers the drawer's own 10px bottom padding as
+   well (bottom: -10px with a matching negative margin and padding of its own) - a sticky box
+   stops at the CONTENT edge, and at bottom: 0 the list showed through that last strip.
+   Its fill is the drawer's, on a solid base so rows do not show through.
+   Kept compact (user request 2026-11-13): 6px above the first button, 6px below the last. */
+#iniGuiActions {
+    position: sticky;
+    bottom: -10px;
+    z-index: 1;
+    margin: 6px 0 -10px;
+    padding: 0 0 6px;
+    background: linear-gradient(var(--fv-chrome-scs), var(--fv-chrome-scs)), #04161c;
+}
+
+/* The hairline over the footer. As wide as the initiative list above it (#iniTable, 95%) and no
+   wider: a border on the footer itself ran the drawer's full width, past the list's edge and up
+   against the scrollbar. */
+#iniGuiActions::before {
+    content: "";
+    display: block;
+    width: 95%;
+    margin: 0 auto;
+    border-top: 1px solid var(--fv-line-scs);
+}
+
+/* Deploy Mines button — sits in the #iniGuiActions footer at the bottom of #iniGui */
+#mineDeployBtn,
+#autoDeployBtn {
     display: block;
     width: 90%;
     box-sizing: border-box;
-    margin: 10px auto 0px;
-    padding: 6px 10px;
+    margin: 6px auto 0px;
+    padding: 3px 10px;
     background: #3793c82a;
     /* Border only, as with the other in-panel buttons: it sits inside the converted ini
        drawer, so a teal outline would read as a miss. Its translucent blue fill and 5px
@@ -1549,10 +1580,24 @@ body {
     opacity: 0.9;
 }
 
-#mineDeployBtn:hover {
+#mineDeployBtn:hover,
+#autoDeployBtn:hover {
     background: #133e56;
     border-color: #5a9abf;
     color: #deebff;
+}
+
+/* Auto-Deploy wears the "your own fleet" green (--fv-own, the colour of the player's own
+   deployment zone), so it cannot be taken for Deploy Minefield's blue when both are shown
+   (user request 2026-11-13). Quieter than the minefield button's bright ACTIVE green below. */
+#autoDeployBtn {
+    background: color-mix(in srgb, var(--fv-own) 16%, transparent);
+    border-color: color-mix(in srgb, var(--fv-own) 55%, transparent);
+}
+
+#autoDeployBtn:hover {
+    background: color-mix(in srgb, var(--fv-own) 32%, #04161c);
+    border-color: var(--fv-own);
 }
 
 #mineDeployBtn.active {
@@ -1574,7 +1619,8 @@ body {
 }
 
 /* ── Confirm dialog ─────────────────────────────────────────────────────────── */
-#mineDeployDialog {
+#mineDeployDialog,
+#autoDeployDialog {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -1735,7 +1781,8 @@ body {
 }
 
 /* Brief toast notification */
-#mineDeployToast {
+#mineDeployToast,
+#autoDeployToast {
     position: fixed;
     bottom: 200px;
     left: 50%;
@@ -1750,6 +1797,42 @@ body {
     padding: 8px 18px;
     pointer-events: none;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
+}
+
+/* Auto-Deploy panel (client/renderer/phaseStrategy/AutoDeploy.js): the minefield dialog's look,
+   plus its one tick box. */
+.auto-deploy-check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 10px 0 4px;
+    font-size: 13px;
+    color: #b8d8ee;
+    cursor: pointer;
+}
+
+#autoDeployDialog .mine-deploy-sub {
+    max-width: 300px;
+    margin: 3px auto 10px;
+}
+
+#autoDeployDialog .mine-deploy-actions {
+    gap: 10px;
+}
+
+#autoDeployDialog .mine-deploy-btn {
+    min-width: 84px;
+}
+
+/* Shuffle: the panel's blue, so it is not mistaken for the green Deploy beside it. */
+#autoDeployDialog #autoDeployShuffle {
+    background: #1d4a66;
+    border-color: #5a9abf;
+}
+
+#autoDeployDialog #autoDeployShuffle:hover {
+    background: #27628a;
 }
 
 .intercept-tooltip {
@@ -1853,8 +1936,8 @@ body {
     display: block;
     width: 90%;
     box-sizing: border-box;
-    margin: 10px auto 0px;
-    padding: 6px 10px;
+    margin: 6px auto 0px;
+    padding: 3px 10px;
     background: #3793c82a;
     border: 1px solid var(--fv-line-scs);
     border-radius: 5px;

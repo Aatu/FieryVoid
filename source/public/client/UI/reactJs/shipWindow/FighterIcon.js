@@ -355,6 +355,17 @@ class FighterIcon extends React.Component {
         //own team only: officers.listFor is empty for anybody else's flight (D4)
         const officerState = window.officers ? officers.postState(ship, fighter.id) : null;
 
+        /* The bar's crits: this craft's own, plus - for every OTHER craft still flying - the whole flight's, which the
+           server parks on the first craft (shipManager.criticals.getFlightCriticals). They affect every craft, so
+           every craft's bar says so, not the first one's alone (user request 2026-11-16). The first craft already
+           carries them as its own; a craft that has left the flight is not affected. Cyan, as before, when the only
+           effect is LaunchedThisTurn - which is also parked on the first craft, so now the whole flight goes cyan. */
+        const ownCrits = shipManager.criticals.getAllCriticals(fighter);
+        const flightCrits = (!destroyed && ship.flight && !shipManager.criticals.isSampleCraft(ship, fighter))
+            ? shipManager.criticals.getFlightCriticals(ship) : [];
+        const barCrits = ownCrits.concat(flightCrits);
+        const barBenign = barCrits.length > 0 && barCrits.every(crit => crit.phpclass === 'LaunchedThisTurn');
+
         return (
             <FighterIconContainer $docked={docked} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut.bind(this)} onTouchStart={this.onFighterTouchStart.bind(this)} onTouchMove={this.onFighterTouchMove.bind(this)} onTouchEnd={this.onFighterTouchEnd.bind(this)} onTouchCancel={this.onFighterTouchCancel.bind(this)}>
                 <FadedContent $destroyed={destroyed} $img={window.AssetManager.getSmartImagePath(fighter.iconPath)}>
@@ -362,8 +373,8 @@ class FighterIcon extends React.Component {
                     <ContainerSystems>{toIcons(ship, fighter, getAftSystems(fighter), destroyed)}</ContainerSystems>
                     <HealthBar
                         $health={barHealth}
-                        $criticals={hasCriticals(fighter)}
-                        $criticalsBenign={hasOnlyLaunchedThisTurn(fighter)}
+                        $criticals={barCrits.length > 0}
+                        $criticalsBenign={barBenign}
                         $docked={docked}
                         $clickable={preBattle}
                         title={preBattle ? "Apply pre-battle damage to this flight" : undefined}
@@ -378,13 +389,6 @@ class FighterIcon extends React.Component {
 
 }
 const getStructureLeft = (ship, system) => (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100;
-
-const hasCriticals = (system) => shipManager.criticals.hasCriticals(system)
-
-//Colour the healthbar cyan rather than orange when LaunchedThisTurn (a benign
-//-50 init penalty for having just launched) is the only critical on the fighter.
-//Includes forInfo criticals to match hasCriticals above, which drives the orange.
-const hasOnlyLaunchedThisTurn = (fighter) => shipManager.criticals.hasOnlyCritical(fighter, 'LaunchedThisTurn', false)
 
 const getWeapons = fighter => fighter.systems.filter(system => system.weapon);
 

@@ -429,11 +429,23 @@ var TrekLightDisruptor = function TrekLightDisruptor(json, ship) {
 TrekLightDisruptor.prototype = Object.create(Weapon.prototype);
 TrekLightDisruptor.prototype.constructor = TrekLightDisruptor;
 
+var TrekEarlyLightDisruptor = function TrekEarlyLightDisruptor(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekEarlyLightDisruptor.prototype = Object.create(Weapon.prototype);
+TrekEarlyLightDisruptor.prototype.constructor = TrekEarlyLightDisruptor;
+
 var TrekMedDisruptor = function TrekMedDisruptor(json, ship) {
     Weapon.call(this, json, ship);
 };
 TrekMedDisruptor.prototype = Object.create(Weapon.prototype);
 TrekMedDisruptor.prototype.constructor = TrekMedDisruptor;
+
+var TrekEarlyMedDisruptor = function TrekEarlyMedDisruptor(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekEarlyMedDisruptor.prototype = Object.create(Weapon.prototype);
+TrekEarlyMedDisruptor.prototype.constructor = TrekEarlyMedDisruptor;
 
 var TrekDisruptorCannon = function TrekDisruptorCannon(json, ship) {
     Weapon.call(this, json, ship);
@@ -764,5 +776,54 @@ TrekPhotonTorpMultiKelly.prototype.doMultipleFireOrders = function (shooter, tar
 
 TrekPhotonTorpMultiKelly.prototype.checkFinished = function () {
 	if(this.fireOrders.length == this.turnsloaded) return true; 
+    return false;
+};
+
+var MicroJumpSystemKelly = function MicroJumpSystemKelly(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MicroJumpSystemKelly.prototype = Object.create(Weapon.prototype);
+MicroJumpSystemKelly.prototype.constructor = MicroJumpSystemKelly;
+
+MicroJumpSystemKelly.prototype.isPosOnSpecialArc = function (shooter, target) {
+    var shooterPos = shipManager.getShipPosition(shooter);
+    var targetCompassHeading = mathlib.getCompassHeadingOfPoint(shooterPos, target);
+    var shooterFacing = shipManager.getShipHeadingAngle(shooter);
+
+    if (Object.values(gamedata.blockedHexes).some(h => h.q === target.q && h.r === target.r)) {
+        var html = "You cannot Warp Jump onto Terrain!";
+        confirm.warning(html);
+        return false;
+
+    }
+
+    const hexDirections = [0, 60, 120, 180, 240, 300];
+
+    function isInArc(angle, start, end) {
+        if (start <= end) {
+            return angle >= start && angle <= end;
+        } else {
+            // arc wraps around 0
+            return angle >= start || angle <= end;
+        }
+    }
+
+    //No roll flipping, as side direction are symmetrical :)    
+    const validDirections = hexDirections.filter(dir =>
+        isInArc(dir, this.startArc, this.endArc)
+    );
+
+    const tolerance = 0.5; // degrees
+
+    for (let dir of validDirections) {
+        let absoluteDir = mathlib.addToDirection(dir, shooterFacing);
+        let delta = Math.abs(targetCompassHeading - absoluteDir);
+        delta = delta > 180 ? 360 - delta : delta;
+
+        if (delta <= tolerance) {
+            return true;
+        }
+    }
+
     return false;
 };

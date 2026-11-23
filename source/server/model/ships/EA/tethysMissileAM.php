@@ -70,7 +70,7 @@ class TethysMissileAM extends MediumShip{
 		
 		$this->hitChart = array(
                 0=> array(
-                        9 => "Thruster",
+                        8 => "Thruster",
                         11 => "Scanner",
                         14 => "Engine",
                         16 => "Hangar",

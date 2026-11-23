@@ -189,7 +189,20 @@ var Weapon = function Weapon(json, ship) {
 	if (this.rangeArray === undefined) this.rangeArray = [];
 	if (this.rangePenaltyArray === undefined) this.rangePenaltyArray = [];
 	if (this.minDamageArray === undefined) this.minDamageArray = [];
-	if (this.maxDamageArray === undefined) this.maxDamageArray = [];	
+	if (this.maxDamageArray === undefined) this.maxDamageArray = [];
+
+	/* A weapon fed from an Ammunition Magazine (checkAmmoMagazine: AmmoMissileRackS and its kin, a
+	   fighter's rack, the direct-fire ammunition weapons) has the rounds in that magazine for firing
+	   modes, and the server sends their per-mode arrays from the LIVE magazine - but the current mode's
+	   own figures (range, distance range, fire control, damage...) only after a critical
+	   (Weapon::stripForJson), so they came from the static BLUEPRINT's first round. Whenever the live
+	   first round was another (a fighter that bought Heavy or LongRange missiles, which come before
+	   Dogfight), the page aimed it with the wrong range until the player cycled the mode: a Heavy
+	   missile launchable out to 8 hexes instead of 5, a LongRange one refused beyond 8 instead of 15.
+	   Deriving the figures from the arrays here is exactly what a mode change does. Found by
+	   tests/ai/fireOracle.js (TACTICAL_AI_PLAN.md 10.6, 2026-11-15). Every weapon has its own copy of
+	   `data` by now (SystemFactory.createSystemFromJson), so the tooltip lines it rewrites stay its own. */
+	if (this.checkAmmoMagazine && this.firingModes && this.data) this.updateFiringModeData();
 
 };
 

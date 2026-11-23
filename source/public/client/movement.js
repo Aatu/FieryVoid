@@ -319,6 +319,10 @@ shipManager.movement = {
         for (var i in ship.movement) {
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn || movement.type != "speedchange") continue;
+            //Only a speed change the PLAYER ordered can be taken back. Engine Shorted's involuntary one (Movement::doStuckEngine) is a
+            //PRETURN row whose value is the whole speed gained, not 0 / 1 - it matched the test below for either arrow, so a click
+            //removed the ship's last row (that very row, when it was the only one) instead of changing speed with a second engine.
+            if (movement.preturn || movement.forced) continue;
             if (movement.value != accel && movement.heading == curheading || movement.value == accel && movement.heading != curheading) {
                 // adjust the current turn delay if the new speed changes the turn delay
                 var oldspeed = shipManager.movement.getSpeed(ship);
@@ -2803,6 +2807,10 @@ shipManager.movement = {
         for (var i in ship.movement) {
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn) continue;
+            //Engine Shorted's involuntary acceleration (Movement::doStuckEngine - the only PRETURN speedchange) is paid by the
+            //shorted engine, which is offline and so added nothing to rem above. Charging it here took it out of the thrust of
+            //any OTHER engine on the hull (and showed a lone engine as negative). The thrusters still count it as channelled.
+            if (movement.preturn && movement.type === "speedchange") continue;
 
             for (var a in movement.assignedThrust) {
                 rem -= movement.assignedThrust[a];

@@ -1,8 +1,54 @@
 import * as React from "react";
 import styled from "styled-components"
-import { Header, Entry, OfficerHeading, OfficerEntry, OfficerName } from './SystemInfo';
+import { Header, Entry, OfficerHeading, OfficerEntry, OfficerName, critLines, sensorDownObPenalty } from './SystemInfo';
 import theme from "../styled/theme";
 import buildHitChart from "../helpers/buildHitChart";
+
+/* A flight's critical effects (user request 2026-11-16) - headings in the orange the fighter card's bar turns for them
+   (theme healthCrit, as the system card's crit rows); the count and the "until" as the system card prints them.
+   ⚠️ NOT styled(Header): SystemInfo imports THIS file, so in the real bundle SystemInfo's exports are still undefined
+   while this module's top level runs, and styled(undefined) throws at load - taking window.UIManager with it.
+   Header's own shape (11px bold span) is restated here instead; imports from ./SystemInfo are read at RENDER only. */
+const CritHeading = styled.span`
+    font-size: 11px;
+    font-weight: bold;
+    color: ${theme.colors.healthCrit};
+`;
+
+const CritCount = styled.span`
+    color: ${theme.colors.healthCrit};
+    font-weight: bold;
+`;
+
+const CritUntil = styled.span`
+    color: ${theme.colors.textDim};
+`;
+
+/* On the hover of ONE craft's card (`craft`, from FighterIcon): the effects on the whole flight - parked on its first
+   craft, where the server reads them (shipManager.criticals.getFlightCriticals) - and this craft's own, its
+   subsystems' included (a magazine's MissileLost). The card's overlays already say when a craft has left the flight
+   or is cut off, so those markers are not repeated. critLines is the system card's, so both use the same words. */
+const fighterCritLines = (ship, craft) => {
+	const criticals = shipManager.criticals;
+	const notState = crit => !criticals.isCraftStateCritical(crit);
+	const sample = criticals.getSampleCraft(ship);
+	const flight = sample ? critLines(sample, notState) : [];
+	const own = criticals.isSampleCraft(ship, craft) ? [] : critLines(craft, notState);
+	const subsystems = Array.isArray(craft.systems) ? craft.systems : Object.values(craft.systems || {});
+	subsystems.forEach(sub => {
+		if (!sub) return;
+		critLines(sub).forEach(line => own.push(Object.assign({}, line, { key: sub.id + '-' + line.key, system: sub.displayName })));
+	});
+	return { flight, own };
+};
+
+const critLineText = line => (
+	<React.Fragment>
+		{line.count > 1 && <CritCount>{'×' + line.count + ' '}</CritCount>}
+		{line.system ? line.system + ': ' : ''}{line.text}
+		{line.until && <CritUntil>{' ' + line.until}</CritUntil>}
+	</React.Fragment>
+);
 
 //$tightBottom (ship window Notes popup, feedback 2026-07-19): drop the trailing
 //blank separator Entry so the popup's small bottom padding sets the gap under the
@@ -98,6 +144,8 @@ class ShipInfo extends React.Component {
 		if (nebulaOb) displayOffensiveBonus = nebula.showOffensiveBonus(displayOffensiveBonus);
 		//an EM storm's 1d3 this turn, as the shot takes it (EM_STORM_PLAN.md #2) - window.emStorm is game.php's alone
 		if (ship.flight && window.emStorm && emStorm.isActive()) displayOffensiveBonus = Math.max(0, displayOffensiveBonus - emStorm.offensivePenalty(ship));
+		//...and a tmpsensordown on its first craft, -5 each, as the shot takes it - the system card's figure (user request 2026-11-16)
+		if (ship.flight) displayOffensiveBonus = Math.max(0, displayOffensiveBonus - sensorDownObPenalty(ship));
 		if (ship.flight && gamedata.areMinesPresent) {
 			if(ship.minesweeper){
 				displayOffensiveBonus -= window.ew.getDetectMEW(ship);
@@ -153,6 +201,9 @@ class ShipInfo extends React.Component {
 			}
 		}
 
+		//a craft's card hovered: the flight's and this craft's critical effects (see fighterCritLines)
+		const crits = (ship.flight && craft) ? fighterCritLines(ship, craft) : { flight: [], own: [] };
+
 		return (
 			<InfoContainer $tightBottom={tightBottom} $compactText={compactText}>
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Offensive bonus: </Header>{(displayOffensiveBonus + shuntOb) * 5}{shuntOb > 0 ? ' (+' + shuntOb * 5 + ' shunted, direct fire only)' : ''}</Entry>}
@@ -166,6 +217,12 @@ class ShipInfo extends React.Component {
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Turn Cost: </Header>{ship.turncost}</Entry>}										
 				{ship.flight && isRevealed && ship.turndelay && <Entry key={reactKey++}><Header>Turn Delay: </Header>{ship.turndelaycost}</Entry>}											
 				{ship.flight && isRevealed && <Entry key={reactKey++}>&nbsp;</Entry>}
+
+				{crits.flight.length > 0 && <Entry key={reactKey++}><CritHeading>CRITICALS (WHOLE FLIGHT):</CritHeading>&nbsp;</Entry>}
+				{crits.flight.map(line => <Entry key={reactKey++}>{critLineText(line)}</Entry>)}
+				{crits.own.length > 0 && <Entry key={reactKey++}><CritHeading>CRITICALS (THIS FIGHTER):</CritHeading>&nbsp;</Entry>}
+				{crits.own.map(line => <Entry key={reactKey++}>{critLineText(line)}</Entry>)}
+				{(crits.flight.length > 0 || crits.own.length > 0) && <Entry key={reactKey++}>&nbsp;</Entry>}
 
 				{Object.keys(notes).length > 0 && <Entry key={reactKey++}><Header>NOTES:</Header>&nbsp;</Entry>}
 				{Object.keys(notes).length > 0 &&

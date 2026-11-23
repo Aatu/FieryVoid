@@ -1283,6 +1283,13 @@ window.ajaxInterface = {
             ships: JSON.stringify(tidyships)
         };
 
+        //CPU opponent (lobby only - game.php's gamedata has no isCpuSlot): the creator is readying a
+        //CPU player's fleet, which gamedata.php commits as the bot (Manager::submitFleetForCpuSlot).
+        if (typeof gamedata.isCpuSlot === 'function' && window.playerManager
+            && gamedata.isCpuSlot(playerManager.getSlotById(gamedata.selectedSlot))) {
+            gd.cpuSlot = 1;
+        }
+
         return gd;
     },
 

@@ -197,7 +197,9 @@ class DeploymentGamePhase implements Phase
         }
     }
 
-    private static function validateDeploymentArea($gamedata, $ship, $move){
+    //Public so that server code which CHOOSES a hex (the CPU opponent's deployment, TACTICAL_AI_PLAN.md
+    //section 3.3) asks the same rule that later judges it, instead of keeping a copy of it.
+    public static function validateDeploymentArea($gamedata, $ship, $move){
         if($ship->isTerrain()) return true; //When manually placing Terrain, they can go anywhere.
 
         /* REINFORCEMENTS_PLAN.md STAGE 7 - a unit coming out of hyperspace ignores its slot's

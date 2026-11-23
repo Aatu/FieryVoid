@@ -760,9 +760,12 @@ class EdfEwDrain extends Critical{
 /* "The flight will not be able to shoot the next turn." Lands on the flight's sample fighter.
    Read by Firing::withdrawGroundedFighterFireOrders(), on the ADVANCE path - ⚠️ NOT on the
    POST path, where a reconstructed ship carries no criticals at all
-   (arch_post_side_ship_reconstruction) and any check would silently never fire. */
+   (arch_post_side_ship_reconstruction) and any check would silently never fire.
+   The description says no WHEN (user, 2026-11-16): ShipSystem::setSystemDataWindow already
+   appends " this turn." / " next turn." to a oneturn crit's text, and a "... this turn" of its
+   own read "cannot fire this turn this turn." on the system card and the fighter hover. */
 class EdfFighterGrounded extends Critical{
-    public $description = "Disrupted by an Energy Draining Field - cannot fire this turn";
+    public $description = "Disrupted by an Energy Draining Field - cannot fire";
     public $oneturn = true;
     public $repairPriority = 0;
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){

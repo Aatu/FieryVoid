@@ -22,6 +22,10 @@
 
 	}
 
+	//CPU opponent (TACTICAL_AI_PLAN.md section 8.1): a slot's "CPU player" tick is printed only for a
+	//player the feature is on for - hidden, not greyed. The first test keeps the AI classes unloaded while it is off.
+	$cpuAllowed = Features::reachable('cpuOpponent') && AISeats::allowedFor($_SESSION["user"] ?? null);
+
 	natsort($maps); // Natural sort: sorts "1", "2", ..., "10", "11"
 
 	//"12.PlanetOrange.jpg" -> "PlanetOrange"
@@ -611,6 +615,9 @@
               <input class="name cg-input" type="text" name="name" value="BLUE">
             </label>
             <div class="cg-slot-actions">
+<?php if ($cpuAllowed): ?>
+              <label class="cg-slot-cpu" title="A computer opponent takes this slot. You buy its fleet in the lobby."><input type="checkbox" class="cpu-check" name="cpu"> CPU player</label>
+<?php endif; ?>
               <button type="button" class="copy-slot-btn cg-btn cg-btn--ghost cg-btn--small" title="Add a copy of this slot to its team">Copy Slot</button>
               <button type="button" class="close remove-btn cg-link">Remove Slot</button>
             </div>

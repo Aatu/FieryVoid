@@ -46,7 +46,7 @@ class federationDreadnought extends BaseShip{
         $this->addPrimarySystem(new CnC(7, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 24, 6, 8));
         $this->addPrimarySystem(new Engine(4, 28, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(4, 4, 4));
+		$this->addPrimarySystem(new Hangar(4, 8, 6));
         $this->addPrimarySystem(new JumpEngine(5, 15, 4, 30));
 		
         $this->addFrontSystem(new Thruster(5, 15, 0, 4, 1));

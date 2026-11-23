@@ -59,6 +59,9 @@ window.gamedata = {
 			case 'Cascor Commonwealth':
 				powerRating = 'Tier 3; League Faction';
 				break;
+			case 'Cascor Commonwealth (reevaluated)':
+				powerRating = 'Tier 2; League Custom Faction';
+				break;				
 			case 'Centauri Republic':
 				powerRating = 'Tier 1; Major Faction';
 				break;
@@ -207,7 +210,10 @@ window.gamedata = {
 				powerRating = 'Tier Ancients';
 				break;
 			case 'Yolu Confederation':
-				powerRating = 'Tier 1; Minor Faction';
+				powerRating = 'Tier Other; Minor Faction';
+				break;
+			case 'Yolu Confederation (reevaluated)':
+				powerRating = 'Tier 1; Minor Custom Faction';
 				break;
 			case 'Barada Imperium':
 				powerRating = 'Tier 3; Minor Custom faction';
@@ -776,21 +782,13 @@ window.gamedata = {
 	enhancementLines: function enhancementLines(ship) {
 		var lines = [];
 		var units = gamedata.bulkCount(ship);
-		var crafts = ship.flight ? (parseInt(ship.flightSize, 10) || 1) : 1;
-		var ordnanceCrafts = lobbyEnhancements.ordnanceCraft(crafts, lobbyEnhancements.prowCount(ship)); //ordnance: never for a craft with a Ramming Prow
 
 		for (var enhId in (ship.enhancementOptions || {})) {
 			var entry = ship.enhancementOptions[enhId];
 			var name = lobbyEnhancements.describeTaken(entry); //null when not taken
 			if (name === null) continue;
 			name = name.replace(/^(\(AMMO\)|\(LIGHT AMMO\)|\(MEDIUM AMMO\)|\(HEAVY AMMO\)|\(Option\))\s*/, '');
-			var rowCrafts = lobbyEnhancements.isOrdnance(entry[0]) ? ordnanceCrafts : crafts;
-			var cost = lobbyEnhancements.isCraftCounted(entry[0]) ? gamedata.enhancementOptionCost(entry) //bought craft by craft (the Ramming Prow)
-				: window.officers
-				? officers.flightCost(entry[0], entry[2], gamedata.enhancementOptionCost(entry), rowCrafts, officers.perCraftExtra(ship, entry[0]), officers.standardFlight(ship))
-				: gamedata.enhancementOptionCost(entry) * rowCrafts;
-			if (window.officers) cost = officers.shipRowCost(ship, entry, cost); //an Expert Political Officer's free expert (Stage 25)
-			lines.unshift({ text: name, cost: cost * units }); //reverse order
+			lines.unshift({ text: name, cost: gamedata.enhancementRowCost(ship, entry) * units }); //reverse order
 		}
 
 		if (window.systemEnhancements) {
@@ -810,6 +808,19 @@ window.gamedata = {
 			});
 		}
 		return lines;
+	},
+
+	/* One unit's cost for one bought ship-level row (enhancementOptions entry), priced as enhancementLines
+	   describes above - what its fleet-list line shows, and what checkChoices totals for its enhancement warning. */
+	enhancementRowCost: function enhancementRowCost(ship, entry) {
+		var crafts = ship.flight ? (parseInt(ship.flightSize, 10) || 1) : 1;
+		if (lobbyEnhancements.isOrdnance(entry[0])) crafts = lobbyEnhancements.ordnanceCraft(crafts, lobbyEnhancements.prowCount(ship)); //ordnance: never for a craft with a Ramming Prow
+		var cost = lobbyEnhancements.isCraftCounted(entry[0]) ? gamedata.enhancementOptionCost(entry) //bought craft by craft (the Ramming Prow)
+			: window.officers
+			? officers.flightCost(entry[0], entry[2], gamedata.enhancementOptionCost(entry), crafts, officers.perCraftExtra(ship, entry[0]), officers.standardFlight(ship))
+			: gamedata.enhancementOptionCost(entry) * crafts;
+		if (window.officers) cost = officers.shipRowCost(ship, entry, cost); //an Expert Political Officer's free expert (Stage 25)
+		return cost;
 	},
 
 	//one unit's cost for one bought enhancement option - the sum the buy dialog's spinner builds
@@ -1246,7 +1257,15 @@ window.gamedata = {
 					}
 				}
 			}
-			totalEnhancementsValue += lship.pointCostEnh;
+			/* The "Enhancement(s) present" warning: bought Enhancements and Officers. Not Options (enhancementOptions[6]),
+			   and not Ammo & Ordnance - a unit's standard outfit, which the server files as enhancements (user, 2026-11-13).
+			   confirm.buySectionOf is the buy dialog's own sorting, so what warns is what the player bought under those headings. */
+			for (var enhNo in lship.enhancementOptions) {
+				var enhEntry = lship.enhancementOptions[enhNo];
+				if (enhEntry[6] || !(enhEntry[2] > 0) || confirm.buySectionOf(enhEntry) === 'ammo') continue;
+				enhancementPresent = true;
+				totalEnhancementsValue += gamedata.enhancementRowCost(lship, enhEntry) * gamedata.bulkCount(lship);
+			}
 			var vLetter = gamedata.variantLetter(lship);
 			var hull = lship.variantOf;
 			if (hull == "") hull = lship.shipClass; //ship is either base itself, or base is indicated in variantOf variable
@@ -1674,14 +1693,7 @@ window.gamedata = {
 				if (lship.factionAge == 3 && window.systemEnhancements && systemEnhancements.carriesAdvGravShields(lship)) advGravShieldShips++;
 			}
 			if (lship.isCombatUnit != true) nonCombatPresent = true;
-			//check for presence of enhancements
-			if (!enhancementPresent) { //if already found - no point in checking
-				for (var enhNo in lship.enhancementOptions) if (!lship.enhancementOptions[enhNo][6]) { //only if enhancement isn't really an option
-					if (lship.enhancementOptions[enhNo][2] > 0) {
-						enhancementPresent = true;
-					}
-				}
-			}
+			//presence of enhancements: noted, with their value, beside totalEnhancementsValue above
 
 		} //end of loop at ships preparing data
 
@@ -1743,7 +1755,7 @@ window.gamedata = {
 		}
 		//enhanced units present?
 		if (enhancementPresent) {
-			warningText += "<br> - Enhancement(s) present! Seek opponent's permission first. Total value: " + totalEnhancementsValue;
+			warningText += "<br> - Enhancement(s) present! Seek opponent's permission first. Total value: " + Math.round(totalEnhancementsValue * 100) / 100;
 			warningFound = true;
 		}
 		//unique units present?
@@ -3726,6 +3738,9 @@ window.gamedata = {
 		gamedata.status = serverdata.status;
 		gamedata.gamespace = serverdata.gamespace;
 		gamedata.rules = serverdata.rules;
+		//CPU opponent (TACTICAL_AI_PLAN.md 8.1): {slot: {level}}, sent only when the game has a CPU seat
+		gamedata.cpuSlots = serverdata.cpuSlots || null;
+		gamedata.isCreator = serverdata.creator == serverdata.forPlayer;
 
 		//REINFORCEMENTS_PLAN.md §4 Stage 1 - the buy-mode toggle ships hidden in the markup and
 		//is revealed here, because this is the first point at which gamedata.rules exists. Runs
@@ -3788,9 +3803,24 @@ window.gamedata = {
 		gamedata.setSlotData(data);
 	},
 
+	/* CPU opponent (TACTICAL_AI_PLAN.md 8.1). A CPU slot is an ordinary slot held by a bot account;
+	   the game's creator may select it and buy, load and ready its fleet exactly as their own.
+	   Units bought for it keep userid = thisplayer here, so every fleet-list path treats them as
+	   the creator's; the server stamps them with the bot's id when the slot is readied. */
+	isCpuSlot: function isCpuSlot(slot) {
+		return !!(slot && gamedata.cpuSlots && gamedata.cpuSlots[slot.slot]);
+	},
+
+	//May this player buy for the slot? Their own, or - for the creator - a CPU player's.
+	canEditSlot: function canEditSlot(slot) {
+		if (!slot) return false;
+		if (slot.playerid == gamedata.thisplayer) return true;
+		return gamedata.isCreator === true && gamedata.isCpuSlot(slot);
+	},
+
 	createSlots: function createSlots() {
 		var selectedSlot = playerManager.getSlotById(gamedata.selectedSlot);
-		if (selectedSlot && selectedSlot.playerid != gamedata.thisplayer) {
+		if (selectedSlot && !gamedata.canEditSlot(selectedSlot)) {
 			$('.slot.slotid_' + selectedSlot.slot).removeClass("selected");
 			gamedata.selectedSlot = null;
 		}
@@ -3814,11 +3844,13 @@ window.gamedata = {
 				$(".playername", slotElement).html(player.name);
 
 				//Only show select button if it's a viable option
-				if (slot.playerid == gamedata.thisplayer && slot.slot !== gamedata.selectedSlot) $(".selectslot", slotElement).show();
+				if (gamedata.canEditSlot(slot) && slot.slot !== gamedata.selectedSlot) $(".selectslot", slotElement).show();
 
-				if (slot.playerid == gamedata.thisplayer && slot.slot == gamedata.selectedSlot ||
-					slot.playerid !== gamedata.thisplayer)
+				if (gamedata.canEditSlot(slot) && slot.slot == gamedata.selectedSlot ||
+					!gamedata.canEditSlot(slot))
 					$(".selectslot", slotElement).hide();
+
+				slotElement.toggleClass("lb-slot--cpu", gamedata.isCpuSlot(slot));
 				//if() $(".selectslot", slotElement).hide();
 
 				if (slot.lastphase >= "-2") {
@@ -3917,7 +3949,7 @@ window.gamedata = {
 
 	enableBuy: function enableBuy() {
 		var selectedSlot = playerManager.getSlotById(gamedata.selectedSlot);
-		if (selectedSlot && selectedSlot.playerid == gamedata.thisplayer) {
+		if (gamedata.canEditSlot(selectedSlot)) {
 			$(".buy").show();
 		} else {
 			$(".buy").hide();
@@ -4976,14 +5008,15 @@ window.gamedata = {
 		var slotid = gamedata.selectedSlot;
 		var selectedSlot = playerManager.getSlotById(slotid);
 		var slotElement = $('.slot.slotid_' + selectedSlot.slot);
+		var forCpu = gamedata.isCpuSlot(selectedSlot); //the creator readying a CPU player's fleet
 
 		if (selectedSlot.lastphase >= "-2") {
-			window.confirm.error("You have already confirmed your fleet for this game!", function () { });
+			window.confirm.error(forCpu ? "This CPU player's fleet is already confirmed!" : "You have already confirmed your fleet for this game!", function () { });
 			return;
 		}
 
 		if (points == 0) {
-			window.confirm.error("You have to buy at least one ship!", function () { });
+			window.confirm.error(forCpu ? "Buy at least one ship for the CPU player first!" : "You have to buy at least one ship!", function () { });
 			return;
 		}
 
@@ -4995,7 +5028,7 @@ window.gamedata = {
 
 		//Pre-battle damage (D1): no rule gates it, so the Ready confirm is where a fleet
 		//carrying damaged or crippled units says so out loud. confirm.confirm renders HTML.
-		var readyMessage = "Are you sure you wish to ready your fleet?";
+		var readyMessage = forCpu ? "Are you sure you wish to ready this CPU player's fleet?" : "Are you sure you wish to ready your fleet?";
 		if (window.battleDamage && battleDamage.fleetHasDamage()) {
 			//Only WARNING: is the warning; the rest is ordinary body text, so it carries its
 			//own class (see confirm.css .prebattle-note).
@@ -5552,7 +5585,7 @@ window.gamedata = {
 		var slotid = slotElement.data("slotid");
 		var slot = playerManager.getSlotById(slotid);
 
-		if (slot.playerid == gamedata.thisplayer) gamedata.selectSlot(slot);
+		if (gamedata.canEditSlot(slot)) gamedata.selectSlot(slot);
 	},
 
 	selectSlot: function selectSlot(slot) {

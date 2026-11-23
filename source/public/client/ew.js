@@ -30,9 +30,11 @@ window.ew = {
             if (primary && shipManager.criticals.hasCritical(primary, "RestrictedEW")) {
                 ret -= 2 * shipManager.criticals.hasCritical(primary, "RestrictedEW"); //-2 does stack!
             }
-            //GTS
-            if (shipManager.criticals.hasCritical("SensorLoss")) {
-                ret -= 3 * shipManager.criticals.hasCritical("SensorLoss"); //-3 does stack!
+            //GTS - a BSG hybrid's Sensor Loss rides its BSGHybrid system, where EW::getScannerOutput reads it. This used
+            //to pass the class name where a system belongs, so it never subtracted anything (fixed 2026-11-16, user).
+            var bsgHybrid = shipManager.systems.getSystemByName(ship, "BSGHybrid");
+            if (bsgHybrid) {
+                ret -= 3 * shipManager.criticals.hasCritical(bsgHybrid, "SensorLoss"); //-3 does stack!
             }
 
             if (primary) {

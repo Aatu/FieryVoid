@@ -37,6 +37,14 @@ const PARAM_SUM_CRIT_DESCRIPTIONS = {
     EMStormPower: (total) => `EM storm: power -${total}`,
     EMStormInitiative: (total) => `EM storm: initiative -${total * 5}`,
     EMStormOffensive: (total) => `EM storm: offensive bonus -${total * 5}`,
+    /* The Energy Draining Field's (user, 2026-11-16), worded exactly as their PHP constructors word them when they are
+       given the param (cricialClasses.php) - the text a reload loses. Each param is the RUNNING total for the turn
+       (EdfExposure::accumulate), and only one crit of a class is in force on a turn, so the "sum" is that total. */
+    EdfThrustDrain: (total) => `Engine output drained by ${total}`,
+    EdfPowerDrain: (total) => `Reactor output drained by ${total}`,
+    EdfIniDrain: (total) => `Initiative reduced by ${total * 5}`,
+    EdfEwDrain: (total) => `EW capacity drained by ${total}`,
+    EdfExposed: (total) => total > 1 ? `Caught in an Energy Draining Field (${total} turns running)` : 'Caught in an Energy Draining Field',
 };
 
 export const Entry = styled(TooltipEntry)`
@@ -115,7 +123,13 @@ class SystemInfo extends React.Component {
         const nebulaOb = !!(ship.flight && window.nebula && nebula.isActive());
         if (nebulaOb) displayOffensiveBonus = nebula.showOffensiveBonus(displayOffensiveBonus);
         //an EM storm's 1d3 this turn, as the shot takes it (EM_STORM_PLAN.md #2) - window.emStorm is game.php's alone
-        if (ship.flight && window.emStorm && emStorm.isActive()) displayOffensiveBonus = Math.max(0, displayOffensiveBonus - emStorm.offensivePenalty(ship));
+        const stormOb = (ship.flight && window.emStorm && emStorm.isActive()) ? emStorm.offensivePenalty(ship) : 0;
+        if (stormOb) displayOffensiveBonus = Math.max(0, displayOffensiveBonus - stormOb);
+        /* ...and a tmpsensordown on the flight's first craft, -1 OB (-5) each, as the shot takes it (weaponManager's OBcrit,
+           Weapon::calculateHitBase). User request 2026-11-16: the OB cell is coloured when a crit changes it, and it must then
+           show the number the shot uses - it used to leave this one out. */
+        const sensorDownOb = ship.flight ? sensorDownObPenalty(ship) : 0;
+        if (sensorDownOb) displayOffensiveBonus = Math.max(0, displayOffensiveBonus - sensorDownOb);
         if (ship.flight && gamedata.areMinesPresent) {
 			if(ship.minesweeper){
 				displayOffensiveBonus -= window.ew.getDetectMEW(ship);
@@ -220,6 +234,16 @@ class SystemInfo extends React.Component {
         if (system.uninterceptable && has('Damage')) chips.push({ kind: 'flag', label: 'Uninterceptable' });
 
         const crits = critLines(system);
+        /* A fighter weapon's OB is the FLIGHT's, and so are the crits that lower it - parked on its first craft, where the
+           server reads them - so its card lists those too, under the weapon's own (user request 2026-11-16): the orange OB
+           cell then says why on the same card. */
+        if (ship.flight) {
+            const sample = shipManager.criticals.getSampleCraft(ship);
+            if (sample && sample !== system) {
+                critLines(sample, crit => FLIGHT_OB_CRITS.indexOf(crit.phpclass) !== -1)
+                    .forEach(line => crits.push(Object.assign({}, line, { key: 'flight-' + line.key })));
+            }
+        }
 
         /* A bulk mine purchase in the lobby keeps its pre-battle damage per copy, outside the blueprint's own damage, and its
            section bar shows MINE 1 (ShipSection) - the card reads the same numbers, so the two agree. */
@@ -227,15 +251,26 @@ class SystemInfo extends React.Component {
         const structureMax = bulkMine ? battleDamage.mineMaxHealth(ship) : system.maxhealth;
         const structureLeft = bulkMine ? battleDamage.mineHealth(ship, 1) : system.maxhealth - damageManager.getDamage(ship, system);
 
-        const arcCell ={ label: 'Arc', value: has('Arc') ? value('Arc') : '—' };
+        //the stats a critical in force has changed - drawn in the critical orange (see critStats)
+        const critHit = critStats(system, has);
+        if (stormOb || sensorDownOb) critHit.add('OB');
+
+        const arcCell ={ label: 'Arc', value: has('Arc') ? value('Arc') : '—', crit: critHit.has('Arc') };
+        const armorCell = { label: 'Armor', value: shipManager.systems.getArmour(ship, system), crit: critHit.has('Armor') };
+        /* Engines, reactors and scanners have no arc, and their output is the number that matters (user request
+           2026-11-16): Output takes the Arc cell - getOutput's figure, so crits, drains, boosts and an offline or
+           destroyed system all show in it, and it goes orange when a critical lowered it (critStats). */
+        const thirdCell = OUTPUT_TYPES.has(system.outputType)
+            ? { label: 'Output', value: shipManager.systems.getOutput(ship, system), crit: critHit.has('Output') }
+            : arcCell;
         const cells = isStructure
-            ? [{ label: 'Armor', value: shipManager.systems.getArmour(ship, system) }, arcCell] //a block draws no power
+            ? [armorCell, arcCell] //a block draws no power
             : [
                 ship.flight
-                    ? { label: 'OB', value: adjustObDisplay(system, displayOffensiveBonus * 5) }
-                    : { label: 'Armor', value: shipManager.systems.getArmour(ship, system) },
-                { label: 'Power', value: has('Power Used') ? value('Power Used') : '—' },
-                arcCell
+                    ? { label: 'OB', value: adjustObDisplay(system, displayOffensiveBonus * 5), crit: critHit.has('OB') }
+                    : armorCell,
+                { label: 'Power', value: has('Power Used') ? value('Power Used') : '—', crit: critHit.has('Power') },
+                thirdCell
             ];
 
         //called shot - the same tests in the same order as before: gamedata.selectedSystems is only read in game
@@ -264,7 +299,11 @@ class SystemInfo extends React.Component {
         if (has('Damage')) rows.push({ label: 'Damage', value: rangeDash(value('Damage')), big: true });
         //every mode, the one in use bright (a single mode only repeats the damage-type chip)
         const modeKeys = system.firingModes ? Object.keys(system.firingModes) : [];
-        if (modeKeys.length > 1) {
+        if (hidesAmmoModes(ship, system) && modeKeys.length > 0) {
+            //drawn even when the rack holds one type, so whether the row is there says nothing about how many it holds
+            const firstKey = system.firingModes[1] !== undefined ? '1' : modeKeys[0];
+            rows.push({ label: 'Firing mode', modes: [{ name: system.firingModes[firstKey], active: true }] });
+        } else if (modeKeys.length > 1) {
             rows.push({ label: 'Firing mode', modes: modeKeys.map(key => ({
                 name: system.firingModes[key], active: String(key) === String(system.firingMode)
             })) });
@@ -283,6 +322,7 @@ class SystemInfo extends React.Component {
             if (key === 'Ammunition' && (system.name === 'GrapplingClaw' || system.name === 'Marines')) return;
             rows.push({ label: key, value: value(key) });
         });
+        rows.forEach(row => { if (critHit.has(row.label)) row.crit = true; });
 
         //through the same hook as the other rows: an Expert Jump Officer's "within N hexes" in the lobby
         const rules = (data.Special && data.Special != "") ? String(value('Special')) : null;
@@ -314,6 +354,14 @@ const FIRE_CONTROL = 'Fire control (fighter/med/cap)';
 const PRIORITY = 'Resolution Priority (ship/fighter)';
 const CARD_KEYS = new Set(['Special', 'ID', 'Arc', 'Power Used', 'Damage', 'Damage type', 'Weapon type', 'Range penalty',
     'Range', FIRE_CONTROL, 'Intercept', 'Number of guns', 'Number of shots', PRIORITY]);
+
+/* A magazine-fed weapon's firing modes ARE the ordnance its magazine holds (AmmoMissileRackS / ammoWeapons recompileFiringModes list
+   only the types aboard), and those types are secret from other teams (AmmoMagazine::stripForJson). The payload still carries every
+   mode, so the card lists only mode 1 to a viewer outside the ship's team (user request 2026-11-16). The card's damage, range and fire
+   control already read mode 1 for them: nothing on the client ever switches an enemy weapon's mode.
+   game.php only - gamedata.isMyorMyTeamShip is not defined in the lobby, which shows no other team's ships. */
+const hidesAmmoModes = (ship, system) => system.checkAmmoMagazine === true
+    && typeof gamedata.isMyorMyTeamShip === 'function' && !gamedata.isMyorMyTeamShip(ship);
 
 //the called-shot chance of each selected weapon against this system, or why there is none
 const calledShotRows = (ship, selectedShip, system) => {
@@ -359,12 +407,60 @@ const cardOfficers = (ship, system) => {
     );
 };
 
+/* WHICH CARD STAT EACH CRITICAL CHANGES (user request 2026-11-16): the card draws that stat's value in the critical
+   orange, so the player sees what was affected. The values themselves already carry the effect - the server builds a
+   weapon's data AFTER its effectCriticals, getArmour subtracts ArmorReduced - except where the effect is applied at
+   fire time (the Antimatter pair: the damage formula and the effective distance), which is still a changed stat.
+   Keys are the CARD's labels (cells: Armor, Power, Arc; rows: as SystemInfo pushes them). A stat the card does not
+   show for this system is simply not coloured; the Criticals block lists every effect regardless. */
+const CRIT_STATS = {
+    ArmorReduced: ['Armor'],
+    EdnPowerDoubled: ['Power'],
+    ReducedArcs: ['Arc'],
+    ReducedDamage: ['Damage'],
+    ReducedDamageAntimatter: ['Damage'],
+    DiceLost: ['Damage'],
+    ReducedRangeAntimatter: ['Range penalty'],
+    ReducedRangeValue: ['Range'],
+    GunLost: ['Guns'],
+};
+/* Output crits, the one-turn drains and a crit-forced shutdown (getOutput answers 0 for an offline system) - on the
+   Output cell of an engine / reactor / scanner, and on the few other systems whose card shows an output figure. */
+const OUTPUT_CRIT = /^(Output(Halved|Reduced)\w*|EdfThrustDrain|EdfPowerDrain|EdfEwDrain|EMStormSensors|EMStormPower|ForcedOffline(OneTurn|ForTurns))$/;
+const OUTPUT_STATS = ['Output', 'Current Output ', 'Shield rating', 'Own thrust'];
+//the systems whose card shows Output in place of Arc: reactors and sub-reactors, engines, scanners (their outputType)
+const OUTPUT_TYPES = new Set(['power', 'thrust', 'EW']);
+//the flight crits that lower a fighter weapon's OB (weaponManager's OBcrit, Weapon::calculateHitBase)
+const FLIGHT_OB_CRITS = ['EMStormOffensive', 'tmpsensordown'];
+
+const critStats = (system, has) => {
+    const stats = new Set();
+    shipManager.criticals.getAllCriticals(system).forEach(crit => {
+        let keys = CRIT_STATS[crit.phpclass] || (OUTPUT_CRIT.test(crit.phpclass) ? OUTPUT_STATS : null);
+        /* Weapon::effectCriticals: a weapon WITH a range penalty gets a steeper one; one without loses 20% of its
+           range instead (a ballistic, a Plasma Wave). The card shows both rows when both exist. */
+        if (crit.phpclass === 'ReducedRange') keys = [has('Range penalty') ? 'Range penalty' : 'Range'];
+        (keys || []).forEach(key => stats.add(key));
+    });
+    return stats;
+};
+
+//a flight's tmpsensordown crits (on its first craft, where the server reads them): one OB point each. Exported for
+//ShipInfo's fighter-card hover, whose "Offensive bonus" line takes it off the same way.
+export const sensorDownObPenalty = (flight) => {
+    const sample = shipManager.criticals.getSampleCraft(flight);
+    return sample ? shipManager.criticals.hasCritical(sample, 'tmpsensordown') : 0;
+};
+
 /* The criticals in effect on this system, one line per critical class: { key, count, text, until }. Was getCriticals,
    which drew them itself; the turn and param arithmetic is unchanged. A class with no crit in effect gives no line, so
-   the card shows no empty "Criticals" block (the old one drew the heading anyway). */
-const critLines = (system) => {
+   the card shows no empty "Criticals" block (the old one drew the heading anyway).
+   `keep` (optional): only the crits it passes are counted - ShipInfo's fighter-card hover uses it to leave out the
+   craft-state markers the card draws as overlays. Exported for that hover, so both say an effect in the same words. */
+export const critLines = (system, keep) => {
     const critData = system.critData || {};
-    const criticals = Array.isArray(system.criticals) ? system.criticals : Object.values(system.criticals || {});
+    const allCriticals = Array.isArray(system.criticals) ? system.criticals : Object.values(system.criticals || {});
+    const criticals = keep ? allCriticals.filter(keep) : allCriticals;
     const critKeys = Object.keys(critData).length > 0
         ? Object.keys(critData)
         : [...new Set(criticals.map(c => c.phpclass))];

@@ -521,7 +521,7 @@
    STATE chips are the exception the user asked for on 2026-11-09 (SHIP_TOOLTIP_REDESIGN_PLAN.md
    §11 item 10): they say what the player has DONE in this stack, and each gets its own colour so
    they can be told apart at a glance - SELECTED below in the accent; the planned OEW (the ship
-   window's OEW green) and fire-target (the Target button's fill) chips follow in Stage 5.
+   window's OEW green) and fire-target (the Target button's hue) chips are at the end of this file.
    line-height 12px, was 13px: pays for the extra 1px gap above it in .fv-hexpicker__text. */
 .fv-hexpicker__chip {
     flex: 0 0 auto;
@@ -540,6 +540,19 @@
 .fv-hexpicker__chip--selected {
     color: var(--fv-accent);
     border-color: var(--fv-accent);
+}
+
+/* The caps sat a pixel HIGH in the chip on a 100% (1x) screen (user, 2026-11-12). MEASURED on the
+   ink, not eyeballed: at 1x the caps are 7 device rows tall, and 7 rows cannot centre in the chip's
+   12-row interior - it came out 2 above / 3 below at every sub-pixel offset. A 1px top pad makes
+   the interior 13 rows, 3 / 3 everywhere; the -1px bottom margin gives that pixel back so a dense
+   row is no taller. Only at 1x: from 1.5x up the 12px box already centres exactly (6 / 6 at 2x)
+   and the pad would put the text low instead; at 1.25x neither is better. */
+@media (max-resolution: 1dppx) {
+    .fv-hexpicker__chip {
+        padding-top: 1px;
+        margin-bottom: -1px;
+    }
 }
 
 /* Initiative ORDER — the movement-group number the Order of Battle prints down its
@@ -1552,4 +1565,76 @@
 .fv-hexpicker__details:focus-visible {
     outline: 1px solid var(--fv-accent);
     outline-offset: -1px;
+}
+
+/* ── SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 5: the STATE chips ───────────────────
+   What the player has done with a unit this turn, each in its own colour (§11 item 10):
+   SELECTED in the accent (above), OEW n in the ship window's OEW green (#acd7a8, the 'OEW' entry
+   of ShipWindowEw.js EW_LABEL_COLORS), ⌖ target in the Target button's hue (--fv-target). */
+.fv-hexpicker__chip--oew {
+    color: #acd7a8;
+    border-color: #acd7a8;
+}
+
+.fv-hexpicker__chip--target {
+    color: var(--fv-target);
+    border-color: var(--fv-target);
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Stage 7: the sheet drills down into a ship card (D9) ─────────────────────
+   A tap on a row (Initial Orders, Pre-Firing, Firing) swaps the list for that unit's card;
+   "‹ N units in hex" takes the title's place in the header and goes back. The card is
+   .fv-shipcard--insheet (shipTooltip.css). */
+.fv-hexpicker__back {
+    display: none;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    height: 100%;
+    padding: 0 6px 0 0;
+    border: 0;
+    background: transparent;
+    color: var(--fv-accent);
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.fv-hexpicker__backcaret {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.fv-hexpicker__cardslot {
+    display: none;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 70vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.fv-hexpicker--detail .fv-hexpicker__back {
+    display: flex;
+}
+
+.fv-hexpicker--detail .fv-hexpicker__title,
+.fv-hexpicker--detail .fv-hexpicker__actions,
+.fv-hexpicker--detail .fv-hexpicker__list {
+    display: none;
+}
+
+.fv-hexpicker--detail .fv-hexpicker__cardslot {
+    display: block;
+}
+
+/* The sheet's header holds the way back now - a real tap target (the 44px floor). */
+.fv-hexpicker--sheet.fv-hexpicker--detail {
+    --hp-header-h: 44px;
 }
