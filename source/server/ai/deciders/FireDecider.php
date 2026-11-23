@@ -483,7 +483,8 @@ class FireDecider
                     $byTarget[$targetId][1]++;
                 }
                 foreach ($byTarget as $targetId => $launch) {
-                    $shot = $view->launched($unit, $weapon, $view->gamedata->getShipById($targetId), $launch[0]);
+                    //(stage T9, M8: a Ballistic Torpedo launcher's orders at one unit are one volley - AIView::launched prices them together)
+                    $shot = $view->launched($unit, $weapon, $view->gamedata->getShipById($targetId), $launch[0], $launch[1]);
                     if ($shot === null || $shot['chance'] < 1) continue;
                     $shot['orders'] = $launch[1]; //one order is one missile
                     $volleys[$targetId][] = array('unit' => $unit, 'weapon' => $weapon, 'shot' => $shot, 'ballistic' => true);
@@ -501,8 +502,10 @@ class FireDecider
     {
         $load = (int)$weapon->getLoadingTime();
         if ($load <= 1) return AIConfig::FIRE_MIN_CHANCE;
-        //a slow PULSE weapon's damage grows much faster than its chance: both its floors are higher (user ruling, 2026-11-19)
-        $premium = ($pulsePremium && $weapon->damageType === 'Pulse') ? AIConfig::FIRE_PULSE_PREMIUM : 0;
+        /* a slow PULSE weapon's damage grows much faster than its chance: both its floors are higher (user ruling, 2026-11-19) - and so
+           does a slow weapon whose every hit grows with the roll (stage T9, M4 - the user, 2026-11-23, on the Antimatter Converter: "Its
+           damage does benefit from better hit chances though, so just add a hit chance premium like we do with Pulse weapons") */
+        $premium = ($pulsePremium && ($weapon->damageType === 'Pulse' || AIView::rollScaled($weapon))) ? AIConfig::FIRE_PULSE_PREMIUM : 0;
 
         //the parting floors by loading time too (stage T6a, game 4774: never below the user's line for a slow gun)
         $floor = AIConfig::FIRE_MIN_CHANCE;

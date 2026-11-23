@@ -119,9 +119,15 @@ class InterceptModel
             $weapon = $entry['weapon'];
             $shot = $entry['shot'];
             if ((int)$weapon->firingMode !== (int)$shot['mode']) $weapon->changeFiringMode((int)$shot['mode']);
-            for ($gun = 0; $gun < max(1, (int)$shot['orders']); $gun++) {
+            /* Stage T9 (M8): a Ballistic Torpedo volley at a SHIP ('merged') is ONE order by the time interception is allocated - the server
+               merges a launcher's torpedoes at one ship first (BallisticTorpedo::beforeFiringOrderResolution, in Firing::prepareFiring) -
+               carrying all of them as its shots. */
+            $merged = !empty($shot['merged']);
+            $count = $merged ? 1 : max(1, (int)$shot['orders']);
+            $shots = $merged ? max(1, (int)$shot['orders']) * max(1, (int)$shot['shots']) : $shot['shots'];
+            for ($gun = 0; $gun < $count; $gun++) {
                 $order = new FireOrder(-1, !empty($entry['ballistic']) ? 'ballistic' : 'normal', $entry['unit']->id, $target->id, $weapon->id, -1, $turn,
-                    (int)$shot['mode'], (int)$shot['chance'], 0, $shot['shots'], 0, 0, null, null, $shot['damageclass']);
+                    (int)$shot['mode'], (int)$shot['chance'], 0, $shots, 0, 0, null, null, $shot['damageclass']);
                 $order->needed = (int)$shot['chance'];
                 $order->chosenLocation = ($shot['hitLoc'] !== null) ? (int)$shot['hitLoc'] : 0;
                 $order->totalIntercept = 0;

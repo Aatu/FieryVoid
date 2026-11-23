@@ -234,6 +234,13 @@ class AIConfig
     const BALLISTIC_MIN_CHANCE = 35;        //no launch below this: a round is spent for good, a torpedo's tube for its whole reload
     const BALLISTIC_MIN_CHANCE_FLIGHT = 50; //...at a flight: one fighter is a poor return on a missile
     const BALLISTIC_RESERVE = 0.0;          //share of a magazine never launched (0 = fire it dry; levels may raise it, stage T8)
+    /* The BALLISTIC TORPEDO (stage T9, M8 - the user, 2026-11-23: "2-3 torpedoes at one or two ships, or 3-6 at a fighter flight (it
+       targets separate fighters), backed by 1 or 2 OEW. Easy and Normal may simply fire 1-3 a turn at one target, Hard can consider
+       splitting a bit more"). A launcher holds up to six and gains one a turn. At a ship its torpedoes are ONE volley - one roll, one
+       interception, and 1 + one more for every 20% the roll beats the need by land (AIView::isTorpedo) - so each torpedo added to a
+       volley adds less; BallisticDecider::torpedoes adds them one at a time while the one added keeps the launch floor
+       (BALLISTIC_MIN_CHANCE(_FLIGHT) - of what it would do unintercepted). The most one launcher sends at ships in a turn: */
+    const TORPEDO_SHIP_VOLLEY = 3;
 
     /* Electronic warfare, stage T3 (EWDecider). Every point starts as defence; a point moves to
        offence while that is worth more in expected damage - dealt, weighed against taken. */
@@ -319,7 +326,7 @@ class AIConfig
        so the page keeps its own copy of the list): change one, change both. A drift shows as a refusal when the slot is readied. */
     const CPU_MISSING_SYSTEMS = array(
         'Marines' => array('Marines', true),                        //boarding - the user, 2026-11-23: "we will add Marines later"
-        'AntiprotonDefender' => array('Antiproton Defender', false), //a special hit chance formula (E4) - the Raiders' Jia carries no other
+        //(the Antiproton Defender's line came out at stage T9's M3, 2026-11-23: AIView::PORTED_SPECIAL - the Raiders' Jia is back)
     );
 
     //Why a CPU player cannot field $unit for a system the AI does not use yet (CPU_MISSING_SYSTEMS), or null.
@@ -432,28 +439,33 @@ class AIConfig
                         Normal orders it (FireDecider::splitGuns / mergeSplits)
          aoeSpread      deployment spread out against an enemy carrying an area-effect weapon (stage T9 - the user, 2026-11-23: "Normal and
                         Hard CPU should recognise when energy mines ... are present and deploy in a more spread out way"): units AOE_SPACING
-                        hexes apart where the zone has room (DeployDecider, FleetDeployer's 'spread'); Easy and legacy as they were */
+                        hexes apart where the zone has room (DeployDecider, FleetDeployer's 'spread'); Easy and legacy as they were
+         torpedoTargets      how many units one Ballistic Torpedo launcher may divide its torpedoes between in a turn (stage T9, M8 - the user,
+                        2026-11-23: "Easy and Normal may simply fire 1-3 a turn at one target, Hard can consider splitting a bit more"):
+                        BallisticDecider::torpedoes, which sends the second unit torpedoes only where they are worth more than more at the first
+         torpedoFlightVolley the most torpedoes one launcher sends at a FLIGHT in a turn ("3-6 at a fighter flight"; Easy and Normal "1-3") -
+                        never more than the flight has craft. At ships TORPEDO_SHIP_VOLLEY, every level */
     const SKILLS = array(
         'easy' => array('sectionHealth' => false, 'ccewDeterrent' => true, 'closeLocks' => false, 'mediumLocks' => false, 'noFlightOEW' => true, 'simpleEW' => true, 'focus' => 0.0, 'heavyFocus' => false,
             'pulsePremium' => false, 'shortening' => false, 'unmovedDanger' => 0.5, 'overspeed' => 0.5, 'ballisticFloor' => false,
             'flightDanger' => 0.75, 'jink' => 'max', 'manoeuvres' => 'none', 'noise' => 10.0, 'coverageGoals' => 0,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none',
-            'interceptorBoost' => false, 'ram' => false, 'splitShots' => false, 'aoeSpread' => false),
+            'interceptorBoost' => false, 'ram' => false, 'splitShots' => false, 'aoeSpread' => false, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3),
         'normal' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'closeLocks' => true, 'mediumLocks' => true, 'noFlightOEW' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 1.5, 'jink' => 'max', 'manoeuvres' => 'swap', 'noise' => 0.0, 'coverageGoals' => 4,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'turn',
-            'interceptorBoost' => false, 'ram' => true, 'splitShots' => false, 'aoeSpread' => true),
+            'interceptorBoost' => false, 'ram' => true, 'splitShots' => false, 'aoeSpread' => true, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3),
         'hard' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'closeLocks' => true, 'mediumLocks' => true, 'noFlightOEW' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 3.0, 'jink' => 'any', 'manoeuvres' => 'all', 'noise' => 0.0, 'coverageGoals' => 12,
             'pileOn' => 1.0, 'support' => 2.0, 'fleetFocus' => 0.5, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => true, 'extendedTurns' => true, 'forecast' => 'full',
-            'interceptorBoost' => true, 'ram' => true, 'splitShots' => true, 'aoeSpread' => true),
+            'interceptorBoost' => true, 'ram' => true, 'splitShots' => true, 'aoeSpread' => true, 'torpedoTargets' => 2, 'torpedoFlightVolley' => 6),
         'legacy' => array('sectionHealth' => false, 'ccewDeterrent' => true, 'closeLocks' => false, 'mediumLocks' => false, 'noFlightOEW' => false, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 0.75, 'jink' => 'max', 'manoeuvres' => 'swap', 'noise' => 0.0, 'coverageGoals' => 0,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none',
-            'interceptorBoost' => false, 'ram' => false, 'splitShots' => false, 'aoeSpread' => false)
+            'interceptorBoost' => false, 'ram' => false, 'splitShots' => false, 'aoeSpread' => false, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3)
     );
 
     /* POWER MANAGEMENT (skill 'powerBoost', stage T5f-4). A gun "reaches" an enemy when, with the units as close as both could

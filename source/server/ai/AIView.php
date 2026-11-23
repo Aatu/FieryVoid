@@ -45,6 +45,7 @@ class AIView
     private $shieldedUnits = array(); //cache: unit id => does it carry a Shield-type defence (shielded() - stage T9)
     private $worst = array();     //cache: unit id => worstExposure()
     private $overlaps = array();  //cache (stage T8): unit id => whole bearing => do 2+ entries of its hit table hold it ('locations': the table)
+    private $rolledDamage = array(); //cache (stage T9, M3-M5): "weapon object:mode:needed" => rollDamage()
 
     //Where TacGamedata::hideStealthShipMovement puts a unit this viewer may not see.
     const HIDDEN_Q = -10000;
@@ -228,7 +229,8 @@ class AIView
         if ($weapon->preFires) return 'pre-firing weapon';
         if ($weapon->hextarget || !empty($weapon->hextargetArray)) return 'hex-targeted';
         if ($weapon->autoFireOnly || !empty($weapon->autoFireOnlyArray)) return 'fires by itself';
-        if (!$this->plainMode($weapon)) return 'split shots'; //stage T9 (E1): only a weapon that splits in EVERY mode - see splitsIn()
+        //stage T9 (E1): only a weapon that splits in EVERY mode - see splitsIn(); the Ballistic Torpedo's split is ported (M8 - torpedoShot)
+        if (!self::isTorpedo($weapon) && !$this->plainMode($weapon)) return 'split shots';
         //from here on some flags are read from the weapon's payload (flag()): only for a weapon that got this far
         if ($this->flag($weapon, 'duoWeapon') || $this->flag($weapon, 'dualWeapon')) return 'compound weapon';
         if ($this->flag($weapon, 'isBoardingAction')) return 'boarding';
@@ -255,7 +257,7 @@ class AIView
             if (!($weapon instanceof MissileLauncher)) return 'limited ammunition';
             if (count($this->modes($weapon)) == 0) return 'out of ammunition';
         }
-        if ($this->flag($weapon, 'specialHitChanceCalculation') || $this->flag($weapon, 'specialRangeCalculation') || $this->flag($weapon, 'specialHitChanceCalculationArray') || $this->flag($weapon, 'specialRangeCalculationArray')) return 'special hit calculation';
+        if (!$this->portedSpecial($weapon)) return 'special hit calculation'; //stage T9 (M3-M5): unless it is one PORTED_SPECIAL names
         if (count($weapon->getFixedFireControlModes()) > 0) return 'fixed fire control';
 
         if ($weapon->isDestroyed()) return 'destroyed';
@@ -295,6 +297,164 @@ class AIView
             $this->ballistics = $kept;
         }
         return !in_array($why, self::NEVER_FIRED, true);
+    }
+
+    /* Stage T9 - the Missing systems M3 / M4 / M5 (plan 10.10): the weapons whose page-side SPECIAL hit or range calculation the bot has
+       ported, by class (instanceof), and which of the two it may carry. weaponBlock leaves every other weapon with either flag alone.
+         - AntimatterWeapon (M3 the Antiproton Defender, M4 the Antimatter Converter; the Vree's Antiproton Gun, Antimatter Cannon and
+           Antimatter Torpedo): its RANGE penalty is its own - none / regular / double brackets, and the range itself doubled for no lock
+           (doubleRangeIfNoLock). AntimatterWeapon::calculateRangePenalty (server) and antimatter.js calculateSpecialRangePenalty (page) are
+           a mirror pair; the bot prices every shot with the server's own calculateHitBase, and fireOracle.js holds every pairing's chance
+           to the page's. Its DAMAGE grows with the roll (rollScaled). The Converter's brackets (0 / 999) make its penalty the ordinary one
+           at every range (the user, 2026-11-23: it "doesn't actually use the specialHitChanceCalculation ... in practice").
+         - PointPulsar (M5): its special HIT modifier (pulse.js calculateSpecialHitChanceMod) is +4 for a CALLED shot at a fighter only -
+           the called-shot penalty undone, as the server's calculateHitBase does; the bot never calls a shot, so for it the formula is the
+           plain one. */
+    const PORTED_SPECIAL = array('AntimatterWeapon' => 'range', 'PointPulsar' => 'hit');
+
+    //No special calculation the page asks of $weapon (the flags as the page has them - flag()), or only the kind PORTED_SPECIAL names for its class.
+    private function portedSpecial(Weapon $weapon)
+    {
+        $hit = $this->flag($weapon, 'specialHitChanceCalculation') || $this->flag($weapon, 'specialHitChanceCalculationArray');
+        $range = $this->flag($weapon, 'specialRangeCalculation') || $this->flag($weapon, 'specialRangeCalculationArray');
+        if (!$hit && !$range) return true;
+        foreach (self::PORTED_SPECIAL as $class => $kind) {
+            if ($weapon instanceof $class) return !($hit && $kind !== 'hit') && !($range && $kind !== 'range');
+        }
+        return false;
+    }
+
+    /* Stage T9 (M3-M5): does $weapon's damage grow with how far the hit roll beats its need? Every AntimatterWeapon: X = (needed - rolled)
+       / 5, rounded down, at most maxX, less 2 for each Reduced Damage critical (getX), and the damage its dmgEquation of X - the Converter's
+       4X+2, the Defender's X+8. Its minDamage..maxDamage says nothing about a shot: the Converter's maxDamage 82 is "a reasonable maximum"
+       for X = 20, so the plain mid-point (42) priced a 40% shot at almost three times what it does (16). See rollDamage(). */
+    public static function rollScaled(Weapon $weapon)
+    {
+        return $weapon instanceof AntimatterWeapon;
+    }
+
+    /* What one hit of a rollScaled() weapon does on average, before armour, when it needs $needed percent (interception already taken
+       off - the figure Weapon::fire rolls against): the weapon's own getDamage over every d100 roll that hits, 1 to $needed (100 at most),
+       in its current mode. A need over 100 hits on any roll and still raises X. Remembered per weapon, mode and need. */
+    private function rollDamage(Weapon $weapon, $needed)
+    {
+        $needed = (int)floor($needed);
+        $key = spl_object_id($weapon) . ':' . (int)$weapon->firingMode . ':' . $needed;
+        if (!isset($this->rolledDamage[$key])) {
+            $order = new FireOrder(-1, 'normal', 0, 0, $weapon->id, -1, $this->turn, (int)$weapon->firingMode, 0, 0, 1, 0, 0, null, null, null);
+            $order->needed = $needed;
+            $hits = min(100, $needed);
+            $sum = 0;
+            if ($hits < 1) {
+                $order->rolled = $needed; //no roll hits: X = 0, for a figure that is never multiplied by more than nothing
+                $sum = $weapon->getDamage($order);
+                $hits = 1;
+            } else {
+                for ($rolled = 1; $rolled <= $hits; $rolled++) {
+                    $order->rolled = $rolled;
+                    $sum += $weapon->getDamage($order);
+                }
+            }
+            $this->rolledDamage[$key] = $sum / $hits;
+        }
+        return $this->rolledDamage[$key];
+    }
+
+    // ------------------------------------------------------------------ stage T9, M8: the Ballistic Torpedo
+
+    /* Is $weapon a BALLISTIC TORPEDO launcher (Centauri; the Kirishiac Phased Gravitic Torpedo extends it)? It holds up to `normalload`
+       torpedoes, one more each turn it does not fire, and splits its shots BY DEFAULT: each click on a unit launches one of them
+       (BallisticTorpedo.doMultipleFireOrders - one 'ballistic' order, one shot, the weapon's type for its damage class) until every
+       torpedo held has an order (checkFinished). The server then resolves those at a SHIP as one volley per launcher (Saturation Mode:
+       BallisticTorpedo::beforeFiringOrderResolution merges them BEFORE interception - Firing::prepareFiring, then automateIntercept - so
+       one roll and one interception, and 1 + one more for every `grouping` the roll beats the need by land, up to the number fired),
+       and at a FLIGHT as one order and roll each, at a fighter of its own (a called shot whose fighter is gone falls back to the
+       ordinary allocation - FighterFlight::getHitSystem - so a torpedo is wasted only on a flight with nobody left). */
+    public static function isTorpedo(Weapon $weapon)
+    {
+        return $weapon instanceof BallisticTorpedo;
+    }
+
+    //The torpedoes a launcher holds now - what the page lets it launch (checkFinished: an order each, up to turnsloaded).
+    public function torpedoes(Weapon $weapon)
+    {
+        return max(0, (int)$weapon->turnsloaded);
+    }
+
+    /* How many torpedoes of a launcher holding $held the bot sends at $target in a turn, at most (the user's ruling, 2026-11-23: "2-3
+       torpedoes at one or two ships, or 3-6 at a fighter flight ... Easy and Normal may simply fire 1-3 a turn at one target, Hard can
+       consider splitting a bit more"): AIConfig::TORPEDO_SHIP_VOLLEY at ships, the level's 'torpedoFlightVolley' at a flight - and no
+       more than the flight has craft left (each torpedo meets a fighter of its own). */
+    public function torpedoCap($target, $held)
+    {
+        if ($target instanceof FighterFlight) {
+            $craft = 0;
+            foreach ($target->systems as $fighter) {
+                if ($fighter instanceof Fighter && !$fighter->isDestroyed()) $craft++;
+            }
+            return max(0, min((int)$held, (int)$this->skill('torpedoFlightVolley'), $craft));
+        }
+        return max(0, min((int)$held, AIConfig::TORPEDO_SHIP_VOLLEY));
+    }
+
+    /* $count torpedoes of launcher $weapon of $unit at $target this turn, as the page launches them (one click each) and the server
+       resolves them (isTorpedo): a shot() whose 'orders' = $count (the rows posted, 'shots' 1 each), 'pulses' = the most that land on
+       one roll ($count at a ship, 1 at a flight), 'merged' = one order to the server's interception (a ship), and 'damage' the whole
+       volley's. Null where the page would launch none (shot()'s tests - the weapon's own mode, its arc at launch, range, line of
+       sight, fire control) or the launcher does not hold $count. The weapon is LEFT IN its mode; answers are remembered as shot()'s. */
+    public function torpedoShot($unit, Weapon $weapon, $target, $count)
+    {
+        $mode = (int)$weapon->firingMode;
+        $key = 'torpedo:' . $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id . ':' . (int)$count;
+        if (!array_key_exists($key, $this->shots)) {
+            $this->refusal = null;
+            $shot = null;
+            if (!self::isTorpedo($weapon) || $count < 1 || $count > $this->torpedoes($weapon)) $this->refuse('unloaded');
+            else {
+                $flight = ($target instanceof FighterFlight);
+                $shot = $this->work($unit, $weapon, $target, $mode, true, $flight ? 1 : (int)$count);
+                if ($shot !== null) $shot = self::asVolley($shot, $target, (int)$count);
+            }
+            $this->shots[$key] = $shot;
+            $this->why[$key] = $this->refusal;
+        }
+        return $this->shots[$key];
+    }
+
+    //A torpedo shot priced at one roll of its 'pulses' (price()), made the whole volley of $count (torpedoShot).
+    private static function asVolley(array $shot, $target, $count)
+    {
+        $flight = ($target instanceof FighterFlight);
+        $shot['orders'] = $count;
+        $shot['shots'] = 1;
+        $shot['pulses'] = $flight ? 1 : $count;
+        $shot['merged'] = !$flight;
+        if ($flight) $shot['damage'] *= $count; //an order and a roll each
+        return $shot;
+    }
+
+    /* Would BallisticDecider launch $weapon of $unit this turn (weaponBlock in its ballistic form)? EWDecider asks it of a ship's torpedo
+       launchers in Initial Orders, before the launches are planned. */
+    public function launcherNow($unit, Weapon $weapon)
+    {
+        if (!$weapon->ballistic) return false;
+        $was = $this->ballistics;
+        $this->ballistics = true;
+        try {
+            return $this->unitBlock($unit) === null && $this->weaponBlock($unit, $weapon, null) === null;
+        } finally {
+            $this->ballistics = $was;
+        }
+    }
+
+    /* What a torpedo volley of $weapon of $shooter launched NOW should do to $target (stage T9, M8 - the user: torpedoes "backed by 1 or 2
+       OEW"): the volley the bot would send there (torpedoCap), from the launch hex, priced as estimate() prices a gun - the real hit
+       formula with the EW the ship carries at the time of asking, uncached - with the page's launch tests (arc as the ship stands now -
+       a launch has no Movement before it - range, line of sight, fire control). No interception. 0 where nothing could be launched. */
+    public function torpedoEstimate($shooter, Weapon $weapon, $target)
+    {
+        if (!self::isTorpedo($weapon)) return 0;
+        return $this->launchValue($shooter, $weapon, $target, $this->turn, $this->torpedoes($weapon), true);
     }
 
     /* A MISSILE RACK fed from an Ammunition Magazine (AmmoMissileRackS and everything built on it,
@@ -421,7 +581,8 @@ class AIView
         }
         foreach (array_keys($weapon->firingModes) as $mode) {
             $mode = (int)$mode;
-            if ($this->splitsIn($weapon, $mode)) continue; //stage T9 (E1): never a splitting mode - see splitsIn()
+            //stage T9 (E1): never a splitting mode - see splitsIn(); a Ballistic Torpedo splits in every mode, and that split is ported (M8)
+            if ($this->splitsIn($weapon, $mode) && !self::isTorpedo($weapon)) continue;
             $type = isset($weapon->damageTypeArray[$mode]) ? $weapon->damageTypeArray[$mode] : $weapon->damageType;
             //⚠️ see the header: with officers aboard, pricing a Piercing shot may spend an Expert Gunner's bonus
             if (TacGamedata::$officersPresent && $type === 'Piercing') continue;
@@ -446,7 +607,13 @@ class AIView
         $key = $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id;
         if (!array_key_exists($key, $this->shots)) {
             $this->refusal = null;
-            $this->shots[$key] = $this->work($unit, $weapon, $target, (int)$mode);
+            if (self::isTorpedo($weapon)) {
+                //stage T9 (M8): a Ballistic Torpedo's shot is ONE torpedo - one click on the page (torpedoShot)
+                $one = $this->work($unit, $weapon, $target, (int)$mode, true, 1);
+                $this->shots[$key] = ($one !== null) ? self::asVolley($one, $target, 1) : null;
+            } else {
+                $this->shots[$key] = $this->work($unit, $weapon, $target, (int)$mode);
+            }
             $this->why[$key] = $this->refusal;
         }
         if ($this->shots[$key] !== null && (int)$weapon->firingMode !== (int)$mode) $weapon->changeFiringMode((int)$mode);
@@ -522,7 +689,8 @@ class AIView
        Particle's, so a click in its Split mode makes no order at all. */
     const SPLIT_FAMILIES = array('TwinArray', 'HeavyArray', 'QuadArray', 'QuadParticleBeam');
 
-    private function work($unit, Weapon $weapon, $target, $mode, $split = false)
+    //$pulses: price() it at that many pulses at most on one roll (stage T9, M8 - a torpedo volley); null for the weapon's own figure
+    private function work($unit, Weapon $weapon, $target, $mode, $split = false, $pulses = null)
     {
         if (!isset($weapon->firingModes[$mode])) return $this->refuse('mode');
         if ((int)$weapon->firingMode !== $mode) $weapon->changeFiringMode($mode);
@@ -559,7 +727,7 @@ class AIView
         //checkIsInRange: a young race's ballistic cannot be launched at a stealth flight more than 5 hexes off (here: nobody's)
         if ($this->ballistics && $flightTarget && $distance > 5 && $target->getSystemByName('Stealth')) return $this->refuse('range');
 
-        $shot = $this->price($unit, $weapon, $target, $mode, $distance, $this->ballistics);
+        $shot = $this->price($unit, $weapon, $target, $mode, $distance, $this->ballistics, $pulses);
         if ($shot === null) return $this->refuse('edge'); //a launch the engine would price on a die (hitBase)
         //the page makes no order for a direct shot that cannot hit; it would launch such a ballistic, the bot never does
         if ($shot['chance'] < 1) return $this->refuse('chance');
@@ -569,7 +737,7 @@ class AIView
     /* The real formula, on an order that exists only here - the shot shot() describes, legality
        aside. Null when it cannot be priced without a die (hitBase). 'perHit' is what one hit of the
        likeliest section does, for re-pricing the shot at a lower chance (damageAfter). */
-    private function price($unit, Weapon $weapon, $target, $mode, $distance, $ballistic)
+    private function price($unit, Weapon $weapon, $target, $mode, $distance, $ballistic, $pulses = null)
     {
         $order = new FireOrder(-1, $ballistic ? 'ballistic' : 'normal', $unit->id, $target->id, $weapon->id, -1, $this->turn, $mode, 0, 0, $weapon->defaultShots, 0, 0, null, null, null);
         $answers = $this->hitBase($weapon, $unit, $target, $order);
@@ -578,19 +746,21 @@ class AIView
         $expected = 0;
         $hitLoc = null;
         $perHit = 0;
+        $needed = 0;
         $likeliest = -1;
         foreach ($answers as $answer) {
-            $hit = $this->damagePerHit($weapon, $unit, $target, $answer['loc'], $distance);
+            $hit = $this->damagePerHit($weapon, $unit, $target, $answer['loc'], $distance, $answer['needed']);
             $chance += $answer['weight'] * $answer['needed'];
-            $expected += $answer['weight'] * $this->atChance($weapon, $hit, $answer['needed']);
+            $expected += $answer['weight'] * $this->atChance($weapon, $hit, $answer['needed'], $pulses);
             if ($answer['weight'] > $likeliest) {
                 $likeliest = $answer['weight'];
                 $hitLoc = $answer['loc'];
                 $perHit = $hit;
+                $needed = $answer['needed'];
             }
         }
 
-        return array(
+        $shot = array(
             'mode' => $mode,
             'chance' => (int)round($chance),
             'orders' => (int)$weapon->guns,
@@ -598,30 +768,44 @@ class AIView
             'damageclass' => strtolower((string)$weapon->weaponClass),
             'damage' => $expected,
             'perHit' => $perHit,
+            'needed' => $needed, //stage T9 (M3-M5): the likeliest entry's need, perHit's - a rollScaled weapon's hit is worth less at a lower one (damageAfter)
             'hitLoc' => $hitLoc,
             'distance' => $distance,
             'edge' => $this->onEdge($unit, $target)
         );
+        if ($pulses !== null) $shot['pulses'] = (int)$pulses;
+        return $shot;
     }
 
     /* A missile of the bot's own already on its way this turn (a ballistic order of Initial Orders,
        read in the Fire phase): what it should do where its target now stands, priced as shot()
        prices a launch - from its launch hex. Null when it cannot be priced without a die. */
-    public function launched($unit, Weapon $weapon, $target, $mode)
+    public function launched($unit, Weapon $weapon, $target, $mode, $count = 1)
     {
         if ((int)$weapon->firingMode !== (int)$mode) $weapon->changeFiringMode((int)$mode);
         $distance = $unit->getHexPos()->distanceTo($target->getHexPos());
-        return $this->price($unit, $weapon, $target, (int)$mode, $distance, true);
+        if (!self::isTorpedo($weapon)) return $this->price($unit, $weapon, $target, (int)$mode, $distance, true);
+        //stage T9 (M8): $count torpedoes of one launcher at $target - one volley at a ship, a roll each at a flight (isTorpedo)
+        $flight = ($target instanceof FighterFlight);
+        $shot = $this->price($unit, $weapon, $target, (int)$mode, $distance, true, $flight ? 1 : max(1, (int)$count));
+        return ($shot !== null) ? self::asVolley($shot, $target, max(1, (int)$count)) : null;
     }
 
     /* What ONE gun of a planned shot should do once interception has taken $intercept points of
-       chance off it (InterceptModel). The weapon is put in the shot's mode. */
+       chance off it (InterceptModel). The weapon is put in the shot's mode.
+       Stage T9: a rollScaled weapon's hit is worth less at the lower need (rollDamage: perHit moved by the drop in its mean - armour as
+       it was, a Raking one's rakes as they were); a shot with 'pulses' (a torpedo volley, one order to the server when 'merged') lands
+       that many at most. */
     public function damageAfter(array $shot, Weapon $weapon, $intercept)
     {
         if ((int)$weapon->firingMode !== (int)$shot['mode']) $weapon->changeFiringMode((int)$shot['mode']);
         $chance = $shot['chance'] - $intercept;
         if ($chance <= 0) return 0;
-        return $this->atChance($weapon, $shot['perHit'], $chance) / max(1, (int)$weapon->guns);
+        $perHit = $shot['perHit'];
+        if ($intercept > 0 && self::rollScaled($weapon) && isset($shot['needed'])) {
+            $perHit = max(0.5, $perHit + $this->rollDamage($weapon, $shot['needed'] - $intercept) - $this->rollDamage($weapon, $shot['needed']));
+        }
+        return $this->atChance($weapon, $perHit, $chance, isset($shot['pulses']) ? $shot['pulses'] : null) / max(1, (int)$weapon->guns);
     }
 
     /* Does the shooter sit exactly on a line between two of the target's sections or profiles
@@ -878,19 +1062,21 @@ class AIView
         return $distance <= $range;
     }
 
-    //What a volley at $chance percent should do: every gun, every shot (or pulse) of it, after armour and range.
-    private function expected(Weapon $weapon, $unit, $target, $chance, $hitLoc, $distance)
+    /* What a volley at $chance percent should do: every gun, every shot (or pulse) of it, after armour and range. $needed: the need
+       before it was clipped to 0..100, for a rollScaled weapon's hit (stage T9); $pulses: atChance's. */
+    private function expected(Weapon $weapon, $unit, $target, $chance, $hitLoc, $distance, $needed = null, $pulses = null)
     {
-        return $this->atChance($weapon, $this->damagePerHit($weapon, $unit, $target, $hitLoc, $distance), $chance);
+        return $this->atChance($weapon, $this->damagePerHit($weapon, $unit, $target, $hitLoc, $distance, $needed), $chance, $pulses);
     }
 
-    //The same, given what one hit does: every gun, every shot (or pulse) at $chance percent. The weapon's mode is the shot's.
-    private function atChance(Weapon $weapon, $perShot, $chance)
+    /* The same, given what one hit does: every gun, every shot (or pulse) at $chance percent. The weapon's mode is the shot's.
+       $pulses: the most pulses one roll lands, when that is not the weapon's own maxpulses (stage T9, M8 - a torpedo volley). */
+    private function atChance(Weapon $weapon, $perShot, $chance, $pulses = null)
     {
         $expected = 0;
         if ($weapon->damageType === 'Pulse') {
             //one roll; each further pulse needs the roll to be `grouping` lower
-            $expected = $perShot * $this->expectedPulses($weapon, $chance);
+            $expected = $perShot * $this->expectedPulses($weapon, $chance, $pulses);
         } else {
             $shots = max(1, (int)$weapon->defaultShots);
             for ($i = 0; $i < $shots; $i++) {
@@ -903,10 +1089,12 @@ class AIView
     /* What one hit is worth: the mode's average damage, less what the range takes off it (a
        plasma weapon's rangeDamagePenalty - Weapon::getDamageMod), less the armour it meets. An
        estimate for ranking, in the spirit of BaseShip::setExpectedDamage - not a simulation. */
-    private function damagePerHit(Weapon $weapon, $unit, $target, $hitLoc, $distance = 0)
+    private function damagePerHit(Weapon $weapon, $unit, $target, $hitLoc, $distance = 0, $needed = null)
     {
         $average = ($weapon->minDamage + $weapon->maxDamage) / 2;
         if ($weapon->maxDamage <= 0) return 1; //no damage of its own: an effect weapon, counted as a token
+        //stage T9 (M3-M5): a weapon whose damage grows with the roll, at the need it is fired at (rollDamage), not its range's mid-point
+        if ($needed !== null && self::rollScaled($weapon)) $average = $this->rollDamage($weapon, $needed);
 
         if ($weapon->rangeDamagePenalty > 0 && $distance > 0) {
             $factor = (TacGamedata::$nebulaPresent && $weapon->weaponClass === 'Plasma') ? 2 : 1; //NEBULA_PLAN.md #11
@@ -970,11 +1158,11 @@ class AIView
         return $this->shieldedUnits[$key];
     }
 
-    //Pulses expected from one pulse shot: 1 on a hit, +1 for each `grouping` the roll beats the need by.
-    private function expectedPulses(Weapon $weapon, $chance)
+    //Pulses expected from one pulse shot: 1 on a hit, +1 for each `grouping` the roll beats the need by - $pulses at most (the weapon's maxpulses when null).
+    private function expectedPulses(Weapon $weapon, $chance, $pulses = null)
     {
         $chance = max(0, min(100, $chance));
-        $max = max(1, (int)$weapon->maxpulses);
+        $max = max(1, (int)($pulses !== null ? $pulses : $weapon->maxpulses));
         $grouping = (float)$weapon->grouping;
         if ($grouping <= 0) return $chance / 100 * max(1, min($max, (int)$weapon->defaultShots));
 
@@ -1179,18 +1367,43 @@ class AIView
     public function launchEstimate($shooter, Weapon $weapon, $target)
     {
         if (!$weapon->ballistic) return 0;
+        //stage T9 (M8): a torpedo launcher holds one more next turn if it does not launch now, up to its normal load
+        $held = self::isTorpedo($weapon) ? min((int)$weapon->getNormalLoad(), $this->torpedoes($weapon) + 1) : 0;
+        return $this->launchValue($shooter, $weapon, $target, $this->turn + 1, $held, false);
+    }
+
+    /* launchEstimate()'s and torpedoEstimate()'s pricing: a launch of $weapon at $target dated $turn (Weapon::getFiringHex then takes the
+       last row of the turn before it as the launch hex), the arc as the shooter stands, the hit formula with the EW on the board. A torpedo
+       launcher holding $held is priced as the volley the bot would send (torpedoCap). $los: ask the page's line-of-sight test too (the
+       launch-now estimate does; the next-turn one never did). */
+    private function launchValue($shooter, Weapon $weapon, $target, $turn, $held, $los)
+    {
         if (TacGamedata::$officersPresent && $weapon->damageType === 'Piercing') return 0;
+
+        $count = self::isTorpedo($weapon) ? $this->torpedoCap($target, $held) : 1;
+        if ($count < 1) return 0;
+        $pulses = self::isTorpedo($weapon) ? (($target instanceof FighterFlight) ? 1 : $count) : null;
 
         $fc = $weapon->fireControl;
         $index = ($target instanceof FighterFlight) ? 0 : (($target->shipSizeClass < 2) ? 1 : 2);
         if (!isset($fc[$index])) return 0;
 
-        $distance = $shooter->getHexPos()->distanceTo($target->getHexPos());
-        if ($distance > 0 && !$this->onArc($shooter, $weapon, $target)) return 0;
+        /* A launch NOW is from where the ship began the turn (getFiringHex: the last row of the turn before) - EWDecider prices its split
+           with the bot's ships stood a turn straight on, which a launch in Initial Orders never sees. Next turn's is from where it stands. */
+        $from = $shooter->getHexPos();
+        $heading = null;
+        if ((int)$turn === $this->turn) {
+            $row = $shooter->getLastTurnMovement($turn);
+            if ($row && $row->position) $from = new OffsetCoordinate($row->position);
+            $heading = round(Mathlib::getCompassHeadingOfPoint(Mathlib::hexCoToPixel($from), Mathlib::hexCoToPixel($target->getHexPos())));
+        }
+        $distance = $from->distanceTo($target->getHexPos());
+        if ($distance > 0 && !($heading !== null ? $this->inArcAt($shooter, $weapon, $heading) : $this->onArc($shooter, $weapon, $target))) return 0;
         if (!$this->inRange($shooter, $weapon, $target, $distance)) return 0;
         if ($target instanceof FighterFlight && $distance > 5 && $target->getSystemByName('Stealth')) return 0;
+        if ($los && !$weapon->ignoresLoS && count($this->blocked) > 0 && Mathlib::isLoSBlocked($from, $target->getHexPos(), $this->blocked)) return 0;
 
-        $order = new FireOrder(-1, 'ballistic', $shooter->id, $target->id, $weapon->id, -1, $this->turn + 1, $weapon->firingMode, 0, 0, $weapon->defaultShots, 0, 0, null, null, null);
+        $order = new FireOrder(-1, 'ballistic', $shooter->id, $target->id, $weapon->id, -1, $turn, $weapon->firingMode, 0, 0, $weapon->defaultShots, 0, 0, null, null, null);
         try {
             $answers = $this->hitBase($weapon, $shooter, $target, $order);
         } catch (Throwable $e) {
@@ -1200,8 +1413,10 @@ class AIView
         $total = 0;
         foreach ($answers as $answer) {
             $chance = max(0, min(100, $answer['needed']));
-            if ($chance > 0) $total += $answer['weight'] * $this->expected($weapon, $shooter, $target, $chance, $answer['loc'], $distance);
+            if ($chance > 0) $total += $answer['weight'] * $this->expected($weapon, $shooter, $target, $chance, $answer['loc'], $distance, $answer['needed'], $pulses);
         }
+        //a torpedo volley at a flight: an order and a roll each (isTorpedo)
+        if ($pulses === 1) $total *= $count;
         return $total;
     }
 
@@ -1227,7 +1442,7 @@ class AIView
         $total = 0;
         foreach ($answers as $answer) {
             $chance = max(0, min(100, $answer['needed']));
-            if ($chance > 0) $total += $answer['weight'] * $this->expected($weapon, $shooter, $target, $chance, $answer['loc'], $distance);
+            if ($chance > 0) $total += $answer['weight'] * $this->expected($weapon, $shooter, $target, $chance, $answer['loc'], $distance, $answer['needed']);
         }
         return $total;
     }

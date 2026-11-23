@@ -348,8 +348,14 @@ class EWDecider
 
         //(game 5826) how many points one step of the search may move onto an enemy: 1 unless an enemy ELINT disrupts this ship
         $step = self::lockStep($view, $ship, $base);
+        //stage T9 (M8): the ship's Ballistic Torpedo launchers that launch this turn - their volley counts in a split's worth (score())
+        $launchers = array();
+        foreach ($view->mounts($ship) as $mount) {
+            if ($mount['fighter'] === null && AIView::isTorpedo($mount['weapon']) && $view->launcherNow($ship, $mount['weapon'])) $launchers[] = $mount['weapon'];
+        }
         $state = array('view' => $view, 'ship' => $ship, 'base' => $base, 'guns' => $guns, 'enemies' => $enemies,
-            'units' => $units, 'threats' => null, 'offence' => array(), 'defence' => array(), 'soft' => $soft, 'disrupted' => ($step > 1));
+            'units' => $units, 'threats' => null, 'offence' => array(), 'defence' => array(), 'soft' => $soft, 'disrupted' => ($step > 1),
+            'launchers' => $launchers);
 
         //the CCEW deterrent first: a point of DEW the greedy below does not have to find a gain for (a level's skill, stage T5f)
         if ($deterrent && $canShootFighters && !$lcv && $alloc['DEW'] > $minDew && $view->skill('ccewDeterrent')) {
@@ -371,6 +377,29 @@ class EWDecider
                 if (isset($alloc['OEW'][(int)$enemy->id]) || !self::reaches($view, $ship, $guns, $enemy, $base)) continue;
                 $alloc['DEW']--;
                 $alloc['OEW'][(int)$enemy->id] = 1;
+            }
+        }
+
+        /* THE TORPEDO'S LOCK (stage T9, M8 - the user, 2026-11-23: Ballistic Torpedoes "backed by 1 or 2 OEW"). A ship whose torpedoes launch
+           this turn puts a point, before the search, on the enemy SHIP they would do most to with it (AIView::torpedoEstimate - the volley the
+           bot would send) - where the point adds something (a jammer denies it). The search may add the second: the volley counts in
+           score(). A flight is CCEW's (noFlightOEW). Every level the search runs at (Easy's simpleEW puts its OEW on the nearest ship). */
+        if (count($launchers) > 0 && !$lcv && $alloc['DEW'] > $minDew) {
+            $pick = null;
+            $pickWorth = 0;
+            foreach ($lockable as $enemy) {
+                if ($enemy instanceof FighterFlight || !empty($enemy->mine) || isset($alloc['OEW'][(int)$enemy->id])) continue;
+                if (isset($caps[(int)$enemy->id]) && $caps[(int)$enemy->id] < 1) continue;
+                $without = self::torpedoWorth($view, $ship, $launchers, $enemy, $base, 0);
+                $with = self::torpedoWorth($view, $ship, $launchers, $enemy, $base, 1);
+                if ($with > $without && $with > $pickWorth) {
+                    $pick = $enemy;
+                    $pickWorth = $with;
+                }
+            }
+            if ($pick !== null) {
+                $alloc['DEW']--;
+                $alloc['OEW'][(int)$pick->id] = 1;
             }
         }
 
@@ -504,6 +533,16 @@ class EWDecider
         return $reach['shots'] == 0;
     }
 
+    //(Stage T9, M8) What $ship's torpedo launchers would do to $enemy with $points of OEW on it (AIView::torpedoEstimate) - the one lock row alone.
+    private static function torpedoWorth(AIView $view, $ship, array $launchers, $enemy, array $base, $points)
+    {
+        $ship->EW = ($points > 0) ? array_merge($base, array(new EWentry(-1, $ship->id, $view->turn, 'OEW', $points, $enemy->id))) : $base;
+        $worth = 0;
+        foreach ($launchers as $weapon) $worth += $view->torpedoEstimate($ship, $weapon, $enemy);
+        $ship->EW = $base;
+        return $worth;
+    }
+
     //Could a loaded gun of $ship do anything to $enemy with a point locked on it? Arcs not asked, as score() does not.
     private static function reaches(AIView $view, $ship, array $guns, $enemy, array $base)
     {
@@ -559,6 +598,25 @@ class EWDecider
                     }
                     $state['offence'][$key] = $view->estimate($ship, $weapon, $enemy, false)
                         * (isset($state['soft'][(int)$enemy->id]) ? AIConfig::EW_MOVES_AFTER_WEIGHT : 1);
+                }
+                $best = max($best, $state['offence'][$key]);
+            }
+            $offence += $best;
+        }
+        /* (Stage T9, M8) the ship's torpedo launchers: each its volley at the one enemy it does most to, launched now - the arc as the ship
+           stands, the launch is before Movement (AIView::torpedoEstimate). Not weighted by who moves first: a torpedo follows its target. */
+        foreach ($state['launchers'] as $weapon) {
+            $best = 0;
+            foreach ($state['enemies'] as $enemy) {
+                $oew = isset($alloc['OEW'][(int)$enemy->id]) ? $alloc['OEW'][(int)$enemy->id] : 0;
+                $ccew = ($enemy instanceof FighterFlight) ? $alloc['CCEW'] : 0;
+                $key = 'torpedo:' . $weapon->id . ':' . $enemy->id . ':' . $oew . ':' . $ccew . ($state['disrupted'] ? ':' . $locks : '');
+                if (!isset($state['offence'][$key])) {
+                    if (!$standing) {
+                        $ship->EW = $rows;
+                        $standing = true;
+                    }
+                    $state['offence'][$key] = $view->torpedoEstimate($ship, $weapon, $enemy);
                 }
                 $best = max($best, $state['offence'][$key]);
             }

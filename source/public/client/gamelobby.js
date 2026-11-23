@@ -3932,8 +3932,8 @@ window.gamedata = {
 	   pods: "Hide for now, we will add Marines later"; TACTICAL_AI_PLAN.md 10.10 "Missing systems").
 	   ⚠️ MIRROR PAIR with AIConfig::CPU_MISSING_SYSTEMS (source/server/ai/AIConfig.php): change one, change both. */
 	CPU_MISSING_SYSTEMS: {
-		Marines: ["Marines", true],
-		AntiprotonDefender: ["Antiproton Defender", false]
+		Marines: ["Marines", true]
+		//(the Antiproton Defender's line came out at stage T9's M3, 2026-11-23 - the Raiders' Jia is back)
 	},
 
 	/* Why a CPU player cannot field a unit of this blueprint for a system the AI does not use yet, or null - the page's half of

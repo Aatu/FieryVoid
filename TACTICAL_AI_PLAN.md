@@ -2499,7 +2499,7 @@ before. Ordered by what they unlock in the user's order:
 | E1 | **Split-shot weapons** - the Twin Array family | Centauri 201, Narn 106, Gaim 92, Abbai 59 (Quad Arrays), Corillani 55, Raiders 45 (**already released: today their Twin Arrays never fire**), Deneth 35, Drazi 10, Centauri (WotCR) 9, Llort 8, Brakiri 6 (Gravitic Lance), Dilgar 4 | Port the page's split-shot orders (weaponManager) into AIView / FireDecider - every shot at one target first, splitting between targets later; fire-pair boards for them. The single largest unlock |
 | E2 | **Ammunition weapons** (a count, no magazine) | Grome 64 (their rail guns), Orieni 53 (gatlings, SO racks), Alacan 16, Small Races 14, Centauri / Cascor / Gaim / Belt / Rogolon 12, Dilgar 7, fighters' torpedo and missile launchers everywhere | Track the count as the page does, never fire past it; the page as oracle |
 | E3 | **Magazine rounds outside `BALLISTIC_ROUNDS`** | Kor-Lyan 102 (D-racks 62, mine launchers 10); fighter racks elsewhere (mostly the survey's empty magazines - first CHECK with missiles bought) | Model each round's rules (interceptor, multiwarhead, mines...) or rule it left alone |
-| E4 | **Special hit chance** (`specialHitChanceCalculation`) | Vree 104 (antimatter - their arsenal), Gaim 60 (Packet Torpedo), Raiders 18 (Antiproton Defender), Minbari 11, Minbari Protectorate 4 | Port each family's page formula into AIView - the server's own `calculateHitBase`, as always - and an oracle board per family |
+| E4 | **Special hit chance** (`specialHitChanceCalculation`) | Vree 104 (antimatter - their arsenal), Gaim 60 (Packet Torpedo), Raiders 18 (Antiproton Defender), Minbari 11, Minbari Protectorate 4 | Port each family's page formula into AIView - the server's own `calculateHitBase`, as always - and an oracle board per family. **The ANTIMATTER family and the Point Pulsar are done (M3-M5, 2026-11-23: `AIView::PORTED_SPECIAL`)** - the Vree's antimatter guns now pass the fire pair; their turret links (E10) are what is left. Gaim's Packet Torpedo and the rest still to do |
 | E5 | **Hex-targeted weapons** | Pak'ma'ra 43 (Plasma Web), Ipsha 16 (Spark Field), Kor-Lyan 16 (Proximity Laser), Narn 12 (Energy Mine), Brakiri 7 (Gravitic Mine), Hyach 6, Vree 5, Cascor 4 | A hex-choice per family; fire-pair hex boards on T6c's vortex pattern (every hex clicked through the page) |
 | E6 | **A Pre-Firing decider** (phase 5 - "nothing in v1", 5.5) | Minbari 10 (Gravity Net), Brakiri 8 (Gravitic Shifter), Minbari Protectorate 8, Narn 2 (Pulsar Mine) | A new decider and a phase-5 oracle - or rule them left alone for v1 (D4) |
 | E7 | **Power models** PowerDecider leaves alone | Pak'ma'ra 14 hulls (Plasma Battery), Ipsha 13 (Mag-Grav), Vorlons 12 (Power Capacitor) | Port each balance into PowerDecider; the orders oracle |
@@ -2553,7 +2553,7 @@ Dilgar Delegor): they "can and should always Ram, and can ignore the normal cond
 |---|---|---|
 | (2) E1, Easy / Normal | `AIView::splitsIn` / `plainMode`: a weapon is left alone ('split shots') only when EVERY mode splits; `modes()` never offers a splitting mode - a Twin Array fires its Normal mode, one order a gun at one target, as the page's plain loop builds it | fireRulesHarness E1 (Primus, G'Quan, Secundus Heavy Array, Bimith Quad Array; GunLost); fire pair 0 diff |
 | (2) E1, Hard | skill `splitShots` (Hard): `FireDecider::splitGuns` offers each gun of a split weapon to the greedy pick on its own (`AIView::splitShot` - one order, one shot, 'Sweeping', the page's doMultipleFireOrders); `mergeSplits` orders a weapon whose every gun went to one target in its plain mode, else one row per target in the split mode (notes 'Split', as the page). Hard re-plans with whole weapons and keeps the split plan only when `planWorth` is higher ("whether there's any advantage in damage potential") - on one harness board in eight the greedy's finer pieces came out worse | fireRulesHarness E2; the fire pair's new split boards (a hull with a split weapon meets a flight cut to 1-2 craft every other round) + `fireOracle.js replaySplits` clicks every split row through the page. Found by it: `FireDecider::entries` overwrote a split weapon's first row (fixed) |
-| (2) default-split weapons | NOT YET - the Ballistic Torpedo (3 Centauri mounts), the slicers (2 EA) stay idle; the Unreliable Twin Array fires whole only (its page prototype is plain Particle: a Split click makes no order - a page gap, not fixed) | - |
+| (2) default-split weapons | The Ballistic Torpedo BUILT at M8 (2026-11-23 - "M8 and M3-M5 as built" below); the slicers (2 EA) stay idle (M9); the Unreliable Twin Array fires whole only (its page prototype is plain Particle: a Split click makes no order - a page gap, not fixed) | - |
 | (1) Minbari jammer | The pricing already knew the jammer (DEW is priced through the real hit formula): a Sharlin vs an Omega + Hyperion moving first goes 5 OEW at 22 hexes, 9 at 26, 12 of 12 from 30. Against enemies moving AFTER it the soft lock held it to 2 OEW / 10 DEW at every range. `EWDecider::jammed()` (the engine's Jammer ability against every non-mine enemy) lifts the soft caps beyond EW_CLOSE_RANGE (medium and close caps stay): 26 hexes 5 OEW, 30 -> 8, 36 -> 12 | levelsHarness P (mutant "always lift" caught by the disarmed-enemy board); orders pair 0 diff |
 | (3) Chameleon | No code: the Dargan's ChameleonSensors is an ELINT scanner; the bot never toggles the disguise (an ELINT ship keeps its EW on DEW, as EA's do). The Rutarian's Stealth is the young-race fighter kind, not trueStealth | pairs over `centauri` |
 | (4) AoE deploy spread | `AIConfig::AOE_WEAPONS` (EnergyMine, LightEnergyMine - instanceof, add a class to extend) + `AOE_SPACING` 3 + skill `aoeSpread` (Normal/Hard): `DeployDecider::aoeThreat` -> FleetDeployer option `spread` (line, screen and rank spacing 3 where the zone has room; 0 = the standard arithmetic, so Auto-Deploy is unchanged) | NEW `tests/ai/deploySpreadHarness.php` 66 checks (no two units within 2 hexes; every hex `inZone`; Easy / no AoE / Auto-Deploy unchanged; tight zone) |
@@ -2566,15 +2566,16 @@ Dilgar Delegor): they "can and should always Ram, and can ignore the normal cond
 gains for free: Abbai 57% -> 96%, Corillani 58% -> 96%, Deneth 40% -> 100%, Llort 86% -> 91%, Drazi 78% -> 82%, Gaim 49% -> 75%.
 Dilgar stays 95% (its 4 Point Pulsars are E4 - a special hit formula - not E1).
 
-#### ⭐ MAJOR FACTIONS - AI STATUS AT A GLANCE (kept current; last updated 2026-11-23)
+#### ⭐ MAJOR FACTIONS - AI STATUS AT A GLANCE (kept current; last updated 2026-11-23, after M8 and M3-M5)
 
 **All nine are on `READY_FACTIONS`** - a CPU player can field them, the lobby offers them, and auto-compose builds their fleets.
 
 **What every released faction gets (built, stages T1-T9):** deployment (formations, Auto-Deploy, spread out against enemy Energy Mines);
 movement (ordinary and gravitic drives, overthrust, turn shortening, extended turns at Hard, pivots and rolls for damaged ships, terrain and
 mine avoidance, enemy-move forecasting at Normal/Hard); power (deficits, Hard boosts); EW (OEW/DEW/CCEW, lock rules, jammer-aware); direct
-fire with focus and interception modelled; ballistic launches (magazine racks, old-style racks, fighter racks with missiles aboard); fighter
-flights (strike / intercept / escort, jinking, coverage search); split-shot weapons (plain mode; Hard splits where it pays); limited-ammo
+fire with focus and interception modelled; ballistic launches (magazine racks, old-style racks, fighter racks with missiles aboard); Ballistic
+Torpedoes (volleys priced as the server resolves them, backed by OEW - M8); antimatter weapons (damage priced by the roll - M3/M4) and Point
+Pulsars (M5); fighter flights (strike / intercept / escort, jinking, coverage search); split-shot weapons (plain mode; Hard splits where it pays); limited-ammo
 weapons (fire until empty); exclusive fighter guns (big gun at ships, paired guns at fighters); ramming (designed rammers always, the
 Desperate rule otherwise); surrender and jump-out; Easy / Normal / Hard; auto-composed fleets (official and semi-custom units, never custom).
 
@@ -2582,24 +2583,26 @@ Desperate rule otherwise); surrender and jump-out; Easy / Normal / Hard; auto-co
 |---|---|---|---|---|---|
 | Earth Alliance | 95% | Interceptors (Hard turns them offensive vs fighter-heavy fleets), magazine missile racks, Thunderbolt linked racks | Lamprey breaching pod (M1) | Molecular Slicer, 2 mounts (M9) | T2-T8 gates; released T7 |
 | Earth Alliance (Early) | 92% | Raptor gatlings (E2); auto-compose fixed for its semi-custom jump-engine hulls | - | (fighter racks carry missiles only when bought - M12) | 20/20 + 4/4 self-play |
-| Centauri Republic | 96% | Twin Arrays (E1), Sitara / Rutarian Ion Bolts (E9), Razarik torpedo racks when bought | Scion breaching pod (M1) | Ballistic Torpedo, 3 (M8); split-arc Twin Array, 2 (M10); Unreliable Twin Array fires whole only (a page gap); Dargan Chameleon (ruled: ignore) | 20/20 + 4/4 + 2 targeted |
+| Centauri Republic | 97% | Twin Arrays (E1), Sitara / Rutarian Ion Bolts (E9), Razarik torpedo racks when bought, Ballistic Torpedoes (M8: 1-3 a turn at one target, Hard two; 1-2 OEW behind them) | Scion breaching pod (M1) | split-arc Twin Array, 2 (M10); Unreliable Twin Array fires whole only (a page gap); Dargan Chameleon (ruled: ignore) | 20/20 + 4/4 + 2 targeted; M8 gates + 6 torpedo self-play games |
 | Centauri Republic (WotCR) | 99% | Phalan Plasma Guns (E9), fighter missile racks when bought | - | - | 20/20 + 4/4 + 1 targeted |
-| Dilgar Imperium | 96% | Delegor designed-to-ram, Bomb Racks (E2), fighter missile racks when bought | Jortavo breaching pod (M1) | Point Pulsar, 4 (M5) | 20/20 + 4/4 |
-| Minbari Federation | 95% | gravitic hulls, Jammer-aware EW, EM Shield counted in damage estimates | breaching pod (M1) | Gravity Net, 10 (M6 - ruled, not built); Antimatter Converter, 11 (M4); Adaptive Armour at defaults (M13); Tractor Beam (ruled: ignore) | 20/20 + 4/4 |
+| Dilgar Imperium | 97% | Delegor designed-to-ram, Bomb Racks (E2), fighter missile racks when bought, Point Pulsars (M5) | Jortavo breaching pod (M1) | (fighter racks carry missiles only when bought - M12) | 20/20 + 4/4; M5 gates + 1 Ochlavita game |
+| Minbari Federation | 98% | gravitic hulls, Jammer-aware EW, EM Shield counted in damage estimates, Antimatter Converters (M4: damage by the roll, the pulse premium on its floors) | breaching pod (M1) | Gravity Net, 10 (M6 - ruled, not built); Adaptive Armour at defaults (M13); Tractor Beam (ruled: ignore) | 20/20 + 4/4; M4 gates + 1 Sharaal/Tigara game |
 | Narn Regime | 96% | Twin Arrays (E1), Energy Mines (aimed with spacing), Tarza torpedo racks when bought | Tra'Kha breaching pods, armed and not (M1) | Pulsar Mine, 2 (M7) | 20/20 + 4/4 + 2 mine games |
 | Orieni Imperium | 98% | gatlings on Templar / High Templar / Uplift (E2), Class-S / SO ship racks (E2) | Hunter-Killer flights (M2) - so its HK Control Nodes sit idle | (fighter racks only when bought - M12) | 20/20 + 2 targeted; ShipMover pair 56 hulls |
-| Raiders | 97% | Twin Arrays (E1), Privateer Phalan Plasma Guns (E9) | Jia (Antiproton Defenders only, M3); breaching pod (M1) | Antiproton Defender on Vastar / Vasy, 12 (M3); Grappling Claw, 2 (M14) | T2-T8 gates; released T7 |
+| Raiders | 99% | Twin Arrays (E1), Privateer Phalan Plasma Guns (E9), Antiproton Defenders (M3 - the Jia is back, Vastar / Vasy fire theirs) | breaching pod (M1) | Grappling Claw, 2 (M14) | T2-T8 gates; released T7; M3 gates + 1 Jia/Vastar/Vasy game |
 
 ("Weapon mounts the AI fires": the survey's share, hidden units left out, fighter racks counted EMPTY - with missiles bought they fire too.)
 
 **Still to build for the Major factions, in a sensible order** (details and the user's rulings: "Missing systems" below):
-1. **M8 Ballistic Torpedo split** (Centauri) - ruled: Easy/Normal 1-3 a turn at one target, Hard splits more; 1-2 OEW behind it.
-2. **M4 / M5 / M3 special hit formulas** - Antimatter Converter (Minbari), Point Pulsar (Dilgar), Antiproton Defender (Raiders; unhides the Jia) - no input needed.
+1. ~~**M8 Ballistic Torpedo split**~~ - BUILT 2026-11-23 ("M8 and M3-M5 as built" below).
+2. ~~**M4 / M5 / M3 special hit formulas**~~ - BUILT 2026-11-23, the Jia unhidden (same section).
 3. **M6 Gravity Net + M7 Pulsar Mine** - a Pre-Firing decider (E6); both ruled (OEW-judged pull/push; Pulsar Mine against fighters).
 4. **M2 Hunter-Killers** (Orieni) - hangar deployment, launch at once, rams at the largest ships first; unhides the HK flights.
 5. **M1 Marines** - boarding; unhides 45 boarding craft across all factions.
 6. **M13 Adaptive Armour** (Minbari), **M12 missiles for auto-composed fighters**, **M11 reloading at a carrier**, **M9 Molecular Slicer**, **M10 split-arc Twin Array**, **M14 Grappling Claw** - smaller items.
 7. **The user's play-test** of the seven factions released in T9.
+
+⚠️ Found at M8, pre-existing: a **Hard extended-turn loop** on a ship that has lost or crippled side thrusters (begin, cancel for 'thrusters', begin again, every turn - "M8 and M3-M5 as built", found list). Worth fixing before the play-test of Hard.
 
 #### T9 release (2026-11-23, second session) - the user's answers, what was built, and the Major factions released
 
@@ -2683,12 +2686,12 @@ mirror): taking the line out of both unhides the units.
 |---|---|---|---|---|---|
 | M1 | **Marines** (boarding) | hidden | 45 boarding craft - EA Lamprey, Raiders, Dilgar Jortavo, Minbari, Narn Tra'Kha (armed and not), Centauri Scion; every other faction's pods, the Trek Nausicaan gliders | "we will add Marines later" | a boarding decider (launch, approach, board) + the Marines' page rules; then the line out of both lists |
 | M2 | **Hunter-Killers** (Orieni: remote-controlled flights, deploy in hangars, designed to ram) | hidden (`ShipMover::unsupportedHullReason`); HK Control Nodes idle | Orieni HK Shining Light / Shining Star | "launch them immediately ... usually target larger ships ... working their way down to HCV and MCV" | hangar deployment, launch from the hangars, flight rams (T9 note 6) |
-| M3 | **Antiproton Defender** (special hit formula, E4) | hidden where it is a unit's only gun; idle elsewhere | Raiders' Jia hidden; 12 mounts on the Raiders' Vastar / Vasy | (no input needed) | port the page's formula into AIView + an oracle board; the line out |
-| M4 | **Antimatter Converter** (special hit, E4) | idle | Minbari 11 | (no input needed) | as M3 |
-| M5 | **Point Pulsar** (special hit, E4) | idle | Dilgar 4 | (no input needed) | as M3 |
+| M3 | **Antiproton Defender** (special hit formula, E4) | ✅ BUILT 2026-11-23 - fired; the line OUT of both lists (the Jia is back) | Raiders' Jia (6 mounts) and Vastar / Vasy (12) | (no input needed) | done - "M8 and M3-M5 as built" |
+| M4 | **Antimatter Converter** (special hit, E4) | ✅ BUILT 2026-11-23 - fired, damage priced by the roll, the pulse premium on its floors | Minbari 11 | the user, 2026-11-23: it "doesn't actually use the specialHitChanceCalculation ... in practice"; its damage "does benefit from better hit chances though, so just add a hit chance premium like we do with Pulse weapons" | done |
+| M5 | **Point Pulsar** (special hit, E4) | ✅ BUILT 2026-11-23 - fired in its plain mode (three orders, one a gun) | Dilgar 4 | (no input needed) | done |
 | M6 | **Gravity Net** (Pre-Firing, E6) | idle | Minbari 10 | both: judged by OEW - pull an enemy ship into the heavy-weapon arcs of the bot's ships that hold a lock on it, or push an enemy ship out of the heavy-weapon arcs it has on the bot's ships it holds a lock on (the user, 2026-11-23). S (largest move wins) / P (this net wins) not ruled separately | a Pre-Firing decider (E6): the net's move hexes priced by the bot's locked heavy guns gained / the enemy's locked heavy guns lost |
 | M7 | **Pulsar Mine** (Pre-Firing, E6) | idle | Narn 2 (G'Karith) | scare fighters off; charge into enemy fighters when the G'Karith moves first - it triggers as they move, starting in its range | E6 |
-| M8 | **Ballistic Torpedo** (splits by default) | idle | Centauri 3 | 2-3 at one or two ships, or 3-6 at a flight (separate fighters), backed by 1-2 OEW; Easy/Normal 1-3 a turn at one target, Hard splits more | salvo pricing + split launches (E1's split orders, ballistic) |
+| M8 | **Ballistic Torpedo** (splits by default) | ✅ BUILT 2026-11-23 | Centauri 3 | 2-3 at one or two ships, or 3-6 at a flight (separate fighters), backed by 1-2 OEW; Easy/Normal 1-3 a turn at one target, Hard splits more | done - "M8 and M3-M5 as built" |
 | M9 | **Molecular Slicer** (splits by default) | idle | EA 2 | - | with M8 |
 | M10 | **Twin Array with split arcs** | idle ('special arcs') | Centauri 2 | - | E11 |
 | M11 | **Reloading at a carrier** (Hangar Ops) | gatlings and fighter racks run dry and stay dry | every gatling flight, every fighter rack | "if possible ... order fighters with empty gatling guns to go and reload in carriers but this is very rare"; ships with an ordnance supply could reload fighters' missiles and torpedoes | a FlightDecider "home to reload" + docking |
@@ -2699,6 +2702,72 @@ mirror): taking the line out of both unhides the units.
 | M16 | **Magazine-fed direct fire** (`AmmoDirectWeapon`) | idle | none in the released factions | - | E2's magazine half |
 | - | Tractor Beam / Self-Repair / Chameleon Sensors | no code - ruled | Minbari, Raiders, Centauri | "ignore" / "fine at defaults" / "ignore for now" | none |
 | - | Unreliable Twin Array | fires whole only - its page prototype is plain Particle, a Split click makes no order (page gap) | Centauri (one hull) | - | a page fix first |
+
+#### M8 and M3-M5 as built (2026-11-23, fourth session) - uncommitted
+
+**The user's request (2026-11-23):** "start working through the Missing Systems list ... starting with these: 1. M8 Ballistic Torpedo split
+(Centauri) - ruled: Easy/Normal 1-3 a turn at one target, Hard splits more; 1-2 OEW behind it. 2. M4 / M5 / M3 special hit formulas - Antimatter
+Converter (Minbari), Point Pulsar (Dilgar), Antiproton Defender (Raiders; unhides the Jia). Note - The Antimatter Converter doesn't actually use
+the specialHitChanceCalculation that other Antimatter weapons do in practice (see its rngNormalPenalty and rngNormalPenalty settings). Its damage
+does benefit from better hit chances though, so just add a hit chance premium like we do with Pulse weapons so we can change it from being idle on
+ai ships. Also, this work will also be relevant for the Vree faction in future, with other relevant weapons being the Antiproton Gun, Antimatter
+Torpedo and Antimatter Cannon."
+
+**M3 / M4 / M5 - the special hit formulas.**
+
+| Item | As built | Proof |
+|---|---|---|
+| Which special calculations are ported | `AIView::PORTED_SPECIAL` (class => the one kind it may carry): `AntimatterWeapon` => 'range' - its range brackets and "range doubled on no lock" are `AntimatterWeapon::calculateRangePenalty` (server) and antimatter.js `calculateSpecialRangePenalty` (page), a mirror pair, and the bot prices every shot with the server's own `calculateHitBase` anyway; `PointPulsar` => 'hit' - its page modifier is +4 for a CALLED shot at a fighter only, and the bot never calls a shot. `weaponBlock` refuses 'special hit calculation' only for a weapon outside the list, or carrying the other kind. The whole antimatter family is in: Converter, Antiproton Defender, and the Vree's Antiproton Gun, Antimatter Cannon and Antimatter Torpedo (ballistic - BallisticDecider's ordinary pass); the Shredder's hex mode and the Vree's turret links are still refused for their own reasons | Fire pair, every pairing's chance against the page's: 0 differences (below), Vree included |
+| Damage by the roll | `AIView::rollScaled` (every AntimatterWeapon) + `rollDamage($weapon, $needed)`: the mean of the weapon's OWN `getDamage` over every d100 roll that hits (1..need, capped at 100; X = (needed - rolled) / 5, maxX, the Reduced Damage critical), remembered per weapon, mode and need. `damagePerHit` takes the need (price, estimate, launch estimates); `damageAfter` moves a hit's worth down with the need interception leaves (Weapon::fire measures X from the need AFTER interception). The plain mid-point priced a Converter (2..82) at 42 a hit: at 60% it does 18, at 20% 2 | fireRulesHarness H2 (the hit = 4X+2 at its need, by an independent sum, at 60% and 20%), H3 (a better chance is a better hit), H4 (an intercepted shot loses more than its share of hits) |
+| The premium | `FireDecider::minimumChance`: a slow weapon whose hit grows with the roll gets FIRE_PULSE_PREMIUM on both floors, as a slow pulse gun does (skill pulsePremium - not Easy): the Converter (3 turns) 44 / 44 parting; a one-turn Antiproton Defender keeps the plain floor | H5 |
+| Point Pulsar | plain mode only (`modes()` never offers Split): three orders, one a gun, at one unit | H6; fire pair |
+| The Jia | `AntiprotonDefender` out of `AIConfig::CPU_MISSING_SYSTEMS` AND gamelobby.js `CPU_MISSING_SYSTEMS` (legacy bundle rebuilt). Also unhides (outside READY_FACTIONS, so no effect yet) Civilians' Vyshesh, Vree Xeon and a Vree mine | H7 (cpuUnitBlock null; its Defenders have shots; FireDecider takes them); the survey probe: Raiders hidden 4 -> 3 |
+| Who can still fight | Posture::usableGuns asks firesKind - a ship left with only Converters, Point Pulsars or Antiproton Defenders CAN fight now | withdrawalHarness A9 moved to a Rogata (Gravity Nets - still never fired), A10 (a Sharaal with only its Converters can fight) |
+
+**M8 - the Ballistic Torpedo.** How the server resolves it (read before pricing it): a launcher holds up to 6 and gains one a turn; each page
+click is one order (`BallisticTorpedo.doMultipleFireOrders`, notes 'Split'); at a SHIP all of one launcher's torpedoes are merged into ONE order
+before interception (`beforeFiringOrderResolution` in `Firing::prepareFiring`, then `automateIntercept`) - one roll, one interception, 1 + one
+more torpedo for every 20 the roll beats the need by, up to the number fired; at a FLIGHT each is its own order and roll at a fighter of its own.
+
+| Item | As built | Proof |
+|---|---|---|
+| Pricing | `AIView::isTorpedo` (BallisticTorpedo - the Kirishiac Phased Gravitic Torpedo extends it), `torpedoShot($unit, $weapon, $target, $count)`: 'orders' $count (posted rows, one shot each), 'pulses' (the most one roll lands: $count at a ship, 1 at a flight), 'merged' (a ship: InterceptModel makes ONE order of it, carrying all the torpedoes), 'damage' the whole volley. `shot()` of a torpedo = one torpedo (one click). `launched(..., $count)` for the Fire phase's own-missile volleys; `launchEstimate` (next turn, ShipDecider) prices the volley the bot would send | fireRulesHarness I1 (k = 1..4 at a ship lands exactly the saturation sum; never more than held), I2 (one merged order of three), I5 (two at a flight = twice one) |
+| The decision | `BallisticDecider::torpedoes`, after the salvos, one launcher at a time (the one worth most first). A torpedo is worth what it ADDS to its target's volley, interception counted, and is launched only while what it adds keeps the launch floor (BALLISTIC_MIN_CHANCE 35 / _FLIGHT 50; Easy any chance worth an order) - at 80% with nothing intercepting the 1st lands 0.8, the 2nd 0.6, the 3rd 0.4: three; at 60%: two. Easy / Normal (skill `torpedoTargets` 1): the one unit whose whole volley is worth most. Hard (2): a torpedo at a time wherever it adds most, up to two units. At most `AIConfig::TORPEDO_SHIP_VOLLEY` (3) at ships; at a flight the level's `torpedoFlightVolley` (Easy/Normal 3, Hard 6) and never more than its craft (`AIView::torpedoCap`). Posted as the page clicks them (`systems()` keeps a two-target launcher's orders on its one system row) | I3 (a ship at its chance gets the floor-rule count, posted an order a torpedo, ballistic, one shot, 'Split'), I4 (two Omegas: Easy {3}, Normal {3}, Hard {2, 1}), I5 (a flight: Normal 3, Hard 6) |
+| A full launcher's reload (implementer's call - to confirm) | Self-play 6146 (Demos + Elutarian v EA): the launchers sat at 6 of 6 for 23 turns, the Elutarian's never fired. The InterceptModel gives a target's EVERY interceptor to the volley, as if nothing else came at it (the same worst case as for missiles - but a merged volley cannot saturate them): an Omega's six take a 90% volley to nothing, a Hyperion's five 85% to 25%. On the board the interceptors were mostly elsewhere (15 points stopped on one of three launches, none on the others). So a launcher holding its normal load that would otherwise launch nothing sends its ONE torpedo - next turn's, which a full launcher loses - at the unit it is worth most at unintercepted, where its chance alone meets the launch floor; a torpedo that draws the interceptors is one fewer on the bot's guns (FireDecider counts its own missiles in the volleys it prices) | I6 (an armed Omega: holding 6 - one goes; holding 5 - kept), every level |
+| "Backed by 1 or 2 OEW" | `EWDecider::allocate`: a ship whose torpedoes launch this turn (`AIView::launcherNow`) puts a point, BEFORE the search, on the enemy SHIP they would do most to with it (`AIView::torpedoEstimate` - the volley the bot would send, launched from the start-of-turn hex with the arc as the ship stands; only where the point adds something - a jammer denies it). `score()` counts each launcher's volley at its best enemy, so the search may add the second. Flights are CCEW's (noFlightOEW). Easy's simpleEW unchanged | J1 (a torpedo-only Demos and a G'Quan at 22: 1 OEW; the launcher gone too: 0), J2 (two armed G'Quans at 14 - the search alone keeps all 9 on DEW: still 1 OEW) |
+| The oracle | fireHarness: a torpedo launcher holds 2, 4, 6, 2 by round (no die thrown - other hulls' boards unchanged); torpedo rows checked (one row a unit, what it holds, its units, the volley sizes, a volley the view prices; interception against the real automateIntercept on the merged order). fireOracle.js `commitLaunches`: a split-by-default weapon takes one click per order, the page's shot count re-read after each (`initializationUpdate`, as the ship window does on SystemDataChanged) | the fire pair below |
+
+**Gates (2026-11-23):**
+- Fire pair over the 13 released directories (dilgar, EA_old, centauri_old, minbari, narn, centauri, orieni, EA, raiders and the four raider
+  directories), phases 3 and 1, Easy / Normal / Hard: Fire phase 646 hulls, 121,077 pairings, 12,732 legal shots (12,650 before - the Converters,
+  Point Pulsars and Defenders), 12,718 of them built exactly by the page (the rest on an edge, counted); Initial Orders 42,108 pairings, 4,048 launches, torpedo rows Easy 8 / 18
+  torpedoes, Normal and Hard 6 / 8 - **0 differences** at every level and phase. No pairing the page could fire is left for "special hit
+  calculation" or "split shots" in these directories (HEAD: 334 and 12 over five of them). Vree (informational): 415 + 106 shots, 0 differences.
+- Orders pair, the same directories, three levels: 570 hulls, 3,420 situations committed through power.js and ew.js - **0 differences**.
+- fireRulesHarness 967 (H, I, J new); mutants - roll damage off, merge off, ship cap off, the torpedo lock off (caught by J2: the search alone
+  kept every point on DEW), the premium off - all five caught. withdrawal 121, levels 340, ram 60, deploySpread 66, budget 30, registry 22,
+  hazards 14,758 PASS; manoeuvre 522 + its 2 known pre-existing "D" failures.
+- Survey (the status table's measure, reproduced exactly on HEAD first): Centauri 96 -> 97%, Dilgar 96 -> 97%, Minbari 95 -> 98%, Raiders
+  97 -> 99% (the Jia back: hidden 4 -> 3); the rest unchanged.
+- Self-play (`--budget=0`, 24x16, kept): 6145 Sharaal + Tigara (Converters fired), 6147 Ochlavitas (Point Pulsars - three orders a volley),
+  6148 Jia + Vastar + Vasy (Defenders fired), Centauri 6144 / 6146 (before the reload rule: 3 torpedoes in 23 turns, the Elutarian's none) and
+  6149 / 6151 (v EA) and 6150 / 6152 (v Narn, Hard and Normal) after it: 66, 10, 78 and 61 torpedoes, both Elutarian launchers firing all game
+  (14-27 each), volleys of 1-3 - 11 games, all PASS (no refused submission, no AI defect).
+
+**Found, reported, not fixed:**
+- `BallisticTorpedo` (torpedo.php) describes Saturation Mode as "one more for every 3 points it beats the needed number by" - the code's `grouping`
+  is 20 (percent: every 4 points of a d20). The bot prices the code.
+- `BallisticTorpedo::beforeFiringOrderResolution` builds its fighter list with `array_unshift` OUTSIDE the "is it alive" test, so every craft -
+  destroyed ones too - goes first: a torpedo may be aimed at a dead fighter. `FighterFlight::getHitSystem` then falls back to the ordinary
+  allocation, so it still hits a live one - and "excess munitions are lost" (its description) is not what happens while any craft lives. The bot
+  never sends more than the craft left.
+- ⚠️ A HARD MOVEMENT LOOP (pre-existing, T5f-5 - ShipDecider and ShipMover are untouched here; the torpedo games just do more thruster damage):
+  in 6149 the EA Omega, two thrusters lost (#30 turn 2, #22 turn 10), BEGAN a left extended turn every turn from 10 to 35 and cancelled it for
+  'thrusters' the next - 27 `validateExtendedTurn[TRIPWIRE]` lines, facing stuck. ShipDecider's begin test compares the owed remainder (3 side
+  thrust) with `ShipMover::thrustNextTurn()` - the TOTAL - not with the thrusters on the side that must pay; with criticals on them (6150's
+  G'Quans: First Thrust Ignored / Half Efficiency) the same. HEAD v HEAD on the same fleets: 2 and 1 tripwires. Needs the per-side test - NOT fixed.
+- The Vree: their antimatter guns pass the fire pair now (phase 3 415 shots, phase 1 106, 0 differences); what is left idle there is the turret
+  link (E10: `linkedFiringSpread`, 115 page-fireable pairings).
 
 ### 10.11 Stage T8 - the skirmish release (2026-11-22) - COMPLETE (user, 2026-11-22), uncommitted
 
