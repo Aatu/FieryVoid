@@ -191,6 +191,8 @@ class TacticalAI
             $unit->EW = $rows;
         }
         $launches = BallisticDecider::systems(BallisticDecider::plan($view), $gamedata->turn);
+        //stage T9 (the user's note 4): area-effect weapons - Energy Mines - launched at the hex an enemy is guessed to end in
+        $mines = AoEDecider::systems(AoEDecider::plan($view), $gamedata->turn);
 
         $entries = array();
         foreach (AIFallback::ownUnits($gamedata, $botId) as $unit) {
@@ -212,6 +214,11 @@ class TacticalAI
                     $entry['systems'][$systemId] = isset($entry['systems'][$systemId]) ? array_merge($entry['systems'][$systemId], $system) : $system;
                 }
             }
+            if (isset($mines[$id])) {
+                foreach ($mines[$id] as $systemId => $system) {
+                    $entry['systems'][$systemId] = isset($entry['systems'][$systemId]) ? array_merge($entry['systems'][$systemId], $system) : $system;
+                }
+            }
             $entries[] = $entry;
         }
 
@@ -224,6 +231,7 @@ class TacticalAI
             . ($p['scanner'] + $p['engine'] > 0 ? '; boosts: scanner +' . $p['scanner'] . ', engine +' . $p['engine'] . ' (' . $p['idle'] . ' idle guns switched off)' : '')
             . ($p['interceptors'] > 0 ? '; ' . $p['interceptors'] . ' Interceptors boosted to fire at fighters' : '')
             . ($b['launches'] > 0 ? '; ballistics: ' . $b['launches'] . ' launchers at ' . $b['targets'] . ' enemies' : '')
+            . (AoEDecider::$last['launches'] > 0 ? '; area-effect: ' . AoEDecider::$last['launches'] . ' mines at the guessed hexes of ' . AoEDecider::$last['targets'] . ' enemies' : '')
             . (count(JumpDecider::$last) > 0 ? '; ' . implode('; ', JumpDecider::$last) : '');
 
         return $entries;

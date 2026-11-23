@@ -433,6 +433,12 @@ server refuses a CPU fleet with any such unit when the slot is readied (`AIConfi
 `READY_FACTIONS`, once it meets the criteria above - **stage T9 (section 10.10) is the plan for growing the list**, with the criteria
 made a concrete gate and every faction's standing surveyed.
 
+**Since T9 (2026-11-23, section 10.10 "T9 release"):** the list is Earth Alliance, Raiders and the Major factions - Dilgar Imperium,
+Minbari Federation, Narn Regime, Centauri Republic, Centauri Republic (WotCR), Earth Alliance (Early), Orieni Imperium. A unit whose
+role rests on a system the AI does not use yet is hidden as bases are (`AIConfig::CPU_MISSING_SYSTEMS` - breaching pods and other
+boarding craft; a unit whose every gun is on the list, the Raiders' Jia) - the list of those systems, to work through one at a time,
+is section 10.10 "Missing systems".
+
 ---
 
 ## 8. The CPU's fleet
@@ -2379,7 +2385,7 @@ with a flight in their arc, best first" - an Interceptor with none is never boos
 * How the bot sees an enemy player's boosted Interceptors depends on what the mask shows of enemy power this turn - not examined.
 * The handler registry and further factions: moved to stage T9 (section 10.10).
 
-### 10.10 Stage T9 - more factions (PLANNED 2026-11-22)
+### 10.10 Stage T9 - more factions (PLANNED 2026-11-22; the Major factions RELEASED 2026-11-23 - "T9 release" below)
 
 **The user (2026-11-21):** "now that we have a method of restricting CPU factions, how do we go about expanding this to factions beyond
 EA and Raiders? Campaign work is paused at the moment, so can you make a realistic plan to add more factions as a new Stage T9 (push
@@ -2531,6 +2537,168 @@ E3-E8 land there); Minor 3-4; each Ancient 2-4; Custom per faction, mostly quick
 | D4 | Weapon families a released faction may leave idle in v1 | Boarding; mines and Pre-Firing weapons until E5 / E6 exist |
 | D5 | Civilians and Streib ("Other") | When the campaign needs them (neutrals) or the user asks |
 | D6 | Ancients in v1 | None; after T9d, one at a time |
+
+#### T9 started 2026-11-23 - the user's six notes, and what was built (uncommitted; ledger `.superpowers/sdd/TACTICAL_AI_PLAN/progress.md`)
+
+**The user's notes (2026-11-23), verbatim in substance:** (1) Minbari: the Jammer prevents OEW locks on their ships, so they "use more OEW,
+especially at the start of games"; (2) split weapons (Twin Arrays) "almost always fire all their shots at the same target ... using Firing
+Mode 1": Easy and Normal ignore the split mode, Hard may split where it pays; where split IS the default mode (the Centauri Ballistic
+Torpedo) Normal and Hard should consider splitting; (3) the Dargan's Chameleon Sensors: ignore for now (a disguise picked for a CPU fleet
+will probably break by accident - fine); (4) area-effect weapons (Narn Energy Mines): aim with the movement predictions at a guessed hex
+(usually a fighter flight's), and Normal/Hard deploy spread out when the enemy has them (extendable to other AoE weapons); (5) Dilgar and
+EA (Early) straightforward; (6) Orieni Hunter-Killers deploy in hangars ($deploysInHangar) and ram by design ($designedToRam - so does the
+Dilgar Delegor): they "can and should always Ram, and can ignore the normal conditions for making a ramming attack".
+
+| Note | As built | Proof |
+|---|---|---|
+| (2) E1, Easy / Normal | `AIView::splitsIn` / `plainMode`: a weapon is left alone ('split shots') only when EVERY mode splits; `modes()` never offers a splitting mode - a Twin Array fires its Normal mode, one order a gun at one target, as the page's plain loop builds it | fireRulesHarness E1 (Primus, G'Quan, Secundus Heavy Array, Bimith Quad Array; GunLost); fire pair 0 diff |
+| (2) E1, Hard | skill `splitShots` (Hard): `FireDecider::splitGuns` offers each gun of a split weapon to the greedy pick on its own (`AIView::splitShot` - one order, one shot, 'Sweeping', the page's doMultipleFireOrders); `mergeSplits` orders a weapon whose every gun went to one target in its plain mode, else one row per target in the split mode (notes 'Split', as the page). Hard re-plans with whole weapons and keeps the split plan only when `planWorth` is higher ("whether there's any advantage in damage potential") - on one harness board in eight the greedy's finer pieces came out worse | fireRulesHarness E2; the fire pair's new split boards (a hull with a split weapon meets a flight cut to 1-2 craft every other round) + `fireOracle.js replaySplits` clicks every split row through the page. Found by it: `FireDecider::entries` overwrote a split weapon's first row (fixed) |
+| (2) default-split weapons | NOT YET - the Ballistic Torpedo (3 Centauri mounts), the slicers (2 EA) stay idle; the Unreliable Twin Array fires whole only (its page prototype is plain Particle: a Split click makes no order - a page gap, not fixed) | - |
+| (1) Minbari jammer | The pricing already knew the jammer (DEW is priced through the real hit formula): a Sharlin vs an Omega + Hyperion moving first goes 5 OEW at 22 hexes, 9 at 26, 12 of 12 from 30. Against enemies moving AFTER it the soft lock held it to 2 OEW / 10 DEW at every range. `EWDecider::jammed()` (the engine's Jammer ability against every non-mine enemy) lifts the soft caps beyond EW_CLOSE_RANGE (medium and close caps stay): 26 hexes 5 OEW, 30 -> 8, 36 -> 12 | levelsHarness P (mutant "always lift" caught by the disarmed-enemy board); orders pair 0 diff |
+| (3) Chameleon | No code: the Dargan's ChameleonSensors is an ELINT scanner; the bot never toggles the disguise (an ELINT ship keeps its EW on DEW, as EA's do). The Rutarian's Stealth is the young-race fighter kind, not trueStealth | pairs over `centauri` |
+| (4) AoE deploy spread | `AIConfig::AOE_WEAPONS` (EnergyMine, LightEnergyMine - instanceof, add a class to extend) + `AOE_SPACING` 3 + skill `aoeSpread` (Normal/Hard): `DeployDecider::aoeThreat` -> FleetDeployer option `spread` (line, screen and rank spacing 3 where the zone has room; 0 = the standard arithmetic, so Auto-Deploy is unchanged) | NEW `tests/ai/deploySpreadHarness.php` 66 checks (no two units within 2 hexes; every hex `inZone`; Easy / no AoE / Auto-Deploy unchanged; tight zone) |
+| (4) Energy Mine aiming | NEW `AoEDecider` (Initial Orders, after the ballistics): each enemy's straight-on hex is a candidate, clear of the bot's own units (`AOE_OWN_MARGIN` 2, where they stand or straight on); worth = `AOE_LANDS` 0.75 x the guess's odds (`AOE_GUESS_FLIGHT` 0.35 / `AOE_GUESS_SHIP` 0.5) x what full damage does in the hex (every craft of a flight, armour off) and a third next to it; each loaded mine takes the best legal candidate left, no two at one hex. `AIView::hexShot` ports the page's targetHex tests (`onArcHex` - onArc's arc logic, at a hex). Every level aims. The level forecast is a Movement decision, so Initial Orders guesses straight on | fireRulesHarness F; fire pair phase 1 with mine boards + `fireOracle.js replayMines` (narn + narn_raiders: 5,516 hexes clicked through targetHex, 1,863 launches identical, 22 planned mines confirmed, 0 differences) |
+| (6) designed to ram - Delegor | `Posture::rammer` returns a designedToRam ram first (every level, no Desperate rule needed); ShipDecider's ram targets add an enemy ship YET TO MOVE at its forecast hex (Easy: straight on); a designed rammer PURSUES (`AIConfig::RAM_PURSUIT` 10 x the closing term, `RAM_DANGER_SHARE` 0.25 of the danger) - before, out of reach it ran 12-20 hexes off | ramHarness D (D6: 10-18 hexes, moved and not, three levels) |
+| (6) Hunter-Killers | NOT YET - still refused for a CPU fleet (`ShipMover::unsupportedHullReason`: remote-controlled flight); needs hangar deployment, launch, flight ram moves | - |
+| (5) the gate | ShipMover pair: dilgar, EA_old, centauri_old, minbari 129,562 plans + Minbari gravitic 27,174; narn, centauri (+ their raider dirs) 94,424 - 0 differences. Fire pair (phases 3 and 1, every level) and orders pair (every level) over the six Major factions: 0 differences (the fire harness now adds planned RAMS as cases - the page found the bot ordering an UNLOADED ram: `Posture::rammer` now asks loaded / switched on, as the page does) | SELF-PLAY (2026-11-23, `--budget=0`, FleetComposer fleets at 2,500 pts against EA, Normal + Hard, 24x16 + 42x30): Dilgar, EA (Early), Centauri (WotCR), Minbari, Narn, Centauri 20/20 PASS each, plus kept G'Quan games (73 Energy Mines, 37 caught units) and Delegor games (3 rams, all hits) - 126 games, 0 AI defects. Left before release: the hull classes with no usable weapon (Raptor, Sitara, breaching pods; Orieni's Templars / Uplift), FleetComposer's 'S' filter (EA (Early) cannot be auto-composed), the user's play-test, then READY_FACTIONS - all but the play-test done in "T9 release" below (the user, 2026-11-23: add each faction once it is available) |
+
+**Survey after E1 (2026-11-23):** Narn 71% -> 93%, Centauri 44% -> 92%, Raiders 88% -> 94%, Centauri (WotCR) 96% -> 98%; League / Minor
+gains for free: Abbai 57% -> 96%, Corillani 58% -> 96%, Deneth 40% -> 100%, Llort 86% -> 91%, Drazi 78% -> 82%, Gaim 49% -> 75%.
+Dilgar stays 95% (its 4 Point Pulsars are E4 - a special hit formula - not E1).
+
+#### ⭐ MAJOR FACTIONS - AI STATUS AT A GLANCE (kept current; last updated 2026-11-23)
+
+**All nine are on `READY_FACTIONS`** - a CPU player can field them, the lobby offers them, and auto-compose builds their fleets.
+
+**What every released faction gets (built, stages T1-T9):** deployment (formations, Auto-Deploy, spread out against enemy Energy Mines);
+movement (ordinary and gravitic drives, overthrust, turn shortening, extended turns at Hard, pivots and rolls for damaged ships, terrain and
+mine avoidance, enemy-move forecasting at Normal/Hard); power (deficits, Hard boosts); EW (OEW/DEW/CCEW, lock rules, jammer-aware); direct
+fire with focus and interception modelled; ballistic launches (magazine racks, old-style racks, fighter racks with missiles aboard); fighter
+flights (strike / intercept / escort, jinking, coverage search); split-shot weapons (plain mode; Hard splits where it pays); limited-ammo
+weapons (fire until empty); exclusive fighter guns (big gun at ships, paired guns at fighters); ramming (designed rammers always, the
+Desperate rule otherwise); surrender and jump-out; Easy / Normal / Hard; auto-composed fleets (official and semi-custom units, never custom).
+
+| Faction | Weapon mounts the AI fires | Special kit the AI uses | Units HIDDEN from CPU fleets | Idle (left alone) - still to build | Proof |
+|---|---|---|---|---|---|
+| Earth Alliance | 95% | Interceptors (Hard turns them offensive vs fighter-heavy fleets), magazine missile racks, Thunderbolt linked racks | Lamprey breaching pod (M1) | Molecular Slicer, 2 mounts (M9) | T2-T8 gates; released T7 |
+| Earth Alliance (Early) | 92% | Raptor gatlings (E2); auto-compose fixed for its semi-custom jump-engine hulls | - | (fighter racks carry missiles only when bought - M12) | 20/20 + 4/4 self-play |
+| Centauri Republic | 96% | Twin Arrays (E1), Sitara / Rutarian Ion Bolts (E9), Razarik torpedo racks when bought | Scion breaching pod (M1) | Ballistic Torpedo, 3 (M8); split-arc Twin Array, 2 (M10); Unreliable Twin Array fires whole only (a page gap); Dargan Chameleon (ruled: ignore) | 20/20 + 4/4 + 2 targeted |
+| Centauri Republic (WotCR) | 99% | Phalan Plasma Guns (E9), fighter missile racks when bought | - | - | 20/20 + 4/4 + 1 targeted |
+| Dilgar Imperium | 96% | Delegor designed-to-ram, Bomb Racks (E2), fighter missile racks when bought | Jortavo breaching pod (M1) | Point Pulsar, 4 (M5) | 20/20 + 4/4 |
+| Minbari Federation | 95% | gravitic hulls, Jammer-aware EW, EM Shield counted in damage estimates | breaching pod (M1) | Gravity Net, 10 (M6 - ruled, not built); Antimatter Converter, 11 (M4); Adaptive Armour at defaults (M13); Tractor Beam (ruled: ignore) | 20/20 + 4/4 |
+| Narn Regime | 96% | Twin Arrays (E1), Energy Mines (aimed with spacing), Tarza torpedo racks when bought | Tra'Kha breaching pods, armed and not (M1) | Pulsar Mine, 2 (M7) | 20/20 + 4/4 + 2 mine games |
+| Orieni Imperium | 98% | gatlings on Templar / High Templar / Uplift (E2), Class-S / SO ship racks (E2) | Hunter-Killer flights (M2) - so its HK Control Nodes sit idle | (fighter racks only when bought - M12) | 20/20 + 2 targeted; ShipMover pair 56 hulls |
+| Raiders | 97% | Twin Arrays (E1), Privateer Phalan Plasma Guns (E9) | Jia (Antiproton Defenders only, M3); breaching pod (M1) | Antiproton Defender on Vastar / Vasy, 12 (M3); Grappling Claw, 2 (M14) | T2-T8 gates; released T7 |
+
+("Weapon mounts the AI fires": the survey's share, hidden units left out, fighter racks counted EMPTY - with missiles bought they fire too.)
+
+**Still to build for the Major factions, in a sensible order** (details and the user's rulings: "Missing systems" below):
+1. **M8 Ballistic Torpedo split** (Centauri) - ruled: Easy/Normal 1-3 a turn at one target, Hard splits more; 1-2 OEW behind it.
+2. **M4 / M5 / M3 special hit formulas** - Antimatter Converter (Minbari), Point Pulsar (Dilgar), Antiproton Defender (Raiders; unhides the Jia) - no input needed.
+3. **M6 Gravity Net + M7 Pulsar Mine** - a Pre-Firing decider (E6); both ruled (OEW-judged pull/push; Pulsar Mine against fighters).
+4. **M2 Hunter-Killers** (Orieni) - hangar deployment, launch at once, rams at the largest ships first; unhides the HK flights.
+5. **M1 Marines** - boarding; unhides 45 boarding craft across all factions.
+6. **M13 Adaptive Armour** (Minbari), **M12 missiles for auto-composed fighters**, **M11 reloading at a carrier**, **M9 Molecular Slicer**, **M10 split-arc Twin Array**, **M14 Grappling Claw** - smaller items.
+7. **The user's play-test** of the seven factions released in T9.
+
+#### T9 release (2026-11-23, second session) - the user's answers, what was built, and the Major factions released
+
+**The user's answers (2026-11-23)** to the questions the first T9 session ended on - rulings, as all the user's notes:
+
+| Question | The answer, in substance | Here |
+|---|---|---|
+| Breaching pods: hide them, or should the AI board? | "Hide for now, we will add Marines later. Start a list of missing systems for AI in Tactical AI Plan so we can tackle them one-by-one in future and unhide these units for ai use." | Hidden; the list is "Missing systems" below |
+| Limited-ammo weapons (gatlings, fighter missile and torpedo racks) | "Just fire freely until empty for now"; ordering fighters with empty gatlings back to a carrier to reload would be good, but is very rare in games; ships with an ordnance supply could in theory reload fighters' missiles and torpedoes | E2 built; reloading listed |
+| Exclusive fighter weapons (Sitara's Ion Bolt, Plasma Gun) | "these more powerful guns will be fired at ships, and the normal paired guns will be fired at fighters or when the larger gun is recharging" | E9 built |
+| Ballistic Torpedo | 2-3 torpedoes at one or two ships, or 3-6 at a fighter flight (it targets separate fighters), backed by 1 or 2 OEW; Easy and Normal may simply fire 1-3 a turn at one target, Hard can consider splitting a bit more | Listed (not built) |
+| Gravity Net: pull or push, S mode or P mode? | (the second round, same day) "Both are valid uses. Use OEW to judge this, e.g. bring an enemy ship into heavy weapon arcs of friendly ships that have a lock, or move enemy ship so it no longer has heavy weapon arcs on ships it has OEW lock on." | Listed (M6) - ruled, not built |
+| Adaptive Armour | Pre-allocated points generally go to the most numerous weapon class in the enemy fleet (Ramming Attacks ignored); as the ship is hit, the rest go where they can, up to the maximum | Listed (defaults today) |
+| Tractor Beam, EM Shield, Self-Repair | Ignore the Tractor Beam (it does nothing); an EM Shield "reduces potential hit chances and damage so possibly needs considered for gauging incoming damage from enemies"; Self-Repair is fine at its defaults | EM Shield built (damage); no code for the other two |
+| Narn Pulsar Mine | "Generally to scare off fighters from getting too close, and charging into enemy fighter units when the G'Karith moves first, since it will then trigger when the fighters take their movement as they start in its range" | Listed |
+| Hunter-Killers | "launch them immediately and they will usually target larger ships in enemy fleet due to their high damage potential, working their way down to HCV and MCV if no larger ships are available" | Listed; HK flights stay hidden |
+| Energy Mine aiming | "Better to space out the mines a little within 1 or 2 hexes of each other to cover more space. Even the 10 damage from an indirect hit is lethal to fighters." | Built |
+| (instruction) | "Once a faction is available (either because all it's ships are playable by ai or because we've hidden the ones that aren't) add it to READY_FACTIONS" | Seven factions added |
+
+**As built:**
+
+| Item | As built | Proof |
+|---|---|---|
+| Auto-compose and 'S' units | `FleetComposer` skipped every unit whose `unofficial` was set - the 102 SEMI-official ('S') ones included, which the lobby's checker counts as official (`lship.unofficial == true`); every jump-engine hull of Earth Alliance (Early) is 'S', so it could never be composed. Now only `=== true` (the static files hold false, true or "S") | fleetComposerHarness + fleetCheckOracle (below) |
+| Hiding units (the missing systems) | `AIConfig::CPU_MISSING_SYSTEMS` (system name => why, and whether it hides every FLIGHT carrying it) + `missingSystemBlock`, inside `cpuUnitBlock`: a flight carrying a boarding system (Marines) - every breaching pod and assault shuttle, armed or not - and a unit with weapons, every one on the list (the Ramming Attack and the jump engine not counted - the Raiders' Jia). ⚠️ MIRROR: gamelobby.js `CPU_MISSING_SYSTEMS` / `cpuMissingSystemBlock` (the Store marks its rows when it builds them, possibly before a CPU slot exists, so the page keeps its own copy); `cpuBlueprintBlock` = hull kinds + missing systems, for the Store's `data-cpu` and `cpuUnitBlock`. Take a line out of BOTH when the AI learns a system and its units come back | Parity over every blueprint (2,736): 0 differences; hidden: 45 boarding craft across all factions, 4 Antiproton-Defender-only units (Raiders' Jia, Civilians' Vyshesh, Vree Xeon and a Vree mine) |
+| E2 - limited ammunition | `AIView::weaponBlock`, as the page's `checkOutOfAmmo`: a weapon with an `ammunition` count (the gatlings) fires while it is above 0 ('out of ammunition' at 0); an OLD missile rack (`MissileLauncher`, its rounds in `missileArray`) fires on a ship freely - the page counts no ship rack's rounds and the server keeps none - and on a flight in a mode with a round left (`AIView::modes`). A magazine-fed direct-fire weapon (`AmmoDirectWeapon`) is still left alone. Unlocks the Raptor, Templar, High Templar, Uplift, the Orieni ship racks and the fighter racks a creator buys missiles for | fireHarness boards: gatlings empty on one board in three, fighter racks loaded on every other; the oracle now FAILS a pairing the page refuses for ammunition unless the bot refuses it too |
+| E9 - exclusive fighter weapons | `weaponBlock` refuses only BALLISTIC exclusive weapons; its conflict test is the page's both ways (`checkConflictingFireOrder`). `FireDecider::conflicts` / `dropConflicts`: a craft's pick drops its conflicting guns (in the greedy pick and the T6g forced loop); `shipsOnly`: an exclusive gun takes no FLIGHT while its craft has another usable gun - while it reloads the paired guns take every target | fireOracle `commitFire`: the Fire plan's rows clicked in TOGETHER (a conflict the one-pairing clicks cannot see). Self-play 6010/6011: every Rutarian Ion Bolt at a ship, every paired gun at a fighter but one (a Hyperion, the Ion Bolt reloading); the Sitara at ships |
+| Energy Mine spacing | `AoEDecider`: where an enemy ENDS is spread round its straight-on guess (`AIConfig::AOE_SPREAD` - flight 0.35 on the hex, 0.3 over the six next to it, 0.2 over the twelve two off; ship 0.5 / 0.25 / 0.1); a mine is valued by what it ADDS over the mines already planned (the most damage at each end counts once); greedy over (mine, hex), every hex within two of a guess a candidate. A second mine at a flight goes next to the first rather than idle or on it, when that is worth more than another enemy's hex. `AOE_GUESS_FLIGHT` / `AOE_GUESS_SHIP` retired | fireRulesHarness F4 (RED: 1 mine, the second idle -> GREEN: 10,2 + 11,2; with an Omega also in reach the second goes to the Omega's guess); self-play 6008/6009: paired mines on adjacent hexes (-11,-8 / -10,-8; -4,2 / -3,3) |
+| Who can still fight | Found by Orieni self-play 6007: the beaten side's last flight (a High Templar, gatlings spent, rack bought empty) was counted able to fight - no surrender, the turn cap. `Posture::usableGuns` now asks `modes()` of old racks too, and `AIView::firesKind`: a gun of a kind the bot never fires (`AIView::NEVER_FIRED` - weaponBlock's P4 reasons) does not count - a ship left with only Antimatter Converters, Gravity Nets or Point Pulsars cannot fight | withdrawalHarness A8 (High Templar: empty / gatling rounds / rack missiles) + A9 (a Sharaal with only its Antimatter Converters): RED on the old Posture (a prepended mutant), GREEN |
+| EM Shield | The hit chance always counted a target's shields (the server's formula); the damage they take off each hit now counts too: `AIView::damagePerHit` subtracts `getDamageMod` (the server's damage step - the strongest defence of each type, on arc from the shooter) for a target carrying a Shield-type defence (`AIView::shielded`, per unit: an EA ship's Interceptors are another type, so EA v EA decisions are unchanged) | fireRulesHarness G1 (RED 54.3 v 54.3 -> GREEN 53.7 v 54.3: a White Star's EM Shield takes 2 off every hit; it is hard to hit, ~20% for a Heavy Laser) |
+| READY_FACTIONS | + Dilgar Imperium, Minbari Federation, Narn Regime, Centauri Republic, Centauri Republic (WotCR), Earth Alliance (Early), Orieni Imperium. FAQ ("What a CPU player can field") and the Starter Guide name them | the gates below |
+
+**Gates (2026-11-23):**
+- Fire pair over 13 directories (dilgar, EA_old, centauri_old, minbari, narn, centauri, orieni, EA, raiders and the four raider directories),
+  phases 3 and 1 at Easy, Normal and Hard: 646 hulls, 121,076 pairings, 12,650 legal shots, 5,308 Fire-plan rows clicked in together (20 of them
+  exclusive weapons), 889 launches and 48 Energy Mines planned, 26,009 jump-point declarations - **0 differences**. Orders pair, the same
+  directories, three levels: 570 hulls, 3,420 situations - **0 differences**.
+- ShipMover pair, Orieni (the one Major not flown before): 56 hulls, 40,152 plans through movement.js - **0 differences**; PHP half 901,499 checks.
+- Harnesses: fireRules 915, levels 340, withdrawal 119, ram 60, hazards 14,758, deploySpread 66, budget 30, cpuLobby 51 (aligned: the list read
+  from AIConfig, a Brakiri unit as the not-ready one, a breaching-pod refusal), flagOff - all PASS; manoeuvre 522 + its 2 known pre-existing
+  "D" failures. FleetComposer + the real Fleet Checker: 384 fleets for every ready faction, all clean and all passed. Lobby parity of the
+  missing systems: 2,736 blueprints, 0 differences.
+- Self-play (`--budget=0`, FleetComposer fleets at 2,500 points against EA, Normal and Hard, 24x16 and 42x30): **Orieni 20/20**; Dilgar,
+  Minbari, Narn, Centauri, Centauri (WotCR), EA (Early) 4/4 each (20/20 each in the first T9 session, before this session's changes); 8
+  targeted games (exclusive weapons, gatlings and racks, spaced mines) 8/8 - 52 games, 0 AI defects. Turn caps are stalemates with both
+  sides fighting (the known pattern). Kept for replay: 6007 (the High Templar game that found the "can still fight" gap), 6008-6015.
+- Replay corpus: 243 passed, 0 failed (run after the registry fix below, which IS engine code). **Still owed: the user's play-test of the new factions.**
+
+**Found while gating - and FIXED at the user's request the same day ("Please fix this leak"):** three engine registries were static
+arrays every CONSTRUCTION appended to and nothing emptied - `GravityNetHandler::$gravityNets` (each Minbari Gravity Net),
+`HkControlNodeOrieni::$nodeList` / `$hkList` and `HkControlNode::$nodeList` / `$hkList` (Nexus Makar; both cleared once per PROCESS,
+`clearLists` / `$alreadyCleared`). Every game load, AI view and lobby probe added its objects, which kept their ships alive - a self-play
+process grew ~13-27 MB a turn in Minbari and Orieni games (EA v EA and Centauri flat at ~30 MB) - and the handlers read entries of EARLIER
+loads (a request that loads the game twice, as the AI's do, counted them again; an earlier load's Gravity Net could win "largest move"
+and leave the resolving game's net with nothing to move). Now the game being resolved is asked: `GravityNetHandler::netsOf($gamedata)`,
+`HkControlNode(Orieni)::nodesOf / flightsOf($gamedata)` - the flights by the CLASSES that register (`$hkClasses`, names only, never objects).
+For a request that loads the game once this is exactly what `clearLists` left, launched flights included (`Manager::insertSingleShip`
+puts them in `$gamedata->ships`). Proof: NEW `tests/ai/registryHarness.php` (RED 7 of 9 - 30 games kept 11 MB; the stale net won; the
+stale Orieni nodes covered the shortfall; Nexus Makar share 0 instead of 0.2 -> GREEN 9/9, +0.05 MB); self-play probes flat (Minbari
+34 -> 36 MB over 15 turns, was 238 MB peak; Orieni 42 -> 41 MB, was 411 MB by turn 13); the replay corpus 243 passed / 0 failed (it reloads, masks
+and re-resolves damage for every game - 5 hold Orieni HKs, none a Gravity Net, and the crit-phase HK shortfall is not among its checks: those two
+are the new harness's B and C). Other registries of
+the same shape, fixed the same way at the user's next request ("let's pre-emptively fix these too"): the Nexus LCV, Polaren LCV and Drakh Raider
+Controllers (`controllersOf($gamedata)`; `getIniBonus($unit, $gamedata)` - its 19 callers pass the game), the Mindrider Hangar (`hangarsOf` /
+`projectionsOf`; a team checked once per game LOAD - a WeakMap - where it was once per process) and the Gravitic Mines
+(`GraviticMineHandler::getAllMines($gamedata)`; its once-per-turn guard keyed by game AND turn). registryHarness E, F, G: RED 11 of 22
+(30 dropped games kept 19.5 MB; stale controllers gave +15 initiative not +5; the second Mindrider game kept its excess Projections; 294 mines
+found where the game had 7) -> GREEN 22/22 (+0.06 MB).
+
+**Survey after the release work** (hidden units left out; fighter racks counted empty, as on the survey board - a creator buys their
+missiles, FleetComposer does not): Centauri (WotCR) 99%, Orieni 98%, Dilgar 96%, Centauri 96%, Narn 96%, Minbari 95%, Earth Alliance (Early)
+92% (Earth Alliance 95%, Raiders 97%). No hull class the lobby offers a CPU player is left without a gun it fires, but EA's Armed Missile
+Shuttle on a board with no missiles (a 'shuttles' hangar: FleetComposer never buys it; a creator buys its missiles).
+
+#### Missing systems - what the AI does not use yet (the user, 2026-11-23: "so we can tackle them one-by-one in future and unhide these units for ai use")
+
+In the released factions first; the enablers E1-E11 above cover the rest. "Hidden" = on `AIConfig::CPU_MISSING_SYSTEMS` (and its lobby
+mirror): taking the line out of both unhides the units.
+
+| # | System | Today | Released factions (units hidden / mounts idle) | How players use it (the user) | The work |
+|---|---|---|---|---|---|
+| M1 | **Marines** (boarding) | hidden | 45 boarding craft - EA Lamprey, Raiders, Dilgar Jortavo, Minbari, Narn Tra'Kha (armed and not), Centauri Scion; every other faction's pods, the Trek Nausicaan gliders | "we will add Marines later" | a boarding decider (launch, approach, board) + the Marines' page rules; then the line out of both lists |
+| M2 | **Hunter-Killers** (Orieni: remote-controlled flights, deploy in hangars, designed to ram) | hidden (`ShipMover::unsupportedHullReason`); HK Control Nodes idle | Orieni HK Shining Light / Shining Star | "launch them immediately ... usually target larger ships ... working their way down to HCV and MCV" | hangar deployment, launch from the hangars, flight rams (T9 note 6) |
+| M3 | **Antiproton Defender** (special hit formula, E4) | hidden where it is a unit's only gun; idle elsewhere | Raiders' Jia hidden; 12 mounts on the Raiders' Vastar / Vasy | (no input needed) | port the page's formula into AIView + an oracle board; the line out |
+| M4 | **Antimatter Converter** (special hit, E4) | idle | Minbari 11 | (no input needed) | as M3 |
+| M5 | **Point Pulsar** (special hit, E4) | idle | Dilgar 4 | (no input needed) | as M3 |
+| M6 | **Gravity Net** (Pre-Firing, E6) | idle | Minbari 10 | both: judged by OEW - pull an enemy ship into the heavy-weapon arcs of the bot's ships that hold a lock on it, or push an enemy ship out of the heavy-weapon arcs it has on the bot's ships it holds a lock on (the user, 2026-11-23). S (largest move wins) / P (this net wins) not ruled separately | a Pre-Firing decider (E6): the net's move hexes priced by the bot's locked heavy guns gained / the enemy's locked heavy guns lost |
+| M7 | **Pulsar Mine** (Pre-Firing, E6) | idle | Narn 2 (G'Karith) | scare fighters off; charge into enemy fighters when the G'Karith moves first - it triggers as they move, starting in its range | E6 |
+| M8 | **Ballistic Torpedo** (splits by default) | idle | Centauri 3 | 2-3 at one or two ships, or 3-6 at a flight (separate fighters), backed by 1-2 OEW; Easy/Normal 1-3 a turn at one target, Hard splits more | salvo pricing + split launches (E1's split orders, ballistic) |
+| M9 | **Molecular Slicer** (splits by default) | idle | EA 2 | - | with M8 |
+| M10 | **Twin Array with split arcs** | idle ('special arcs') | Centauri 2 | - | E11 |
+| M11 | **Reloading at a carrier** (Hangar Ops) | gatlings and fighter racks run dry and stay dry | every gatling flight, every fighter rack | "if possible ... order fighters with empty gatling guns to go and reload in carriers but this is very rare"; ships with an ordnance supply could reload fighters' missiles and torpedoes | a FlightDecider "home to reload" + docking |
+| M12 | **Fighter missiles in an auto-composed fleet** | `FleetComposer` buys plain units - a fighter rack carries nothing (a creator's fleet carries what was bought) | every rack-armed flight FleetComposer buys | - | buy missiles in FleetComposer (they are bought as enhancements / ammo) |
+| M13 | **Adaptive Armour** | defaults (nothing allocated) | Minbari 2 hulls | points to the most numerous enemy weapon class (rams ignored), the rest as the ship is hit, up to the maximum | an Initial Orders handler |
+| M14 | **Grappling Claw** (boarding) | idle | Raiders 2 | - | with M1 |
+| M15 | **Exclusive BALLISTIC weapons** | idle (`weaponBlock`) | none in the released factions | - | a conflict rule in BallisticDecider (as E9's) |
+| M16 | **Magazine-fed direct fire** (`AmmoDirectWeapon`) | idle | none in the released factions | - | E2's magazine half |
+| - | Tractor Beam / Self-Repair / Chameleon Sensors | no code - ruled | Minbari, Raiders, Centauri | "ignore" / "fine at defaults" / "ignore for now" | none |
+| - | Unreliable Twin Array | fires whole only - its page prototype is plain Particle, a Split click makes no order (page gap) | Centauri (one hull) | - | a page fix first |
 
 ### 10.11 Stage T8 - the skirmish release (2026-11-22) - COMPLETE (user, 2026-11-22), uncommitted
 

@@ -42,6 +42,7 @@ class AIView
     private $refusal = null;
     private $sent = array();      //cache: weapon object id => array(its public properties, its payload or null)
     private $mountOrder = array(); //cache: unit id => weapon object id => place in mounts()
+    private $shieldedUnits = array(); //cache: unit id => does it carry a Shield-type defence (shielded() - stage T9)
     private $worst = array();     //cache: unit id => worstExposure()
     private $overlaps = array();  //cache (stage T8): unit id => whole bearing => do 2+ entries of its hit table hold it ('locations': the table)
 
@@ -227,19 +228,33 @@ class AIView
         if ($weapon->preFires) return 'pre-firing weapon';
         if ($weapon->hextarget || !empty($weapon->hextargetArray)) return 'hex-targeted';
         if ($weapon->autoFireOnly || !empty($weapon->autoFireOnlyArray)) return 'fires by itself';
-        if ($weapon->canSplitShots || !empty($weapon->canSplitShotsArray)) return 'split shots';
+        if (!$this->plainMode($weapon)) return 'split shots'; //stage T9 (E1): only a weapon that splits in EVERY mode - see splitsIn()
         //from here on some flags are read from the weapon's payload (flag()): only for a weapon that got this far
         if ($this->flag($weapon, 'duoWeapon') || $this->flag($weapon, 'dualWeapon')) return 'compound weapon';
         if ($this->flag($weapon, 'isBoardingAction')) return 'boarding';
         if ($weapon->splitArcs || $this->flag($weapon, 'specialArcs')) return 'special arcs';
         if ($this->flag($weapon, 'hasSpecialTargeting') || $this->flag($weapon, 'canOnlyCalledShot') || $this->flag($weapon, 'reinforceAmount')) return 'special targeting';
         if ($weapon->linkedFiringGroup !== null || $this->flag($weapon, 'flightExclusiveGroup')) return 'linked firing';
-        if ($weapon->exclusive) return 'exclusive weapon';
+        /* Stage T9 (E9): a DIRECT-FIRE exclusive weapon (the Sitara's Ion Bolt, the Phalan's Plasma Gun) is offered like any gun -
+           FireDecider::conflicts keeps a craft to it or to its other guns, as the page does (the test at the end of this function, and
+           weaponManager.checkConflictingFireOrder). A ballistic one stays left alone: BallisticDecider has no such rule. */
+        if ($weapon->exclusive && $weapon->ballistic) return 'exclusive weapon';
         if ($weapon->weaponClass === 'Support' || $this->flag($weapon, 'canTargetAllies') || $this->flag($weapon, 'canTargetAlliesArray')) return 'support weapon';
         //Sustained fire is something a player switches on (an overload, in Initial Orders); the bot never does,
         //and a Heavy Laser that is not overloading is a plain gun.
         if ($weapon->alwaysoverloading || $weapon->isOverloadingOnTurn($this->turn)) return 'overload / sustained fire';
-        if ($this->flag($weapon, 'ammunition') !== null || $weapon->checkAmmoMagazine || $this->flag($weapon, 'missileArray')) return 'limited ammunition';
+        /* Stage T9 (E2 - the user, 2026-11-23: limited-ammo weapons "Just fire freely until empty for now"), as the page's
+           checkOutOfAmmo asks: a weapon with an `ammunition` count (the gatlings) fires while it is above 0; an old missile rack
+           (MissileLauncher, its rounds in `missileArray`) fires in a mode with a round left (modes() offers only those) on a flight,
+           and freely on a ship - the page counts no ship rack's rounds, and the server's ship racks keep none. A weapon fed from a
+           magazine (AmmoDirectWeapon) is still left alone. */
+        $ammunition = $this->flag($weapon, 'ammunition');
+        if ($ammunition !== null && (int)$ammunition <= 0) return 'out of ammunition';
+        if ($weapon->checkAmmoMagazine) return 'limited ammunition';
+        if ($this->flag($weapon, 'missileArray')) {
+            if (!($weapon instanceof MissileLauncher)) return 'limited ammunition';
+            if (count($this->modes($weapon)) == 0) return 'out of ammunition';
+        }
         if ($this->flag($weapon, 'specialHitChanceCalculation') || $this->flag($weapon, 'specialRangeCalculation') || $this->flag($weapon, 'specialHitChanceCalculationArray') || $this->flag($weapon, 'specialRangeCalculationArray')) return 'special hit calculation';
         if (count($weapon->getFixedFireControlModes()) > 0) return 'fixed fire control';
 
@@ -250,13 +265,36 @@ class AIView
         if ($weapon->firedOnTurn($this->turn) || count($this->ordersThisTurn($weapon)) > 0) return 'already has an order this turn';
         if (!$this->loaded($weapon)) return 'not loaded';
 
-        //weaponManager.checkConflictingFireOrder: an exclusive weapon on the same craft has an order
+        //weaponManager.checkConflictingFireOrder: on the same craft (or ship) a weapon of the same kind - direct or ballistic - has an
+        //order, and one of the two is exclusive (stage T9: both ways, as the page asks it; it was only "the other is exclusive")
         foreach (($fighter !== null ? $fighter->systems : $unit->systems) as $other) {
-            if ($other === $weapon || !($other instanceof Weapon) || !$other->exclusive || $other->ballistic) continue;
+            if ($other === $weapon || !($other instanceof Weapon) || (bool)$other->ballistic !== (bool)$weapon->ballistic) continue;
+            if (!$other->exclusive && !$weapon->exclusive) continue;
             if (count($this->ordersThisTurn($other)) > 0) return 'an exclusive weapon is firing';
         }
 
         return null;
+    }
+
+    /* Stage T9: weaponBlock's reasons that mean the bot never fires that KIND of weapon (principle P4) - not this turn's state of it
+       (lost, off, reloading, empty, already firing). */
+    const NEVER_FIRED = array('compound weapon', 'pre-firing weapon', 'hex-targeted', 'split shots', 'boarding', 'special arcs',
+        'special targeting', 'linked firing', 'exclusive weapon', 'support weapon', 'overload / sustained fire', 'limited ammunition',
+        'special hit calculation', 'fixed fire control');
+
+    /* Does the bot fire this kind of weapon at all, in the phase that is its own (direct fire or ballistic)? Posture::usableGuns asks it
+       (stage T9): a unit whose guns are all of kinds it never fires - Antimatter Converters, Gravity Nets, Point Pulsars - cannot fight,
+       for surrender, jumping out and the last stand. */
+    public function firesKind($unit, Weapon $weapon, $fighter = null)
+    {
+        $kept = $this->ballistics;
+        $this->ballistics = (bool)$weapon->ballistic;
+        try {
+            $why = $this->weaponBlock($unit, $weapon, $fighter);
+        } finally {
+            $this->ballistics = $kept;
+        }
+        return !in_array($why, self::NEVER_FIRED, true);
     }
 
     /* A MISSILE RACK fed from an Ammunition Magazine (AmmoMissileRackS and everything built on it,
@@ -336,6 +374,29 @@ class AIView
         return $orders;
     }
 
+    /* Stage T9, enabler E1 (TACTICAL_AI_PLAN.md 10.10): does $weapon split its shots in $mode? The page sends a splitting mode
+       through the weapon's own doMultipleFireOrders (weaponManager.targetShip) - an order a click, each at a unit of its own: the
+       Twin Array family's 'Split' - and every other mode through its plain loop, an order a gun, all at the unit clicked. A weapon
+       with a per-mode list splits as the list says (the page's updateFiringModeData: a mode the list leaves out does not split);
+       one without it splits in every mode or in none.
+       The user's ruling of 2026-11-23: "Split Weapons like Twin Arrays ... almost always fire all their shots at the same target in
+       practice using Firing Mode 1" - so the bot orders a weapon in its plain modes only (modes()), and a weapon with none (the
+       Ballistic Torpedo, the slicers) stays left alone (weaponBlock). Hard's own split: splitShot() and FireDecider::splitGuns. */
+    public function splitsIn(Weapon $weapon, $mode)
+    {
+        if (!empty($weapon->canSplitShotsArray)) return !empty($weapon->canSplitShotsArray[(int)$mode]);
+        return (bool)$weapon->canSplitShots;
+    }
+
+    //Has $weapon a firing mode that does not split its shots (splitsIn)?
+    public function plainMode(Weapon $weapon)
+    {
+        foreach (array_keys($weapon->firingModes) as $mode) {
+            if (!$this->splitsIn($weapon, (int)$mode)) return true;
+        }
+        return false;
+    }
+
     //The firing modes of a weapon the bot will consider.
     public function modes(Weapon $weapon)
     {
@@ -346,8 +407,21 @@ class AIView
             }
             return $modes;
         }
+        /* Stage T9 (E2): an OLD missile rack (MissileLauncher - its rounds in missileArray, a mode each): on a flight only a mode with a
+           round left (the page's checkOutOfAmmo; a fighter rack's fire() spends one or fizzles - so a fighter rack on anything else is
+           counted too); on a ship every mode (the page asks no count, the server keeps none). */
+        if ($weapon instanceof MissileLauncher) {
+            $counted = ($weapon instanceof FighterMissileRack) || ($weapon->getUnit() instanceof FighterFlight);
+            foreach (array_keys($weapon->firingModes) as $mode) {
+                $missile = isset($weapon->missileArray[$mode]) ? $weapon->missileArray[$mode] : null;
+                if ($missile === null || ($counted && (int)$missile->amount <= 0)) continue;
+                $modes[] = (int)$mode;
+            }
+            return $modes;
+        }
         foreach (array_keys($weapon->firingModes) as $mode) {
             $mode = (int)$mode;
+            if ($this->splitsIn($weapon, $mode)) continue; //stage T9 (E1): never a splitting mode - see splitsIn()
             $type = isset($weapon->damageTypeArray[$mode]) ? $weapon->damageTypeArray[$mode] : $weapon->damageType;
             //⚠️ see the header: with officers aboard, pricing a Piercing shot may spend an Expert Gunner's bonus
             if (TacGamedata::$officersPresent && $type === 'Piercing') continue;
@@ -395,13 +469,66 @@ class AIView
         return null;
     }
 
-    private function work($unit, Weapon $weapon, $target, $mode)
+    /* Stage T9, enabler E1 - Hard's split (the skill 'splitShots'): ONE gun of $weapon in its splitting $mode at $target - the order
+       one click makes on the page (the Twin Array family's doMultipleFireOrders: one order, one shot, damage class 'Sweeping'), priced
+       as shot() prices a volley: 'orders' 1, 'damage' one gun's share. Null where the page would make no such order, or for a weapon
+       whose page split the bot has not ported (SPLIT_FAMILIES). The weapon is LEFT IN $mode; answers are remembered as shot()'s. */
+    public function splitShot($unit, Weapon $weapon, $target, $mode)
+    {
+        $key = 'split:' . $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id;
+        if (!array_key_exists($key, $this->shots)) {
+            $this->refusal = null;
+            $shot = null;
+            if (!in_array(get_class($weapon), self::SPLIT_FAMILIES, true) || !$this->splitsIn($weapon, (int)$mode)) $this->refuse('mode');
+            else $shot = $this->work($unit, $weapon, $target, (int)$mode, true);
+            if ($shot !== null) {
+                $guns = max(1, $shot['orders']);
+                $shot['damage'] = $shot['damage'] / $guns;
+                $shot['orders'] = 1;
+                $shot['shots'] = 1;
+                $shot['damageclass'] = 'Sweeping';
+            }
+            $this->shots[$key] = $shot;
+            $this->why[$key] = $this->refusal;
+        }
+        if ($this->shots[$key] !== null && (int)$weapon->firingMode !== (int)$mode) $weapon->changeFiringMode((int)$mode);
+        return $this->shots[$key];
+    }
+
+    /* Stage T9 (the user's note 4 - AREA-EFFECT weapons): can $weapon of $unit be launched at $hex now, as weaponManager.targetHex takes
+       it, and what would the page make of it? Only the weapons of AIConfig::AOE_WEAPONS (an Energy Mine: ballistic, hex-targeted - the
+       page's plain loop, one order a gun, no unit, the hex in x / y). The page's tests: Initial Orders (a ballistic), the unit able to
+       fire, the weapon whole, loaded and switched on, no order on it this turn (the bot never re-aims one), the hex inside its arc, no
+       blocked hex in the line, within its range (0 = any). Null when it cannot; else array('mode', 'orders', 'shots', 'damageclass').
+       ⚠️ The page's targetHex ENDS the whole click on a blocked line - for the bot that is simply no launch at that hex. */
+    public function hexShot($unit, Weapon $weapon, OffsetCoordinate $hex)
+    {
+        if (!$this->ballistics || !$weapon->ballistic || !$weapon->hextarget || $weapon->autoFireOnly) return null;
+        if (!AoEDecider::isAoe($weapon) || $this->unitBlock($unit) !== null) return null;
+        if ($weapon->isDestroyed() || $weapon->isOfflineOnTurn($this->turn) || !$this->loaded($weapon)) return null;
+        if ($weapon->firedOnTurn($this->turn) || count($this->ordersThisTurn($weapon)) > 0) return null;
+        if ($weapon->splitArcs || $this->flag($weapon, 'specialArcs')) return null; //the page asks such a weapon itself (isPosOnSpecialArc)
+        if (!$this->onArcHex($unit, $weapon, $hex)) return null;
+        $from = $unit->getHexPos();
+        if (!$weapon->ignoresLoS && count($this->blocked) > 0 && Mathlib::isLoSBlocked($from, $hex, $this->blocked)) return null;
+        if ($weapon->range != 0 && $from->distanceTo($hex) > $weapon->range) return null;
+        $type = isset($weapon->data['Weapon type']) ? (string)$weapon->data['Weapon type'] : (string)$weapon->weaponClass;
+        return array('mode' => (int)$weapon->firingMode, 'orders' => max(1, (int)$weapon->guns), 'shots' => (int)$weapon->defaultShots, 'damageclass' => strtolower($type));
+    }
+
+    /* The weapons whose page split splitShot() is a port of - by EXACT class, as the page picks a system's prototype by its class:
+       the Twin Array, the Heavy Array, the Quad Array (mode 5) and the Quad Particle Beam share one doMultipleFireOrders shape (one
+       order a click, one shot, 'Sweeping', until every gun has one). Not the Unreliable Twin Array: its page prototype is a plain
+       Particle's, so a click in its Split mode makes no order at all. */
+    const SPLIT_FAMILIES = array('TwinArray', 'HeavyArray', 'QuadArray', 'QuadParticleBeam');
+
+    private function work($unit, Weapon $weapon, $target, $mode, $split = false)
     {
         if (!isset($weapon->firingModes[$mode])) return $this->refuse('mode');
         if ((int)$weapon->firingMode !== $mode) $weapon->changeFiringMode($mode);
 
-        //what a mode may turn the weapon into
-        if ($weapon->hextarget || $weapon->autoFireOnly || $weapon->canSplitShots || (bool)$weapon->ballistic !== $this->ballistics) return $this->refuse('mode');
+        //what a mode may turn the weapon into (a splitting mode only for splitShot)
+        if ($weapon->hextarget || $weapon->autoFireOnly || (bool)$weapon->canSplitShots !== $split || (bool)$weapon->ballistic !== $this->ballistics) return $this->refuse('mode');
         if (!$this->loaded($weapon)) return $this->refuse('unloaded');
         if ($weapon->guns < 1) return $this->refuse('mode');
 
@@ -685,6 +812,19 @@ class AIView
        ahead and then fails an arc that starts at 0. */
     public function onArc($unit, Weapon $weapon, $target)
     {
+        return $this->inArcAt($unit, $weapon, round(Mathlib::getCompassHeadingOfShip($unit, $target)));
+    }
+
+    /* Stage T9 (area-effect weapons): weaponManager.isPosOnWeaponArc - the same arc, at the compass heading of a HEX's centre from
+       the unit (mathlib.getCompassHeadingOfPoint; the page rounds it in isInArc as onArc does). */
+    public function onArcHex($unit, Weapon $weapon, OffsetCoordinate $hex)
+    {
+        return $this->inArcAt($unit, $weapon, round(Mathlib::getCompassHeadingOfPoint(Mathlib::hexCoToPixel($unit->getHexPos()), Mathlib::hexCoToPixel($hex))));
+    }
+
+    //Is the (rounded) compass $heading inside $weapon's arc, turned by $unit's facing - shipManager.systems.getArcs + mathlib.isInArc.
+    private function inArcAt($unit, Weapon $weapon, $heading)
+    {
         $start = $weapon->startArc;
         $end = $weapon->endArc;
 
@@ -699,8 +839,6 @@ class AIView
         $facing = $unit->getFacingAngle();
         $start = self::addToDirection($start, $facing);
         $end = self::addToDirection($end, $facing);
-
-        $heading = round(Mathlib::getCompassHeadingOfShip($unit, $target));
 
         if ($start == $end) return true;
         if ($heading == 0 && ($start == 360 || $end == 360)) return true;
@@ -775,6 +913,19 @@ class AIView
             $average = max(0, $average - round($distance * $weapon->rangeDamagePenalty * $factor));
         }
 
+        /* Stage T9 (the user, 2026-11-23: an EM Shield "reduces potential hit chances and damage so possibly needs considered for gauging
+           incoming damage from enemies"): the hit chance has always counted a target's shields - it is the server's own formula - and now
+           the damage they take off each hit does too, as Weapon's damage step takes it (getDamageMod: the strongest defence of each type,
+           on arc from where the shooter stands). Asked only of a target carrying a Shield-type defence, so a decision pays nothing for the
+           rest (an EA ship's Interceptors are defences too, of another type, and take nothing off). */
+        if ($this->shielded($target)) {
+            try {
+                $average = max(0, $average - $target->getDamageMod($unit, null, $this->turn, $weapon));
+            } catch (Throwable $e) {
+                //as before stage T9: no reduction
+            }
+        }
+
         $armour = 0;
         try {
             if ($target instanceof FighterFlight) {
@@ -796,6 +947,27 @@ class AIView
         }
 
         return max(0.5, $average - $armour);
+    }
+
+    //Does $target carry a Shield-type defence (a Shield, an EM Shield, a fighter's shield...)? Remembered per unit for the view's life.
+    private function shielded($target)
+    {
+        $key = (int)$target->id;
+        if (!isset($this->shieldedUnits[$key])) {
+            $systems = $target->systems;
+            if ($target instanceof FighterFlight) {
+                $sample = $target->getSampleFighter();
+                $systems = $sample ? $sample->systems : array();
+            }
+            $this->shieldedUnits[$key] = false;
+            foreach ($systems as $system) {
+                if ($system instanceof DefensiveSystem && $system->getDefensiveType() === 'Shield') {
+                    $this->shieldedUnits[$key] = true;
+                    break;
+                }
+            }
+        }
+        return $this->shieldedUnits[$key];
     }
 
     //Pulses expected from one pulse shot: 1 on a hit, +1 for each `grouping` the roll beats the need by.

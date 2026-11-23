@@ -3562,9 +3562,10 @@ window.gamedata = {
 
 		//data-cost is the BASE point cost the Cost filter reads (for a flight,
 		//the full-flight price shown in the row, not the per-craft one). data-cpu: a CPU player could fly
-		//it (stage T7, cpuHullBlock) - the filter hides the rest while a CPU player's slot is selected.
+		//it (stage T7, cpuHullBlock; stage T9, the missing systems - cpuBlueprintBlock) - the filter hides the rest while a CPU
+		//player's slot is selected.
 		var h = $('<div oncontextmenu="return false;" class="ship lb-ship ' + rowClass + '" data-custom="' + isCustomShip
-			+ '" data-isd="' + ship.isd + '" data-cost="' + ship.pointCost + '" data-cpu="' + (gamedata.cpuHullBlock(ship) === null) + '">'
+			+ '" data-isd="' + ship.isd + '" data-cost="' + ship.pointCost + '" data-cpu="' + (gamedata.cpuBlueprintBlock(ship) === null) + '">'
 			+ '<span class="lb-ship-name"><span class="shiptype' + customShipHighlight + '">' + this.prepareClassName(ship) + '</span>'
 			+ (sizeTag ? ' <span class="fightersize">' + sizeTag + '</span>' : '') + '</span>'
 			+ '<span class="lb-ship-cost">' + pointCostFull + '</span>'
@@ -3927,10 +3928,52 @@ window.gamedata = {
 		return null;
 	},
 
+	/* Stage T9 - systems the AI does not use yet, by name: [why, hides every FLIGHT that carries it] (the user, 2026-11-23, on breaching
+	   pods: "Hide for now, we will add Marines later"; TACTICAL_AI_PLAN.md 10.10 "Missing systems").
+	   ⚠️ MIRROR PAIR with AIConfig::CPU_MISSING_SYSTEMS (source/server/ai/AIConfig.php): change one, change both. */
+	CPU_MISSING_SYSTEMS: {
+		Marines: ["Marines", true],
+		AntiprotonDefender: ["Antiproton Defender", false]
+	},
+
+	/* Why a CPU player cannot field a unit of this blueprint for a system the AI does not use yet, or null - the page's half of
+	   AIConfig::missingSystemBlock (same rules, same wording): a flight whose craft carry a system marked true (a boarding craft); a
+	   unit that carries weapons, every one of them on the list (the Ramming Attack and the jump engine not counted). */
+	cpuMissingSystemBlock: function cpuMissingSystemBlock(ship) {
+		var list = gamedata.CPU_MISSING_SYSTEMS;
+		var mounts = [];
+		for (var i in ship.systems) {
+			var system = ship.systems[i];
+			if (!system) continue;
+			if (system.fighter && system.systems) {
+				for (var j in system.systems) if (system.systems[j]) mounts.push(system.systems[j]);
+			} else {
+				mounts.push(system);
+			}
+		}
+		var weapons = 0, unused = 0, why = [];
+		for (var k = 0; k < mounts.length; k++) {
+			var mount = mounts[k];
+			var entry = Object.prototype.hasOwnProperty.call(list, mount.name) ? list[mount.name] : null;
+			if (entry && entry[1] && ship.flight) return "a boarding craft: the AI does not use " + entry[0] + " yet";
+			if (!mount.weapon || mount.name == "RammingAttack" || mount.name == "jumpEngine") continue;
+			weapons++;
+			if (!entry) continue;
+			unused++;
+			if (why.indexOf(entry[0]) === -1) why.push(entry[0]);
+		}
+		return (weapons > 0 && unused == weapons) ? "no weapon the AI uses yet (" + why.join(", ") + ")" : null;
+	},
+
+	//What the Store's CPU filter asks of a blueprint (data-cpu): the hull kinds ShipMover never plots for, then the missing systems.
+	cpuBlueprintBlock: function cpuBlueprintBlock(ship) {
+		return gamedata.cpuHullBlock(ship) || gamedata.cpuMissingSystemBlock(ship);
+	},
+
 	//Why a CPU player cannot field this unit, or null - the page's half of AIConfig::cpuUnitBlock (same wording).
 	cpuUnitBlock: function cpuUnitBlock(ship) {
 		if (!gamedata.cpuFactionReady(ship.faction)) return ship.faction + " is not a CPU faction yet";
-		return gamedata.cpuHullBlock(ship);
+		return gamedata.cpuBlueprintBlock(ship);
 	},
 
 	/* A slot was selected (selectSlot, which every poll repeats): when that changes between a CPU player's slot and any

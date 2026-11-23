@@ -350,7 +350,9 @@ class FleetComposer
         foreach ($json[$faction] as $s) {
             if (!is_array($s) || empty($s['phpclass']) || !class_exists($s['phpclass'])) continue;
             if (empty($s['isCombatUnit']) || !empty($s['base']) || !empty($s['smallBase']) || !empty($s['osat']) || !empty($s['mine'])) continue;
-            if (!empty($s['unofficial']) || (int)($s['factionAge'] ?? 1) > 2) continue;
+            //Custom units only: the checker's `lship.unofficial == true` - a SEMI-official unit ('S': 102 of them, every jump-engine
+            //hull of Earth Alliance (Early) among them) is official to it (stage T9, 2026-11-23)
+            if (($s['unofficial'] ?? false) === true || (int)($s['factionAge'] ?? 1) > 2) continue;
             $occurence = (string)($s['occurence'] ?? '');
             if ($occurence !== 'common' && $occurence !== 'uncommon') continue;
             if ($isd !== null && (int)($s['isd'] ?? 0) > $isd) continue; //an ISD of 0 or text always passes, as in the lobby
@@ -393,11 +395,15 @@ class FleetComposer
         return self::$catalogues[$key] = $out;
     }
 
-    //Can a CPU player field this class? (AIConfig::cpuUnitBlock: the readiness list, and the hulls ShipMover never plots.)
+    /* Is this class left out? A unit a CPU player cannot field (AIConfig::cpuUnitBlock: the readiness list, the hulls ShipMover never
+       plots, the missing systems), or a CUSTOM design - `unofficial` true as the CLASS says, whatever the static file says (the user,
+       2026-11-23: "Prevent the AI FleetComposer from auto-picking any ships marked as custom"; a SEMI-custom 'S' design stays allowed,
+       his ruling the same day - the Fleet Checker counts it as official, and every EA (Early) jump-engine hull is one). */
     private static function cpuBlocked($phpclass)
     {
         try {
-            return AIConfig::cpuUnitBlock(new $phpclass(-1, -1, 'composer', 0)) !== null;
+            $unit = new $phpclass(-1, -1, 'composer', 0);
+            return ($unit->unofficial ?? false) === true || AIConfig::cpuUnitBlock($unit) !== null;
         } catch (Throwable $e) {
             return true;
         }

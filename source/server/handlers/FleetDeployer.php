@@ -83,7 +83,9 @@ class FleetDeployer
          unitIds   only these ship ids (default: every eligible unit of the slot)
          occupied  hexes the caller knows to be in use and this cannot see - a page's placements
                    not yet committed: list of array('q', 'r', 'flight' => bool)
-         seed      varies the layout; default 0 */
+         seed      varies the layout; default 0
+         spread    (stage T9 - the CPU against area-effect weapons, DeployDecider) the least distance wanted between two units: the line,
+                   the screen and the ranks that far apart where the zone has room; default 0, the standard layout (Auto-Deploy) */
     public static function plan(TacGamedata $gamedata, $playerid, $slotid, array $options = array())
     {
         $slot = $gamedata->getSlotById($slotid);
@@ -93,6 +95,8 @@ class FleetDeployer
         if (count($units) == 0) return array();
 
         $seed = isset($options['seed']) ? abs((int)$options['seed']) : 0;
+        //stage T9: the least distance wanted between any two units (the CPU against area-effect weapons - DeployDecider); 0 = the standard layout
+        $spread = isset($options['spread']) ? max(0, (int)$options['spread']) : 0;
         $anchors = self::anchors($units);
         $groupCount = max(1, min(count($anchors), isset($options['groups']) ? (int)$options['groups'] : 1));
 
@@ -106,16 +110,17 @@ class FleetDeployer
         $board = self::board($gamedata, $slot, isset($options['occupied']) ? $options['occupied'] : array());
 
         $span = max(1, (int)floor($frame['length'] / $groupCount));
-        $roomy = max(1, $span - self::GROUP_GAP);
+        $roomy = max(1, $span - max(self::GROUP_GAP, $spread));
+        $depthStep = max(1, $spread); //(stage T9) the ranks that far apart too
 
         $plan = array();
         foreach ($groups as $index => $group) {
             $centre = (int)round(-$frame['length'] / 2 + $span * ($index + 0.5));
             list($hullSpeed, $flightSpeed) = self::commonSpeeds($group['units']);
 
-            foreach (self::formation($group, $roomy, $mirror, $seed) as $place) {
+            foreach (self::formation($group, $roomy, $mirror, $seed, $spread) as $place) {
                 list($ship, $lateral, $depth) = $place;
-                $hex = self::hexAt($frame, $centre + $lateral, $depth);
+                $hex = self::hexAt($frame, $centre + $lateral, $depth * $depthStep);
                 $hex = self::nearestAcceptable($gamedata, $ship, $hex, $slot, $board);
                 if ($hex === null) continue;
 
@@ -219,7 +224,9 @@ class FleetDeployer
 
     /* One group -> list of array(ship, lateral, depth), lateral counted from the group's centre.
        $room is how many hexes of the long axis the group has to itself. */
-    private static function formation(array $group, $room, $mirror, $seed = 0)
+    /* $spread (stage T9): the least distance wanted between neighbours on the line and in the screen - kept while the group's room holds
+       them, else the standard spacing (0 = the standard layout). */
+    private static function formation(array $group, $room, $mirror, $seed = 0, $spread = 0)
     {
         $line = array();
         $support = array();
@@ -252,6 +259,7 @@ class FleetDeployer
         if ($seed > 0) usort($screen, function ($a, $b) use ($lot) { return $lot($a) < $lot($b) ? -1 : ($lot($a) > $lot($b) ? 1 : $a->id - $b->id); });
 
         $spacing = (self::rankCapacity($room, self::LINE_SPACING) >= count($line)) ? self::LINE_SPACING : 1;
+        if ($spread > $spacing && self::rankCapacity($room, $spread) >= count($line)) $spacing = $spread;
         $capacity = self::rankCapacity($room, $spacing);
 
         $places = array();
@@ -263,9 +271,10 @@ class FleetDeployer
         $behind = -2 - (int)floor(max(0, count($support) - 1) / $capacity);
         foreach ($overflow as $k => $ship) $places[] = array($ship, self::outward($k % $capacity) * $spacing * $mirror, $behind - (int)floor($k / $capacity));
 
-        //The screen: one flight a hex, in front; a second rank in front of that if it must.
-        $screenCapacity = self::rankCapacity($room, 1);
-        foreach ($screen as $k => $ship) $places[] = array($ship, self::outward($k % $screenCapacity) * $mirror, 1 + (int)floor($k / $screenCapacity));
+        //The screen: one flight a hex, in front; a second rank in front of that if it must. (Stage T9: $spread apart where there is room.)
+        $screenSpacing = ($spread > 1 && self::rankCapacity($room, $spread) >= count($screen)) ? $spread : 1;
+        $screenCapacity = self::rankCapacity($room, $screenSpacing);
+        foreach ($screen as $k => $ship) $places[] = array($ship, self::outward($k % $screenCapacity) * $screenSpacing * $mirror, 1 + (int)floor($k / $screenCapacity));
 
         return $places;
     }

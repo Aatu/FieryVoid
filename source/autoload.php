@@ -166,6 +166,7 @@ spl_autoload_register(
                 'antophearly' => '/server/model/ships/brakiri/antophEarly.php',
                 'antophupgrade' => '/server/model/ships/brakiri/antophUpgrade.php',
                 'aoe' => '/server/model/weapons/AoE.php',
+                'aoedecider' => '/server/ai/deciders/AoEDecider.php',
                 'apolloam' => '/server/model/ships/EA/apolloAM.php',
                 'apollostrikeam' => '/server/model/ships/EA/apolloStrikeAM.php',
                 'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',

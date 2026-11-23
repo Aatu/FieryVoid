@@ -294,6 +294,7 @@ class EWDecider
            Hard's power test). On 5826's turn 3 Omega #1 had put all 7 points on the G'Quan, 17 hexes off: the threats DEW is priced
            against were empty (the Heavy Lasers reloading, the pulse guns short of reach where the Narn ships stood), yet once both
            closed the Va'Kar's Medium Pulses and Ion Torpedo reached it. (A level's skill.) */
+        $mediumCaps = array(); //(stage T9) the medium-range caps alone, for when the soft ones are lifted below
         if ($view->skill('mediumLocks') && $points > 1) {
             $medium = array();
             foreach ($enemies as $enemy) {
@@ -302,7 +303,10 @@ class EWDecider
             }
             if (count($medium) > 0 && !self::unthreatened($view, $ship, $enemies)) {
                 $half = max(1, (int)floor($points * AIConfig::EW_MEDIUM_LOCK_SHARE));
-                foreach ($medium as $id) $caps[$id] = isset($caps[$id]) ? min($caps[$id], $half) : $half;
+                foreach ($medium as $id) {
+                    $caps[$id] = isset($caps[$id]) ? min($caps[$id], $half) : $half;
+                    $mediumCaps[$id] = $half;
+                }
             }
         }
 
@@ -375,6 +379,24 @@ class EWDecider
            $step points onto one enemy at once, its gain counted per point, so it is taken only when it pays better than the
            single points beside it. */
         $current = self::score($state, $alloc);
+
+        /* A JAMMER (stage T9 - the user's note on the Minbari, 2026-11-23: "The Minbari's unique system is the Jammer, which prevents
+           OEW locks on their ships when active. This generally means they use more OEW, especially at the start of games, as the
+           enemies ability to retaliate is vastly reduced due to low hit chances from having double range penalty"). The pricing
+           already knows the jammer - DEW is priced through the real hit formula, the doubled range penalty included - so a jammed ship
+           goes all-in on OEW at long range against enemies moving first. Against enemies moving AFTER it the soft lock capped every
+           lock at EW_SOFT_LOCK and the rest stayed on DEW (a Sharlin 30 hexes from an Omega and a Hyperion moving after it: 2 OEW,
+           10 DEW - with every enemy gun at a few percent). So a ship whose jammer denies EVERY enemy a lock (jammed()) has no soft
+           locks beyond EW_CLOSE_RANGE: the split is the pricing's (an enemy moving after still counts for EW_MOVES_AFTER_WEIGHT of
+           its fire); the close-range and medium-range caps stay. */
+        if (self::jammed($ship, $enemies)) {
+            foreach (array_keys($soft) as $id) {
+                if (isset($close[$id])) continue;
+                if (isset($mediumCaps[$id])) $caps[$id] = $mediumCaps[$id];
+                else unset($caps[$id]);
+            }
+        }
+
         while ($alloc['DEW'] > $minDew) {
             $best = null;
             $bestTotal = null;
@@ -453,6 +475,19 @@ class EWDecider
         $disruption = EW::getDistruptionEW($view->gamedata, $ship);
         $ship->EW = $base;
         return ($disruption > 0) ? 1 + (int)ceil($disruption) : 1;
+    }
+
+    /* (Stage T9) Does $ship's jammer deny every enemy that could shoot at it a lock - the engine's own test (Jammer::
+       getSpecialAbilityValue: on, not in a nebula, the shooter of another faction, no Advanced Sensors)? Mines left to Hazards. */
+    private static function jammed($ship, array $enemies)
+    {
+        $any = false;
+        foreach ($enemies as $enemy) {
+            if (!empty($enemy->mine)) continue;
+            if ($ship->getSpecialAbilityValue('Jammer', array('shooter' => $enemy, 'target' => $ship)) <= 0) return false;
+            $any = true;
+        }
+        return $any;
     }
 
     /* Is the danger of return fire "very low" (the user's ruling on game 5826)? Only when no loaded gun or launcher of any enemy

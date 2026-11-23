@@ -19,6 +19,7 @@ class DeployDecider
     {
         $personality = isset($seat['cpu']['personality']) ? $seat['cpu']['personality'] : AIConfig::DEFAULT_PERSONALITY;
         $seed = isset($seat['cpu']['seed']) ? (int)$seat['cpu']['seed'] : 0;
+        $view = new AIView($gamedata, $botId, AIConfig::seatLevel($seat), $seed);
 
         $planned = array();
         foreach ($gamedata->getSlotsByPlayerId($botId) as $slot) {
@@ -28,10 +29,36 @@ class DeployDecider
             else if ($personality === 'aggressive' || $personality === 'skirmisher') $groups = $anchors;
             else $groups = (int)ceil($anchors / 2);
 
-            $plan = FleetDeployer::plan($gamedata, $botId, $slot->slot, array('groups' => $groups, 'seed' => $seed));
+            $options = array('groups' => $groups, 'seed' => $seed);
+            //stage T9: spread out against an enemy carrying an area-effect weapon (the skill 'aoeSpread' - Normal and Hard)
+            if ($view->skill('aoeSpread') && self::aoeThreat($gamedata, $slot->team)) $options['spread'] = AIConfig::AOE_SPACING;
+            $plan = FleetDeployer::plan($gamedata, $botId, $slot->slot, $options);
             foreach ($plan as $place) $planned[$place['shipid']] = $place;
         }
 
         return AIFallback::deployment($gamedata, $botId, $planned);
+    }
+
+    /* Stage T9 (the user, 2026-11-23: "Normal and Hard CPU should recognise when energy mines (in a way that can be extended later to
+       cover other AoE weapons) are present and deploy in a more spread out way"): does a unit of another team carry a weapon of
+       AIConfig::AOE_WEAPONS - a ship's, or a fighter's? A fleet's make-up is on every player's screen (its ships and their systems), so
+       no mask is broken by asking. */
+    public static function aoeThreat(TacGamedata $gamedata, $team)
+    {
+        foreach ($gamedata->ships as $unit) {
+            if ($unit->team == $team || $unit->isDestroyed() || $unit->isTerrain()) continue;
+            $systems = array();
+            foreach ($unit->systems as $system) {
+                if ($system instanceof Fighter) foreach ($system->systems as $sub) $systems[] = $sub;
+                else $systems[] = $system;
+            }
+            foreach ($systems as $system) {
+                if (!($system instanceof Weapon) || $system->isDestroyed()) continue;
+                foreach (AIConfig::AOE_WEAPONS as $class) {
+                    if ($system instanceof $class) return true;
+                }
+            }
+        }
+        return false;
     }
 }

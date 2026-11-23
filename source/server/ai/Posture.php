@@ -118,8 +118,11 @@ class Posture
             if ($gun->isDestroyed() || ($mount['fighter'] !== null && $mount['fighter']->isDestroyed())) continue;
             if ($gun instanceof JumpEngine || $gun->isRammingAttack || $gun->hextarget || $gun->weaponClass === 'Support') continue;
             if (PowerDecider::forcedOff($gun, $turn)) continue;
-            if ($gun instanceof AmmoMissileRackS) {
-                if (count($view->modes($gun)) == 0) continue; //no plain round left in its magazine
+            //stage T9: a kind the bot never fires (AIView::NEVER_FIRED) does no damage for it - a unit left with only such guns cannot fight
+            if (!$view->firesKind($unit, $gun, $mount['fighter'])) continue;
+            if ($gun instanceof AmmoMissileRackS || $gun instanceof MissileLauncher) {
+                //no plain round left in its magazine; an old rack of a flight with no round left (stage T9, E2 - AIView::modes)
+                if (count($view->modes($gun)) == 0) continue;
             } else {
                 if ($gun->maxDamage <= 0) continue;
                 //no fire control for any size of unit: a pure interceptor (an Interceptor Mk II) never damages anything
@@ -142,10 +145,8 @@ class Posture
        flight's ram is not built); not a base, OSAT, mine or terrain, whose ram is there "for technical purposes" (autoFireOnly). */
     public static function rammer(AIView $view, $unit)
     {
-        if (!$view->skill('ram')) return null;
         if ($unit instanceof FighterFlight || !empty($unit->base) || !empty($unit->smallBase) || !empty($unit->osat) || !empty($unit->mine)) return null;
         if ($unit->isTerrain() || $unit->isDestroyed() || $unit->isDisabled()) return null;
-        if (!self::desperate($view->gamedata, $unit->team)) return null;
 
         $ram = null;
         foreach ($unit->systems as $system) {
@@ -155,6 +156,15 @@ class Posture
             }
         }
         if ($ram === null) return null;
+        //the page's own tests before it takes an order (weaponManager.targetShip): loaded, not switched off (stage T9 - found by the fire pair)
+        if (!$view->loaded($ram) || $ram->isOfflineOnTurn($view->turn)) return null;
+        /* Stage T9 (the user, 2026-11-23): a unit DESIGNED to ram (RammingAttack::$designedToRam - the Dilgar Delegor; the Orieni
+           Hunter-Killers, a flight, when the bot flies them) "can and should always Ram, and can ignore the normal conditions for making
+           a ramming attack" - at every level, the Desperate rule or not, armed and whole. */
+        if ($ram->designedToRam) return $ram;
+
+        if (!$view->skill('ram')) return null;
+        if (!self::desperate($view->gamedata, $unit->team)) return null;
 
         if (count(self::usableGuns($view, $unit)) == 0) return $ram;
         $primary = $unit->getStructureSystem(0);

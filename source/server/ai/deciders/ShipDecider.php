@@ -217,7 +217,7 @@ class ShipDecider
             $shortened !== null ? '; last turn shortened' : '',
             ($hz['drift'] + $hz['meteors'] + $hz['mines'] > 0) ? sprintf('; hazards: drift %.0f, meteors %.0f, mines %.0f', $hz['drift'], $hz['meteors'], $hz['mines']) : '',
             $timing['cut'] ? sprintf('; OUT OF TIME (%.1f s): %d end states found, %d judged this turn, %d whole', $timing['seconds'], $timing['plans'], $timing['judgedNow'], $timing['judgedNext']) : '')
-            . (!empty($j['ram']) && $j['ram'] > 0 ? sprintf('; RAMMING (last resort, Desperate rule): worth %.0f', $j['ram']) : '');
+            . (!empty($j['ram']) && $j['ram'] > 0 ? sprintf('; RAMMING (%s): worth %.0f', ($context['ram'] !== null && $context['ram']->designedToRam) ? 'designed to ram' : 'last resort, Desperate rule', $j['ram']) : '');
 
         if (is_array(self::$trace)) {
             uasort($judged, function ($a, $b) { return $b['score'] <=> $a['score']; });
@@ -240,11 +240,11 @@ class ShipDecider
        terms, in hexes of the ship's own value: closing on the nearest enemy (always - enough to bring
        a ship in where the fire is slight, too little to buy a bad trade), formation, speed and
        manoeuvres; then the board. */
-    private static function score(array $j, $hexValue, $dangerWeight = AIConfig::MOVE_DANGER_WEIGHT)
+    private static function score(array $j, $hexValue, $dangerWeight = AIConfig::MOVE_DANGER_WEIGHT, $closingWeight = 1.0)
     {
         return $j['offence'] + AIConfig::MOVE_LAUNCH_WEIGHT * $j['launch'] - $dangerWeight * $j['danger']
             + AIConfig::MOVE_NEXT_TURN_WEIGHT * ($j['nextOffence'] - $dangerWeight * $j['nextDanger'])
-            - $hexValue * (AIConfig::MOVE_CLOSING_PER_HEX * $j['closing'] + $j['shaping'])
+            - $hexValue * (AIConfig::MOVE_CLOSING_PER_HEX * $closingWeight * $j['closing'] + $j['shaping'])
             - $j['hazard']
             + (isset($j['ram']) ? $j['ram'] : 0); //stage T6d: a last-resort ram (0 for every ship that does not ram)
     }
@@ -349,7 +349,7 @@ class ShipDecider
                     break;
                 }
                 $now[$index] = self::judgeNow($view, $ship, $plan, $context, $fire, $hazards, $start);
-                $now[$index]['score'] = self::score($now[$index], $context['hexValue'], $context['dangerWeight']);
+                $now[$index]['score'] = self::score($now[$index], $context['hexValue'], $context['dangerWeight'], $context['closingWeight']);
             }
             $judgedNow = count($now);
 
@@ -370,7 +370,7 @@ class ShipDecider
             ksort($out);
             return $out;
         }, array((int)$ship->id));
-        foreach ($judged as $index => $j) $judged[$index]['score'] = self::score($j, $context['hexValue'], $context['dangerWeight']);
+        foreach ($judged as $index => $j) $judged[$index]['score'] = self::score($j, $context['hexValue'], $context['dangerWeight'], $context['closingWeight']);
         $counts['judgedNow'] = (isset($counts['judgedNow']) ? $counts['judgedNow'] : 0) + $judgedNow;
         if ($cut) $counts['cut'] = true;
         return $judged;
@@ -610,8 +610,17 @@ class ShipDecider
         if ($ram !== null) {
             foreach ($enemies as $e => $enemy) {
                 $unit = $enemy['unit'];
-                if (!$enemy['moved'] || $unit instanceof FighterFlight || !empty($unit->mine) || $unit->isTerrain()) continue;
-                $ramTargets[$e] = $unit->getHexPos()->q . ',' . $unit->getHexPos()->r;
+                if ($unit instanceof FighterFlight || !empty($unit->mine) || $unit->isTerrain()) continue;
+                if ($enemy['moved']) {
+                    $ramTargets[$e] = $unit->getHexPos()->q . ',' . $unit->getHexPos()->r;
+                    continue;
+                }
+                /* Stage T9: a unit DESIGNED to ram ("should always Ram") goes for an enemy yet to move as well - at the hex the level
+                   forecasts it to end in (EnemyForecast - or flying straight on), where atFireTime() stands it for the judging. */
+                if (!$ram->designedToRam) continue;
+                $row = isset($view->forecast[(int)$unit->id]) ? $view->forecast[(int)$unit->id] : AIView::straightOn($unit, $turn);
+                $at = ($row !== null) ? $row->position : $unit->getHexPos();
+                $ramTargets[$e] = $at->q . ',' . $at->r;
             }
         }
 
@@ -622,7 +631,9 @@ class ShipDecider
             //the level's skills (stage T5f, AIConfig::SKILLS) - and Hard's focus target for the fleet's heavy guns (MoveDecider)
             'manoeuvres' => $view->skill('manoeuvres'), 'unmovedDanger' => (float)$view->skill('unmovedDanger'),
             'focus' => $view->focus, 'focusBonus' => (float)$view->skill('fleetFocus'), 'bestReply' => (bool)$view->skill('bestReply'),
-            'dangerWeight' => (float)$view->skill('shipDanger'),
+            //stage T9: a unit designed to ram PURSUES - its closing counts RAM_PURSUIT times, the enemy's fire at it RAM_DANGER_SHARE as much
+            'dangerWeight' => (float)$view->skill('shipDanger') * (($ram !== null && $ram->designedToRam) ? AIConfig::RAM_DANGER_SHARE : 1.0),
+            'closingWeight' => ($ram !== null && $ram->designedToRam) ? AIConfig::RAM_PURSUIT : 1.0,
             'overspeed' => AIConfig::MOVE_COST_OVERSPEED * (float)$view->skill('overspeed'),
             //judged without this turn's engine boost (Hard's power, stage T5f-4): next turn may not have it
             'turnable' => $mover->fastestTurnable(false), 'safe' => $mover->safeSpeed(AIConfig::MOVE_SAFE_TURN_SHARE, false),

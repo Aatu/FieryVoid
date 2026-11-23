@@ -289,8 +289,12 @@ class AIConfig
        the slot is readied (Manager::submitFleetForCpuSlot - the user's ruling of 2026-11-21). A faction joins when it meets section
        7: every hull clean in the ShipMover pair, no blocking system without a handler, self-play against EA with no AI defect.
        Both were proven by directory (EA, raiders) - the other factions those directories hold (EA's defences and early ships,
-       Civilians, Custom Ships) are not on it. */
-    const READY_FACTIONS = array('Earth Alliance', 'Raiders');
+       Civilians, Custom Ships) are not on it.
+       Stage T9 (the user, 2026-11-23: "Once a faction is available (either because all it's ships are playable by ai or because we've
+       hidden the ones that aren't) add it to READY_FACTIONS"): the Major factions through the plan 10.10 gate, their unusable units hidden
+       by CPU_MISSING_SYSTEMS. */
+    const READY_FACTIONS = array('Earth Alliance', 'Raiders', 'Dilgar Imperium', 'Minbari Federation', 'Narn Regime', 'Centauri Republic',
+        'Centauri Republic (WotCR)', 'Earth Alliance (Early)', 'Orieni Imperium');
 
     /* Why a CPU player cannot field $unit (a ship or a blueprint), or null when it can: its faction is not on READY_FACTIONS, or it is
        a kind of unit ShipMover never plots for (ShipMover::unsupportedHullReason - "Hide any ships that are currently listed in
@@ -299,7 +303,44 @@ class AIConfig
     public static function cpuUnitBlock($unit)
     {
         if (!in_array($unit->faction, self::READY_FACTIONS, true)) return $unit->faction . ' is not a CPU faction yet';
-        return ShipMover::unsupportedHullReason($unit);
+        $hull = ShipMover::unsupportedHullReason($unit);
+        return ($hull !== null) ? $hull : self::missingSystemBlock($unit);
+    }
+
+    /* MISSING SYSTEMS (stage T9 - the user, 2026-11-23, on breaching pods: "Hide for now, we will add Marines later. Start a list of
+       missing systems for AI in Tactical AI Plan so we can tackle them one-by-one in future and unhide these units for ai use" - the
+       list is plan 10.10 "Missing systems"). Systems, by their `name`, that the AI does not use yet: name => array(why, hides every
+       FLIGHT that carries it). A CPU player may not field
+         - a flight whose craft carry a system marked true - a boarding craft (breaching pods, assault shuttles, armed or not), or
+         - a unit that carries weapons and none the AI uses: every one of them on this list (the Ramming Attack and the jump engine
+           are not counted - a unit with no other weapon is not hidden by this, a designed rammer included).
+       Take a line out when the AI learns its system: the units come back by themselves.
+       ⚠️ MIRROR PAIR with gamelobby.js CPU_MISSING_SYSTEMS / cpuMissingSystemBlock (the Store marks its rows once, when it builds them,
+       so the page keeps its own copy of the list): change one, change both. A drift shows as a refusal when the slot is readied. */
+    const CPU_MISSING_SYSTEMS = array(
+        'Marines' => array('Marines', true),                        //boarding - the user, 2026-11-23: "we will add Marines later"
+        'AntiprotonDefender' => array('Antiproton Defender', false), //a special hit chance formula (E4) - the Raiders' Jia carries no other
+    );
+
+    //Why a CPU player cannot field $unit for a system the AI does not use yet (CPU_MISSING_SYSTEMS), or null.
+    public static function missingSystemBlock($unit)
+    {
+        $weapons = 0;   //weapons counted (not the Ramming Attack or the jump engine)
+        $unused = 0;    //of them, on the list
+        $why = array();
+        foreach ($unit->systems as $system) {
+            foreach (($system instanceof Fighter) ? $system->systems : array($system) as $mount) {
+                $name = (string)$mount->name;
+                $entry = isset(self::CPU_MISSING_SYSTEMS[$name]) ? self::CPU_MISSING_SYSTEMS[$name] : null;
+                if ($entry !== null && $entry[1] && $unit instanceof FighterFlight) return 'a boarding craft: the AI does not use ' . $entry[0] . ' yet';
+                if (!($mount instanceof Weapon) || $name === 'RammingAttack' || $name === 'jumpEngine') continue;
+                $weapons++;
+                if ($entry === null) continue;
+                $unused++;
+                $why[$entry[0]] = true;
+            }
+        }
+        return ($weapons > 0 && $unused == $weapons) ? 'no weapon the AI uses yet (' . implode(', ', array_keys($why)) . ')' : null;
     }
 
     /* LEVELS (stage T5f - plan 5.8, built from the user's notes on games 4750 and 4774; the split was accepted 2026-11-19).
@@ -383,28 +424,36 @@ class AIConfig
                         (PowerDecider::interceptors has the rule). Only Interceptors whose arc faces a flight are boosted (T7b-2,
                         the user: "prioritise Interceptors likely to have arcs")
          ram            last-resort ramming under the Desperate rule (T6d, built at T8 - the user's ruling of 2026-11-21: Normal and
-                        Hard, Easy never): see RAM_PRIMARY_SHARE and Posture::rammer */
+                        Hard, Easy never): see RAM_PRIMARY_SHARE and Posture::rammer
+         splitShots     a split-shot weapon (the Twin Array family) may divide its guns between targets (stage T9, enabler E1 - the
+                        user, 2026-11-23: "Easy and Normal CPUs should just ignore the split mode and use their default firing mode.
+                        Hard could consider whether there's any advantage in damage potential by splitting"): each gun is offered to
+                        the greedy pick on its own, and a weapon whose guns all go to one target is ordered in its plain mode, as
+                        Normal orders it (FireDecider::splitGuns / mergeSplits)
+         aoeSpread      deployment spread out against an enemy carrying an area-effect weapon (stage T9 - the user, 2026-11-23: "Normal and
+                        Hard CPU should recognise when energy mines ... are present and deploy in a more spread out way"): units AOE_SPACING
+                        hexes apart where the zone has room (DeployDecider, FleetDeployer's 'spread'); Easy and legacy as they were */
     const SKILLS = array(
         'easy' => array('sectionHealth' => false, 'ccewDeterrent' => true, 'closeLocks' => false, 'mediumLocks' => false, 'noFlightOEW' => true, 'simpleEW' => true, 'focus' => 0.0, 'heavyFocus' => false,
             'pulsePremium' => false, 'shortening' => false, 'unmovedDanger' => 0.5, 'overspeed' => 0.5, 'ballisticFloor' => false,
             'flightDanger' => 0.75, 'jink' => 'max', 'manoeuvres' => 'none', 'noise' => 10.0, 'coverageGoals' => 0,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none',
-            'interceptorBoost' => false, 'ram' => false),
+            'interceptorBoost' => false, 'ram' => false, 'splitShots' => false, 'aoeSpread' => false),
         'normal' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'closeLocks' => true, 'mediumLocks' => true, 'noFlightOEW' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 1.5, 'jink' => 'max', 'manoeuvres' => 'swap', 'noise' => 0.0, 'coverageGoals' => 4,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'turn',
-            'interceptorBoost' => false, 'ram' => true),
+            'interceptorBoost' => false, 'ram' => true, 'splitShots' => false, 'aoeSpread' => true),
         'hard' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'closeLocks' => true, 'mediumLocks' => true, 'noFlightOEW' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 3.0, 'jink' => 'any', 'manoeuvres' => 'all', 'noise' => 0.0, 'coverageGoals' => 12,
             'pileOn' => 1.0, 'support' => 2.0, 'fleetFocus' => 0.5, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => true, 'extendedTurns' => true, 'forecast' => 'full',
-            'interceptorBoost' => true, 'ram' => true),
+            'interceptorBoost' => true, 'ram' => true, 'splitShots' => true, 'aoeSpread' => true),
         'legacy' => array('sectionHealth' => false, 'ccewDeterrent' => true, 'closeLocks' => false, 'mediumLocks' => false, 'noFlightOEW' => false, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 0.75, 'jink' => 'max', 'manoeuvres' => 'swap', 'noise' => 0.0, 'coverageGoals' => 0,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none',
-            'interceptorBoost' => false, 'ram' => false)
+            'interceptorBoost' => false, 'ram' => false, 'splitShots' => false, 'aoeSpread' => false)
     );
 
     /* POWER MANAGEMENT (skill 'powerBoost', stage T5f-4). A gun "reaches" an enemy when, with the units as close as both could
@@ -436,6 +485,33 @@ class AIConfig
        when it has no usable weapon, or its PRIMARY structure is down to this share of its boxes - Normal and Hard (skill 'ram'), only
        at an enemy ship it can reach this turn (Posture::rammer / ramValue; ShipDecider plans into its hex, FireDecider orders the ram). */
     const RAM_PRIMARY_SHARE = 0.25;
+
+    /* Stage T9 (the user, 2026-11-23: units DESIGNED to ram "can and should always Ram"): such a unit - the Dilgar Delegor (Posture::
+       rammer: RammingAttack::$designedToRam) - PURSUES. Its closing term (MOVE_CLOSING_PER_HEX) counts RAM_PURSUIT times, and the enemy's
+       fire at it RAM_DANGER_SHARE of the level's shipDanger: out of reach of a ram, a Delegor 10-18 hexes from an Omega turned away and
+       ran 12-20 hexes off - the "best trade" of its two Scatter Pulsars - and a rammer that turns away never rams. */
+    const RAM_PURSUIT = 10.0;
+    const RAM_DANGER_SHARE = 0.25;
+
+    /* Stage T9 (the user, 2026-11-23: "Normal and Hard CPU should recognise when energy mines (in a way that can be extended later to cover
+       other AoE weapons) are present and deploy in a more spread out way to minimise potential damage from this AoE weapon"). AOE_WEAPONS:
+       the weapon classes (and their subclasses) that hit every unit in and round the hex they land in - an Energy Mine does its full damage
+       to each unit in that hex (each craft of a flight) and a third of it to each unit in the six round it. Against an enemy carrying one,
+       the skill 'aoeSpread' deploys units AOE_SPACING hexes apart where the zone has room (FleetDeployer's 'spread'): two units three
+       hexes apart can never share a mine. Add a class here to make another weapon count. */
+    const AOE_WEAPONS = array('EnergyMine', 'LightEnergyMine');
+    const AOE_SPACING = 3;
+    /* ...and aiming them (AoEDecider, the user's same note: "choose a target (usually a fighter flight for Energy Mines) and take a guess
+       where they will move, then target that area"): a mine lands on its hex AOE_LANDS of the time (AoE::fire: 75 of 100 - 15 more stray
+       up to six hexes, 10 fizzle). AOE_SPREAD: where an enemy ENDS against its straight-on guess - on the guessed hex, on one of the six
+       next to it (all alike), on one of the twelve two off (all alike); the rest of the time further off. A flight turns on any hex, a ship
+       less. Spacing (the user, 2026-11-23: "space out the mines a little within 1 or 2 hexes of each other to cover more space"): a second
+       mine is valued by what it adds over the first, so it goes next to it, not on it. No mine where one of the bot's own units, where it
+       stands or flying straight on, is within AOE_OWN_MARGIN hexes of the blast (it hits the hex and the six round it, friend or foe).
+       The odds are guesses of the implementer's. */
+    const AOE_LANDS = 0.75;
+    const AOE_SPREAD = array('flight' => array(0.35, 0.3, 0.2), 'ship' => array(0.5, 0.25, 0.1));
+    const AOE_OWN_MARGIN = 2;
 
     /* A SIDE DOWN TO ITS FIGHTERS (stage T6g, the user 2026-11-21: "tone down AI fighters that stay too far away when they are the
        only unit left for the AI player, as this will frustrate players. E.g. can't go three turns without firing a shot, and maybe
