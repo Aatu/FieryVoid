@@ -386,6 +386,14 @@ class HangarDecider
        carrier's Ordnance Reserve (HANG_ORD) pays for the round. Every live craft. */
     public static function reloadDue($flight, $carrier)
     {
+        return count(self::stillReloading($flight, $carrier)) > 0;
+    }
+
+    /* What the servicing would still reload (reloadDue's rules): one array(rounds held, rounds it reloads to) for each gun, rack round or
+       magazine round of a live craft that would get another. Empty: nothing more would reload. */
+    private static function stillReloading($flight, $carrier)
+    {
+        $out = array();
         $pool = HangarOps::reloadPoolRemaining($carrier);
         $bonus = 0;
         foreach ((array)$flight->enhancementOptions as $option) {
@@ -397,7 +405,7 @@ class HangarDecider
                 if ($system->isDestroyed()) continue;
                 if ($system instanceof FighterMissileRack) {
                     foreach ((array)$system->missileArray as $round) {
-                        if ($round && (int)$round->amount < (int)$system->maxAmount && $pool >= (int)$round->cost) return true;
+                        if ($round && (int)$round->amount < (int)$system->maxAmount && $pool >= (int)$round->cost) $out[] = array((int)$round->amount, (int)$system->maxAmount);
                     }
                 } else if ($system instanceof AmmoMagazine) {
                     foreach ((array)$flight->enhancementOptions as $option) {
@@ -405,22 +413,35 @@ class HangarDecider
                         if ($class === null || (int)($option[2] ?? 0) <= 0 || !class_exists($class)) continue;
                         $round = new $class();
                         if (!array_key_exists($round->modeName, $system->ammoCountArray)) continue;
-                        if ((int)$system->ammoCountArray[$round->modeName] < (int)$option[2] && $pool >= (int)$round->getPrice($flight)) return true;
+                        $held = (int)$system->ammoCountArray[$round->modeName];
+                        if ($held < (int)$option[2] && $pool >= (int)$round->getPrice($flight)) $out[] = array($held, (int)$option[2]);
                     }
                 } else if ($system instanceof Weapon) {
                     $cap = self::reloadable($system);
-                    if ($cap > 0 && isset($system->ammunition) && (int)$system->ammunition < $cap + $bonus) return true;
+                    if ($cap > 0 && isset($system->ammunition) && (int)$system->ammunition < $cap + $bonus) $out[] = array((int)$system->ammunition, $cap + $bonus);
                 }
             }
         }
-        return false;
+        return $out;
     }
 
-    //A docked flight of the bot's own (not one that starts docked) with nothing more to reload in $carrier: it may go.
+    /* A docked flight of the bot's own (not one that starts docked) that may go: every weapon still reloading in $carrier holds
+       AIConfig::RELOAD_LAUNCH_SHARE of its full load (rounded up; 1.0 = nothing more to reload - full, or the reserve spent). */
     private static function reloaded($flight, $carrier)
     {
-        return $flight instanceof FighterFlight && empty($flight->remoteControl) && (int)$flight->userid === (int)$carrier->userid
-            && !self::reloadDue($flight, $carrier);
+        return self::loadedEnough($flight, $carrier, AIConfig::RELOAD_LAUNCH_SHARE);
+    }
+
+    //reloaded() at a share of its own (the harness asks other shares than AIConfig's).
+    public static function loadedEnough($flight, $carrier, $share)
+    {
+        if (!($flight instanceof FighterFlight) || !empty($flight->remoteControl) || (int)$flight->userid !== (int)$carrier->userid) return false;
+        $share = max(0.0, min(1.0, (float)$share));
+        foreach (self::stillReloading($flight, $carrier) as $item) {
+            list($held, $full) = $item;
+            if ($share >= 1.0 || $held < (int)ceil($share * $full)) return false;
+        }
+        return true;
     }
 
     //Weapon::$reloadable (protected - read as whileDocked reads it): the rounds a docked gun reloads to, 0 for none.

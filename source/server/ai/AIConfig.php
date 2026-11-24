@@ -173,6 +173,11 @@ class AIConfig
     const FLIGHT_COVERAGE_TRIES = 6;
     //Stage T9, M11: the aimed search's plans for a flight going home to reload (to its carrier's hex - FlightDecider::dockRows)
     const FLIGHT_HOME_PLANS = 8;
+    /* Stage T9, M11 (the user, 2026-11-24: "a full load is about 6 turns and it might be better to relaunch them after a partial reload"):
+       the share of a full load EVERY weapon still reloading must hold before a docked flight is launched again - 1.0 = full (a spent
+       gatling: 6 turns docked), 0.5 = half (3 turns), 0 = the first launch chance. A weapon that can reload no further (full, or the
+       carrier's Ordnance Reserve spent) never holds it back. Rounded up: 0.5 of 6 rounds = 3, of 1 missile = 1. */
+    const RELOAD_LAUNCH_SHARE = 0.5;
     const FLIGHT_SUPPORT_RANGE = 4;         //Hard's mutual support (skill 'support', T5f-3): within this many hexes of another flight is together
     const FLIGHT_INTERCEPT_WEIGHT = 1.5;    //an enemy flight near the bot's ships is worth this much more to a flight that can shoot fighters - a priority, no longer the only target
     const FLIGHT_CLOSING_PER_HEX = 2.0;     //each hex between the flight's guns' reach and its target, when nothing is in reach
