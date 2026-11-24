@@ -120,6 +120,8 @@ window.gamedata = {
 			}
 			if (!game.waiting) tags += this.tagHtml("you", "Your turn");
 		}
+		//CPU opponent (TACTICAL_AI_PLAN.md stage T8): a game with a CPU player says so (the server sends the flag only with the feature on)
+		if (game.cpu) tags += this.tagHtml("cpu", "vs CPU");
 
 		var bits = [];
 		if (game.turn > 0) bits.push("TURN " + game.turn);

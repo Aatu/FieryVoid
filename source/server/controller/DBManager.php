@@ -2748,6 +2748,7 @@ class DBManager
 		$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, g.gamespace, g.rules, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers, (select count(*) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as occupiedSlots, (SELECT count(*) FROM tac_playeringame WHERE gameid = g.id AND playerid = ?) as userInGame, (g.password_hash IS NOT NULL) as isPrivate from tac_game g WHERE  g.status = 'LOBBY';");
 
         $games = [];
+        $full = []; //indexes into $games of games with no free slot that the viewer is not in (CPU opponent, below)
 
         if ($stmt) {
             $stmt->bind_param("i", $userid);
@@ -2774,8 +2775,21 @@ class DBManager
                     "test"        => $desc["test"],
                     "private"     => (bool)$isPrivate
                 ];
+                if ($userInGame == 0 && (int)$occupiedSlots >= (int)$slots) $full[] = count($games) - 1;
             }
             $stmt->close();
+        }
+
+        /* CPU opponent (TACTICAL_AI_PLAN.md stage T8 - the user, 2026-11-22: a game with its creator and one CPU slot "appears in
+           games.php screen under Join Games and it shouldn't"): a game with a CPU player whose every slot is taken has no seat for
+           anybody else, so only its own players are shown it - as a Fleet Test game is above (Join Games is also where a player
+           finds his OWN lobby). Asked after the statement is closed: AISeats may query (no APCu). With the feature off no game
+           has a CPU player and nothing is asked. */
+        if (count($full) > 0 && Features::reachable('cpuOpponent')) {
+            foreach ($full as $index) {
+                if (AISeats::gameHasCpu($games[$index]['id'])) unset($games[$index]);
+            }
+            $games = array_values($games);
         }
         return $games;
 
@@ -4801,12 +4815,12 @@ class DBManager
                 p.gameid = g.id
             WHERE
                 $idleRule
-                (DATE_ADD(p.lastactivity, INTERVAL 5 DAY) < NOW()
+                (DATE_ADD(p.lastactivity, INTERVAL 7 DAY) < NOW()
                 AND
                 g.status = 'LOBBY')
 
         ");
-		//28.03.2024: increased delete time for inactive games to 5 days: useful for test games, as well as allows games to be picked up after weekend!
+		//20.11.2026: increased delete time for inactive games to 7 days: since fleet test games cluttering up lobby is no longer a thing!
         if ($stmt) {
             $stmt->bind_result($id);
             $stmt->execute();

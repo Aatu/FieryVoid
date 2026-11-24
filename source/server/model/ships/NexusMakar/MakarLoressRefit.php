@@ -78,7 +78,7 @@ class MakarLoressRefit extends LCV{
         public function getInitiativebonus($gamedata){
 	    $iniBonus = parent::getInitiativebonus($gamedata);
             //may be boosted by LCV Controller...
-	    $iniBonus += NexusLCVController::getIniBonus($this);
+	    $iniBonus += NexusLCVController::getIniBonus($this, $gamedata);
             return $iniBonus;
         }
 

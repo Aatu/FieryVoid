@@ -6,6 +6,10 @@ class BaseShip {
     public $Huge = 0; //For massive terrain units, denotes how many hexes radius they have from centre hex.
     public $imagePath, $shipClass;
     public $systems = array();
+    //getStructureSystem's table (TACTICAL_AI_PLAN.md stage T8): int location => the hull's first Structure there, built from this many
+    //systems (rebuilt when the count changes); null = a location that is not a plain int, so it walks the systems as it always did
+    private $structureAt = null;
+    private $structureAtCount = -1;
     public $EW = array();
     public array $structures = [];
     public array $locations = [];
@@ -2918,16 +2922,12 @@ class BaseShip {
 		}
         
         public function getLastMovement(){
-            $m = null;
-
             if (!is_array($this->movement) || empty($this->movement))
                 return null;
 
-            foreach($this->movement as $elementKey => $move) {
-                $m = $move;
-            }
-
-            return $m;
+            //the last row in the list's order - read directly (TACTICAL_AI_PLAN.md stage T8: it walked the whole list, and the CPU
+            //opponent asks for a unit's place and facing tens of thousands of times a decision; getCoPos/getHexPos/getFacingAngle too)
+            return $this->movement[array_key_last($this->movement)];
         }
 
         /* AutomatedMovement seam: describes how this unit should move when under server
@@ -3299,29 +3299,20 @@ class BaseShip {
 
     public function getCoPos(){
 
-        $movement = null;
         if (!is_array($this->movement) || empty($this->movement)){
             return array("x"=>0, "y"=>0);
         }
-        foreach ($this->movement as $move){
-            $movement = $move;
-        }
-        return $movement->getCoPos();
+        return $this->movement[array_key_last($this->movement)]->getCoPos(); //the last row (see getLastMovement)
 
     }
 
     public function getHexPos() : OffsetCoordinate{
 
-        $movement = null;
         if (!is_array($this->movement) || empty($this->movement)){
             return new OffsetCoordinate(0, 0);
         }
 
-        foreach ($this->movement as $move){
-            $movement = $move;
-        }
-
-        return $movement->position;
+        return $this->movement[array_key_last($this->movement)]->position; //the last row (see getLastMovement)
     }
 
 
@@ -3514,17 +3505,11 @@ public function getAllEWExceptDEW($turn){
 }
 
     public function getFacingAngle(){
-        $movement = null;
-
         if (!is_array($this->movement) || empty($this->movement)){
             return 0;
         }
 
-        foreach ($this->movement as $move){
-            $movement = $move;
-        }
-
-        return $movement->getFacingAngle();
+        return $this->movement[array_key_last($this->movement)]->getFacingAngle(); //the last row (see getLastMovement)
     }
 
 
@@ -3581,6 +3566,30 @@ public function getAllEWExceptDEW($turn){
     }
 
     public function getStructureSystem($location){
+        /* TACTICAL_AI_PLAN.md stage T8: a plain location number is answered from a table of the hull's Structures (the first of
+           each location, as the walk below finds it) - asked thousands of times a CPU decision, it walked every system each time.
+           Rebuilt whenever the number of systems changes; anything but an int keeps the walk and its loose comparison. */
+        if (is_int($location)) {
+            if ($this->structureAtCount !== count($this->systems)) {
+                $table = array();
+                foreach ($this->systems as $system){
+                    if (!($system instanceof Structure)) continue;
+                    if (!is_int($system->location)) { $table = null; break; } //a location that is not a plain int: always walk
+                    if (!isset($table[$system->location])) $table[$system->location] = $system;
+                }
+                $this->structureAt = $table;
+                $this->structureAtCount = count($this->systems);
+            }
+            if ($this->structureAt !== null) {
+                if (isset($this->structureAt[$location])) return $this->structureAt[$location];
+                return ($location != 0) ? $this->getStructureSystem(0) : null;
+            }
+        }
+        return $this->getStructureSystemByWalk($location);
+    }
+
+    //getStructureSystem as it always was: the first Structure whose location == $location, else the primary's.
+    private function getStructureSystemByWalk($location){
         foreach ($this->systems as $system){
             if ($system instanceof Structure  && $system->location == $location){
                 return $system;

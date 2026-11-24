@@ -12489,30 +12489,38 @@ class KirishiacElintModule extends ShipSystem implements SpecialAbility{
 /*custon system for Nexus LCVs*/
 class NexusLCVController extends ShipSystem {
 
-    public static $controllerList = array();
+    /* (Until 2026-11-23 a static $controllerList every controller joined when it was CONSTRUCTED, never emptied: it kept the ships of
+       every game load of the process alive, and getIniBonus took the strongest controller of ANY load. Now the game asked about is
+       searched - controllersOf. tests/ai/registryHarness.php E.) */
     public $name = "NexusLCVController";
     public $displayName = "LCV Controller";
     public $iconPath = "hkControlNode.png";
     public $boostable = true;
     public $maxBoostLevel = 2;
 	
-    public static function addControllerNexus($controller){
-	    NexusLCVController::$controllerList[] = $controller; //add controller to list
+    //The controllers of this kind among $gamedata's units, in its order.
+    private static function controllersOf($gamedata){
+        $controllers = array();
+        foreach ($gamedata->ships as $ship){
+            foreach ($ship->systems as $system){
+                if ($system instanceof NexusLCVController) $controllers[] = $system;
+            }
+        }
+        return $controllers;
     }
 	
 
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
         $this->boostEfficiency = $powerReq;
-	    NexusLCVController::addControllerNexus($this);
     }    
 	
-    public static function getIniBonus($unit){ //get current Initiative bonus; current = actual as of last turn
+    public static function getIniBonus($unit, $gamedata){ //get current Initiative bonus; current = actual as of last turn - from $gamedata's controllers
 	    $iniBonus = 0;
 	    $turn = TacGamedata::$currentTurn-1;
 	    $turn = max(1,$turn);
 	    //strongest system applies
-	    foreach(NexusLCVController::$controllerList as $controller){
+	    foreach(NexusLCVController::controllersOf($gamedata) as $controller){
 		$controllerShip = $controller->getUnit();
 		if($unit->userid == $controllerShip->userid){ //only for the same player...
 			if ( ($controller->isDestroyed($turn))
@@ -12548,30 +12556,38 @@ class NexusLCVController extends ShipSystem {
 
 class NexusPolarenLCVController extends ShipSystem {
 
-    public static $controllerList = array();
+    /* (Until 2026-11-23 a static $controllerList every controller joined when it was CONSTRUCTED, never emptied: it kept the ships of
+       every game load of the process alive, and getIniBonus took the strongest controller of ANY load. Now the game asked about is
+       searched - controllersOf. tests/ai/registryHarness.php E.) */
     public $name = "NexusPolarenLCVController";
     public $displayName = "Polaren LCV Controller";
     public $iconPath = "hkControlNode.png";
     public $boostable = true;
     public $maxBoostLevel = 2;
 	
-    public static function addControllerNexus($controller){
-	    NexusPolarenLCVController::$controllerList[] = $controller; //add controller to list
+    //The controllers of this kind among $gamedata's units, in its order.
+    private static function controllersOf($gamedata){
+        $controllers = array();
+        foreach ($gamedata->ships as $ship){
+            foreach ($ship->systems as $system){
+                if ($system instanceof NexusPolarenLCVController) $controllers[] = $system;
+            }
+        }
+        return $controllers;
     }
 	
 
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
         $this->boostEfficiency = $powerReq;
-	    NexusPolarenLCVController::addControllerNexus($this);
     }    
 	
-    public static function getIniBonus($unit){ //get current Initiative bonus; current = actual as of last turn
+    public static function getIniBonus($unit, $gamedata){ //get current Initiative bonus; current = actual as of last turn - from $gamedata's controllers
 	    $iniBonus = 0;
 	    $turn = TacGamedata::$currentTurn-1;
 	    $turn = max(1,$turn);
 	    //strongest system applies
-	    foreach(NexusPolarenLCVController::$controllerList as $controller){
+	    foreach(NexusPolarenLCVController::controllersOf($gamedata) as $controller){
 		$controllerShip = $controller->getUnit();
 		if($unit->userid == $controllerShip->userid){ //only for the same player...
 			if ( ($controller->isDestroyed($turn))
@@ -12608,7 +12624,9 @@ class NexusPolarenLCVController extends ShipSystem {
 	
 /*custom system - Drakh Raider Controller*/
 class DrakhRaiderController extends ShipSystem {
-    public static $controllerList = array();
+    /* (Until 2026-11-23 a static $controllerList every controller joined when it was CONSTRUCTED, never emptied: it kept the ships of
+       every game load of the process alive, and getIniBonus took the strongest controller of ANY load. Now the game asked about is
+       searched - controllersOf. tests/ai/registryHarness.php E.) */
     public $name = "drakhRaiderController";
     public $displayName = "Raider Controller";
     public $iconPath = "hkControlNode.png";
@@ -12616,24 +12634,30 @@ class DrakhRaiderController extends ShipSystem {
     public $maxBoostLevel = 2;
 	public $primary = true;
 	
-    public static function addController($controller){
-	    DrakhRaiderController::$controllerList[] = $controller; //add controller to list
+    //The controllers of this kind among $gamedata's units, in its order.
+    private static function controllersOf($gamedata){
+        $controllers = array();
+        foreach ($gamedata->ships as $ship){
+            foreach ($ship->systems as $system){
+                if ($system instanceof DrakhRaiderController) $controllers[] = $system;
+            }
+        }
+        return $controllers;
     }
 	
 
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
         $this->boostEfficiency = $powerReq;
-	    DrakhRaiderController::addController($this);
     }    
 	
 	
-    public static function getIniBonus($unit){ //get current Initiative bonus; current = actual as of last turn
+    public static function getIniBonus($unit, $gamedata){ //get current Initiative bonus; current = actual as of last turn - from $gamedata's controllers
 	    $iniBonus = 0;
 	    $turn = TacGamedata::$currentTurn-1;
 	    $turn = max(1,$turn);
 	    //strongest system applies
-	    foreach(DrakhRaiderController::$controllerList as $controller){
+	    foreach(DrakhRaiderController::controllersOf($gamedata) as $controller){
 		$controllerShip = $controller->getUnit();
 		if($unit->userid == $controllerShip->userid){ //only for the same player...
 			if ( ($controller->isDestroyed($turn))
@@ -12680,61 +12704,58 @@ class HkControlNode extends ShipSystem{
     public $primary = true;
     private static $fullIniPenalty = -50; //-10, times 5 d20->d100
 	
-    public static $alreadyCleared = false;	
-	public static $nodeList = array(); //array of nodes in game
-	public static $hkList = array(); // array of HK flights in game
-    
+	/* The HK flight CLASSES (lower case => true) that registered with addHKFlight - a class, never an object. Until 2026-11-23 static
+	   lists of every node and HK flight CONSTRUCTED in the process, cleared once per process (clearLists, $alreadyCleared): every game
+	   load, AI view and lobby probe added its objects and kept their ships alive (a self-play process grew 13-27 MB a turn), and a request
+	   that loaded the game more than once counted the earlier loads' nodes and flights again. Now the game being resolved is asked
+	   (nodesOf / flightsOf) - which is what clearLists left in a request that loaded it once, launched flights included
+	   (Manager::insertSingleShip puts them in $gamedata->ships). tests/ai/registryHarness.php D. */
+	private static $hkClasses = array();
+
     protected $possibleCriticals = array( //simplified from B5Wars!
         15=>"OutputReduced1",
         21=>"OutputReduced2",
-    );	
+    );
 
     function __construct($armour, $maxhealth, $powerReq, $output){
-        parent::__construct($armour, $maxhealth, $powerReq, $output ); 
-	    HkControlNode::$nodeList[] = $this;
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
     }
-	
-	
-	
+
+
+
 	/*to be called by every HK flight after creation*/
     public static function addHKFlight($HKflight){
-	    HkControlNode::$hkList[] = $HKflight;
+	    HkControlNode::$hkClasses[strtolower(get_class($HKflight))] = true;
     }
-	
-	//inactive entries (from other gamedata) might have slipped by... clear them out!
-	public static function clearLists($gamedata){
-		HkControlNode::$alreadyCleared = true;
-		$tmpArray = array();
-		foreach(HkControlNode::$nodeList as $curr){
-			$shp = $curr->getUnit();
-			//is this unit defined in current gamedata? (particular instance!)
-			$belongs = $gamedata->shipBelongs($shp);
-			if ($belongs){
-				$tmpArray[] = $curr;
-			}			
+
+	//The HK Control Nodes of $gamedata's units, in its order.
+	private static function nodesOf($gamedata){
+		$nodes = array();
+		foreach ($gamedata->ships as $ship){
+			foreach ($ship->systems as $system){
+				if ($system instanceof HkControlNode) $nodes[] = $system;
+			}
 		}
-		HkControlNode::$nodeList = $tmpArray;
-		$tmpArray = array();
-		foreach(HkControlNode::$hkList as $curr){
-			//is this unit defined in current gamedata? (particular instance!)
-			$belongs = $gamedata->shipBelongs($curr);
-			if ($belongs){
-				$tmpArray[] = $curr;
-			}			
+		return $nodes;
+	}
+
+	//The HK flights (of a class that registered with addHKFlight) among $gamedata's units, in its order.
+	private static function flightsOf($gamedata){
+		$flights = array();
+		foreach ($gamedata->ships as $ship){
+			if (isset(HkControlNode::$hkClasses[strtolower(get_class($ship))])) $flights[] = $ship;
 		}
-		HkControlNode::$hkList = $tmpArray;
-	}//endof function clearLists
-	
+		return $flights;
+	}
+
 	/*how big percentage of uncontrolled penalty will be assigned (multiplier)*/
 	public static function getUncontrolledMod($playerID,$gamedata){
 		$turn = TacGamedata::$currentTurn-1; //Ini based on Controllers from PREVIOUS turn!
-		$turn = max(1,$turn);	
+		$turn = max(1,$turn);
 		$totalNodeOutput = 0; //output of all active HK control nodes!
-		$totalHKs = 0; //number of all Hunter-Killer craft in operation!		
-		
-		if(!HkControlNode::$alreadyCleared) HkControlNode::clearLists($gamedata); //in case some inactive entries slipped in
-		
-		foreach(HkControlNode::$nodeList as $currNode){
+		$totalHKs = 0; //number of all Hunter-Killer craft in operation!
+
+		foreach(HkControlNode::nodesOf($gamedata) as $currNode){
 			if ( ($currNode->isDestroyed($turn))
 			     || ($currNode->isOfflineOnTurn($turn))
 			    ){ continue; }//if controller system is destroyed or offline, no effect (or rather - was last turn)			
@@ -12742,8 +12763,8 @@ class HkControlNode extends ShipSystem{
 			if ($shp->userid == $playerID) $totalNodeOutput +=  $currNode->getOutput();			
 		}
 		$totalNodeOutput = $totalNodeOutput*6;//translate to number of controled craft - 6 per standard-sized flight
-		
-		foreach(HkControlNode::$hkList as $hkFlight){
+
+		foreach(HkControlNode::flightsOf($gamedata) as $hkFlight){
 			if ($hkFlight->userid == $playerID) {
 				$totalHKs += $hkFlight->countActiveCraft($turn);
 			}
@@ -12819,9 +12840,12 @@ class HkControlNodeOrieni extends ShipSystem{
 		21=>"OutputReduced2",
 	);
 
-	public static $alreadyCleared = false;
-	public static $nodeList = array(); //Orieni control nodes in game
-	public static $hkList = array();   //Orieni HK flights in game
+	/* The Orieni HK flight CLASSES (lower case => true) that registered with addHKFlight - a class, never an object. Until 2026-11-23
+	   static lists of every node and HK flight CONSTRUCTED in the process, cleared once per process (clearLists, $alreadyCleared) - the
+	   leak, and the stale counts, of HkControlNode (see its $hkClasses). Now the game being resolved is asked (nodesOf / flightsOf): what
+	   clearLists left in a request that loaded it once, a flight LAUNCHED this turn included (Manager::insertSingleShip puts it in
+	   $gamedata->ships). tests/ai/registryHarness.php C. */
+	private static $hkClasses = array();
 
 	/* One-shot per advance: guards resolveNodeShortfall against running more than once
 	 * within a single setCriticals (which re-runs on replay). */
@@ -12833,35 +12857,38 @@ class HkControlNodeOrieni extends ShipSystem{
 
 	function __construct($armour, $maxhealth, $powerReq, $output){
 		parent::__construct($armour, $maxhealth, $powerReq, $output);
-		HkControlNodeOrieni::$nodeList[] = $this;
 	}
 
 	/*to be called by every Orieni HK flight after creation*/
 	public static function addHKFlight($HKflight){
-		HkControlNodeOrieni::$hkList[] = $HKflight;
+		HkControlNodeOrieni::$hkClasses[strtolower(get_class($HKflight))] = true;
 	}
 
-	//inactive entries (from other gamedata) might have slipped by... clear them out!
-	public static function clearLists($gamedata){
-		HkControlNodeOrieni::$alreadyCleared = true;
-		$tmpArray = array();
-		foreach(HkControlNodeOrieni::$nodeList as $curr){
-			$shp = $curr->getUnit();
-			if ($gamedata->shipBelongs($shp)) $tmpArray[] = $curr;
+	//The Orieni HK Control Nodes of $gamedata's units, in its order.
+	private static function nodesOf($gamedata){
+		$nodes = array();
+		foreach ($gamedata->ships as $ship){
+			foreach ($ship->systems as $system){
+				if ($system instanceof HkControlNodeOrieni) $nodes[] = $system;
+			}
 		}
-		HkControlNodeOrieni::$nodeList = $tmpArray;
-		$tmpArray = array();
-		foreach(HkControlNodeOrieni::$hkList as $curr){
-			if ($gamedata->shipBelongs($curr)) $tmpArray[] = $curr;
+		return $nodes;
+	}
+
+	//The Orieni HK flights (of a class that registered with addHKFlight) among $gamedata's units, in its order.
+	private static function flightsOf($gamedata){
+		$flights = array();
+		foreach ($gamedata->ships as $ship){
+			if (isset(HkControlNodeOrieni::$hkClasses[strtolower(get_class($ship))])) $flights[] = $ship;
 		}
-		HkControlNodeOrieni::$hkList = $tmpArray;
-	}//endof function clearLists
+		return $flights;
+	}
 
 	/* How many WHOLE HK flights this player can control, based on active control-node
-	 * output. One point of output controls one standard flight. */
-	private static function getControllableFlights($playerID, $turn){
+	 * output (of $gamedata's nodes). One point of output controls one standard flight. */
+	private static function getControllableFlights($playerID, $turn, $gamedata){
 		$capacity = 0;
-		foreach(HkControlNodeOrieni::$nodeList as $currNode){
+		foreach(HkControlNodeOrieni::nodesOf($gamedata) as $currNode){
 			if ( ($currNode->isDestroyed($turn))
 			     || ($currNode->isOfflineOnTurn($turn))
 			    ){ continue; }//if controller system is destroyed or offline, no effect
@@ -12901,8 +12928,6 @@ class HkControlNodeOrieni extends ShipSystem{
 		if (HkControlNodeOrieni::$shortfallResolved) return;
 		HkControlNodeOrieni::$shortfallResolved = true;
 
-		if(!HkControlNodeOrieni::$alreadyCleared) HkControlNodeOrieni::clearLists($gamedata); //drop any inactive entries
-
 		$turn = $gamedata->turn; //control is exercised THIS turn; crit takes effect (oneturn) NEXT turn
 
 		//Bucket EVERY on-map HK flight that demands control, by owner.
@@ -12918,12 +12943,12 @@ class HkControlNodeOrieni extends ShipSystem{
 		//the node-shortfall penalty RENEWS every turn the shortfall stands - see the method
 		//header for why this is safe (the two Uncontrolled crits never key to the same turn).
 		//INCLUDED: a flight LAUNCHED this turn. Hangar launch (HangarOps::process*Launches,
-		//run in Pass 2 of setCriticals) spawns it as a fresh, non-removed FighterFlight whose
-		//constructor re-registers it on $hkList, and resolveNodeShortfall runs at the tail of
-		//setCriticals - after that - so a just-launched HK is on the map next turn and correctly
-		//demands a Control Node now.
+		//run in Pass 2 of setCriticals) spawns it as a fresh, non-removed FighterFlight that
+		//Manager::insertSingleShip adds to $gamedata->ships, and resolveNodeShortfall runs at the
+		//tail of setCriticals - after that - so a just-launched HK is on the map next turn and
+		//correctly demands a Control Node now.
 		$flightsByPlayer = array();
-		foreach(HkControlNodeOrieni::$hkList as $hkFlight){
+		foreach(HkControlNodeOrieni::flightsOf($gamedata) as $hkFlight){
 			if (!empty($hkFlight->removed)) continue; //docked (incl. docked this turn) - in hangar, no node needed
 			if ($hkFlight->isDestroyed()) continue;
 			if ($hkFlight->countActiveCraft($turn) < 1) continue;
@@ -12931,7 +12956,7 @@ class HkControlNodeOrieni extends ShipSystem{
 		}
 
 		foreach($flightsByPlayer as $playerID => $flights){
-			$capacity = HkControlNodeOrieni::getControllableFlights($playerID, $turn);
+			$capacity = HkControlNodeOrieni::getControllableFlights($playerID, $turn, $gamedata);
 			$shortfall = count($flights) - $capacity;
 			if ($shortfall <= 0) continue; //all flights covered
 
@@ -12964,8 +12989,6 @@ class HkControlNodeOrieni extends ShipSystem{
 		if (HkControlNodeOrieni::$deploymentShortfallResolved) return;
 		HkControlNodeOrieni::$deploymentShortfallResolved = true;
 
-		if(!HkControlNodeOrieni::$alreadyCleared) HkControlNodeOrieni::clearLists($gamedata);
-
 		$turn = $gamedata->turn;
 
 		//All on-map HK flights demand control. Split into "deployed this turn" (eligible for
@@ -12973,7 +12996,7 @@ class HkControlNodeOrieni extends ShipSystem{
 		//previous fire phase's resolver - counted for capacity but NOT re-crit here).
 		$onMapByPlayer  = array(); //all on-map flights (for capacity accounting)
 		$newByPlayer    = array(); //subset deployed THIS turn, on the map (eligible for this-turn crit)
-		foreach(HkControlNodeOrieni::$hkList as $hkFlight){
+		foreach(HkControlNodeOrieni::flightsOf($gamedata) as $hkFlight){
 			if (empty($hkFlight->remoteControl)) continue; //only remote-controlled HKs are affected
 			if (!empty($hkFlight->removed)) continue;       //docked - in a hangar, needs no node
 			if ($hkFlight->isDestroyed()) continue;
@@ -12988,7 +13011,7 @@ class HkControlNodeOrieni extends ShipSystem{
 		}
 
 		foreach($newByPlayer as $playerID => $newFlights){
-			$capacity   = HkControlNodeOrieni::getControllableFlights($playerID, $turn);
+			$capacity   = HkControlNodeOrieni::getControllableFlights($playerID, $turn, $gamedata);
 			$onMap      = $onMapByPlayer[$playerID];
 			$shortfall  = count($onMap) - $capacity;
 			if ($shortfall <= 0) continue; //whole on-map roster is covered
@@ -16749,17 +16772,19 @@ class MindriderHangar extends ShipSystem{
 	public $isTargetable = true; //true if hangar has capacity
 	protected $doCountForCombatValue = true; //true if hangar has capacity  
 	
-	public static $alreadyCleared = array();    	
-	public static $hangarList = array(); //array of Mindrider Hangars in game
-	public static $projectionList = array(); // array of Thought Projection flights in game
+	/* Until 2026-11-23 static lists of every hangar and Thought Projection flight CONSTRUCTED in the process, and a list of the teams
+	   checked - never emptied: they kept every game load's ships alive, and once a team was checked it never was again in that process
+	   (a self-play or AI-driver process, or a request loading the game twice). Now the game being resolved is searched (hangarsOf /
+	   projectionsOf - flights by the CLASSES that register), and a team is checked once per game LOAD ($checked). registryHarness F. */
+	private static $projectionClasses = array(); //lower-case class => true
+	private static $checked = null; //WeakMap: gamedata => team => true
 	public $output = 0;
     
     protected $possibleCriticals = array(
     );	
 
     function __construct($armour, $maxhealth, $powerReq, $output){
-        parent::__construct($armour, $maxhealth, $powerReq, $output ); 
-	    MindriderHangar::$hangarList[] = $this;
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
 	    $this->output = $output;
 	    
 	    if($output == 0){
@@ -16773,47 +16798,43 @@ class MindriderHangar extends ShipSystem{
 	
 	//to be called by every Thought Projection flight after creation
     public static function addProjections($projectionflight){
-	    MindriderHangar::$projectionList[] = $projectionflight;
+	    MindriderHangar::$projectionClasses[strtolower(get_class($projectionflight))] = true;
     }
-	
-	//inactive entries (from other gamedata) might have slipped by... clear them out!
-	public static function clearLists($gamedata, $ship){
-	    // Mark $alreadyCleared so it only happens once per turn.
-	    
-		MindriderHangar::$alreadyCleared[] = $ship->team;
-		$tmpArray = array();
-		foreach(MindriderHangar::$hangarList as $curr){
-			$ship = $curr->getUnit();
-			//is this unit defined in current gamedata? (particular instance!)
-			$belongs = $gamedata->shipBelongs($ship);
-			if ($belongs){
-				$tmpArray[] = $curr;
-			}			
-		}
-		MindriderHangar::$hangarList = $tmpArray;
-		$tmpArray = array();
-		foreach(MindriderHangar::$projectionList as $curr){
-			//is this unit defined in current gamedata? (particular instance!)
-			$belongs = $gamedata->shipBelongs($curr);
-			if ($belongs){
-				$tmpArray[] = $curr;
-			}			
-		}
-		MindriderHangar::$projectionList = $tmpArray;
-	}//endof function clearLists
 
-	//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
+	//The Mindrider Hangars among $gamedata's units, in its order.
+	private static function hangarsOf($gamedata){
+		$hangars = array();
+		foreach ($gamedata->ships as $ship){
+			foreach ($ship->systems as $system){
+				if ($system instanceof MindriderHangar) $hangars[] = $system;
+			}
+		}
+		return $hangars;
+	}
+
+	//The Thought Projection flights (of a class that registered with addProjections) among $gamedata's units, in its order.
+	private static function projectionsOf($gamedata){
+		$flights = array();
+		foreach ($gamedata->ships as $ship){
+			if (isset(MindriderHangar::$projectionClasses[strtolower(get_class($ship))])) $flights[] = $ship;
+		}
+		return $flights;
+	}
+
+	//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator
 	public function criticalPhaseEffects($ship, $gamedata) {
 	    $thisShip = $this->getUnit();
-	    
-	    foreach(MindriderHangar::$alreadyCleared as $team){
-	    	if($team == $thisShip->team)	return; // Already checked for this team, no further action neeed for other Hangars.
-		}
-		
-		$this->clearLists($gamedata, $thisShip);	
+
+	    //once per team for this game load: the first of its hangars checks the whole team's Projections
+	    if (MindriderHangar::$checked === null) MindriderHangar::$checked = new WeakMap();
+	    $done = isset(MindriderHangar::$checked[$gamedata]) ? MindriderHangar::$checked[$gamedata] : array();
+	    if (isset($done[$thisShip->team])) return; // Already checked for this team, no further action neeed for other Hangars.
+	    $done[$thisShip->team] = true;
+	    MindriderHangar::$checked[$gamedata] = $done;
+
 	    $hangarCapacity = 0;
 
-	    foreach (MindriderHangar::$hangarList as $hangar) {
+	    foreach (MindriderHangar::hangarsOf($gamedata) as $hangar) {
 	        $hangarShip = $hangar->getUnit();
 	        if ($hangarShip->userid != $thisShip->userid) continue; // Not interested in non-friendly ships.
 	        if ($hangarShip->isDestroyed()) continue; // Ignore destroyed ships - destroyed Hangars are actually fine.
@@ -16823,7 +16844,7 @@ class MindriderHangar extends ShipSystem{
 
 	    $activeThoughts = 0;
 
-	    foreach (MindriderHangar::$projectionList as $projection) {
+	    foreach (MindriderHangar::projectionsOf($gamedata) as $projection) {
 	        if ($projection->userid != $thisShip->userid) continue; // Not interested in non-friendly ships.
 	        if ($projection->isDestroyed()) continue; // Ignore destroyed flights.
 
@@ -16851,12 +16872,13 @@ class MindriderHangar extends ShipSystem{
 
 		if($toDisengage > 0){
 
-		    if (empty(MindriderHangar::$projectionList)) {
+		    $projections = MindriderHangar::projectionsOf($gamedata);
+		    if (empty($projections)) {
 		        return $fighterCount;
 		    }
 
-		    $randomPick = array_rand(MindriderHangar::$projectionList);
-		    $projectionFlight = MindriderHangar::$projectionList[$randomPick];
+		    $randomPick = array_rand($projections);
+		    $projectionFlight = $projections[$randomPick];
 
 		    if ($projectionFlight->team != $thisShip->team || $projectionFlight->isDestroyed()) {
 		        return $fighterCount; // Return if invalid flight

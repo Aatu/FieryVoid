@@ -1085,8 +1085,12 @@ class Weapon extends ShipSystem
             $this->data["Intercept"] = "-" . $this->intercept * 5;
         }
 		
+		//Fighter guns only (weaponManager.checkConflictingFireOrder): blocks the same craft's other weapons of the SAME kind
+		//(direct-fire vs ballistic), and once fired the whole flight cannot intercept (Firing::getUnassignedInterceptors)
 		if($this->exclusive){
-			$this->data["Exclusive"] = 'Yes';
+			$kind = $this->ballistic ? 'ballistic' : 'direct-fire';
+			$this->data["Exclusive"] = "Cannot fire on the same turn as its fighter's other " . $kind
+				. " weapons; if fired, the flight cannot intercept that turn";
 		}
 		//Firing-linked weapons that share a turret (an angular-spread group) note which turret they
 		//are mounted on, so the player sees their fire is tied to the turret's other weapon(s). The

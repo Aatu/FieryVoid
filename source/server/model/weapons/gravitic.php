@@ -1052,7 +1052,7 @@ class GravityNet extends Weapon implements SpecialAbility{
 			$powerReq = 5;
 		}
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        GravityNetHandler::addGravityNet($this);//so all Targeting Array are accessible together.
+		//(no longer registered with GravityNetHandler: it finds the nets of the game being resolved - see GravityNetHandler::netsOf)
     }
 
 	public function getSpecialAbilityValue($args)
@@ -1114,7 +1114,7 @@ class GravityNet extends Weapon implements SpecialAbility{
             if ($target instanceof Mine){
                 $fireOrder->pubnotes = "<br>Mines cannot be moved by Gravity Net.";
             } else if($shooter->Enormous || (!$target->Enormous && $shooterSize >= $targetSize)){ //Make sure target is equal to or smaller then shooter.      
-                $primaryGravityNet = GravityNetHandler::getPrimaryGravNetPerTarget($target);
+                $primaryGravityNet = GravityNetHandler::getPrimaryGravNetPerTarget($target, $gamedata);
                 if($this == $primaryGravityNet){//check if THIS gravity net is the primary gravity net(Primary is defined as gravity net that hits a given target with largest move distance)
                     $fireOrder->pubnotes = "<br>Ship has been forced to move by a Gravity Net.";
                     $this->doGravityNetMove($target, $fireOrder->id, $gamedata);
@@ -1203,17 +1203,25 @@ class GravityNet extends Weapon implements SpecialAbility{
      //endof GravityNet
 }
 
-class GravityNetHandler{ 
+class GravityNetHandler{
 	public $name = "GravityNetHandler";
-	private static $gravityNets = array();	
-	
-	//should be called by every Targeting Array on creation!
-	public static function addGravityNet($weapon){
-		self::$gravityNets[] = $weapon;		
+
+	/* The Gravity Nets of $gamedata's units, in its order (ships, then their systems - the order they were built in). Until 2026-11-23 a
+	   static list every Gravity Net joined when it was CONSTRUCTED, never emptied: every game load, AI view and lobby probe of the process
+	   added its nets, which kept their ships alive (a self-play process grew 13-27 MB a turn), and a target's nets were sought among all of
+	   them - an earlier load's could win the "largest move" and leave the resolving game's net with nothing to move (tests/ai/registryHarness.php B). */
+	private static function netsOf($gamedata){
+		$nets = array();
+		foreach ($gamedata->ships as $ship){
+			foreach ($ship->systems as $system){
+				if ($system instanceof GravityNet) $nets[] = $system;
+			}
+		}
+		return $nets;
 	}
 
-    public static function getPrimaryGravNetPerTarget($target){//returns the primary gravity net, highest priorty, highest movement and hitting grav net, per target
-        $hittingGravNetsOnTarget = self::getHittingGravNetsOnTarget($target); //get all hitting gravity nets on the same target.
+    public static function getPrimaryGravNetPerTarget($target, $gamedata){//returns the primary gravity net, highest priorty, highest movement and hitting grav net, per target - of the nets of $gamedata
+        $hittingGravNetsOnTarget = self::getHittingGravNetsOnTarget($target, $gamedata); //get all hitting gravity nets on the same target.
         $priortyGravNets = self::getPriortyGravNets($hittingGravNetsOnTarget); //see if any priority mode grav nets exist
 
         if(count($priortyGravNets) > 0){
@@ -1224,9 +1232,9 @@ class GravityNetHandler{
         return $primaryGravityNet;
     }
 
-    private static function getHittingGravNetsOnTarget($target){//get all gravity nets that target same target and hit.
+    private static function getHittingGravNetsOnTarget($target, $gamedata){//get all gravity nets that target same target and hit.
         $hittingGravNetsOnTarget = array();
-        foreach(self::$gravityNets as $gravityNet){            
+        foreach(self::netsOf($gamedata) as $gravityNet){
             foreach($gravityNet->fireOrders as $fireOrder){                
                 $fireOrderTargetid = $fireOrder->targetid;//current fireorder targetid
                 $currTargetid = $target->id; //current gravity net's targetid
@@ -2368,7 +2376,7 @@ class GraviticMine extends Weapon{
 		if ( $maxhealth == 0 ) $maxhealth = 6;
 		if ( $powerReq == 0 ) $powerReq = 6;
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-		GraviticMineHandler::register($this);
+		//(no longer registered with GraviticMineHandler: it finds the mines of the game being resolved - getAllMines($gamedata))
 	}
 
 	public function calculateHitBase($gamedata, $fireOrder)
@@ -2446,13 +2454,15 @@ class GraviticMine extends Weapon{
         }
 
         // Cross-mine resolution runs exactly once per turn, on the first mine that gets here.
-        if (GraviticMineHandler::$resolvedTurn === $gamedata->turn) return;
-        GraviticMineHandler::$resolvedTurn = $gamedata->turn;
+        // (keyed by game AND turn since 2026-11-23: one process resolving two games - a self-play or AI-driver run - at the same turn
+        // number skipped the second)
+        if (GraviticMineHandler::$resolvedTurn === $gamedata->id . ':' . $gamedata->turn) return;
+        GraviticMineHandler::$resolvedTurn = $gamedata->id . ':' . $gamedata->turn;
 
         // Build the active-mine list once.
         $activeMines = array();
         $seenFireOrderIds = array();
-        foreach (GraviticMineHandler::getAllMines() as $mineWeapon) {
+        foreach (GraviticMineHandler::getAllMines($gamedata) as $mineWeapon) {
             $mineUnit = $mineWeapon->getUnit();
             if ($mineUnit === null) continue;
             if ($mineUnit->isDestroyed()) continue;
@@ -2765,21 +2775,24 @@ class GraviticMine extends Weapon{
 
 
 class GraviticMineHandler {
-    private static $mines = array();
-
     // Per-turn guards / data carried across the beforePreFiringOrderResolution → fire pipeline.
-    public static $resolvedTurn = -1;
+    public static $resolvedTurn = -1; //"game id:turn" resolved last
     public static $alreadyMovedTargetIds = array();
     public static $alreadyShearedTargetIds = array();
     public static $shearDamageByTargetId = array();
     public static $shearSourceHexByTargetId = array();
 
-    public static function register($weapon){
-        self::$mines[] = $weapon;
-    }
-
-    public static function getAllMines(){
-        return self::$mines;
+    /* The Gravitic Mines of $gamedata's units, in its order. Until 2026-11-23 a static list every mine joined when it was CONSTRUCTED,
+       never emptied: it kept every game load's ships alive and handed the resolver the mines of every load of the process (only the
+       fire-order de-duplication below kept that harmless). tests/ai/registryHarness.php G. */
+    public static function getAllMines($gamedata){
+        $mines = array();
+        foreach ($gamedata->ships as $ship){
+            foreach ($ship->systems as $system){
+                if ($system instanceof GraviticMine) $mines[] = $system;
+            }
+        }
+        return $mines;
     }
 }
 

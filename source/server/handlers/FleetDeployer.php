@@ -20,8 +20,9 @@
  *
  * LEGALITY. Every hex returned satisfies DeploymentGamePhase::validateDeploymentArea (the rule
  * that judges the submission) AND the game page's slightly tighter box test, so a player's page
- * accepts the layout for commit. Terrain is never stood on; two ships never share a hex (the
- * page's rule - flights may share). A wanted hex that is not acceptable is replaced by the nearest
+ * accepts the layout for commit. Terrain is never stood on; two ships never share a hex, and since
+ * 2026-11-20 neither does a flight with a ship or with another flight (the page's rule; see
+ * nearestAcceptable). A wanted hex that is not acceptable is replaced by the nearest
  * one that is; a unit with nowhere to go is left OUT of the plan for the caller to deal with.
  *
  * NOT PLACED BY IT: bases, OSATs and mines (mines have their own Deploy Minefield tool), terrain,
@@ -82,7 +83,9 @@ class FleetDeployer
          unitIds   only these ship ids (default: every eligible unit of the slot)
          occupied  hexes the caller knows to be in use and this cannot see - a page's placements
                    not yet committed: list of array('q', 'r', 'flight' => bool)
-         seed      varies the layout; default 0 */
+         seed      varies the layout; default 0
+         spread    (stage T9 - the CPU against area-effect weapons, DeployDecider) the least distance wanted between two units: the line,
+                   the screen and the ranks that far apart where the zone has room; default 0, the standard layout (Auto-Deploy) */
     public static function plan(TacGamedata $gamedata, $playerid, $slotid, array $options = array())
     {
         $slot = $gamedata->getSlotById($slotid);
@@ -92,6 +95,8 @@ class FleetDeployer
         if (count($units) == 0) return array();
 
         $seed = isset($options['seed']) ? abs((int)$options['seed']) : 0;
+        //stage T9: the least distance wanted between any two units (the CPU against area-effect weapons - DeployDecider); 0 = the standard layout
+        $spread = isset($options['spread']) ? max(0, (int)$options['spread']) : 0;
         $anchors = self::anchors($units);
         $groupCount = max(1, min(count($anchors), isset($options['groups']) ? (int)$options['groups'] : 1));
 
@@ -105,22 +110,24 @@ class FleetDeployer
         $board = self::board($gamedata, $slot, isset($options['occupied']) ? $options['occupied'] : array());
 
         $span = max(1, (int)floor($frame['length'] / $groupCount));
-        $roomy = max(1, $span - self::GROUP_GAP);
+        $roomy = max(1, $span - max(self::GROUP_GAP, $spread));
+        $depthStep = max(1, $spread); //(stage T9) the ranks that far apart too
 
         $plan = array();
         foreach ($groups as $index => $group) {
             $centre = (int)round(-$frame['length'] / 2 + $span * ($index + 0.5));
             list($hullSpeed, $flightSpeed) = self::commonSpeeds($group['units']);
 
-            foreach (self::formation($group, $roomy, $mirror, $seed) as $place) {
+            foreach (self::formation($group, $roomy, $mirror, $seed, $spread) as $place) {
                 list($ship, $lateral, $depth) = $place;
-                $hex = self::hexAt($frame, $centre + $lateral, $depth);
+                $hex = self::hexAt($frame, $centre + $lateral, $depth * $depthStep);
                 $hex = self::nearestAcceptable($gamedata, $ship, $hex, $slot, $board);
                 if ($hex === null) continue;
 
                 $key = $hex->q . ',' . $hex->r;
                 $board['any'][$key] = true;
                 if (!($ship instanceof FighterFlight)) $board['ship'][$key] = true;
+                else $board['flight'][$key] = true; //2026-11-20: nothing may join it any more (nearestAcceptable)
 
                 $plan[] = array(
                     'shipid' => (int)$ship->id,
@@ -217,7 +224,9 @@ class FleetDeployer
 
     /* One group -> list of array(ship, lateral, depth), lateral counted from the group's centre.
        $room is how many hexes of the long axis the group has to itself. */
-    private static function formation(array $group, $room, $mirror, $seed = 0)
+    /* $spread (stage T9): the least distance wanted between neighbours on the line and in the screen - kept while the group's room holds
+       them, else the standard spacing (0 = the standard layout). */
+    private static function formation(array $group, $room, $mirror, $seed = 0, $spread = 0)
     {
         $line = array();
         $support = array();
@@ -250,6 +259,7 @@ class FleetDeployer
         if ($seed > 0) usort($screen, function ($a, $b) use ($lot) { return $lot($a) < $lot($b) ? -1 : ($lot($a) > $lot($b) ? 1 : $a->id - $b->id); });
 
         $spacing = (self::rankCapacity($room, self::LINE_SPACING) >= count($line)) ? self::LINE_SPACING : 1;
+        if ($spread > $spacing && self::rankCapacity($room, $spread) >= count($line)) $spacing = $spread;
         $capacity = self::rankCapacity($room, $spacing);
 
         $places = array();
@@ -261,9 +271,10 @@ class FleetDeployer
         $behind = -2 - (int)floor(max(0, count($support) - 1) / $capacity);
         foreach ($overflow as $k => $ship) $places[] = array($ship, self::outward($k % $capacity) * $spacing * $mirror, $behind - (int)floor($k / $capacity));
 
-        //The screen: one flight a hex, in front; a second rank in front of that if it must.
-        $screenCapacity = self::rankCapacity($room, 1);
-        foreach ($screen as $k => $ship) $places[] = array($ship, self::outward($k % $screenCapacity) * $mirror, 1 + (int)floor($k / $screenCapacity));
+        //The screen: one flight a hex, in front; a second rank in front of that if it must. (Stage T9: $spread apart where there is room.)
+        $screenSpacing = ($spread > 1 && self::rankCapacity($room, $spread) >= count($screen)) ? $spread : 1;
+        $screenCapacity = self::rankCapacity($room, $screenSpacing);
+        foreach ($screen as $k => $ship) $places[] = array($ship, self::outward($k % $screenCapacity) * $screenSpacing * $mirror, 1 + (int)floor($k / $screenCapacity));
 
         return $places;
     }
@@ -379,11 +390,12 @@ class FleetDeployer
     }
 
     /* What already stands where: 'hard' = terrain (nothing may go there), 'ship' = a hull (no second
-       hull), 'any' = anything at all (avoided while there is room). Built from terrain, this
-       team's units already on the board or committed this phase, and the caller's own list. */
+       hull, and no flight), 'flight' = a fighter flight (no hull, no second flight - added 2026-11-20), 'any' = anything
+       at all (avoided while there is room). Built from terrain, this team's units already on the board
+       or committed this phase, and the caller's own list. */
     private static function board(TacGamedata $gamedata, $slot, $occupied)
     {
-        $board = array('hard' => array(), 'ship' => array(), 'any' => array());
+        $board = array('hard' => array(), 'ship' => array(), 'flight' => array(), 'any' => array());
 
         foreach ($gamedata->blockedHexes ?: array() as $hex) {
             $blocked = new OffsetCoordinate($hex);
@@ -409,6 +421,7 @@ class FleetDeployer
             $key = $position->q . ',' . $position->r;
             $board['any'][$key] = true;
             if (!($ship instanceof FighterFlight) && empty($ship->mine)) $board['ship'][$key] = true;
+            else if ($ship instanceof FighterFlight && empty($ship->mine)) $board['flight'][$key] = true;
         }
 
         if (is_array($occupied)) {
@@ -417,6 +430,9 @@ class FleetDeployer
                 $key = (int)$entry['q'] . ',' . (int)$entry['r'];
                 $board['any'][$key] = true;
                 if (empty($entry['flight'])) $board['ship'][$key] = true;
+                //the page's 'flight' flag also covers mines (AutoDeploy.js), so the last-resort search below
+                //steps round a mine it could have shared - harmless, and no new field for it
+                else $board['flight'][$key] = true;
             }
         }
 
@@ -470,10 +486,20 @@ class FleetDeployer
     }
 
     /* $wanted if the unit may stand there, else the nearest hex where it may - first looking for
-       an empty one, then (a hull) one holding only flights, or (a flight) any without terrain. */
+       an empty one, then one holding nothing but this team's mines.
+
+       ⭐ FIGHTERS NO LONGER STACK IN DEPLOYMENT - NOT WITH SHIPS, NOT WITH EACH OTHER (user,
+       2026-11-20). The second pass used to let a hull join flights and a flight join anything but
+       terrain - the page's rule, whose ship half existed so a flight could ESCORT a ship from turn 1
+       (the escort intercept wanted the same hex at the end of the previous turn too, and deployment is
+       the end of turn 0). Defensive Intercept replaced escorting (FIGHTER_MISSIONS_PLAN.md R5) and only
+       asks for the same hex when fire resolves, and the user ruled that flights no longer stack with
+       each other either; the page dropped both (DeploymentPhaseStrategy.onHexClicked) and this follows
+       it, or Auto-Deploy and the CPU could still stack what a player cannot. The old test is kept,
+       commented out, for a rollback. */
     private static function nearestAcceptable(TacGamedata $gamedata, $ship, OffsetCoordinate $wanted, $slot, array $board)
     {
-        $flight = self::isFlight($ship);
+        //$flight = self::isFlight($ship);   //only the old rule below asked it - restore with that line
         $candidates = self::hexesAround($wanted, self::SEARCH_RADIUS);
 
         foreach (array(true, false) as $wantEmpty) {
@@ -481,7 +507,8 @@ class FleetDeployer
                 $key = $hex->q . ',' . $hex->r;
                 if (isset($board['hard'][$key])) continue;
                 if ($wantEmpty && isset($board['any'][$key])) continue;
-                if (!$wantEmpty && !$flight && isset($board['ship'][$key])) continue;
+                //if (!$wantEmpty && !$flight && isset($board['ship'][$key])) continue;   //old rule: a flight could join a hull, a hull could join flights
+                if (!$wantEmpty && (isset($board['ship'][$key]) || isset($board['flight'][$key]))) continue; //nothing joins a hull or a flight
                 if (self::inZone($gamedata, $ship, $hex, $slot)) return $hex;
             }
         }

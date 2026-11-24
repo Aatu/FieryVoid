@@ -314,6 +314,13 @@ class Manager{
                 self::$dbManager->getPlayerGames($userid),
                 self::$dbManager->getLobbyGames($userid)
             );
+            /* CPU opponent (TACTICAL_AI_PLAN.md stage T8, open decision A2's default: CPU games are listed, marked as such): a game
+               with a CPU player says so on its card. One APCu read a game (AISeats::gameHasCpu); nothing at all with the feature off. */
+            if (Features::reachable('cpuOpponent')) {
+                foreach ($games as $index => $game) {
+                    if (isset($game['id']) && AISeats::gameHasCpu($game['id'])) $games[$index]['cpu'] = true;
+                }
+            }
 
             // Cache result
             if (function_exists('apcu_store')) {
@@ -2209,18 +2216,99 @@ class Manager{
             $botId = $seats[$slotid]['playerid'];
 
             $fleet = array();
+            $unusable = array(); //stage T7: units a CPU player cannot field (AIConfig::cpuUnitBlock), named in the refusal
             foreach (self::getShipsFromJSON($ships) as $key => $ship) {
                 if ((int)$ship->slot !== $slotid) continue;
+                $block = AIConfig::cpuUnitBlock($ship);
+                if ($block !== null) $unusable[] = $ship->name . ' (' . $block . ')';
                 $ship->userid = $botId;
                 $fleet[$key] = $ship;
             }
             if (count($fleet) == 0)
                 throw new Exception("Buy at least one unit for the CPU player first.");
+            if (count($unusable) > 0)
+                throw new Exception("The CPU player cannot use " . implode(', ', $unusable) . ". Remove "
+                    . (count($unusable) == 1 ? "it" : "them") . " from its fleet first.");
         } catch (Exception $e) {
             return json_encode(array("error" => $e->getMessage()));
         }
 
         return self::submitShipsForPlayer($gameid, $botId, $turn, $phase, $activeship, $fleet, '', $slotid);
+    }
+
+    /* AUTO-COMPOSE (TACTICAL_AI_PLAN.md section 8.2, stage T8): a fleet for a CPU slot the creator left EMPTY, committed as the bot the
+       way submitFleetForCpuSlot commits a bought one (same guards). FleetComposer builds it for the slot's points
+       (refused when they are unlimited - the user, 2026-11-24) and the game's In-Service Date, of $faction when that is a ready
+       faction (the one the creator has open in the Store), else of one drawn from the game and slot - and when that one cannot make
+       a clean fleet, of the other ready factions in turn. Refused, naming why, when none can: a game too small or too early for a
+       Fleet Checker clean fleet (the creator then buys one by hand). Plain units only: no enhancements, refits or officers. */
+    public static function autoComposeCpuSlot($gameid, $creatorId, $turn, $phase, $activeship, $slotid, $faction = null){
+        try {
+            if (!Features::reachable(AIConfig::FLAG) || !AISeats::allowedFor($creatorId))
+                throw new Exception("CPU opponents are not available.");
+
+            $gameid = (int)$gameid;
+            $slotid = (int)$slotid;
+            self::initDBManager();
+
+            $game = self::$dbManager->getGameRowLight($gameid);
+            if (!$game || $game['status'] !== 'LOBBY')
+                throw new Exception("A CPU player's fleet can only be composed while the game is in its lobby.");
+            if ($game['creator'] !== (int)$creatorId)
+                throw new Exception("Only the game's creator can compose a CPU player's fleet.");
+
+            $seats = self::$dbManager->getCpuSeats($gameid);
+            if (!isset($seats[$slotid]))
+                throw new Exception("That slot is not a CPU player's.");
+            $botId = $seats[$slotid]['playerid'];
+            $slots = self::$dbManager->getSlotsInGame($gameid);
+            if (!isset($slots[$slotid]))
+                throw new Exception("That slot is not in this game.");
+            $slot = $slots[$slotid];
+
+            /* The user, 2026-11-24: no auto-compose where the game is set to Unlimited Points - the composer builds to spend the
+               slot's points, and an unlimited slot (-1) has none. ⚠️ MIRROR of gamedata.cpuComposeBlock (gamelobby.js). */
+            if (!((int)$slot->points > 0))
+                throw new Exception("Auto-compose is not available in an Unlimited Points game: it builds a fleet to spend the CPU"
+                    . " player's points, and there is no limit to build to. Buy this CPU player's fleet by hand.");
+            $points = (int)$slot->points;
+            $scenario = self::$dbManager->getGameScenario($gameid);
+            $isd = isset($scenario['inServiceDate']) ? (int)$scenario['inServiceDate'] : null;
+            $seed = $gameid * 31 + $slotid;
+            $factions = array_values(AIConfig::READY_FACTIONS);
+            $first = in_array($faction, $factions, true) ? $faction : FleetComposer::factionFor($seed);
+            $order = array_merge(array($first), array_values(array_diff($factions, array($first))));
+
+            $composed = null;
+            $refusals = array();
+            foreach ($order as $candidate) {
+                $fleet = FleetComposer::compose($candidate, $points, $isd, $seed);
+                if (count($fleet['problems']) == 0) { $composed = $fleet; break; }
+                $refusals[] = $candidate . ' (' . $fleet['problems'][0] . ')';
+            }
+            if ($composed === null)
+                throw new Exception("No Fleet Checker clean fleet can be composed for " . $points . " points"
+                    . ($isd ? " by " . $isd : "") . " - " . implode(', ', $refusals) . ". Buy this CPU player's fleet by hand.");
+
+            $entries = array();
+            foreach ($composed['units'] as $index => $unit) {
+                $entry = array('id' => -($index + 1), 'phpclass' => $unit['phpclass'], 'userid' => $botId, 'name' => $unit['name'],
+                    'slot' => $slotid, 'team' => $slot->team, 'pointCostEnh' => 0, 'pointCostEnh2' => 0,
+                    'movement' => array(), 'EW' => array(), 'enhancementOptions' => array(), 'systems' => array());
+                if ($unit['flightSize'] !== null) $entry['flightSize'] = $unit['flightSize'];
+                $entry = array_merge($entry, FleetComposer::entryExtras($unit)); //stage T9, M12: a flight's half load of missiles, as the lobby posts it
+                $entries[] = $entry;
+            }
+            $ships = ShipPayload::buildShips($entries);
+            foreach ($ships as $ship) {
+                $block = AIConfig::cpuUnitBlock($ship); //by construction never - FleetComposer asks the same
+                if ($block !== null) throw new Exception("The composed fleet holds " . $ship->name . " (" . $block . ").");
+            }
+        } catch (Exception $e) {
+            return json_encode(array("error" => $e->getMessage()));
+        }
+
+        return self::submitShipsForPlayer($gameid, $botId, $turn, $phase, $activeship, $ships, '', $slotid);
     }
 
     /* The player's Auto-Deploy button (TACTICAL_AI_PLAN.md section 5.2, "Caller 2"): where
@@ -2270,7 +2358,9 @@ class Manager{
        them from humans and let the creator select one. Added to the payload only while the
        feature is on, the game is in its lobby and it has a CPU seat - every other payload is
        left exactly as it was (plan principle P6). Level only: personality and seed stay here.
-       ⚠️ gamelobby.js parseServerData copies it BY NAME. */
+       With it, `cpuFactions` (stage T7): the readiness list, AIConfig::READY_FACTIONS - the only
+       factions the page offers while a CPU slot is selected.
+       ⚠️ gamelobby.js parseServerData copies both BY NAME. */
     public static function addCpuSlots($data, $gameid){
         if (!Features::reachable('cpuOpponent')) return;
         if (!is_object($data) || !isset($data->status) || $data->status !== 'LOBBY') return;
@@ -2280,7 +2370,10 @@ class Manager{
         foreach (self::getDBManager()->getCpuSeats((int)$gameid) as $slot => $seat) {
             $list[$slot] = array('level' => isset($seat['cpu']['level']) ? $seat['cpu']['level'] : AIConfig::DEFAULT_LEVEL);
         }
-        if (count($list) > 0) $data->cpuSlots = (object)$list;
+        if (count($list) > 0) {
+            $data->cpuSlots = (object)$list;
+            $data->cpuFactions = array_values(AIConfig::READY_FACTIONS);
+        }
     }
 
     private static function submitForPlayer($gameid, $userid, $turn, $phase, $activeship, $ships, $status, $slotid, $shipsAreBuilt){

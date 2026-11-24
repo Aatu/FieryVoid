@@ -190,7 +190,7 @@ const ThrusterSetContainer = styled.div`
 const ThrustUIContainer = styled.div`
     position: absolute;
     transform: translate(-50%, -50%);
-    z-index: 7002;
+    z-index: 10012; /*was 7002, one above the ship card; the card moved to 10010 (above the ship windows) on 2026-11-21, so this kept its place over it*/
     display: flex;
     align-items: center;
     justify-content: center;

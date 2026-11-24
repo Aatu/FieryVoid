@@ -977,6 +977,8 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 						</select>
 					</span>
 				</div>
+				<!-- Stage T7 (TACTICAL_AI_PLAN.md): shown while a CPU player's slot is selected (gamedata.applyCpuSlotFilters). -->
+				<p class="lb-picker-empty" id="factionListCpu" hidden>Buying for a CPU player: only the factions it can play are listed.</p>
 				<div class="lb-picker-list" id="factionList"></div>
 				<p class="lb-picker-empty" id="factionListEmpty" hidden>No faction matches these filters.</p>
 				<!-- The randomiser (plan §4.5, Stage 7): rolls one of the factions the list above shows,

@@ -119,7 +119,11 @@ try {
             $ships = json_encode($ships);
         }
 
-        if (!empty($_POST["cpuSlot"]) && Features::reachable('cpuOpponent')) {
+        if (!empty($_POST["autoCompose"]) && Features::reachable('cpuOpponent')) {
+            // CPU opponent, stage T8: the creator readies a CPU slot left empty - its fleet is auto-composed (plan section 8.2).
+            $ret = Manager::autoComposeCpuSlot($gameid, $playerid, $turn, $phase, $activeship, $slotid,
+                isset($_POST["faction"]) ? (string)$_POST["faction"] : null);
+        } elseif (!empty($_POST["cpuSlot"]) && Features::reachable('cpuOpponent')) {
             // CPU opponent: the creator commits the fleet bought for a CPU slot (plan section 8.1).
             $ret = Manager::submitFleetForCpuSlot($gameid, $playerid, $turn, $phase, $activeship, $ships, $slotid);
         } else {

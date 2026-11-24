@@ -274,7 +274,7 @@
 			}
 
 			$this->data["Special"] .= "Can fire at multiple targets, providing it has enough shots available.";
-			$this->data["Special"] .= "<br>Multiple torpedoes from the same launcher against the same ship are combined into a single volley with ONE to-hit roll (Saturation Mode): the shot lands one torpedo, plus one more for every 3 points it beats the needed number by (up to the number fired). Interception is rolled once for the whole volley.";
+			$this->data["Special"] .= "<br>Multiple torpedoes from the same launcher against the same ship are combined into a single volley with ONE to-hit roll (Saturation Mode): the shot lands one torpedo, plus one more for every 20% points it beats the needed number by (up to the number fired). Interception is rolled once for the whole volley.";
 			$this->data["Special"] .= "<br>Against enemy fighters flights, torpedoes always attack a different fighter. If there are more torpedoes than fighters, excess munitions are lost.";
 		}
 	

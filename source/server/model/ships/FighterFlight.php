@@ -754,11 +754,8 @@ class FighterFlight extends BaseShip
 
     public function getFacingAngle()
     {
-        $movement = null;
-
-        foreach ($this->movement as $move) {
-            $movement = $move;
-        }
+        //the last row, read directly (TACTICAL_AI_PLAN.md stage T8 - see BaseShip::getLastMovement); none: fails as it always did
+        $movement = (is_array($this->movement) && !empty($this->movement)) ? $this->movement[array_key_last($this->movement)] : null;
 
         return $movement->getFacingAngle();
     }

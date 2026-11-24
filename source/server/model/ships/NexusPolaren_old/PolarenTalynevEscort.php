@@ -81,7 +81,7 @@ class PolarenTalynevEscort extends LCV{
         public function getInitiativebonus($gamedata){
 	    $iniBonus = parent::getInitiativebonus($gamedata);
             //may be boosted by LCV Controller...
-	    $iniBonus += NexusPolarenLCVController::getIniBonus($this);
+	    $iniBonus += NexusPolarenLCVController::getIniBonus($this, $gamedata);
             return $iniBonus;
         }
 

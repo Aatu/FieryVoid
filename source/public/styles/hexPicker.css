@@ -47,7 +47,9 @@
     --hp-icon: 24px;
     /* details icon inside it                       */
     --hp-card-w: 320px;
-    --hp-sheet-max-w: 400px;
+    /* The picker's CSS zoom - 1 here, smaller on smaller screens ("Smaller screens" below). */
+    --hp-zoom: 1;
+    --hp-sheet-max-w: calc(400px * var(--hp-zoom));
     /* sheet width cap. Without it the sheet spans
        left:8px..right:8px, which is fine on a 390px
        phone but absurd on a landscape phone or a
@@ -73,9 +75,11 @@
     --row-bar: var(--fv-line-soft);
 
     position: absolute;
-    z-index: 7001;
+    /* 7001 -> 10010 (user, 2026-11-21): level with the ship card (shipTooltip.css), above the ship
+       windows (10001) - the card docks beside this picker and, on touch, opens INSIDE its sheet. */
+    z-index: 10010;
     box-sizing: border-box;
-    width: var(--hp-card-w);
+    width: calc(var(--hp-card-w) * var(--hp-zoom));
     max-width: calc(100vw - 16px);
     display: flex;
     flex-direction: column;
@@ -279,7 +283,8 @@
 .fv-hexpicker__list {
     flex: 1 1 auto;
     min-height: 0;
-    max-height: var(--hp-list-max);
+    /* ÷ the zoom: the list is zoomed and Chrome zooms vh with it ("Smaller screens" below) */
+    max-height: calc(var(--hp-list-max) / var(--hp-zoom));
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
@@ -755,7 +760,37 @@
     .fv-hexpicker--sheet {
         --hp-row-h: 46px;
         --hp-list-max: 46vh;
-        --hp-sheet-max-w: 460px;
+        --hp-sheet-max-w: calc(460px * var(--hp-zoom));
+    }
+}
+
+/* ── Smaller screens: the picker zoomed (user, 2026-11-24: "obnoxiously large on mobile") ──
+   The ship card's scaling (shipTooltip.css "Smaller screens"), on the same breakpoints - keep the two
+   in step: 1 at 1024 x 640 and up, 0.85, then 0.75 on phones. CSS zoom on the CONTENT blocks only:
+   ⭐ never the root (its left/top/right/bottom would be zoomed too - and positionSelf, the drag and
+   the docked card all measure the root, which stays in screen px), never the caret (positioned on
+   the root in screen px), never the card slot (the ship card in it zooms itself, --tt-zoom). The
+   root's width and the sheet's width cap carry the zoom instead (--hp-card-w / --hp-sheet-max-w
+   uses). ⚠️ This takes the sheet's rows below the 44px coarse floor noted above (52 / 44 -> 39 / 33px
+   at 0.75) - the user's call, asked for after "buttons are too large in all instances". */
+.fv-hexpicker > .fv-hexpicker__grab,
+.fv-hexpicker > .fv-hexpicker__header,
+.fv-hexpicker > .fv-hexpicker__actions,
+.fv-hexpicker > .fv-hexpicker__list {
+    zoom: var(--hp-zoom);
+}
+
+@supports (zoom: 0.5) {
+    @media (max-width: 1023px), (max-height: 639px) {
+        .fv-hexpicker {
+            --hp-zoom: 0.85;
+        }
+    }
+
+    @media (max-width: 767px), (max-height: 479px) {
+        .fv-hexpicker {
+            --hp-zoom: 0.75;
+        }
     }
 }
 
@@ -808,7 +843,7 @@
    a hover tooltip. Fixed to the viewport (the JS clamps it 8px inside), above the ship tooltip it opens from. */
 .fv-missionpicker {
     position: fixed;
-    z-index: 7002;
+    z-index: 10011;    /* one above the ship card (10010) it opens from */
     box-sizing: border-box;
     width: 330px;
     max-width: calc(100vw - 16px);
@@ -996,6 +1031,35 @@
     border-radius: 3px;
 }
 
+/* Propagate to all Flights - the icon button on the right of a fighter mission row (user, 2026-11-20). The icon is
+   img/propogateMission.png recoloured to the Fighter Mission button's teal (#0096BC, img/FighterMissions.png); the
+   hover is the header buttons' (solid colours - the alpha-compounding trap). */
+.fv-missionpicker__propagate {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    margin-left: 6px;
+    padding: 0;
+    background: transparent url("../img/propogateMission.png") center / 18px 18px no-repeat;
+    border: 1px solid transparent;
+    border-radius: var(--fv-radius-modal);
+    cursor: pointer;
+}
+
+.fv-missionpicker__propagate:hover {
+    border-color: var(--fv-line-scs);
+    background-color: var(--fv-line-soft);
+}
+
+/* What the last Propagate did, under the list until the next pick or view change. */
+.fv-missionpicker__notice {
+    padding: 5px 10px;
+    border-top: 1px solid var(--fv-rule);
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--fv-text-accent);
+}
+
 /* A one-button footer under the list, the button centred in its row (the Analyst's Cancel scan - user, play tests 4524/4525). */
 .fv-missionpicker__footer {
     display: flex;
@@ -1025,14 +1089,16 @@
 .fv-missionpicker__row:focus,
 .fv-missionpicker__back:focus,
 .fv-missionpicker__close:focus,
-.fv-missionpicker__button:focus {
+.fv-missionpicker__button:focus,
+.fv-missionpicker__propagate:focus {
     outline: none;
 }
 
 .fv-missionpicker__row:focus-visible,
 .fv-missionpicker__back:focus-visible,
 .fv-missionpicker__close:focus-visible,
-.fv-missionpicker__button:focus-visible {
+.fv-missionpicker__button:focus-visible,
+.fv-missionpicker__propagate:focus-visible {
     outline: 1px solid var(--fv-accent);
     outline-offset: -1px;
 }
@@ -1611,13 +1677,24 @@
     line-height: 1;
 }
 
+/* 70vh -> 50vh (user, 2026-11-21: the card in the sheet was too large in portrait AND landscape - with
+   the header and grab bar the sheet covered ~77% of a portrait phone and ~85% of a landscape one). The
+   card scrolls inside this slot past that; landscape gets its own cap below. */
 .fv-hexpicker__cardslot {
     display: none;
     flex: 1 1 auto;
     min-height: 0;
-    max-height: 70vh;
+    max-height: 50vh;
     overflow-y: auto;
     overscroll-behavior: contain;
+}
+
+/* Landscape phone: 58vh is ~210px on a 360px-tall screen, about the height of the free-standing card
+   there (65vh, which the user found fine) once the sheet's header is added. */
+@media (orientation: landscape) and (max-height: 500px) {
+    .fv-hexpicker__cardslot {
+        max-height: 58vh;
+    }
 }
 
 .fv-hexpicker--detail .fv-hexpicker__back {
@@ -1634,7 +1711,15 @@
     display: block;
 }
 
-/* The sheet's header holds the way back now - a real tap target (the 44px floor). */
+/* The sheet's header holds the way back now - a real tap target. 44px -> 34px (user, 2026-11-21, with
+   the card's own touch targets in shipTooltip.css): the "‹ N units in hex" button is the whole header
+   width, so the height alone was never what made it easy to hit.
+   And the sheet narrows to the free-standing card's 250px (+ the card's 8px margins and the sheet's
+   1px borders) while it shows one (user's S21 screenshots, 2026-11-21): stretched to the sheet's full
+   width the card was ~385px wide in portrait and ~445px in landscape. The list gets its width back.
+   2026-11-24: the card is zoomed on smaller screens (--tt-zoom, set on this sheet by shipTooltip.css
+   "Smaller screens"), so the sheet narrows to the ZOOMED card: 250 x zoom + 18. */
 .fv-hexpicker--sheet.fv-hexpicker--detail {
-    --hp-header-h: 44px;
+    --hp-header-h: 34px;
+    --hp-sheet-max-w: calc(250px * var(--tt-zoom, 1) + 18px);
 }
