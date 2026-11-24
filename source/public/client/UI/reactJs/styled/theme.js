@@ -86,7 +86,8 @@ const theme = {
         body: "arial",
         mono: 'Consolas, "Lucida Console", monospace', //numeric readouts - SCS datasheet feel
         //the platform's own UI face (Segoe UI / San Francisco / Roboto) - the system tooltip card's text
-        //(user choice 2026-11-08: crisper than Arial at 12-13px, and no download). No tokens.css twin.
+        //(user choice 2026-11-08: crisper than Arial at 12-13px, and no download). ⚠️ TWIN: --fv-ui in
+        //tokens.css, which the jQuery ship card (ShipTooltip) reads - change both or neither.
         ui: 'system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
         //--fv-display - the lobby's panel and section titles. Only pages that @import it
         //(gamesNew.css) have it: game.php does NOT, so reach for it only on lobby surfaces.

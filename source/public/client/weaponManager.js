@@ -756,44 +756,19 @@ window.weaponManager = {
             return;
         }
 
-        if (!(calledid > 0)) {
-            //(calledid == null){
-            var html = "";
-            var section = weaponManager.getShipHittingSide(selectedShip, ship);
-
-            for (var i = 0; i < section.length; i++) {
-                switch (section[i]) {
-                    case 1:
-                        html += "-FORWARD-";
-                        break;
-                    case 2:
-                        html += "-AFT-";
-                        break;
-                    case 3:
-                        html += "-PORT-";
-                        break;
-                    case 4:
-                        html += "-STARBORD-";
-                        break;
-                    case 31:
-                        html += "-PORT.FWD-";
-                        break;
-                    case 32:
-                        html += "-PORT.AFT-";
-                        break;
-                    case 41:
-                        html += "-STBD.FWD-";
-                        break;
-                    case 42:
-                        html += "-STBD.AFT-";
-                        break;
-                    default:
-                        html += "-OTHER-";
-                        break;
-                }
-            }
-            $('<div><span class="weapon">' + html + '</span></div>').appendTo(f);
+        /* One row per weapon - identical ones grouped, see the end of this function
+           (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 4, §14.9): weapon | mode | hit chance,
+           with no "Approx:" - every number in the last column is a hit chance. A weapon that cannot
+           shoot shows its reason across the last two columns instead; the reason keeps its old
+           class, so it keeps its old colour. */
+        function row(weaponName, statusClass, statusText) {
+            return '<div class="tt-row"><span class="weapon" title="' + String(weaponName).replace(/"/g, "&quot;") + '">' + weaponName + '</span>'
+                + '<span class="' + statusClass + ' tt-status">' + statusText + '</span></div>';
         }
+
+        /* The "-PORT-" side line that used to open this list is the ship card's Facing now
+           (SHIP_TOOLTIP_REDESIGN_PLAN.md §4.4: "TARGETING list incl. -PORT- side line -> From
+           <sel> Facing"), read from the same getShipHittingSide, in the "From" section above. */
 
         /* Boarding attaches to the section its ENTRY HEX EDGE points at, not to whichever arc
            the bearing happens to fall in, so name that one section. Without this the player was
@@ -817,7 +792,7 @@ window.weaponManager = {
                 } else {
                     attachHtml = 'BOARDING: section rolled by server (two sections tie)';
                 }
-                $('<div><span class="weapon">' + attachHtml + '</span></div>').appendTo(f);
+                $('<div class="tt-line"><span class="weapon">' + attachHtml + '</span></div>').appendTo(f);
             }
         }
 
@@ -928,51 +903,80 @@ window.weaponManager = {
                     //Mine's orb - plan 3.10c). Same refusal as Huge terrain, and deliberately in
                     //the same line: what the player needs is one "Cannot Target", not a new reason.
                     if (abductionLine) {
-                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hexTargeted"> Abduction</span></div>').appendTo(f);
+                        //tt-abduction: the ship card counts this row as one its Target button can fire
+                        $(row(weapon.displayName, 'hexTargeted tt-abduction', 'Abduction')).appendTo(f);
                     } else if (ship.Huge > 0 || !shipManager.isTargetable(ship) || attachedUnitHidden || attachedWeaponHidden || clawBlindSpot) { //Cannot Target larger terrain or POds that are attached to non-facing sides
-                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotTarget"> Cannot Target</span></div>').appendTo(f);
+                        $(row(weapon.displayName, 'cannotTarget', 'Cannot Target')).appendTo(f);
                     } else if (loSBlocked) {
                         // LOS is blocked - only display the blocked message
-                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> Line of Sight Blocked</span></div>').appendTo(f);
+                        $(row(weapon.displayName, 'losBlocked', 'Line of Sight Blocked')).appendTo(f);
                     } else if (skinDanceBlocked !== null) {
                         // Can't target outside forward 120 degrees if skin-dancing
-                        $('<div><span class="weapon">' + weapon.displayName + ': </span><span class="skinDanceBlocked">' + skinDanceBlocked + ' is Skin Dancing</span></div>').appendTo(f);
+                        $(row(weapon.displayName, 'skinDanceBlocked', skinDanceBlocked + ' is Skin Dancing')).appendTo(f);
                     } else if (weapon.hextarget) {
                         // Don't show hit chance if targeting the hex.
-                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hexTargeted"> Hex Targeted</span></div>').appendTo(f);
+                        $(row(weapon.displayName, 'hexTargeted', 'Hex Targeted')).appendTo(f);
                     } else if (weaponManager.getLinkedFiringBlock(selectedShip, weapon, ship) != null) {
                         // Firing-linked weapon: this target is disallowed by a sibling's existing order
                         // (a different unit, or outside the group's angular spread). Shown while aiming
                         // so the restriction is visible before the click; the click itself is blocked
                         // with the full reason in targetShip.
-                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotTarget"> Linked Firing</span></div>').appendTo(f);
+                        $(row(weapon.displayName, 'cannotTarget', 'Linked Firing')).appendTo(f);
                     } else {
                         // LOS is not blocked, not hex targeted, show normal hit chance info, check Sweeping weapons first.
                         if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
-                            $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotCalled"> Cannot Called Shot</span></div>').appendTo(f);
+                            $(row(weapon.displayName, 'cannotCalled', 'Cannot Called Shot')).appendTo(f);
                         } else {
                             var result = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
                             var hitChance = result.hitChance;
 
                             var tooltipText = weaponManager.buildHitChanceTooltipText(result);
                             var chanceClass = (hitChance <= 0 ? 'negHitchange' : 'posHitchange');
+                            //tt-ballistic: a ballistic launches at 0% or less, anything else does not
+                            //(targetShip) - the ship card's Target button reads it off the row
+                            if (weapon.ballistic) chanceClass += ' tt-ballistic';
                             if (tooltipText) chanceClass += ' hit-chance-tooltip';
                             var dataAttr = tooltipText ? ' data-tooltip="' + tooltipText + '"' : '';
 
                             if (keys.length > 1) {
-                                $('<div><span class="weapon">' + weapon.displayName + ': <span class="firingMode"> (' + value + ')</span> - <span class="' + chanceClass + '"' + dataAttr + '>Approx: ' + hitChance + '%</span></div>').appendTo(f);
+                                $('<div class="tt-row"><span class="weapon" title="' + String(weapon.displayName).replace(/"/g, "&quot;") + '">' + weapon.displayName + '</span><span class="firingMode">' + value + '</span><span class="' + chanceClass + '"' + dataAttr + '><span class="hitvalue">' + hitChance + '%</span></span></div>').appendTo(f);
                             } else {
-                                $('<div><span class="weapon">' + weapon.displayName + ': </span><span class="' + chanceClass + '"' + dataAttr + '>Approx: ' + hitChance + '%</span></div>').appendTo(f);
+                                $('<div class="tt-row"><span class="weapon" title="' + String(weapon.displayName).replace(/"/g, "&quot;") + '">' + weapon.displayName + '</span><span class="firingMode"></span><span class="' + chanceClass + '"' + dataAttr + '><span class="hitvalue">' + hitChance + '%</span></span></div>').appendTo(f);
                             }
                         }
                     }
                 } else {
-                    $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInRange"> Not In Range</span></div>').appendTo(f);
+                    $(row(weapon.displayName, 'notInRange', 'Not In Range')).appendTo(f);
                 }
             } else {
-                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInArc"> Not In Arc </span></div>').appendTo(f);
+                $(row(weapon.displayName, 'notInArc', 'Not In Arc')).appendTo(f);
             }
         }
+
+        /* Identical weapons share one row (user, 2026-11-16): a flight's six guns, a broadside of
+           one weapon type. Two rows group only when their MARKUP is identical - the same name, mode
+           and hit chance, down to the breakdown behind the number - so the same weapon with a range
+           penalty critical, or in another mode, keeps a row of its own. Status rows group the same
+           way (3× … NOT IN ARC). The count goes IN FRONT of the name, where the name's ellipsis can
+           never cut it, and on the row as data-count, which the ship card's Target button counts. */
+        var groups = {};
+        var order = [];
+        f.children('.tt-row').each(function () {
+            var key = this.outerHTML;
+            if (groups[key]) {
+                groups[key].count++;
+                $(this).remove();
+            } else {
+                groups[key] = { row: this, count: 1 };
+                order.push(key);
+            }
+        });
+        order.forEach(function (key) {
+            var group = groups[key];
+            if (group.count < 2) return;
+            $(group.row).attr('data-count', group.count)
+                .find('.weapon').first().prepend($('<span class="tt-count"></span>').text(group.count + '×'));
+        });
 
     },
 
@@ -1215,6 +1219,15 @@ window.weaponManager = {
        them because its per-hex penalty depends on how many discharges the shot against THAT target
        fuses, and the hook is otherwise handed nothing but a distance - which would leave the range
        half of a prediction describing a different shot from the fire-control half. */
+    /* A to-hit goal on the d20 scale -> the percentage a shot needs. ⚠️ MIRROR PAIR with
+       Weapon::goalToPercent (PHP) - read its note. The goal is a sum of fractions added in a
+       different order on each side, so it is snapped to six decimals before it is rounded, and a
+       half rounds away from zero as PHP's round() does (Math.round alone sends -0.5 to 0). */
+    goalToPercent: function goalToPercent(goal) {
+        var percent = Math.round(goal * 5 * 1e6) / 1e6;
+        return percent < 0 ? -Math.round(-percent) : Math.round(percent);
+    },
+
     calculateRangePenalty: function calculateRangePenalty(distance, weapon, target, calledid, fireOrder) {
         var rangePenalty = 0;
 
@@ -2637,7 +2650,7 @@ window.weaponManager = {
                  + shotMods.calledShot
                  + shotMods.otherTotal
                  - edfPenalty;
-        var hitChance = Math.round(goal * 5);
+        var hitChance = weaponManager.goalToPercent(goal);
 
         //Build modifier list (zeros omitted)
         var modifiers = [];
@@ -2667,7 +2680,7 @@ window.weaponManager = {
 
         //Dev-mode invariant: breakdown sum must reproduce hitChance
         var sumCheck = modifiers.reduce(function (s, m) { return s + m.value; }, 0);
-        if (Math.round(sumCheck / 20 * 100) !== hitChance) {
+        if (weaponManager.goalToPercent(sumCheck) !== hitChance) {
             console.warn('calculateHitChange breakdown sum mismatch', { sumCheck: sumCheck, hitChance: hitChance, goal: goal });
         }
 

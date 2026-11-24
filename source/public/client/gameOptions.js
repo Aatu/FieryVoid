@@ -46,7 +46,14 @@ window.gameOptions = (function () {
             title: "Every game opens with the background/terrain images switched off, as the Disable Background button on the map does - that button still turns it back on for the session",
             def: false,
             onChange: applyMapBackground
-        }
+        },
+        /*{
+            key: "translucentShipTooltips",
+            label: "See-through ship tooltips (90% opacity)",
+            title: "Ship tooltips are drawn at 90% opacity, so the map shows through them. Off: solid",
+            def: true,
+            onChange: applyShipTooltipOpacity
+        }*/
     ];
 
     function byKey(key) {
@@ -123,6 +130,14 @@ window.gameOptions = (function () {
        later than anything in this file runs, so there is no load-time call to make here. */
     function applyMapBackground(value) {
         window.dispatchEvent(new CustomEvent("BackgroundPreferenceChanged", { detail: { off: value } }));
+    }
+
+    /* A card reads this as it is built (ShipTooltip's constructor); this repaints the ones
+       already open - the pinned card the player is looking at while they flip the box. */
+    function applyShipTooltipOpacity(value) {
+        if (window.ShipTooltip && typeof ShipTooltip.applyTranslucency === "function") {
+            ShipTooltip.applyTranslucency(value);
+        }
     }
 
     return {

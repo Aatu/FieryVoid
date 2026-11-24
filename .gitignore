@@ -26,3 +26,4 @@ nano*
 
 # Local-only Discord secrets for the docker dev container (never commit)
 docker/php/varconfig.local.php
+.impeccable/config.json

@@ -16,8 +16,15 @@ import { parseRulesText, briefCount, rulesBlocks, boldSegments } from "../helper
      called-shot chances AFTER the rules, so on a long system they were the first lines pushed off the screen.
    - The rules text shows its first lines and a "+N more" row until Shift is held. Shift is tracked for the
      whole page (below), so a card that opens while it is already down opens expanded.
-   - Measured, then placed (helpers/placeTooltip): beside the ship window, never off the screen. A card still too
-     tall opens WIDE - numbers on the left, the rules flowing into as many columns as they need.
+   - Measured, then placed (helpers/placeTooltip): beside the ship window, else above or below it, never off the
+     screen. A card still too tall opens WIDE - numbers on the left, the rules flowing into as many columns as they need.
+   - As wide as its content, between CARD_MIN_WIDTH and CARD_WIDTH (user request 2026-11-12): a system with little to
+     say draws a narrow card, and rules text wraps at the full width.
+   - Smaller on a smaller screen (CARD_FIT, user request 2026-11-12), by CSS zoom on the Scaled wrapper inside the frame
+     rather than a transform: zoom scales the LAYOUT, so text renders at its real size and box edges still land on
+     whole device pixels. The frame itself is not zoomed, so its left/top, offsetWidth and offsetHeight are screen px;
+     an element INSIDE the wrapper reports offsetWidth/offsetHeight in its own unzoomed px (multiply by the zoom for
+     screen px), while its getBoundingClientRect is on screen px in Chrome and Firefox (see snapTracks for older zoom).
    - Opened by a touch long-press (SystemIcon), it shows everything, stays up when the finger lifts, scrolls,
      and closes on the next tap outside it.
    - No element opacity anywhere: the old box's opacity 0.8 faded every letter (the alpha-compounding trap,
@@ -26,12 +33,31 @@ import { parseRulesText, briefCount, rulesBlocks, boldSegments } from "../helper
      goes on each element here and the Consolas parts take theirs back with a doubled class (&&). */
 
 /* The structure track: one box per point, always ONE full-width row - the boxes widen or narrow to fill it (user choice
-   2026-11-09: a 6-box Twin Array draws wide boxes, a Structure block thin ones). The pane is 284px wide: on a 1x screen
-   past ~120 boxes the boxes, under 1.4px, snap unevenly and run together, so the plain bar takes over there (a base's
-   biggest blocks; 6,614 of 6,818 Structure blocks are 120 or fewer). */
-const TRACK_MAX = 40;
-const TRACK_WIDE_GAPS = 30;  //up to this many boxes the gaps are 2px; past it 1px, so the boxes keep some width
+   2026-11-09: a 6-box Twin Array draws wide boxes, a Structure block thin ones). Past TRACK_MAX boxes the plain bar
+   takes over.
+   Every box is placed on whole DEVICE pixels after the card is placed (snapTracks, 2026-11-12). Laid out by CSS alone,
+   a 2px gap on a 110% screen is 2.2 device px, and each one rounded to 2 or 3 depending on where it fell - the
+   "random gaps" the user reported, which no TRACK_MAX could fix. Snapped, every gap is the same width and the boxes
+   differ by at most one device pixel. */
+const TRACK_MAX = 120;
+const TRACK_WIDE_GAPS = 60;  //up to this many boxes the gaps are 2px; past it 1px, so the boxes keep some width
+const TRACK_MIN_BOX = 6;     //a track keeps its boxes at least this wide: a long track holds a narrow card open
+const trackGap = count => count > TRACK_WIDE_GAPS ? 1 : 2;
 const TOUCH_WINDOW = 1500;   //ms after SystemIcon's touchstart stamp within which a new card counts as opened by touch
+/* The card's width inside its frame (2026-11-12): as wide as its content, between these two. The 10px padding either side
+   leaves CARD_WIDTH - 20 for the content - the 284px pane the wide layout's numbers keep (WIDE_LEFT). */
+const CARD_WIDTH = 304;
+const CARD_MIN_WIDTH = 198;
+/* A smaller screen draws a smaller card (2026-11-12): the zoom is the screen's share of width x height, never above
+   1 and never below `min`. width 1024 is the ship window's own small-screen breakpoint (ShipWindow SMALL_SCREEN_QUERY),
+   below which the window starts shrinking too. `min` is the legibility floor: 0.75 puts body text at 9px. */
+const CARD_FIT = { width: 1024, height: 640, min: 0.75 };
+const zoomWorks = () => typeof CSS !== "undefined" && Boolean(CSS.supports) && CSS.supports("zoom", "0.5");
+const cardZoom = view => {
+    if (!zoomWorks()) return 1;
+    const fit = Math.min(1, view.width / CARD_FIT.width, view.height / CARD_FIT.height);
+    return Math.round(Math.max(CARD_FIT.min, fit) * 100) / 100;
+};
 const WIDE_LEFT = 284;       //the numbers pane when the card opens wide
 const WIDE_COLUMN = 296;     //one rules column when the card opens wide
 const WIDE_GAP = 18;
@@ -104,13 +130,12 @@ export const RichText = ({ text }) => String(text == null ? "" : text).split(/<b
 const Card = styled.div`
     position: absolute;
     z-index: 20000;
-    width: 306px;
+    width: max-content;
     color: ${theme.colors.text};
     background-color: ${theme.colors.panelBg};
     border: 1px solid ${theme.colors.line};
     box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
-    font-size: ${SIZE.body};
-    line-height: 1.4;
+    border-radius: 4px;
     text-align: left;
     /*A hover card never takes the pointer: it cannot be reached anyway, and it must not swallow clicks. A card
       pinned by touch takes it back, to scroll.*/
@@ -128,10 +153,19 @@ const Card = styled.div`
         font-family: ${theme.fonts.ui};
     }
 
-    &[data-wide] { width: auto; }
+    &[data-wide] [data-scale] { max-width: none; }
     &[data-wide] [data-body] { display: flex; align-items: flex-start; gap: ${WIDE_GAP}px; }
     &[data-wide] [data-left] { flex: none; width: ${WIDE_LEFT}px; }
     &[data-wide] [data-rules] { flex: none; margin-top: 0; column-gap: ${WIDE_GAP}px; }
+`;
+
+/* everything inside the frame: what layout() zooms on a smaller screen, and what sets the card's width */
+const Scaled = styled.div`
+    width: max-content;
+    min-width: ${CARD_MIN_WIDTH}px;
+    max-width: ${CARD_WIDTH}px;
+    font-size: ${SIZE.body};
+    line-height: 1.4;
 `;
 
 const Head = styled.div`
@@ -255,11 +289,13 @@ export const SectionLabel = styled.div`
     }
 `;
 
+//$minWidth: what the track needs for TRACK_MIN_BOX boxes (never past the full pane), which holds a narrow card open
 const StructRow = styled.div`
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     row-gap: 4px;
     align-items: baseline;
+    min-width: ${props => props.$minWidth || 0}px;
 `;
 
 const Num = styled.span`
@@ -273,11 +309,14 @@ const Of = styled.span`
     && { font-family: ${theme.fonts.mono}; }
 `;
 
+/* The grid is where the boxes sit until snapTracks places each one on device pixels (absolutely, inside the track). */
 const Track = styled.span`
+    position: relative;
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(${props => props.$count}, minmax(0, 1fr));
-    column-gap: ${props => props.$count > TRACK_WIDE_GAPS ? 1 : 2}px;
+    column-gap: ${props => trackGap(props.$count)}px;
+    height: 10px;
 `;
 
 const TrackBox = styled.i`
@@ -303,12 +342,14 @@ const BarFill = styled.i`
    ship window's own health-bar rule). */
 export const Structure = ({ remaining, max, crit }) => {
     const left = Math.max(0, remaining);
+    const track = max > 0 && max <= TRACK_MAX;
+    const minWidth = track ? Math.min(CARD_WIDTH - 20, max * TRACK_MIN_BOX + (max - 1) * trackGap(max)) : 0;
     return (
-        <StructRow>
+        <StructRow $minWidth={minWidth}>
             <Lab>Structure</Lab>
             <Num>{left}<Of>/{max}</Of></Num>
-            {max > 0 && max <= TRACK_MAX
-                ? <Track $count={max}>{Array.from({ length: max }, (_, i) => <TrackBox key={i} $lost={i >= left} $crit={crit} />)}</Track>
+            {track
+                ? <Track data-track="" $count={max}>{Array.from({ length: max }, (_, i) => <TrackBox key={i} $lost={i >= left} $crit={crit} />)}</Track>
                 : <Bar><BarFill $crit={crit} style={{ width: (max > 0 ? 100 * left / max : 0) + "%" }} /></Bar>}
         </StructRow>
     );
@@ -332,22 +373,26 @@ const Cell = styled.div`
     & + & { border-left: 1px solid ${theme.colors.rule}; }
 `;
 
+/* $crit (user request 2026-11-16): a critical in force changes this stat (SystemInfo critStats) - its value is drawn
+   in the critical orange (--fv-crit / theme healthCrit, the structure track's crit colour) so the player sees WHAT was
+   affected; the Criticals block above says how. Applies to a cell's value and a profile row's value alike. */
 const CellValue = styled.span`
     max-width: 100%;
     font-size: ${SIZE.body};
-    color: ${theme.colors.text};
+    color: ${props => props.$crit ? theme.colors.healthCrit : theme.colors.text};
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     && { font-family: ${theme.fonts.mono}; }
 `;
 
+//cells: { label, value, crit? }
 export const Cells = ({ cells }) => (
     <CellRow $count={cells.length}>
         {cells.map(cell => (
             <Cell key={cell.label}>
                 <Lab>{cell.label}</Lab>
-                <CellValue title={String(cell.value)}>{String(cell.value)}</CellValue>
+                <CellValue $crit={cell.crit} title={String(cell.value)}>{String(cell.value)}</CellValue>
             </Cell>
         ))}
     </CellRow>
@@ -436,9 +481,10 @@ export const OfficerLabel = styled.span`
     color: ${theme.colors.enhTitle};
 `;
 
+//the label column is as wide as its longest label (a 92px floor came out 2026-11-12: it held short-label cards wide)
 const ProfGrid = styled.div`
     display: grid;
-    grid-template-columns: minmax(92px, max-content) minmax(0, 1fr);
+    grid-template-columns: max-content minmax(0, 1fr);
     column-gap: 10px;
     row-gap: 2px;
     align-items: baseline;
@@ -449,11 +495,11 @@ const ProfLab = styled(Lab)`
     ${props => props.$sub ? "padding-left: 8px;" : ""}
 `;
 
-//$big (the damage figure) is set apart by weight and colour, not size - see SIZE
+//$big (the damage figure) is set apart by weight and colour, not size - see SIZE; $crit: see CellValue
 const ProfVal = styled.span`
     font-size: ${SIZE.body};
     font-weight: ${props => props.$big ? 700 : 400};
-    color: ${props => props.$big ? theme.colors.text : theme.colors.textAccent};
+    color: ${props => props.$crit ? theme.colors.healthCrit : (props.$big ? theme.colors.text : theme.colors.textAccent)};
     ${props => props.$mono ? `&& { font-family: ${theme.fonts.mono}; }` : ""}
 `;
 
@@ -540,8 +586,8 @@ export const FireControl = ({ value }) => {
     );
 };
 
-/* rows: { label, value, big?, aux? }, { label, fc } or { label, modes } - a label starting " - " is a sub-item of the
-   row above */
+/* rows: { label, value, big?, aux?, crit? }, { label, fc } or { label, modes } - a label starting " - " is a sub-item of
+   the row above */
 export const Profile = ({ rows }) => (
     <ProfGrid>
         {rows.map((row, i) => (
@@ -550,7 +596,7 @@ export const Profile = ({ rows }) => (
                 <span>
                     {row.fc !== undefined ? <FireControl value={row.fc} />
                         : row.modes ? <Modes modes={row.modes} />
-                            : <ProfVal $big={row.big} $mono={looksNumeric(row.value)}><RichText text={row.value} /></ProfVal>}
+                            : <ProfVal $big={row.big} $crit={row.crit} $mono={looksNumeric(row.value)}><RichText text={row.value} /></ProfVal>}
                     {row.aux && <Aux>{row.aux}</Aux>}
                 </span>
             </React.Fragment>
@@ -684,6 +730,7 @@ class SystemCard extends React.Component {
     constructor(props) {
         super(props);
         this.ref = React.createRef();
+        this.scaledRef = React.createRef();
         this.state = { shift: shiftDown };
         this.touchSubject = undefined;
         this.touch = false;
@@ -733,18 +780,22 @@ class SystemCard extends React.Component {
         if (window.uiEvents) window.uiEvents.relay(this.props.closeEvent || "SystemMouseOut");
     }
 
-    /* Measure the card as drawn, open it wide if it is taller than the screen, then place it. Runs after every
-       render, so it first undoes what the last pass set. */
+    /* Zoom the card for the screen, measure it as drawn, open it wide if it is taller than the screen, place it, then
+       put the structure boxes on device pixels where it landed. Runs after every render, so it first undoes what the
+       last pass set. Measurements of the frame (node) are screen px; of anything inside it, the card's own px. */
     layout() {
         const node = this.ref.current;
-        if (!node) return;
+        const scaled = this.scaledRef.current;
+        if (!node || !scaled) return;
         const view = {
             width: document.documentElement.clientWidth || window.innerWidth,
             height: document.documentElement.clientHeight || window.innerHeight
         };
+        const zoom = cardZoom(view);
         const maxHeight = view.height - 2 * EDGE;
         const rules = node.querySelector("[data-rules]");
 
+        scaled.style.zoom = zoom === 1 ? "" : String(zoom);
         delete node.dataset.wide;
         node.style.maxHeight = "";
         if (rules) {
@@ -757,7 +808,7 @@ class SystemCard extends React.Component {
         if (this.touch) {
             node.style.maxHeight = maxHeight + "px";           //it scrolls
         } else if (node.offsetHeight > maxHeight) {
-            if (rules) this.openWide(node, rules, maxHeight, view.width);
+            if (rules) this.openWide(node, rules, maxHeight, view.width, zoom);
             if (node.offsetHeight > maxHeight) node.style.maxHeight = maxHeight + "px";   //a window too small even for that
         }
 
@@ -765,16 +816,18 @@ class SystemCard extends React.Component {
             { width: node.offsetWidth, height: node.offsetHeight }, view);
         node.style.left = position.left + "px";
         node.style.top = position.top + "px";
+
+        this.snapTracks(node, scaled, zoom);
     }
 
     /* Numbers on the left, the rules beside them in balanced columns: add a column until they are short enough, as
        many as the screen is wide enough for. A screen without room for even one column beside the numbers keeps the
-       card as it was. */
-    openWide(node, rules, maxHeight, viewWidth) {
+       card as it was. Widths and heights inside the card are in its own px; `zoom` converts them to the screen's. */
+    openWide(node, rules, maxHeight, viewWidth, zoom) {
         node.dataset.wide = "";
         rules.style.width = WIDE_COLUMN + "px";
-        const fixed = node.offsetWidth - WIDE_COLUMN;       //frame, padding, the numbers pane and the gap beside it
-        const widthAllows = Math.floor((viewWidth - 2 * EDGE - fixed + WIDE_GAP) / (WIDE_COLUMN + WIDE_GAP));
+        const fixed = node.offsetWidth - WIDE_COLUMN * zoom;       //frame, padding, the numbers pane and the gap beside it
+        const widthAllows = Math.floor((viewWidth - 2 * EDGE - fixed + WIDE_GAP * zoom) / ((WIDE_COLUMN + WIDE_GAP) * zoom));
         if (widthAllows < 1) {
             delete node.dataset.wide;
             rules.style.width = "";
@@ -782,8 +835,8 @@ class SystemCard extends React.Component {
         }
         const body = node.querySelector("[data-body]");
         const bodyStyle = window.getComputedStyle(body);
-        const chrome = node.offsetHeight - body.offsetHeight;
-        const columnHeight = Math.max(160, maxHeight - chrome
+        const chrome = node.offsetHeight - body.offsetHeight * zoom;     //frame, head and foot, in screen px
+        const columnHeight = Math.max(160, (maxHeight - chrome) / zoom
             - parseFloat(bodyStyle.paddingTop) - parseFloat(bodyStyle.paddingBottom));
         const natural = rules.offsetHeight;
         if (natural <= columnHeight) return;
@@ -795,6 +848,42 @@ class SystemCard extends React.Component {
         }
     }
 
+    /* Each structure box placed on whole device pixels: the gap a fixed number of them, the boxes sharing what is left
+       (so they differ by one at most). Worked in device px from where the track actually sits on the screen - its
+       left edge is rarely on a pixel boundary - then written back as the box's left/width in the card's own px. Until
+       this runs (and should it ever not) the boxes sit in the track's CSS grid. */
+    snapTracks(node, scaled, zoom) {
+        const tracks = node.querySelectorAll("[data-track]");
+        if (tracks.length === 0) return;
+        const dpr = window.devicePixelRatio || 1;
+        const scale = dpr * zoom;                      //device px per card px
+        /* getBoundingClientRect is in screen px in Chrome and Firefox; the older zoom (WebKit's) reports a zoomed element's
+           rect in its own px. The wrapper's rect against its own offsetWidth tells the two apart - as a choice of the two,
+           never the ratio itself: offsetWidth is a whole number, and its rounding alone moved every box ~0.35px. */
+        const ratio = scaled.offsetWidth > 0 ? scaled.getBoundingClientRect().width / scaled.offsetWidth : zoom;
+        const toScreen = Math.abs(ratio - zoom) <= Math.abs(ratio - 1) ? 1 : zoom;
+
+        tracks.forEach(track => {
+            const boxes = track.children;
+            const count = boxes.length;
+            const rect = track.getBoundingClientRect();
+            if (count === 0 || !(rect.width > 0)) return;
+            const origin = rect.left * toScreen * dpr;
+            const width = rect.width * toScreen * dpr;
+            const gap = Math.max(1, Math.round(trackGap(count) * scale));
+            const pitch = (width + gap) / count;
+            for (let i = 0; i < count; i++) {
+                const start = Math.round(origin + i * pitch);
+                const end = Math.round(origin + (i + 1) * pitch) - gap;
+                const style = boxes[i].style;
+                style.position = "absolute";
+                style.top = "0px";
+                style.left = ((start - origin) / scale) + "px";
+                style.width = (Math.max(1, end - start) / scale) + "px";
+            }
+        });
+    }
+
     render() {
         const { name, id, chips, children, rules, footer } = this.props;
         const touch = this.isTouch();
@@ -804,38 +893,40 @@ class SystemCard extends React.Component {
 
         return (
             <Card ref={this.ref} $pinned={touch}>
-                <Head data-head="">
-                    <Title>
-                        <Name>{name}</Name>
-                        {id !== undefined && id !== null && id !== "" && <Id>ID {id}</Id>}
-                    </Title>
-                    {chips && chips.length > 0 && (
-                        <Chips>{chips.map(chip => (
-                            <Chip key={chip.kind + "-" + chip.label} $kind={chip.kind} $color={chip.color}>{chip.label}</Chip>
-                        ))}</Chips>
+                <Scaled ref={this.scaledRef} data-scale="">
+                    <Head data-head="">
+                        <Title>
+                            <Name>{name}</Name>
+                            {id !== undefined && id !== null && id !== "" && <Id>ID {id}</Id>}
+                        </Title>
+                        {chips && chips.length > 0 && (
+                            <Chips>{chips.map(chip => (
+                                <Chip key={chip.kind + "-" + chip.label} $kind={chip.kind} $color={chip.color}>{chip.label}</Chip>
+                            ))}</Chips>
+                        )}
+                    </Head>
+                    <Body data-body="">
+                        <Left data-left="">{children}</Left>
+                        {items.length > 0 && (
+                            <RulesPane data-rules="">
+                                <SectionLabel>Special rules</SectionLabel>
+                                <Rules blocks={rulesBlocks(items.slice(0, shown))} />
+                                {hidden > 0 && (
+                                    <More>
+                                        <span>+{hidden} more rules {hidden === 1 ? "line" : "lines"}</span>
+                                        <span>hold <Kbd>Shift</Kbd> for all</span>
+                                    </More>
+                                )}
+                            </RulesPane>
+                        )}
+                    </Body>
+                    {(footer || touch) && (
+                        <Foot>
+                            {footer ? <FootMono>{footer}</FootMono> : <span />}
+                            {touch && <span>Tap outside to close</span>}
+                        </Foot>
                     )}
-                </Head>
-                <Body data-body="">
-                    <Left data-left="">{children}</Left>
-                    {items.length > 0 && (
-                        <RulesPane data-rules="">
-                            <SectionLabel>Special rules</SectionLabel>
-                            <Rules blocks={rulesBlocks(items.slice(0, shown))} />
-                            {hidden > 0 && (
-                                <More>
-                                    <span>+{hidden} more rules {hidden === 1 ? "line" : "lines"}</span>
-                                    <span>hold <Kbd>Shift</Kbd> for all</span>
-                                </More>
-                            )}
-                        </RulesPane>
-                    )}
-                </Body>
-                {(footer || touch) && (
-                    <Foot>
-                        {footer ? <FootMono>{footer}</FootMono> : <span />}
-                        {touch && <span>Tap outside to close</span>}
-                    </Foot>
-                )}
+                </Scaled>
             </Card>
         );
     }

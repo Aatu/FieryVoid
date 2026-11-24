@@ -25,6 +25,19 @@ $discord_notify_idle_secs = 300;                  // don't ping players seen pol
 // it as ?key=... when you open the tool.
 $maintenance_key = '';
 
+// Feature flags (Features.php). A part-built feature is reachable only where its flag is true;
+// ABSENT OR FALSE = OFF, so the live server stays dark unless a flag is set in ITS varconfig.
+//   cpuOpponent - CPU-controlled slots (TACTICAL_AI_PLAN.md section 2).
+//   autoDeploy  - the Auto-Deploy button of the Deployment phase (TACTICAL_AI_PLAN.md section 5.2).
+// $feature_beta_testers lists player ids who get a feature while its flag is otherwise off.
+$feature_flags = array(
+    //'cpuOpponent' => true,
+    'autoDeploy' => true,
+);
+$feature_beta_testers = array(
+    //'cpuOpponent' => array(1, 2),
+);
+
 // APCu debug logging toggle. When true, the gamedata cache paths error_log()
 // their hits/misses/fast-poll exits/touches so you can watch APCu working
 // (see Manager::apcuLog()). Leave FALSE normally — at true it logs on EVERY poll

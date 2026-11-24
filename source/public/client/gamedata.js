@@ -2662,6 +2662,13 @@ getActiveShipName: function getActiveShipName() {
 
         backDiv.addEventListener("click", gamedata.sliderToggle);
 
+        /* The panel's own buttons - Deploy Minefield, Auto-Deploy, Manage Reinforcements - go in ONE
+           footer that sticks to the bottom of the drawer (tactical.css #iniGuiActions): with a long
+           initiative list the list scrolls and the buttons stay in view (user request 2026-11-13).
+           Appended at the very end of this method, and only if it holds a button. */
+        var iniActions = document.createElement('div');
+        iniActions.id = 'iniGuiActions';
+
         // ── Deploy Mines button ───────────────────────────────────────────────────
         // Only show during deployment phase when the player has un-destroyed mines.
         var existingMineBtn = document.getElementById('mineDeployBtn');
@@ -2693,9 +2700,28 @@ getActiveShipName: function getActiveShipName() {
                         mineBtn.classList.remove('active');
                     }
                 });
-                // Append inside #iniGui so it sits naturally at the bottom of the panel
-                ini_gui.appendChild(mineBtn);
+                iniActions.appendChild(mineBtn);
             }
+        }
+
+        /* Auto-Deploy (TACTICAL_AI_PLAN.md section 5.2): places the player's fleet in formation and
+           leaves the commit to them. Beside Deploy Minefield, and drawn the same way. The module
+           decides whether it is offered - the `autoDeploy` feature flag, the Deployment phase, and
+           the player having units of their own to place this turn. */
+        var existingAutoBtn = document.getElementById('autoDeployBtn');
+        if (existingAutoBtn) existingAutoBtn.parentNode.removeChild(existingAutoBtn);
+
+        if (window.AutoDeploy && AutoDeploy.isOffered()) {
+            var autoBtn = document.createElement('button');
+            autoBtn.id = 'autoDeployBtn';
+            autoBtn.textContent = 'Auto-Deploy';
+            autoBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                AutoDeploy.onButtonClicked();
+            });
+            iniActions.appendChild(autoBtn);
+        } else if (window.AutoDeploy) {
+            AutoDeploy.close(); //its panel must not outlive the phase
         }
 
         /* REINFORCEMENTS_PLAN.md Stage 4 - MANAGE REINFORCEMENTS. Same shape as the mine button
@@ -2727,8 +2753,10 @@ getActiveShipName: function getActiveShipName() {
                 ReinforcementEntry.onButtonClicked();
             });
 
-            ini_gui.appendChild(reinfBtn);
+            iniActions.appendChild(reinfBtn);
         }
+
+        if (iniActions.childNodes.length > 0) ini_gui.appendChild(iniActions);
     },
 
 

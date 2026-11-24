@@ -1,9 +1,11 @@
 # Ship Tooltip → Ship Card, and the Hex Picker working with it
 
-**Status: Stage 1 BUILT 2026-11-09, uncommitted, not play-tested (§12). Stages 2-8 not started.**
+**Status: Stage 1 BUILT 2026-11-09 (committed d2bc81238). Stages 2-7 BUILT 2026-11-10, uncommitted,
+not play-tested (§14). Stage 8 not started - it needs its own ruling.**
 D1 is ruled (Option A) with twelve refinements in **§11, which override §4-§6 wherever they differ**,
-and a second round in **§11.1, which overrides §11**.
-D2/D3 were taken as recommended when the user asked for Stage 1. D5-D10 remain open.
+and a second round in **§11.1, which overrides §11**. **§14 records where the build departs from §4-§6.**
+D2/D3 were taken as recommended when the user asked for Stage 1. D5, D7, D8, D9, D10 were RULED as
+recommended on 2026-11-10 (asked before Stage 2); D6 was settled by §11.1 R2.5.
 **Mockups (design canvas):** https://claude.ai/artifact/PcQ7rYkmV9HovyNixscazC. It has before/after,
 the card in five contexts, three action styles (D1), an interactive picker + card prototype (D2: open
 Tweaks to switch what a map click does), a Firing storyboard and two linked phone screens.
@@ -399,12 +401,12 @@ in a fresh local game.
 | D2 | Picker stickiness: P1 / P2 / P3 | **P2** (built in Stage 1; P1 is a one-line change) |
 | D3 | Sticky phases | **Initial Orders, Pre-Firing, Firing** (built in Stage 1) |
 | D4 | Hull strip on the card | **RULED: no.** Build it, leave it commented out (§11 item 9) |
-| D5 | When the picker is open, dock the card beside it (vs. under the hex as today) | **Dock** |
-| D6 | Enemy DEW in Initial Orders: show `≤ N · hidden` / keep today's bare number / `—` | **`≤ N · hidden`** (today shows the full pool as if known, because enemy EW is hidden in phase 1 and `getEWLeft` returns it all) |
-| D7 | Square corners for the ship card (ends its 7px exception) | **Square**, like the system card |
-| D8 | Hover peek `pointer-events: none` instead of self-destroying | **Yes** |
-| D9 | Touch: drill-down inside the sheet / a card stacked above the sheet | **Drill-down** |
-| D10 | Pinned card draggable by its head | **Yes**, per instance |
+| D5 | When the picker is open, dock the card beside it (vs. under the hex as today) | **RULED 2026-11-10: Dock** |
+| D6 | Enemy DEW in Initial Orders: show `≤ N · hidden` / keep today's bare number / `—` | **RULED (§11.1 R2.5): `≤ N`**, no sub line (today shows the full pool as if known, because enemy EW is hidden in phase 1 and `getEWLeft` returns it all) |
+| D7 | Square corners for the ship card (ends its 7px exception) | **RULED 2026-11-10: Square**, like the system card |
+| D8 | Hover peek `pointer-events: none` instead of self-destroying | **RULED 2026-11-10: Yes** |
+| D9 | Touch: drill-down inside the sheet / a card stacked above the sheet | **RULED 2026-11-10: Drill-down** |
+| D10 | Pinned card draggable by its head | **RULED 2026-11-10: Yes**, per instance |
 
 ---
 
@@ -529,3 +531,265 @@ mutants (no creation-time clear; the old always-hex-side rule).
 - The static `#shipNameContainer` div in game.php (L651) appears to have no JS reader.
 - While a pinned card is up, hovering another unit shows nothing (PhaseStrategy L1121). That is
   Stage 8's question.
+- (2026-11-10) `tests/replay/lateEwElintHarness.js` fails on a clean tree: its stub world lacks
+  `shipManager.getProjectionOrigin`, which `ew.collectEwDetectors` now calls. Pre-existing; untouched.
+- (2026-11-10) Stage 2-7 harness stubs needed `officers.redlineThrustBonus` / `mayRedlineLand`,
+  `shipManager.systems.isDestroyed` and `shipManager.criticals.isCutOffFighter` just to evaluate the
+  Fire menu's conditions on a flight - the menu's predicates reach a long way. Not a bug.
+
+---
+
+## 14. Stages 2-7 as built (2026-11-10)
+
+**Files:** `client/UI/ShipTooltip.js` (rewritten), `client/UI/shipTooltipMenu.js`,
+`shipTooltipInitialOrdersMenu.js`, `shipTooltipFireMenu.js`, `shipTooltipMovementMenu.js` (additive
+fields only), `client/weaponManager.js` (targeting row markup), `client/UI/SelectFromShips.js`,
+`client/renderer/phaseStrategy/PhaseStrategy.js`, `styles/shipTooltip.css`, `styles/tactical.css`,
+`styles/hexPicker.css`, `styles/tokens.css`, `reactJs/shipWindow/ShipWindowEw.js`,
+`reactJs/styled/theme.js` and `reactJs/common/Tooltip.js` (comments). Bundles rebuilt with
+`fvbuild -Client`. **`fvbuild -Sync` was NOT run: Docker was down.** Run it (or restart the php
+container) before testing locally.
+
+**The shape.** `ShipTooltip.buildModel(ship, selectedShip)` is a pure model (exported for node
+harnesses) - every number is the old `createForSingleShip` computation, moved. The renderer turns it
+into: head band (art, name, sub) · chips · key cells · "From ‹sel›" · EW · Fire orders · Movement /
+Costs / Combat · TARGETING · Target button · INCOMING · Orders tiles · footer (Ship details + `Ini base
+· mod`). The public API and every hook class are unchanged (§7).
+
+**Menus (Stage 4).** `ShipTooltipMenu` gained `getVisibleButtons()` (renderTo's own filter, which the
+harnesses lift), `bindAction()` and `bindInfo()` (renderTo's own steps, split out). The card places
+each visible button by its new fields: `group` + `role` → a −/+ stepper in that EW type's row;
+`kind: 'primary'` → the Target button; `kind: 'clear'` → Clear all EW; `kind: 'footer'` → Ship details;
+anything else → a captioned tile (`label`, else a static `info`). **No condition was edited** - checked
+against the HEAD menus in 800 cases.
+
+**Departures from §4-§6 (the build's own decisions; the user may overturn any):**
+1. **No `value(menu)` field.** The card reads every EW value through one function (`ewValue`), for
+   the rows it draws and for a row it makes for a stepper, so the two can never disagree.
+2. **EW values are EFFECTIVE**, as the ship window and the old lines printed them: DIST per third
+   (quarter for ConstrainedEW), BDEW ×0.25, SDEW ×0.5. A stepper click moves the RAW points; the
+   button's title says so.
+3. **The zoom/scroll callback order was NOT changed (§6.3).** Moving `repositionTooltip` after the
+   picker would undo the picker's avoidance nudge for every UNdocked card, which is why it runs first.
+   Instead the picker's `placeTooltipClear` - already called on hover, zoom, scroll, fold, expand,
+   refresh and its header drag - asks a card docked to it to `place()` itself. The card still derives
+   everything from the picker's rectangle (trap 7).
+4. **Click docking only where the picker stays open** (Initial Orders, Pre-Firing, Firing). In the
+   other phases a selection closes the picker, and a card docked to it would have nothing beside it.
+   A hover peek docks in every phase.
+5. **The picker closing under a docked card** (its ✕, a replacement picker): the card
+   `undock()`s and returns under its unit. A card inside the sheet goes with the sheet.
+6. **Dragging a docked card undocks it** (its caret would point at nothing).
+7. **The caret is its own element in `<body>`** (`.fv-shipcard-caret`): the card is its own scroll
+   container and would clip a caret drawn outside its border. Removed with the card.
+8. **Placement flips ABOVE the unit** when there is no room below and there is above; the side is
+   sticky per card (the picker's rule). §4.6 only asked for a clamp.
+9. **Terrain shows DEFENCE and SPEED**, not identity only: small asteroids are targetable, and
+   drifting terrain moves (Terrain Drift).
+10. **Anyone else's EW** shows as a read-only EW section of NONZERO rows only (CCEW, BDEW, Detect
+    Stealth, Detect Mines, Support DEW) - nothing in Initial Orders, where it is hidden anyway. Their
+    movement facts (thrust, turn cost/delay with rates, pivot, roll, accel) are in the SPEED cell's
+    title, not a section (§2.1 called them noise on an enemy).
+11. **Your own ship plotting (Movement) has no EW section** - its DEW is in the Combat section, as the
+    Movement board drew it.
+12. **DEFENCE with a unit selected** dims the profile that does not face it and keeps the facing one
+    bright (both on a boundary).
+13. **"Target N weapons"** counts the TARGETING rows that carry a hit chance - the weapons
+    weaponManager itself judged able to shoot - rather than re-asking arc and range.
+14. **The `-PORT-` side line left the TARGETING list** (now "Facing" in the "From" section, as §4.4
+    said). Rows are `.tt-row` weapon | mode | hit chance; a status word spans the last two columns
+    and keeps its old class (so its old colour).
+15. **Tile captions** add "Cancel node" / "Cancel swap" for the withdrawals, so a pair's two states
+    read differently.
+16. **The EW icon is not lifted.** Measured on the ink at 2x: the −/+ boxes sit exactly on the row's
+    middle, the caps label and value within 0.75px, and the user's DEW art centres with NO offset. The
+    mockup's 1px lift put it 2px high. Icons with decorations on top (CCEW's dots, MDEW's star) read
+    higher by their decoration.
+17. **Hull strip** built (`buildHull`, `renderHull`, CSS) and left out, per D4/§11 item 9.
+18. **New tokens:** `--fv-ui` (twin of `theme.fonts.ui`, sync comment on both) and `--fv-target`,
+    `--fv-target-fill`, `--fv-target-text` (the Target button and the picker's ⌖ chip - two surfaces).
+    `window.EW_LABEL_COLORS` is published by ShipWindowEw.js and read by the card (§11 item 11).
+19. **The picker's `refresh()` rebuilds nothing unless a row would render differently** (a signature
+    of the descriptor keys). It is now called from `onShipEwChanged` and `onSystemDataChanged`, and
+    the second fires on every weapon click.
+20. **Reads that walk a unit's systems fall back instead of throwing** (`readSafely`; trap 15). The
+    last swallowed error is kept on `ShipTooltip.lastReadError` for a console session.
+
+**Stage 5 badges:** `OEW n` (the selected unit's own OEW on an enemy row) and `⌖ ‹target›` /
+`⌖ N targets` (an own row's fire orders this turn, interception excluded; a masked mine reads "Mine",
+a unit the player cannot see reads "target"), phases 1/5/3 only, part of the run key.
+
+**Stage 7 sheet:** a TAP on a row in a sticky phase drills down - the card replaces the list in
+`.fv-hexpicker__cardslot` (`.fv-hexpicker--detail`), the header shows `‹ N units in hex` (44px), the
+card hides its own ✕ and does not drag. A press is still only the preview. Back, a map click and the
+sheet's ✕ all end the drill-down; the card tells the picker it has gone (`onCardGone`) however it went.
+
+**Verified** (scratchpad harnesses, real jQuery 4 + the real files, stubbed game world):
+- `card.js` - **98 checks**: no throw across 5 phases × 10 unit kinds × 4 selections × peek/pinned;
+  every §4.4 item; observer and 3-team colours on both arms; clamp, flip, stickiness and head drag;
+  facing, EW pool, `≤ N`; **every menu button under exactly its HEAD conditions in 800 cases**
+  (fixtures × phases × selections × weapon/stealth/mine options), the old `renderTo` agreeing;
+  steppers, the disabled half, click, right-click max and the 500ms long press; the primary label;
+  tiles and the info line. Catches **8 of 8 mutants**.
+- `dock.js` - **47 checks** with the real PhaseStrategy + SelectFromShips: badges through
+  `onShipEwChanged` / `onSystemDataChanged`, run splitting, the refresh skip; docking geometry, caret,
+  zoom, fold, scroll-out, side choice and stickiness, picker drag, card drag, picker ✕, stale docks,
+  Movement; the sheet drill-down, back, map clicks, ✕. Catches **8 of 9 mutants**; the ninth (drop
+  PhaseStrategy's stale-dock guard) is equivalent - the card's own `place()` refuses a destroyed
+  picker's dock too.
+- `stage1.js` (Stage 1's, 42 checks) still passes; one check updated, because a refresh with nothing
+  changed now keeps the same row (and its focus) instead of rebuilding it.
+- `tests/replay/initialOrdersTooltipHarness.js` 23/23.
+- Screenshots (static page, real CSS + JS): ten card contexts at 1920×1080 plus a 2x crop; the docked
+  card beside a real picker; the phone sheet (true 390px, touch emulation via CDP) drilled down and
+  back. 48×44 steppers on coarse pointers; no horizontal scroll at 390px.
+
+**Not verified:** the live game (no session - planting is denied), real art for every EW icon at
+every DPR, and the INCOMING list under the new frame with real ballistics (its rules are untouched).
+
+### 14.1 Refinement round 3 (user, 2026-11-10, from the first live screenshots) - overrides §14
+
+"Overall there is too much wasted space and the mix of fv-text-dim with the team colours doesn't seem
+to match up very well."
+
+| # | Ruling | Built |
+|---|---|---|
+| R3.1 | Narrow the card by eliminating empty space | **300px → 250px.** The savings come from R3.2 and R3.5, plus tighter padding (sections 5/9/6, cells 4/4/5), EW rows 28 → 24px with 22×20 steppers and a 28px value column, tiles 58px, footer button 22px. |
+| R3.2 | Ini and Speed to the top of Movement; Movement as four rows of two (Ini + Speed, Thrust + Accel, Turn cost + Turn delay, Pivot + Roll); show Movement on ENEMY cards too | Movement is on every ship, base and flight card, own or not (a flight: Pivot + Combat pivot). **The cells are DEFENCE + DEW** (flight: DEFENCE + ARMOR; mine: DEFENCE [+ SIG]; terrain: DEFENCE + SPEED), with DEFENCE the wider column, because Mindrider decimals (`48.75 · 48.75`) were being cut. The Movement-phase cell variant and the Costs/Combat sections are gone; while you plot your own ship, Movement comes straight after the cells. This supersedes §14 departure 10 (movement facts in the SPEED title). |
+| R3.3 | Clear All EW smaller, on the ELECTRONIC WARFARE label's row, pinned right | A 15px button in the section heading (`.fv-shipcard__clr` is now a span in `.fv-shipcard__mh`). 32px on coarse pointers. |
+| R3.4 | The −/+ buttons in their row's label colour | Each EW row carries `--ew-color` (from `window.EW_LABEL_COLORS`); its label and both buttons use it. Hover lights the glyph and fill and keeps the border. A disabled half stays `--fv-line-soft`. |
+| R3.5 | Header one row: the name and ✕ on the same line, a little padding | 32px (was 58): art 34×24, name 13px, ✕ centred. The sub line rides on the name's line: the class (it gives way first and ellipsises) or a flight's `4/6` (title `4 of 6 fighters`; never cut). |
+| R3.6 | (the colour remark) | **`--tt-dim`**, one card-scoped variable, now paints every dim label, heading and the ✕. Value: **the dim grey tinted 30% toward the card's allegiance colour** (`color-mix(in srgb, var(--tt-rail) 30%, #9a9a9a)`, so observers and 3+ teams follow their team), with a neutral `#9ea4aa` where `color-mix` is missing. Four options were shot side by side (today's blue-grey, neutral grey, tint 30%, tint 50%); 30% was chosen as the default and is one number to retune. The INCOMING list keeps `--fv-text-dim` (its rules stay untouched). |
+
+Verified: `card.js` now 101 checks (the layout checks rewritten for R3.1-R3.5, plus the row colour and
+the heading button), still 8/8 mutants; `dock.js` 47, `stage1.js` 42, IO menu harness 23 - all green.
+Screenshots: the ten-context sheet, the four label-colour options, the docked card and the phone sheet
+at the new width. Bundles rebuilt (`fvbuild -Client`); `-Sync` still owed (Docker down).
+
+### 14.2 Refinement round 4 (user, 2026-11-10, "definitely improving") - overrides §14.1
+
+| # | Ruling | Built |
+|---|---|---|
+| R4.1 | Movement's first row is Speed + Ini; the Ini brackets hold the bare order number | `Speed 6 · Ini −20 (1)`. Overrides §11.1 R2.5's `(1st)`; `ordinal()` is gone. |
+| R4.2 | CLEAR ALL EW → CLEAR EW, in the card's new colour scheme | The menu entry's `label` is "Clear EW" and the button reads it. Text `--tt-dim`, a line `--tt-btn-line` (the rail 40% into a dark grey), transparent fill; hover: bright text, the rail colour, `--tt-btn-hover` (the rail 14% into black). Neutral fallbacks without `color-mix`. |
+| R4.3 | Ship details in the same style | Same rules as R4.2. The stepper buttons keep their row colours (R3.4). |
+| R4.4 | A little more width for EW values (BDEW's `1.25`, `0.75`) | Value column 28 → 36px (44px on coarse pointers, unchanged). |
+| R4.5 | Grey out an EW row whose option is unavailable (DIST from an ELINT already on BDEW) | `greyUnavailableEwRows`: a row is greyed (`.fv-shipcard__ewr--off`, title "not available now") when the card's menu CARRIES that EW type's steppers and neither half passed its conditions - so no rule is restated, and the menu's own conditions decide. Only for the allocating unit: a self type on the selected unit's own card, a targeted type on another unit's card with a unit selected. Never greyed: DEW and Support DEW (not allocated), another own ship's EW section, anything in a menu without EW steppers (Movement, Waiting, the Firing menu outside the late-EW window), and the hover peek (it has no menu to ask). Grey label and value; the icon greys by `filter`, not opacity. |
+
+Verified: `card.js` 110 checks (+9 for round 4: the swap, `(1)`, "Clear EW", DIST greyed under BDEW,
+OEW still live beside it, nothing greyed when all is open, BDEW greyed under DIST while Detect Stealth
+is not, DEW never, another own ship never, Firing never, the peek never), 10/10 mutants including two
+new ones (grey regardless of scope; never grey). `dock.js` 47, `stage1.js` 42, IO menu harness 23.
+Screenshot of the four round-4 cases. Bundles rebuilt; `-Sync` still owed.
+
+### 14.3 Refinement round 5 (user, 2026-11-10; finished 2026-11-12) - overrides §14.2
+
+| # | Ruling | Built |
+|---|---|---|
+| R5.1 | A second press of Ship details closes that ship's window | `openSCS` sends `OpenShipWindowFor` with `toggle: true`; `PhaseStrategy.onOpenShipWindowFor` closes instead when `ShipWindowManager.isOpen(ship)`. Only this button toggles - the fleet list still always opens. |
+| R5.2 | Facing lines up with Movement's second column | "From" uses the same two equal columns as Movement (its 0.8fr / 1.2fr override is gone). A boundary prints `P.FWD/PORT` (no spaces) to fit the half. Measured: Facing and Initiative share a left edge on every card. |
+| R5.3 | Defence and DEW cells are equal halves | `.fv-shipcard__cells--n2` 1.5fr 1fr → 1fr 1fr (123px each). |
+| R5.4 | "From" and the selected unit's name looked misaligned | NOT CHANGED: they are one span, one font, one line box; measured on the ink at 2x they occupy the same pixel rows. No stylesheet game.php loads (nor the React bundle) reaches that span. Asked for a close-up if it still reads low. |
+| R5.5 | No art on the pinned card; the peek keeps it, right of the name | The pinned card's `head.append(art)` is commented out in `renderHead`; the peek appends it after the name. Pinned head padding-left 9px. |
+| R5.6 | Thrust and Speed swap | Movement rows: Thrust + Initiative, Speed + Accel, Turn Cost + Turn Delay, Pivot + Roll. |
+| R5.7 | Ini base / mod beside MOVEMENT; Ship details fills the footer; no footer on the peek | `MOVEMENT – Ini base 0 · mod 0`, packed left (5px gaps), the pair ellipsises. `model.footer` is gone; `renderFoot` only empties. Ship details `flex: 1`, centred. The peek's footer is `:empty`. |
+| R5.8 | Hex-picker chip text sat high | At 1x the caps are 7 device rows in a 12-row interior → 2 above / 3 below at every sub-pixel offset. `@media (max-resolution: 1dppx)`: `padding-top: 1px; margin-bottom: -1px` → 3 / 3, row heights unchanged. Above 1x left alone: 6 / 6 at 2x already; at 1.25x neither value wins. |
+
+⚠️ The first attempt at this round's CSS never reached disk (a Python edit script; `python` in Git Bash
+is the WindowsApps stub and exits "Permission denied") while the JS did - which is why R5.2, R5.3 and the
+R5.7 gap looked untouched in the first play test.
+
+### 14.4 Refinement round 6 (user, 2026-11-12) - overrides §14.3
+
+| # | Ruling | Built |
+|---|---|---|
+| R6.1 | "From ‹selected›" and Range / Facing above the Defence / DEW cells; the OEW / DIST rows stay below them (asked: "FROM + Range/Facing only") | The From block keeps `.fv-shipcard__sec--rel` (heading + spec only); the EW spent ON the unit is a new `.fv-shipcard__sec--relew` under the cells. `findOrMakeEwRow` → `ensureSection('relew')` (after the cells; keeps its "From" heading only when no From block exists); `ensureSection('ew')` anchors after `--relew`, else the cells, else `--rel`. Body order: chips › rel › cells › relew › … |
+| R6.2 | Head band and footer: a subtle wash of the rail colour instead of `--fv-card`'s blue | `--tt-wash` = rail 16% into black (`--fv-card` without `color-mix`); the footer's Ship details hovers to `--tt-wash-hover` (30%) - the shared `--tt-btn-hover` (14%) would be darker than the washed ground. The strong rail rule moved from the cells' top to the head's bottom (the cells are no longer first); the body's first block draws no rule; the stack grid's head opts out. |
+| R6.3 | Ini base / Ini mod as chips, no "–" | Two `.fv-shipcard__inichip` beside MOVEMENT: `INI BASE 0`, `INI MOD −50`, outlined in the label colour, value in mono. 9px / line-height 12px / 14px tall = the heading line, so the row is no taller. Measured on the ink: 3 / 3 at 1x; at 1.25x-2x half a CSS px low at most (odd ink in an even box - unavoidable; low is the better side for caps). |
+
+### 14.5 Refinement round 7 (user, 2026-11-12) - overrides §14.4 R6.3
+
+| # | Ruling | Built |
+|---|---|---|
+| R7.1 | The Ini chips did not work: no MOVEMENT heading at all; Ini Base + Ini Mod as a stat row above Thrust + Initiative | The movement section has `title: null`; its spec starts `Ini Base`, `Ini Mod` (signed values, only when the unit has an initiative). Five rows of two; Ini Mod sits above the Initiative it adds to. The chip markup and CSS are gone. |
+| R7.2 | EW values in one column with the DEW cell's number | `.fv-shipcard__vb { margin-right: max(0px, calc(25% - 4.5px - var(--tt-vb-half))) }` - derived from the card width, so it holds in the wider in-sheet card; `--tt-vb-half` 40px (70px on touch, where a 250px card is too narrow and the block sits right-aligned). Measured 0.0px off the DEW number on every card, desktop and the 390px sheet. Labels lose 12.5px; "DETECT STEALTH" (100px) still fits its 101.5px. |
+
+### 14.6 Refinement round 8 (user, 2026-11-12)
+
+| # | Ruling | Built |
+|---|---|---|
+| R8.1 | Every EW row's icon starts under the "D" of the DEFENCE label above it | The label is CENTRED, so its start depends on the platform's font: `alignEwRows` MEASURES it (a Range on the label text) and sets `--tt-ew-indent` on the card; the CSS puts it on the ICON's left margin (a row padding would shrink the row the value column's 25% margin is taken from). Runs from `show()` (in the sheet: AFTER `onCardDocked`, before which the card is not laid out), `update()` and `refreshButtons()`. Only beside the two-cell grid - an enemy mine's lone centred Defence cell leaves its rows flush. Measured 0.00px on every card: desktop, scrolling, docked, the 390px sheet. |
+| R8.2 | The indent cost the labels 15px (asked): shorter names | `EW_TYPE` gains `full`: rows read DET. STEALTH / DET. MINES / SUPP. DEW, the full name in the label's title, the stepper aria-labels and the greyed-row title. Row gap 7 → 5px. Tightest: Det. stealth 9.1px spare (5.1 while the card scrolls). |
+| R8.3 | The card's scrollbar in the head band's dress | `::-webkit-scrollbar` 8px: thumb `--tt-wash` with a `--tt-rail` border, hover `--tt-wash-hover`, track `--fv-overlay`. `scrollbar-color` only under `@supports not selector(::-webkit-scrollbar)` - Chrome 121+ IGNORES the pseudo-elements when it is set. ⚠️ The visual kit's cdp.mjs launches Chrome with `--hide-scrollbars`; `cdp_sb.mjs` drops it. |
+
+### 14.7 Refinement round 9 (user, 2026-11-12)
+
+| # | Ruling | Built |
+|---|---|---|
+| R9.1 | CLEAR EW centred on the column of EW values below it | `.fv-shipcard__clr` is a ZERO-width slot on that column's centre line - `margin-right: max(var(--tt-vb-half), calc(25% - 4.5px))`, the value block's own centre (it follows the block to the right edge on a narrow touch card) - and the button, `justify-content: center`, overflows it equally both ways: centred at any button width, and the heading text loses no room. `--tt-vb-half` moved up to the card (40px; 70px on touch) so the value block and the slot share it. Measured ≤ 0.01px off the values: desktop, scrolling, touch. |
+| R9.2 | CLEAR EW on the same background as Ship details | `--tt-wash` (Ship details is transparent on the footer's `--tt-wash`), hover `--tt-wash-hover`. |
+
+Observation (not changed): the EW icon BOXES start exactly under DEFENCE's "D" (R8.1), but the icon art has transparent margins - the drawn DEW / MDEW art starts ~4px right of the "D", CCEW's dots ~2px.
+
+### 14.8 Refinement round 10 (user, 2026-11-12)
+
+| # | Ruling | Built |
+|---|---|---|
+| R10.1 | Hide CLEAR EW when there is no EW to clear (everything still in DEW) | A menu condition, `hasEwToClear` (shipTooltipInitialOrdersMenu.js), on the `removeAllEW` entry: true only for a row of THIS turn's EW, other than DEW, with points in it - DEW is the remainder, not an allocation. Null-safe on its own. Live, because every EW change rebuilds the card (`onShipEwChanged` → `update`). Checked: no rows / a 0-point row / a DEW row / last turn's rows → hidden; CCEW 2 or OEW 1 → shown; spend a point → appears, Clear → gone; nothing selected → card builds, no button. |
+
+### 14.9 Refinement round 11 (user, 2026-11-16)
+
+| # | Ruling | Built |
+|---|---|---|
+| R11.1 | Show Facing on a fighter flight as on a ship (its armour differs front / side / aft) | A flight has no `outerSections` - `FighterFlight::getLocations` puts all four arcs on location 0, so `fillLocationsGUI` sends none and `getShipHittingSide` always answered nothing. `buildFacing` now sends a flight to `buildFlightFacing`, which tests the four arcs of `getLocations` (FWD 330-30, STBD 30-150, AFT 150-210, PORT 210-330; ⚠️ a MIRROR of that PHP) with `getShipHittingSide`'s own bearing maths. Listed FWD, AFT, PORT, STBD so a boundary reads as a ship's does (`FWD/STBD`). FWD/AFT light the forward Defence number, PORT/STBD the side one - `getLocations`' `profile`. |
+| R11.2 | No "Target selected weapons" button when none of the selected weapons can be aimed at the unit | Renderer only, no menu condition touched: `renderActions` places a `kind: 'primary'` button only when `targetableCount` > 0 - the TARGETING rows carrying a hit chance - ≤0% only for a BALLISTIC weapon (user, 2026-11-16: `targetShip` launches a ballistic at 0% and declares nothing else below 1%; weaponManager marks the number `tt-ballistic`) - or an Abduction (a new `tt-abduction` class on that row), summed through `data-count`. A list hidden by `refreshTargeting` counts nothing (it is hidden, not emptied, so its rows can be stale). Live: `onSystemDataChanged` already runs `refreshTargeting` then `refreshButtons`. |
+| R11.3 | Group identical weapons in TARGETING (same type and same hit chance - a range-penalty crit keeps its own row) | `weaponManager.targetingShipTooltip` ends by merging rows whose MARKUP is identical (name, mode, hit chance and the breakdown behind it, or the same status): the first keeps its place, gains `data-count` and a `3×` `.tt-count` in front of the name (the name's ellipsis cannot cut it). Status rows group too (`2× Heavy Laser  NOT IN ARC`). The Target label counts weapons, not rows. |
+| R11.4 | The whole tooltip at 90% opacity, with a manual toggle | `opacity: 0.9` on `.fv-shipcard--translucent` (peek, pinned, stack) and its dock caret; the card inside the picker's sheet stays solid (no map under it). The toggle is an OPTIONS-tab entry, `translucentShipTooltips` "See-through ship tooltips (90% opacity)", default ON, per browser (gameOptions.js). The constructor reads it; flipping it repaints open cards (`ShipTooltip.applyTranslucency`). The header's "no element opacity" rule now names this one exception: root opacity composites the card as one layer, so nothing compounds. |
+
+Verified: a round-11 harness (real ShipTooltip.js, the menus, gameOptions.js, mathlib.js and the real `targetingShipTooltip`, jsdom) - 88 checks: 16 flight bearings × heading (label + lit Defence number), own flight, peek, nothing selected, ships unchanged; grouping (identical, crit-different, another mode, order, `data-count`, the kept breakdown, and EVERY status - Not In Arc, Not In Range, Hex Targeted, Linked Firing, Cannot Target, Line of Sight Blocked - grouped per weapon; user confirmed 2026-11-16: "anything where it's the same result for the same type of weapon"); the button absent / present / singular / plural / Abduction / Initial Orders / hidden list / live add-remove / click; ≤0% non-ballistic (none), 1% (button), ballistic 0% / −10% (button), 0% beside 65% (button, one weapon), a ballistic and a direct-fire twin never grouped; opacity computed from the real CSS, the in-sheet card, the switch live on an open card, remembered, drawn in the OPTIONS tab. Catches 11 of 11 mutants. Bundles rebuilt (`node scripts/bundle-legacy.js`) and synced (`fvbuild -Sync`); not play-tested.
+
+### 14.10 Refinement round 12 (user, 2026-11-16) - "tooltips can become very long … smaller screens"
+
+| # | Ruling | Built |
+|---|---|---|
+| R12.1 | The ORDERS tiles move out of the card into a vertical column on its RIGHT, with a small in / out toggle (default out), hidden entirely when the unit has no options this phase | **The root is now a bare flex row**: `.fv-shipcard__card` (the old card box - border, rail, 65vh scroll, ✕) and `.fv-shipcard__side` (the panel). The panel must sit outside the card's scroll box (it would be clipped) and INSIDE the root, so place / placeDocked / keepInView / the head drag / the picker's `placeTooltipClear` all measure and move it without knowing about it. The constructor moves `.buttons` into the panel; `renderActions` → `setSide` sets `fv-shipcard--has-side` only while a tile is offered (no tile → no panel, no toggle). 78px wide (90 on coarse pointers), its head band continues the card's (same wash, 32px, rail rule), border laid over the card's right border (−2px margin), card's top-right corner squared. The toggle folds it to a tab of the head band alone (`fv-shipcard--side-folded`). Tiles keep their captions; a dynamic info line shows under them in the panel. The panel's head band drags the card too (its toggle does not). |
+| R12.2 | Movement folds, and so does the EW section on your OWN card; Movement folded by default in the Firing phase | Movement has a heading again - `▸ MOVEMENT` is the fold button (a folded section needs something to name it and to open it; round 7 had removed the heading). Own EW: `▾ ELECTRONIC WARFARE`, Clear EW stays in the heading when folded. Anyone else's `EW` rows and the OEW/DIST rows (`--relew`) do not fold. CSS chevrons (two borders of a box), `aria-expanded`, a 32px target on coarse pointers. |
+| R12.3 | Fire orders under Movement in the Firing phase | `model.fireAfterMovement` (phase 3 only); Pre-Firing keeps EW → Fire orders → Movement. *Superseded by R13.3: Pre-Firing too.* |
+
+**Build decisions (the user may overturn any):**
+1. **Fold state is per PHASE, shared by every card** (`folds()`, keyed `turn:phase`): each phase starts from its defaults (panel out; Movement folded in Firing only; EW open); what the player opens or closes then holds for every card - the card rebuilds on every EW click and retarget - until the phase changes. Never stored past the page. The hover peek follows the same state (it is click-through, so it cannot be toggled itself).
+2. **Docked on the picker's LEFT, the panel mirrors** to the card's far side (`fv-shipcard--side-left`, row-reverse), so the card's edge and the dock caret still face the picker; dragging a docked card keeps the side it had (flipping would jump the card from under the pointer); `undock()` puts it back on the right.
+3. **Undocked, the CARD (not card + panel) is centred on its unit**; the clamp keeps the whole row on screen, so near the right edge the card moves left to fit the panel.
+4. **The card inside the picker's sheet (phone) has no panel** - no room beside it, and the sheet scrolls the card - so its tiles stay inline under "Orders" as before.
+5. The panel is titled "Orders" (the card's existing word), not "Options".
+6. `show()` sets `display: flex` itself - jQuery's `show()` would write the tag's default `block`.
+
+Verified: round-12 harness (real ShipTooltip.js, the four menus, jQuery 4 and shipTooltip.css in jsdom; card.js's stubs) - 80 checks: the root/card/side structure and every hook class inside the card; the peek and the in-sheet card without a panel; the tile in the panel, its action and info line; no tile → no panel, live both ways; fold / unfold, kept through refreshButtons, update and the next card, reset by a new phase; Movement open in 1/5/2 and folded in 3, kept across cards, reset next turn; own EW folds (Clear EW stays, steppers kept), enemy EW and relew never; section order in 3/5/2; card centred and the row clamped; docked left / right / dragged / undocked; the panel head drags, its toggle does not. Catches 13 of 13 mutants. `dock.js` 47 and `stage1.js` 42 still pass; round 11's sections 1-3 pass (its section 4 stops on the commented-out `translucentShipTooltips` option - not this round). ⚠️ jsdom's cascade reads SOURCE ORDER, not specificity: the folded-section hide rule sits after the spec grid and the EW rows so both agree. Screenshots (headless Chrome, real CSS/JS): ten card contexts, a 2x crop of the head-band joins, docked right / left / folded beside the real picker, and the 390px phone sheet. Bundles rebuilt (`node scripts/bundle-legacy.js`) and synced (`fvbuild -Sync`); not play-tested.
+
+### 14.11 Refinement round 13 (user, 2026-11-16)
+
+| # | Ruling | Built |
+|---|---|---|
+| R13.1 | The ORDERS panel (and its toggle) moves down so its top border lines up with the bottom border of the card's head band | `.fv-shipcard__side` gets `margin-top: 33px` (the card's 2px border + the head's 32px less its 1px rule), so its 2px top border starts on the rule's row and the rule runs on into it. Its `max-height` becomes `calc(65vh - 33px)`, so the row is never taller than the card's own 65vh cap. The card's head band, ✕ and top corners now stand clear of the panel, so the round-12 rules that squared the card's top-right (top-left when mirrored) corner are gone. The panel keeps its own head band (wash, 32px, rail rule); folded it is still a tab of that band alone (31px, no rule: the toggle stays on the same line when it folds). Mirrored docking (`--side-left`) is unchanged apart from the drop. |
+| R13.2 | Brighter text for the section headings | A new token, `--tt-head`: the same 30% allegiance tint as `--tt-dim`, on `#d4d4d4` instead of `#9a9a9a` (fallback `#c9cdd1` without `color-mix()`). Worn by the cell labels (DEFENCE, DEW, ARMOR), the section heads `.fv-shipcard__mh` (From, Movement, Electronic warfare / EW, Fire orders, the in-sheet Orders), TARGETING / INCOMING (`.tt-head`) and the ORDERS panel's title. Row labels (Speed, Range, …), the class sub line, the chips and the toggles stay `--tt-dim`. On a green card: heading rgb(173, 202, 173), row label rgb(132, 161, 132). The fold button's hover is still `--fv-text-bright`. |
+| R13.3 | Fire orders below Movement in Pre-Firing as well | `model.fireAfterMovement = gamephase == 3 \|\| gamephase == 5` - the only two phases Fire orders show in, so it now always follows Movement. Movement's fold default is unchanged: folded by default in Firing only, open in Pre-Firing. |
+| R13.4 | `--tt-head` a little brighter again (second pass, same day) | The grey under the 30% tint `#d4d4d4` → `#e6e6e6` (fallback `#c9cdd1` → `#dadde0`). Green card: heading rgb(186, 215, 186), was (173, 202, 173); red card rgb(228, 183, 180). |
+| R13.5 | Fire orders folds too, open by default | `sectionElement('fire', 'Fire orders', 'fire')` - the same fold heading, chevron and `folds()` state as Movement / own EW (`fire: false` in the defaults: open in Pre-Firing and Firing). Shared by every card and the peek for the phase, like the others. ⚠️ The folded-section hide rule moved BELOW the Fire orders rules in shipTooltip.css: Chrome hides the rows by specificity anyway, but jsdom's source-order cascade did not, so the harness and the browser disagreed - keep that rule after any foldable section's rows. |
+| R13.6 | The ORDERS panel collapsed by default in every phase | `folds()` default `side: true` (was `false`): each phase starts with the panel folded to its tab; opening it holds for every card for the rest of the phase, as before. Supersedes build decision 1's "panel out" in §14.10. |
+
+Verified: the round-12 harness, carried forward as round 13 (session 44a15bb4 scratchpad `harness/round13.js`) - 108 checks: Pre-Firing order `ew,move,fire` with Movement open, Initial Orders without fire orders; the panel's 33px drop and capped height, the card's top-right corner kept round with a panel, `--tt-head` on the section head / cell label / panel title / TARGETING, `--tt-dim` kept on a row label and the toggle; the panel IN by default (a tab, title "Show orders (1)"), opened and held through refreshButtons / update / the next card, IN again in phases 5 / 1 / 2 and next turn; Fire orders' fold heading open in 3 and 5, folded rows hidden with the heading kept and its place under Movement, held through update / the next card / the peek, open again next phase, "None yet" under the heading. Catches 20 of 20 mutants (round 12's 13, plus Pre-Firing reverted, the drop removed, a heading back on `--tt-dim`, the corner squared again, the panel out by default, Fire orders folded by default, Fire orders not foldable). Headless Chrome (real CSS/JS): the head rule's row and the panel's top edge both measure 33px below the card's top on every card with a panel - right, mirrored left, open, folded - and beside the real picker (docked right / left / folded, no errors); a 2x crop of both joins. Bundles rebuilt and synced; not play-tested.
+
+### 14.12 Refinement round 14 (user, 2026-11-16) - stats a critical has changed, in the critical orange
+
+The system card's rule (SystemInfo `critStats`, same day) brought to the ship card: "where criticals affect stats such as Ini Mod, Thrust, Defence Profile, DEW".
+
+| Stat | Orange when a critical in force... | Mirrors |
+|---|---|---|
+| Ini Mod | on the C&C: CommunicationsDisrupted, ReducedIniative(OneTurn), swtargetheld, tmpinidown, ShadowPilotPain, HangarOperations, LCVLaunchedThisTurn, EdfIniDrain, EMStormInitiative - never on an OSAT. A flight: tmpinidown, LaunchedThisTurn, ReducedIniative(OneTurn), Uncontrolled, EdfIniDrain, EMStormInitiative on its first craft | `BaseShip::getCommonIniModifiers` (exact class names; CommunicationsDisruptedOneTurn added there 2026-11-16 - it was never counted) |
+| Thrust | an engine's output crit / EDF thrust drain / forced shutdown, swtargetheld on ANY system, ShadowPilotPain on the C&C (BioDrive output); a flight: EdfThrustDrain on its first craft | movement.js `getFullEngineThrust`, `FighterFlight::getEffectiveFreeThrust` |
+| Defence (F-S) | ProfileIncreased on the C&C | `BaseShip::stripForJson` adds it to the profiles it sends |
+| DEW (the cell, and your own card's DEW row) | a scanner's output crit / EDF EW drain / EM storm sensors / forced shutdown, RestrictedEW or tmpsensordown on the primary C&C, a BSG hybrid's SensorLoss | ew.js `getScannerOutput` (its SensorLoss line fixed 2026-11-16 - it passed the class name as the system, so subtracted nothing; and the SERVER's EW::getScannerOutput now takes tmpsensordown off a ship too, as the page and the bot always did) |
+
+`ShipTooltip.js` `critStats(ship)` (in `buildModel`, through `readSafely`) sets `crit` on the cells, the two Movement rows and the DEW EW row; the renderer adds `fv-shipcard__cv--crit` / `fv-shipcard__crit` / `fv-shipcard__sv--crit`. The CSS replaces the value's BRIGHT colour only: a Defence number dimmed for facing away stays dim (the facing still reads), and an EW row greyed as not open stays grey. Values are unchanged - they already carry the effects. Not coloured: Speed, Accel, turn costs (no critical changes them) and the rolled Initiative total (Ini Mod is the part a critical changes).
+
+Verified: headless Chrome on the visual kit with the REAL criticals.js - 11 cards (all four stats, none, C&C sensor crit only, scanner drain, tractor on a weapon, every crit ENDED, an OSAT, the one-turn comms crit, an enemy with facing, a storm/EDF flight, a flight whose craft 1 only dropped out): 36 computed colours, 10 of 10 mutants caught. The round-13 harness still passes (108). Bundles rebuilt and synced; not play-tested.

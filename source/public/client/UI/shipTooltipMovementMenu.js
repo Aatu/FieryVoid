@@ -21,6 +21,7 @@ window.ShipTooltipMovementMenu = function () {
     ShipTooltipMovementMenu.buttons = [
         {
             className: "jumpOut",
+            label: "Jump out", //the ship card's tile caption (SHIP_TOOLTIP_REDESIGN_PLAN.md §5.2)
             condition: [isSelf, canJumpOut],
             action: jumpOut,
             info: "Jump to Hyperspace"

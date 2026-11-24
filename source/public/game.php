@@ -218,6 +218,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
                     : function(){};
                 var _loadStart = _last;
 
+<?php if (Features::enabledFor('autoDeploy', $thisplayer)): //Auto-Deploy (TACTICAL_AI_PLAN.md 5.2): nothing is printed while the flag is off ?>
+                window.fvFeatures = { autoDeploy: true };
+<?php endif; ?>
                 var serverError = <?php print($error); ?>;
                 if (serverError) {
                     var errorMsg = serverError.error || JSON.stringify(serverError);
@@ -355,6 +358,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/MineDeployment.js"></script>
+    <script defer src="client/renderer/phaseStrategy/AutoDeploy.js"></script>
     <!-- REINFORCEMENTS_PLAN.md Stage 4 - the "Call Reinforcements" flow. A sibling of
          MineDeployment.js: a bespoke map click mode driven from an #iniGui button, because the
          opener has no hex and so cannot go through weaponManager.targetHex (plan section 3.4).

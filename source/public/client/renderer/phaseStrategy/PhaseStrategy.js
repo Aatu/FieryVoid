@@ -52,6 +52,13 @@ window.PhaseStrategy = function () {
        reveals no board position, which is the only thing those guards exist to protect - and
        for a docked unit the window is the only route to its contents at all. */
     PhaseStrategy.prototype.onOpenShipWindowFor = function (payload) {
+        //The ship card's "Ship details" button is a toggle: pressed while that ship's window is
+        //open, it closes it (payload.toggle - shipTooltipMenu.js openSCS).
+        if (payload.toggle && payload.ship && this.shipWindowManager.isOpen(payload.ship)) {
+            this.onCloseShipWindow(payload);
+            return;
+        }
+
         this.shipWindowManager.open(payload.ship);
 
         if (!payload.select || !payload.ship) return;
@@ -1197,7 +1204,13 @@ window.PhaseStrategy = function () {
             ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, false);
         }
 
-        var shipTooltip = new window.ShipTooltip(this.selectedShip, ships, position, shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip), menu, payload.hex, ballisticsMenu);
+        /* A card opened from a hex picker ROW docks to that picker (SHIP_TOOLTIP_REDESIGN_PLAN.md
+           Stages 6-7): beside it on desktop, inside the sheet on touch. Only for the picker that is
+           open right now and only for one unit - a stale dock from a replaced picker is ignored. */
+        var dock = (payload && payload.dock && ships.length === 1 && payload.dock.picker === this.selectFromShips
+            && !payload.dock.picker.destroyed) ? payload.dock : null;
+
+        var shipTooltip = new window.ShipTooltip(this.selectedShip, ships, position, shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip), menu, payload.hex, ballisticsMenu, { dock: dock });
 
         this.shipTooltip = shipTooltip;
         //What the tooltip's own X presses. It has to route back through hideShipTooltip rather
@@ -1635,6 +1648,7 @@ window.PhaseStrategy = function () {
         this.shipIconContainer.getByShip(ship).consumeEW(ship);
         this.ewIconContainer.updateForShip(ship);
         this.shipWindowManager.update();
+        this.refreshSelectFromShips(); //the open picker's "OEW n" badges (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 5)
     };
 
     PhaseStrategy.prototype.onShipMovementChanged = function (payload) {
@@ -1875,6 +1889,11 @@ window.PhaseStrategy = function () {
         if (this.shipTooltip && typeof this.shipTooltip.refreshButtons === 'function') {
             this.shipTooltip.refreshButtons();
         }
+
+        //The open picker's "⌖ target" badges (SHIP_TOOLTIP_REDESIGN_PLAN.md Stage 5): declaring and
+        //withdrawing a fire order both land here. refresh() rebuilds nothing unless a row changed,
+        //which matters - this handler also fires on every weapon click.
+        this.refreshSelectFromShips();
 
         /* The INCOMING list, for the two phases that can change it while a tooltip is open:
            Firing (3), where interception is declared against these shots, and INITIAL ORDERS (1),

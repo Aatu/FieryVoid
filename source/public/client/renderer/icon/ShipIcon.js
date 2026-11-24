@@ -1840,62 +1840,82 @@ window.ShipIcon = function () {
     };
 
     /* DESTROYED SECTIONS ON THE HULL ART. When a section's structure block is destroyed, that part of
-       the icon is torn away with a ragged, scorched edge. Fiery Void did this in the canvas renderer
-       (client/damageDrawer.js, removed in f05215cbc when WebGL took over); this uses
-       the same two images - img/damagemask.png the hole, img/damage.png the scorch - stamped on the
-       GPU instead (webglSprite.setDamageStamps), so nothing per-ship is baked into the shared texture.
+       the icon is torn away along a ragged, scorched, here-and-there burning edge. Fiery Void did
+       this in the canvas renderer (client/damageDrawer.js, removed in f05215cbc when WebGL took
+       over) by stamping a hole on the hull image. Here each damaged ship gets its own DAMAGE MAP
+       instead - a canvas the size of its art, drawn below and laid over the art by the sprite's
+       shader (webglSprite.setDamageMap) - so nothing is baked into the texture the class shares.
 
        WHERE: the section's structure ARC (startArc/endArc - filled from getLocations() and carried in
        the static bundle, see showStructureArc), so every hull the game knows places itself: HCV,
        capital, six-sided, the base layouts, Vree rings. getArcs applies the roll, so a rolled ship's
-       port loss shows on the side it now presents, exactly as the structure wedge does. Along that
-       bearing the stamp sits on the hull's real EDGE, read from the art's own alpha (getHullRay),
-       so a thin spine with a wide middle - the Omega - loses a bite of hull rather than of space.
+       port loss shows on the side it now presents, exactly as the structure wedge does. The arc is
+       read in the hull's OWN PROPORTIONS (see getSectionFrame): on a long hull the forward section
+       is the nose, and a side section the whole flank between nose and stern.
 
-       HOW BIG: fractions of the hull's reach, so a corvette and a dreadnought lose proportionate
-       chunks. DEPTH is the stamp's radius along the section's bearing, SPAN across it - which is what
-       turns a side loss on a long thin hull into a long shallow gouge instead of a hole straight
-       through - and MAX_ASPECT stops the ragged edge being smeared out. The hole itself is the mask's
-       solid core, about 0.6 of the stamp radius, spikes reaching ~0.8 and scorch ~0.95. SCORCH is how
-       dark the char gets.
+       WHAT: a band of hull stripped off the section's outer edge, following the silhouette along
+       the whole of the section - not a bite out of one spot. (It was a bite until 2026-11-12. User,
+       game 4556: on a Sharlin the aft bite only ever found the tail fin, on a Primus a side bite
+       cut a fin loose and left it hanging in space, and most bites were too narrow for the section
+       they stood for.) The band is measured from the hull's BULK - the art less its spikes, blades
+       and barrels (measureBulk) - so it always lands on hull, and such clutter standing outside a
+       torn stretch goes with it.
 
-       Two more for long thin hulls (user report, game 4527: a Targath losing a side showed nothing).
-       Its side ray meets a spine 6px from the centre, so DEPTH alone made a hole ~2px deep. MIN_DEPTH
-       is a floor on DEPTH as a fraction of the hull's half-LENGTH, which makes the bite visible; a
-       normal hull's side reach is already well past it (an Omega's ~4x), so only thin profiles move.
-       MAX_THROUGH then caps how far the HOLE may reach through the hull along that line, as a fraction
-       of its full thickness there - without it the floor snapped the Targath's spine on one side loss
-       and cut the ship in two with both, which reads as the primary section gone. At 0.45 the cap sits
-       above what DEPTH alone ever asks for (0.7 x 0.6 of the reach), so in practice it only trims the
-       floor's lift and normal hulls never meet it. 0.35 left the Targath's notch barely visible even
-       zoomed in. All of these knobs are meant to be tuned by eye. */
-    ShipIcon.SECTION_DAMAGE_DEPTH = 0.7;
-    ShipIcon.SECTION_DAMAGE_MIN_DEPTH = 0.15;
-    ShipIcon.SECTION_DAMAGE_MAX_THROUGH = 0.45;
+       HOW DEEP: DEPTH is the band as a fraction of how far the hull stands out from its middle on
+       that bearing - so a bow or stern, which can only be as wide as the hull, loses a good length
+       of it, and a flank a shallower strip all the way along, deeper where the hull is broad.
+       MIN_DEPTH is a floor on that, as a fraction of the hull's size (measureBulk), so a slim
+       hull's flank still shows (a Targath's spine is 6px from its centreline). MAX_THROUGH then
+       caps the band on every line at that fraction of the hull the line actually crosses, so a
+       thin spine keeps its core even with both sides gone, where the masses either side of it
+       lose the full band. RAGGED is how far the band's depth wanders along the edge. FRAGMENT: a
+       piece the tearing leaves cut off from the rest is dropped if it is smaller than this
+       fraction of the hull (bigger ones stay - that is the ship broken, not debris). SCORCH is how
+       dark the char gets, SCORCH_WIDTH how far in from the tear it reaches (of the hull's size),
+       FIRE roughly the share of the torn edge that is burning.
 
-    /* A WAISTED SIDE - a thin middle between bigger masses, like the Targath's spine between its
-       claw and engine block (user screenshot, 2026-11-08). Even sized up, a notch in the spine barely
-       reads, because the eye goes to the masses either side of it. So when a section's middle reaches
-       out less than WAIST of what those masses do, the loss also takes a bite out of the outer edge of
-       each mass on that side (getWaistLobes). WAIST_BITE sizes those bites as a fraction of how far
-       that mass stands out from the hull's axis - the hole itself is ~0.6 of that again, so 0.75 eats
-       a bit under half way into the claw or engine block (0.6 still barely read on the Targath).
-       WAIST_MAX caps those bites at a fraction of the hull's half-length: a broad mass - a Brakiri
-       Corumai's swept wing - otherwise lost more than a whole normal side does. Sides only - see
-       getWaistLobes. A sweep of 417 hulls in 20 factions found ~8% waisted: thin-spined designs such
-       as the Targath, Hyperion, Corumai and Lykorai, a few Pak'ma'ra; everything else keeps its
-       single bite. */
-    ShipIcon.SECTION_DAMAGE_WAIST = 0.5;
-    ShipIcon.SECTION_DAMAGE_WAIST_BITE = 0.75;
-    ShipIcon.SECTION_DAMAGE_WAIST_MAX = 0.3;
-    ShipIcon.SECTION_DAMAGE_SPAN = 0.3;
-    ShipIcon.SECTION_DAMAGE_MAX_ASPECT = 2.5;
+       LONG_END: on a long, slim hull - Omega, Hyperion, Tinashi, a Targath, Babylon 5 - the bow and
+       stern are narrow, so the same share of the LENGTH as any other ship loses reads as a nick
+       off the tip (user, 2026-11-12: "take slightly more hull off the front and aft sections of
+       really long ships"). So a section facing down the hull's length goes this much deeper again
+       on a hull whose length is over SECTION_SLENDER_TO times its average width, easing in from
+       SECTION_SLENDER_FROM. Measured: Omega ~7, Hyperion ~9, Tinashi ~4.5, B5 ~12; G'Quan, Sharlin,
+       Primus and an Artemis all ~2-2.6, so they are untouched. The flanks are never deepened.
+
+       TWO_SECTION: a hull with only two outer sections - an HCV's fore and aft, a Drazi's port and
+       starboard - has each one stand for half the ship, so its band goes this much deeper (DEPTH
+       and MIN_DEPTH alike; user, 2026-11-12: "cut deeper into the hull when a ship only has two
+       external structures"). MAX_THROUGH goes up by the same factor, so a Drazi's spine is cut
+       deeper too, but no further than SECTION_THROUGH_MOST: with both halves gone a fifth of the
+       hull is still left between the two bands. That limit holds whether or not the other half
+       is lost - were it eased while it stood, the first band would shrink back when it fell.
+
+       All of these are meant to be tuned by eye; a sweep of 262 hull shapes in 27 factions has one section taking 4-27% of the art
+       (typically 14%) and every section together typically 44%. */
+    ShipIcon.SECTION_DAMAGE_DEPTH = 0.35;
+    ShipIcon.SECTION_DAMAGE_MIN_DEPTH = 0.12;
+    ShipIcon.SECTION_DAMAGE_MAX_THROUGH = 0.35;
+    ShipIcon.SECTION_DAMAGE_RAGGED = 0.35;
+    ShipIcon.SECTION_DAMAGE_FRAGMENT = 0.06;
     ShipIcon.SECTION_DAMAGE_SCORCH = 0.85;
+    ShipIcon.SECTION_DAMAGE_SCORCH_WIDTH = 0.12;
+    ShipIcon.SECTION_DAMAGE_FIRE = 0.35;
+    ShipIcon.SECTION_DAMAGE_LONG_END = 0.5;
+    ShipIcon.SECTION_DAMAGE_TWO_SECTION = 1.7;
 
     //Used only when a structure carries no usable arc (a stale static bundle): the standard B5W layout.
     var SECTION_FALLBACK_BEARINGS = { 1: 0, 2: 180, 3: 270, 4: 90, 31: 300, 32: 240, 41: 60, 42: 120 };
-    var HULL_SOLID_ALPHA = 128;
-    var DAMAGE_MASK_CORE = 0.6; //img/damagemask.png's solid hole, as a fraction of the stamp's radius
+    var HULL_SOLID_ALPHA = 128;  //counts as hull when measuring it
+    var HULL_PIECE_ALPHA = 48;   //holds two parts of the art together when looking for loose pieces
+    var HULL_DRAWN_ALPHA = 13;   //the sprite shader discards anything fainter
+    var SECTION_REACH_FLOOR = 0.6; //of the hull's full reach on a bearing: the least any stretch of it is reckoned to stand out (cutSection)
+    var SECTION_ARC_FLOOR = 52;  //degrees either side of its bearing that even a narrow section reaches on the art (getSectionFrame)
+    var SECTION_SLENDER_FROM = 2.8; //hull slenderness (measureBulk) where the deeper bow and stern of SECTION_DAMAGE_LONG_END...
+    var SECTION_SLENDER_TO = 6;     //...start, and where they are at full depth
+    var SECTION_TORN_SPREAD = 16;   //pixels: how far into the empty space round torn-away art the map still reads torn (drawDamageMap)
+    var SECTION_THROUGH_MOST = 0.4; //the furthest TWO_SECTION takes MAX_THROUGH: two opposite bands still leave a fifth of the hull between them
+    var SECTION_EDGE_SLOPE = 1;     //steps deeper per line along the edge: the steepest a torn edge turns where it runs in behind a pod or fin (1 = 45 degrees; easeSteps)
+    var CUT_DROPPED = 255;          //in a damage map's cut[]: a loose piece dropped, rather than a section's number (drawDamageMap)
 
     /* The locations whose section is lost: any NON-primary structure block destroyed (one entry per
        location - a Vree section has an outer ring block as well as its own). Primary never appears:
@@ -1923,59 +1943,67 @@ window.ShipIcon = function () {
     };
 
     /* Show exactly these locations as lost (and every other section intact). Cheap to call on every
-       poll and every replay frame - it returns at once unless the set, or a rolled ship's bearings,
-       changed. The art may still be loading on a fresh icon, so the stamps wait for it. */
+       poll and every replay frame - it returns at once unless the set, or a rolled ship's arcs,
+       changed. The art may still be loading on a fresh icon, so the map waits for it. */
     ShipIcon.prototype.setLostSections = function (locations) {
         if (!this.shipSprite || this.terrain) return;
 
         var ship = this.ship;
         var sections = (locations || []).map(function (location) {
-            return { location: location, bearing: getSectionBearing(ship, location) };
+            return getSectionArc(ship, location);
         });
-        var key = sections.map(function (s) { return s.location + '@' + Math.round(s.bearing); }).join(',');
+        var key = sections.map(function (s) { return s.location + '@' + Math.round(s.start) + '-' + Math.round(s.end); }).join(',');
         if (key === this.lostSectionsKey) return;
         this.lostSectionsKey = key;
 
         var sprite = this.shipSprite;
         if (sections.length === 0) {
-            sprite.setDamageStamps(null);
+            sprite.setDamageMap(null);
             requestSceneRender();
             return;
         }
 
         var self = this;
+        var deeper = countOuterSections(ship) === 2 ? ShipIcon.SECTION_DAMAGE_TWO_SECTION : 1;
         sprite.whenTextureReady(function (texture) {
             if (self.lostSectionsKey !== key) return; //superseded while the art was loading
             var hull = getHullAlpha(texture);
             if (!hull) return;
-            var built = sections.map(function (section) {
-                return buildSectionStamps(hull, ship.id, section);
-            });
-            //every section's main bite first, so if a busy hull ever runs past the shader's 8 it is
-            //waist satellites that are dropped, never a section
-            var stamps = built.map(function (b) { return b.main; });
-            built.forEach(function (b) { stamps = stamps.concat(b.satellites); });
-            sprite.setDamageStamps(stamps, ShipIcon.SECTION_DAMAGE_SCORCH);
+            sprite.setDamageMap(drawDamageMap(hull, ship.id, sections, deeper), ShipIcon.SECTION_DAMAGE_SCORCH);
             requestSceneRender();
         });
     };
+
+    //How many sections the hull has outside its primary (distinct non-primary structure locations).
+    function countOuterSections(ship) {
+        var seen = {};
+        var count = 0;
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (!s || s.name !== 'structure' || s.location == 0 || seen[s.location]) continue;
+            seen[s.location] = true;
+            count++;
+        }
+        return count;
+    }
 
     function requestSceneRender() {
         if (window.webglScene && window.webglScene.requestRender) window.webglScene.requestRender();
     }
 
-    //Game bearing (clockwise from the prow) of a section's centre, after any roll.
-    function getSectionBearing(ship, location) {
+    //A section's arc as game bearings (clockwise from the prow), after any roll: { location, start, end }.
+    function getSectionArc(ship, location) {
         for (var i in ship.systems) {
             var s = ship.systems[i];
             if (!s || s.name !== 'structure' || s.location != location) continue;
             if (typeof s.startArc !== 'number' || typeof s.endArc !== 'number' || s.startArc === s.endArc) continue;
             var arcs = shipManager.systems.getArcs(ship, s);
-            return mathlib.getArcCentre(arcs.start, arcs.end);
+            return { location: location, start: arcs.start, end: arcs.end };
         }
 
         var bearing = SECTION_FALLBACK_BEARINGS[location] || 0;
-        return shipManager.movement.isRolled(ship) ? (360 - bearing) % 360 : bearing;
+        if (shipManager.movement.isRolled(ship)) bearing = (360 - bearing) % 360;
+        return { location: location, start: (bearing + 315) % 360, end: (bearing + 45) % 360 };
     }
 
     /* The hull art's alpha, read once per IMAGE (cached on the shared texture) and only for a class
@@ -1994,19 +2022,11 @@ window.ShipIcon = function () {
             var height = canvas.height;
             var rgba = canvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, width, height).data;
             var alpha = new Uint8Array(width * height);
-            var extentX = 0;
-            var extentY = 0;
-            for (var i = 0; i < alpha.length; i++) {
-                alpha[i] = rgba[i * 4 + 3];
-                if (alpha[i] < HULL_SOLID_ALPHA) continue;
-                extentX = Math.max(extentX, Math.abs(i % width + 0.5 - width / 2));
-                extentY = Math.max(extentY, Math.abs(Math.floor(i / width) + 0.5 - height / 2));
-            }
-            data.hullAlpha = {
-                width: width, height: height, alpha: alpha,
-                extentX: extentX || width / 2, extentY: extentY || height / 2, //the hull's half-length / half-beam
-                rays: {}
-            };
+            for (var i = 0; i < alpha.length; i++) alpha[i] = rgba[i * 4 + 3];
+
+            var hull = { width: width, height: height, alpha: alpha };
+            measureBulk(hull);
+            data.hullAlpha = hull;
         } catch (e) {
             //an unreadable canvas leaves the hull drawn intact rather than throwing out of a poll
         }
@@ -2014,181 +2034,636 @@ window.ShipIcon = function () {
         return data.hullAlpha;
     }
 
-    /* Where a section's bearing meets the hull: { angle, reach } - the pixel-space direction from the
-       image centre (where the unit stands in its hex; radians, counter-clockwise, v up) and the
-       distance out to the outermost solid pixel that way.
+    /* THE BULK of a hull: its art with the appendages taken off - antennae, gun barrels, a Primus's
+       tail spike, the tail and trailing prongs of a Sharlin. Sections are placed and measured on
+       the bulk, because that is where a section IS: read off the whole art, a Primus's aft third
+       was nothing but its spike, and an aft loss never reached the hull (user, game 4556).
 
-       The bearing is read in the hull's OWN PROPORTIONS (scaled by its half-length and half-beam), so
-       on a long hull a 60-degree quarter - a base's 41, a six-sided ship's forward quarter - lands on
-       the forward CORNER where that section is, not a third of the way along the side where a plain
-       60-degree ray would leave a thin hull almost at once. Square-on bearings are unchanged by it.
+       An appendage is art THIN FOR THIS HULL - narrower than about half the hull's typical
+       thickness, so an Omega keeps its spine (it IS the hull) while a Primus, three times as
+       stout, sheds a spike as wide as that spine - together with anything that only hangs on by
+       something that thin and is small beside the main body (the Sharlin's tail). A hull with
+       hardly any bulk by that measure (spidery art) is treated as all bulk.
 
-       The widest of three rays 4 degrees apart, so one slipping between two prongs doesn't sink the
-       stamp into the middle of the hull. */
-    function getHullRay(hull, phi) {
-        var key = Math.round(mathlib.radianToDegree(phi));
-        if (hull.rays[key] !== undefined) return hull.rays[key];
+       Sets on hull: bulk (1 per bulk pixel), centreX / centreY (the middle of the bulk's box, in
+       pixels from the image centre, v up), extentX / extentY (that box's half-length and
+       half-beam), size - the one figure everything about the damage is scaled by. It is the
+       mean of the two extents the way an area would have it, so a station eight times as long as
+       it is wide isn't charred right through by a scorch sized for its length - and slenderness,
+       the bulk's length over its AVERAGE width (see SECTION_DAMAGE_LONG_END). Average, not the
+       box's: a Tinashi's swept wings make its box nearly square, but the hull is a long spine. */
+    function measureBulk(hull) {
+        var width = hull.width;
+        var height = hull.height;
+        var alpha = hull.alpha;
+        var count = width * height;
+        var i;
 
-        var cx = hull.width / 2;
-        var cy = hull.height / 2;
-        var direction = Math.atan2(Math.sin(phi) * hull.extentY, Math.cos(phi) * hull.extentX);
-        var best = 0;
+        //how deep inside the art each pixel is
+        var inside = new Float32Array(count);
+        var depths = [];
+        for (i = 0; i < count; i++) {
+            if (alpha[i] >= HULL_SOLID_ALPHA) inside[i] = count;
+        }
+        spreadDistance(width, height, inside, true);
+        for (i = 0; i < count; i++) {
+            if (inside[i] > 0) depths.push(inside[i]);
+        }
+        depths.sort(function (a, b) { return a - b; });
+        var thin = Math.max(2, 0.5 * (depths[depths.length >> 1] || 0));
 
-        [-4, 0, 4].forEach(function (offset) {
-            var angle = direction + mathlib.degreeToRadian(offset);
-            var dx = Math.cos(angle);
-            var dy = -Math.sin(angle); //canvas rows run down, the sprite's v runs up
+        //the cores: art deeper than thin. Keep the main one and any other of real size.
+        var core = new Uint8Array(count);
+        for (i = 0; i < count; i++) core[i] = inside[i] > thin ? 1 : 0;
+        var cores = labelPieces(width, height, core);
+        var largest = 0;
+        for (i = 1; i < cores.sizes.length; i++) largest = Math.max(largest, cores.sizes[i]);
 
-            for (var t = Math.ceil(Math.hypot(cx, cy)); t > best; t--) {
-                var x = Math.round(cx + dx * t);
-                var y = Math.round(cy + dy * t);
-                if (x < 0 || y < 0 || x >= hull.width || y >= hull.height) continue;
-                if (hull.alpha[y * hull.width + x] >= HULL_SOLID_ALPHA) {
-                    best = t;
-                    break;
+        //...and everything within thin of a kept core is bulk
+        var toCore = new Float32Array(count);
+        for (i = 0; i < count; i++) {
+            toCore[i] = cores.labels[i] && cores.sizes[cores.labels[i]] >= 0.15 * largest ? 0 : count;
+        }
+        spreadDistance(width, height, toCore, false);
+
+        var bulk = new Uint8Array(count);
+        var bulkCount = 0;
+        for (i = 0; i < count; i++) {
+            if (alpha[i] < HULL_SOLID_ALPHA || toCore[i] > thin + 1) continue;
+            bulk[i] = 1;
+            bulkCount++;
+        }
+        if (bulkCount < 0.35 * depths.length) {
+            for (i = 0; i < count; i++) bulk[i] = alpha[i] >= HULL_SOLID_ALPHA ? 1 : 0;
+            bulkCount = depths.length;
+        }
+
+        var minX = width, maxX = -1, minY = height, maxY = -1;
+        for (i = 0; i < count; i++) {
+            if (!bulk[i]) continue;
+            var x = i % width;
+            var y = (i - x) / width;
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+        }
+        if (maxX < 0) { //no solid art at all: call the whole image the hull
+            minX = 0; maxX = width - 1; minY = 0; maxY = height - 1;
+        }
+
+        hull.bulk = bulk;
+        hull.centreX = (minX + maxX + 1) / 2 - width / 2;
+        hull.centreY = height / 2 - (minY + maxY + 1) / 2;
+        hull.extentX = Math.max(1, (maxX - minX + 1) / 2);
+        hull.extentY = Math.max(1, (maxY - minY + 1) / 2);
+        hull.size = Math.sqrt(hull.extentX * hull.extentY);
+
+        var length = 2 * Math.max(hull.extentX, hull.extentY);
+        hull.slenderness = length * length / Math.max(1, bulkCount); //length over average width
+    }
+
+    /* One ship's damage map: a canvas the size of its art, opaque, the three colour channels being
+       amounts for the sprite shader - RED how much of the hull is torn away, GREEN how charred what
+       is left is, BLUE where the torn edge burns. Drawn once per change in what the ship has lost
+       (a few milliseconds), never per frame. deeper: the TWO_SECTION factor, or 1. */
+    function drawDamageMap(hull, shipId, sections, deeper) {
+        var width = hull.width;
+        var height = hull.height;
+        var alpha = hull.alpha;
+        var cut = new Uint8Array(width * height);
+        //cut[] marks each torn pixel with the section that took it (1, 2, ... in order) or CUT_DROPPED
+        var parts = sections.map(function (section, index) {
+            return cutSection(hull, shipId, section, sections, cut, deeper, index + 1);
+        });
+        dropLooseFragments(hull, cut);
+        var eased = false;
+        parts.forEach(function (part) {
+            if (easeSteps(hull, part, cut)) eased = true;
+        });
+        if (eased) dropLooseFragments(hull, cut); //a stub the easing cut through at its root
+
+        var scorchWidth = Math.max(3, ShipIcon.SECTION_DAMAGE_SCORCH_WIDTH * hull.size);
+        var fireWidth = Math.max(2.5, 0.05 * hull.size);
+        var firePatch = Math.max(3, 0.08 * hull.size);  //how long a stretch of edge burns or doesn't
+        var fireFrom = 0.5 + (0.5 - ShipIcon.SECTION_DAMAGE_FIRE) * 0.75;
+        var seed = getDamageSeed(shipId, 0);
+
+        //distance from the nearest torn-away piece of HULL. Faint fringe that went with the tear
+        //doesn't count, so the char follows where art really came off.
+        var distance = new Float32Array(width * height);
+        var i;
+        for (i = 0; i < distance.length; i++) distance[i] = cut[i] && alpha[i] >= HULL_PIECE_ALPHA ? 0 : scorchWidth + 2;
+        spreadDistance(width, height, distance, false);
+
+        /* The empty space round the torn-away art reads torn as well, out to SECTION_TORN_SPREAD,
+           wherever torn art is nearer than art that is left. The shader multiplies the art's alpha
+           by (1 - torn), and both textures are filtered: with the map left at 0 out there, it blends
+           back toward "intact" across the old silhouette just where the art is fading out over it,
+           and the art's dark outline came back as a faint ghost of the lost hull (user, 2026-11-12:
+           "lingering outlines of their undamaged hull shapes") - more of it the further out the
+           camera, as the mipmaps average wider. Nearer art that is LEFT keeps its own surround at 0,
+           so a whole edge isn't thinned. */
+        var toTorn = new Float32Array(width * height);
+        var toLeft = new Float32Array(width * height);
+        for (i = 0; i < toTorn.length; i++) {
+            toTorn[i] = cut[i] ? 0 : SECTION_TORN_SPREAD + 1;
+            toLeft[i] = !cut[i] && alpha[i] >= HULL_DRAWN_ALPHA ? 0 : SECTION_TORN_SPREAD + 1;
+        }
+        spreadDistance(width, height, toTorn, false);
+        spreadDistance(width, height, toLeft, false);
+
+        var canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        var context = canvas.getContext('2d');
+        var image = context.createImageData(width, height);
+        var px = image.data;
+
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                i = y * width + x;
+                var o = i * 4;
+                px[o + 3] = 255;
+                if (cut[i] || (alpha[i] < HULL_DRAWN_ALPHA && toTorn[i] <= SECTION_TORN_SPREAD && toTorn[i] < toLeft[i])) {
+                    px[o] = 255;
+                    continue;
+                }
+
+                var d = distance[i];
+                if (d >= scorchWidth || alpha[i] < HULL_DRAWN_ALPHA) continue;
+
+                //char: darkest against the tear, mottled, fading into clean hull
+                var char = 1 - (d - 1) / scorchWidth;
+                px[o + 1] = 255 * Math.min(1, char * char * (0.75 + 0.5 * valueNoise(x / 3, y / 3, seed)));
+
+                //fire: a thin glowing rim, alight along some stretches of the tear and dark on others.
+                //Only where there is hull behind it to burn - not along a severed antenna.
+                if (d < fireWidth + 1 && hull.bulk[i]) {
+                    var alight = smoothstep(fireFrom, fireFrom + 0.1, valueNoise(x / firePatch, y / firePatch, seed + 1));
+                    var heat = 1 - (d - 1) / fireWidth;
+                    px[o + 2] = 255 * alight * heat * heat * (0.55 + 0.45 * valueNoise(x / 1.5, y / 1.5, seed + 2));
                 }
             }
-        });
-
-        if (!best) best = Math.min(cx, cy) * 0.5; //nothing solid that way at all: a token bite nearer the middle
-        hull.rays[key] = { angle: direction, reach: best };
-        return hull.rays[key];
-    }
-
-    /* A section's stamps: { main, satellites }. main sits on the hull's edge along the section's
-       bearing; satellites (usually none) are the extra bites a WAISTED side takes - see
-       SECTION_DAMAGE_WAIST. Satellites are the main bite's size, but round rather than drawn out
-       along the hull, and each spun by its own seed. */
-    function buildSectionStamps(hull, shipId, section) {
-        var phi = -mathlib.degreeToRadian(section.bearing); //game bearings run clockwise; setFacing(-facing)
-        var ray = getHullRay(hull, phi);
-        var reach = ray.reach;
-        var across = (getHullRay(hull, phi + Math.PI / 2).reach + getHullRay(hull, phi - Math.PI / 2).reach) / 2;
-        var seed = getSectionSeed(shipId, section.location);
-
-        var halfLength = Math.max(hull.extentX, hull.extentY);
-        var thickness = reach + getHullRay(hull, phi + Math.PI).reach; //edge to edge through the centre, on this line
-        var depth = Math.min(
-            Math.max(ShipIcon.SECTION_DAMAGE_DEPTH * reach, ShipIcon.SECTION_DAMAGE_MIN_DEPTH * halfLength) * (0.92 + 0.16 * seed.size),
-            ShipIcon.SECTION_DAMAGE_MAX_THROUGH * thickness / DAMAGE_MASK_CORE
-        );
-        var span = Math.min(Math.max(ShipIcon.SECTION_DAMAGE_SPAN * across, depth), depth * ShipIcon.SECTION_DAMAGE_MAX_ASPECT);
-
-        var main = makeStamp(hull, reach * Math.cos(ray.angle), reach * Math.sin(ray.angle), ray.angle, depth, span, seed.spin);
-        var satellites = getWaistLobes(hull, ray.angle, reach).map(function (lobe, i) {
-            var lobeDepth = Math.max(depth, Math.min(ShipIcon.SECTION_DAMAGE_WAIST_BITE * lobe.reach,
-                ShipIcon.SECTION_DAMAGE_WAIST_MAX * halfLength));
-            return makeStamp(hull, lobe.x, lobe.y, ray.angle, lobeDepth, lobeDepth,
-                getSectionSeed(shipId, section.location + 100 * (i + 1)).spin);
-        });
-
-        return { main: main, satellites: satellites };
-    }
-
-    /* One stamp for webglSprite.setDamageStamps: its UV centre (x, y = pixels from the image centre,
-       v up), and the matrix taking a UV offset from there to the stamp's own -1..1 square - UV to
-       pixels, into the bite's frame (radial along `angle`, tangential), onto the depth x span
-       ellipse, then spun so no two holes look alike. Linear end to end, hence one matrix. */
-    function makeStamp(hull, x, y, angle, depth, span, spin) {
-        var cos = Math.cos(angle);
-        var sin = Math.sin(angle);
-        var spinCos = Math.cos(spin);
-        var spinSin = Math.sin(spin);
-
-        function toLocal(px, py) {
-            var r = (px * cos + py * sin) / depth;
-            var t = (-px * sin + py * cos) / span;
-            return [r * spinCos - t * spinSin, r * spinSin + t * spinCos];
         }
 
-        var du = toLocal(hull.width, 0);  //where a step of 1 in u lands
-        var dv = toLocal(0, hull.height); //...and of 1 in v
+        context.putImageData(image, 0, 0);
+        return canvas;
+    }
+
+    /* Tear one lost section's band off the hull: marks cut[] (1 = gone) for every pixel of the art
+       it takes.
+
+       The section is worked in its own frame - p running OUTWARD along its bearing, s along its
+       edge. Each line of constant s is walked in from outside the art until it meets the hull's
+       BULK (measureBulk); the band is everything from there to a set depth further in, and
+       everything outside that point too. So the band follows the silhouette of the hull proper
+       all along the section, and whatever thin clutter stood outside that stretch of hull - a
+       spike, a blade, a barrel - goes with it rather than being all that is lost. MAX_THROUGH
+       caps the depth at a fraction of the bulk the line crosses.
+
+       The band's depth wanders along the edge (RAGGED) and grain breaks it up pixel by pixel, which
+       is what leaves the edge torn rather than drawn. Only pixels inside the section's own arc go:
+       toward a neighbour that is still intact the band shallows out to nothing, with a little
+       reach past the arc's end so the two never meet on a ruled line. Toward a neighbour that is
+       lost too it runs full depth to the boundary, or the corner between them would stand proud.
+
+       deeper: the TWO_SECTION factor on a hull with just two outer sections, otherwise 1. mark: what
+       this section writes into cut[]. Returns what easeSteps needs to work in the same frame. */
+    function cutSection(hull, shipId, section, sections, cut, deeper, mark) {
+        var width = hull.width;
+        var height = hull.height;
+        var alpha = hull.alpha;
+        var bulk = hull.bulk;
+        var cx = width / 2;
+        var cy = height / 2;
+        var seed = getDamageSeed(shipId, section.location);
+        var frame = getSectionFrame(hull, section, sections);
+        var dx = frame.dx;
+        var dy = frame.dy;
+
+        var size = Math.ceil(Math.hypot(width, height)) + 2; //lines across the art, and steps along each
+        var half = size / 2;
+
+        //how far the hull stands out from its middle on this bearing, hence how deep the band: on each
+        //line a fraction of how far out THAT stretch of hull stands (a G'Quan's wing loses more than
+        //the slim hull forward of it) - though never reckoned at under SECTION_REACH_FLOOR of the full
+        //reach, nor the band at under MIN_DEPTH
+        var reach = Math.abs(dx) * hull.extentX + Math.abs(dy) * hull.extentY;
+        var middleStep = hull.centreX * dx + hull.centreY * dy + half;
+        var leastBand = ShipIcon.SECTION_DAMAGE_MIN_DEPTH * deeper * hull.size;
+        //the bow or stern of a LONG hull goes deeper (SECTION_DAMAGE_LONG_END): `along` is how squarely
+        //this section faces down the hull's length, squared so a diagonal quarter barely moves
+        var along = hull.extentX >= hull.extentY ? dx : dy;
+        var endDepth = ShipIcon.SECTION_DAMAGE_DEPTH * deeper * (1 + ShipIcon.SECTION_DAMAGE_LONG_END * along * along *
+            smoothstep(SECTION_SLENDER_FROM, SECTION_SLENDER_TO, hull.slenderness));
+        var faceBand = Math.max(ShipIcon.SECTION_DAMAGE_DEPTH * deeper * reach, leastBand); //the deepest it gets, LONG_END apart
+        //a two-section hull's band may also cross more of the hull, up to SECTION_THROUGH_MOST (see TWO_SECTION)
+        var through = Math.max(ShipIcon.SECTION_DAMAGE_MAX_THROUGH,
+            Math.min(ShipIcon.SECTION_DAMAGE_MAX_THROUGH * deeper, SECTION_THROUGH_MOST));
+        var broad = Math.max(6, 0.25 * hull.size);  //the long swells in the band's depth...
+        var fine = Math.max(2.5, 0.07 * hull.size); //...and the teeth on them
+
+        var contact = new Int16Array(size);   //per line: the step at which it first meets bulk, -1 if never
+        var lineBand = new Float32Array(size); //per line: how deep the band is there
+        var weights = new Float32Array(width * height); //per pixel: how far inside the section's arc (for easeSteps)
+        var middle = 0.2 * (Math.abs(dy) * hull.extentX + Math.abs(dx) * hull.extentY); //lines this near the bearing's own...
+        var face = -1;                                                                  //...set where the section's face is
+
+        for (var si = 0; si < size; si++) {
+            var s = si - half + 0.5;
+            var first = -1;
+            var crossed = 0;
+            for (var pi = size - 1; pi >= 0; pi--) {
+                var p = pi - half + 0.5;
+                var hx = Math.floor(cx + p * dx - s * dy);
+                var hy = Math.floor(cy - (p * dy + s * dx)); //canvas rows run down, the frame's v runs up
+                if (hx < 0 || hy < 0 || hx >= width || hy >= height || !bulk[hy * width + hx]) continue;
+                if (first < 0) first = pi;
+                crossed++;
+            }
+            contact[si] = first;
+            if (first < 0) continue;
+            if (Math.abs(s) <= middle && first > face) face = first;
+
+            var wander = valueNoise(s / broad, 0, seed) + valueNoise(s / fine, 7, seed) - 1; //-1..1
+            var standsOut = Math.max(first + 1 - middleStep, SECTION_REACH_FLOOR * reach);
+            var here = Math.max(endDepth * standsOut, leastBand);
+            lineBand[si] = Math.min(here * (1 + ShipIcon.SECTION_DAMAGE_RAGGED * wander), through * crossed);
+        }
+
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                var i = y * width + x;
+                if (alpha[i] === 0 || cut[i]) continue;
+
+                var px = x + 0.5 - cx;
+                var py = cy - (y + 0.5);
+                var lineIndex = Math.floor(px * -dy + py * dx + half);
+                if (contact[lineIndex] < 0) continue;
+
+                //where this pixel stands in the section's arc: 1 well inside, 0 outside
+                var bearing = -mathlib.radianToDegree(Math.atan2((py - hull.centreY) / hull.extentY, (px - hull.centreX) / hull.extentX));
+                var off = ((bearing - frame.centre) % 360 + 540) % 360 - 180; //-180..180, positive toward the arc's end
+                var edge = frame.halfSpan - Math.abs(off);                     //degrees inside the arc
+                var weight;
+                if (off >= 0 ? frame.taperEnd : frame.taperStart) {
+                    var wobble = frame.margin * 1.2 * (valueNoise(Math.hypot(px, py) / fine, 3, seed) - 0.5);
+                    weight = smoothstep(-frame.margin, frame.margin, edge + wobble);
+                    if (weight < 1 && frame.wideSpan > frame.halfSpan) {
+                        //a narrow arc's wider reach (see getSectionFrame) - but only along the section's own
+                        //face, not onto hull that merely looks out the same way from further back (an Omega's
+                        //rotating section, seen past its bow). Judged by the band BEFORE a long hull's deeper
+                        //ends: that deepening is for the end itself, not licence to reach further round it
+                        var behind = face - contact[lineIndex];
+                        var wide = smoothstep(-frame.margin, frame.margin, frame.wideSpan - Math.abs(off) + wobble) *
+                            (1 - smoothstep(faceBand, 2 * faceBand, behind));
+                        if (wide > weight) weight = wide;
+                    }
+                } else {
+                    weight = edge >= 0 ? 1 : 0;
+                }
+                if (weight <= 0) continue;
+                weights[i] = weight;
+
+                var inward = contact[lineIndex] - Math.floor(px * dx + py * dy + half); //steps in from where the hull starts; negative = outside it
+                if (inward < 0) {
+                    if (weight >= 0.5) cut[i] = mark; //clutter standing off a stretch of hull that is going
+                    continue;
+                }
+                var depth = lineBand[lineIndex] * weight * (0.7 + 0.3 * valueNoise(x / 2.2, y / 2.2, seed + 1));
+                if (depth >= 1 && inward < depth) cut[i] = mark;
+            }
+        }
+
+        return { dx: dx, dy: dy, size: size, contact: contact, lineBand: lineBand, weights: weights, seed: seed, mark: mark };
+    }
+
+    /* Bevel the cliffs in a lost section's torn edge. Where a stretch of hull had pods or a fin
+       standing off it, the band was measured from them and ran out before the hull behind (or
+       left a stub of the fin's root on it), while the stretch beside, with nothing standing off
+       it, lost a strip off the same surface - so the torn edge stepped back at a right angle where
+       the pods began (user, 2026-11-12, a Drazi's spine: "smoother with a diagonal line instead").
+
+       So wherever the edge (the outermost hull left on each line, AFTER dropLooseFragments has
+       taken the pods) jumps out sharply from one line to the next - a CLIFF, more than half what
+       the deeper line lost - the shallower side is bevelled down to it, the edge rising no steeper
+       than SECTION_EDGE_SLOPE. The bevel is never taller than what the deeper line lost: it joins
+       the torn edge back up to the surface it was torn from, so a Drazi's spine gets a diagonal,
+       while a G'Quan's wing standing far out beyond the torn hull only has its torn corner taken
+       off, not its root. The ordinary raggedness of the edge is far short of a cliff and is left
+       alone. Works in cutSection's frame (part), inside the section's arc. True if it cut anything. */
+    function easeSteps(hull, part, cut) {
+        var width = hull.width;
+        var height = hull.height;
+        var alpha = hull.alpha;
+        var bulk = hull.bulk;
+        var cx = width / 2;
+        var cy = height / 2;
+        var dx = part.dx;
+        var dy = part.dy;
+        var size = part.size;
+        var half = size / 2;
+        var si;
+
+        var pixelAt = function (s, pi) { //the pixel at step pi of the line through s, -1 if off the art
+            var p = pi - half + 0.5;
+            var hx = Math.floor(cx + p * dx - s * dy);
+            var hy = Math.floor(cy - (p * dy + s * dx));
+            return hx < 0 || hy < 0 || hx >= width || hy >= height ? -1 : hy * width + hx;
+        };
+
+        var surface = new Float32Array(size); //per line: the step of the outermost hull left on it, Infinity if none
+        var lostHere = new Float32Array(size); //...and how much was torn off the hull it belongs to: the tallest bevel it can carry
+        for (si = 0; si < size; si++) {
+            surface[si] = Infinity;
+            if (part.contact[si] < 0) continue;
+            var s = si - half + 0.5;
+            for (var pi = size - 1; pi >= 0; pi--) {
+                var at = pixelAt(s, pi);
+                if (at < 0 || !bulk[at] || cut[at]) continue;
+                surface[si] = pi;
+                //up through the torn-off hull that was joined to it - not across a gap to a pod - and
+                //only what THIS section's band tore, never deeper than that band: a cliff in another
+                //lost section's edge is that one's to bevel (bevelling against it ate the corners
+                //between two lost sections), and a sliver dropped off the side of a spar is no tear
+                //(counted, it let the bevel cut through an Alykent's spar at the root)
+                var top = pi;
+                while (top + 1 < size && (at = pixelAt(s, top + 1)) >= 0 && bulk[at] && cut[at] === part.mark) top++;
+                lostHere[si] = Math.min(top - pi, part.lineBand[si]);
+                break;
+            }
+        }
+
+        //per line: how far down its edge is bevelled (a step; Infinity = not at all)
+        var bevelTo = new Float32Array(size).fill(Infinity);
+        var bevelled = false;
+        for (si = 0; si < size; si++) {
+            if (surface[si] === Infinity) continue;
+            var lost = lostHere[si];
+            var torn = surface[si] + lost; //where this line's surface was before the tear
+            for (var side = -1; side <= 1; side += 2) {
+                var next = si + side;
+                if (next < 0 || next >= size || surface[next] - surface[si] <= Math.max(2, 0.5 * lost)) continue;
+                for (var d = 1; d * SECTION_EDGE_SLOPE < lost; d++) {
+                    var line = si + side * d;
+                    //hull standing out past where this line's surface was is a fin, a prong, a wing - not
+                    //the same surface left whole beside the tear - and keeps its shape
+                    if (line < 0 || line >= size || surface[line] === Infinity || surface[line] > torn + 1) break;
+                    var bottom = surface[si] + d * SECTION_EDGE_SLOPE;
+                    if (bottom < bevelTo[line]) bevelTo[line] = bottom;
+                    bevelled = true;
+                }
+            }
+        }
+        if (!bevelled) return false;
+
+        var any = false;
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                var i = y * width + x;
+                if (alpha[i] === 0 || cut[i] || !part.weights[i]) continue;
+
+                //the line and step pixelAt reaches this pixel by (it samples on pixel corners, so the
+                //pixel's centre sits half a step past it)
+                var px = x + 0.5 - cx;
+                var py = cy - (y + 0.5);
+                var lineIndex = Math.floor(px * -dy + py * dx + half - 0.5);
+                if (lineIndex < 0 || lineIndex >= size || bevelTo[lineIndex] >= surface[lineIndex]) continue;
+
+                var into = surface[lineIndex] - Math.floor(px * dx + py * dy + half - 0.5); //steps in from the edge
+                var ramp = (surface[lineIndex] - bevelTo[lineIndex]) * part.weights[i] * (0.7 + 0.3 * valueNoise(x / 2.2, y / 2.2, part.seed + 1));
+                if (into >= 0 && ramp >= 1 && into < ramp) {
+                    cut[i] = part.mark;
+                    any = true;
+                }
+            }
+        }
+        return any;
+    }
+
+    /* A section's frame on the hull art: (dx, dy) the unit vector pointing OUT of the hull along
+       its bearing (pixels, v up), and its arc as centre / halfSpan in degrees.
+
+       The ARC is read in the hull's OWN PROPORTIONS (cutSection measures each pixel's bearing from
+       the middle of the bulk, on the bulk squashed to a square). On a long hull that makes a
+       base's 60-degree quarter the forward half of one flank, where that section is, rather than
+       a wedge a plain 60-degree ray would carry out of a thin hull almost at once, and it makes a
+       capital ship's side arc the whole flank. The direction the band is stripped along is the
+       plain bearing: that quarter's edge is the station's flank, and it is torn from the side -
+       along a bearing squashed the same way the cut ran nearly down the station's length and took
+       the boom off it.
+
+       wideSpan: a NARROW arc also reaches out to SECTION_ARC_FLOOR either side of its centre.
+       Squashed to a square, a capital ship's 60-degree bow or stern arc covers only the middle of
+       that end of the box, and on a hull whose stern is hollow - a Sharlin's, set well forward of
+       its fin tips - that wedge has narrowed to a sliver by the time it reaches the hull. A
+       little over 45 degrees is the whole end of the box, which is what the section is on the art.
+       cutSection only lets that wider reach take hull lying along the section's own FACE: an
+       Omega's rotating section looks forward too, from well inside 52 degrees, and is no part of
+       its bow. The flanks' arcs are wider than the floor already, so a side loss still leaves bow
+       and stern alone.
+
+       taperStart / taperEnd: whether the band fades out toward that end of the arc - it does unless
+       the section next door is lost too (its arc starts or ends on the same bearing). margin is
+       the width of that fade, in degrees. */
+    function getSectionFrame(hull, section, sections) {
+        var span = mathlib.getArcLength(section.start % 360, section.end % 360) || 360;
+        var centre = mathlib.getArcCentre(section.start, section.end);
+        var angle = -mathlib.degreeToRadian(centre); //game bearings run clockwise; setFacing(-facing)
+
+        var meets = function (bearing, which) {
+            return sections.some(function (other) {
+                return other !== section && mathlib.getAngleDistance(other[which], bearing) <= 5;
+            });
+        };
 
         return {
-            u: 0.5 + x / hull.width,
-            v: 0.5 + y / hull.height,
-            m00: du[0], m01: dv[0],
-            m10: du[1], m11: dv[1]
+            dx: Math.cos(angle),
+            dy: Math.sin(angle),
+            centre: centre,
+            halfSpan: span / 2,
+            wideSpan: Math.max(span / 2, SECTION_ARC_FLOOR),
+            margin: Math.min(12, span * 0.15),
+            taperStart: span < 359 && !meets(section.start, 'end'),
+            taperEnd: span < 359 && !meets(section.end, 'start')
         };
     }
 
-    /* THE WAIST TEST, for a side facing `angle` (pixel space, v up). Walk lines parallel to that
-       bearing, offset along the hull from the centre, and measure how far out the hull reaches on
-       each - the side's profile. Where `middle` (the main bite's own reach) is less than
-       SECTION_DAMAGE_WAIST of the most prominent mass found 30-80% of the way out along the hull on
-       either side, that mass's outer edge is a lobe: { x, y } in pixels from the image centre.
-       Measured against the MAIN BITE's reach, not the profile's middle: an Omega's image centre is on
-       the thin spine just aft of its rotating section, but the main bite's fanned ray already lands
-       on that section, so there is no waist to make up for. Reaches along the profile are the LEAST
-       of three lines 3px apart, so a lone fin or antenna can't pose as a mass. Cached per image and
-       bearing. */
-    function getWaistLobes(hull, angle, middle) {
-        hull.lobes = hull.lobes || {};
-        var key = Math.round(mathlib.radianToDegree(angle));
-        if (hull.lobes[key]) return hull.lobes[key];
+    /* Drop the debris. Tearing a band off can leave bits of art joined to nothing - the outer end of
+       a fin whose root went, a tooth of the ragged edge - and a loose scrap hanging beside the ship
+       reads as a drawing error, not damage. So: split the art into joined-up pieces before and
+       after the cut. Where one original piece is now several, the biggest is the ship and stays;
+       any other is cut too if it is under SECTION_DAMAGE_FRAGMENT of the hull. A piece that was
+       ALREADY separate in the art (a detached pod, a ring) is its own biggest piece and is never
+       touched. The faint fringe a dropped piece was drawn with goes with it. */
+    function dropLooseFragments(hull, cut) {
+        var width = hull.width;
+        var height = hull.height;
+        var alpha = hull.alpha;
+        var i;
 
-        var dx = Math.cos(angle);
-        var dy = Math.sin(angle);
+        //joined = through art solid enough to be seen holding the two parts together
+        var before = new Uint8Array(width * height);
+        var after = new Uint8Array(width * height);
+        for (i = 0; i < before.length; i++) {
+            if (alpha[i] < HULL_PIECE_ALPHA) continue;
+            before[i] = 1;
+            if (!cut[i]) after[i] = 1;
+        }
+        var whole = labelPieces(width, height, before);
+        var left = labelPieces(width, height, after);
 
-        /* Only a SIDE has a waist: a bearing within ~20 degrees of square-on to the hull's long axis.
-           On a diagonal the profile's lines run slantwise down the length of the hull and "reach"
-           stops meaning how far a mass stands out - a B5 aft quarter measured the whole aft spine
-           and its satellite took the station's aft half away. */
-        if (Math.abs(hull.extentX >= hull.extentY ? dx : dy) > 0.35) {
-            hull.lobes[key] = [];
-            return hull.lobes[key];
+        var owner = [];   //left piece -> the original piece it came from
+        for (i = 0; i < left.labels.length; i++) {
+            if (left.labels[i]) owner[left.labels[i]] = whole.labels[i];
         }
 
-        var tx = -dy; //along the hull, at right angles to the bearing
-        var ty = dx;
-        var along = Math.abs(tx) * hull.extentX + Math.abs(ty) * hull.extentY;
-
-        var profile = function (s) {
-            return Math.min(
-                getEdgeDistance(hull, (s - 3) * tx, (s - 3) * ty, dx, dy),
-                getEdgeDistance(hull, s * tx, s * ty, dx, dy),
-                getEdgeDistance(hull, (s + 3) * tx, (s + 3) * ty, dx, dy)
-            );
-        };
-
-        var step = Math.max(1, Math.round(along / 40));
-        var lobes = [];
-
-        [1, -1].forEach(function (sign) {
-            var best = null;
-            for (var s = Math.round(along * 0.3); s <= along * 0.8; s += step) {
-                var reach = profile(sign * s);
-                if (!best || reach > best.reach) best = { s: sign * s, reach: reach };
-            }
-            if (best && best.reach > 0 && middle < ShipIcon.SECTION_DAMAGE_WAIST * best.reach) {
-                lobes.push({ x: best.s * tx + best.reach * dx, y: best.s * ty + best.reach * dy, reach: best.reach });
-            }
-        });
-
-        hull.lobes[key] = lobes;
-        return lobes;
-    }
-
-    /* Distance from (ox, oy) - pixels from the image centre, v up - along (dx, dy) to the outermost
-       solid pixel on that line, or 0 if the hull never reaches out that way from there. */
-    function getEdgeDistance(hull, ox, oy, dx, dy) {
-        var cx = hull.width / 2;
-        var cy = hull.height / 2;
-        for (var u = Math.ceil(Math.hypot(hull.width, hull.height)); u > 0; u--) {
-            var x = Math.round(cx + ox + dx * u);
-            var y = Math.round(cy - (oy + dy * u)); //canvas rows run down
-            if (x < 0 || y < 0 || x >= hull.width || y >= hull.height) continue;
-            if (hull.alpha[y * hull.width + x] >= HULL_SOLID_ALPHA) return u;
+        var biggest = []; //original piece -> the largest piece left of it
+        var hullSize = 0;
+        for (var piece = 1; piece < left.sizes.length; piece++) {
+            var from = owner[piece];
+            if (biggest[from] === undefined || left.sizes[piece] > left.sizes[biggest[from]]) biggest[from] = piece;
         }
-        return 0;
+        for (i = 1; i < whole.sizes.length; i++) hullSize += whole.sizes[i];
+
+        var limit = ShipIcon.SECTION_DAMAGE_FRAGMENT * hullSize;
+        var dropped = new Uint8Array(width * height);
+        var any = false;
+        for (i = 0; i < left.labels.length; i++) {
+            var label = left.labels[i];
+            if (!label || biggest[owner[label]] === label || left.sizes[label] >= limit) continue;
+            cut[i] = CUT_DROPPED;
+            dropped[i] = 1;
+            any = true;
+        }
+        if (!any) return;
+
+        for (var pass = 0; pass < 2; pass++) {
+            var fringe = [];
+            for (var y = 1; y < height - 1; y++) {
+                for (var x = 1; x < width - 1; x++) {
+                    i = y * width + x;
+                    if (cut[i] || alpha[i] === 0 || alpha[i] >= HULL_PIECE_ALPHA) continue;
+                    if (dropped[i - 1] || dropped[i + 1] || dropped[i - width] || dropped[i + width]) fringe.push(i);
+                }
+            }
+            for (var f = 0; f < fringe.length; f++) {
+                cut[fringe[f]] = CUT_DROPPED;
+                dropped[fringe[f]] = 1;
+            }
+        }
     }
 
-    //Stable per ship and section, so a hole looks the same every poll, every replay and to every player.
-    function getSectionSeed(shipId, location) {
-        var id = Number(shipId) || 0;
-        var a = Math.sin(id * 12.9898 + location * 78.233) * 43758.5453;
-        var b = Math.sin(id * 39.3468 + location * 11.135) * 24634.6345;
-        return { spin: (a - Math.floor(a)) * Math.PI * 2, size: b - Math.floor(b) };
+    /* The joined-up pieces of a mask (1 per member pixel): { labels, sizes } - labels[pixel] is its
+       piece's number (0 = not a member), sizes[number] that piece's pixel count. Joined means
+       touching, corners included. */
+    function labelPieces(width, height, member) {
+        var labels = new Int32Array(width * height);
+        var sizes = [0];
+        var stack = new Int32Array(width * height);
+
+        for (var start = 0; start < labels.length; start++) {
+            if (labels[start] || !member[start]) continue;
+
+            var label = sizes.length;
+            var count = 0;
+            var top = 0;
+            stack[top++] = start;
+            labels[start] = label;
+
+            while (top > 0) {
+                var at = stack[--top];
+                var ax = at % width;
+                var ay = (at - ax) / width;
+                count++;
+
+                for (var ny = ay - 1; ny <= ay + 1; ny++) {
+                    if (ny < 0 || ny >= height) continue;
+                    for (var nx = ax - 1; nx <= ax + 1; nx++) {
+                        if (nx < 0 || nx >= width) continue;
+                        var next = ny * width + nx;
+                        if (labels[next] || !member[next]) continue;
+                        labels[next] = label;
+                        stack[top++] = next;
+                    }
+                }
+            }
+            sizes.push(count);
+        }
+
+        return { labels: labels, sizes: sizes };
+    }
+
+    /* Two-pass chamfer distance, in place: distance[] comes in 0 at the sources and large everywhere
+       else, and leaves as each pixel's distance in pixels from the nearest source. edgeIsSource
+       treats everything beyond the image as a source too. */
+    function spreadDistance(width, height, distance, edgeIsSource) {
+        var diagonal = Math.SQRT2;
+        var x, y, i, d;
+
+        for (y = 0; y < height; y++) {
+            for (x = 0; x < width; x++) {
+                i = y * width + x;
+                d = distance[i];
+                if (d === 0) continue;
+                if (edgeIsSource && (x === 0 || y === 0 || x === width - 1 || y === height - 1)) d = Math.min(d, 1);
+                if (x > 0) d = Math.min(d, distance[i - 1] + 1);
+                if (y > 0) {
+                    d = Math.min(d, distance[i - width] + 1);
+                    if (x > 0) d = Math.min(d, distance[i - width - 1] + diagonal);
+                    if (x < width - 1) d = Math.min(d, distance[i - width + 1] + diagonal);
+                }
+                distance[i] = d;
+            }
+        }
+
+        for (y = height - 1; y >= 0; y--) {
+            for (x = width - 1; x >= 0; x--) {
+                i = y * width + x;
+                d = distance[i];
+                if (d === 0) continue;
+                if (x < width - 1) d = Math.min(d, distance[i + 1] + 1);
+                if (y < height - 1) {
+                    d = Math.min(d, distance[i + width] + 1);
+                    if (x < width - 1) d = Math.min(d, distance[i + width + 1] + diagonal);
+                    if (x > 0) d = Math.min(d, distance[i + width - 1] + diagonal);
+                }
+                distance[i] = d;
+            }
+        }
+    }
+
+    function smoothstep(from, to, value) {
+        var t = Math.min(1, Math.max(0, (value - from) / (to - from)));
+        return t * t * (3 - 2 * t);
+    }
+
+    //Stable per ship and section, so a tear looks the same every poll, every replay and to every player.
+    function getDamageSeed(shipId, location) {
+        return (Math.imul(Number(shipId) || 0, 40503) + Math.imul(location + 1, 9973)) | 0;
+    }
+
+    //0..1, the same for the same lattice point and seed on every machine (integer maths only).
+    function hashUnit(x, y, seed) {
+        var h = (Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(seed, 1274126177)) | 0;
+        h = Math.imul(h ^ (h >>> 13), 1274126177);
+        return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    }
+
+    //Smooth 0..1 noise over the plane; one lattice cell per unit of x and y.
+    function valueNoise(x, y, seed) {
+        var xi = Math.floor(x);
+        var yi = Math.floor(y);
+        var fx = x - xi;
+        var fy = y - yi;
+        fx = fx * fx * (3 - 2 * fx);
+        fy = fy * fy * (3 - 2 * fy);
+        var a = hashUnit(xi, yi, seed);
+        var b = hashUnit(xi + 1, yi, seed);
+        var c = hashUnit(xi, yi + 1, seed);
+        var d = hashUnit(xi + 1, yi + 1, seed);
+        return a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy;
     }
 
     var BDEW_HEXES = 20; //the blanket is 20 hexes whatever the ship's BDEW rating - 25 with an Expert ELINT Officer (ew.elintRange)

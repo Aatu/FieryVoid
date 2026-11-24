@@ -74,6 +74,7 @@ CREATE TABLE `player` (
   `discord_verify_id` varchar(32) DEFAULT NULL,
   `discord_verify_code` varchar(10) DEFAULT NULL,
   `discord_verify_expires` int(11) DEFAULT NULL,
+  `is_cpu` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_discord_id` (`discord_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=210 DEFAULT CHARSET=utf8;
@@ -87,6 +88,8 @@ CREATE TABLE `player` (
 LOCK TABLES `player` WRITE;
 /*!40000 ALTER TABLE `player` DISABLE KEYS */;
 INSERT INTO `player` (`id`,`username`,`password`,`accesslevel`) VALUES (3,'player1','*2470C0C06DEE42FD1618BB99005ADCA2EC9D1E19',0),(4,'player2','*2470C0C06DEE42FD1618BB99005ADCA2EC9D1E19',0);
+-- CPU opponent bot accounts (db/cpuOpponent.sql): '!' can never match a login.
+INSERT INTO `player` (`username`,`password`,`accesslevel`,`is_cpu`) VALUES ('CPU Alpha','!',1,1),('CPU Bravo','!',1,1),('CPU Charlie','!',1,1),('CPU Delta','!',1,1),('CPU Echo','!',1,1),('CPU Foxtrot','!',1,1),('CPU Golf','!',1,1),('CPU Hotel','!',1,1);
 /*!40000 ALTER TABLE `player` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -370,7 +373,8 @@ CREATE TABLE `tac_playeringame` (
   `depheight` int(11) DEFAULT NULL,
   `depavailable` int(11) DEFAULT NULL,
   `waiting` boolean DEFAULT TRUE,
-  `surrendered` int(11) DEFAULT NULL,  
+  `surrendered` int(11) DEFAULT NULL,
+  `cpu` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`gameid`,`slot`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -535,6 +539,37 @@ CREATE TABLE `tac_minesweep` (
   `moves`   mediumtext NOT NULL,
   `found`   text       NOT NULL,
   PRIMARY KEY (`gameid`, `turn`, `shipid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+--
+-- Table structure for tables `tac_ai_state` and `tac_ai_log`
+-- CPU opponent: a bot's plan for the turn, and its decision / defect log. See db/cpuOpponent.sql.
+--
+
+DROP TABLE IF EXISTS `tac_ai_state`;
+
+CREATE TABLE `tac_ai_state` (
+  `gameid`   int(11)    NOT NULL,
+  `playerid` int(11)    NOT NULL,
+  `turn`     int(11)    NOT NULL,
+  `data`     mediumtext NOT NULL,
+  PRIMARY KEY (`gameid`, `playerid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `tac_ai_log`;
+
+CREATE TABLE `tac_ai_log` (
+  `id`       int(11)      NOT NULL AUTO_INCREMENT,
+  `gameid`   int(11)      NOT NULL,
+  `playerid` int(11)      NOT NULL,
+  `turn`     int(11)      NOT NULL,
+  `phase`    int(11)      NOT NULL,
+  `kind`     varchar(20)  NOT NULL,
+  `message`  text         NOT NULL,
+  `loggedat` int(11)      NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_ai_log_game` (`gameid`, `kind`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

@@ -125,6 +125,13 @@ class Manager{
         self::$dbManager = $dbManager;
     }
 
+    //The request's one database connection, opened on first use. For code that lives outside this
+    //class but must share its connection and transactions (the CPU opponent - source/server/ai/).
+    public static function getDBManager() {
+        self::initDBManager();
+        return self::$dbManager;
+    }
+
     private static function deleteOldGames()
     {
         try {
@@ -144,6 +151,8 @@ class Manager{
         try {
             self::initDBManager();
             self::$dbManager->leaveSlot($user, $gameid, $slotid);
+            //CPU opponent: bots do not outstay the creator, or the last human (else the game below is never "empty")
+            if (Features::reachable('cpuOpponent')) AISeats::releaseAbandoned($gameid);
             self::$dbManager->deleteEmptyGames();
             self::touchGame($gameid);
 
@@ -245,6 +254,7 @@ class Manager{
 
                 $data = $lobbymodel->stripForJson();
                 unset($lobbymodel);
+                self::addCpuSlots($data, $gameid);
 
                 if ($timestamp > 0) {
                     $data->last_update = $timestamp;
@@ -419,6 +429,12 @@ class Manager{
             //so a refusal means something is badly wrong - roll the game back rather than leave it empty.
             if (!self::takeSlot($userid, $gameid, 1))
                 throw new Exception("Manager::createGame: could not seat the creator in slot 1 of game $gameid");
+
+            //CPU opponent (TACTICAL_AI_PLAN.md section 8.1): the slots the creator marked "CPU".
+            //Feature off = the mark is never read, whatever the POST says.
+            if (Features::reachable('cpuOpponent') && empty($data["rules"]["fleetTest"]))
+                AISeats::seatMarkedSlots($userid, $gameid, $data["slots"]);
+
             self::$dbManager->endTransaction(false);
             return $gameid;
         }
@@ -941,7 +957,8 @@ class Manager{
                 $t_start_strip = microtime(true);
                 $data = $gdS->stripForJson();
                 $GLOBALS['dbg_stripForJson'] = microtime(true) - $t_start_strip;
-    
+                self::addCpuSlots($data, $gameid);
+
                 if ($timestamp > 0) {
                      $data->last_update = $timestamp;
                 }
@@ -2152,15 +2169,129 @@ class Manager{
         }
     }
 
+    //A browser's POST: $ships is the posted JSON text (or its decoded array).
     public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships, $status, $slotid = 0){
+        return self::submitForPlayer($gameid, $userid, $turn, $phase, $activeship, $ships, $status, $slotid, false);
+    }
+
+    /* The same submission for a caller that has no JSON to post - the CPU opponent
+       (TACTICAL_AI_PLAN.md section 3.2 step 6), and a server-made fleet. $ships is the ship array
+       ShipPayload::buildShips returns. Everything after the decode is one body, shared with the
+       human path line for line: lock, transaction, surrender, the checks, process(), cache touch,
+       notifications. Returns the same JSON text - '{}' or '{"error": ...}'. */
+    public static function submitShipsForPlayer($gameid, $userid, $turn, $phase, $activeship, array $ships, $status = '', $slotid = 0){
+        return self::submitForPlayer($gameid, $userid, $turn, $phase, $activeship, $ships, $status, $slotid, true);
+    }
+
+    /* The creator buys a CPU player's fleet (TACTICAL_AI_PLAN.md section 8.1). $ships is the lobby's
+       ordinary POST; only the units bought into slot $slotid are kept, stamped with the bot's id
+       and committed AS the bot, through the same body as every other submission.
+       Refused unless: the feature is on for this player, the game is in its lobby, the requester
+       created it, and the slot is a CPU seat. No other player's slot can be bought for this way. */
+    public static function submitFleetForCpuSlot($gameid, $creatorId, $turn, $phase, $activeship, $ships, $slotid){
         try {
-        
+            if (!Features::reachable(AIConfig::FLAG) || !AISeats::allowedFor($creatorId))
+                throw new Exception("CPU opponents are not available.");
+
+            $gameid = (int)$gameid;
+            $slotid = (int)$slotid;
+            self::initDBManager();
+
+            $game = self::$dbManager->getGameRowLight($gameid);
+            if (!$game || $game['status'] !== 'LOBBY')
+                throw new Exception("A CPU player's fleet can only be bought while the game is in its lobby.");
+            if ($game['creator'] !== (int)$creatorId)
+                throw new Exception("Only the game's creator can buy a CPU player's fleet.");
+
+            $seats = self::$dbManager->getCpuSeats($gameid);
+            if (!isset($seats[$slotid]))
+                throw new Exception("That slot is not a CPU player's.");
+            $botId = $seats[$slotid]['playerid'];
+
+            $fleet = array();
+            foreach (self::getShipsFromJSON($ships) as $key => $ship) {
+                if ((int)$ship->slot !== $slotid) continue;
+                $ship->userid = $botId;
+                $fleet[$key] = $ship;
+            }
+            if (count($fleet) == 0)
+                throw new Exception("Buy at least one unit for the CPU player first.");
+        } catch (Exception $e) {
+            return json_encode(array("error" => $e->getMessage()));
+        }
+
+        return self::submitShipsForPlayer($gameid, $botId, $turn, $phase, $activeship, $fleet, '', $slotid);
+    }
+
+    /* The player's Auto-Deploy button (TACTICAL_AI_PLAN.md section 5.2, "Caller 2"): where
+       FleetDeployer would stand this player's fleet. NOTHING IS WRITTEN - the page places the
+       units itself, as if by hand, and the player commits when ready.
+       $options, all from the page and all optional:
+         groups    battlegroups wanted (FleetDeployer clamps it per slot)
+         seed      0 = the standard layout; anything else a variant of it (the panel's Shuffle)
+         ships     ship ids to place (the page leaves out what the player placed and is keeping)
+         occupied  [{q, r, flight}] - those kept placements, which are not in the database yet
+       Returns JSON: {"placements": [{shipid, x, y, facing, speed, group}, ...]} or {"error": ...}. */
+    public static function getAutoDeployPlan($gameid, $userid, array $options = array()){
+        try {
+            if (!is_numeric($gameid) || !is_numeric($userid) || !Features::enabledFor('autoDeploy', $userid))
+                throw new Exception("Auto-Deploy is not available.");
+
+            self::initDBManager();
+            $gamedata = self::$dbManager->getTacGamedata((int)$userid, (int)$gameid);
+            if (!$gamedata || $gamedata->status !== 'ACTIVE' || $gamedata->phase != -1)
+                throw new Exception("Auto-Deploy only works in the Deployment phase.");
+
+            $slots = $gamedata->getSlotsByPlayerId($userid);
+            if (count($slots) == 0) throw new Exception("You have no fleet in this game.");
+            if ($gamedata->hasAlreadySubmitted($userid)) throw new Exception("You have already committed this phase.");
+
+            $deployerOptions = array('groups' => isset($options['groups']) && is_numeric($options['groups']) ? (int)$options['groups'] : 1);
+            if (isset($options['seed']) && is_numeric($options['seed']))
+                $deployerOptions['seed'] = max(0, min(1000000, (int)$options['seed'])); //the panel's Shuffle
+            if (isset($options['ships']) && is_array($options['ships']))
+                $deployerOptions['unitIds'] = array_slice(array_filter($options['ships'], 'is_numeric'), 0, 1000);
+            if (isset($options['occupied']) && is_array($options['occupied']))
+                $deployerOptions['occupied'] = array_slice($options['occupied'], 0, 1000);
+
+            $placements = array();
+            foreach ($slots as $slot) {
+                if ($slot->surrendered !== null) continue;
+                $placements = array_merge($placements, FleetDeployer::plan($gamedata, (int)$userid, $slot->slot, $deployerOptions));
+            }
+
+            return json_encode(array('placements' => $placements));
+        } catch (Exception $e) {
+            return json_encode(array("error" => $e->getMessage()));
+        }
+    }
+
+    /* The lobby's `cpuSlots` key: {slot: {level}} for the game's CPU seats, so the page can tell
+       them from humans and let the creator select one. Added to the payload only while the
+       feature is on, the game is in its lobby and it has a CPU seat - every other payload is
+       left exactly as it was (plan principle P6). Level only: personality and seed stay here.
+       ⚠️ gamelobby.js parseServerData copies it BY NAME. */
+    public static function addCpuSlots($data, $gameid){
+        if (!Features::reachable('cpuOpponent')) return;
+        if (!is_object($data) || !isset($data->status) || $data->status !== 'LOBBY') return;
+        if (!AISeats::gameHasCpu($gameid)) return;
+
+        $list = array();
+        foreach (self::getDBManager()->getCpuSeats((int)$gameid) as $slot => $seat) {
+            $list[$slot] = array('level' => isset($seat['cpu']['level']) ? $seat['cpu']['level'] : AIConfig::DEFAULT_LEVEL);
+        }
+        if (count($list) > 0) $data->cpuSlots = (object)$list;
+    }
+
+    private static function submitForPlayer($gameid, $userid, $turn, $phase, $activeship, $ships, $status, $slotid, $shipsAreBuilt){
+        try {
+
             //    file_put_contents('/tmp/fierylog', "Gameid: $gameid submitTacGamedata ships:". var_export($ships, true) ."\n\n", FILE_APPEND);
-            self::initDBManager();  
+            self::initDBManager();
             $starttime = time();
-            
-            $ships = self::getShipsFromJSON($ships);
-            
+
+            if (!$shipsAreBuilt) $ships = self::getShipsFromJSON($ships);
+
             if (sizeof($ships)==0)
 				throw new Exception("Gamedata missing");
             //print(var_dump($ships));
@@ -2782,297 +2913,9 @@ class Manager{
             $array = json_decode($json, true);
         }
 
-        $ships = array();
-        //$array = json_decode($json, true);
-        if (!is_array($array)) return $ships;
-    
-        foreach ($array as $value) {
-            $movements = array();
-            if (isset($value["movement"]) && is_array($value["movement"])) {
-                foreach($value["movement"] as $i => $move) {
-                    $movement = new MovementOrder(
-                        $move["id"] ?? -1,
-                        $move["type"] ?? null,
-                        new OffsetCoordinate($move["position"] ?? [0, 0]),
-                        $move["xOffset"] ?? 0,
-                        $move["yOffset"] ?? 0,
-                        $move["speed"] ?? 0,
-                        $move["heading"] ?? 0,
-                        $move["facing"] ?? 0,
-                        $move["preturn"] ?? false,
-                        $move["turn"] ?? 0,
-                        $move["value"] ?? 0,
-                        $move["at_initiative"] ?? false
-                    );
-                    $movement->requiredThrust = $move["requiredThrust"] ?? 0;
-                    $movement->assignedThrust = $move["assignedThrust"] ?? 0;
-                    //Carry the 'forced' flag through the POST (Gravitic Augmenter free jinks are
-                    //marked forced=true). submitMovement skips forced moves so they never persist -
-                    //they are re-added transiently every load. Without this whitelist the flag is
-                    //lost and the free jink would be written to the DB, doubling next load.
-                    $movement->forced = $move["forced"] ?? false;
-
-                    $movements[$i] = $movement;
-                }
-            }
-    
-            $EW = array();
-            if (isset($value["EW"]) && is_array($value["EW"])) {
-                foreach($value["EW"] as $i => $EWdata) {
-                    $EWentry = new EWentry(
-                        -1,
-                        $EWdata["shipid"] ?? -1,
-                        $EWdata["turn"] ?? 0,
-                        $EWdata["type"] ?? "",
-                        $EWdata["amount"] ?? 0,
-                        $EWdata["targetid"] ?? null
-                    );
-                    $EW[$i] = $EWentry;
-                }
-            }
-    
-            $className = $value["phpclass"] ?? null;
-            if (!$className) continue; // skip if class not defined
-    
-            /** @var BaseShip $ship */
-            $ship = new $className(
-                $value["id"] ?? -1,
-                $value["userid"] ?? -1,
-                $value["name"] ?? "Unnamed",
-                $value["slot"] ?? 0
-            );
-
-			$ship->team = $value["team"] ?? 0;
-    
-            $ship->pointCostEnh = ($value["pointCostEnh"] ?? 0) + ($value["pointCostEnh2"] ?? 0);
-            $ship->setMovements($movements);
-            $ship->EW = $EW;
-            
-            if (isset($value["bulkBuy"])) {
-                $ship->bulkBuy = $value["bulkBuy"];
-            }
-
-            if ($ship instanceof FighterFlight) {
-                $ship->flightSize = $value["flightSize"] ?? 1;
-                $ship->populate();
-            }
-
-            //Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §4.3). Carried RAW here and
-            //validated by PreBattleDamage::sanitise at the one place it is consumed -
-            //BuyingGamePhase::process. Every other phase ignores the field, so a client
-            //cannot inject damage mid-game.
-            //⚠️ Must stay AFTER the populate() above: flight ordinals resolve by position
-            //in $ship->systems, so the fighters have to exist first.
-            $ship->preBattleDamage = $value["preBattleDamage"] ?? array();
-
-            /* Reinforcements (REINFORCEMENTS_PLAN.md §4 Stage 1). Carried RAW here and consumed by
-               BuyingGamePhase::process alone, which checks the game rule and only then writes the
-               real $ship->reinforcement. Every other phase ignores the field, so a client cannot
-               flag a unit into hyperspace mid-game.
-               ⚠️ DELIBERATELY NOT $ship->reinforcement. That property is read by getTurnDeployed
-               and getTurnPlaced, and a POST-side ship carries no $arrivalTurn - so writing it here
-               would make every POSTed reinforcement answer 999 to both accessors in every phase,
-               silently early-returning Hangar::generateIndividualNotes and
-               HangarOps::validateDeployBayOrders, neither of which resolves through
-               $gamedata->getShipById() the way DeploymentGamePhase::validateDeployment now does.
-               See BaseShip::$reinforcementClaim and plan trap 3.
-               ⚠️ The saved-fleet parser above (getSavedShipsFromJSON) writes the REAL property from
-               the same wire key, and the difference is the point: those ships are built, sanitised,
-               written to tac_saved_ship and thrown away without ever entering a TacGamedata, so
-               neither turn accessor can be reached. These ships do enter one. */
-            $ship->reinforcementClaim = !empty($value["reinforcement"]);
-
-            /* THE MANIFEST (REINFORCEMENTS_PLAN.md §3.5, Stage 5) - the ONE reinforcement field a
-               client is trusted to send in a live game, and even then only as a claim.
-               InitialOrdersGamePhase::process re-validates it against the SERVER-side ships and
-               writes NULL for anything it does not believe.
-
-               ⚠️ $arrivalTurn IS DELIBERATELY NOT WHITELISTED and must never be. It is written only
-               by the end-of-formation-turn deviation sweep; a client that could set it could bring
-               its own fleet out of hyperspace a turn early, at a hex of its choosing, with no
-               exit in between. $reinforcement is not whitelisted here either - see the claim
-               property above.
-
-               (int) rather than a raw carry: mysqli and JSON disagree about number types, and the
-               validation downstream compares it against real ship ids. 0 is normalised to null so
-               "unassigned" has exactly one representation. */
-            $arrivalVia = isset($value["arrivalVia"]) ? (int)$value["arrivalVia"] : 0;
-            $ship->arrivalVia = ($arrivalVia > 0) ? $arrivalVia : null;
-
-            /* HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6a/H6b - the arrival SPEED and the carrier to START
-               IN, beside the berth they belong to, and the same kind of thing: a claim.
-               InitialOrdersGamePhase::persistManifest clamps the speed, re-fits the hangar and writes
-               what it believes; nothing else reads them. Only meaningful with a berth. */
-            if ($ship->arrivalVia !== null && isset($value["arrivalSpeed"])) {
-                $hangar = isset($value["arrivalHangar"]) ? (int)$value["arrivalHangar"] : 0;
-                $ship->setArrivalOrderClaim((int)$value["arrivalSpeed"], ($hangar > 0) ? $hangar : null);
-            }
-
-            $ship->enhancementOptions = $value["enhancementOptions"] ?? [];
-
-            /* Per-system enhancements (WEAPON_ENHANCEMENTS_PLAN.md §4.5). Carried RAW here and
-               validated by Enhancements::sanitiseSystemEnhancements at the one place it is
-               consumed - BuyingGamePhase::process - which re-resolves every systemid, re-checks
-               eligibility and REPLACES the client's prices with the server's own (D4). Every
-               other phase ignores the field, so a client cannot inject a refit mid-game. */
-            $ship->systemEnhancements = $value["systemEnhancements"] ?? array();
-
-            /* OFFICERS_PLAN.md Stage 10 - officers the player ordered to another post this turn. A CLAIM,
-               carried raw: InitialOrdersGamePhase::process checks each against the loaded ship
-               (Officers::saveTransfers) before writing it, and every other phase ignores the field. */
-            $ship->setOfficerTransferClaims($value["officerTransfers"] ?? array());
-
-            /* FIGHTER_MISSIONS_PLAN.md §3.7 - the mission the player picked for a flight this turn, {m, k}. A CLAIM,
-               carried raw: InitialOrdersGamePhase::process checks it against the loaded flight (FighterMissions::
-               saveClaim) before writing it, and every other phase ignores the field. */
-            if ($ship instanceof FighterFlight) $ship->setFighterMissionClaim($value["fighterMission"] ?? null);
-
-            /* OFFICERS_PLAN.md Stage 36 - an Expert Electrician's split of this turn's shunted power, {ob, thrust}. A CLAIM, carried raw:
-               InitialOrdersGamePhase::process checks it against the loaded flight (Officers::saveElectricianShunt); every other phase ignores it. */
-            if ($ship instanceof FighterFlight) $ship->setElectricianClaim($value["electricianShunt"] ?? null);
-
-            /* OFFICERS_PLAN.md Stage 35 - an Expert Analyst's scan this turn, {a: ability, t: target id}. A CLAIM, carried raw:
-               InitialOrdersGamePhase::process checks it against the loaded ship (Officers::saveAnalystScan); every other phase ignores it. */
-            $ship->setAnalystScanClaim($value["analystScan"] ?? null);
-
-            $systems = $value["systems"] ?? [];
-            foreach ($systems as $i => $system) {
-                $sys = $ship->getSystemById($i);
-
-                if (isset($system["power"]) && is_array($system["power"])) {
-                    foreach ($system["power"] as $power) {
-                        $powerEntry = new PowerManagementEntry(
-                            $power["id"] ?? -1,
-                            $power["shipid"] ?? -1,
-                            $power["systemid"] ?? -1,
-                            $power["type"] ?? "",
-                            $power["turn"] ?? 0,
-                            $power["amount"] ?? 0
-                        );
-                        if ($sys) {
-                            $sys->setPower($powerEntry);
-                        }
-                    }
-                }
-    
-                if (isset($system["fireOrders"]) && is_array($system["fireOrders"])) {
-                    $fires = [];
-                    foreach($system["fireOrders"] as $fo) {
-                        $fireOrder = new FireOrder(
-                            -1,
-                            $fo["type"] ?? "",
-                            $fo["shooterid"] ?? -1,
-                            $fo["targetid"] ?? -1,
-                            $fo["weaponid"] ?? -1,
-                            $fo["calledid"] ?? -1,
-                            $fo["turn"] ?? 0,
-                            $fo["firingMode"] ?? 1,
-                            0, 0, $fo["shots"] ?? 0, 0, 0,
-                            $fo["x"] ?? 0,
-                            $fo["y"] ?? 0,
-                            $fo["damageclass"] ?? null
-                        );
-                        //Carry the client-supplied notes through. The FireOrder ctor doesn't
-                        //take notes, and weapons that need to pass custom per-shot data to
-                        //server-side resolution (e.g. Hypergraviton Blaster transfer-target
-                        //list) encode it here. Safe: server-side notes writes happen later
-                        //during firing resolution as appends/overwrites; nothing reads the
-                        //incoming client notes value except weapons that opt in.
-                        $fireOrder->notes = $fo["notes"] ?? "";
-                        if ($sys) {
-                            $fires[] = $fireOrder;
-                        }
-                    }
-                    if ($sys) $sys->setFireOrders($fires);
-                }
-    
-                if (isset($system["systems"]) && is_array($system["systems"])) {
-                    foreach ($system["systems"] as $fightersys) {
-                        $fig = $sys ? $sys->getSystemById($fightersys["id"] ?? -1) : null;
-                        if (!$fig) continue;
-    
-                        if (isset($fightersys["fireOrders"]) && is_array($fightersys["fireOrders"])) {
-                            $fires = [];
-                            foreach($fightersys["fireOrders"] as $fo) {
-                                $fireOrder = new FireOrder(
-                                    -1,
-                                    $fo["type"] ?? "",
-                                    $fo["shooterid"] ?? -1,
-                                    $fo["targetid"] ?? -1,
-                                    $fo["weaponid"] ?? -1,
-                                    $fo["calledid"] ?? -1,
-                                    $fo["turn"] ?? 0,
-                                    $fo["firingMode"] ?? 1,
-                                    0, 0, $fo["shots"] ?? 0, 0, 0,
-                                    $fo["x"] ?? 0,
-                                    $fo["y"] ?? 0,
-                                    $fo["damageclass"] ?? null
-                                );
-                                //Carry client-supplied notes through the FIGHTER branch too (the
-                                //main-ship branch already does this). MinorThoughtPulsar encodes its
-                                //free thrust allocation as "MTP|hit|shots|dmg" here; read in
-                                //beforeFiringOrderResolution. Safe: server-side notes are written later
-                                //during firing resolution; nothing reads incoming notes except opt-in weapons.
-                                $fireOrder->notes = $fo["notes"] ?? "";
-                                $fires[] = $fireOrder;
-                            }
-    
-                            // ammo transfer
-                            if (isset($fightersys["ammo"])) {
-                                foreach ($fightersys["ammo"] as $i => $ammo) {
-                                    if (isset($ammo)) {
-                                        $fig->setAmmo($i, $ammo);
-                                    }
-                                }
-                            }
-    
-                            $fig->setFireOrders($fires);
-                        }
-    
-                        if (isset($fightersys["individualNotesTransfer"])) {
-                            $fig->individualNotesTransfer = $fightersys["individualNotesTransfer"];
-                            $fig->doIndividualNotesTransfer();
-                        }
-
-                        /* Some fighter systems CAN be boosted now.
-                           ⚠️ ONE setPower() PER ENTRY (fixed 2026-09-11). ShipSystem::setPower APPENDS
-                           whatever it is given, and this used to hand it the whole list - twice, because
-                           the block was duplicated - so a POST-side fighter system's $power held NESTED
-                           ARRAYS instead of entries. DBManager::submitPower quietly flattens that shape,
-                           which is why nothing noticed until something asked a POST-side fighter's power a
-                           question: JumpEngine::isOverloading, via
-                           InitialOrdersGamePhase::dropFireOfJumpingShip, fataled with "Attempt to read
-                           property turn on array" (game 4347). The shape now matches the DB-loaded one,
-                           which also sets one entry at a time. */
-                        if (isset($fightersys["power"]) && is_array($fightersys["power"])) {
-                            foreach ($fightersys["power"] as $p) {
-                                $fig->setPower(new PowerManagementEntry(
-                                    $p["id"] ?? -1,
-                                    $p["shipid"] ?? -1,
-                                    $p["systemid"] ?? -1,
-                                    $p["type"] ?? "",
-                                    $p["turn"] ?? 0,
-                                    $p["amount"] ?? 0
-                                ));
-                            }
-                        }
-                    }
-                }
-    
-                if (isset($system["individualNotesTransfer"])) {
-
-                    if ($sys) {
-                        $sys->individualNotesTransfer = $system["individualNotesTransfer"];
-                        $sys->doIndividualNotesTransfer();
-                    }
-                }
-            }
-    
-            //$ships[(int)($value["id"] ?? count($ships))] = $ship;
-            $ships[$value["id"] ?? uniqid('ship_')] = $ship; //Apply a unique entry, as it seemed Loaded Fleets were overwriting a single ship sometimes.  
-        }
-    
-        return $ships;
+        //The per-ship body lives in ShipPayload, so a browser POST, the CPU opponent and any
+        //server-made fleet all build their ships with the same code (TACTICAL_AI_PLAN.md 3.2).
+        return ShipPayload::buildShips($array);
     }
   
     public static function insertIndividualNote($note){                
