@@ -229,7 +229,16 @@ window.ShipTooltip = function () {
         range.selectNodeContents(label);
         var textRect = range.getBoundingClientRect();
         if (!textRect.width) return; //not laid out (yet)
-        node.style.setProperty('--tt-ew-indent', Math.max(0, textRect.left - rowRect.left).toFixed(2) + 'px');
+        //The rects are SCREEN px; the indent is used inside the zoomed card (2026-11-24, --tt-zoom), in its own px.
+        node.style.setProperty('--tt-ew-indent', (Math.max(0, textRect.left - rowRect.left) / cardZoom(row)).toFixed(2) + 'px');
+    }
+
+    /* The CSS zoom the card is drawn at (shipTooltip.css "Smaller screens": 1, 0.85 or 0.75 by screen size).
+       `el` is any element inside the card box. */
+    function cardZoom(el) {
+        var card = el && el.closest ? el.closest('.fv-shipcard__card') : null;
+        var zoom = card && window.getComputedStyle ? parseFloat(window.getComputedStyle(card).zoom) : 1;
+        return zoom > 0 ? zoom : 1;
     }
 
     ShipTooltip.prototype.reposition = function (position) {
@@ -289,7 +298,8 @@ window.ShipTooltip = function () {
         //The CARD is centred on its unit; the ORDERS panel (round 12) hangs off its right edge, and
         //`width` - the whole row - is what the clamp keeps on screen, so near the right edge the
         //card moves left to make room for the panel.
-        var cardWidth = (this.cardElement && this.cardElement[0] && this.cardElement[0].offsetWidth) || width;
+        //The card's RECT: it is zoomed on smaller screens, and its offsetWidth is then in its own px.
+        var cardWidth = (this.cardElement && this.cardElement[0] && this.cardElement[0].getBoundingClientRect().width) || width;
         var left = point.x - cardWidth / 2;
         var top = side === 'below' ? below : above;
 

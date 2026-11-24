@@ -45,6 +45,8 @@
     /* Half of an EW row's [stepper][value][stepper] block, (22 + 36 + 22) / 2 - 49px on touch. Read
        by the value column (.fv-shipcard__vb) and by Clear EW, which centres on that column. */
     --tt-vb-half: 40px;
+    /* The card's CSS zoom - 1 here, smaller on smaller screens ("Smaller screens" below). */
+    --tt-zoom: 1;
     /* THE TONING KNOBS (user, 2026-11-21: the allegiance colours read "a bit rich"). ShipTooltip.js
        toned() mixes every allegiance colour it hands the card - the rail/border it writes inline as
        --tt-rail (so everything derived from it below: wash, tinted labels, button lines), the name and
@@ -92,8 +94,11 @@
     /* 300px -> 250px (round 3): Ini and Speed moved into Movement, the header became one row, and
        the empty space went with them. */
     width: 250px;
-    max-width: calc(100vw - 16px);
-    max-height: 65vh;
+    /* vw / vh are zoomed with the element (Chrome 158, measured), so the caps are divided by the zoom
+       to stay the same share of the SCREEN */
+    max-width: calc((100vw - 16px) / var(--tt-zoom));
+    max-height: calc(65vh / var(--tt-zoom));
+    zoom: var(--tt-zoom);
     overflow-x: hidden;
     overflow-y: auto;
     padding: 0;
@@ -1020,8 +1025,10 @@
     flex: none;
     flex-direction: column;
     width: 78px;
-    /* the card's 65vh less the drop, so the row is never taller than the card can be */
-    max-height: calc(65vh - 33px);
+    /* the card's 65vh less the drop, so the row is never taller than the card can be. Zoomed with
+       the card (same --tt-zoom), so the 33px drop still meets the card's head rule. */
+    max-height: calc(65vh / var(--tt-zoom) - 33px);
+    zoom: var(--tt-zoom);
     margin-top: 33px;
     margin-left: -2px;
     background: var(--fv-overlay);
@@ -1297,9 +1304,17 @@
         border: 0;
     }
 
+    /* 32px -> 24px (user, 2026-11-24: "reduce the height of the Ship Details button" on a phone). Target
+       keeps the same size as Ship details (user, 2026-11-13). The footer's padding goes 4 -> 3px with it. */
     .fv-shipcard .fv-shipcard__btn,
     .fv-shipcard .fv-shipcard__fire {
-        min-height: 32px;
+        height: 24px;
+        min-height: 0;
+    }
+
+    .fv-shipcard .fv-shipcard__foot {
+        padding-top: 3px;
+        padding-bottom: 3px;
     }
 
     /* the tile art a step down from the mouse's 30px; the caption keeps its size */
@@ -1308,9 +1323,11 @@
         height: 26px;
     }
 
-    /* round 12: the fold headings and the ORDERS toggle as touch targets */
+    /* round 12: the fold headings and the ORDERS toggle as touch targets. Fold 24px -> 18px (user,
+       2026-11-24: the section header rows were too tall on a phone); the heading's text is the whole
+       card width, so the height alone was never what made it easy to hit. */
     .fv-shipcard .fv-shipcard__fold {
-        min-height: 24px;
+        min-height: 18px;
     }
 
     .fv-shipcard .fv-shipcard__sidetoggle {
@@ -1330,11 +1347,37 @@
    65vh, which the user found fine. */
 @media (pointer: coarse) and (orientation: portrait) {
     .shipNameContainer .fv-shipcard__card {
-        max-height: 50vh;
+        max-height: calc(50vh / var(--tt-zoom));
     }
 
     .shipNameContainer .fv-shipcard__side {
-        max-height: calc(50vh - 33px);
+        max-height: calc(50vh / var(--tt-zoom) - 33px);
+    }
+}
+
+/* ── Smaller screens: the whole card zoomed (user, 2026-11-24) ────────────────
+   On a phone the 250px card was too large (players' complaint), so it shrinks with the screen the
+   way the system card did (SystemCard.js, 2026-11-12: 1 at 1024 x 640 and up, a 0.75 floor - body
+   text 9px). CSS zoom, not transform: it scales the LAYOUT, so text renders at its real size and
+   everything that measures the root (place, placeDocked, drag, keepInView) still gets screen px.
+   ⭐ The ROOT is never zoomed - its left/top would be zoomed too. --tt-zoom goes on the card box and
+   the ORDERS panel (above), and onto the hex picker's sheet, which narrows to the card's zoomed
+   width while it shows one (hexPicker.css --hp-sheet-max-w). ShipTooltip.js alignEwRows divides its
+   screen-px measurement by the zoom; place() reads the card's width from its rect.
+   Only where zoom works, so a browser without it never gets the divided vh caps. */
+@supports (zoom: 0.5) {
+    @media (max-width: 1023px), (max-height: 639px) {
+        .shipNameContainer.fv-shipcard,
+        .fv-hexpicker--sheet {
+            --tt-zoom: 0.85;
+        }
+    }
+
+    @media (max-width: 767px), (max-height: 479px) {
+        .shipNameContainer.fv-shipcard,
+        .fv-hexpicker--sheet {
+            --tt-zoom: 0.75;
+        }
     }
 }
 

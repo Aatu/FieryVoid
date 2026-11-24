@@ -47,7 +47,9 @@
     --hp-icon: 24px;
     /* details icon inside it                       */
     --hp-card-w: 320px;
-    --hp-sheet-max-w: 400px;
+    /* The picker's CSS zoom - 1 here, smaller on smaller screens ("Smaller screens" below). */
+    --hp-zoom: 1;
+    --hp-sheet-max-w: calc(400px * var(--hp-zoom));
     /* sheet width cap. Without it the sheet spans
        left:8px..right:8px, which is fine on a 390px
        phone but absurd on a landscape phone or a
@@ -77,7 +79,7 @@
        windows (10001) - the card docks beside this picker and, on touch, opens INSIDE its sheet. */
     z-index: 10010;
     box-sizing: border-box;
-    width: var(--hp-card-w);
+    width: calc(var(--hp-card-w) * var(--hp-zoom));
     max-width: calc(100vw - 16px);
     display: flex;
     flex-direction: column;
@@ -281,7 +283,8 @@
 .fv-hexpicker__list {
     flex: 1 1 auto;
     min-height: 0;
-    max-height: var(--hp-list-max);
+    /* ÷ the zoom: the list is zoomed and Chrome zooms vh with it ("Smaller screens" below) */
+    max-height: calc(var(--hp-list-max) / var(--hp-zoom));
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
@@ -757,7 +760,37 @@
     .fv-hexpicker--sheet {
         --hp-row-h: 46px;
         --hp-list-max: 46vh;
-        --hp-sheet-max-w: 460px;
+        --hp-sheet-max-w: calc(460px * var(--hp-zoom));
+    }
+}
+
+/* ── Smaller screens: the picker zoomed (user, 2026-11-24: "obnoxiously large on mobile") ──
+   The ship card's scaling (shipTooltip.css "Smaller screens"), on the same breakpoints - keep the two
+   in step: 1 at 1024 x 640 and up, 0.85, then 0.75 on phones. CSS zoom on the CONTENT blocks only:
+   ⭐ never the root (its left/top/right/bottom would be zoomed too - and positionSelf, the drag and
+   the docked card all measure the root, which stays in screen px), never the caret (positioned on
+   the root in screen px), never the card slot (the ship card in it zooms itself, --tt-zoom). The
+   root's width and the sheet's width cap carry the zoom instead (--hp-card-w / --hp-sheet-max-w
+   uses). ⚠️ This takes the sheet's rows below the 44px coarse floor noted above (52 / 44 -> 39 / 33px
+   at 0.75) - the user's call, asked for after "buttons are too large in all instances". */
+.fv-hexpicker > .fv-hexpicker__grab,
+.fv-hexpicker > .fv-hexpicker__header,
+.fv-hexpicker > .fv-hexpicker__actions,
+.fv-hexpicker > .fv-hexpicker__list {
+    zoom: var(--hp-zoom);
+}
+
+@supports (zoom: 0.5) {
+    @media (max-width: 1023px), (max-height: 639px) {
+        .fv-hexpicker {
+            --hp-zoom: 0.85;
+        }
+    }
+
+    @media (max-width: 767px), (max-height: 479px) {
+        .fv-hexpicker {
+            --hp-zoom: 0.75;
+        }
     }
 }
 
@@ -1683,8 +1716,10 @@
    width, so the height alone was never what made it easy to hit.
    And the sheet narrows to the free-standing card's 250px (+ the card's 8px margins and the sheet's
    1px borders) while it shows one (user's S21 screenshots, 2026-11-21): stretched to the sheet's full
-   width the card was ~385px wide in portrait and ~445px in landscape. The list gets its width back. */
+   width the card was ~385px wide in portrait and ~445px in landscape. The list gets its width back.
+   2026-11-24: the card is zoomed on smaller screens (--tt-zoom, set on this sheet by shipTooltip.css
+   "Smaller screens"), so the sheet narrows to the ZOOMED card: 250 x zoom + 18. */
 .fv-hexpicker--sheet.fv-hexpicker--detail {
     --hp-header-h: 34px;
-    --hp-sheet-max-w: 268px;
+    --hp-sheet-max-w: calc(250px * var(--tt-zoom, 1) + 18px);
 }
