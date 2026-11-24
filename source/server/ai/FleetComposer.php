@@ -11,13 +11,15 @@
  *
  * WHAT IT BUYS: from the faction's own catalogue - static/json/<faction>.json, the file the lobby's Store and checker read - plain
  * combat units only: common and uncommon (no rare, unique or special variant), official, in service by the game's date, no base /
- * OSAT / mine, nothing out of tier, no craft that needs any hangar but a fighter's, no hull whose hangars carry a minimum the
- * composer does not fill (Fighter Squadrons, Mapmaker Probes), nothing a CPU player cannot fly (AIConfig::cpuUnitBlock). Fighters in
- * full flights of six. No enhancements, refits or officers (plan 8.2: "auto-composed fleets are plain").
+ * OSAT / mine, nothing out of tier, no craft that needs any hangar but a fighter's or a Hunter-Killer's (stage T9, M2), no hull whose
+ * hangars carry a minimum the composer does not fill (Fighter Squadrons, Mapmaker Probes), nothing a CPU player cannot fly
+ * (AIConfig::cpuUnitBlock). Fighters in full flights of six. No enhancements, refits or officers (plan 8.2: "auto-composed fleets are
+ * plain").
  *
  * HOW: capital ships first (the checker wants one per 5,000 points from 3,000) with a jump engine among them, then ships towards a
  * share of the points drawn from the seed, then fighters until every carrier's hangars are at least half full (a carrier the points
- * cannot fill goes, and the fill is tried again), then whatever still fits, the dearest first. Every pick keeps the per-hull,
+ * cannot fill goes, and the fill is tried again), then Hunter-Killers until the carriers' HK space is at least half full where the
+ * points allow (stage T9, M2 - the user, 2026-11-24: "fill HK space"), then whatever still fits, the dearest first. Every pick keeps the per-hull,
  * rarity and deployment-bracket limits. Each attempt is checked (problems()); the seed varies the picks; of the clean attempts the
  * one spending most is kept, and it stops at the first within 2% of the points (plan 8.2).
  * Deterministic for a seed: a generator of its own, so mt_rand's global state is left alone.
@@ -29,6 +31,10 @@ class FleetComposer
     //Hangar categories the checker holds to a MINIMUM (gamelobby.js: 'Fighter Squadrons', and noHangarMaxCraftTypes) - a hull
     //declaring one would need craft the composer does not buy, so it is not bought.
     const MINIMUM_CATEGORIES = array('Fighter Squadrons', 'Mapmaker Probes');
+    /* Stage T9, M2 (the user, 2026-11-24: auto-compose should "fill HK space"): the Hunter-Killer category. The checker allows a fleet
+       "up to" its carriers' declared Hunter-Killers (a custom category - no minimum, never counted as fighters); the composer buys HK
+       flights until that space is at least half full where the points allow it (fillHunterKillers), and never past it. */
+    const HK_CATEGORY = 'Hunter-Killers';
 
     private static $catalogues = array(); //"faction|isd" => the catalogue as candidates (a static file is megabytes of JSON)
 
@@ -57,12 +63,18 @@ class FleetComposer
             $problems = self::problems($units, $points);
             if (count($problems) == 0) $units = self::polish($catalogue, $units, $points);
             $spent = self::spent($units);
+            /* (stage T9, M2) among attempts with as few problems, one that fills half the Hunter-Killer space beats one that does not -
+               an attempt that spent its points on ships first must not win on points alone (the first sweep: 28 of 96 clean Orieni
+               fleets left their HK space under half) */
+            $short = self::hkShort($units);
             if ($best === null || count($problems) < count($best['problems'])
-                || (count($problems) == count($best['problems']) && $spent > $best['points'])) {
-                $best = array('faction' => $faction, 'points' => $spent, 'units' => $units, 'problems' => $problems);
+                || (count($problems) == count($best['problems']) && !$short && $best['hkShort'])
+                || (count($problems) == count($best['problems']) && $short == $best['hkShort'] && $spent > $best['points'])) {
+                $best = array('faction' => $faction, 'points' => $spent, 'units' => $units, 'problems' => $problems, 'hkShort' => $short);
             }
-            if (count($problems) == 0 && $spent >= 0.98 * $points) break;
+            if (count($problems) == 0 && !$short && $spent >= 0.98 * $points) break;
         }
+        unset($best['hkShort']);
 
         $named = array();
         $counts = array();
@@ -81,6 +93,7 @@ class FleetComposer
     {
         $ships = $catalogue['ships'];
         $flights = $catalogue['flights'];
+        $hks = $catalogue['hks'];
         $units = array();
         if (count($ships) == 0) return $units;
 
@@ -124,12 +137,15 @@ class FleetComposer
             array_splice($units, $drop, 1);
         }
 
+        //3b. (stage T9, M2) Hunter-Killers until the carriers' HK space is at least half full - as far as the points go
+        self::fillHunterKillers($units, $hks, $points, $rng);
+
         //4. whatever still fits, one of the three dearest each time: a ship (a carrier only while the fighters still fill half of
         //   the hangars it adds) or a flight the hangars have room for
         for ($guard = 0; $guard < 80; $guard++) {
             $left = $points - self::spent($units);
             $options = array();
-            foreach (array_merge($ships, $flights) as $candidate) {
+            foreach (array_merge($ships, $flights, $hks) as $candidate) {
                 if ($candidate['cost'] > $left || !self::allowed($units, $candidate, $points)) continue;
                 $with = $units;
                 $with[] = $candidate;
@@ -148,11 +164,12 @@ class FleetComposer
     //and that leaves the fleet clean - the trade spending most each round, a few rounds at most.
     private static function polish(array $catalogue, array $units, $points)
     {
-        $all = array_merge($catalogue['ships'], $catalogue['flights']);
+        $all = array_merge($catalogue['ships'], $catalogue['flights'], $catalogue['hks']);
         for ($round = 0; $round < 6 && self::spent($units) < 0.98 * $points; $round++) {
             $left = $points - self::spent($units);
             $best = null;
             $bestGain = 0;
+            $hkFilled = !self::hkShort($units);
             foreach ($units as $index => $unit) {
                 foreach ($all as $candidate) {
                     $gain = $candidate['cost'] - $unit['cost'];
@@ -160,6 +177,7 @@ class FleetComposer
                     $traded = $units;
                     $traded[$index] = $candidate;
                     if (count(self::problems($traded, $points)) > 0) continue;
+                    if ($hkFilled && self::hkShort($traded)) continue; //(stage T9, M2) no trade empties the HK space it filled
                     $best = $traded;
                     $bestGain = $gain;
                 }
@@ -204,6 +222,35 @@ class FleetComposer
             $units[] = $cheapest[$rng(count($cheapest))];
         }
         return false;
+    }
+
+    /* Stage T9, M2: Hunter-Killer flights (the cheapest two, one drawn from the seed) until the carriers' HK space is at least half
+       full, never past it, while the points allow; best effort - the checker asks for no minimum. */
+    private static function fillHunterKillers(array &$units, array $hks, $points, callable $rng)
+    {
+        for ($guard = 0; $guard < 40 && self::hkShort($units); $guard++) {
+            $left = $points - self::spent($units);
+            $options = array();
+            foreach ($hks as $hk) {
+                if ($hk['cost'] > $left || !self::allowed($units, $hk, $points)) continue;
+                $with = $units;
+                $with[] = $hk;
+                $after = self::hangars($with);
+                if ($after['hkCraft'] > $after['hkCapacity']) continue;
+                $options[] = $hk;
+            }
+            if (count($options) == 0) return;
+            usort($options, function ($a, $b) { return $a['cost'] <=> $b['cost']; });
+            $cheapest = array_slice($options, 0, 2);
+            $units[] = $cheapest[$rng(count($cheapest))];
+        }
+    }
+
+    //Is the fleet's Hunter-Killer space less than half full (none to fill: no)?
+    private static function hkShort(array $units)
+    {
+        $h = self::hangars($units);
+        return $h['hkCapacity'] > 0 && $h['hkCraft'] < (int)ceil($h['hkCapacity'] / 2);
     }
 
     //Does adding $candidate keep every bracket, per-hull and rarity limit?
@@ -275,16 +322,24 @@ class FleetComposer
     {
         $capacity = array('heavy' => 0, 'medium' => 0, 'light' => 0, 'ultralight' => 0);
         $craft = array('heavy' => 0, 'medium' => 0, 'light' => 0, 'ultralight' => 0);
+        $hkCapacity = 0; //(stage T9, M2) the Hunter-Killers category: its own space, never counted as fighters
+        $hkCraft = 0;
         foreach ($units as $unit) {
+            if (!empty($unit['hk'])) {
+                $hkCraft += self::FLIGHT_SIZE / $unit['unitSize'];
+                continue;
+            }
             if ($unit['flight']) {
                 $craft[$unit['craftSize']] += ($unit['craftSize'] === 'ultralight') ? self::FLIGHT_SIZE : self::FLIGHT_SIZE / $unit['unitSize'];
                 continue;
             }
             foreach ($capacity as $size => $boxes) $capacity[$size] += $unit['hangar'][$size];
+            $hkCapacity += isset($unit['hangar']['hk']) ? $unit['hangar']['hk'] : 0;
         }
         return array('capacity' => $capacity, 'craft' => $craft,
             'available' => $capacity['heavy'] + $capacity['medium'] + $capacity['light'] + $capacity['ultralight'] / 2,
-            'present' => $craft['heavy'] + $craft['medium'] + $craft['light'] + $craft['ultralight'] / 2);
+            'present' => $craft['heavy'] + $craft['medium'] + $craft['light'] + $craft['ultralight'] / 2,
+            'hkCapacity' => $hkCapacity, 'hkCraft' => $hkCraft);
     }
 
     private static function hangarProblems(array $h)
@@ -293,6 +348,8 @@ class FleetComposer
         $min = (int)ceil($h['available'] / 2);
         if ($h['present'] > $h['available'] || $h['present'] < $min) $problems[] = "fighters $h[present] (between $min and $h[available])";
         if (!self::rowsOk($h)) $problems[] = 'fighters of a size beyond the hangars for it';
+        //(stage T9, M2) the checker's custom-category row: "allowed up to" the carriers' declared Hunter-Killers
+        if ($h['hkCraft'] > $h['hkCapacity']) $problems[] = "Hunter-Killers $h[hkCraft] (allowed up to $h[hkCapacity])";
         return $problems;
     }
 
@@ -346,7 +403,7 @@ class FleetComposer
         $json = is_file($file) ? json_decode((string)file_get_contents($file), true) : null;
         if (!is_array($json) || !isset($json[$faction]) || !is_array($json[$faction])) throw new Exception("No ship catalogue for $faction.");
 
-        $out = array('ships' => array(), 'flights' => array());
+        $out = array('ships' => array(), 'flights' => array(), 'hks' => array()); //(stage T9, M2: 'hks' - Hunter-Killer flights)
         foreach ($json[$faction] as $s) {
             if (!is_array($s) || empty($s['phpclass']) || !class_exists($s['phpclass'])) continue;
             if (empty($s['isCombatUnit']) || !empty($s['base']) || !empty($s['smallBase']) || !empty($s['osat']) || !empty($s['mine'])) continue;
@@ -360,14 +417,16 @@ class FleetComposer
             if (!empty($s['customFtrName']) || !empty($s['customFighter']) || !empty($s['noHangarRequired'])) continue;
             $flight = !empty($s['flight']);
             $hangarRequired = (string)($s['hangarRequired'] ?? '');
-            if ($flight ? ($hangarRequired !== 'fighters') : ($hangarRequired !== '')) continue;
+            $hk = $flight && $hangarRequired === self::HK_CATEGORY; //(stage T9, M2) a Hunter-Killer flight: its own category
+            if ($flight ? ($hangarRequired !== 'fighters' && !$hk) : ($hangarRequired !== '')) continue;
             $maxFlightSize = (int)($s['maxFlightSize'] ?? 0);
             if ($flight && $maxFlightSize > 0 && $maxFlightSize < self::FLIGHT_SIZE) continue;
             $fighters = is_array($s['fighters'] ?? null) ? $s['fighters'] : array();
             if (count(array_intersect(array_keys($fighters), self::MINIMUM_CATEGORIES)) > 0) continue;
 
-            $hangar = array('heavy' => 0, 'medium' => 0, 'light' => 0, 'ultralight' => 0, 'total' => 0);
+            $hangar = array('heavy' => 0, 'medium' => 0, 'light' => 0, 'ultralight' => 0, 'total' => 0, 'hk' => 0);
             foreach ($fighters as $size => $boxes) {
+                if ($size === self::HK_CATEGORY) $hangar['hk'] += (int)$boxes; //(stage T9, M2) its own space - not in 'total'
                 $slot = ($size === 'normal' || $size === 'heavy') ? 'heavy' : $size;
                 if (!in_array($slot, array('heavy', 'medium', 'light', 'ultralight'), true)) continue; //shuttles, assault shuttles, ...
                 $hangar[$slot] += (int)$boxes;
@@ -376,7 +435,8 @@ class FleetComposer
             $jinking = (int)($s['jinkinglimit'] ?? 0);
             $craftSize = ($jinking >= 99) ? 'ultralight' : (($jinking >= 10) ? 'light' : (($jinking >= 8) ? 'medium' : (($jinking >= 6) ? 'heavy' : null)));
             $unitSize = (float)($s['unitSize'] ?? 1);
-            if ($flight && ($craftSize === null || $unitSize <= 0)) continue;
+            if ($flight && $unitSize <= 0) continue;
+            if ($flight && $craftSize === null && !$hk) continue; //(a Hunter-Killer is no fighter size - the checker classes it by its category)
 
             $jump = false;
             foreach ((array)($s['systems'] ?? array()) as $system) {
@@ -385,12 +445,12 @@ class FleetComposer
             if (self::cpuBlocked($s['phpclass'])) continue;
 
             $class = (string)($s['shipClass'] ?? $s['phpclass']);
-            $out[$flight ? 'flights' : 'ships'][] = array(
+            $out[$hk ? 'hks' : ($flight ? 'flights' : 'ships')][] = array(
                 'phpclass' => $s['phpclass'], 'class' => $class,
                 'hull' => ((string)($s['variantOf'] ?? '') !== '') ? (string)$s['variantOf'] : $class,
                 'cost' => (int)$s['pointCost'], 'limited' => (int)($s['limited'] ?? 0), 'rarity' => ($occurence === 'common') ? 'C' : 'U',
                 'size' => (int)($s['shipSizeClass'] ?? 0), 'flight' => $flight, 'jump' => $jump, 'hangar' => $hangar,
-                'craftSize' => $craftSize, 'unitSize' => $unitSize);
+                'craftSize' => $craftSize, 'unitSize' => $unitSize, 'hk' => $hk);
         }
         return self::$catalogues[$key] = $out;
     }

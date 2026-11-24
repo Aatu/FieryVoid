@@ -21,22 +21,30 @@ class DeployDecider
         $seed = isset($seat['cpu']['seed']) ? (int)$seat['cpu']['seed'] : 0;
         $view = new AIView($gamedata, $botId, AIConfig::seatLevel($seat), $seed);
 
+        /* Stage T9, M2: flights that must start in a hangar (the Orieni Hunter-Killers) go into the carriers, spread over them
+           (HangarDecider) - not into the formation. One with no room anywhere is placed with the rest. */
+        $docked = HangarDecider::dockPlan($gamedata, $botId);
+
         $planned = array();
         foreach ($gamedata->getSlotsByPlayerId($botId) as $slot) {
-            $anchors = FleetDeployer::maxGroups($gamedata, $botId, $slot->slot);
+            $unitIds = array();
+            foreach (FleetDeployer::eligibleUnits($gamedata, $botId, $slot->slot) as $unit) {
+                if (!isset($docked[(int)$unit->id])) $unitIds[] = (int)$unit->id;
+            }
+            $anchors = FleetDeployer::maxGroups($gamedata, $botId, $slot->slot, $unitIds);
 
             if ($personality === 'cautious') $groups = 1;
             else if ($personality === 'aggressive' || $personality === 'skirmisher') $groups = $anchors;
             else $groups = (int)ceil($anchors / 2);
 
-            $options = array('groups' => $groups, 'seed' => $seed);
+            $options = array('groups' => $groups, 'seed' => $seed, 'unitIds' => $unitIds);
             //stage T9: spread out against an enemy carrying an area-effect weapon (the skill 'aoeSpread' - Normal and Hard)
             if ($view->skill('aoeSpread') && self::aoeThreat($gamedata, $slot->team)) $options['spread'] = AIConfig::AOE_SPACING;
-            $plan = FleetDeployer::plan($gamedata, $botId, $slot->slot, $options);
+            $plan = (count($unitIds) > 0) ? FleetDeployer::plan($gamedata, $botId, $slot->slot, $options) : array();
             foreach ($plan as $place) $planned[$place['shipid']] = $place;
         }
 
-        return AIFallback::deployment($gamedata, $botId, $planned);
+        return HangarDecider::dock(AIFallback::deployment($gamedata, $botId, $planned), $docked);
     }
 
     /* Stage T9 (the user, 2026-11-23: "Normal and Hard CPU should recognise when energy mines (in a way that can be extended later to

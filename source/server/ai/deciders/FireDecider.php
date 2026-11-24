@@ -52,7 +52,20 @@ class FireDecider
         $gamedata->prepareForPlayer(); //the mask a human in this seat plays behind; also fills what the page reads
 
         $view = new AIView($gamedata, $botId, AIConfig::seatLevel($seat), AIConfig::seatSeed($seat));
-        return self::entries($view, self::plan($view));
+        $entries = self::entries($view, self::plan($view));
+
+        /* Stage T9, M2: the flights that started the battle in a hangar (the Orieni Hunter-Killers) are launched, as far as the bays'
+           launch rates allow (HangarDecider) - a Fire-phase order, resolved at the end of the turn. */
+        $launches = HangarDecider::launches($view);
+        if (count($launches) > 0) {
+            foreach ($entries as $index => $entry) {
+                if (!isset($launches[(int)$entry['id']])) continue;
+                foreach ($launches[(int)$entry['id']] as $hangarId => $system) $entries[$index]['systems'][$hangarId] = $system;
+            }
+        }
+        $line = HangarDecider::describeLaunches();
+        if ($line !== '') self::$lastSummary .= '; ' . $line;
+        return $entries;
     }
 
     //A plan as the entries AIOrderBuilder describes: every unit of the bot, with its fire orders.
@@ -276,6 +289,40 @@ class FireDecider
             );
             $rams++;
             if ($ram->designedToRam) $designedRams++;
+        }
+
+        /* Stage T9, M2: a flight DESIGNED to ram (the Orieni Hunter-Killers) rams whatever of its quarry shares its hex - every craft with
+           its own Ramming Attack, an order each, all at one unit (as AutomatedMovement::createAutomatedRamOrders rams for an Uncontrolled
+           one): the largest enemy ship there (Posture::ramClass), the most it does breaking a tie; a fighter flight only once the enemy has
+           no ship left (the user, 2026-11-24). An Uncontrolled flight is the server's (Posture::flightRams gives it no craft). */
+        $enemyShips = false;
+        foreach ($enemies as $enemy) {
+            if (!($enemy instanceof FighterFlight) && empty($enemy->mine) && !$enemy->isTerrain()) $enemyShips = true;
+        }
+        foreach ($view->myUnits() as $unit) {
+            $craft = Posture::flightRams($view, $unit);
+            if (count($craft) == 0) continue;
+            $ram = $craft[0]['ram'];
+            $best = null;
+            foreach ($enemies as $enemy) {
+                if (!empty($enemy->mine) || $enemy->isTerrain()) continue;
+                if ($enemy instanceof FighterFlight && $enemyShips) continue;
+                $value = Posture::flightRamValue($view, $unit, $ram, $enemy, count($craft), $state[$enemy->id]['health'], $state[$enemy->id]['value'] / $state[$enemy->id]['health']);
+                if ($value <= 0) continue;
+                $key = array(($enemy instanceof FighterFlight) ? -1 : Posture::ramClass($enemy), $value);
+                if ($best === null || $key > $best[1]) $best = array($enemy, $key);
+            }
+            if ($best === null) continue;
+            $target = $best[0];
+            foreach ($craft as $one) {
+                $plan[] = array(
+                    'unit' => $unit, 'weapon' => $one['ram'], 'fighter' => $one['fighter'], 'target' => $target,
+                    'mode' => 1, 'chance' => (int)round($view->chanceOf($unit, $one['ram'], $target, false)), 'orders' => 1, 'shots' => 1,
+                    'damageclass' => strtolower((string)$one['ram']->weaponClass), 'damage' => $best[1][1] / count($craft), 'score' => $best[1][1] / count($craft)
+                );
+            }
+            $rams++;
+            $designedRams++;
         }
 
         //each weapon back in the mode its order is in: the volleys were valued with every candidate in turn

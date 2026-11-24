@@ -492,6 +492,11 @@ class AIConfig
        the share asked of primary + the section facing the enemy instead, ships left with a whole primary and one section lost - a
        ship that can turn a fresh side. 0.5 was the implementer's pick; the user set 0.15 (2026-11-21, after committing T6). */
     const JUMP_DAMAGED_SHARE = 0.15;
+    /* "CANNOT GET BACK INTO THE FIGHT" (the second case) - nothing of the ship could come within reach of an enemy within this many turns,
+       both flying their hardest each turn (Posture::canFight). Stage T9, M2 (the user's ruling, 2026-11-24 - found by the Hunter-Killer
+       self-play): it was this turn alone, and on turn 1 of a 42x30 game slow short-ranged carriers 34 hexes from the enemy (Orieni
+       Prophet, Vigilant) jumped out at once. A ship stranded far off the map still leaves. */
+    const JUMP_REACH_TURNS = 3;
 
     /* LAST-RESORT RAMMING (stage T6d, built at T8 - the user's ruling of 2026-11-21): a ship of a team the Desperate rule covers rams
        when it has no usable weapon, or its PRIMARY structure is down to this share of its boxes - Normal and Hard (skill 'ram'), only
@@ -504,6 +509,16 @@ class AIConfig
        ran 12-20 hexes off - the "best trade" of its two Scatter Pulsars - and a rammer that turns away never rams. */
     const RAM_PURSUIT = 10.0;
     const RAM_DANGER_SHARE = 0.25;
+    /* Stage T9, M2 - the Hunter-Killers (the user, 2026-11-23: "launch them immediately and they will usually target larger ships in enemy
+       fleet due to their high damage potential, working their way down to HCV and MCV if no larger ships are available"; 2026-11-24: on
+       down to LCVs, and fighters once no ship is left). A size class is "available" while one of its units is within this many turns of the
+       flight, both flying their hardest (Posture::ramQuarry); a larger class further off than that gives way to a nearer smaller one. The
+       turns are the implementer's reading. A Hunter-Killer flight pursues as a designed rammer ship does (RAM_PURSUIT, RAM_DANGER_SHARE). */
+    const RAM_QUARRY_TURNS = 2;
+    /* ...and the plans it asks ShipMover for beyond the plainest-first search (FlightDecider::ramSearch - enumerateToward): for each of its
+       RAM_AIMED_QUARRY nearest quarry, RAM_AIMED_PLANS that end in its hex at the Fire phase, or as far along the way as it can go */
+    const RAM_AIMED_PLANS = 6;
+    const RAM_AIMED_QUARRY = 2;
 
     /* Stage T9 (the user, 2026-11-23: "Normal and Hard CPU should recognise when energy mines (in a way that can be extended later to cover
        other AoE weapons) are present and deploy in a more spread out way to minimise potential damage from this AoE weapon"). AOE_WEAPONS:

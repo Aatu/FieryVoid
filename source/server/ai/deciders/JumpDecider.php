@@ -7,8 +7,9 @@
  * most ships fight until they are destroyed or the game is won. A damaged Jump Engine trying to open a jump point can also destroy
  * the ship, so if more than 50% damage is taken the Jump should not be attempted". Ruled the same day - a ship leaves when:
  *   - it has NO USABLE WEAPON (Posture::usableGuns), or
- *   - it CANNOT GET BACK INTO THE FIGHT: nothing of it can come within reach of any enemy this turn (Posture::canFight - far off the
- *     map, unable to brake or turn), or
+ *   - it CANNOT GET BACK INTO THE FIGHT: nothing of it can come within reach of any enemy within AIConfig::JUMP_REACH_TURNS turns
+ *     (Posture::canFight - far off the map, unable to brake or turn; this turn alone until stage T9's M2, which sent slow carriers home
+ *     on turn 1 - the user's ruling of 2026-11-24), or
  *   - it is EXPECTED TO BE DESTROYED: the loaded enemy guns that can reach it - each enemy from the facing that brings most of them
  *     to bear (it will turn to it), a balanced EW split both ways - are expected to deal more than what is left of it (its primary
  *     structure and the section facing the worst of them, AIView::healthLeft), it is already "so damaged" - its primary structure
@@ -113,7 +114,9 @@ class JumpDecider
     public static function reason(AIView $view, $ship, array $enemies)
     {
         if (count(Posture::usableGuns($view, $ship)) == 0) return 'no usable weapon';
-        if (!Posture::canFight($view, $ship, $enemies)) return 'cannot get back into the fight';
+        //(stage T9, M2 - the user, 2026-11-24: over AIConfig::JUMP_REACH_TURNS, not this turn alone - on turn 1 of a 42x30 game slow
+        //short-ranged carriers 34 hexes off "could not get back" and jumped out, their HK control nodes with them)
+        if (!Posture::canFight($view, $ship, $enemies, AIConfig::JUMP_REACH_TURNS)) return 'cannot get back into the fight';
 
         /* Only a ship already "so damaged" (AIConfig::JUMP_DAMAGED_SHARE): its PRIMARY structure - the boxes whose loss destroys it -
            down to that share. A sound one fights on, whatever could be thrown at it; so does one that has lost the section facing

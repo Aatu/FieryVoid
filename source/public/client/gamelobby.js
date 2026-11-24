@@ -3919,7 +3919,7 @@ window.gamedata = {
 	/* Why a CPU player cannot fly a unit of this blueprint, or null - the kinds ShipMover never plots for.
 	   ⚠️ MIRROR PAIR with ShipMover::unsupportedHullReason (source/server/ai/ShipMover.php): add a kind there, add it here. */
 	cpuHullBlock: function cpuHullBlock(ship) {
-		if (ship.flight && ship.remoteControl) return "a remote-controlled flight";
+		//(stage T9, M2 - 2026-11-24: remote-controlled flights, the Orieni Hunter-Killers, are flown by the AI since)
 		if (ship.shipSizeClass == 5) return "terrain";
 		if (ship.base || ship.smallBase) return "a base";
 		if (ship.osat) return "an OSAT";

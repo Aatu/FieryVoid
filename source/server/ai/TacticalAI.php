@@ -80,7 +80,10 @@ class TacticalAI
         Posture::$mustShoot = Posture::mustShoot($shots, $turn);
         if ($refusals == 0 && !in_array((int)$phase, self::$without, true)) {
             try {
-                if ($phase == -1) $entries = DeployDecider::orders($gamedata, $botId, $seat);
+                if ($phase == -1) {
+                    $entries = DeployDecider::orders($gamedata, $botId, $seat);
+                    $summary = HangarDecider::describeDocks(); //stage T9, M2 (null when nothing starts docked)
+                }
                 else if ($phase == 1) {
                     Posture::$last = null;
                     $entries = self::initialOrders($gamedata, $botId, $seat);

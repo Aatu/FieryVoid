@@ -71,19 +71,21 @@ class Posture
         return sprintf('%d of %d units can damage an enemy; fleet value %.0f against %.0f', $assessment['able'], $assessment['units'], $assessment['own'], $assessment['enemy']);
     }
 
-    /* Can $unit damage any of $enemies this turn - "no usable weapon, or nothing can get within reach"? See the header. */
-    public static function canFight(AIView $view, $unit, array $enemies)
+    /* Can $unit damage any of $enemies this turn - "no usable weapon, or nothing can get within reach"? See the header.
+       $turns (stage T9, M2 - the user's ruling of 2026-11-24): the reach over that many turns, both flying their hardest each turn - JumpDecider's
+       "cannot get back into the fight" asks AIConfig::JUMP_REACH_TURNS; surrender, the last stand and the rest ask this turn's. */
+    public static function canFight(AIView $view, $unit, array $enemies, $turns = 1)
     {
         if ($unit->isDestroyed()) return false;
         if (!($unit instanceof FighterFlight) && $unit->isDisabled()) return false;
 
         $guns = self::usableGuns($view, $unit);
-        if (count($guns) == 0) return false;
+        if (count($guns) == 0) return self::canRam($unit, $enemies, $turns);
 
         $turn = $view->turn;
         $points = ($unit instanceof FighterFlight) ? 0 : EWDecider::points($unit, $turn);
         foreach ($enemies as $enemy) {
-            $steps = PowerDecider::maxMove($unit) + PowerDecider::maxMove($enemy) + AIConfig::POWER_REACH_SLACK;
+            $steps = max(1, (int)$turns) * (PowerDecider::maxMove($unit) + PowerDecider::maxMove($enemy)) + AIConfig::POWER_REACH_SLACK;
             $found = PowerDecider::nearer($unit, $enemy, $steps, $turn, function () use ($view, $unit, $enemy, $guns, $points, $turn) {
                 $kept = $unit->EW;
                 if ($points > 0) $unit->EW[] = new EWentry(-1, $unit->id, $turn, 'OEW', $points, $enemy->id);
@@ -102,6 +104,27 @@ class Posture
                 }
             });
             if ($found) return true;
+        }
+        return false;
+    }
+
+    /* Stage T9, M2: a flight DESIGNED to ram (the Hunter-Killers - its rams are its only weapons) can fight while a live craft still
+       carries its Ramming Attack and an enemy could be in its hex this turn, both closing as hard as they can (the reach above). An
+       Uncontrolled one counts too: the server flies it at the enemy and rams for it. */
+    private static function canRam($unit, array $enemies, $turns = 1)
+    {
+        if (!($unit instanceof FighterFlight)) return false;
+        $rams = false;
+        foreach ($unit->systems as $fighter) {
+            if (!($fighter instanceof Fighter) || $fighter->isDestroyed()) continue;
+            foreach ($fighter->systems as $system) {
+                if ($system instanceof RammingAttack && $system->designedToRam && !$system->isDestroyed()) $rams = true;
+            }
+        }
+        if (!$rams) return false;
+        foreach ($enemies as $enemy) {
+            $steps = max(1, (int)$turns) * (PowerDecider::maxMove($unit) + PowerDecider::maxMove($enemy)) + AIConfig::POWER_REACH_SLACK;
+            if ($unit->getHexPos()->distanceTo($enemy->getHexPos()) <= $steps) return true;
         }
         return false;
     }
@@ -197,6 +220,84 @@ class Posture
         $factor = $back ? $back->getBaseRammingFactor() : $target->getRammingFactor();
         $taken = min($chance * 0.625 * $factor, $worth[2]) * $worth[3] * $worth[4]; //(0.625: the mean of a ram's quarter-to-whole factor, as its damage range)
         return $dealt - $taken;
+    }
+
+    // ------------------------------------------------------------------ stage T9, M2: flights designed to ram (the Orieni Hunter-Killers)
+
+    /* The craft of a flight DESIGNED to ram that can ram this turn: list of array('fighter' => Fighter, 'ram' => RammingAttack) - every
+       live craft whose Ramming Attack is designedToRam, loaded and switched on (weaponManager.targetShip's own tests). Empty for any other
+       unit, and for a flight the server flies this turn (Uncontrolled - AutomatedMovement plots its seek and declares its rams, and
+       Firing::validateFireOrders refuses a player's). Each craft rams with its own Ramming Attack, one order each, as the page orders a
+       flight's ram. */
+    public static function flightRams(AIView $view, $unit)
+    {
+        if (!($unit instanceof FighterFlight) || $unit->isDestroyed()) return array();
+        if (!empty($unit->remoteControl) && AutomatedMovement::isUnderAutomatedControl($unit, $view->gamedata)) return array();
+        $out = array();
+        foreach ($unit->systems as $fighter) {
+            if (!($fighter instanceof Fighter) || $fighter->isDestroyed()) continue;
+            foreach ($fighter->systems as $system) {
+                if (!($system instanceof RammingAttack) || !$system->designedToRam || $system->autoFireOnly || $system->isDestroyed()) continue;
+                if (!$view->loaded($system) || $system->isOfflineOnTurn($view->turn)) continue;
+                $out[] = array('fighter' => $fighter, 'ram' => $system);
+                break;
+            }
+        }
+        return $out;
+    }
+
+    /* What a flight designed to ram goes for, among $enemies: the user's rulings - "they will usually target larger ships in enemy fleet
+       due to their high damage potential, working their way down to HCV and MCV if no larger ships are available" (2026-11-23), on down
+       to LCVs and, once the enemy has no ship left, its fighter flights ("Anything, fighters too", 2026-11-24). "Available" is read as
+       within reach: the largest size class (Enormous, capital, HCV, MCV, LCV) with a unit the flight could reach within
+       AIConfig::RAM_QUARRY_TURNS turns (both flying their hardest - PowerDecider::maxMove), or the largest there is when none is that
+       near. The units of that class; mines and terrain are never quarry. */
+    public static function ramQuarry($flight, array $enemies)
+    {
+        $ships = array();
+        $flights = array();
+        foreach ($enemies as $enemy) {
+            if (!empty($enemy->mine) || $enemy->isTerrain()) continue;
+            if ($enemy instanceof FighterFlight) $flights[] = $enemy;
+            else $ships[] = $enemy;
+        }
+        if (count($ships) == 0) return $flights;
+
+        $own = PowerDecider::maxMove($flight);
+        $classes = array();
+        foreach ($ships as $ship) {
+            $class = self::ramClass($ship);
+            $near = $flight->getHexPos()->distanceTo($ship->getHexPos()) <= AIConfig::RAM_QUARRY_TURNS * $own + PowerDecider::maxMove($ship);
+            if (!isset($classes[$class])) $classes[$class] = array('near' => false, 'units' => array());
+            $classes[$class]['units'][] = $ship;
+            if ($near) $classes[$class]['near'] = true;
+        }
+        krsort($classes);
+        foreach ($classes as $row) {
+            if ($row['near']) return $row['units'];
+        }
+        return reset($classes)['units'];
+    }
+
+    /* A ship's size class for ramQuarry: an Enormous unit above a capital ship, then shipSizeClass (capital 3, HCV 2, MCV 1) - and an LCV
+       below an MCV: FV's LCVs are medium ships to the engine (class LCV extends MediumShip, shipSizeClass 1; hangarRequired 'LCVs'). */
+    public static function ramClass($ship)
+    {
+        if (!empty($ship->Enormous)) return 4;
+        if ($ship instanceof LCV || (string)($ship->hangarRequired ?? '') === 'LCVs') return 0;
+        return (int)$ship->shipSizeClass;
+    }
+
+    /* What $count craft of a flight designed to ram, ramming $target from where the flight stands now, should be worth: each craft's
+       expected ram damage (AIView - the engine's ram chance, which counts the flight's own speed and jinking as the Hunter-Killers'
+       "HK Targeting" penalty, and the target's speed), no more in all than finishes it ($health), times what a point of it is worth
+       ($worth). Nothing for what comes back: a Hunter-Killer is spent by its ram, which is what it is for. 0 from another hex. */
+    public static function flightRamValue(AIView $view, $flight, RammingAttack $ram, $target, $count, $health, $worth)
+    {
+        if ($flight->getHexPos()->distanceTo($target->getHexPos()) != 0 || $count <= 0) return 0;
+        $each = $view->estimate($flight, $ram, $target, false);
+        if ($each <= 0) return 0;
+        return min($each * $count, (float)$health) * (float)$worth;
     }
 
     // ------------------------------------------------------------------ stage T6g: a side down to its fighters

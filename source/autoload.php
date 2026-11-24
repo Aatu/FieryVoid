@@ -1524,6 +1524,7 @@ spl_autoload_register(
                 'halosearly' => '/server/model/ships/brakiri/halosEarly.php',
                 'haltona' => '/server/model/ships/brakiri/haltona.php',
                 'hangar' => '/server/model/systems/baseSystems.php',
+                'hangardecider' => '/server/ai/deciders/HangarDecider.php',
                 'hangaroperations' => '/server/model/cricialClasses.php',
                 'hangarops' => '/server/model/systems/HangarOps.php',
                 'hardcell' => '/server/model/ships/StarWarsCloneWars/Hardcell.php',

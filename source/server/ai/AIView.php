@@ -139,7 +139,10 @@ class AIView
 
         $flight = ($unit instanceof FighterFlight);
         if (!$flight && ($unit->isDisabled() || $this->pageDisabled($unit))) return 'disabled';
-        if (!empty($unit->remoteControl)) return 'remote-controlled flight'; //Hunter-Killers: the server may be driving it
+        /* Stage T9, M2: a Hunter-Killer flight is the bot's to fly and ram with - but not while it is Uncontrolled (ELINT jamming, a
+           control-node shortfall): the server flies it and declares its rams (AutomatedMovement), and refuses a player's orders for it
+           (Firing::validateFireOrders). */
+        if (!empty($unit->remoteControl) && AutomatedMovement::isUnderAutomatedControl($unit, $this->gamedata)) return 'uncontrolled - the server flies it';
         if (HangarOps::bayCarrierAttachedTo($unit, $this->gamedata) !== null) return 'riding a docking bay';
 
         if (!empty($unit->trueStealth)) return 'stealth unit';        //firing reveals it: a decision the bot cannot make yet

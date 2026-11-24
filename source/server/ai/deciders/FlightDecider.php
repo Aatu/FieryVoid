@@ -45,15 +45,15 @@
  */
 class FlightDecider
 {
-    //What the last orders() did, for tac_ai_log: missions given, flights jinking, flights that had to fire (stage T6g).
-    public static $last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0, 'searched' => 0, 'found' => 0, 'forced' => 0);
+    //What the last orders() did, for tac_ai_log: missions given, flights jinking, flights that had to fire (stage T6g), Hunter-Killers (M2).
+    public static $last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0, 'searched' => 0, 'found' => 0, 'forced' => 0, 'hunt' => 0, 'ramming' => 0);
 
     //Stage T6g: what a place where a flight that must fire cannot is marked down by - more than any other term can make up.
     const MUST = 1.0e6;
 
     public static function reset()
     {
-        self::$last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0, 'searched' => 0, 'found' => 0, 'forced' => 0);
+        self::$last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0, 'searched' => 0, 'found' => 0, 'forced' => 0, 'hunt' => 0, 'ramming' => 0);
     }
 
     //For the harness and scratch checks only: set to an array and rows() appends its six best places, terms and all.
@@ -91,6 +91,10 @@ class FlightDecider
         if ($searchEnd === null || AIConfig::cpuSeconds() < $searchEnd) {
             foreach (self::coverageSearch($view, $mover, $flight, $plans, $context, $hazards, $start, $searchEnd) as $plan) $plans[] = $plan;
         }
+        //Stage T9, M2: a flight designed to ram also asks for plans that END where its quarry will be at the Fire phase
+        if ($context['ram'] !== null && ($searchEnd === null || AIConfig::cpuSeconds() < $searchEnd)) {
+            foreach (self::ramSearch($view, $mover, $flight, $plans, $context) as $plan) $plans[] = $plan;
+        }
 
         /* One estimate per place and facing: that is all fire and danger depend on - and per jinking level. The most a
            place allows is what the plan to it that leaves most thrust can buy. */
@@ -122,7 +126,8 @@ class FlightDecider
         foreach ($judged as $variants) {
             foreach ($variants as $j) if ($j['offence'] > 0) $inReach = true;
         }
-        $farOff = ($context['nearest'] > 2 * self::reach($plans, $context['guns']));
+        //(a flight designed to ram never falls back to escorting: it hunts - see $score below)
+        $farOff = ($context['ram'] === null) && ($context['nearest'] > 2 * self::reach($plans, $context['guns']));
         self::$last[!$inReach && $farOff && !$context['lastStand'] ? 'escort' : $context['mission']]++;
 
         /* A SIDE DOWN TO ITS FIGHTERS (stage T6g, AIConfig::FLIGHT_MAX_IDLE_TURNS): with no fleet to keep with, each hex short of
@@ -140,7 +145,28 @@ class FlightDecider
             }
         }
         if ($must) self::$last['forced']++;
-        $score = function (array $j) use ($context, $inReach, $farOff, $must, $tier, $leashed) {
+
+        /* Stage T9, M2 - A FLIGHT DESIGNED TO RAM (the Orieni Hunter-Killers; the user, 2026-11-23: units designed to ram "can and should
+           always Ram"). Where some place ends in a quarry's hex at the Fire phase, only those places are chosen from, by what the ram
+           should do there (judge()'s 'ram' - the flight's own speed and jinking lower its chance, so the slower, unjinked way in wins) and
+           the board's hazards: rams resolve before the other fire, so the fire the flight would take there counts for nothing. Else it
+           HUNTS: each hex short of its nearest quarry costs RAM_PURSUIT times a flight's closing, speed beyond the chase speed as a hex
+           short (it must still be able to stop on its quarry), and the fire it would take only RAM_DANGER_SHARE as much. */
+        $ramming = false;
+        if ($context['ram'] !== null) {
+            foreach ($judged as $variants) {
+                foreach ($variants as $j) if ($j['ram'] > 0) $ramming = true;
+            }
+            if ($ramming) self::$last['ramming']++;
+        }
+        $score = function (array $j) use ($context, $inReach, $farOff, $must, $tier, $leashed, $ramming) {
+            if ($context['ram'] !== null) {
+                //(never jinking into a ram: it lowers the ram's chance and buys nothing - and where a ram already finishes the target
+                //either way the two would tie)
+                if ($ramming) return ($j['ram'] > 0 && $j['jink'] == 0) ? $j['ram'] - $j['hazard'] : -self::MUST;
+                return -$context['ramDanger'] * $j['danger'] - $j['hazard']
+                    - AIConfig::FLIGHT_CLOSING_PER_HEX * (AIConfig::RAM_PURSUIT * $j['short'] + $j['fast']);
+            }
             $s = $j['offence'] - $context['dangerWeight'] * $j['danger'] - $j['hazard'] - $context['support'] * $j['apart'];
             //down to its fighters: within FLIGHT_LEASH of the target where it can be, else as near as it gets - before anything else
             if ($context['lastStand']) $s -= $leashed ? (($j['leash'] > 0) ? self::MUST : 0) : self::MUST * $j['leash'];
@@ -386,6 +412,18 @@ class FlightDecider
         }
 
         $closing = count($raiders) > 0 ? $raiders : array_map(function ($e) { return $e['unit']; }, $enemies);
+
+        /* Stage T9, M2: a flight DESIGNED to ram (the Hunter-Killers - Posture::flightRams: its craft that can ram) closes on its QUARRY
+           alone - the largest enemy ships within reach first (Posture::ramQuarry) - and rams in judge(). */
+        $ramCraft = Posture::flightRams($view, $flight);
+        $quarry = array();
+        if (count($ramCraft) > 0) {
+            $quarry = Posture::ramQuarry($flight, array_map(function ($e) { return $e['unit']; }, $enemies));
+            if (count($quarry) > 0) $closing = $quarry;
+        }
+        $quarryIds = array();
+        foreach ($quarry as $unit) $quarryIds[(int)$unit->id] = true;
+
         $nearest = PHP_INT_MAX;
         $chase = PHP_INT_MAX; //stage T6g: the speed closing in may build up to - the nearest target's, FLIGHT_CHASE_MARGIN over
         foreach ($closing as $target) {
@@ -407,9 +445,14 @@ class FlightDecider
 
         $health = $view->healthLeft($flight);
         $lastStand = Posture::lastStand($view); //stage T6g: the side down to its fighters
+        $hunting = count($ramCraft) > 0 && count($quarry) > 0;
         return array('guns' => $guns, 'enemies' => $enemies, 'closing' => $closing, 'nearest' => $nearest, 'chase' => $chase,
             'lastStand' => $lastStand, 'mustShoot' => $lastStand && isset(Posture::$mustShoot[(int)$flight->id]),
-            'mission' => count($raiders) > 0 ? 'intercept' : 'strike', 'health' => $health, 'worth' => $view->value($flight) / $health,
+            //stage T9, M2: the ram (one craft's - they are all alike), how many craft can ram, and the quarry's ids
+            'ram' => $hunting ? $ramCraft[0]['ram'] : null, 'ramCount' => count($ramCraft), 'quarry' => $quarryIds,
+            //...and what the fire it takes hunting counts for: a designed rammer's (a Delegor's) - not the level's fighter caution
+            'ramDanger' => (float)$view->skill('shipDanger') * AIConfig::RAM_DANGER_SHARE,
+            'mission' => $hunting ? 'hunt' : (count($raiders) > 0 ? 'intercept' : 'strike'), 'health' => $health, 'worth' => $view->value($flight) / $health,
             //the level's skills (stage T5f): what the flight's own losses count for, an enemy yet to move, staying together
             'dangerWeight' => (float)$view->skill('flightDanger'), 'unmovedDanger' => (float)$view->skill('unmovedDanger'), 'support' => $support);
     }
@@ -524,6 +567,18 @@ class FlightDecider
             $board = $hazards->judge($flight, $start, $plan, $context['worth']);
             //each target's health from where the flight stands: the section its hits go through (stage T5f - Normal and Hard)
             $targets = ShipDecider::targetsFrom($view, $flight, $context['enemies']);
+
+            /* Stage T9, M2: the best ram from here - a quarry standing in this hex at the Fire phase (judge() is asked inside
+               atFireTime: an enemy yet to move stands where the level forecasts it, or straight on), the flight's speed and jinking
+               as this place has them. */
+            $ram = 0.0;
+            if ($context['ram'] !== null) {
+                foreach ($context['enemies'] as $enemy) {
+                    if (!isset($context['quarry'][(int)$enemy['unit']->id])) continue;
+                    if ($flight->getHexPos()->distanceTo($enemy['unit']->getHexPos()) != 0) continue;
+                    $ram = max($ram, Posture::flightRamValue($view, $flight, $context['ram'], $enemy['unit'], $context['ramCount'], $enemy['health'], $enemy['worth']));
+                }
+            }
         } finally {
             if ($jink > 0) array_pop($flight->movement);
             array_pop($flight->movement);
@@ -532,6 +587,60 @@ class FlightDecider
         return array('offence' => ShipDecider::removed($damage, $targets), 'danger' => ShipDecider::lost($incoming, $context['health'], $context['worth']),
             'short' => ($short === PHP_INT_MAX) ? 0 : $short, 'beyondFleet' => ($fleet === PHP_INT_MAX) ? 0 : max(0, $fleet - AIConfig::FLIGHT_ESCORT_RANGE),
             'apart' => ($wing === PHP_INT_MAX) ? 0 : max(0, $wing - AIConfig::FLIGHT_SUPPORT_RANGE),
-            'hazard' => $board['total'], 'shoots' => $shoots, 'fast' => max(0, (int)$plan['speed'] - $context['chase']), 'leash' => $leash);
+            'hazard' => $board['total'], 'shoots' => $shoots, 'fast' => max(0, (int)$plan['speed'] - $context['chase']), 'leash' => $leash,
+            'ram' => $ram, 'jink' => (int)$jink);
+    }
+
+    /* Stage T9, M2: the plans the plainest-first search does not offer a flight designed to ram - it lists every plan of few orders
+       before any of many, and running a flight up to its top speed is many orders (self-play 6158: three Hunter-Killer flights crept
+       up at speed 4-6, none in reach of a ram, and were shot down). For each of its nearest quarry (RAM_AIMED_QUARRY), where the
+       quarry should stand at the Fire phase (where it has moved to, or the level's forecast / straight on): plans that END there
+       when the flight can get there this turn (its speed and all its thrust - PowerDecider::maxMove), else plans that end as far
+       along the way to it as that allows. ShipMover::enumerateToward, RAM_AIMED_PLANS a goal, any facing (a ram has no arc). */
+    private static function ramSearch(AIView $view, ShipMover $mover, $flight, array $plans, array $context)
+    {
+        $reached = array();
+        foreach ($plans as $plan) $reached[$plan['position']->q . ',' . $plan['position']->r] = true;
+        $start = $flight->getHexPos();
+        $reach = PowerDecider::maxMove($flight);
+        $goals = $view->atFireTime(function () use ($context, $start, $reach, $reached) {
+            $near = array();
+            foreach ($context['enemies'] as $enemy) {
+                if (!isset($context['quarry'][(int)$enemy['unit']->id])) continue;
+                $at = $enemy['unit']->getHexPos();
+                $near[] = array($start->distanceTo($at), $at);
+            }
+            usort($near, function ($a, $b) { return $a[0] - $b[0]; });
+            $out = array();
+            foreach (array_slice($near, 0, AIConfig::RAM_AIMED_QUARRY) as $one) {
+                list($distance, $at) = $one;
+                //in reach: its hex; else the hex as far along the way to it as the flight can go
+                $goal = ($distance <= $reach) ? $at : self::along($start, $at, $reach);
+                $key = $goal->q . ',' . $goal->r;
+                if (!isset($reached[$key])) $out[$key] = true;
+            }
+            return $out;
+        }, array((int)$flight->id));
+
+        $found = array();
+        foreach (array_keys($goals) as $key) {
+            foreach ($mover->enumerateToward(array($key => true), AIConfig::RAM_AIMED_PLANS) as $plan) $found[] = $plan;
+        }
+        return $found;
+    }
+
+    //The hex $steps hexes from $from on the way to $to (each step to the neighbour nearest it).
+    private static function along(OffsetCoordinate $from, OffsetCoordinate $to, $steps)
+    {
+        $at = $from;
+        for ($i = 0; $i < $steps && $at->distanceTo($to) > 0; $i++) {
+            $best = null;
+            for ($direction = 0; $direction < 6; $direction++) {
+                $next = $at->moveToDirection($direction);
+                if ($best === null || $next->distanceTo($to) < $best->distanceTo($to)) $best = $next;
+            }
+            $at = $best;
+        }
+        return $at;
     }
 }

@@ -177,10 +177,11 @@ class ShipMover
     /* The KINDS of unit ShipMover never plots for, whatever the game - unsupportedReason's first answers, which a class's blueprint
        can give as well as a ship in play. Stage T7 (the user, 2026-11-21: "Hide any ships that are currently listed in
        unsupportedReason()"): the lobby hides them for a CPU slot and the server refuses them in a CPU fleet (AIConfig::cpuUnitBlock).
-       ⚠️ MIRROR: gamelobby.js gamedata.cpuHullBlock asks the same of the lobby's blueprints - add a kind here, add it there. */
+       ⚠️ MIRROR: gamelobby.js gamedata.cpuHullBlock asks the same of the lobby's blueprints - add a kind here, add it there.
+       Stage T9, M2 (2026-11-24): a remote-controlled flight (the Orieni Hunter-Killers) is flown since - an ordinary flight to the page;
+       while it is Uncontrolled the server flies and rams it (AutomatedMovement), and the bot leaves it alone (MoveDecider, AIView). */
     public static function unsupportedHullReason($ship)
     {
-        if ($ship instanceof FighterFlight && !empty($ship->remoteControl)) return 'a remote-controlled flight';
         if ($ship->isTerrain()) return 'terrain';
         if (!empty($ship->base) || !empty($ship->smallBase)) return 'a base';
         if (!empty($ship->osat)) return 'an OSAT';

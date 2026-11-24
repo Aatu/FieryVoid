@@ -107,7 +107,8 @@ class MoveDecider
         $parts = array_merge(ShipDecider::$last, JumpDecider::$last);
         if ($flights > 0) {
             $f = FlightDecider::$last;
-            $parts[] = $flights . ' flights: ' . $f['strike'] . ' striking, ' . $f['intercept'] . ' intercepting, ' . $f['escort'] . ' escorting; ' . $f['jinking'] . ' jinking'
+            $parts[] = $flights . ' flights: ' . $f['strike'] . ' striking, ' . $f['intercept'] . ' intercepting, ' . $f['escort'] . ' escorting'
+                . ($f['hunt'] > 0 ? ', ' . $f['hunt'] . ' hunting to ram (' . $f['ramming'] . ' into a quarry\'s hex)' : '') . '; ' . $f['jinking'] . ' jinking'
                 . ($f['searched'] > 0 ? '; ' . $f['found'] . ' of ' . $f['searched'] . ' less covered places reached' : '')
                 . ($f['forced'] > 0 ? '; ' . $f['forced'] . ' MUST FIRE this turn (no shot for ' . (AIConfig::FLIGHT_MAX_IDLE_TURNS - 1) . ' turns, the side down to its fighters)' : '');
         }
@@ -131,6 +132,10 @@ class MoveDecider
     //One active unit's rows (orders()' loop): a flight by FlightDecider, a ship by ShipDecider - or JumpDecider when it is leaving.
     private static function unitRows(AIView $view, TacGamedata $gamedata, $botId, $ship, Hazards $hazards, &$flights)
     {
+        /* Stage T9, M2 (the user, 2026-11-24): an Uncontrolled Hunter-Killer flight (ELINT jamming, a control-node shortfall) is the
+           server's - AutomatedMovement plots its seek when this activation is committed, whatever is posted for it - so the bot posts
+           nothing for it, as the page does (movement.js isMovementReady). */
+        if (!empty($ship->remoteControl) && AutomatedMovement::isUnderAutomatedControl($ship, $gamedata)) return array();
         $mover = ShipMover::forShip($ship, $gamedata);
         if ($mover !== null && $mover->isFlight()) {
             $flights++;
