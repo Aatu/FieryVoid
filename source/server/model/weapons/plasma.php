@@ -16,7 +16,7 @@ class Plasma extends Weapon{
 		if ($this->rangeDamagePenalty <> 0){
 			$this->data["Special"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex).<br>";
 		}else{
-			$this->data["Special"] = "".
+			$this->data["Special"] = "";
 		}
 		$this->data["Special"] .= "Ignores half of armor.";
 	}
