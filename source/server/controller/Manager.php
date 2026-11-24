@@ -2238,7 +2238,7 @@ class Manager{
 
     /* AUTO-COMPOSE (TACTICAL_AI_PLAN.md section 8.2, stage T8): a fleet for a CPU slot the creator left EMPTY, committed as the bot the
        way submitFleetForCpuSlot commits a bought one (same guards). FleetComposer builds it for the slot's points
-       (AIConfig::COMPOSE_UNLIMITED_POINTS when they are unlimited) and the game's In-Service Date, of $faction when that is a ready
+       (refused when they are unlimited - the user, 2026-11-24) and the game's In-Service Date, of $faction when that is a ready
        faction (the one the creator has open in the Store), else of one drawn from the game and slot - and when that one cannot make
        a clean fleet, of the other ready factions in turn. Refused, naming why, when none can: a game too small or too early for a
        Fleet Checker clean fleet (the creator then buys one by hand). Plain units only: no enhancements, refits or officers. */
@@ -2266,7 +2266,12 @@ class Manager{
                 throw new Exception("That slot is not in this game.");
             $slot = $slots[$slotid];
 
-            $points = ((int)$slot->points > 0) ? (int)$slot->points : AIConfig::COMPOSE_UNLIMITED_POINTS;
+            /* The user, 2026-11-24: no auto-compose where the game is set to Unlimited Points - the composer builds to spend the
+               slot's points, and an unlimited slot (-1) has none. ⚠️ MIRROR of gamedata.cpuComposeBlock (gamelobby.js). */
+            if (!((int)$slot->points > 0))
+                throw new Exception("Auto-compose is not available in an Unlimited Points game: it builds a fleet to spend the CPU"
+                    . " player's points, and there is no limit to build to. Buy this CPU player's fleet by hand.");
+            $points = (int)$slot->points;
             $scenario = self::$dbManager->getGameScenario($gameid);
             $isd = isset($scenario['inServiceDate']) ? (int)$scenario['inServiceDate'] : null;
             $seed = $gameid * 31 + $slotid;

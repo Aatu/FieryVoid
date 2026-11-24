@@ -287,10 +287,6 @@ class AIConfig
     const PERSONALITIES = array('balanced');
     const DEFAULT_PERSONALITY = 'balanced';
 
-    /* AUTO-COMPOSE (stage T8, plan 8.2): the points an empty CPU slot's fleet is composed for when the slot's points are unlimited
-       (FleetComposer needs a figure; the lobby's default game size). */
-    const COMPOSE_UNLIMITED_POINTS = 3500;
-
     /* THE READINESS LIST (plan section 7, stage T7 - the user, 2026-11-21: "Hide Factions not cleared for CPU use in gamelobby
        Faction Picker ... just show EA and Raiders atm and add more as we tackle Stage T7 in time"). The factions a CPU player may
        field, spelt as their ship classes spell $faction. The lobby offers only these for a CPU slot (its `cpuFactions` key,

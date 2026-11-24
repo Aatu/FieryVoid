@@ -3868,6 +3868,15 @@ window.gamedata = {
 		return $("<div>").text(slot.name || ("Slot " + slot.slot)).html();
 	},
 
+	/* Why an empty CPU slot cannot be auto-composed, or null (the user, 2026-11-24: "should not be available where a game is set to
+	   Unlimited Points"). The composer builds a fleet to SPEND the slot's points, and an unlimited slot (points -1) has none to spend.
+	   ⚠️ MIRROR of Manager::autoComposeCpuSlot's own refusal - change one, change the other. */
+	cpuComposeBlock: function cpuComposeBlock(slot) {
+		if (!(Number(slot.points) > 0)) return "Auto-compose is not available in an Unlimited Points game: it builds a fleet to spend"
+			+ " the CPU player's points, and there is no limit to build to. Buy this CPU player's fleet by hand.";
+		return null;
+	},
+
 	//The CPU slots the creator's Ready would auto-compose: not readied, and nothing bought for them in the page.
 	emptyCpuSlots: function emptyCpuSlots() {
 		if (gamedata.isCreator !== true || !gamedata.slots) return [];
@@ -3909,6 +3918,11 @@ window.gamedata = {
 
 	//The creator pressed Ready on a CPU slot with nothing bought: offer to auto-compose it.
 	offerAutoCompose: function offerAutoCompose(slot) {
+		var block = gamedata.cpuComposeBlock(slot);
+		if (block !== null) {
+			window.confirm.error("This CPU player has no fleet yet. " + block, function () { });
+			return;
+		}
 		var faction = gamedata.cpuComposeFaction();
 		confirm.confirm("This CPU player has no fleet yet. Auto-compose one and ready it?"
 			+ '<span class="prebattle-note">It gets a plain ' + (faction ? faction + " " : "") + "fleet for its points, built to pass the"
@@ -5239,12 +5253,23 @@ window.gamedata = {
 		readyMessage += gamedata.readyReinforcementWarning();
 
 		//Stage T8 (plan 8.1): the creator's own Ready also readies every CPU slot left EMPTY, auto-composed - named here first
-		var emptyCpu = forCpu ? [] : gamedata.emptyCpuSlots();
+		//- except one with Unlimited Points (cpuComposeBlock), which is left unreadied and named, for the creator to buy by hand
+		var emptyCpu = [], unComposable = [];
+		(forCpu ? [] : gamedata.emptyCpuSlots()).forEach(function (slot) {
+			(gamedata.cpuComposeBlock(slot) === null ? emptyCpu : unComposable).push(slot);
+		});
 		if (emptyCpu.length > 0) {
 			readyMessage += '<span class="prebattle-note">'
 				+ emptyCpu.map(gamedata.cpuSlotLabel).join(", ")
 				+ (emptyCpu.length == 1 ? " (a CPU player) has" : " (CPU players) have")
 				+ " no fleet: " + (emptyCpu.length == 1 ? "it" : "each") + " gets a plain one, built to pass the Fleet Checker.</span>";
+		}
+		if (unComposable.length > 0) {
+			readyMessage += '<span class="prebattle-note">'
+				+ unComposable.map(gamedata.cpuSlotLabel).join(", ")
+				+ (unComposable.length == 1 ? " (a CPU player) has" : " (CPU players) have")
+				+ " no fleet, and auto-compose is not available in an Unlimited Points game: buy "
+				+ (unComposable.length == 1 ? "its" : "their") + " fleet by hand before the game can start.</span>";
 		}
 
 		// Pass the submission function as a callback, not invoke it immediately
