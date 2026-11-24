@@ -3928,17 +3928,24 @@ window.gamedata = {
 		return null;
 	},
 
-	/* Stage T9 - systems the AI does not use yet, by name: [why, hides every FLIGHT that carries it] (the user, 2026-11-23, on breaching
-	   pods: "Hide for now, we will add Marines later"; TACTICAL_AI_PLAN.md 10.10 "Missing systems").
+	/* Stage T9 - systems the AI does not use yet, by name: [why, what it hides - "flight": every FLIGHT carrying it; "unit": ANY unit
+	   carrying it] (the user, 2026-11-23, on breaching pods: "Hide for now, we will add Marines later"; 2026-11-24, M9: the Molecular
+	   Slicer hides the EA ships carrying it; TACTICAL_AI_PLAN.md 10.10 "Missing systems").
 	   ⚠️ MIRROR PAIR with AIConfig::CPU_MISSING_SYSTEMS (source/server/ai/AIConfig.php): change one, change both. */
 	CPU_MISSING_SYSTEMS: {
-		Marines: ["Marines", true]
+		Marines: ["Marines", "flight"],
 		//(the Antiproton Defender's line came out at stage T9's M3, 2026-11-23 - the Raiders' Jia is back)
+		//M9 - every Molecular Slicer
+		MolecularSlicerBeamL: ["Molecular Slicer", "unit"],
+		MolecularSlicerBeamM: ["Molecular Slicer", "unit"],
+		MolecularSlicerBeamH: ["Molecular Slicer", "unit"],
+		MolecularSlicerBeamA: ["Molecular Slicer", "unit"]
 	},
 
 	/* Why a CPU player cannot field a unit of this blueprint for a system the AI does not use yet, or null - the page's half of
-	   AIConfig::missingSystemBlock (same rules, same wording): a flight whose craft carry a system marked true (a boarding craft); a
-	   unit that carries weapons, every one of them on the list (the Ramming Attack and the jump engine not counted). */
+	   AIConfig::missingSystemBlock (same rules, same wording): a flight whose craft carry a system marked "flight" (a boarding craft);
+	   any unit carrying a system marked "unit"; a unit that carries weapons, every one of them on the list (the Ramming Attack and the
+	   jump engine not counted). */
 	cpuMissingSystemBlock: function cpuMissingSystemBlock(ship) {
 		var list = gamedata.CPU_MISSING_SYSTEMS;
 		var mounts = [];
@@ -3955,7 +3962,8 @@ window.gamedata = {
 		for (var k = 0; k < mounts.length; k++) {
 			var mount = mounts[k];
 			var entry = Object.prototype.hasOwnProperty.call(list, mount.name) ? list[mount.name] : null;
-			if (entry && entry[1] && ship.flight) return "a boarding craft: the AI does not use " + entry[0] + " yet";
+			if (entry && entry[1] === "flight" && ship.flight) return "a boarding craft: the AI does not use " + entry[0] + " yet";
+			if (entry && entry[1] === "unit") return "carries a " + entry[0] + ": the AI does not use it yet";
 			if (!mount.weapon || mount.name == "RammingAttack" || mount.name == "jumpEngine") continue;
 			weapons++;
 			if (!entry) continue;

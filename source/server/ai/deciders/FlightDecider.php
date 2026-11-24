@@ -46,14 +46,17 @@
 class FlightDecider
 {
     //What the last orders() did, for tac_ai_log: missions given, flights jinking, flights that had to fire (stage T6g), Hunter-Killers (M2).
-    public static $last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0, 'searched' => 0, 'found' => 0, 'forced' => 0, 'hunt' => 0, 'ramming' => 0);
+    //(stage T9, M11: 'home' - flights going home to reload, 'docking' - of them, those flown into their carrier's hex to dock)
+    public static $last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0, 'searched' => 0, 'found' => 0, 'forced' => 0, 'hunt' => 0, 'ramming' => 0,
+        'home' => 0, 'docking' => 0);
 
     //Stage T6g: what a place where a flight that must fire cannot is marked down by - more than any other term can make up.
     const MUST = 1.0e6;
 
     public static function reset()
     {
-        self::$last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0, 'searched' => 0, 'found' => 0, 'forced' => 0, 'hunt' => 0, 'ramming' => 0);
+        self::$last = array('strike' => 0, 'intercept' => 0, 'escort' => 0, 'jinking' => 0, 'searched' => 0, 'found' => 0, 'forced' => 0, 'hunt' => 0, 'ramming' => 0,
+            'home' => 0, 'docking' => 0);
     }
 
     //For the harness and scratch checks only: set to an array and rows() appends its six best places, terms and all.
@@ -95,6 +98,19 @@ class FlightDecider
         if ($context['ram'] !== null && ($searchEnd === null || AIConfig::cpuSeconds() < $searchEnd)) {
             foreach (self::ramSearch($view, $mover, $flight, $plans, $context) as $plan) $plans[] = $plan;
         }
+        /* Stage T9, M11 - HOME TO RELOAD (HangarDecider::home: dry, with a carrier that can take it and reload it). Where the carrier has
+           moved this turn - its end known - the flight flies a plan that lets it dock (dockRows); else it closes on where the carrier
+           will be (judge()'s 'home', in hexes) and keeps out of fire, the places nearer it asked of an aimed search too. */
+        if ($context['home'] !== null) {
+            $docking = self::dockRows($view, $mover, $plans, $flight, $context['home']);
+            if ($docking !== null) {
+                self::$last['home']++;
+                self::$last['docking']++;
+                return $docking;
+            }
+            $hex = $context['home']['hex'];
+            foreach ($mover->enumerateToward(array($hex->q . ',' . $hex->r => true), AIConfig::FLIGHT_HOME_PLANS) as $plan) $plans[] = $plan;
+        }
 
         /* One estimate per place and facing: that is all fire and danger depend on - and per jinking level. The most a
            place allows is what the plan to it that leaves most thrust can buy. */
@@ -128,7 +144,7 @@ class FlightDecider
         }
         //(a flight designed to ram never falls back to escorting: it hunts - see $score below)
         $farOff = ($context['ram'] === null) && ($context['nearest'] > 2 * self::reach($plans, $context['guns']));
-        self::$last[!$inReach && $farOff && !$context['lastStand'] ? 'escort' : $context['mission']]++;
+        self::$last[($context['home'] === null && !$inReach && $farOff && !$context['lastStand']) ? 'escort' : $context['mission']]++;
 
         /* A SIDE DOWN TO ITS FIGHTERS (stage T6g, AIConfig::FLIGHT_MAX_IDLE_TURNS): with no fleet to keep with, each hex short of
            the target costs at every distance - the flight does not fly further off than it must; and a flight that MUST fire this
@@ -160,6 +176,8 @@ class FlightDecider
             if ($ramming) self::$last['ramming']++;
         }
         $score = function (array $j) use ($context, $inReach, $farOff, $must, $tier, $leashed, $ramming) {
+            //stage T9, M11: going home to reload - each hex from where the carrier will be, as a flight's closing, and the fire it takes there
+            if ($context['home'] !== null) return -$context['dangerWeight'] * $j['danger'] - $j['hazard'] - AIConfig::FLIGHT_CLOSING_PER_HEX * $j['home'];
             if ($context['ram'] !== null) {
                 //(never jinking into a ram: it lowers the ram's chance and buys nothing - and where a ram already finishes the target
                 //either way the two would tie)
@@ -386,7 +404,7 @@ class FlightDecider
                 $weapon = $mount['weapon'];
                 if (!$view->plainGun($weapon, $mount['fighter']) || !$view->loaded($weapon)) continue;
                 $base = get_class($weapon) . '|' . $weapon->firingMode;
-                $withArc = $base . '|' . $weapon->startArc . '|' . $weapon->endArc;
+                $withArc = $base . '|' . AIView::arcKey($weapon);
                 if (!isset($arced[$withArc])) $arced[$withArc] = array('weapon' => $weapon, 'count' => 0);
                 $arced[$withArc]['count']++;
                 if (!isset($any[$base])) $any[$base] = array('weapon' => $weapon, 'count' => 0);
@@ -446,13 +464,17 @@ class FlightDecider
         $health = $view->healthLeft($flight);
         $lastStand = Posture::lastStand($view); //stage T6g: the side down to its fighters
         $hunting = count($ramCraft) > 0 && count($quarry) > 0;
+        //stage T9, M11: a dry flight with a carrier to reload it goes home (HangarDecider::home - null when it does not)
+        //(home() asks Posture::usableGuns itself: gunGroups still lists a gatling whose rounds are spent)
+        $home = !$hunting ? HangarDecider::home($view, $flight) : null;
         return array('guns' => $guns, 'enemies' => $enemies, 'closing' => $closing, 'nearest' => $nearest, 'chase' => $chase,
             'lastStand' => $lastStand, 'mustShoot' => $lastStand && isset(Posture::$mustShoot[(int)$flight->id]),
             //stage T9, M2: the ram (one craft's - they are all alike), how many craft can ram, and the quarry's ids
             'ram' => $hunting ? $ramCraft[0]['ram'] : null, 'ramCount' => count($ramCraft), 'quarry' => $quarryIds,
             //...and what the fire it takes hunting counts for: a designed rammer's (a Delegor's) - not the level's fighter caution
             'ramDanger' => (float)$view->skill('shipDanger') * AIConfig::RAM_DANGER_SHARE,
-            'mission' => $hunting ? 'hunt' : (count($raiders) > 0 ? 'intercept' : 'strike'), 'health' => $health, 'worth' => $view->value($flight) / $health,
+            'home' => $home,
+            'mission' => ($home !== null) ? 'home' : ($hunting ? 'hunt' : (count($raiders) > 0 ? 'intercept' : 'strike')), 'health' => $health, 'worth' => $view->value($flight) / $health,
             //the level's skills (stage T5f): what the flight's own losses count for, an enemy yet to move, staying together
             'dangerWeight' => (float)$view->skill('flightDanger'), 'unmovedDanger' => (float)$view->skill('unmovedDanger'), 'support' => $support);
     }
@@ -588,7 +610,44 @@ class FlightDecider
             'short' => ($short === PHP_INT_MAX) ? 0 : $short, 'beyondFleet' => ($fleet === PHP_INT_MAX) ? 0 : max(0, $fleet - AIConfig::FLIGHT_ESCORT_RANGE),
             'apart' => ($wing === PHP_INT_MAX) ? 0 : max(0, $wing - AIConfig::FLIGHT_SUPPORT_RANGE),
             'hazard' => $board['total'], 'shoots' => $shoots, 'fast' => max(0, (int)$plan['speed'] - $context['chase']), 'leash' => $leash,
-            'ram' => $ram, 'jink' => (int)$jink);
+            'ram' => $ram, 'jink' => (int)$jink,
+            //stage T9, M11: hexes from where the carrier of a flight going home will be
+            'home' => ($context['home'] !== null) ? $plan['position']->distanceTo($context['home']['hex']) : 0);
+    }
+
+    /* Stage T9, M11: the rows that let a flight going home dock this turn, or null. Only once its carrier has MOVED this turn (its end
+       known) and did not pivot or roll: a plan ending in the carrier's hex, on its heading, its speed within the flight's thrust of the
+       carrier's (HangarOps::canApproachCarrier - the server asks the same when the dock order is resolved). The plans searched, then an
+       aimed search to that hex and heading (a flight's facing follows its heading); the plainest kept, jinking all the thrust left allows
+       (the flight takes this turn's fire there - jinking costs the dock nothing). */
+    private static function dockRows(AIView $view, ShipMover $mover, array $plans, $flight, array $home)
+    {
+        $carrier = $home['carrier'];
+        $turn = $view->turn;
+        if ($carrier->getLastTurnMoved() < $turn) return null;
+        if (Movement::isPivoting($carrier, $turn, $view->gamedata) || Movement::isRolling($carrier, $turn, $view->gamedata)) return null;
+        $end = $carrier->getLastMovement();
+        if (!$end || !$end->position) return null;
+        $thrust = (int)$flight->getEffectiveFreeThrust($turn);
+        $fits = function (array $plan) use ($end, $thrust) {
+            return (int)$plan['position']->q === (int)$end->position->q && (int)$plan['position']->r === (int)$end->position->r
+                && (int)$plan['heading'] === (int)$end->heading && abs((int)$plan['speed'] - (int)$end->speed) <= $thrust;
+        };
+        $found = null;
+        foreach ($plans as $plan) {
+            if ($fits($plan)) { $found = $plan; break; }
+        }
+        if ($found === null) {
+            foreach ($mover->enumerateToward(array($end->position->q . ',' . $end->position->r => (int)$end->heading), AIConfig::FLIGHT_HOME_PLANS) as $plan) {
+                if ($fits($plan)) { $found = $plan; break; }
+            }
+        }
+        if ($found === null) return null;
+        $plotted = self::replay($mover, $found);
+        if ($plotted === null) return null;
+        $room = $plotted->jinkRoom();
+        if ($room > 0 && $plotted->jinkLevels($room) > 0) self::$last['jinking']++;
+        return $plotted->rows();
     }
 
     /* Stage T9, M2: the plans the plainest-first search does not offer a flight designed to ram - it lists every plan of few orders

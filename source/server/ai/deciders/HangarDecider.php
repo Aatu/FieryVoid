@@ -26,12 +26,25 @@
  * pivoting or rolling launches nothing (HangarOps::canLaunchWholeFlight refuses it). The order is the page's too: {phpclass, size,
  * dockedFlightId} in the `launches` list of the bay holding the flight's entry.
  *
- * Flights the bot docks by choice (none yet) and any other docked craft are left where they are.
+ * HOME TO RELOAD (stage T9, M11 - the user, 2026-11-23: "if possible ... order fighters with empty gatling guns to go and reload in
+ * carriers"; ruled 2026-11-24: home when DRY, out again when FULL, and no Ordnance Reserve bought for an auto-composed carrier). A flight
+ * of the bot with no usable gun left (Posture::usableGuns) goes home (home()) to the nearest carrier with a bay that holds it whole and
+ * where the carrier's servicing would reload it (reloadDue - the engine's three whileDocked rules: a gatling's free round a turn, an old
+ * rack's or a magazine's missiles only from the carrier's Ordnance Reserve). FlightDecider flies it there; in the Fire phase it docks
+ * where it ended its move, in a bay the server's own test takes it in (docks(): HangarOps::canShipReceive) - a `docks` order on the bay,
+ * {flightId, count}, beside any launches (docks are resolved first and share the bay's rate). Docked, it is launched again with the
+ * others (launches()) once nothing more would reload: full, or the reserve spent.
+ * Any other docked craft are left where they are.
  */
 class HangarDecider
 {
-    //What the last dockPlan() / launches() did, for tac_ai_log.
-    public static $last = array('docked' => 0, 'carriers' => 0, 'onMap' => 0, 'launched' => 0, 'craft' => 0, 'held' => 0);
+    //What the last dockPlan() / launches() did, for tac_ai_log (stage T9, M11: 'docking' - flights ordered to dock this Fire phase).
+    public static $last = array('docked' => 0, 'carriers' => 0, 'onMap' => 0, 'launched' => 0, 'craft' => 0, 'held' => 0, 'docking' => 0);
+
+    /* Stage T9, M11: the AMMO_F* enhancements a magazine restocks and their rounds - a COPY of AmmoMagazine::whileDocked's own map (a
+       function-static there). Change one, change both. */
+    const MAGAZINE_ROUNDS = array('AMMO_FB' => 'AmmoMissileFB', 'AMMO_FL' => 'AmmoMissileFL', 'AMMO_FH' => 'AmmoMissileFH',
+        'AMMO_FY' => 'AmmoMissileFY', 'AMMO_FD' => 'AmmoMissileFD', 'AMMO_DUM' => 'AmmoMissileFDum');
 
     //Must $unit start the battle in a hangar where there is room (the Orieni Hunter-Killers)?
     public static function startsDocked($unit)
@@ -195,8 +208,9 @@ class HangarDecider
 
     // ------------------------------------------------------------------ launch (Fire phase)
 
-    /* The launch orders for this Fire phase: unit id => hangar id => array('id', 'individualNotesTransfer'), for FireDecider's
-       entries. Every flight that started docked by rule goes, as far as the bays' launch rates allow. */
+    /* The hangar orders for this Fire phase: unit id => hangar id => array('id', 'individualNotesTransfer'), for FireDecider's
+       entries. Every flight that started docked by rule goes, and (stage T9, M11) every flight the bot sent home once nothing more would
+       reload, as far as the bays' launch rates allow; the flights going home dock (docks()) - first, as the server resolves them. */
     public static function launches(AIView $view)
     {
         self::$last['launched'] = 0;
@@ -204,22 +218,25 @@ class HangarDecider
         self::$last['held'] = 0;
         $gamedata = $view->gamedata;
         $turn = $view->turn;
+        $landing = array(); //hangar id => craft docking there this turn
+        $docks = self::docks($view, $landing);
         $out = array();
         foreach ($view->myUnits() as $carrier) {
             if ($carrier instanceof FighterFlight) continue;
             $hangars = HangarOps::collectHangars($carrier);
             if (count($hangars) == 0) continue;
+            $cid = (int)$carrier->id;
             $entries = self::dockedHere($carrier, $hangars, $gamedata);
-            if (count($entries) == 0) continue;
+            if (count($entries) == 0 && !isset($docks[$cid])) continue;
+            $orders = array(); //hangar id => launch orders
             if (Movement::isPivoting($carrier, $turn, $gamedata) || Movement::isRolling($carrier, $turn, $gamedata)) {
                 self::$last['held'] += count($entries);
-                continue;
+                $entries = array();
             }
 
-            $budget = array(); //hangar id => craft it may still launch this turn (confirm.js baseBudget)
-            foreach ($hangars as $h) $budget[(int)$h->id] = max(0, (int)$h->output - (int)$h->launchedThisTurn - (int)$h->landedThisTurn);
+            $budget = array(); //hangar id => craft it may still launch this turn (confirm.js baseBudget), less the craft landing there first
+            foreach ($hangars as $h) $budget[(int)$h->id] = max(0, (int)$h->output - (int)$h->launchedThisTurn - (int)$h->landedThisTurn - ($landing[(int)$h->id] ?? 0));
 
-            $orders = array(); //hangar id => launch orders
             foreach ($entries as $docked) {
                 $entry = $docked['entry'];
                 $have = (int)($entry['flightSize'] ?? 0);
@@ -246,14 +263,19 @@ class HangarDecider
                 self::$last['craft'] += $size;
                 if ($size < $have) self::$last['held']++;
             }
-            foreach ($orders as $hid => $list) {
-                $out[(int)$carrier->id][$hid] = array('id' => $hid, 'individualNotesTransfer' => json_encode(array('launches' => $list)));
+            //one payload a bay: its launches, and (stage T9, M11) the flights docking in it - the page's Stage 5 shape
+            foreach (array_unique(array_merge(array_keys($orders), array_keys($docks[$cid] ?? array()))) as $hid) {
+                $payload = array();
+                if (isset($orders[$hid])) $payload['launches'] = $orders[$hid];
+                if (isset($docks[$cid][$hid])) $payload['docks'] = $docks[$cid][$hid];
+                $out[$cid][$hid] = array('id' => $hid, 'individualNotesTransfer' => json_encode($payload));
             }
         }
         return $out;
     }
 
-    //The launchable entries of flights that started docked by rule, in bay order: list of array('hangar', 'entry').
+    /* The launchable entries, in bay order: list of array('hangar', 'entry'). Flights that started docked by rule, and (stage T9, M11)
+       the bot's own flights home to reload once nothing more would reload in this carrier (reloadDue) - full, or the reserve spent. */
     private static function dockedHere($carrier, array $hangars, TacGamedata $gamedata)
     {
         $out = array();
@@ -263,11 +285,148 @@ class HangarDecider
                 $id = (int)($entry['dockedFlightId'] ?? 0);
                 if ($id <= 0 || !empty($entry['cannotLaunch']) || (int)($entry['flightSize'] ?? 0) <= 0) continue;
                 $flight = $gamedata->getShipById($id);
-                if (!self::startsDocked($flight)) continue;
+                if (!self::startsDocked($flight) && !self::reloaded($flight, $carrier)) continue;
                 $out[] = array('hangar' => $h, 'entry' => $entry);
             }
         }
         return $out;
+    }
+
+    // ------------------------------------------------------------------ stage T9, M11: home to reload
+
+    /* Where $flight goes home to: array('carrier', 'hangar', 'hex' - where the carrier will be at the Fire phase: its end when it has
+       moved this turn, else straight on), the nearest carrier that can take it whole and would reload it - or null: it is not going home
+       (it can still fight, it is not a flight of the bot's own to bring home, or no carrier can take it or reload it). */
+    public static function home(AIView $view, $flight)
+    {
+        if (!self::mayGoHome($view, $flight)) return null;
+        $best = null;
+        $from = $flight->getHexPos();
+        foreach (self::homeBays($view, $flight) as $bay) {
+            $d = $from->distanceTo($bay['carrier']->getHexPos());
+            if ($best === null || $d < $best['d'] || ($d == $best['d'] && $bay['carrier']->id < $best['carrier']->id)) $best = $bay + array('d' => $d);
+        }
+        if ($best === null) return null;
+        $carrier = $best['carrier'];
+        $hex = $carrier->getHexPos();
+        if ($carrier->getLastTurnMoved() < $view->turn) {
+            $guess = AIView::straightOn($carrier, $view->turn); //(null standing still)
+            if ($guess !== null) $hex = $guess->position;
+        }
+        return array('carrier' => $carrier, 'hangar' => $best['hangar'], 'hex' => $hex);
+    }
+
+    /* A flight of the bot's own, on the board, with no usable gun left (Posture::usableGuns - spent gatlings, empty racks): not a
+       flight the server flies or one designed to ram (a Hunter-Killer's ram is no gun, and it never reloads), nor a mine. */
+    private static function mayGoHome(AIView $view, $flight)
+    {
+        if (!($flight instanceof FighterFlight) || !empty($flight->remoteControl) || !empty($flight->mine) || self::startsDocked($flight)) return false;
+        if ((int)$flight->userid !== (int)$view->botId || !$view->onBoard($flight)) return false;
+        if (count(Posture::flightRams($view, $flight)) > 0) return false;
+        return count(Posture::usableGuns($view, $flight)) == 0;
+    }
+
+    /* The bays of the bot's carriers $flight could go home to: list of array('carrier', 'hangar', 'fit') - ONE bay holding the whole
+       flight (one dock order; a catapult - a rear approach, one craft - is left out), whose landing rate takes it in one turn, in a
+       carrier that would reload it. $reserved: hangar id => boxes promised to flights docking before it this turn. */
+    private static function homeBays(AIView $view, $flight, array $reserved = array())
+    {
+        $turn = (int)$view->turn;
+        $n = $flight->countActiveCraft($turn);
+        $out = array();
+        foreach ($view->myUnits() as $carrier) {
+            if ($carrier instanceof FighterFlight || count(HangarOps::collectHangars($carrier)) == 0) continue;
+            if ((int)$carrier->slot !== (int)$flight->slot || !self::reloadDue($flight, $carrier)) continue;
+            $fit = self::fit($carrier, $flight, $reserved, array(), $turn);
+            if ($fit === null || count($fit['boxes']) != 1 || !empty($fit['hangar']->isCatapult) || (int)$fit['hangar']->output < $n) continue;
+            $out[] = array('carrier' => $carrier, 'hangar' => $fit['hangar'], 'fit' => $fit);
+        }
+        return $out;
+    }
+
+    /* The dock orders for this Fire phase: carrier id => hangar id => list of {flightId, count}; $landing (hangar id => craft) is what
+       each bay lands - launches() takes it off the bay's rate (Hangar::criticalPhaseEffects: dock, then servicing, then launch). A
+       flight going home docks in the first of its bays the server's own test takes it in (HangarOps::canShipReceive: the carrier did
+       not pivot or roll, the same hex and heading, the speed within the flight's thrust, the room, the rate) - with the flights already
+       docking there counted (boxes and rate). The speed is asked first: past the thrust only a Redline Pilot's d20 could hold. */
+    private static function docks(AIView $view, array &$landing)
+    {
+        self::$last['docking'] = 0;
+        $gamedata = $view->gamedata;
+        $turn = (int)$view->turn;
+        $reserved = array();
+        $out = array();
+        foreach ($view->myUnits() as $flight) {
+            if (!self::mayGoHome($view, $flight)) continue;
+            $n = $flight->countActiveCraft($turn);
+            $move = $flight->getLastMovement();
+            if ($n <= 0 || !$move) continue;
+            $thrust = (int)$flight->getEffectiveFreeThrust($turn);
+            foreach (self::homeBays($view, $flight, $reserved) as $bay) {
+                $carrier = $bay['carrier'];
+                $hangar = $bay['hangar'];
+                $hid = (int)$hangar->id;
+                $end = $carrier->getLastMovement();
+                if (!$end || abs((int)$end->speed - (int)$move->speed) > $thrust) continue;
+                if ((int)$hangar->launchedThisTurn + (int)$hangar->landedThisTurn + ($landing[$hid] ?? 0) + $n > (int)$hangar->output) continue;
+                if (!HangarOps::canShipReceive($hangar, $carrier, $flight, $n, $gamedata)) continue;
+                $out[(int)$carrier->id][$hid][] = array('flightId' => (int)$flight->id, 'count' => $n);
+                $landing[$hid] = ($landing[$hid] ?? 0) + $n;
+                foreach ($bay['fit']['boxes'] as $id => $boxes) $reserved[$id] = ($reserved[$id] ?? 0) + $boxes;
+                self::$last['docking']++;
+                break;
+            }
+        }
+        return $out;
+    }
+
+    /* Would the carrier's servicing still add a round to $flight docked in $carrier (HangarOps::serviceDockedFlights -> each system's
+       whileDocked)? A gun that reloads by itself (Weapon::$reloadable - the gatlings) below that cap plus the flight's EXT_AMMO; an old
+       missile rack (FighterMissileRack) below its maxAmount, or a magazine below a load the flight bought (AmmoMagazine), while the
+       carrier's Ordnance Reserve (HANG_ORD) pays for the round. Every live craft. */
+    public static function reloadDue($flight, $carrier)
+    {
+        $pool = HangarOps::reloadPoolRemaining($carrier);
+        $bonus = 0;
+        foreach ((array)$flight->enhancementOptions as $option) {
+            if (($option[0] ?? '') === 'EXT_AMMO') $bonus += max(0, (int)($option[2] ?? 0));
+        }
+        foreach ($flight->systems as $craft) {
+            if (!($craft instanceof Fighter) || $craft->isDestroyed()) continue;
+            foreach ($craft->systems as $system) {
+                if ($system->isDestroyed()) continue;
+                if ($system instanceof FighterMissileRack) {
+                    foreach ((array)$system->missileArray as $round) {
+                        if ($round && (int)$round->amount < (int)$system->maxAmount && $pool >= (int)$round->cost) return true;
+                    }
+                } else if ($system instanceof AmmoMagazine) {
+                    foreach ((array)$flight->enhancementOptions as $option) {
+                        $class = self::MAGAZINE_ROUNDS[(string)($option[0] ?? '')] ?? null;
+                        if ($class === null || (int)($option[2] ?? 0) <= 0 || !class_exists($class)) continue;
+                        $round = new $class();
+                        if (!array_key_exists($round->modeName, $system->ammoCountArray)) continue;
+                        if ((int)$system->ammoCountArray[$round->modeName] < (int)$option[2] && $pool >= (int)$round->getPrice($flight)) return true;
+                    }
+                } else if ($system instanceof Weapon) {
+                    $cap = self::reloadable($system);
+                    if ($cap > 0 && isset($system->ammunition) && (int)$system->ammunition < $cap + $bonus) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    //A docked flight of the bot's own (not one that starts docked) with nothing more to reload in $carrier: it may go.
+    private static function reloaded($flight, $carrier)
+    {
+        return $flight instanceof FighterFlight && empty($flight->remoteControl) && (int)$flight->userid === (int)$carrier->userid
+            && !self::reloadDue($flight, $carrier);
+    }
+
+    //Weapon::$reloadable (protected - read as whileDocked reads it): the rounds a docked gun reloads to, 0 for none.
+    private static function reloadable(Weapon $weapon)
+    {
+        return (int)(function () { return $this->reloadable; })->call($weapon);
     }
 
     //The bays a docked entry is drawn from: its occupancy (HangarOps::occupancyBaysFor), or the bay holding it.
@@ -309,7 +468,8 @@ class HangarDecider
     public static function describeLaunches()
     {
         $l = self::$last;
-        if ($l['launched'] == 0 && $l['held'] == 0) return '';
-        return 'hangars: ' . $l['launched'] . ' flights launching (' . $l['craft'] . ' craft)' . ($l['held'] > 0 ? ', ' . $l['held'] . ' waiting for launch room' : '');
+        if ($l['launched'] == 0 && $l['held'] == 0 && $l['docking'] == 0) return '';
+        return 'hangars: ' . $l['launched'] . ' flights launching (' . $l['craft'] . ' craft)' . ($l['held'] > 0 ? ', ' . $l['held'] . ' waiting for launch room' : '')
+            . ($l['docking'] > 0 ? ', ' . $l['docking'] . ' docking to reload' : '');
     }
 }

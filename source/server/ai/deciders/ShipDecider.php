@@ -518,7 +518,7 @@ class ShipDecider
             $next = $now || ($why === 'not loaded' && (int)$weapon->getLoadingTime() <= (int)$weapon->turnsloaded + 1);
             if (!$now && !$next) continue;
             $slow = (int)$weapon->getLoadingTime() > 1;
-            $key = get_class($weapon) . '|' . $weapon->firingMode . '|' . $weapon->startArc . '|' . $weapon->endArc . '|' . (int)$now . (int)$next . '|' . count($weapon->criticals);
+            $key = get_class($weapon) . '|' . $weapon->firingMode . '|' . AIView::arcKey($weapon) . '|' . (int)$now . (int)$next . '|' . count($weapon->criticals);
             if (!isset($guns[$key])) $guns[$key] = array('weapon' => $weapon, 'count' => 0, 'now' => $now, 'next' => $next, 'slow' => $slow,
                 'heavy' => FireDecider::isHeavy($weapon)); //stage T5f-3: Hard's fleet focus draws the heavy guns
             $guns[$key]['count']++;
@@ -534,7 +534,7 @@ class ShipDecider
                 if (count($modes) == 0) continue;
                 if (!in_array((int)$weapon->firingMode, $modes, true)) $weapon->changeFiringMode($modes[0]);
             }
-            $key = get_class($weapon) . '|' . $weapon->firingMode . '|' . $weapon->startArc . '|' . $weapon->endArc . '|' . count($weapon->criticals);
+            $key = get_class($weapon) . '|' . $weapon->firingMode . '|' . AIView::arcKey($weapon) . '|' . count($weapon->criticals);
             if (!isset($launchers[$key])) $launchers[$key] = array('weapon' => $weapon, 'count' => 0);
             $launchers[$key]['count']++;
         }
@@ -558,7 +558,7 @@ class ShipDecider
                     $next = $now || (int)$weapon->getLoadingTime() <= (int)$weapon->turnsloaded + 1;
                     if (!$now && !$next) continue;
                     $base = get_class($weapon) . '|' . $weapon->firingMode . '|' . (int)$now . (int)$next;
-                    $withArc = $base . '|' . $weapon->startArc . '|' . $weapon->endArc;
+                    $withArc = $base . '|' . AIView::arcKey($weapon);
                     if (!isset($arced[$withArc])) $arced[$withArc] = array('weapon' => $weapon, 'count' => 0, 'now' => $now, 'next' => $next);
                     $arced[$withArc]['count']++;
                     if (!isset($any[$base])) $any[$base] = array('weapon' => $weapon, 'count' => 0, 'now' => $now, 'next' => $next);
@@ -570,6 +570,27 @@ class ShipDecider
                 'health' => $view->healthLeft($enemy), 'worth' => $view->value($enemy) / $view->healthLeft($enemy),
                 //where it stands before it moves, and how far it could go towards the ship (Hard's one-ply reply, stage T5f-3)
                 'start' => $enemy->getHexPos(), 'reach' => $last ? max(0, (int)$last->speed) + 1 : 1);
+        }
+
+        /* Stage T9, M7 (the skill 'pulsarCharge'): the ship's Pulsar Mines - whole and switched on - and, for each, what one attack of it
+           should do to a craft of each enemy flight yet to move (AIView::pulsarAttack): such a flight STARTS its move where it stands now,
+           and a mine attacks every craft that was within its 2 hexes and arc at any moment of the craft's move, judged from where the
+           mine's ship stood then - for a flight moving after the ship, where it ENDS (PulsarMine::checkForValidTargets; units move in
+           initiative order). A flight that has moved already was judged from where the ship began: nothing the ship does now changes it. */
+        $pulsars = array();
+        if ($view->skill('pulsarCharge')) {
+            foreach ($ship->systems as $system) {
+                if (!($system instanceof PulsarMine) || $system->isDestroyed() || $system->isOfflineOnTurn($turn)) continue;
+                $perCraft = array();
+                foreach ($enemies as $e => $enemy) {
+                    if ($enemy['moved'] || !($enemy['unit'] instanceof FighterFlight)) continue;
+                    $craft = 0;
+                    foreach ($enemy['unit']->systems as $fighter) if ($fighter instanceof Fighter && !$fighter->isDestroyed()) $craft++;
+                    $attack = $view->pulsarAttack($ship, $system, $enemy['unit']);
+                    if ($craft > 0 && $attack > 0) $perCraft[$e] = array('attack' => $attack, 'craft' => $craft);
+                }
+                if (count($perCraft) > 0) $pulsars[] = array('weapon' => $system, 'flights' => $perCraft);
+            }
         }
 
         //What the ship closes on: the enemy's ships - a capital ship does not chase fighters - or its flights when that is all there is.
@@ -622,7 +643,7 @@ class ShipDecider
 
         $now = $mover->state(); //before any order: a pivot or roll carried over from last turn (stage T5e)
         return array('guns' => array_values($guns), 'launchers' => array_values($launchers), 'enemies' => $enemies, 'friends' => $friends, 'quarry' => $quarry,
-            'ram' => $ram, 'ramTargets' => $ramTargets,
+            'ram' => $ram, 'ramTargets' => $ramTargets, 'pulsars' => $pulsars,
             'health' => $view->healthLeft($ship), 'worth' => $view->value($ship) / $view->healthLeft($ship), 'comfort' => $comfort,
             //the level's skills (stage T5f, AIConfig::SKILLS) - and Hard's focus target for the fleet's heavy guns (MoveDecider)
             'manoeuvres' => $view->skill('manoeuvres'), 'unmovedDanger' => (float)$view->skill('unmovedDanger'),
@@ -818,7 +839,6 @@ class ShipDecider
             }
             if (isset($damage[$index]) && $gun['slow']) $firedSlow[$index] = true;
         }
-
         $launches = array();
         foreach ($context['launchers'] as $index => $launcher) {
             foreach ($context['enemies'] as $e => $enemy) {
@@ -872,6 +892,9 @@ class ShipDecider
             if ($enemy['moved']) $incoming[] = array($d, $view->exposure($ship, $enemy['unit']));
             else $incoming[] = array($d * $context['unmovedDanger'], $view->exposureUnmoved($ship, $enemy['unit']));
         }
+
+        //stage T9, M7: the Pulsar Mines at the enemy flights that start their move within reach of where the ship ends - shared out with the guns
+        foreach (self::pulsarFire($view, $ship, $context) as $key => $row) $damage[$key] = $row;
 
         return array('offence' => self::removed($damage, $targets), 'launch' => self::removed($launches, $targets),
             'danger' => self::lost($incoming, $context['health'], $context['worth']), 'firedSlow' => $firedSlow,
@@ -1000,6 +1023,46 @@ class ShipDecider
     {
         if (!isset(self::$arcFree[$hexKey][$index][$e])) self::$arcFree[$hexKey][$index][$e] = (float)$view->estimate($ship, $weapon, $target, false);
         return self::$arcFree[$hexKey][$index][$e];
+    }
+
+    /* Stage T9, M7: what the ship's Pulsar Mines ($context['pulsars']) should do from the end state judged to the enemy flights yet to
+       move - each flight's start hex (where it stands now: $enemy['start']) within the mine's range (2) and its arc from the ship's end
+       facing, the line between clear (PulsarMine::checkTargetConditions). Every live craft is attacked once, up to the mine's 18 attacks
+       (createFireOrders - the flights in the game's unit order, as it walks them). Rows for ShipDecider::removed, keyed 'pulsar:mine:enemy'
+       with that flight alone in them: the mine's attacks at one flight are no use at another, so it is not one gun choosing a target. */
+    private static function pulsarFire(AIView $view, $ship, array $context)
+    {
+        $rows = array();
+        if (count($context['pulsars']) == 0) return $rows;
+        foreach ($context['pulsars'] as $m => $pulsar) {
+            $mine = $pulsar['weapon'];
+            $left = 18;
+            foreach ($pulsar['flights'] as $e => $flight) {
+                if ($left <= 0) break;
+                if (!self::pulsarReaches($view, $ship, $mine, $context['enemies'][$e]['start'])) continue;
+                $attacks = min($left, $flight['craft']);
+                $left -= $attacks;
+                $rows['pulsar:' . $m . ':' . $e] = array($e => $attacks * $flight['attack']);
+            }
+        }
+        return $rows;
+    }
+
+    /* Would $mine, on $ship where it stands now, attack a craft on $hex? PulsarMine::checkTargetConditions: within the mine's range (2),
+       in its arc - the bearing taken as dead ahead (0) when the craft shares the ship's hex - and a clear line. (Public for
+       tests/ai/gravityNetHarness.php, which holds it to the engine's own attacks.) */
+    public static function pulsarReaches(AIView $view, $ship, Weapon $mine, OffsetCoordinate $hex)
+    {
+        $from = $ship->getHexPos();
+        $distance = $from->distanceTo($hex);
+        if ($distance > (int)$mine->range) return false;
+        if ($distance == 0) {
+            if (!Mathlib::isInArc(0, $mine->startArc, $mine->endArc)) return false;
+        } else if (!$view->onArcHex($ship, $mine, $hex)) {
+            return false;
+        }
+        $blocked = is_array($view->gamedata->blockedHexes) ? $view->gamedata->blockedHexes : array();
+        return count($blocked) == 0 || !Mathlib::isLoSBlocked($from, $hex, $blocked);
     }
 
     //What one enemy's guns loaded now should do to the ship this turn: from their arcs once it has moved, every gun while it has yet to.

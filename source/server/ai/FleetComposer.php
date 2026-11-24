@@ -14,7 +14,8 @@
  * OSAT / mine, nothing out of tier, no craft that needs any hangar but a fighter's or a Hunter-Killer's (stage T9, M2), no hull whose
  * hangars carry a minimum the composer does not fill (Fighter Squadrons, Mapmaker Probes), nothing a CPU player cannot fly
  * (AIConfig::cpuUnitBlock). Fighters in full flights of six. No enhancements, refits or officers (plan 8.2: "auto-composed fleets are
- * plain").
+ * plain") - but a missile-armed flight carries a HALF LOAD of its Basic missiles (stage T9, M12 - the user, 2026-11-24; ordnanceOf),
+ * bought as the lobby buys them: Ammo & Ordnance, which the checker never counts as an enhancement.
  *
  * HOW: capital ships first (the checker wants one per 5,000 points from 3,000) with a jump engine among them, then ships towards a
  * share of the points drawn from the seed, then fighters until every carrier's hangars are at least half full (a carrier the points
@@ -47,8 +48,9 @@ class FleetComposer
     }
 
     /* The fleet for $faction within $points, in service by $isd (a year; null, 0 or '' for no cutoff), drawn from $seed:
-         'faction', 'points' (spent), 'problems' (what the checker would refuse - EMPTY when it is clean),
-         'units': list of array('phpclass', 'name', 'flightSize' (null for a ship), 'pointCost').
+         'faction', 'points' (spent, missiles included), 'problems' (what the checker would refuse - EMPTY when it is clean),
+         'units': list of array('phpclass', 'name', 'flightSize' (null for a ship), 'pointCost' (the catalogue's, a flight's for six),
+                  'ordnance' (stage T9, M12: the missiles a flight buys - ordnanceOf - or null)).
        Throws when the faction has no catalogue. */
     public static function compose($faction, $points, $isd = null, $seed = 1)
     {
@@ -81,7 +83,7 @@ class FleetComposer
         foreach ($best['units'] as $unit) {
             $counts[$unit['class']] = isset($counts[$unit['class']]) ? $counts[$unit['class']] + 1 : 1;
             $named[] = array('phpclass' => $unit['phpclass'], 'name' => $unit['class'] . ' ' . $counts[$unit['class']],
-                'flightSize' => $unit['flight'] ? self::FLIGHT_SIZE : null, 'pointCost' => $unit['cost']);
+                'flightSize' => $unit['flight'] ? self::FLIGHT_SIZE : null, 'pointCost' => $unit['cost'], 'ordnance' => $unit['ordnance'] ?? null);
         }
         $best['units'] = $named;
         return $best;
@@ -146,14 +148,14 @@ class FleetComposer
             $left = $points - self::spent($units);
             $options = array();
             foreach (array_merge($ships, $flights, $hks) as $candidate) {
-                if ($candidate['cost'] > $left || !self::allowed($units, $candidate, $points)) continue;
+                if (self::price($candidate) > $left || !self::allowed($units, $candidate, $points)) continue;
                 $with = $units;
                 $with[] = $candidate;
                 if (count(self::hangarProblems(self::hangars($with))) > 0) continue;
                 $options[] = $candidate;
             }
             if (count($options) == 0) break;
-            usort($options, function ($a, $b) { return $b['cost'] <=> $a['cost']; });
+            usort($options, function ($a, $b) { return self::price($b) <=> self::price($a); });
             $top = array_slice($options, 0, 3);
             $units[] = $top[$rng(count($top))];
         }
@@ -172,7 +174,7 @@ class FleetComposer
             $hkFilled = !self::hkShort($units);
             foreach ($units as $index => $unit) {
                 foreach ($all as $candidate) {
-                    $gain = $candidate['cost'] - $unit['cost'];
+                    $gain = self::price($candidate) - self::price($unit);
                     if ($gain <= $bestGain || $gain > $left) continue;
                     $traded = $units;
                     $traded[$index] = $candidate;
@@ -193,7 +195,7 @@ class FleetComposer
     {
         $fits = array();
         foreach ($pool as $candidate) {
-            if ($candidate['cost'] > $budget || !self::allowed($units, $candidate, $points)) continue;
+            if (self::price($candidate) > $budget || !self::allowed($units, $candidate, $points)) continue;
             $fits[] = $candidate;
             if ($candidate['rarity'] === 'C') $fits[] = $candidate;
         }
@@ -209,7 +211,7 @@ class FleetComposer
             $left = $points - self::spent($units);
             $options = array();
             foreach ($flights as $flight) {
-                if ($flight['cost'] > $left || !self::allowed($units, $flight, $points)) continue;
+                if (self::price($flight) > $left || !self::allowed($units, $flight, $points)) continue;
                 $with = $units;
                 $with[] = $flight;
                 $after = self::hangars($with);
@@ -217,7 +219,7 @@ class FleetComposer
                 $options[] = $flight;
             }
             if (count($options) == 0) return false;
-            usort($options, function ($a, $b) { return $a['cost'] <=> $b['cost']; });
+            usort($options, function ($a, $b) { return self::price($a) <=> self::price($b); });
             $cheapest = array_slice($options, 0, 2);
             $units[] = $cheapest[$rng(count($cheapest))];
         }
@@ -232,7 +234,7 @@ class FleetComposer
             $left = $points - self::spent($units);
             $options = array();
             foreach ($hks as $hk) {
-                if ($hk['cost'] > $left || !self::allowed($units, $hk, $points)) continue;
+                if (self::price($hk) > $left || !self::allowed($units, $hk, $points)) continue;
                 $with = $units;
                 $with[] = $hk;
                 $after = self::hangars($with);
@@ -240,7 +242,7 @@ class FleetComposer
                 $options[] = $hk;
             }
             if (count($options) == 0) return;
-            usort($options, function ($a, $b) { return $a['cost'] <=> $b['cost']; });
+            usort($options, function ($a, $b) { return self::price($a) <=> self::price($b); });
             $cheapest = array_slice($options, 0, 2);
             $units[] = $cheapest[$rng(count($cheapest))];
         }
@@ -278,7 +280,7 @@ class FleetComposer
         return $problems;
     }
 
-    //The deployment brackets (10 / 33 / 50% of the points on base cost - one unit alone in a bracket may break it), the escort a
+    //The deployment brackets (10 / 33 / 50% of the points on base cost - the checker's catalogue cost, no missiles - one unit alone in a bracket may break it), the escort a
     //restricted unit needs, the per-hull limit and the uncommon limits per hull and per fleet.
     private static function limitProblems(array $units, $points)
     {
@@ -382,10 +384,16 @@ class FleetComposer
         return false;
     }
 
+    //What a unit costs the fleet: the catalogue's price and (stage T9, M12) a flight's missiles. The brackets alone use the first.
+    private static function price(array $unit)
+    {
+        return $unit['cost'] + (isset($unit['ordnance']) ? $unit['ordnance']['price'] : 0);
+    }
+
     private static function spent(array $units)
     {
         $sum = 0;
-        foreach ($units as $unit) $sum += $unit['cost'];
+        foreach ($units as $unit) $sum += self::price($unit);
         return $sum;
     }
 
@@ -450,9 +458,92 @@ class FleetComposer
                 'hull' => ((string)($s['variantOf'] ?? '') !== '') ? (string)$s['variantOf'] : $class,
                 'cost' => (int)$s['pointCost'], 'limited' => (int)($s['limited'] ?? 0), 'rarity' => ($occurence === 'common') ? 'C' : 'U',
                 'size' => (int)($s['shipSizeClass'] ?? 0), 'flight' => $flight, 'jump' => $jump, 'hangar' => $hangar,
-                'craftSize' => $craftSize, 'unitSize' => $unitSize, 'hk' => $hk);
+                'craftSize' => $craftSize, 'unitSize' => $unitSize, 'hk' => $hk,
+                'ordnance' => $flight ? self::ordnanceOf($s['phpclass']) : null); //stage T9, M12
         }
         return self::$catalogues[$key] = $out;
+    }
+
+    /* Stage T9, M12 (the user, 2026-11-24: auto-compose buys a HALF LOAD of BASIC missiles for a missile-armed flight). What a flight of
+       six buys, or null: its Basic missile - or, on a flight that offers none, its Dogfight missile (the Gamma and Atlas Starfuries:
+       their only one) - half of what a craft can carry, at least one. Two kinds, each as the lobby buys and prices it:
+         'magazine'  an AmmoMagazine flight: the enhancement row AMMO_FB / AMMO_FY, 'count' a craft ('row' the server's own option row),
+                     priced count x price x six craft (confirm.enhRowCost - Ammo & Ordnance, never an "enhancement" to the checker);
+         'rack'      old missile racks (FighterMissileRack - their rounds in missileArray): 'mode' (the firing mode's key), 'amount' a
+                     launcher, on every launcher with that mode; priced amount x cost x launchers x six craft (confirm.getTotalCost,
+                     ajaxInterface's pointCostEnh2).
+       'price' is the six craft's total; entryExtras() posts it. */
+    private static function ordnanceOf($phpclass)
+    {
+        try {
+            $flight = new $phpclass(-1, -1, 'composer', 0);
+            if (!($flight instanceof FighterFlight)) return null;
+            $flight->flightSize = self::FLIGHT_SIZE;
+            $flight->populate();
+            Enhancements::setEnhancementOptions($flight);
+        } catch (Throwable $e) {
+            return null;
+        }
+        $rows = array();
+        foreach ($flight->enhancementOptions as $row) $rows[$row[0]] = $row;
+        foreach (array('AMMO_FB', 'AMMO_FY') as $enh) {
+            if (!isset($rows[$enh]) || (int)$rows[$enh][3] < 1) continue;
+            $count = max(1, intdiv((int)$rows[$enh][3], 2));
+            $row = $rows[$enh];
+            $row[2] = $count;
+            return array('kind' => 'magazine', 'enh' => $enh, 'count' => $count, 'row' => $row, 'price' => $count * (int)$row[4] * self::FLIGHT_SIZE);
+        }
+        $craft = $flight->getSampleFighter();
+        foreach (array('FB', 'FY') as $wanted) {
+            $launchers = 0;
+            $max = 0;
+            $cost = 0;
+            $mode = null;
+            foreach ($craft->systems as $weapon) {
+                if (!($weapon instanceof Weapon) || empty($weapon->missileArray)) continue;
+                foreach ((array)$weapon->firingModes as $key => $name) {
+                    if ($name !== $wanted || !isset($weapon->missileArray[$key])) continue;
+                    $launchers++;
+                    $max = ($max == 0) ? (int)$weapon->maxAmount : min($max, (int)$weapon->maxAmount);
+                    $cost = (int)$weapon->missileArray[$key]->cost;
+                    $mode = $key;
+                }
+            }
+            if ($launchers == 0 || $max < 1) continue;
+            $amount = max(1, intdiv($max, 2));
+            return array('kind' => 'rack', 'mode' => $mode, 'name' => $wanted, 'amount' => $amount, 'launchers' => $launchers,
+                'price' => $amount * $cost * $launchers * self::FLIGHT_SIZE);
+        }
+        return null;
+    }
+
+    /* Stage T9, M12: the payload keys a composed unit's missiles add to its buying entry (Manager::autoComposeCpuSlot), shaped as the lobby
+       posts a bought flight: a magazine's enhancement row (its cost in pointCostEnh, as doBuyShip books an enhancement), or every rack's
+       rounds on every craft ('ammo' by firing mode, its cost in pointCostEnh2 - ajaxInterface). Empty for a unit that buys none. */
+    public static function entryExtras(array $unit)
+    {
+        $ordnance = $unit['ordnance'] ?? null;
+        if ($ordnance === null) return array();
+        if ($ordnance['kind'] === 'magazine') {
+            return array('enhancementOptions' => array($ordnance['row']), 'pointCostEnh' => $ordnance['price']);
+        }
+        $flight = new $unit['phpclass'](-1, -1, 'composer', 0);
+        $flight->flightSize = (int)$unit['flightSize'];
+        $flight->populate();
+        $systems = array();
+        foreach ($flight->systems as $craft) {
+            if (!($craft instanceof Fighter)) continue;
+            $racks = array();
+            foreach ($craft->systems as $weapon) {
+                if (!($weapon instanceof Weapon) || empty($weapon->missileArray)) continue;
+                //(gamelobby.js doBuyShip: every launcher's rounds of the firing mode of that NAME)
+                $key = array_search($ordnance['name'], (array)$weapon->firingModes, true);
+                //(with its - empty - fireOrders, as ajaxInterface posts every craft weapon: ShipPayload reads 'ammo' only beside them)
+                if ($key !== false && isset($weapon->missileArray[$key])) $racks[] = array('id' => (int)$weapon->id, 'fireOrders' => array(), 'ammo' => array($key => $ordnance['amount']));
+            }
+            if (count($racks) > 0) $systems[(int)$craft->id] = array('id' => (int)$craft->id, 'systems' => $racks); //(ShipPayload finds a row's system by its KEY)
+        }
+        return array('systems' => $systems, 'pointCostEnh2' => $ordnance['price']);
     }
 
     /* Is this class left out? A unit a CPU player cannot field (AIConfig::cpuUnitBlock: the readiness list, the hulls ShipMover never

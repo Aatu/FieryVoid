@@ -6,7 +6,7 @@
  * Manager::submitShipsForPlayer - the body a browser's POST runs, line for line. Nothing in a
  * phase, handler or rule knows a bot is there (principle P1).
  *
- * A phase with a decider (Deployment, Initial Orders, Movement, Firing so far) plays its decision; a phase without
+ * A phase with a decider (Deployment, Initial Orders, Movement, Pre-Firing, Firing) plays its decision; a phase without
  * one plays the fallback (AIFallback), which is also what a refused decision is replaced with.
  *
  * A refusal is an AI defect and is logged as one (tac_ai_log, kind 'defect'). A bot refused
@@ -62,7 +62,8 @@ class TacticalAI
            Deployment (stage T1a), Initial Orders (stage T3 - power and EW; masks $gamedata too),
            Movement (stage T1b - holds course, steers clear of terrain),
            Firing (stage T2 - direct fire; it masks $gamedata in place, as the view of the bot's
-           own player, which is why the fallback below reads nothing a mask touches). */
+           own player, which is why the fallback below reads nothing a mask touches),
+           Pre-Firing (stage T9, M6 - the Gravity Nets; it masks $gamedata too). */
         $entries = null;
         $summary = null;
         $status = '';
@@ -114,6 +115,11 @@ class TacticalAI
                         $db->setAiState($gameid, $botId, $turn, $state);
                         return self::result('pending');
                     }
+                }
+                else if ($phase == 5) {
+                    //stage T9, M6: Pre-Firing - the Gravity Nets (a seat is owed this phase only with a pre-firing weapon ready)
+                    $entries = GravityNetDecider::orders($gamedata, $botId, $seat);
+                    $summary = GravityNetDecider::$lastSummary; //null when no net fired
                 }
                 else if ($phase == 3) {
                     $entries = FireDecider::orders($gamedata, $botId, $seat);
@@ -196,6 +202,8 @@ class TacticalAI
         $launches = BallisticDecider::systems(BallisticDecider::plan($view), $gamedata->turn);
         //stage T9 (the user's note 4): area-effect weapons - Energy Mines - launched at the hex an enemy is guessed to end in
         $mines = AoEDecider::systems(AoEDecider::plan($view), $gamedata->turn);
+        //stage T9, M13: Adaptive Armour - turn 1's pre-allocated points, and every turn the points the hits have unlocked
+        $armour = AdaptiveArmourDecider::plan($view);
 
         $entries = array();
         foreach (AIFallback::ownUnits($gamedata, $botId) as $unit) {
@@ -222,6 +230,14 @@ class TacticalAI
                     $entry['systems'][$systemId] = isset($entry['systems'][$systemId]) ? array_merge($entry['systems'][$systemId], $system) : $system;
                 }
             }
+            if (isset($armour[$id])) {
+                foreach ($armour[$id] as $systemId => $system) {
+                    if (!isset($entry['systems'][$systemId])) $entry['systems'][$systemId] = $system;
+                    //a craft's row may carry its launches already: its controller joins the craft's own systems
+                    else if (isset($system['systems'])) $entry['systems'][$systemId]['systems'] = array_merge($entry['systems'][$systemId]['systems'] ?? array(), $system['systems']);
+                    else $entry['systems'][$systemId] = array_merge($entry['systems'][$systemId], $system);
+                }
+            }
             $entries[] = $entry;
         }
 
@@ -235,6 +251,7 @@ class TacticalAI
             . ($p['interceptors'] > 0 ? '; ' . $p['interceptors'] . ' Interceptors boosted to fire at fighters' : '')
             . ($b['launches'] > 0 ? '; ballistics: ' . $b['launches'] . ' launchers at ' . $b['targets'] . ' enemies' : '')
             . (AoEDecider::$last['launches'] > 0 ? '; area-effect: ' . AoEDecider::$last['launches'] . ' mines at the guessed hexes of ' . AoEDecider::$last['targets'] . ' enemies' : '')
+            . (AdaptiveArmourDecider::$last['points'] > 0 ? '; adaptive armour: ' . AdaptiveArmourDecider::$last['points'] . ' points on ' . AdaptiveArmourDecider::$last['controllers'] . ' units' : '')
             . (count(JumpDecider::$last) > 0 ? '; ' . implode('; ', JumpDecider::$last) : '');
 
         return $entries;

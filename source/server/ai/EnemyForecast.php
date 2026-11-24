@@ -166,7 +166,7 @@ class EnemyForecast
         foreach ($view->mounts($unit) as $mount) {
             $weapon = $mount['weapon'];
             if (!$view->plainGun($weapon, $mount['fighter']) || !$view->loaded($weapon) || $weapon->isOfflineOnTurn($view->turn)) continue;
-            $key = get_class($weapon) . '|' . $weapon->firingMode . '|' . $weapon->startArc . '|' . $weapon->endArc;
+            $key = get_class($weapon) . '|' . $weapon->firingMode . '|' . AIView::arcKey($weapon);
             if (!isset($kinds[$key])) $kinds[$key] = array('weapon' => $weapon, 'count' => 0);
             $kinds[$key]['count']++;
         }

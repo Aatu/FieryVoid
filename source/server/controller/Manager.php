@@ -2291,6 +2291,7 @@ class Manager{
                     'slot' => $slotid, 'team' => $slot->team, 'pointCostEnh' => 0, 'pointCostEnh2' => 0,
                     'movement' => array(), 'EW' => array(), 'enhancementOptions' => array(), 'systems' => array());
                 if ($unit['flightSize'] !== null) $entry['flightSize'] = $unit['flightSize'];
+                $entry = array_merge($entry, FleetComposer::entryExtras($unit)); //stage T9, M12: a flight's half load of missiles, as the lobby posts it
                 $entries[] = $entry;
             }
             $ships = ShipPayload::buildShips($entries);

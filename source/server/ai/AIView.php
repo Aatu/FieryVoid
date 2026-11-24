@@ -237,7 +237,8 @@ class AIView
         //from here on some flags are read from the weapon's payload (flag()): only for a weapon that got this far
         if ($this->flag($weapon, 'duoWeapon') || $this->flag($weapon, 'dualWeapon')) return 'compound weapon';
         if ($this->flag($weapon, 'isBoardingAction')) return 'boarding';
-        if ($weapon->splitArcs || $this->flag($weapon, 'specialArcs')) return 'special arcs';
+        //(stage T9, M10: a split-arc mount is a plain gun - onArc asks every one of its arcs, as the page does)
+        if ($this->flag($weapon, 'specialArcs')) return 'special arcs';
         if ($this->flag($weapon, 'hasSpecialTargeting') || $this->flag($weapon, 'canOnlyCalledShot') || $this->flag($weapon, 'reinforceAmount')) return 'special targeting';
         if ($weapon->linkedFiringGroup !== null || $this->flag($weapon, 'flightExclusiveGroup')) return 'linked firing';
         /* Stage T9 (E9): a DIRECT-FIRE exclusive weapon (the Sitara's Ion Bolt, the Phalan's Plasma Gun) is offered like any gun -
@@ -687,6 +688,123 @@ class AIView
         return array('mode' => (int)$weapon->firingMode, 'orders' => max(1, (int)$weapon->guns), 'shots' => (int)$weapon->defaultShots, 'damageclass' => strtolower($type));
     }
 
+    /* Stage T9, M6 - the GRAVITY NET (Pre-Firing). A player fires one in TWO clicks, both ported here and judged by fireOracle.js
+       (replayNets):
+         1. the unit (weaponManager.targetShip -> GravityNet.doMultipleFireOrders): one 'prefiring' order at it, damage class
+            'gravitic', the note 'Split' - netShot();
+         2. the hex to move it to (weaponManager.targetHex -> GravityNet.doMultipleHexFireOrders): a second 'prefiring' order at no
+            unit, the hex in x / y, damage class 'gravNetMoveHex' - netHex().
+       netShot: the page's tests for the first click - Pre-Firing, the net whole, switched on, loaded and without an order this turn,
+       the unit able to fire (unitBlock - stricter than the page, as everywhere), the target an ENEMY - or, with $allies (Hard's skill
+       'netAllies' - the user, 2026-11-24), a FRIENDLY unit too, as the page lets a player net one (a canTargetAll weapon: a click on a
+       friendly unit targets it - PhaseStrategy / gamedata.canTargetAlly), never the net's own ship - not a mine nor Enormous
+       (doMultipleFireOrders), the fire control for its size, a clear line, the arc, the range, and a chance of at least 1. Null when the
+       page would make no order; else array('chance' => percent, 'distance' => hexes). The chance is the engine's own (GravityNet::
+       calculateHitBase: -15 at a gravitic or Ancient unit, a friend too; at a friend the bot holds no lock on, the no-lock penalty). Why
+       it is null: why() is not kept for it - $this->refusal holds the last reason (netWhy()). */
+    public function netShot($unit, Weapon $net, $target, $allies = false)
+    {
+        $this->refusal = null;
+        if ((int)$this->gamedata->phase !== 5 || !($net instanceof GravityNet) || $net->ballistic) return $this->refuse('mode');
+        if ($this->unitBlock($unit) !== null) return $this->refuse('unit');
+        if ($net->isDestroyed() || $net->isOfflineOnTurn($this->turn) || $net->stowed || !$this->loaded($net)) return $this->refuse('unloaded');
+        if ($net->firedOnTurn($this->turn) || count($this->ordersThisTurn($net)) > 0) return $this->refuse('ordered');
+
+        if ($target->id === $unit->id || ($target->team == $unit->team && !$allies)) return $this->refuse('target');
+        if (!empty($target->mine) || (!($target instanceof FighterFlight) && (int)$target->shipSizeClass > 3)) return $this->refuse('target');
+
+        $fc = $net->fireControl;
+        if ($target instanceof FighterFlight) {
+            if (!isset($fc[0])) return $this->refuse('fc');
+        } else if ($target->shipSizeClass < 2) {
+            if (!isset($fc[1])) return $this->refuse('fc');
+        } else if (!isset($fc[2])) {
+            return $this->refuse('fc');
+        }
+
+        $from = $unit->getHexPos();
+        $to = $target->getHexPos();
+        if (!$net->ignoresLoS && count($this->blocked) > 0 && Mathlib::isLoSBlocked($from, $to, $this->blocked)) return $this->refuse('los');
+        if (!$this->onArc($unit, $net, $target)) return $this->refuse('arc');
+        $distance = $from->distanceTo($to);
+        if (!$this->inRange($unit, $net, $target, $distance)) return $this->refuse('range');
+
+        $order = new FireOrder(-1, 'prefiring', $unit->id, $target->id, $net->id, -1, $this->turn, $net->firingMode, 0, 0, 1, 0, 0, null, null, 'gravitic');
+        $answers = $this->hitBase($net, $unit, $target, $order);
+        if (count($answers) == 0) return $this->refuse('edge');
+        $chance = 0;
+        foreach ($answers as $answer) $chance += $answer['weight'] * $answer['needed'];
+        $chance = (int)round($chance);
+        if ($chance < 1) return $this->refuse('chance');
+        return array('chance' => $chance, 'distance' => $distance);
+    }
+
+    //Why the last netShot() answered null: 'mode', 'unit', 'unloaded', 'ordered', 'target', 'fc', 'los', 'arc', 'range', 'edge' or 'chance'.
+    public function netWhy()
+    {
+        return $this->refusal;
+    }
+
+    /* The second click: may the net, its first order at $target, move it to $hex? weaponManager.targetHex's tests - the hex inside the
+       net's arc from the shooter (isPosOnWeaponArc), the line from the shooter to it clear (a blocked one ENDS the page's click: no
+       order), within the net's range (0 = any) - then GravityNet.validateTargetMoveHex: no further from the target than the net's Move
+       Distance (netReach), the line from the target to it clear, and not itself a blocked hex. The page asks nothing of the map's edge
+       or of other units there; the decider keeps to the map itself. */
+    public function netHex($unit, Weapon $net, $target, OffsetCoordinate $hex)
+    {
+        if (!$this->onArcHex($unit, $net, $hex)) return false;
+        $from = $unit->getHexPos();
+        if (!$net->ignoresLoS && count($this->blocked) > 0 && Mathlib::isLoSBlocked($from, $hex, $this->blocked)) return false;
+        if ($net->range != 0 && $from->distanceTo($hex) > $net->range) return false;
+
+        $at = $target->getHexPos();
+        if ($at->distanceTo($hex) > $this->netReach($net)) return false;
+        foreach ($this->blocked as $blocked) {
+            if ((int)$blocked->q === (int)$hex->q && (int)$blocked->r === (int)$hex->r) return false;
+        }
+        if (count($this->blocked) > 0 && Mathlib::isLoSBlocked($at, $hex, $this->blocked)) return false;
+        return true;
+    }
+
+    /* How far this turn's roll lets the net move a unit: its Move Distance (the d6 the server rolls for each net in the Movement phase -
+       GravityNet::generateIndividualNotes - and shows from Pre-Firing on: onIndividualNotesLoaded). 0 when there is none this turn. */
+    public function netReach(Weapon $net)
+    {
+        return is_numeric($net->moveDistance) ? max(0, (int)$net->moveDistance) : 0;
+    }
+
+    /* Stage T9, M7 - the PULSAR MINE (the Narn G'Karith; the JaStat base): the damage ONE of its attacks should do to a craft of
+       $flight. It fires by itself (autoFireOnly - nobody aims it): after Movement, at every enemy craft that was within its 2 hexes and
+       its arc at any moment of the craft's own move - judged from where the mine's ship stood then, as the units move in initiative order
+       (PulsarMine::checkForValidTargets) - one order a craft, called at it, up to 18 a mine (createFireOrders). Priced here as the engine
+       will price that order; its range penalty is 0 and it ignores jinking, so where either unit stands does not change it. Range, arc
+       and the 18 are the caller's (ShipDecider). 0 when the flight has no craft left or the shot cannot be priced. */
+    public function pulsarAttack($ship, Weapon $mine, $flight)
+    {
+        if (!($flight instanceof FighterFlight) || !isset($mine->fireControl[0])) return 0;
+        $craft = null;
+        foreach ($flight->systems as $fighter) {
+            if ($fighter instanceof Fighter && !$fighter->isDestroyed()) {
+                $craft = $fighter;
+                break;
+            }
+        }
+        if ($craft === null) return 0;
+
+        $order = new FireOrder(-1, 'prefiring', $ship->id, $flight->id, $mine->id, $craft->id, $this->turn, 1, 0, 0, 1, 0, 0, 0, 0, $mine->weaponClass, -1);
+        try {
+            $answers = $this->hitBase($mine, $ship, $flight, $order);
+        } catch (Throwable $e) {
+            return 0;
+        }
+        $total = 0;
+        foreach ($answers as $answer) {
+            $chance = max(0, min(100, $answer['needed']));
+            if ($chance > 0) $total += $answer['weight'] * $chance / 100 * $this->damagePerHit($mine, $ship, $flight, $answer['loc'], 0, $answer['needed']);
+        }
+        return $total;
+    }
+
     /* The weapons whose page split splitShot() is a port of - by EXACT class, as the page picks a system's prototype by its class:
        the Twin Array, the Heavy Array, the Quad Array (mode 5) and the Quad Particle Beam share one doMultipleFireOrders shape (one
        order a click, one shot, 'Sweeping', until every gun has one). Not the Unreliable Twin Array: its page prototype is a plain
@@ -1010,12 +1128,44 @@ class AIView
         return $this->inArcAt($unit, $weapon, round(Mathlib::getCompassHeadingOfPoint(Mathlib::hexCoToPixel($unit->getHexPos()), Mathlib::hexCoToPixel($hex))));
     }
 
-    //Is the (rounded) compass $heading inside $weapon's arc, turned by $unit's facing - shipManager.systems.getArcs + mathlib.isInArc.
+    /* Is the (rounded) compass $heading inside $weapon's arc, turned by $unit's facing - shipManager.systems.getArcs + mathlib.isInArc.
+       Stage T9, M10: a SPLIT-ARC mount (the Centauri Primus's forward Twin Arrays, 240-300 and 60-120 at once) bears in EVERY one of its
+       arcs - weaponManager.isOnWeaponArcMultiple / isPosOnWeaponArc over shipManager.systems.getMultipleArcs (each arc mirrored on its own
+       by a roll); the live startArc/endArc is only the first of them. */
     private function inArcAt($unit, Weapon $weapon, $heading)
     {
-        $start = $weapon->startArc;
-        $end = $weapon->endArc;
+        foreach (self::arcsOf($weapon) as $arc) {
+            if ($this->wedgeHolds($unit, $arc[0], $arc[1], $heading)) return true;
+        }
+        return false;
+    }
 
+    //The arcs a mount holds at once: its split list (Weapon::$startArcArray keyed from 0 when $splitArcs), else its one live arc.
+    public static function arcsOf(Weapon $weapon)
+    {
+        if ($weapon->splitArcs && !empty($weapon->startArcArray) && !empty($weapon->endArcArray)) {
+            $arcs = array();
+            foreach ($weapon->startArcArray as $i => $start) {
+                if (!isset($weapon->endArcArray[$i])) continue; //getMultipleArcs skips an unmatched pair
+                $arcs[] = array($start, $weapon->endArcArray[$i]);
+            }
+            if (count($arcs) > 0) return $arcs;
+        }
+        return array(array($weapon->startArc, $weapon->endArc));
+    }
+
+    //A key for "guns alike in arc" (the deciders count alike guns once): the live arc, and a split mount's every arc.
+    public static function arcKey(Weapon $weapon)
+    {
+        $key = $weapon->startArc . '|' . $weapon->endArc;
+        if (!$weapon->splitArcs) return $key;
+        foreach (self::arcsOf($weapon) as $arc) $key .= '|' . $arc[0] . '-' . $arc[1];
+        return $key;
+    }
+
+    //One wedge, $start..$end of the unit's own frame, at compass $heading - getArcs (a roll mirrors it) + isInArc.
+    private function wedgeHolds($unit, $start, $end, $heading)
+    {
         $length = ($start > $end) ? 360 - $start + $end : $end - $start;
         $fullCircle = ($start === $end || $start == $end || $length >= 360);
         if (!$fullCircle && Movement::isRolled($unit)) {

@@ -171,6 +171,8 @@ class AIConfig
        also stops asking once the flight's search time is spent (FlightDecider::coverageSearch). */
     const FLIGHT_COVERAGE_PLANS = 4;
     const FLIGHT_COVERAGE_TRIES = 6;
+    //Stage T9, M11: the aimed search's plans for a flight going home to reload (to its carrier's hex - FlightDecider::dockRows)
+    const FLIGHT_HOME_PLANS = 8;
     const FLIGHT_SUPPORT_RANGE = 4;         //Hard's mutual support (skill 'support', T5f-3): within this many hexes of another flight is together
     const FLIGHT_INTERCEPT_WEIGHT = 1.5;    //an enemy flight near the bot's ships is worth this much more to a flight that can shoot fighters - a priority, no longer the only target
     const FLIGHT_CLOSING_PER_HEX = 2.0;     //each hex between the flight's guns' reach and its target, when nothing is in reach
@@ -316,17 +318,25 @@ class AIConfig
 
     /* MISSING SYSTEMS (stage T9 - the user, 2026-11-23, on breaching pods: "Hide for now, we will add Marines later. Start a list of
        missing systems for AI in Tactical AI Plan so we can tackle them one-by-one in future and unhide these units for ai use" - the
-       list is plan 10.10 "Missing systems"). Systems, by their `name`, that the AI does not use yet: name => array(why, hides every
-       FLIGHT that carries it). A CPU player may not field
-         - a flight whose craft carry a system marked true - a boarding craft (breaching pods, assault shuttles, armed or not), or
-         - a unit that carries weapons and none the AI uses: every one of them on this list (the Ramming Attack and the jump engine
-           are not counted - a unit with no other weapon is not hidden by this, a designed rammer included).
+       list is plan 10.10 "Missing systems"). Systems, by their `name`, that the AI does not use yet: name => array(why, what it hides).
+       A CPU player may not field
+         - with 'flight': a flight whose craft carry it - a boarding craft (breaching pods, assault shuttles, armed or not);
+         - with 'unit': ANY unit carrying it, whatever else it carries (stage T9, M9 - the Molecular Slicer, the user, 2026-11-24: "a
+           very complex Ancient weapon, add it to CPU_MISSING_SYSTEMS to hide the EA ships with it for now" - the Omega Epsilon, whose
+           other guns would otherwise keep it in);
+         - and with either, a unit that carries weapons and none the AI uses: every one of them on this list (the Ramming Attack and
+           the jump engine are not counted - a unit with no other weapon is not hidden by this, a designed rammer included).
        Take a line out when the AI learns its system: the units come back by themselves.
        ⚠️ MIRROR PAIR with gamelobby.js CPU_MISSING_SYSTEMS / cpuMissingSystemBlock (the Store marks its rows once, when it builds them,
        so the page keeps its own copy of the list): change one, change both. A drift shows as a refusal when the slot is readied. */
     const CPU_MISSING_SYSTEMS = array(
-        'Marines' => array('Marines', true),                        //boarding - the user, 2026-11-23: "we will add Marines later"
+        'Marines' => array('Marines', 'flight'),                    //boarding - the user, 2026-11-23: "we will add Marines later"
         //(the Antiproton Defender's line came out at stage T9's M3, 2026-11-23: AIView::PORTED_SPECIAL - the Raiders' Jia is back)
+        //M9 - every Molecular Slicer (they split by default over a whole hit chart; the Shadows' and customs' too)
+        'MolecularSlicerBeamL' => array('Molecular Slicer', 'unit'),
+        'MolecularSlicerBeamM' => array('Molecular Slicer', 'unit'),
+        'MolecularSlicerBeamH' => array('Molecular Slicer', 'unit'),
+        'MolecularSlicerBeamA' => array('Molecular Slicer', 'unit'),
     );
 
     //Why a CPU player cannot field $unit for a system the AI does not use yet (CPU_MISSING_SYSTEMS), or null.
@@ -339,7 +349,8 @@ class AIConfig
             foreach (($system instanceof Fighter) ? $system->systems : array($system) as $mount) {
                 $name = (string)$mount->name;
                 $entry = isset(self::CPU_MISSING_SYSTEMS[$name]) ? self::CPU_MISSING_SYSTEMS[$name] : null;
-                if ($entry !== null && $entry[1] && $unit instanceof FighterFlight) return 'a boarding craft: the AI does not use ' . $entry[0] . ' yet';
+                if ($entry !== null && $entry[1] === 'flight' && $unit instanceof FighterFlight) return 'a boarding craft: the AI does not use ' . $entry[0] . ' yet';
+                if ($entry !== null && $entry[1] === 'unit') return 'carries a ' . $entry[0] . ': the AI does not use it yet';
                 if (!($mount instanceof Weapon) || $name === 'RammingAttack' || $name === 'jumpEngine') continue;
                 $weapons++;
                 if ($entry === null) continue;
@@ -444,28 +455,40 @@ class AIConfig
                         2026-11-23: "Easy and Normal may simply fire 1-3 a turn at one target, Hard can consider splitting a bit more"):
                         BallisticDecider::torpedoes, which sends the second unit torpedoes only where they are worth more than more at the first
          torpedoFlightVolley the most torpedoes one launcher sends at a FLIGHT in a turn ("3-6 at a fighter flight"; Easy and Normal "1-3") -
-                        never more than the flight has craft. At ships TORPEDO_SHIP_VOLLEY, every level */
+                        never more than the flight has craft. At ships TORPEDO_SHIP_VOLLEY, every level
+         gravityNets    Gravity Nets fired in Pre-Firing (stage T9, M6 - the user, 2026-11-23/24: "Use OEW to judge this, e.g. bring an
+                        enemy ship into heavy weapon arcs of friendly ships that have a lock, or move enemy ship so it no longer has heavy
+                        weapon arcs on ships it has OEW lock on"; also to turn a damaged side to the fleet's guns, or push a ship of many
+                        light, range-hungry guns as far off as the net allows): GravityNetDecider. No level split was ruled - on at every
+                        level; legacy (= the T5e Normal) off, as it was
+         pulsarCharge   a ship with Pulsar Mines (the Narn G'Karith) values ending its move within their 2 hexes and arc of enemy flights
+                        that move AFTER it - they start their own move in range and are attacked (stage T9, M7 - the user: "charging into
+                        enemy fighter units when the G'Karith moves first, since it will then trigger when the fighters take their movement
+                        as they start in its range"): ShipDecider::pulsarFire. On at every level; legacy off
+         netAllies      Gravity Nets at FRIENDLY units too - the bot's own and its teammates' (the user, 2026-11-24: "a HARD CPU player will
+                        consider whether moving allies is advantageous and attempt to do so. Easy and Normal can skip this"): a friend put
+                        where its fire is more, or the enemy's fire at the side less, by the same trade (GravityNetDecider). Hard only */
     const SKILLS = array(
         'easy' => array('sectionHealth' => false, 'ccewDeterrent' => true, 'closeLocks' => false, 'mediumLocks' => false, 'noFlightOEW' => true, 'simpleEW' => true, 'focus' => 0.0, 'heavyFocus' => false,
             'pulsePremium' => false, 'shortening' => false, 'unmovedDanger' => 0.5, 'overspeed' => 0.5, 'ballisticFloor' => false,
             'flightDanger' => 0.75, 'jink' => 'max', 'manoeuvres' => 'none', 'noise' => 10.0, 'coverageGoals' => 0,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none',
-            'interceptorBoost' => false, 'ram' => false, 'splitShots' => false, 'aoeSpread' => false, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3),
+            'interceptorBoost' => false, 'ram' => false, 'splitShots' => false, 'aoeSpread' => false, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3, 'gravityNets' => true, 'pulsarCharge' => true, 'netAllies' => false),
         'normal' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'closeLocks' => true, 'mediumLocks' => true, 'noFlightOEW' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 1.5, 'jink' => 'max', 'manoeuvres' => 'swap', 'noise' => 0.0, 'coverageGoals' => 4,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'turn',
-            'interceptorBoost' => false, 'ram' => true, 'splitShots' => false, 'aoeSpread' => true, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3),
+            'interceptorBoost' => false, 'ram' => true, 'splitShots' => false, 'aoeSpread' => true, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3, 'gravityNets' => true, 'pulsarCharge' => true, 'netAllies' => false),
         'hard' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'closeLocks' => true, 'mediumLocks' => true, 'noFlightOEW' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 3.0, 'jink' => 'any', 'manoeuvres' => 'all', 'noise' => 0.0, 'coverageGoals' => 12,
             'pileOn' => 1.0, 'support' => 2.0, 'fleetFocus' => 0.5, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => true, 'extendedTurns' => true, 'forecast' => 'full',
-            'interceptorBoost' => true, 'ram' => true, 'splitShots' => true, 'aoeSpread' => true, 'torpedoTargets' => 2, 'torpedoFlightVolley' => 6),
+            'interceptorBoost' => true, 'ram' => true, 'splitShots' => true, 'aoeSpread' => true, 'torpedoTargets' => 2, 'torpedoFlightVolley' => 6, 'gravityNets' => true, 'pulsarCharge' => true, 'netAllies' => true),
         'legacy' => array('sectionHealth' => false, 'ccewDeterrent' => true, 'closeLocks' => false, 'mediumLocks' => false, 'noFlightOEW' => false, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 0.75, 'jink' => 'max', 'manoeuvres' => 'swap', 'noise' => 0.0, 'coverageGoals' => 0,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none',
-            'interceptorBoost' => false, 'ram' => false, 'splitShots' => false, 'aoeSpread' => false, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3)
+            'interceptorBoost' => false, 'ram' => false, 'splitShots' => false, 'aoeSpread' => false, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3, 'gravityNets' => false, 'pulsarCharge' => false, 'netAllies' => false)
     );
 
     /* POWER MANAGEMENT (skill 'powerBoost', stage T5f-4). A gun "reaches" an enemy when, with the units as close as both could
@@ -539,6 +562,18 @@ class AIConfig
     const AOE_LANDS = 0.75;
     const AOE_SPREAD = array('flight' => array(0.35, 0.3, 0.2), 'ship' => array(0.5, 0.25, 0.1));
     const AOE_OWN_MARGIN = 2;
+
+    /* Stage T9, M6 - GRAVITY NETS (GravityNetDecider, the skill 'gravityNets'). A net is fired only where the move it buys is worth at
+       least GRAVNET_MIN_GAIN of fleet value this Fire phase - the trade (damage the bot's units should deal less the level's shipDanger
+       weight times what the moved unit should deal them, as ShipDecider weighs a trade) with the target where the net puts it, against where it stands, times the
+       net's chance to hit (and for a second net at the same unit, only what it adds: the server moves a unit by ONE net, the hitting one
+       with the largest Move Distance). A net reloads in two turns, so a trivial move now can cost a good one next turn; the figure is the
+       implementer's. GRAVNET_DECISION_SECONDS: the CPU time pricing the hexes may take (GravityNetDecider::$budget; 0 = none, the
+       harnesses) - the targets nearest the nets first, so a cut leaves the farthest unpriced. */
+    const GRAVNET_MIN_GAIN = 10.0;
+    //...and never at a chance under this (the user, 2026-11-24: "The minimum hit chance I think should be 15%") - a net spent on a long shot is not there next turn
+    const GRAVNET_MIN_CHANCE = 15;
+    const GRAVNET_DECISION_SECONDS = 2.0;
 
     /* A SIDE DOWN TO ITS FIGHTERS (stage T6g, the user 2026-11-21: "tone down AI fighters that stay too far away when they are the
        only unit left for the AI player, as this will frustrate players. E.g. can't go three turns without firing a shot, and maybe
