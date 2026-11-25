@@ -4,7 +4,7 @@ class VelraxCarythe extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 300;
+	$this->pointCost = 310;
 	$this->faction = "Nexus Velrax Republic (early)";
         $this->phpclass = "VelraxCarythe";
         $this->imagePath = "img/ships/Nexus/velraxVersythe.png";
@@ -16,7 +16,7 @@ class VelraxCarythe extends HeavyCombatVesselLeftRight{
         $this->canvasSize = 125;
 		$this->unofficial = true;
 
-        $this->fighters = array("normal"=>12);
+        $this->fighters = array("normal"=>24);
 
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -30,7 +30,7 @@ class VelraxCarythe extends HeavyCombatVesselLeftRight{
 
         $this->addPrimarySystem(new Reactor(3, 18, 0, 0));
         $this->addPrimarySystem(new CnC(3, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 16, 3, 5));
+        $this->addPrimarySystem(new Scanner(3, 16, 3, 4));
         $this->addPrimarySystem(new Engine(3, 20, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(2, 2, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 1));
@@ -40,13 +40,13 @@ class VelraxCarythe extends HeavyCombatVesselLeftRight{
 
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 180, 60));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 120, 360));
-		$this->addLeftSystem(new Hangar(3, 8, 6));
+		$this->addLeftSystem(new Hangar(3, 14, 6));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 		$this->addLeftSystem(new CargoBay(2, 30)); 
 
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 300, 180));
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 0, 240));
-		$this->addRightSystem(new Hangar(3, 8, 6));
+		$this->addRightSystem(new Hangar(3, 14, 6));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 		$this->addRightSystem(new CargoBay(2, 30)); 
 

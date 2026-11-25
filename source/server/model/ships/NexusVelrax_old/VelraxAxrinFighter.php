@@ -21,7 +21,7 @@ class VelraxAxrinFighter extends FighterFlight{
         $this->turncost = 0.33;
 		$this->turndelay = 0;
         
-        $this->iniativebonus = 90;
+        $this->iniativebonus = 85;
         $this->populate();       
 
     }
