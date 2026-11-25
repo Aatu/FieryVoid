@@ -4,7 +4,7 @@ class VelraxSoressPDCRefit extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 100*6;
+        $this->pointCost = 60*6;
         $this->faction = "Nexus Velrax Republic";
         $this->phpclass = "VelraxSoressPDCRefit";
         $this->shipClass = "Soress Planetary Defense Craft (2112)";
@@ -26,7 +26,7 @@ class VelraxSoressPDCRefit extends FighterFlight{
 		
 		$this->hangarRequired = "superheavy"; //Velrax Hisskar are housed in regular hangars, as heavy fighters
 //		$this->unitSize = 0.5; //one craft requires 2 hangar slots
-        $this->iniativebonus = 60;
+        $this->iniativebonus = 75;
         $this->hasNavigator = true;
     	$this->superheavy = true;
         $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
@@ -58,7 +58,7 @@ class VelraxSoressPDCRefit extends FighterFlight{
 			$fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base
 
             $frontGun = new NexusLightIonBolter(270, 90, 0);
-            $frontGun->displayName = "Light Ion Gun";
+            $frontGun->displayName = "Light Ion Bolter";
             $fighter->addFrontSystem($frontGun);
 
 			$fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base

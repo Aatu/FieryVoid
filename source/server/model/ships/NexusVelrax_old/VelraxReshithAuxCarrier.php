@@ -4,7 +4,7 @@ class VelraxReshithAuxCarrier extends MediumShipLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 150;
+        $this->pointCost = 130;
         $this->faction = "Nexus Velrax Republic (early)";
         $this->phpclass = "VelraxReshithAuxCarrier";
         $this->imagePath = "img/ships/Nexus/velraxKrissith.png";

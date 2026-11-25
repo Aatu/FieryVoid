@@ -4,7 +4,7 @@ class VelraxOzaraEscort extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 300;
+        $this->pointCost = 245;
         $this->faction = "Nexus Velrax Republic (early)";
         $this->phpclass = "VelraxOzaraEscort";
         $this->imagePath = "img/ships/Nexus/velraxThristen.png";
@@ -30,19 +30,19 @@ class VelraxOzaraEscort extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 8, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 11, 4, 5));
-        $this->addPrimarySystem(new Engine(3, 9, 0, 8, 3));
-        $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
+        $this->addPrimarySystem(new Engine(3, 9, 0, 10, 3));
+        $this->addPrimarySystem(new Thruster(2, 10, 0, 5, 3));
+        $this->addPrimarySystem(new Thruster(2, 10, 0, 5, 4));        
         
-		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 180, 60));
+		$this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 180, 60));
 		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 240, 60));
 		$this->addFrontSystem(new NexusDartInterceptor(2, 4, 1, 270, 90));
 		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 300, 120));
-		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 300, 180));
-        $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
+		$this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 300, 180));
+        $this->addFrontSystem(new Thruster(2, 12, 0, 6, 1));
 	    
-        $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
-        $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
+        $this->addAftSystem(new Thruster(2, 9, 0, 5, 2));    
+        $this->addAftSystem(new Thruster(2, 9, 0, 5, 2));    
         $this->addAftSystem(new Hangar(1, 2, 2));
 		$this->addAftSystem(new NexusIonGun(2, 2, 2, 120, 360));
 		$this->addAftSystem(new NexusIonGun(2, 2, 2, 0, 240));
@@ -61,7 +61,8 @@ class VelraxOzaraEscort extends MediumShip{
 		),
 
 		1=> array(
-			6 => "Thruster",
+			5 => "Thruster",
+			7 => "Twin Ion Gun",
 			9 => "Ion Gun",
 			11 => "Dart Interceptor",
 			17 => "Structure",

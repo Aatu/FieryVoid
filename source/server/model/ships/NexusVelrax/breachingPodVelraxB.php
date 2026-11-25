@@ -4,7 +4,7 @@ class breachingPodVelraxB extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 30 * 6;
+        $this->pointCost = 40 * 6;
         $this->faction = "Nexus Velrax Republic";
         $this->phpclass = "breachingPodVelraxB";
         $this->shipClass = "Korveth Breaching Pods";

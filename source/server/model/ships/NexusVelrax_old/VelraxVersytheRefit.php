@@ -26,7 +26,7 @@ class VelraxVersytheRefit extends HeavyCombatVesselLeftRight{
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 3;
-        $this->iniativebonus = 30;
+        $this->iniativebonus = 20;
 
         $this->addPrimarySystem(new Reactor(3, 18, 0, 0));
         $this->addPrimarySystem(new CnC(3, 12, 0, 0));
