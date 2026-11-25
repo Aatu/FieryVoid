@@ -41,9 +41,9 @@ class VelraxGunboatRefit2 extends LCV{
 //        $this->addPrimarySystem(new AntiquatedScanner(2, 7, 2, 4));
 		$this->addPrimarySystem(new Engine(3, 15, 0, 6, 2));
 
-		$this->addFrontSystem(new NexusIonBolter(2, 2, 2, 240, 60));
+		$this->addFrontSystem(new DualIonBolter(2, 4, 4, 240, 60));
 		$this->addFrontSystem(new EWPlasmaArc(2, 5, 4, 300, 60));
-		$this->addFrontSystem(new NexusIonBolter(2, 2, 2, 300, 120));
+		$this->addFrontSystem(new DualIonBolter(2, 4, 4, 300, 120));
 	    
         $this->addPrimarySystem(new Structure(3, 32));
 	    
@@ -51,7 +51,7 @@ class VelraxGunboatRefit2 extends LCV{
         		0=> array( 
         				10 => "Structure",
         				13 => "1:Plasma Arc",
-        				15 => "1:Ion Bolter",
+        				15 => "1:Dual Ion Bolter",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -59,7 +59,7 @@ class VelraxGunboatRefit2 extends LCV{
         		1=> array( //redirect to PRIMARY
         				10 => "Structure",
         				13 => "1:Plasma Arc",
-        				15 => "1:Ion Bolter",
+        				15 => "1:Dual Ion Bolter",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -67,7 +67,7 @@ class VelraxGunboatRefit2 extends LCV{
         		2=> array( //redirect to PRIMARY
         				10 => "Structure",
         				13 => "1:Plasma Arc",
-        				15 => "1:Ion Bolter",
+        				15 => "1:Dual Ion Bolter",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

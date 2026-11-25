@@ -4,7 +4,7 @@ class VelraxVasrevEscort extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 325;
+        $this->pointCost = 310;
         $this->faction = "Nexus Velrax Republic (early)";
         $this->phpclass = "VelraxVasrevEscort";
         $this->imagePath = "img/ships/Nexus/velraxSathrin.png";
@@ -31,19 +31,19 @@ class VelraxVasrevEscort extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 10, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 5, 5));
-        $this->addPrimarySystem(new Engine(3, 12, 0, 8, 3));
+        $this->addPrimarySystem(new Engine(3, 12, 0, 10, 3));
         $this->addPrimarySystem(new Hangar(1, 2, 2));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 4));        
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 3));
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 4));        
         
 		$this->addFrontSystem(new NexusDartInterceptor(2, 4, 1, 240, 60));
 		$this->addFrontSystem(new EWPlasmaArc(3, 5, 4, 270, 90));
 		$this->addFrontSystem(new NexusTwinIonGun(3, 4, 4, 270, 90));
 		$this->addFrontSystem(new NexusDartInterceptor(2, 4, 1, 300, 120));
-        $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(2, 12, 0, 6, 1));
 	    
-        $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
-        $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
+        $this->addAftSystem(new Thruster(3, 9, 0, 5, 2));    
+        $this->addAftSystem(new Thruster(3, 9, 0, 5, 2));    
 		$this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 120, 360));
 		$this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 0, 240));
        

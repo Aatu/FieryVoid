@@ -4,7 +4,7 @@ class VelraxSevashCarrierRail extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 300;
+        $this->pointCost = 305;
         $this->faction = "Nexus Velrax Republic (early)";
         $this->phpclass = "VelraxSevashCarrierRail";
         $this->imagePath = "img/ships/Nexus/velraxSevash.png";
@@ -17,7 +17,7 @@ class VelraxSevashCarrierRail extends MediumShip{
 	    $this->isd = 2062;
 
 	    $this->notes = 'Atmospheric Capable.';
-        $this->fighters = array("normal"=>6);
+        $this->fighters = array("light"=>6);
         
         $this->forwardDefense = 11;
         $this->sideDefense = 13;

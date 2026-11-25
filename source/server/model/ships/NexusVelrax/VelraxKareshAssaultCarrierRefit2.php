@@ -15,7 +15,7 @@ class VelraxKareshAssaultCarrierRefit2 extends HeavyCombatVesselLeftRight{
         $this->canvasSize = 125;
 		$this->unofficial = true;
 
-        $this->fighters = array("assault shuttles"=>8, "Breaching Pods"=>2);
+        $this->fighters = array("assault shuttles"=>12, "Breaching Pods"=>2);
 
         $this->forwardDefense = 12;
         $this->sideDefense = 14;
@@ -31,21 +31,21 @@ class VelraxKareshAssaultCarrierRefit2 extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 5, 6));
         $this->addPrimarySystem(new Engine(4, 15, 0, 8, 4));
-        $this->addAftSystem(new Thruster(3, 15, 0, 4, 1));
+        $this->addAftSystem(new Thruster(3, 15, 0, 6, 1));
         $this->addAftSystem(new Thruster(4, 20, 0, 8, 2));
 
         $this->addLeftSystem(new Quarters(3, 12));
         $this->addLeftSystem(new NexusStreakInterceptor(2, 4, 1, 180, 60));
         $this->addLeftSystem(new DualIonBolter(2, 4, 4, 240, 60));
         $this->addLeftSystem(new DualIonBolter(2, 4, 4, 120, 300));
-		$this->addLeftSystem(new Hangar(3, 6, 6, 3));
+		$this->addLeftSystem(new Hangar(3, 8, 6, 3));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 
         $this->addRightSystem(new CargoBay(3, 12));
         $this->addRightSystem(new NexusStreakInterceptor(2, 4, 1, 300, 180));
         $this->addRightSystem(new DualIonBolter(2, 4, 4, 300, 120));
         $this->addRightSystem(new DualIonBolter(2, 4, 4, 60, 240));
-		$this->addRightSystem(new Hangar(3, 6, 6, 3));
+		$this->addRightSystem(new Hangar(3, 8, 6, 3));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

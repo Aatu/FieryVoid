@@ -21,7 +21,7 @@ class VelraxResteraxRefit extends FighterFlight{
         $this->turncost = 0.33;
 		$this->turndelay = 0;
         
-        $this->iniativebonus = 80;
+        $this->iniativebonus = 85;
         $this->populate();       
 
     }

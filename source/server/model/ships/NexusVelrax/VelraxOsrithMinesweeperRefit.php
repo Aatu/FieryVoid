@@ -4,7 +4,7 @@ class VelraxOsrithMinesweeperRefit extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 375;
+        $this->pointCost = 310;
         $this->faction = "Nexus Velrax Republic";
         $this->phpclass = "VelraxOsrithMinesweeperRefit";
         $this->imagePath = "img/ships/Nexus/velraxSathrin.png";

@@ -4,7 +4,7 @@ class VelraxSivrinGunship extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 365;
+	$this->pointCost = 415;
 	$this->faction = "Nexus Velrax Republic (early)";
         $this->phpclass = "VelraxSivrinGunship";
         $this->imagePath = "img/ships/Nexus/velraxSivrin.png";
@@ -30,7 +30,7 @@ class VelraxSivrinGunship extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Engine(4, 13, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2, 2));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
-        $this->addAftSystem(new Thruster(3, 15, 0, 4, 1));
+        $this->addAftSystem(new Thruster(3, 15, 0, 6, 1));
         $this->addAftSystem(new Thruster(4, 20, 0, 8, 2));
 
         $this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 240, 360));

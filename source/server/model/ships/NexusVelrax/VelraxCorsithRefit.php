@@ -20,7 +20,7 @@ class VelraxCorsithRefit extends FighterFlight{
         $this->turncost = 0.33;
         
 		$this->hangarRequired = 'assault shuttles'; //for fleet check
-    	$this->iniativebonus = 11 * 5;
+    	$this->iniativebonus = 10 * 5;
         $this->populate();
     }
 
