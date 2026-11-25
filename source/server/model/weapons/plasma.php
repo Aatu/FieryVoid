@@ -13,8 +13,12 @@ class Plasma extends Weapon{
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		$this->data["Special"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex).";
-		$this->data["Special"] .= "<br>Ignores half of armor.";
+		if ($this->rangeDamagePenalty <> 0){
+			$this->data["Special"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex).<br>";
+		}else{
+			$this->data["Special"] = "";
+		}
+		$this->data["Special"] .= "Ignores half of armor.";
 	}
 	
 	public function setSystemData($data, $subsystem){
