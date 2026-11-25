@@ -1702,6 +1702,18 @@ div[data-team-id="2"] .remove-team-btn {
   margin-bottom: 0px;  
 }
 
+/* A CPU slot's level (TACTICAL_AI_PLAN.md stage T8) - beside its tick, only while it is ticked. */
+.cg-cpu-level.cg-input {
+  width: auto;
+  min-width: 0;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+.cg-cpu-level[hidden] {
+  display: none;
+}
+
 /* A new copy is scrolled into view; this keeps it clear of the sticky nav bar. */
 .cg-page .slot,
 .cg-team {

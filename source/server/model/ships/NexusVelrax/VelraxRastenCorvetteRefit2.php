@@ -4,7 +4,7 @@ class VelraxRastenCorvetteRefit2 extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 310;
+        $this->pointCost = 270;
         $this->faction = "Nexus Velrax Republic";
         $this->phpclass = "VelraxRastenCorvetteRefit2";
         $this->imagePath = "img/ships/Nexus/velraxThristen.png";
@@ -34,10 +34,10 @@ class VelraxRastenCorvetteRefit2 extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
         
-		$this->addFrontSystem(new NexusTwinIonGun(1, 4, 4, 180, 60));
+		$this->addFrontSystem(new DualIonBolter(1, 4, 4, 180, 60));
 		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 60));
 		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 60));
-		$this->addFrontSystem(new NexusTwinIonGun(1, 4, 4, 300, 180));
+		$this->addFrontSystem(new DualIonBolter(1, 4, 4, 300, 180));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
 	    
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
@@ -62,7 +62,7 @@ class VelraxRastenCorvetteRefit2 extends MediumShip{
 		1=> array(
 			6 => "Thruster",
 			9 => "Medium Plasma Cannon",
-			11 => "Twin Ion Gun",
+			11 => "Dual Ion Bolter",
 			17 => "Structure",
 			20 => "Primary",
 		),

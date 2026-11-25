@@ -4,7 +4,7 @@ class VelraxLightCarrierRefit extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 445;
+	$this->pointCost = 430;
 	$this->faction = "Nexus Velrax Republic";
         $this->phpclass = "VelraxLightCarrierRefit";
         $this->imagePath = "img/ships/Nexus/VelraxResskar2.png";
@@ -14,15 +14,15 @@ class VelraxLightCarrierRefit extends BaseShip{
 		$this->limited = 33;
 		$this->unofficial = true;
 
-        $this->fighters = array("light"=>6, "heavy"=>6);
+        $this->fighters = array("light"=>12, "heavy"=>6);
 
 		$this->isd = 2105;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 14;
         
-        $this->turncost = 1.0;
-        $this->turndelaycost = 1.0;
+        $this->turncost = 0.75;
+        $this->turndelaycost = 0.75;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
@@ -41,16 +41,17 @@ class VelraxLightCarrierRefit extends BaseShip{
         $this->addFrontSystem(new DualIonBolter(2, 4, 4, 300, 120));
 
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
+		$this->addAftSystem(new Hangar(2, 6, 6, 3));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
 		$this->addAftSystem(new JumpEngine(4, 20, 6, 35));
 
 		$this->addLeftSystem(new PlasmaWaveTorpedo(3, 7, 4, 300, 60));
-        $this->addLeftSystem(new DualIonBolter(2, 4, 4, 180, 360));
+        $this->addLeftSystem(new DualIonBolter(2, 4, 4, 120, 300));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 		$this->addLeftSystem(new Hangar(2, 7, 6, 3));
 
 		$this->addRightSystem(new PlasmaWaveTorpedo(3, 7, 4, 300, 60));
-        $this->addRightSystem(new DualIonBolter(2, 4, 4, 0, 180));
+        $this->addRightSystem(new DualIonBolter(2, 4, 4, 60, 240));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 		$this->addRightSystem(new Hangar(2, 7, 6, 3));
         
@@ -79,7 +80,8 @@ class VelraxLightCarrierRefit extends BaseShip{
 			),
 			2=> array(
 					6 => "Thruster",
-					10 => "Jump Engine",
+					8 => "Hangar",
+					11 => "Jump Engine",
 					18 => "Structure",
 					20 => "Primary",
 			),

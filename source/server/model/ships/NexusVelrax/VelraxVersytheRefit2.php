@@ -4,7 +4,7 @@ class VelraxVersytheRefit2 extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 485;
+	$this->pointCost = 450;
 	$this->faction = "Nexus Velrax Republic";
         $this->phpclass = "VelraxVersytheRefit2";
         $this->imagePath = "img/ships/Nexus/velraxVersythe.png";
@@ -24,7 +24,7 @@ class VelraxVersytheRefit2 extends HeavyCombatVesselLeftRight{
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 3;
-        $this->iniativebonus = 30;
+        $this->iniativebonus = 20;
 
         $this->addPrimarySystem(new Reactor(4, 18, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));

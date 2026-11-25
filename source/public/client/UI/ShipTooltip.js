@@ -229,7 +229,16 @@ window.ShipTooltip = function () {
         range.selectNodeContents(label);
         var textRect = range.getBoundingClientRect();
         if (!textRect.width) return; //not laid out (yet)
-        node.style.setProperty('--tt-ew-indent', Math.max(0, textRect.left - rowRect.left).toFixed(2) + 'px');
+        //The rects are SCREEN px; the indent is used inside the zoomed card (2026-11-24, --tt-zoom), in its own px.
+        node.style.setProperty('--tt-ew-indent', (Math.max(0, textRect.left - rowRect.left) / cardZoom(row)).toFixed(2) + 'px');
+    }
+
+    /* The CSS zoom the card is drawn at (shipTooltip.css "Smaller screens": 1, 0.85 or 0.75 by screen size).
+       `el` is any element inside the card box. */
+    function cardZoom(el) {
+        var card = el && el.closest ? el.closest('.fv-shipcard__card') : null;
+        var zoom = card && window.getComputedStyle ? parseFloat(window.getComputedStyle(card).zoom) : 1;
+        return zoom > 0 ? zoom : 1;
     }
 
     ShipTooltip.prototype.reposition = function (position) {
@@ -289,7 +298,8 @@ window.ShipTooltip = function () {
         //The CARD is centred on its unit; the ORDERS panel (round 12) hangs off its right edge, and
         //`width` - the whole row - is what the clamp keeps on screen, so near the right edge the
         //card moves left to make room for the panel.
-        var cardWidth = (this.cardElement && this.cardElement[0] && this.cardElement[0].offsetWidth) || width;
+        //The card's RECT: it is zoomed on smaller screens, and its offsetWidth is then in its own px.
+        var cardWidth = (this.cardElement && this.cardElement[0] && this.cardElement[0].getBoundingClientRect().width) || width;
         var left = point.x - cardWidth / 2;
         var top = side === 'below' ? below : above;
 
@@ -1040,49 +1050,75 @@ window.ShipTooltip = function () {
     }
 
     /* The facing (Stage 3): which of the target's sections faces the selected unit, from the same
-       helper the TARGETING list's old "-PORT-" line used. FWD/AFT bear on the forward profile,
-       everything else on the side one - that is the number the card lights up. */
+       helper the TARGETING list's old "-PORT-" line used - and which Defence number the shot meets,
+       the one the card lights up. */
     var SECTION_LABEL = { 1: 'FWD', 2: 'AFT', 3: 'PORT', 4: 'STBD', 31: 'P.FWD', 32: 'P.AFT', 41: 'S.FWD', 42: 'S.AFT', 0: 'PRI' };
 
-    /* A fighter flight's four armour arcs - ⚠️ MIRROR of FighterFlight::getLocations (PHP), which
-       puts every arc on location 0, so fillLocationsGUI sends a flight NO outerSections and
-       getShipHittingSide always answered "nothing" (the card showed no Facing on a flight). The
+    /* The four PROFILE arcs: forward profile from 330-30 and 150-210, side profile everywhere else -
+       ⚠️ MIRROR of weaponManager.getShipDefenceFacingFromHeading, the bearing the hit chance reads
+       the profile from. They pick the lit Defence number on EVERY non-base unit (user, 2026-11-19):
+       an MCV's / HCV's FWD section spans 270-90, so a section-based light (the old rule) lit the
+       forward number for a shot from 60° that meets the side profile. A bearing exactly on a
+       boundary lights both, as before.
+       They are also a fighter flight's four armour arcs - ⚠️ MIRROR of FighterFlight::getLocations
+       (PHP), which puts every arc on location 0, so fillLocationsGUI sends a flight NO outerSections
+       and getShipHittingSide always answered "nothing" (the card showed no Facing on a flight). The
        arc still picks the ARMOUR a hit meets (fighter.php getArmourBase), so the card names it as
        it names a ship's section (user, 2026-11-16). Listed in a ship's section order (FWD, AFT,
        PORT, STBD - getShipHittingSide sorts by location id) so a boundary reads the same way on
-       both; FWD and AFT bear on the forward profile, as getLocations' `profile` has it. */
-    var FLIGHT_ARCS = [
+       both. ⚠️ OSAT::getLocations (PHP) is the SAME four arcs and profiles, all on location 0 too,
+       so an OSAT also arrives with no outerSections and is named from this table (user, 2026-11-19). */
+    var PROFILE_ARCS = [
         { label: 'FWD', min: 330, max: 30, fwd: true },
         { label: 'AFT', min: 150, max: 210, fwd: true },
         { label: 'PORT', min: 210, max: 330, fwd: false },
         { label: 'STBD', min: 30, max: 150, fwd: false }
     ];
 
-    function buildFlightFacing(source, ship) {
+    //The PROFILE_ARCS the selected unit sits in (two on a boundary); null when the bearing can't be read.
+    function profileArcsAt(source, ship) {
         var bearing = readSafely(function () { return mathlib.getCompassHeadingOfShip(ship, source); }, null);
         var heading = readSafely(function () { return shipManager.getShipHeadingAngle(ship); }, null);
         if (bearing === null || heading === null) return null;
-        var labels = [];
-        var fwd = false, side = false;
-        FLIGHT_ARCS.forEach(function (arc) {
-            if (!mathlib.isInArc(bearing, mathlib.addToDirection(arc.min, heading), mathlib.addToDirection(arc.max, heading))) return;
-            labels.push(arc.label);
-            if (arc.fwd) fwd = true; else side = true;
+        return PROFILE_ARCS.filter(function (arc) {
+            return mathlib.isInArc(bearing, mathlib.addToDirection(arc.min, heading), mathlib.addToDirection(arc.max, heading));
         });
-        return labels.length ? { label: labels.join(' / '), fwd: fwd, side: side } : null;
+    }
+
+    function buildFlightFacing(source, ship) {
+        var arcs = profileArcsAt(source, ship);
+        if (!arcs || !arcs.length) return null;
+        return {
+            label: arcs.map(function (arc) { return arc.label; }).join(' / '),
+            fwd: arcs.some(function (arc) { return arc.fwd; }),
+            side: arcs.some(function (arc) { return !arc.fwd; })
+        };
     }
 
     function buildFacing(source, ship) {
         if (ship.flight) return buildFlightFacing(source, ship);
+        //An OSAT has only a Primary (see PROFILE_ARCS) - its armour arcs still pick the profile a shot meets.
+        if (ship.osat && !(ship.outerSections && ship.outerSections.length)) return buildFlightFacing(source, ship);
         var sections = readSafely(function () { return weaponManager.getShipHittingSide(source, ship); }, null);
         if (!sections || !sections.length) return null;
+        //An MCV / HCV lists one section once per arc it owns (FWD at 330-30 AND 30-90), so a shot on
+        //that line read "FWD / FWD" - name each section once.
+        var seen = [];
         var labels = [];
-        var fwd = false, side = false;
         sections.forEach(function (location) {
+            if (seen.indexOf(location) >= 0) return;
+            seen.push(location);
             labels.push(SECTION_LABEL[location] || 'OTHER');
-            if (location == 1 || location == 2) fwd = true; else side = true;
         });
-        return { label: labels.join(' / '), fwd: fwd, side: side };
+        //The lit number: a base meets its forward profile from every side (weaponManager.getShipDefenceValue);
+        //anything else the profile of the arc the shot comes from.
+        if (ship.base) return { label: labels.join(' / '), fwd: true, side: false };
+        var arcs = profileArcsAt(source, ship) || [];
+        return {
+            label: labels.join(' / '),
+            fwd: arcs.some(function (arc) { return arc.fwd; }),
+            side: arcs.some(function (arc) { return !arc.fwd; })
+        };
     }
 
     /* Enemy DEW in Initial Orders (D6, §11.1 R2.5): another player's EW for THIS turn is hidden until
@@ -1361,8 +1397,9 @@ window.ShipTooltip = function () {
                 { label: 'Initiative', value: iniValue, title: (ini && ini.order) ? 'Initiative ' + ini.total + ', order ' + ini.order : 'No initiative order' },
                 { label: 'Speed', value: movement.speed },
                 { label: 'Accel', value: movement.accel, title: 'Acceleration cost' },
-                { label: 'Turn Cost', value: movement.turnCost, title: 'Turn cost ' + movement.turnCost + ' (rate ' + movement.turnRate + ')' },
-                { label: 'Turn Delay', value: movement.turnDelay, title: 'Turn delay ' + movement.turnDelay + ' (rate ' + movement.turnDelayRate + ')' },
+                //User 2026-11-19: each led by its base rate in dim brackets - `(0.66) 4`.
+                { label: 'Turn Cost', value: movement.turnCost, base: movement.turnRate, title: 'Turn cost ' + movement.turnCost + ' (rate ' + movement.turnRate + ')' },
+                { label: 'Turn Delay', value: movement.turnDelay, base: movement.turnDelayRate, title: 'Turn delay ' + movement.turnDelay + ' (rate ' + movement.turnDelayRate + ')' },
                 { label: 'Pivot', value: movement.pivot, title: 'Pivot cost' }
             );
             spec.push(ship.flight
@@ -1494,7 +1531,7 @@ window.ShipTooltip = function () {
             //(measured 141px in 114px) - there the brackets go on a line of their own below.
             var hasBase = cell.baseFwd !== undefined && cell.baseSide !== undefined;
             var split = hasBase && (Math.round(cell.fwd) !== cell.fwd || Math.round(cell.side) !== cell.side);
-            var base = function (n) { return jQuery('<span class="fv-shipcard__defb"></span>').text((split ? '' : ' ') + '(' + fmt(n) + ')'); };
+            var base = function (n) { return jQuery('<span class="fv-shipcard__defb"></span>').text((split ? '' : '') + '(' + fmt(n) + ')'); };
             value.append(jQuery('<span class="fv-shipcard__def"></span>').toggleClass('fv-shipcard__def--hot', !!(hot && hot.fwd)).text(fmt(cell.fwd)));
             if (hasBase && !split) value.append(base(cell.baseFwd));
             value.append(jQuery('<span class="fv-shipcard__sep"></span>').text('·'));
@@ -1570,8 +1607,15 @@ window.ShipTooltip = function () {
             if (item.title) line.attr('title', item.title);
             var label = jQuery('<span></span>').text(item.label);
             if (item.color) label.css('color', item.color);
-            line.append(label, jQuery('<b></b>').toggleClass('fv-shipcard__crit', !!item.crit) //critStats
-                .text(item.value === undefined || item.value === null ? '—' : String(item.value)));
+            var value = jQuery('<b></b>').toggleClass('fv-shipcard__crit', !!item.crit) //critStats
+                .text(item.value === undefined || item.value === null ? '—' : String(item.value));
+            //a base rate in dim brackets to the LEFT of the value (Turn Cost / Turn Delay); --based
+            //lets the brackets give way first in a tight cell, never the value itself
+            if (item.base !== undefined && item.base !== null) {
+                value.addClass('fv-shipcard__based')
+                    .prepend(jQuery('<span class="fv-shipcard__specb"></span>').text('(' + fmt(item.base) + ')'));
+            }
+            line.append(label, value);
             spec.append(line);
         });
         return spec;
@@ -2186,14 +2230,29 @@ window.ShipTooltip = function () {
         return 'rgb(' + Math.round(rgb[0]) + ',' + Math.round(rgb[1]) + ',' + Math.round(rgb[2]) + ')';
     }
 
+    // TONED (user, 2026-11-21: the card's colours read "a bit rich", and should blend with the
+    // page): every allegiance colour the card paints - its rail and border (and so the head
+    // wash, the tinted labels and button lines, which shipTooltip.css derives from the rail),
+    // the name, and other units' names in From / Fire orders - is mixed a step toward grey, on
+    // BOTH arms of the gate alike. The knobs, --tt-chroma and --tt-grey, are in shipTooltip.css
+    // on the card and its caret. Card-only: the map, fleet list, combat log, hex picker rows
+    // and the stack grid keep the team palette as it is. Without color-mix() nothing changes.
+    var CAN_TONE = !!(window.CSS && CSS.supports && CSS.supports('color', 'color-mix(in srgb, red 50%, blue)'));
+
+    function toned(color) {
+        return CAN_TONE ? 'color-mix(in srgb, ' + color + ' var(--tt-chroma), var(--tt-grey))' : color;
+    }
+
     // Inline colour for the ship name. Empty string on the class path — the CSS class
-    // from getAllyClass is already carrying it, and returning nothing is what lets it.
+    // from getAllyClass is already carrying it, and returning nothing is what lets it -
+    // unless the colour is toned (above): a class cannot be toned for one surface, so then
+    // both arms take the inline colour.
     // The two arms agree on BRIGHTNESS as well as on scheme (2026-08-20): keep them level.
     function getNameStyle(ship) {
-        if (!usesTeamColor(ship)) {
+        if (!usesTeamColor(ship) && !CAN_TONE) {
             return '';
         }
-        return ' style="color:' + teamRgb(ship) + ';"';
+        return ' style="color:' + getNameColor(ship) + ';"';
     }
 
     // The colour the name will ACTUALLY render in — the same decision as getNameStyle,
@@ -2201,19 +2260,19 @@ window.ShipTooltip = function () {
     // name with it.
     function getNameColor(ship) {
         if (!usesTeamColor(ship)) {
-            return ALLEGIANCE_NAME[getAllyClass(ship)] || 'var(--fv-text)';
+            return toned(ALLEGIANCE_NAME[getAllyClass(ship)] || 'var(--fv-text)');
         }
-        return teamRgb(ship);
+        return toned(teamRgb(ship));
     }
 
     // The rail and border colour - the same gate again. The raw team colour on the team arm, as
     // the picker's rows put it on their rail (getTeamColorVars): a full-chroma value reads as a
-    // signal precisely because there is so little of it.
+    // signal precisely because there is so little of it. Toned since 2026-11-21 (above).
     function getRailColor(ship) {
         if (!usesTeamColor(ship)) {
-            return ALLEGIANCE_RAIL[getAllyClass(ship)] || 'var(--fv-line-scs)';
+            return toned(ALLEGIANCE_RAIL[getAllyClass(ship)] || 'var(--fv-line-scs)');
         }
-        return teamRgb(ship);
+        return toned(teamRgb(ship));
     }
 
     // The stack grid's two per-cell channels, for the observer / 3+-team case only.

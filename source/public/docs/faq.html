@@ -190,8 +190,9 @@
   <h3>During deployment</h3>
   <ul>
     <li><b>Shift + left-click</b> deploys a ship straight into a hex other units already occupy (long press on a
-      touchscreen). It must still be a valid deployment: fighters and mines can stack with ships, but ships cannot be
-      deployed with other ships.</li>
+      touchscreen). It must still be a valid deployment: mines can stack with anything, but ships and fighter flights
+      cannot be deployed in the same hex as another ship or flight. (To start fighters aboard a carrier, dock them into
+      its hangar instead.)</li>
     <li><b>Double left-click</b> selects a single unit in a hex straight away when you already have a deployable unit
       selected (if the hex holds several units you still pick from the list). It makes selecting quicker when your
       selected unit is a fighter flight or a mine.</li>
@@ -467,6 +468,86 @@
     ranking goes up by one on the ladder and the loser's goes down by the same amount.</p>
   <p>To see a player's match history over the last three months - your own included - click <b>View Ladder</b> on the
     main page, then click their name.</p>
+</section>
+
+<section data-key="cpu" data-title="Playing Against the CPU" data-group="Interface &amp; Site">
+  <p class="fvd-lede">A game can have computer opponents. A CPU player takes a team slot and plays its turns by itself -
+    moving, firing, setting power and EW, launching and flying its fighters - by the same rules as everyone else.</p>
+  <div class="fvd-note"><span class="fvd-note-label">In testing</span> CPU opponents are still being tested. Until they are
+    open to everyone, the option appears in Create Game only for the players taking part.</div>
+
+  <h3>Setting up a game</h3>
+  <figure class="fvd-fig fvd-fig--side">
+    <img src="img/docViewer/cpu-create-game.png" alt="A Create Game slot with CPU player ticked and its level list open: Easy, Normal, Hard">
+    <figcaption>Tick CPU player, then pick its level.</figcaption>
+  </figure>
+  <ol class="fvd-steps">
+    <li>In <b>Create Game</b>, tick <b>CPU player</b> on each slot a computer should take. A level list appears beside it -
+      <b>Easy</b>, <b>Normal</b> (the default) or <b>Hard</b>; see <a href="#cpu-levels">Levels</a> below. The slot you
+      take yourself (Team 1's first slot) always stays yours, so it has no CPU tick.</li>
+    <li>Set the slot's points and deployment zone as usual, then create the game. The CPU player is seated in its slot
+      straight away - you will find it there, already named, when the lobby opens.</li>
+    <li>In the lobby, click <b>Select</b> on the CPU slot and give it a fleet exactly as you would your own: buy units, or
+      load a saved fleet. Press <b>Ready</b> with the CPU slot selected to confirm it. Click <b>Select</b> on your own slot
+      to go back to your fleet.</li>
+    <li>Or leave it empty: pressing <b>Ready</b> on it, or readying your own fleet, gives it a fleet built for its points
+      (see <a href="#cpu-autofleet">below</a>).</li>
+  </ol>
+  <figure class="fvd-fig fvd-fig--side">
+    <img src="img/docViewer/cpu-lobby-slot.png" alt="The lobby's Teams panel: the creator ready in Team 1, CPU Alpha (Easy) seated in Team 2 with a Select button">
+    <figcaption>In the lobby, the CPU player already holds its slot, its level beside its name.</figcaption>
+  </figure>
+  <p>Only the game's creator can buy for a CPU player. Other players see the slot as a CPU player with its level, and its
+    fleet stays hidden from them until the game starts, as any opponent's would - an auto-composed fleet is hidden from you
+    too. A CPU game with no slot left for another player is not listed under Join Games.</p>
+  <p>CPU players can share a game with other people, on either team - including yours, as an ally. A CPU ally plays its own
+    game, though: it does not coordinate with you beyond tending to engage the enemies nearest it. CPU players cannot take
+    part in a <a href="#ladder">Ladder</a> game - the CPU tick disappears while Ladder Game is ticked.</p>
+  <p>New to Fiery Void? The Starter Guide walks through <a href="starterGuide.php#practice-game">a practice game against
+    the CPU</a>.</p>
+
+  <h3>What a CPU player can field</h3>
+  <p>For now a CPU player fields units of <b>Earth Alliance</b>, <b>Earth Alliance (Early)</b>, <b>Centauri Republic</b>,
+    <b>Centauri Republic (WotCR)</b>, <b>Dilgar Imperium</b>, <b>Minbari Federation</b>, <b>Narn Regime</b>, <b>Orieni
+    Imperium</b> or <b>Raiders</b>; more factions will follow. While a CPU slot is selected, the Faction Picker and the Store
+    show only what it can use, and a saved fleet loads without the units it cannot. Bases, OSATs, mines, breaching pods and
+    other boarding craft (it does not board yet) and a few other special units are left out too. You may buy enhancements and
+    options for its units; it simply ignores any it has no use for.</p>
+
+  <h3 data-anchor="cpu-autofleet">An auto-composed fleet</h3>
+  <p>A CPU slot left empty gets a fleet built for it: plain units (no enhancements), common and uncommon variants only, in
+    service by the game's In-Service Date, with fighters for its carriers, spending as much of its points as the units allow
+    - and always a fleet the Fleet Checker passes. Press <b>Ready</b> on the CPU slot itself while the Store shows a faction it
+    can field, and the fleet is of that faction; otherwise its faction is picked at random. A very small or very early game may
+    have no legal fleet at all (the Fleet Checker
+    always wants a jump engine, for one); the lobby then says so, and you buy the CPU player's fleet by hand. Auto-compose is
+    not available in an <b>Unlimited Points</b> game - a fleet is built to spend the CPU player's points, and there is no limit
+    to build to - so there too you buy its fleet by hand.</p>
+
+  <h3 data-anchor="cpu-levels">Levels</h3>
+  <dl class="fvd-defs">
+    <dt>Easy</dt><dd>Plays loosely: simple EW, no focus fire, no pivots or rolls, no reading of where you may move, and its
+      manoeuvres are not always the best ones.</dd>
+    <dt>Normal</dt><dd>Plays properly: full EW (anti-fighter CCEW included), concentrates its fire, shortens its turns and
+      reads where your ships may move this turn.</dd>
+    <dt>Hard</dt><dd>Everything Normal does, and more: pivots and rolls freely, reads your possible moves more thoroughly,
+      manages power (switching off guns that cannot reach anything to boost others), takes extended turns, flies its
+      fighters together onto weakened targets, and boosts interceptors against fighter-heavy fleets.</dd>
+  </dl>
+
+  <h3>During the game</h3>
+  <ul>
+    <li>A CPU player takes its turn on the server, usually within seconds of everyone else's; with a large fleet its Movement
+      can take a few of your page's refreshes.</li>
+    <li>It sees only what a player in its seat would see.</li>
+    <li>It may jump a badly damaged ship out with a working jump engine, and it surrenders a battle it can no longer fight.</li>
+    <li>With the <b>Desperate</b> rule covering its team, a Normal or Hard CPU player rams as a last resort: a ship with no
+      usable weapon left, or down to a quarter of its primary structure, rams an enemy ship it can reach.</li>
+  </ul>
+
+  <h3>Leaving</h3>
+  <p>If the creator leaves the lobby, the CPU players leave with them. Once you have readied your fleet you may still leave a
+    lobby whose only other players are CPU players.</p>
 </section>
 
 <!-- ═══════════════════════════ RULES & MECHANICS ═══════════════════════════ -->

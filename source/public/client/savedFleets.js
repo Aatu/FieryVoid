@@ -76,7 +76,11 @@ window.savedFleets = {
 		}
 
 		if (savedFleets.saveSummary().saveable === 0) {
-			window.confirm.fleetNotice("None of your units survive to be saved.");
+			//In the lobby only the SELECTED slot is saved (isSaveableFleetShip), so "nothing to
+			//save" there means that slot is empty, not that anything died.
+			window.confirm.fleetNotice(gamedata.gamephase === -2
+				? "The selected slot has no units to save."
+				: "None of your units survive to be saved.");
 			return;
 		}
 

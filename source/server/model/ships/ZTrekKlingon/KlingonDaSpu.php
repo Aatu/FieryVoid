@@ -52,12 +52,9 @@ class KlingonDaSpu extends HeavyCombatVessel{
 	$this->addFrontSystem(new TrekLightDisruptor(3, 0, 0, 210, 360));
 	$this->addFrontSystem(new TrekLightDisruptor(3, 0, 0, 0, 150));
 
-
 	$warpNacelle = new TrekWarpDrive(3, 33, 0, 6); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
-		
-
 		
 	$projection = new TrekShieldProjection(2, 16, 6, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(1, 6, 2, 2, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
@@ -72,7 +69,6 @@ class KlingonDaSpu extends HeavyCombatVessel{
 	$this->addAftSystem(new TrekLightDisruptorArray(3, 6, 3, 180, 360));
 	$this->addAftSystem(new TrekLightDisruptor(3, 0, 0, 180, 330));
 	$this->addAftSystem(new TrekLightDisruptor(3, 0, 0, 30, 180));
-
 		
 	//technical thrusters - unlimited, like for LCVs		
 	$this->addPrimarySystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
@@ -107,9 +103,8 @@ class KlingonDaSpu extends HeavyCombatVessel{
             2=> array(
 				2 => "Shield Projector",
 				7 => "Nacelle",
-				10 => "Disruptor Cannon",
-				12 => "Light Disruptor Array",
-				13 => "Light Disruptor",
+				9 => "Light Disruptor Array",
+				11 => "Light Disruptor",
 				17 => "Structure",
 				20 => "Primary",
             ),

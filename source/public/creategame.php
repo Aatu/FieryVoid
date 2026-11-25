@@ -616,7 +616,13 @@
             </label>
             <div class="cg-slot-actions">
 <?php if ($cpuAllowed): ?>
-              <label class="cg-slot-cpu" title="A computer opponent takes this slot. You buy its fleet in the lobby."><input type="checkbox" class="cpu-check" name="cpu"> CPU player</label>
+              <label class="cg-slot-cpu" title="A computer opponent takes this slot. Buy or load its fleet in the lobby - or leave it empty, and one is built for it."><input type="checkbox" class="cpu-check" name="cpu"> CPU player</label>
+              <?php /* TACTICAL_AI_PLAN.md stage T8: how well it plays - shown only while the slot is ticked CPU (createGame.setSlotData) */ ?>
+              <select class="cg-cpu-level cg-input" name="cpuLevel" title="How well the CPU player plays" aria-label="CPU player level" hidden>
+<?php foreach (AIConfig::LEVELS as $cpuLevel): ?>
+                <option value="<?php echo $cpuLevel; ?>"<?php echo ($cpuLevel === AIConfig::DEFAULT_LEVEL) ? ' selected' : ''; ?>><?php echo ucfirst($cpuLevel); ?></option>
+<?php endforeach; ?>
+              </select>
 <?php endif; ?>
               <button type="button" class="copy-slot-btn cg-btn cg-btn--ghost cg-btn--small" title="Add a copy of this slot to its team">Copy Slot</button>
               <button type="button" class="close remove-btn cg-link">Remove Slot</button>

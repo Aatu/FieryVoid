@@ -20,7 +20,7 @@ import { parseRulesText, briefCount, rulesBlocks, boldSegments } from "../helper
      screen. A card still too tall opens WIDE - numbers on the left, the rules flowing into as many columns as they need.
    - As wide as its content, between CARD_MIN_WIDTH and CARD_WIDTH (user request 2026-11-12): a system with little to
      say draws a narrow card, and rules text wraps at the full width.
-   - Smaller on a smaller screen (CARD_FIT, user request 2026-11-12), by CSS zoom on the Scaled wrapper inside the frame
+   - Drawn at CARD_ZOOM on every screen (2026-11-23; from 2026-11-12 only a smaller screen shrank it), by CSS zoom on the Scaled wrapper inside the frame
      rather than a transform: zoom scales the LAYOUT, so text renders at its real size and box edges still land on
      whole device pixels. The frame itself is not zoomed, so its left/top, offsetWidth and offsetHeight are screen px;
      an element INSIDE the wrapper reports offsetWidth/offsetHeight in its own unzoomed px (multiply by the zoom for
@@ -48,16 +48,12 @@ const TOUCH_WINDOW = 1500;   //ms after SystemIcon's touchstart stamp within whi
    leaves CARD_WIDTH - 20 for the content - the 284px pane the wide layout's numbers keep (WIDE_LEFT). */
 const CARD_WIDTH = 304;
 const CARD_MIN_WIDTH = 198;
-/* A smaller screen draws a smaller card (2026-11-12): the zoom is the screen's share of width x height, never above
-   1 and never below `min`. width 1024 is the ship window's own small-screen breakpoint (ShipWindow SMALL_SCREEN_QUERY),
-   below which the window starts shrinking too. `min` is the legibility floor: 0.75 puts body text at 9px. */
-const CARD_FIT = { width: 1024, height: 640, min: 0.75 };
+/* The card's zoom on EVERY screen (user request 2026-11-23: at full size the card hid too much of the map, e.g. the
+   firing arcs). It was the small-screen size: from 2026-11-12 the zoom followed the screen (1 at 1024 x 640 and up,
+   down to a 0.75 floor); now every screen gets that floor. 0.75 puts body text at 9px - the legibility floor. */
+const CARD_ZOOM = 0.75;
 const zoomWorks = () => typeof CSS !== "undefined" && Boolean(CSS.supports) && CSS.supports("zoom", "0.5");
-const cardZoom = view => {
-    if (!zoomWorks()) return 1;
-    const fit = Math.min(1, view.width / CARD_FIT.width, view.height / CARD_FIT.height);
-    return Math.round(Math.max(CARD_FIT.min, fit) * 100) / 100;
-};
+const cardZoom = () => zoomWorks() ? CARD_ZOOM : 1;
 const WIDE_LEFT = 284;       //the numbers pane when the card opens wide
 const WIDE_COLUMN = 296;     //one rules column when the card opens wide
 const WIDE_GAP = 18;
@@ -159,7 +155,7 @@ const Card = styled.div`
     &[data-wide] [data-rules] { flex: none; margin-top: 0; column-gap: ${WIDE_GAP}px; }
 `;
 
-/* everything inside the frame: what layout() zooms on a smaller screen, and what sets the card's width */
+/* everything inside the frame: what layout() zooms (CARD_ZOOM), and what sets the card's width */
 const Scaled = styled.div`
     width: max-content;
     min-width: ${CARD_MIN_WIDTH}px;
@@ -791,7 +787,7 @@ class SystemCard extends React.Component {
             width: document.documentElement.clientWidth || window.innerWidth,
             height: document.documentElement.clientHeight || window.innerHeight
         };
-        const zoom = cardZoom(view);
+        const zoom = cardZoom();
         const maxHeight = view.height - 2 * EDGE;
         const rules = node.querySelector("[data-rules]");
 
