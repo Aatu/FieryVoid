@@ -172,6 +172,8 @@ class TacticalAI
 
         $gamedata->prepareForPlayer();
         $view = new AIView($gamedata, $botId, AIConfig::seatLevel($seat), AIConfig::seatSeed($seat));
+        //(2026-11-26, Normal and Hard - the skill 'powerReach') a deficit paid again with the enemy in view: guns out of reach first
+        $power = PowerDecider::replan($view, $power);
         //Can the side still fight (stage T6b)? Asked first, on the masked view; play() keeps the count of turns and surrenders
         Posture::assess($view);
         /* Stage T6c: ships that leave the battle - their jump points declared now, flown into this turn, left through next turn.
@@ -184,6 +186,8 @@ class TacticalAI
         /* Hard's Interceptors turned to offence against a fighter-heavy enemy (stage T7): after boost() - a boost row would make its
            understands() refuse the ship - and before EW, which then sees them as the anti-fighter guns they will be this turn. */
         $power = PowerDecider::interceptors($view, $power);
+        //(2026-11-26) a ship that ended its move off the map, where the scenario says it is lost: its reactor overloaded (self-destruct)
+        $power = PowerDecider::overloadOffMap($view, $power);
         $ew = EWDecider::plan($view, $remembered);
 
         /* Ballistics (stage T4) last: a launch is priced with the EW just decided, so that split
@@ -249,6 +253,7 @@ class TacticalAI
             . ($p['short'] > 0 ? ', ' . $p['short'] . ' ships still short' : '')
             . ($p['scanner'] + $p['engine'] > 0 ? '; boosts: scanner +' . $p['scanner'] . ', engine +' . $p['engine'] . ' (' . $p['idle'] . ' idle guns switched off)' : '')
             . ($p['interceptors'] > 0 ? '; ' . $p['interceptors'] . ' Interceptors boosted to fire at fighters' : '')
+            . (count($p['overload']) > 0 ? '; off the map, reactor overloaded: ' . implode(', ', $p['overload']) : '')
             . ($b['launches'] > 0 ? '; ballistics: ' . $b['launches'] . ' launchers at ' . $b['targets'] . ' enemies' : '')
             . (AoEDecider::$last['launches'] > 0 ? '; area-effect: ' . AoEDecider::$last['launches'] . ' mines at the guessed hexes of ' . AoEDecider::$last['targets'] . ' enemies' : '')
             . (AdaptiveArmourDecider::$last['points'] > 0 ? '; adaptive armour: ' . AdaptiveArmourDecider::$last['points'] . ' points on ' . AdaptiveArmourDecider::$last['controllers'] . ' units' : '')

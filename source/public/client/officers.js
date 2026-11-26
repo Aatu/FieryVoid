@@ -36,7 +36,7 @@ window.officers = {
 		{ id: 'OFF_SCAN', label: 'Expert Scanner', post: 'scanner',
 			summary: 'May save 1 more EW point to spend in Firing Phase' },
 		{ id: 'OFF_TECH', label: 'Expert Technician', post: 'reactor',
-			summary: '+2 power, +1 when a system is switched off, +1/3 of each destroyed system\'s power; -2 on reactor criticals' },
+			summary: '+2 power, +1 from one deactivated system, +1/3 of each destroyed system\'s power; -2 on reactor criticals' },
 		{ id: 'OFF_GENE', label: 'Expert Geneticist', post: 'cnc', stats: { forwardDefense: 2, sideDefense: 2, toHitBonus: -1 },
 			summary: '-1 to hit with own weapons, +2 to be hit, enemies may ram this ship' },
 		{ id: 'OFF_MWE', label: 'Matter Weapons Expert', post: 'cnc', needs: 'matterWeapon', movable: true,

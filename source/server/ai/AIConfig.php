@@ -85,8 +85,20 @@ class AIConfig
     const MOVE_CLOSING_NEXT_TURN = 0.5;     //...and this much a hex of it a turn on, everybody flying straight on: a ship closing points at its enemy
     const MOVE_FORMATION_RANGE = 4;         //a loose formation: within this many hexes of the nearest of the bot's other ships...
     const MOVE_FORMATION_PER_HEX = 2.5;     //...at this much a hex beyond it (more than closing gains a hex, so a leader waits for the fleet)
-    const MOVE_MIN_SPEED = 3;               //each point of speed below this costs MOVE_COST_SLOW (the deployer's floor too)
-    const MOVE_COST_SLOW = 1.0;
+    /* SLOW (the user's tester, 2026-11-26: "units - especially fighters - should not reduce speed below 5 unless forced"): below
+       speed 5 every point costs the unit 10 initiative (BaseShip::getCommonIniModifiers) - it moves earlier, and the enemy moves
+       after it. Each point of speed below MOVE_MIN_SPEED costs a ship MOVE_COST_SLOW hexes (was 3 and 1.0: next to nothing) and a
+       flight FLIGHT_COST_SLOW of its score - a big enough shot still buys it, thruster damage or a tight turn still forces it. */
+    /* COMMITTED (the user, 2026-11-26: "AI ships are a bit too avoidant - where they have an EW lock on a ship and can get a decent
+       shot with heavy weapons they should favour that over running away"; and mediums "able to move after the enemy and line up a
+       good shot"): a place where a loaded heavy gun has MOVE_COMMITTED_CHANCE or better at an enemy ship it holds an OEW lock on, or
+       where half its loaded guns have it at an enemy ship that has already moved, weighs the enemy's fire MOVE_COMMITTED_DANGER as
+       much (ShipDecider::fireTerms / score; the skill 'committed' - Easy, Normal and Hard; legacy off). */
+    const MOVE_COMMITTED_CHANCE = 50;
+    const MOVE_COMMITTED_DANGER = 0.6;
+    const MOVE_MIN_SPEED = 5;
+    const MOVE_COST_SLOW = 5.0;             //hexes (2.5% of the ship's own value) per point of speed below MOVE_MIN_SPEED
+    const FLIGHT_COST_SLOW = 3.0;           //a flight's score (1.5 hexes of FLIGHT_CLOSING_PER_HEX) per point below MOVE_MIN_SPEED
     const MOVE_COST_FAST = 1.5;             //each point above the comfortable speed of the ship's size (live data: capital 4.7, heavy 5.2, medium 6.1)
     const MOVE_COMFORT_SPEED = array(3 => 5, 2 => 5, 1 => 6, 0 => 7); //shipSizeClass => speed; a bigger class uses the last
     const MOVE_COST_UNTURNABLE = 5.0;       //each point of speed above the fastest at which a whole turn's thrust still pays for a turn (ShipMover::fastestTurnable)
@@ -240,6 +252,7 @@ class AIConfig
     const BALLISTIC_ROUNDS = array('Basic', 'LongRange', 'Heavy', 'Flash', 'Antifighter', 'D-Light', 'Dogfight');
     const BALLISTIC_MIN_CHANCE = 35;        //no launch below this: a round is spent for good, a torpedo's tube for its whole reload
     const BALLISTIC_MIN_CHANCE_FLIGHT = 50; //...at a flight: one fighter is a poor return on a missile
+    const BALLISTIC_FLIGHT_JINK = 0.5;      //(2026-11-26) a launch at a flight is priced with it jinking this share of what it can (it moves after, seeing the launch)
     const BALLISTIC_RESERVE = 0.0;          //share of a magazine never launched (0 = fire it dry; levels may raise it, stage T8)
     /* The BALLISTIC TORPEDO (stage T9, M8 - the user, 2026-11-23: "2-3 torpedoes at one or two ships, or 3-6 at a fighter flight (it
        targets separate fighters), backed by 1 or 2 OEW. Easy and Normal may simply fire 1-3 a turn at one target, Hard can consider
@@ -281,6 +294,11 @@ class AIConfig
        EW_CCEW_CAP unless the enemy's visible value is EW_FIGHTER_HEAVY or more in flights, or at least half of the ship's
        guns are anti-fighter guns (fire control better against fighters than against capital ships: a Twin Array 6/5/4
        is one, a Standard Particle Beam 4/4/4 is not). */
+    /* MISSILE SHIPS (the user's tester, 2026-11-26, live game 7857): a ship with EW_MISSILE_SHARE of its fire or more in weapons that
+       use no OEW (every missile) "turtles" - EW_TURTLE_LOCK at most on an enemy, CCEW at its deterrent point, the rest DEW (EWDecider,
+       the skill 'missileTurtle'). And the fighter-heavy lift of EW_CCEW_CAP below needs an anti-fighter gun on the ship. */
+    const EW_MISSILE_SHARE = 0.5;
+    const EW_TURTLE_LOCK = 1;
     const EW_CCEW_REACH = 10;
     const EW_CCEW_CAP = 2;
     const EW_FIGHTER_HEAVY = 0.33;
@@ -468,28 +486,37 @@ class AIConfig
                         as they start in its range"): ShipDecider::pulsarFire. On at every level; legacy off
          netAllies      Gravity Nets at FRIENDLY units too - the bot's own and its teammates' (the user, 2026-11-24: "a HARD CPU player will
                         consider whether moving allies is advantageous and attempt to do so. Easy and Normal can skip this"): a friend put
-                        where its fire is more, or the enemy's fire at the side less, by the same trade (GravityNetDecider). Hard only */
+                        where its fire is more, or the enemy's fire at the side less, by the same trade (GravityNetDecider). Hard only
+         powerReach     a ship in a power deficit switches off first the loaded guns that can reach NO enemy this turn (the user's tester,
+                        2026-11-26, local game 6197: a White Star Command "at range start with Molecular Pulsars deactivated; closer,
+                        deactivate the Improved Neutron Laser to power the Molecular Pulsars" - the second half is the least fire for its
+                        power going first, as at every level): PowerDecider::replan, on the masked view. Normal and Hard
+         missileTurtle  a ship most of whose fire is missiles (no OEW) keeps its EW on DEW: EW_TURTLE_LOCK an enemy, CCEW's deterrent point
+                        (the user's tester, 2026-11-26: "missile ships should 'turtle' with high DEW at Normal and Hard"). Normal and Hard
+         committed      a place with a decent locked heavy shot, or an attack run on a ship that has moved, weighs its danger
+                        MOVE_COMMITTED_DANGER as much (the user, 2026-11-26: "AI ships are a bit too avoidant"): ShipDecider::fireTerms.
+                        Easy, Normal and Hard; legacy off */
     const SKILLS = array(
         'easy' => array('sectionHealth' => false, 'ccewDeterrent' => true, 'closeLocks' => false, 'mediumLocks' => false, 'noFlightOEW' => true, 'simpleEW' => true, 'focus' => 0.0, 'heavyFocus' => false,
             'pulsePremium' => false, 'shortening' => false, 'unmovedDanger' => 0.5, 'overspeed' => 0.5, 'ballisticFloor' => false,
             'flightDanger' => 0.75, 'jink' => 'max', 'manoeuvres' => 'none', 'noise' => 10.0, 'coverageGoals' => 0,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none',
-            'interceptorBoost' => false, 'ram' => false, 'splitShots' => false, 'aoeSpread' => false, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3, 'gravityNets' => true, 'pulsarCharge' => true, 'netAllies' => false),
+            'interceptorBoost' => false, 'ram' => false, 'splitShots' => false, 'aoeSpread' => false, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3, 'gravityNets' => true, 'pulsarCharge' => true, 'netAllies' => false, 'powerReach' => false, 'missileTurtle' => false, 'committed' => true),
         'normal' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'closeLocks' => true, 'mediumLocks' => true, 'noFlightOEW' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 1.5, 'jink' => 'max', 'manoeuvres' => 'swap', 'noise' => 0.0, 'coverageGoals' => 4,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'turn',
-            'interceptorBoost' => false, 'ram' => true, 'splitShots' => false, 'aoeSpread' => true, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3, 'gravityNets' => true, 'pulsarCharge' => true, 'netAllies' => false),
+            'interceptorBoost' => false, 'ram' => true, 'splitShots' => false, 'aoeSpread' => true, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3, 'gravityNets' => true, 'pulsarCharge' => true, 'netAllies' => false, 'powerReach' => true, 'missileTurtle' => true, 'committed' => true),
         'hard' => array('sectionHealth' => true, 'ccewDeterrent' => true, 'closeLocks' => true, 'mediumLocks' => true, 'noFlightOEW' => true, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 3.0, 'jink' => 'any', 'manoeuvres' => 'all', 'noise' => 0.0, 'coverageGoals' => 12,
             'pileOn' => 1.0, 'support' => 2.0, 'fleetFocus' => 0.5, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => true, 'extendedTurns' => true, 'forecast' => 'full',
-            'interceptorBoost' => true, 'ram' => true, 'splitShots' => true, 'aoeSpread' => true, 'torpedoTargets' => 2, 'torpedoFlightVolley' => 6, 'gravityNets' => true, 'pulsarCharge' => true, 'netAllies' => true),
+            'interceptorBoost' => true, 'ram' => true, 'splitShots' => true, 'aoeSpread' => true, 'torpedoTargets' => 2, 'torpedoFlightVolley' => 6, 'gravityNets' => true, 'pulsarCharge' => true, 'netAllies' => true, 'powerReach' => true, 'missileTurtle' => true, 'committed' => true),
         'legacy' => array('sectionHealth' => false, 'ccewDeterrent' => true, 'closeLocks' => false, 'mediumLocks' => false, 'noFlightOEW' => false, 'simpleEW' => false, 'focus' => 1.0, 'heavyFocus' => true,
             'pulsePremium' => true, 'shortening' => true, 'unmovedDanger' => 1.0, 'overspeed' => 1.0, 'ballisticFloor' => true,
             'flightDanger' => 0.75, 'jink' => 'max', 'manoeuvres' => 'swap', 'noise' => 0.0, 'coverageGoals' => 0,
             'pileOn' => 0.0, 'support' => 0.0, 'fleetFocus' => 0.0, 'bestReply' => false, 'shipDanger' => 0.75, 'powerBoost' => false, 'extendedTurns' => false, 'forecast' => 'none',
-            'interceptorBoost' => false, 'ram' => false, 'splitShots' => false, 'aoeSpread' => false, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3, 'gravityNets' => false, 'pulsarCharge' => false, 'netAllies' => false)
+            'interceptorBoost' => false, 'ram' => false, 'splitShots' => false, 'aoeSpread' => false, 'torpedoTargets' => 1, 'torpedoFlightVolley' => 3, 'gravityNets' => false, 'pulsarCharge' => false, 'netAllies' => false, 'powerReach' => false, 'missileTurtle' => false, 'committed' => false)
     );
 
     /* POWER MANAGEMENT (skill 'powerBoost', stage T5f-4). A gun "reaches" an enemy when, with the units as close as both could

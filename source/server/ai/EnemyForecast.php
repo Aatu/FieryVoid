@@ -61,7 +61,7 @@ class EnemyForecast
         foreach ($view->enemies() as $enemy) {
             $enemyIds[] = (int)$enemy->id;
             if ($enemy instanceof FighterFlight || !empty($enemy->mine)) continue;
-            if ($enemy->getLastTurnMoved() >= $turn) continue; //it has moved: it stands where it ended
+            if ($view->hasMoved($enemy)) continue; //it has moved: it stands where it ended (2026-11-26: or it moved without a row)
             if (ShipMover::unsupportedReason($enemy, $turn) !== null) continue;
             $pending[] = array($enemy, self::rangeTo($enemy, $view->myUnits()));
         }
