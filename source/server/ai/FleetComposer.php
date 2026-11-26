@@ -151,7 +151,8 @@ class FleetComposer
                 if (self::price($candidate) > $left || !self::allowed($units, $candidate, $points)) continue;
                 $with = $units;
                 $with[] = $candidate;
-                if (count(self::hangarProblems(self::hangars($with))) > 0) continue;
+                $after = self::hangars($with);
+                if (count(self::hangarProblems($after)) > 0 || self::hkUncontrolled($after)) continue;
                 $options[] = $candidate;
             }
             if (count($options) == 0) break;
@@ -180,6 +181,7 @@ class FleetComposer
                     $traded[$index] = $candidate;
                     if (count(self::problems($traded, $points)) > 0) continue;
                     if ($hkFilled && self::hkShort($traded)) continue; //(stage T9, M2) no trade empties the HK space it filled
+                    if (self::hkUncontrolled(self::hangars($traded))) continue; //(2026-11-26) nor leaves a flight no node controls
                     $best = $traded;
                     $bestGain = $gain;
                 }
@@ -238,7 +240,7 @@ class FleetComposer
                 $with = $units;
                 $with[] = $hk;
                 $after = self::hangars($with);
-                if ($after['hkCraft'] > $after['hkCapacity']) continue;
+                if ($after['hkCraft'] > $after['hkCapacity'] || self::hkUncontrolled($after)) continue;
                 $options[] = $hk;
             }
             if (count($options) == 0) return;
@@ -248,11 +250,19 @@ class FleetComposer
         }
     }
 
-    //Is the fleet's Hunter-Killer space less than half full (none to fill: no)?
+    //Is the fleet's Hunter-Killer space less than half full (none to fill, or no HK Control Node free to control another: no)?
     private static function hkShort(array $units)
     {
         $h = self::hangars($units);
-        return $h['hkCapacity'] > 0 && $h['hkCraft'] < (int)ceil($h['hkCapacity'] / 2);
+        return $h['hkCapacity'] > 0 && $h['hkFlights'] < $h['hkNodes'] && $h['hkCraft'] < (int)ceil($h['hkCapacity'] / 2);
+    }
+
+    /* (2026-11-26, live game 7845: a Benevolent's HK hangar bought a Shining Light with no HK Control Node in the fleet, and the flight
+       was Uncontrolled - the server's to fly and ram with - all game) More Hunter-Killer flights than the fleet's HK Control Nodes
+       control? Not a checker rule (the lobby allows it); the composer's own - it never buys a flight the fleet cannot control. */
+    private static function hkUncontrolled(array $h)
+    {
+        return $h['hkFlights'] > $h['hkNodes'];
     }
 
     //Does adding $candidate keep every bracket, per-hull and rarity limit?
@@ -326,11 +336,15 @@ class FleetComposer
         $craft = array('heavy' => 0, 'medium' => 0, 'light' => 0, 'ultralight' => 0);
         $hkCapacity = 0; //(stage T9, M2) the Hunter-Killers category: its own space, never counted as fighters
         $hkCraft = 0;
+        $hkFlights = 0; //(2026-11-26) Hunter-Killer flights against the HK Control Nodes' output (a flight each)
+        $hkNodes = 0;
         foreach ($units as $unit) {
             if (!empty($unit['hk'])) {
                 $hkCraft += self::FLIGHT_SIZE / $unit['unitSize'];
+                $hkFlights++;
                 continue;
             }
+            $hkNodes += $unit['hkNodes'] ?? 0;
             if ($unit['flight']) {
                 $craft[$unit['craftSize']] += ($unit['craftSize'] === 'ultralight') ? self::FLIGHT_SIZE : self::FLIGHT_SIZE / $unit['unitSize'];
                 continue;
@@ -341,7 +355,7 @@ class FleetComposer
         return array('capacity' => $capacity, 'craft' => $craft,
             'available' => $capacity['heavy'] + $capacity['medium'] + $capacity['light'] + $capacity['ultralight'] / 2,
             'present' => $craft['heavy'] + $craft['medium'] + $craft['light'] + $craft['ultralight'] / 2,
-            'hkCapacity' => $hkCapacity, 'hkCraft' => $hkCraft);
+            'hkCapacity' => $hkCapacity, 'hkCraft' => $hkCraft, 'hkFlights' => $hkFlights, 'hkNodes' => $hkNodes);
     }
 
     private static function hangarProblems(array $h)
@@ -447,8 +461,10 @@ class FleetComposer
             if ($flight && $craftSize === null && !$hk) continue; //(a Hunter-Killer is no fighter size - the checker classes it by its category)
 
             $jump = false;
+            $hkNodes = 0; //(2026-11-26) the Hunter-Killer flights its HK Control Nodes control - an output each
             foreach ((array)($s['systems'] ?? array()) as $system) {
                 if (is_array($system) && ($system['name'] ?? '') === 'jumpEngine') $jump = true;
+                if (is_array($system) && ($system['name'] ?? '') === 'hkControlNode') $hkNodes += (int)($system['output'] ?? 0);
             }
             if (self::cpuBlocked($s['phpclass'])) continue;
 
@@ -457,7 +473,7 @@ class FleetComposer
                 'phpclass' => $s['phpclass'], 'class' => $class,
                 'hull' => ((string)($s['variantOf'] ?? '') !== '') ? (string)$s['variantOf'] : $class,
                 'cost' => (int)$s['pointCost'], 'limited' => (int)($s['limited'] ?? 0), 'rarity' => ($occurence === 'common') ? 'C' : 'U',
-                'size' => (int)($s['shipSizeClass'] ?? 0), 'flight' => $flight, 'jump' => $jump, 'hangar' => $hangar,
+                'size' => (int)($s['shipSizeClass'] ?? 0), 'flight' => $flight, 'jump' => $jump, 'hangar' => $hangar, 'hkNodes' => $hkNodes,
                 'craftSize' => $craftSize, 'unitSize' => $unitSize, 'hk' => $hk,
                 'ordnance' => $flight ? self::ordnanceOf($s['phpclass']) : null); //stage T9, M12
         }

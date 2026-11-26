@@ -56,8 +56,34 @@ class BallisticDecider
     /* The plan: a list of array('unit', 'weapon', 'fighter', 'target', 'mode', 'round', 'chance',
        'orders', 'shots', 'damageclass', 'damage', 'score'). One row per weapon that launches;
        'round' is the name of the round a magazine-fed rack draws, null for any other weapon.
-       $view must be a view of Initial Orders (AIView::$ballistics). */
+       $view must be a view of Initial Orders (AIView::$ballistics).
+       (2026-11-26 - the user's tester on live game 7857: "full Apollo salvoes at the weakest fighter flight despite a more valuable
+       ship") A flight moves after the launches - and sees them - and a ballistic hit is taken off by its jinking (Weapon::
+       calculateHitBase: "ballistics always affected by jinking"). Every launch at a flight is priced with the flight jinking
+       BALLISTIC_FLIGHT_JINK of what it can (its jinking limit, within its free thrust): a 'jink' row stood on it for the plan. Until
+       then a launch at a flight was priced as if it would not jink at all. */
     public static function plan(AIView $view)
+    {
+        $jinked = array();
+        if ($view->ballistics) {
+            foreach ($view->enemies() as $enemy) {
+                if (!($enemy instanceof FighterFlight) || !empty($enemy->mine)) continue;
+                $most = min((int)$enemy->jinkinglimit, (int)$enemy->freethrust);
+                $level = (int)ceil($most * AIConfig::BALLISTIC_FLIGHT_JINK);
+                $last = $enemy->getLastMovement();
+                if ($level <= 0 || !$last || Movement::getJinking($enemy, $view->turn) > 0) continue;
+                $enemy->movement[] = new MovementOrder(-1, 'jink', new OffsetCoordinate($last->position), 0, 0, (int)$last->speed, (int)$last->heading, (int)$last->facing, false, $view->turn, $level, 0);
+                $jinked[] = $enemy;
+            }
+        }
+        try {
+            return self::planJinked($view);
+        } finally {
+            foreach ($jinked as $enemy) array_pop($enemy->movement);
+        }
+    }
+
+    private static function planJinked(AIView $view)
     {
         self::$last = array('launches' => 0, 'targets' => 0);
         $plan = array();
