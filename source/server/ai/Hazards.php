@@ -34,8 +34,10 @@ class Hazards
 {
     //"q,r" => true for every hex never to be entered: terrain and Enormous units, as the game lists them (TacGamedata::setBlockedHexes).
     public $blocked = array();
-    //array(halfWidth, halfHeight) of the map, or null for a map with no edge.
+    //array(width, height) of the map (hexesOffMap reads it), or null for a map with no edge.
     public $bounds = null;
+    //(2026-11-26) the scenario's map-border rule: mapRule()
+    public $rule = null;
 
     /** @var AIView */
     private $view;
@@ -52,6 +54,7 @@ class Hazards
         $gamedata = $view->gamedata;
         $this->blocked = self::blockedKeys($gamedata);
         $this->bounds = self::mapBounds($gamedata);
+        $this->rule = self::mapRule($gamedata);
         foreach ($gamedata->blockedHexes ?: array() as $hex) $this->blockedList[] = ($hex instanceof OffsetCoordinate) ? $hex : new OffsetCoordinate($hex);
 
         $rule = $gamedata->rules ? $gamedata->rules->getRuleByName('terrainDrift') : null;
@@ -113,9 +116,12 @@ class Hazards
     public function board(array $path, OffsetCoordinate $end, array $continuation)
     {
         $score = 0;
+        $outside = 0; //(2026-11-26) 'Cannot leave map at all': the hexes of the move off the map
         foreach ($path as $hex) {
             if (isset($this->blocked[$hex->q . ',' . $hex->r])) $score += AIConfig::MOVE_COST_BLOCKED;
+            if ($this->rule === 'leave') $outside = max($outside, self::hexesOffMap($hex, $this->bounds));
         }
+        if ($outside > 0) $score += AIConfig::MOVE_COST_OFF_MAP + $outside * AIConfig::MOVE_COST_PER_HEX_OVER;
         $over = self::hexesOffMap($end, $this->bounds);
         if ($over > 0) $score += AIConfig::MOVE_COST_OFF_MAP + $over * AIConfig::MOVE_COST_PER_HEX_OVER;
 
@@ -373,14 +379,60 @@ class Hazards
         $width = 0;
         $height = 0;
         if (sscanf((string)$gamedata->gamespace, '%dx%d', $width, $height) !== 2 || $width <= 0 || $height <= 0) return null;
-        return array(intdiv($width, 2), intdiv($height, 2));
+        return array($width, $height);
     }
 
-    //How far past the map's edge a hex lies (0 = on the map).
-    public static function hexesOffMap(OffsetCoordinate $hex, $bounds)
+    /* How far past the map's edge a hex lies (0 = on the map). The map is the box the page DRAWS (webglHexGridRenderer
+       drawGameSpace): $width hexes wide - shifted half a hex left when $width is even - and $height rows high, centred on 0,0; a hex
+       is on it when its centre is strictly inside (for this geometry: when the whole hex is). A hex's centre stands q - 0.5 hex
+       widths across on an odd row (coordinateConverter.fromHexToGame). Until 2026-11-26 the bot allowed |q| <= W/2 and |r| <= H/2:
+       a hex more each way than the page draws - live game 7845's Benevolent ended turn 6 at 21,-8 on a 42x30 map, which the page
+       draws past the right edge (that row's last hex is 20).
+       $clearly: count only a hex whose centre is PAST the edge - not one cut in half by it (lostOffMap: a unit is blown up only
+       where no player would call it on the board). */
+    public static function hexesOffMap(OffsetCoordinate $hex, $bounds, $clearly = false)
     {
         if ($bounds === null) return 0;
-        return max(0, abs($hex->q) - $bounds[0]) + max(0, abs($hex->r) - $bounds[1]);
+        list($width, $height) = $bounds;
+        $x = $hex->q - 0.5 * ($hex->r & 1);
+        $shift = ($width % 2 == 0) ? -0.5 : 0.0;
+        $low = $shift - $width / 2;
+        $high = $shift + $width / 2;
+        $over = 0;
+        if ($clearly) {
+            if ($x > $high) $over += (int)ceil($x - $high);
+            else if ($x < $low) $over += (int)ceil($low - $x);
+            if (abs($hex->r) > $height / 2) $over += (int)ceil(abs($hex->r) - $height / 2);
+            return $over;
+        }
+        if ($x >= $high) $over += (int)floor($x - $high) + 1;
+        else if ($x <= $low) $over += (int)floor($low - $x) + 1;
+        if (abs($hex->r) >= $height / 2) $over += (int)floor(abs($hex->r) - $height / 2) + 1;
+        return $over;
+    }
+
+    /* The scenario's map-border rule (the Create Game card's 'Map Borders', stored in the game's description as its line
+       "MAP BORDERS: ..." - scenarioCard.js), or null when the description states none: 'end' - "Can't end movement outside map"
+       (a unit that does is lost); 'leave' - "Cannot leave map at all" (not even in passing). The bot keeps to the board on any
+       map with an edge; the rule says what the board costs and when a unit off it is lost (PowerDecider::overloadOffMap). */
+    public static function mapRule(TacGamedata $gamedata)
+    {
+        if (self::mapBounds($gamedata) === null) return null;
+        //(TacGamedata's constructor turns the description's line breaks into <br>: the line ends at the first '<' or line break)
+        if (!preg_match('/MAP BORDERS:\s*([^<\r\n]*)/i', (string)$gamedata->description, $m)) return null;
+        $text = strtolower($m[1]);
+        if (strpos($text, 'cannot leave') !== false) return 'leave';
+        if (strpos($text, 'end movement') !== false) return 'end';
+        return null;
+    }
+
+    //Is $unit off the map, where the scenario says a unit off it is lost (mapRule)? Clearly off: its hex's centre past the edge.
+    public static function lostOffMap($unit, TacGamedata $gamedata)
+    {
+        if (self::mapRule($gamedata) === null) return false;
+        $last = $unit->getLastMovement();
+        if (!$last || !$last->position) return false;
+        return self::hexesOffMap(new OffsetCoordinate($last->position), self::mapBounds($gamedata), true) > 0;
     }
 
     //For the decision line: what is on the board that the bot steers around.

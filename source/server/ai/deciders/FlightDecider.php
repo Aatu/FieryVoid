@@ -182,10 +182,15 @@ class FlightDecider
                 //(never jinking into a ram: it lowers the ram's chance and buys nothing - and where a ram already finishes the target
                 //either way the two would tie)
                 if ($ramming) return ($j['ram'] > 0 && $j['jink'] == 0) ? $j['ram'] - $j['hazard'] : -self::MUST;
+                /* (2026-11-26) no ram this turn: within ramming reach of the quarry for next turn (beyondRam - each hex beyond it
+                   costs as a hex short did), and there close to the fleet, for its covering fire (the tester: "move within ramming
+                   range for next turn, or stay close to own ships for covering fire") - no longer onto the quarry's own hex. */
                 return -$context['ramDanger'] * $j['danger'] - $j['hazard']
-                    - AIConfig::FLIGHT_CLOSING_PER_HEX * (AIConfig::RAM_PURSUIT * $j['short'] + $j['fast']);
+                    - AIConfig::FLIGHT_CLOSING_PER_HEX * (AIConfig::RAM_PURSUIT * $j['beyondRam'] + $j['fast'])
+                    - AIConfig::FLIGHT_TETHER_PER_HEX * $j['beyondFleet'];
             }
-            $s = $j['offence'] - $context['dangerWeight'] * $j['danger'] - $j['hazard'] - $context['support'] * $j['apart'];
+            $s = $j['offence'] - $context['dangerWeight'] * $j['danger'] - $j['hazard'] - $context['support'] * $j['apart']
+                - AIConfig::FLIGHT_COST_SLOW * $j['slow']; //(2026-11-26) under speed 5 a flight loses initiative
             //down to its fighters: within FLIGHT_LEASH of the target where it can be, else as near as it gets - before anything else
             if ($context['lastStand']) $s -= $leashed ? (($j['leash'] > 0) ? self::MUST : 0) : self::MUST * $j['leash'];
             if ($context['lastStand']) $s -= AIConfig::FLIGHT_CLOSING_PER_HEX * ($j['short'] + $j['fast']);
@@ -366,7 +371,6 @@ class FlightDecider
        here: Hazards prices it. */
     private static function context(AIView $view, $flight)
     {
-        $turn = $view->turn;
         $guns = self::gunGroups($view, $flight);
 
         $antiFighter = false;
@@ -385,7 +389,7 @@ class FlightDecider
         $enemyFlightsUnmoved = false;
         foreach ($view->enemies() as $enemy) {
             if (!empty($enemy->mine)) continue;
-            $moved = !empty($enemy->base) || !empty($enemy->smallBase) || !empty($enemy->osat) || $enemy->getLastTurnMoved() >= $turn;
+            $moved = $view->hasMoved($enemy, $flight); //(2026-11-26) a parked unit ahead in the initiative order has moved
 
             $raider = false;
             if ($antiFighter && $enemy instanceof FighterFlight) {
@@ -509,6 +513,9 @@ class FlightDecider
        as a 'jink' row, which the hit formula reads both ways (Movement::getJinking) - and taken back. */
     private static function judge(AIView $view, $flight, array $plan, $jink, array $context, Hazards $hazards, OffsetCoordinate $start)
     {
+        //(2026-11-26) in an enemy's hex, the hex it came in from first - the bearing between the two is taken from there (enteredFrom)
+        $before = $view->enteredFrom($plan, array_map(function ($e) { return $e['unit']; }, $context['enemies']));
+        if ($before !== null) $flight->movement[] = $before;
         $flight->movement[] = new MovementOrder(-1, 'move', $plan['position'], 0, 0, $plan['speed'], $plan['heading'], $plan['facing'], false, $view->turn, 0, 0);
         if ($jink > 0) $flight->movement[] = new MovementOrder(-1, 'jink', $plan['position'], 0, 0, $plan['speed'], $plan['heading'], $plan['facing'], false, $view->turn, $jink, 0);
         try {
@@ -540,6 +547,16 @@ class FlightDecider
             }
             if (count($context['guns']) == 0) {
                 foreach ($context['closing'] as $target) $short = min($short, $flight->getHexPos()->distanceTo($target->getHexPos()));
+            }
+            /* (2026-11-26) A flight designed to ram, with no quarry it can ram this turn (only one that has MOVED is rammed - see
+               $ram below): the hexes it ends beyond its ramming reach NEXT turn (PowerDecider::maxMove from this end state: its speed
+               and all its thrust) of the nearest quarry - within that reach it need not close any further. */
+            $beyondRam = 0;
+            if ($context['ram'] !== null) {
+                $nextReach = PowerDecider::maxMove($flight);
+                $beyondRam = PHP_INT_MAX;
+                foreach ($context['closing'] as $target) $beyondRam = min($beyondRam, max(0, $flight->getHexPos()->distanceTo($target->getHexPos()) - $nextReach));
+                if ($beyondRam === PHP_INT_MAX) $beyondRam = 0;
             }
 
             /* Stage T6g: a flight that must fire this turn needs a place where a gun of it would really be fired - at or above
@@ -590,13 +607,13 @@ class FlightDecider
             //each target's health from where the flight stands: the section its hits go through (stage T5f - Normal and Hard)
             $targets = ShipDecider::targetsFrom($view, $flight, $context['enemies']);
 
-            /* Stage T9, M2: the best ram from here - a quarry standing in this hex at the Fire phase (judge() is asked inside
-               atFireTime: an enemy yet to move stands where the level forecasts it, or straight on), the flight's speed and jinking
-               as this place has them. */
+            /* Stage T9, M2: the best ram from here - a quarry standing in this hex at the Fire phase, the flight's speed and jinking
+               as this place has them. Only a quarry that has MOVED this turn (the user's tester, 2026-11-26, live game 7845: "change
+               targeting for all ramming attacks to only ram ships that have already moved" - one yet to move may simply fly off). */
             $ram = 0.0;
             if ($context['ram'] !== null) {
                 foreach ($context['enemies'] as $enemy) {
-                    if (!isset($context['quarry'][(int)$enemy['unit']->id])) continue;
+                    if (!isset($context['quarry'][(int)$enemy['unit']->id]) || !$enemy['moved']) continue;
                     if ($flight->getHexPos()->distanceTo($enemy['unit']->getHexPos()) != 0) continue;
                     $ram = max($ram, Posture::flightRamValue($view, $flight, $context['ram'], $enemy['unit'], $context['ramCount'], $enemy['health'], $enemy['worth']));
                 }
@@ -604,13 +621,15 @@ class FlightDecider
         } finally {
             if ($jink > 0) array_pop($flight->movement);
             array_pop($flight->movement);
+            if ($before !== null) array_pop($flight->movement);
         }
 
         return array('offence' => ShipDecider::removed($damage, $targets), 'danger' => ShipDecider::lost($incoming, $context['health'], $context['worth']),
             'short' => ($short === PHP_INT_MAX) ? 0 : $short, 'beyondFleet' => ($fleet === PHP_INT_MAX) ? 0 : max(0, $fleet - AIConfig::FLIGHT_ESCORT_RANGE),
             'apart' => ($wing === PHP_INT_MAX) ? 0 : max(0, $wing - AIConfig::FLIGHT_SUPPORT_RANGE),
-            'hazard' => $board['total'], 'shoots' => $shoots, 'fast' => max(0, (int)$plan['speed'] - $context['chase']), 'leash' => $leash,
-            'ram' => $ram, 'jink' => (int)$jink,
+            'hazard' => $board['total'], 'shoots' => $shoots, 'fast' => max(0, (int)$plan['speed'] - $context['chase']),
+            'slow' => max(0, AIConfig::MOVE_MIN_SPEED - (int)$plan['speed']), 'leash' => $leash, //(2026-11-26: 'slow' - points under speed 5)
+            'ram' => $ram, 'jink' => (int)$jink, 'beyondRam' => $beyondRam,
             //stage T9, M11: hexes from where the carrier of a flight going home will be
             'home' => ($context['home'] !== null) ? $plan['position']->distanceTo($context['home']['hex']) : 0);
     }

@@ -410,7 +410,7 @@ class AIView
     public function torpedoShot($unit, Weapon $weapon, $target, $count)
     {
         $mode = (int)$weapon->firingMode;
-        $key = 'torpedo:' . $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id . ':' . (int)$count;
+        $key = 'torpedo:' . $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id . ':' . (int)$count . $this->jinkKey($target);
         if (!array_key_exists($key, $this->shots)) {
             $this->refusal = null;
             $shot = null;
@@ -609,7 +609,7 @@ class AIView
        The weapon is LEFT IN $mode. Answers are remembered for the life of the view. */
     public function shot($unit, Weapon $weapon, $target, $mode)
     {
-        $key = $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id;
+        $key = $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id . $this->jinkKey($target);
         if (!array_key_exists($key, $this->shots)) {
             $this->refusal = null;
             if (self::isTorpedo($weapon)) {
@@ -631,8 +631,17 @@ class AIView
        there is a shot, or it was never asked. */
     public function why($unit, Weapon $weapon, $target, $mode)
     {
-        $key = $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id;
+        $key = $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id . $this->jinkKey($target);
         return isset($this->why[$key]) ? $this->why[$key] : null;
+    }
+
+    /* (2026-11-26) A flight's jinking this turn, as a cache-key suffix ('' for anything else): BallisticDecider asks the same pairing
+       with a flight jinking (the jinking it would likely take once it sees the launches) - shot() must not answer from the plain one. */
+    private function jinkKey($target)
+    {
+        if (!($target instanceof FighterFlight)) return '';
+        $jink = Movement::getJinking($target, $this->turn);
+        return ($jink > 0) ? ':j' . $jink : '';
     }
 
     private function refuse($reason)
@@ -1642,6 +1651,61 @@ class AIView
 
     // ------------------------------------------------------------------ next turn
 
+    /* Has $unit made its move this turn, as the bot moving now can tell (2026-11-26, local game 6197)? A unit that cannot move; one
+       with a movement row of this turn; or - in the Movement phase - one AHEAD of the bot's active unit in the initiative order. That
+       last test is the fix: a unit that keeps its speed and course (a parked Bin'Tak at speed 0) sends NO rows - its dummy 'end' row
+       is only written when the phase ends (MovementGamePhase::advance) - so until then the row test calls it yet to move, and the
+       bot weighed five parked dreadnoughts as five that could still turn their guns anywhere: it stood off all game. Units move
+       lowest initiative first: one at a time in TacGamedata::sortShips order, or a bracket at a time (SimultaneousMovementRule -
+       whenever the active units are a list); a unit active now, or in the active bracket, has not moved yet for all the bot can tell
+       (it plots "simultaneously"). $mover: the bot's unit asking (default: its active unit, mover()). */
+    public function hasMoved($unit, $mover = null)
+    {
+        if (!empty($unit->base) || !empty($unit->smallBase) || !empty($unit->osat) || !empty($unit->mine)) return true;
+        if ($unit->getLastTurnMoved() >= $this->turn) return true;
+        if ((int)$this->gamedata->phase !== 2) return false;
+        if ($mover === null) $mover = $this->mover();
+        if ($mover === null || (int)$unit->id === (int)$mover->id) return false;
+        $active = $this->gamedata->activeship;
+        if (is_array($active)) {
+            if (in_array((int)$unit->id, array_map('intval', $active), true)) return false;
+            return (int)$unit->iniative < (int)$mover->iniative;
+        }
+        if ((int)$unit->id === (int)$active) return false;
+        return TacGamedata::sortShips($unit, $mover) < 0;
+    }
+
+    /* The row a decider stands a unit in BEFORE its plan's end row, or null (2026-11-26, live game 7857 turn 4: the Blue Aurora
+       flight jumped the Red Aurora in its hex - judged to fire 41 - and then had no gun on arc). Two units in one hex take their
+       bearing from where the one moving later came from: the hex before its last (BaseShip::getPreviousCoPos, from
+       mathlib::getCompassHeadingOfShip). A decider's single stand-in row skipped the path, so that hex read as the turn's START and
+       the arcs were judged from the wrong side. Only when an enemy of $units stands in the plan's end hex (elsewhere the previous hex
+       changes nothing) and the plan entered it from a hex of its own path (one hex in: the start, as the rows already say). */
+    public function enteredFrom(array $plan, array $units)
+    {
+        $path = isset($plan['path']) ? $plan['path'] : array();
+        if (count($path) < 2) return null;
+        $q = (int)$plan['position']->q;
+        $r = (int)$plan['position']->r;
+        foreach ($units as $unit) {
+            $at = $unit->getHexPos();
+            if ((int)$at->q !== $q || (int)$at->r !== $r) continue;
+            return new MovementOrder(-1, 'move', $path[count($path) - 2], 0, 0, $plan['speed'], $plan['heading'], $plan['facing'], false, $this->turn, 0, 0);
+        }
+        return null;
+    }
+
+    //The bot's unit that holds the Movement phase's activation now (the first, when the activation is a bracket), or null.
+    public function mover()
+    {
+        $active = $this->gamedata->activeship;
+        $ids = is_array($active) ? array_map('intval', $active) : array((int)$active);
+        foreach ($this->myUnits() as $unit) {
+            if (in_array((int)$unit->id, $ids, true)) return $unit;
+        }
+        return null;
+    }
+
     /* A unit one turn straight on from where it stands, as a movement row - or null for one that
        will not move. The guess a player makes about a board he cannot see yet, and what a bot's
        own ships do unless something is in the way (MoveDecider). */
@@ -1669,7 +1733,7 @@ class AIView
     {
         $moved = array();
         foreach (array_merge($this->myUnits(), $this->enemies()) as $unit) {
-            if (in_array((int)$unit->id, $except, true) || $unit->getLastTurnMoved() >= $this->turn) continue;
+            if (in_array((int)$unit->id, $except, true) || $this->hasMoved($unit)) continue; //(2026-11-26: hasMoved, not the row test)
             $row = isset($this->forecast[(int)$unit->id]) ? $this->forecast[(int)$unit->id] : self::straightOn($unit, $this->turn);
             if ($row === null) continue;
             $unit->movement[] = $row;

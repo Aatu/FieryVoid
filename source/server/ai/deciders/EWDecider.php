@@ -255,7 +255,15 @@ class EWDecider
         foreach ($guns as $weapon) {
             if (isset($weapon->fireControl[0])) $canShootFighters = true;
         }
-        $ccewCap = ($fighterHeavy || ($plain > 0 && 2 * $antiFighter >= $plain)) ? PHP_INT_MAX : AIConfig::EW_CCEW_CAP;
+        /* (2026-11-26 - the user's tester on live game 7857: "Apollo full CCEW vs fighters instead of 1-2 points as Hard should"; the
+           Omega too, once the Sentri closed) A fighter-heavy enemy lifts the cap only on a ship with an anti-fighter gun to use it -
+           the Apollo and the Omega have none (their Standard Particle Beams aim no better at a fighter than at a capital ship) - or
+           when the enemy has no ship left at all (CCEW is then the only offensive EW there is: no OEW on fighters, game 5826). */
+        $noShips = true;
+        foreach ($enemies as $enemy) {
+            if (!($enemy instanceof FighterFlight) && empty($enemy->mine)) $noShips = false;
+        }
+        $ccewCap = (($fighterHeavy && ($antiFighter > 0 || $noShips)) || ($plain > 0 && 2 * $antiFighter >= $plain)) ? PHP_INT_MAX : AIConfig::EW_CCEW_CAP;
 
         /* CLOSE ENGAGEMENT (user ruling, 2026-11-19): an enemy within EW_CLOSE_RANGE gets a soft lock at most, and with an
            enemy SHIP that close at least EW_CLOSE_MIN_DEW of the points stay in DEW. (An LCV has the page's own rule.) */
@@ -426,6 +434,18 @@ class EWDecider
             }
         }
 
+        /* MISSILE SHIPS TURTLE (the user's tester, 2026-11-26, live game 7857 - the Apollo: "missile ships should 'turtle' with high DEW
+           at Normal and Hard - missiles don't benefit from OEW"; Weapon::$useOEW is false on every missile). A ship most of whose fire
+           is in weapons that use no OEW (missileShip) locks no enemy past EW_TURTLE_LOCK and keeps CCEW to the deterrent's point: the
+           rest is DEW. (The skill 'missileTurtle'; after the jammer's lifts, which it overrules.) */
+        if ($view->skill('missileTurtle') && self::missileShip($view, $ship)) {
+            foreach ($enemies as $enemy) {
+                $id = (int)$enemy->id;
+                $caps[$id] = isset($caps[$id]) ? min($caps[$id], AIConfig::EW_TURTLE_LOCK) : AIConfig::EW_TURTLE_LOCK;
+            }
+            $ccewCap = min($ccewCap, 1);
+        }
+
         while ($alloc['DEW'] > $minDew) {
             $best = null;
             $bestTotal = null;
@@ -491,6 +511,26 @@ class EWDecider
             }
         }
         return $list;
+    }
+
+    /* (2026-11-26) Is most of $ship's fire - EW_MISSILE_SHARE or more, each weapon by its average damage, shots and guns a turn of
+       its loading - in weapons that use no OEW (Weapon::$useOEW false: every missile)? */
+    public static function missileShip(AIView $view, $ship)
+    {
+        $all = 0.0;
+        $missiles = 0.0;
+        foreach ($view->mounts($ship) as $mount) {
+            $weapon = $mount['weapon'];
+            if ($weapon->isDestroyed() || $weapon instanceof JumpEngine || !empty($weapon->isRammingAttack) || $weapon->maxDamage <= 0) continue;
+            if ($weapon->weaponClass === 'Support' || $weapon->isOfflineOnTurn($view->turn)) continue;
+            $fc = $weapon->fireControl;
+            if (!isset($fc[0]) && !isset($fc[1]) && !isset($fc[2])) continue; //no offensive fire at all (an Interceptor)
+            $worth = (($weapon->minDamage + $weapon->maxDamage) / 2) * max(1, (int)$weapon->defaultShots) * max(1, (int)$weapon->guns)
+                / max(1, (int)$weapon->loadingtime);
+            $all += $worth;
+            if (empty($weapon->useOEW)) $missiles += $worth;
+        }
+        return $all > 0 && $missiles >= AIConfig::EW_MISSILE_SHARE * $all;
     }
 
     /* How many points one step of the search may move onto one enemy (the user's notes on game 5826): 1 - the search as it always

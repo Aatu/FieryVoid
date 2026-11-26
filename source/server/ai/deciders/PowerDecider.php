@@ -16,7 +16,8 @@
  *   - a ship in deficit switches systems off, least useful first, until it is not:
  *       the jump engine (the bot does not jump before stage T6), weapons still loading, other
  *       systems, loaded weapons, and only then the engine and the scanner.
- * It never overloads. A bot posts only this turn's rows, and carries nothing over: the same deficit
+ * It overloads no weapon, and a reactor only on a ship lost off the map (overloadOffMap, 2026-11-26).
+ * A bot posts only this turn's rows, and carries nothing over: the same deficit
  * switches the same systems off again next turn, and a ship that has its power back gets everything back.
  *
  * HARD boosts as well (boost(), stage T5f-4 - the skill 'powerBoost'): one-turn guns that can reach
@@ -34,7 +35,11 @@ class PowerDecider
     /* What the last plan did, for tac_ai_log: 'off' systems switched off for a deficit, 'short' ships still in deficit; what
        boost() did: 'idle' guns switched off to pay for boosts, 'scanner' / 'engine' boost levels bought; and what interceptors()
        did: 'interceptors' Interceptors boosted to fire at fighters (stage T7). */
-    public static $last = array('off' => 0, 'short' => 0, 'idle' => 0, 'scanner' => 0, 'engine' => 0, 'interceptors' => 0);
+    public static $last = array('off' => 0, 'short' => 0, 'idle' => 0, 'scanner' => 0, 'engine' => 0, 'interceptors' => 0, 'overload' => array());
+
+    /* (2026-11-26) ship id => the systems plan() switched off for a deficit this turn, in order - replan() picks them again once the
+       enemy can be seen. */
+    public static $shed = array();
 
     //Systems the bot never switches off: the page ties other rules to them.
     const KEEP_ON = array('reactor', 'cnC', 'shieldGenerator');
@@ -46,7 +51,8 @@ class PowerDecider
     {
         $turn = (int)$gamedata->turn;
         $plan = array();
-        self::$last = array('off' => 0, 'short' => 0, 'idle' => 0, 'scanner' => 0, 'engine' => 0, 'interceptors' => 0);
+        self::$last = array('off' => 0, 'short' => 0, 'idle' => 0, 'scanner' => 0, 'engine' => 0, 'interceptors' => 0, 'overload' => array());
+        self::$shed = array();
 
         foreach (AIFallback::ownUnits($gamedata, $botId) as $ship) {
             if ($ship instanceof FighterFlight || $ship->isTerrain() || $ship->isDestroyed()) continue;
@@ -67,6 +73,7 @@ class PowerDecider
                         $rows[] = self::switchOff($ship, $system, $turn);
                         $balance += $system->powerReq;
                         self::$last['off']++;
+                        self::$shed[(int)$ship->id][] = $system;
                     }
                     if ($balance < 0) self::$last['short']++; //nothing left to switch off: the page lets that through too
                 }
@@ -75,6 +82,59 @@ class PowerDecider
             if (count($rows) > 0) $plan[(int)$ship->id] = $rows;
         }
 
+        return $plan;
+    }
+
+    /* NORMAL and HARD (the skill 'powerReach', 2026-11-26): the deficit's choice made again with the enemy in view - plan() runs
+       before the view is masked and cannot ask where the enemy is. For every ship plan() switched systems off for (self::$shed),
+       those rows are taken back and the deficit is paid again in sheddable()'s order with reaches(): the loaded guns that can reach
+       no enemy this turn go first. Run before anything else reads the power (Posture, JumpDecider, boost, EW). */
+    public static function replan(AIView $view, array $plan)
+    {
+        if (!$view->skill('powerReach') || count(self::$shed) == 0) return $plan;
+        $turn = $view->turn;
+        $enemies = array();
+        foreach ($view->enemies() as $enemy) {
+            if (empty($enemy->mine)) $enemies[] = $enemy;
+        }
+        if (count($enemies) == 0) return $plan;
+
+        foreach (AIFallback::ownUnits($view->gamedata, $view->botId) as $ship) {
+            $id = (int)$ship->id;
+            if (!isset(self::$shed[$id])) continue;
+            //take the deficit's rows back: the "off" entry switchOff() wrote on each system, and its row in the plan
+            $ids = array();
+            foreach (self::$shed[$id] as $system) {
+                $ids[(int)$system->id] = true;
+                foreach ($system->power as $k => $power) {
+                    if ((int)$power->turn === (int)$turn && (int)$power->type === 1 && (int)$power->id === -1) {
+                        unset($system->power[$k]);
+                        $system->power = array_values($system->power);
+                        break;
+                    }
+                }
+            }
+            $kept = array();
+            foreach (isset($plan[$id]) ? $plan[$id] : array() as $row) {
+                if ((int)$row['type'] === 1 && isset($ids[(int)$row['systemid']])) continue;
+                $kept[] = $row;
+            }
+            self::$last['off'] -= count(self::$shed[$id]);
+
+            $reach = self::reaches($view, $ship, $enemies, true);
+            $balance = self::balance($ship, $turn);
+            $shed = array();
+            foreach (self::sheddable($ship, $turn, $reach) as $system) {
+                if ($balance >= 0) break;
+                $kept[] = self::switchOff($ship, $system, $turn);
+                $balance += $system->powerReq;
+                $shed[] = $system;
+            }
+            self::$last['off'] += count($shed);
+            self::$shed[$id] = $shed;
+            if (count($kept) > 0) $plan[$id] = $kept;
+            else unset($plan[$id]);
+        }
         return $plan;
     }
 
@@ -250,6 +310,33 @@ class PowerDecider
         return $plan;
     }
 
+    /* (2026-11-26, live game 7845 - the user's tester: "if it exits at end of movement it's destroyed per scenario and should
+       overload its reactor") A ship of the bot's that ended last turn's move off the map, where the scenario says a unit off it is
+       lost (Hazards::mapRule - "Can't end movement outside map" / "Cannot leave map at all"), overloads its reactor: the page's
+       boost on the Reactor (power.js setBoost - a power row of type 2), which the server blows up at the start of this turn's Fire
+       phase (Firing::fireWeapons, Reactor::isOverloading). The Crusader of 7845 had lost its retro and side thrusters, was carried
+       off the board on turn 7 and came back. Every reactor of the ship, as the page would do it; a flight has none. Names the
+       ships in self::$last['overload']. */
+    public static function overloadOffMap(AIView $view, array $plan)
+    {
+        self::$last['overload'] = array();
+        $turn = $view->turn;
+        foreach (AIFallback::ownUnits($view->gamedata, $view->botId) as $ship) {
+            if ($ship instanceof FighterFlight || $ship->isTerrain() || $ship->isDestroyed() || !empty($ship->mine)) continue;
+            if ($ship->getTurnDeployed($view->gamedata) > $turn || !Hazards::lostOffMap($ship, $view->gamedata)) continue;
+            $rows = array();
+            foreach ($ship->systems as $system) {
+                if (!($system instanceof Reactor) || $system->isDestroyed() || self::hasRow($system, $turn, 2)) continue;
+                $system->power[] = new PowerManagementEntry(-1, $ship->id, $system->id, 2, $turn, 1);
+                $rows[] = AIOrderBuilder::power($ship->id, $system->id, $turn, 2, 1);
+            }
+            if (count($rows) == 0) continue;
+            $plan[(int)$ship->id] = array_merge(isset($plan[(int)$ship->id]) ? $plan[(int)$ship->id] : array(), $rows);
+            self::$last['overload'][] = $ship->name;
+        }
+        return $plan;
+    }
+
     /* $ship's Interceptors that a boost would turn to offence, each as array('gun' => the weapon, 'boosted' => array('fireControl',
        'intercept') as the server will set them): fire control null against everything now and some once boosted, an intercept rating
        now and none then; loaded; and a boost the page's plus button takes (power.js clickPlus: boostable, not switched off -
@@ -351,18 +438,22 @@ class PowerDecider
        this turn). Each pair
        is asked with the ship as close to the enemy as both could come (maxMove, both ways) and the best case for the shooter:
        every EW point of its ship locked on to the other, no DEW against it (this turn's is not set yet). (Public since the user's
-       ruling on game 5826: EWDecider asks it whether any return fire could reach a ship at all.) */
-    public static function reaches(AIView $view, $ship, array $enemies)
+       ruling on game 5826: EWDecider asks it whether any return fire could reach a ship at all.)
+       $likely (2026-11-26, replan()): the likely case instead - the two closing at the speeds they have now, no slack, and no EW
+       lock (this turn's EW is not set yet, and it is spread): a deficit must switch something off either way, and the best case
+       gave 6197's White Star Molecular Pulsars 14 damage each 19 hexes out with all 10 of its points on one Bin'Tak (0.4 without).
+       It adds 'plain' (weapon id => true: every plain gun asked) and 'damage' (weapon id => its best expected damage at an enemy). */
+    public static function reaches(AIView $view, $ship, array $enemies, $likely = false)
     {
         $turn = $view->turn;
         $result = array('guns' => array(), 'shots' => 0, 'fight' => false);
-        $points = EWDecider::points($ship, $turn);
+        $points = $likely ? 0 : EWDecider::points($ship, $turn);
         $own = self::maxMove($ship);
 
         foreach ($enemies as $enemy) {
-            $steps = $own + self::maxMove($enemy) + AIConfig::POWER_REACH_SLACK;
+            $steps = $likely ? self::speedNow($ship) + self::speedNow($enemy) : $own + self::maxMove($enemy) + AIConfig::POWER_REACH_SLACK;
             $enemyPoints = ($enemy instanceof FighterFlight) ? 0 : EWDecider::points($enemy, $turn);
-            self::nearer($ship, $enemy, $steps, $turn, function () use ($view, $ship, $enemy, $points, $enemyPoints, $turn, &$result) {
+            self::nearer($ship, $enemy, $steps, $turn, function () use ($view, $ship, $enemy, $points, $enemyPoints, $turn, $likely, &$result) {
                 $keptOwn = $ship->EW;
                 $keptEnemy = $enemy->EW;
                 if ($points > 0) $ship->EW[] = new EWentry(-1, $ship->id, $turn, 'OEW', $points, $enemy->id);
@@ -371,14 +462,19 @@ class PowerDecider
                     $distance = $ship->getHexPos()->distanceTo($enemy->getHexPos());
                     foreach ($view->mounts($ship) as $mount) {
                         $gun = $mount['weapon'];
-                        if ($gun->isDestroyed() || $gun->isOfflineOnTurn($turn) || isset($result['guns'][(int)$gun->id])) continue;
+                        //($likely: every enemy is asked, for the best damage of each gun)
+                        if ($gun->isDestroyed() || $gun->isOfflineOnTurn($turn) || (!$likely && isset($result['guns'][(int)$gun->id]))) continue;
                         if ($gun->ballistic) {
                             //a launcher of its own launches this turn with this turn's EW: a fight, if it is loaded and in range
                             if (!($gun instanceof JumpEngine) && !$gun->hextarget && $view->loaded($gun) && ((int)$gun->range == 0 || $distance <= (int)$gun->range)) $result['fight'] = true;
                             continue;
                         }
-                        if (!$view->plainGun($gun) || $view->estimate($ship, $gun, $enemy, false) <= 0) continue;
+                        if (!$view->plainGun($gun)) continue;
+                        if ($likely) $result['plain'][(int)$gun->id] = true;
+                        $damage = $view->estimate($ship, $gun, $enemy, false);
+                        if ($damage <= 0) continue;
                         $result['guns'][(int)$gun->id] = true;
+                        if ($likely) $result['damage'][(int)$gun->id] = max(isset($result['damage'][(int)$gun->id]) ? $result['damage'][(int)$gun->id] : 0, $damage);
                         if ($view->loaded($gun)) $result['fight'] = true;
                     }
                     foreach ($view->mounts($enemy) as $mount) {
@@ -413,7 +509,18 @@ class PowerDecider
         $guns = array();
         $interceptors = array();
         $drives = array();
+        $immobile = self::immobileTarget($view);
         foreach ($ship->systems as $system) {
+            /* (2026-11-26 - the user's tester: "unless the enemy team has a stationary base, a Hard opponent should deactivate Mass
+               Drivers for spare power") A gun that only ever hits a speed-0 Enormous unit (Weapon::$targetsImmobile - the Mass Driver:
+               MassDriver::calculateHitBase) is no use while the enemy has none: it pays first, its slow loading lost for nothing. */
+            if ($system instanceof Weapon && !empty($system->targetsImmobile) && !$immobile && $system->powerReq > 0 && !$system->isDestroyed()
+                && !self::isOff($system, $turn) && !self::hasRow($system, $turn, 2) && empty($system->stripForJson()->powerLocked)) {
+                $ordered = false;
+                foreach ($system->fireOrders as $fire) if ((int)$fire->turn === (int)$turn) $ordered = true;
+                if (!$ordered) $drives[] = $system;
+                continue;
+            }
             /* Stage T6e (the user, 2026-11-21): a jump engine with more than half its boxes lost is not used to jump (JumpDecider - its
                failure chance is the share lost) and "can be deactivated for extra power by Hard CPU opponents": it pays first. */
             if ($system instanceof JumpEngine) {
@@ -457,6 +564,16 @@ class PowerDecider
             return ($a[0] != $b[0]) ? (($a[0] < $b[0]) ? -1 : 1) : $a[1] - $b[1];
         });
         return array_merge($drives, array_map(function ($row) { return $row[2]; }, $list));
+    }
+
+    //Does the enemy have a unit a Mass Driver could hit (MassDriver::calculateHitBase): an Enormous one that is a base or stands at speed 0?
+    private static function immobileTarget(AIView $view)
+    {
+        foreach ($view->enemies() as $enemy) {
+            if (empty($enemy->Enormous)) continue;
+            if (!empty($enemy->base) || !empty($enemy->smallBase) || (int)$enemy->getSpeed() === 0) return true;
+        }
+        return false;
     }
 
     /* The system a boost of $kind would go on, or null: 'scanner' - the one the page lets a player boost, its highest-rated
@@ -535,6 +652,14 @@ class PowerDecider
 
     /* Run $work with $ship standing $steps hexes nearer $target (never past it) - a movement row of this turn on top of its
        list, taken off again whatever happens. (Public since stage T6b, for Posture.) */
+    //(2026-11-26) The speed a unit has now (its last movement row's), 0 for one that never moves.
+    private static function speedNow($unit)
+    {
+        if (!empty($unit->base) || !empty($unit->smallBase) || !empty($unit->osat) || !empty($unit->mine) || $unit->isTerrain()) return 0;
+        $last = $unit->getLastMovement();
+        return $last ? max(0, (int)$last->speed) : 0;
+    }
+
     public static function nearer($ship, $target, $steps, $turn, callable $work)
     {
         $last = $ship->getLastMovement();
@@ -633,8 +758,18 @@ class PowerDecider
     }
 
     /* The systems a deficit may switch off, in the order they go. What the page's Off button
-       allows (SystemInfoButtons canOffline): a system that draws power, is on, and is not locked on. */
-    public static function sheddable($ship, $turn)
+       allows (SystemInfoButtons canOffline): a system that draws power, is on, and is not locked on.
+       THE ORDER (the user's tester, 2026-11-26 - live game 7857: "at first reactor critical the Jump Drive was turned off - this should
+       be a last resort for an undamaged jump drive, not the first"; local game 6197: a White Star Command should "keep the Jammer
+       powered"): a jump engine too damaged to jump with (JumpDecider::driveDamage over JUMP_MAX_DRIVE_DAMAGE - it is never used);
+       with $reach (replan(), the skill 'powerReach' - reaches()), the guns that reach no enemy this turn, loaded or not, the
+       shortest-ranged first (the steepest range penalty: the last to come within reach); weapons still loading; every other system;
+       the loaded weapons, least fire for its power first; a Jammer; the scanner; and LAST a jump engine with half its boxes or more
+       (the user, 2026-11-26: "a Jump Engine with 50% or more health should be the last thing to deactivate. Scanners go before
+       it" - an Engine draws no power, so it is never on the list). Until then a jump engine went first whatever its state, and a Jammer with the other systems, before any gun.
+       (A gun switched off does not load: "still loading" first kept 6197's White Star Neutron Laser - fired on turn 1, so loading
+       on turn 2 - off for the rest of the game, its pulsars on far out of reach. With the reach known, the pulsars go first there.) */
+    public static function sheddable($ship, $turn, ?array $reach = null)
     {
         $list = array();
         foreach ($ship->systems as $system) {
@@ -643,23 +778,32 @@ class PowerDecider
             $sent = $system->stripForJson();
             if (!empty($sent->powerLocked)) continue;
 
-            if ($system instanceof JumpEngine) $rank = 0;
-            else if ($system instanceof Weapon) $rank = ($system->loadingtime > $system->turnsloaded && $system->loadingtime > $system->overloadturns) ? 1 : 3;
+            if ($system instanceof JumpEngine) $rank = (JumpDecider::driveDamage($system) > AIConfig::JUMP_MAX_DRIVE_DAMAGE) ? 0 : 6;
+            else if ($system instanceof Weapon) {
+                $rank = ($system->loadingtime > $system->turnsloaded && $system->loadingtime > $system->overloadturns) ? 1 : 3;
+                //with the reach known (replan()), a plain gun that can do nothing this turn goes first, and any other is ranked with the
+                //loaded ones by the fire it should give for its power this turn - loading or not (a gun switched off does not load)
+                if ($reach !== null && isset($reach['plain'][(int)$system->id])) $rank = isset($reach['damage'][(int)$system->id]) ? 3 : 0.5;
+            }
+            else if ($system instanceof Jammer) $rank = 3.5;
             else if ($system instanceof Engine) $rank = 4;
             else if ($system instanceof Scanner) $rank = 5;
             else $rank = 2;
 
-            //within a rank: the gun that gives least fire for its power first; anything else in its own order
+            //within a rank: the gun that gives least fire for its power first; anything else in its own order - among the guns that
+            //reach nothing, the steepest range penalty first (worth then counts down from it)
             $worth = 0;
             if ($system instanceof Weapon && !($system instanceof JumpEngine)) {
                 $worth = (($system->minDamage + $system->maxDamage) / 2) * max(1, (int)$system->defaultShots) * max(1, (int)$system->guns)
                     / max(1, (int)$system->loadingtime) / $system->powerReq;
+                if ($rank == 0.5) $worth = -1000 * (float)$system->rangePenalty + $worth / 1000;
+                else if ($reach !== null && isset($reach['damage'][(int)$system->id])) $worth = $reach['damage'][(int)$system->id] / max(1, (int)$system->loadingtime) / $system->powerReq;
             }
             $list[] = array($rank, $worth, (int)$system->id, $system);
         }
 
         usort($list, function ($a, $b) {
-            if ($a[0] !== $b[0]) return $a[0] - $b[0];
+            if ($a[0] != $b[0]) return ($a[0] < $b[0]) ? -1 : 1; //(ranks are fractional since 2026-11-26)
             if ($a[1] != $b[1]) return ($a[1] < $b[1]) ? -1 : 1;
             return $a[2] - $b[2];
         });
