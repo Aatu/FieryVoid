@@ -17,7 +17,7 @@ class VelraxSevashRefitRail extends MediumShip{
 	    $this->isd = 2108;
 
 	    $this->notes = 'Atmospheric Capable.';
-        $this->fighters = array("normal"=>6);
+        $this->fighters = array("light"=>6);
         
         $this->forwardDefense = 11;
         $this->sideDefense = 13;

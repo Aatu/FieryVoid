@@ -17,11 +17,11 @@ class VelraxHasertAttack extends FighterFlight{
         
         $this->forwardDefense = 6;
         $this->sideDefense = 7;
-        $this->freethrust = 8;
-        $this->offensivebonus = 4;
+        $this->freethrust = 9;
+        $this->offensivebonus = 5;
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
-	$this->turndelay = 0;
+		$this->turndelay = 0;
         
         $this->iniativebonus = 20 *5;
         $this->populate();       

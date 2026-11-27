@@ -363,6 +363,11 @@
   color: var(--fv-accent);
 }
 
+/* A game with a CPU player (TACTICAL_AI_PLAN.md stage T8) - the buy dialog's gunmetal, as the lobby's CPU slot. */
+.fv-tag--cpu {
+  color: var(--fv-gunmetal);
+}
+
 /* A password-protected game in Join Games (Stage 8): the lobby's private padlock yellow. */
 .fv-tag--private {
   display: inline-flex;

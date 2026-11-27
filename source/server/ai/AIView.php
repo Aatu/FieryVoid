@@ -42,11 +42,22 @@ class AIView
     private $refusal = null;
     private $sent = array();      //cache: weapon object id => array(its public properties, its payload or null)
     private $mountOrder = array(); //cache: unit id => weapon object id => place in mounts()
+    private $shieldedUnits = array(); //cache: unit id => does it carry a Shield-type defence (shielded() - stage T9)
+    private $worst = array();     //cache: unit id => worstExposure()
+    private $overlaps = array();  //cache (stage T8): unit id => whole bearing => do 2+ entries of its hit table hold it ('locations': the table)
+    private $rolledDamage = array(); //cache (stage T9, M3-M5): "weapon object:mode:needed" => rollDamage()
 
     //Where TacGamedata::hideStealthShipMovement puts a unit this viewer may not see.
     const HIDDEN_Q = -10000;
 
-    public function __construct(TacGamedata $gamedata, $botId)
+    /* The seat's level and seed (stage T5f): what the bot is able to do (skill()) and what its random choices are drawn
+       from (noise()). A view made without them plays Normal. */
+    public $level = AIConfig::DEFAULT_LEVEL;
+    private $seed = 0;
+    //The enemy unit id the fleet's heavy guns go for this Movement phase (stage T5f-3, the skill 'fleetFocus'), or null.
+    public $focus = null;
+
+    public function __construct(TacGamedata $gamedata, $botId, $level = AIConfig::DEFAULT_LEVEL, $seed = 0)
     {
         $this->gamedata = $gamedata;
         $this->botId = (int)$botId;
@@ -54,6 +65,29 @@ class AIView
         $this->ballistics = ((int)$gamedata->phase === 1);
         $this->team = $gamedata->getPlayerTeam();
         $this->blocked = is_array($gamedata->blockedHexes) ? $gamedata->blockedHexes : array();
+        $this->level = isset(AIConfig::SKILLS[$level]) ? $level : AIConfig::DEFAULT_LEVEL;
+        $this->seed = (int)$seed;
+    }
+
+    /* For the ladder harness only (selfPlayHarness --skill=hard:manoeuvres=swap): level => skill => value, read before
+       AIConfig::SKILLS - a tuning question asked without editing the levels. Nothing in a game sets it. */
+    public static $overrides = array();
+
+    //One of the level's player skills (AIConfig::SKILLS).
+    public function skill($name)
+    {
+        if (isset(self::$overrides[$this->level]) && array_key_exists($name, self::$overrides[$this->level])) return self::$overrides[$this->level][$name];
+        return AIConfig::SKILLS[$this->level][$name];
+    }
+
+    /* A draw from the standard normal distribution, fixed by the seat's seed, the turn and $key - the same question gets
+       the same answer, so a game replays exactly (plan 5.8). The global generators are left alone. */
+    public function noise($key)
+    {
+        $words = unpack('N2', hash('sha256', $this->seed . '|' . $this->turn . '|' . $key, true));
+        $u1 = ($words[1] + 1) / 4294967297;
+        $u2 = ($words[2] + 1) / 4294967297;
+        return sqrt(-2 * log($u1)) * cos(2 * M_PI * $u2);
     }
 
     // ------------------------------------------------------------------ units
@@ -105,7 +139,10 @@ class AIView
 
         $flight = ($unit instanceof FighterFlight);
         if (!$flight && ($unit->isDisabled() || $this->pageDisabled($unit))) return 'disabled';
-        if (!empty($unit->remoteControl)) return 'remote-controlled flight'; //Hunter-Killers: the server may be driving it
+        /* Stage T9, M2: a Hunter-Killer flight is the bot's to fly and ram with - but not while it is Uncontrolled (ELINT jamming, a
+           control-node shortfall): the server flies it and declares its rams (AutomatedMovement), and refuses a player's orders for it
+           (Firing::validateFireOrders). */
+        if (!empty($unit->remoteControl) && AutomatedMovement::isUnderAutomatedControl($unit, $this->gamedata)) return 'uncontrolled - the server flies it';
         if (HangarOps::bayCarrierAttachedTo($unit, $this->gamedata) !== null) return 'riding a docking bay';
 
         if (!empty($unit->trueStealth)) return 'stealth unit';        //firing reveals it: a decision the bot cannot make yet
@@ -195,20 +232,36 @@ class AIView
         if ($weapon->preFires) return 'pre-firing weapon';
         if ($weapon->hextarget || !empty($weapon->hextargetArray)) return 'hex-targeted';
         if ($weapon->autoFireOnly || !empty($weapon->autoFireOnlyArray)) return 'fires by itself';
-        if ($weapon->canSplitShots || !empty($weapon->canSplitShotsArray)) return 'split shots';
+        //stage T9 (E1): only a weapon that splits in EVERY mode - see splitsIn(); the Ballistic Torpedo's split is ported (M8 - torpedoShot)
+        if (!self::isTorpedo($weapon) && !$this->plainMode($weapon)) return 'split shots';
         //from here on some flags are read from the weapon's payload (flag()): only for a weapon that got this far
         if ($this->flag($weapon, 'duoWeapon') || $this->flag($weapon, 'dualWeapon')) return 'compound weapon';
         if ($this->flag($weapon, 'isBoardingAction')) return 'boarding';
-        if ($weapon->splitArcs || $this->flag($weapon, 'specialArcs')) return 'special arcs';
+        //(stage T9, M10: a split-arc mount is a plain gun - onArc asks every one of its arcs, as the page does)
+        if ($this->flag($weapon, 'specialArcs')) return 'special arcs';
         if ($this->flag($weapon, 'hasSpecialTargeting') || $this->flag($weapon, 'canOnlyCalledShot') || $this->flag($weapon, 'reinforceAmount')) return 'special targeting';
         if ($weapon->linkedFiringGroup !== null || $this->flag($weapon, 'flightExclusiveGroup')) return 'linked firing';
-        if ($weapon->exclusive) return 'exclusive weapon';
+        /* Stage T9 (E9): a DIRECT-FIRE exclusive weapon (the Sitara's Ion Bolt, the Phalan's Plasma Gun) is offered like any gun -
+           FireDecider::conflicts keeps a craft to it or to its other guns, as the page does (the test at the end of this function, and
+           weaponManager.checkConflictingFireOrder). A ballistic one stays left alone: BallisticDecider has no such rule. */
+        if ($weapon->exclusive && $weapon->ballistic) return 'exclusive weapon';
         if ($weapon->weaponClass === 'Support' || $this->flag($weapon, 'canTargetAllies') || $this->flag($weapon, 'canTargetAlliesArray')) return 'support weapon';
         //Sustained fire is something a player switches on (an overload, in Initial Orders); the bot never does,
         //and a Heavy Laser that is not overloading is a plain gun.
         if ($weapon->alwaysoverloading || $weapon->isOverloadingOnTurn($this->turn)) return 'overload / sustained fire';
-        if ($this->flag($weapon, 'ammunition') !== null || $weapon->checkAmmoMagazine || $this->flag($weapon, 'missileArray')) return 'limited ammunition';
-        if ($this->flag($weapon, 'specialHitChanceCalculation') || $this->flag($weapon, 'specialRangeCalculation') || $this->flag($weapon, 'specialHitChanceCalculationArray') || $this->flag($weapon, 'specialRangeCalculationArray')) return 'special hit calculation';
+        /* Stage T9 (E2 - the user, 2026-11-23: limited-ammo weapons "Just fire freely until empty for now"), as the page's
+           checkOutOfAmmo asks: a weapon with an `ammunition` count (the gatlings) fires while it is above 0; an old missile rack
+           (MissileLauncher, its rounds in `missileArray`) fires in a mode with a round left (modes() offers only those) on a flight,
+           and freely on a ship - the page counts no ship rack's rounds, and the server's ship racks keep none. A weapon fed from a
+           magazine (AmmoDirectWeapon) is still left alone. */
+        $ammunition = $this->flag($weapon, 'ammunition');
+        if ($ammunition !== null && (int)$ammunition <= 0) return 'out of ammunition';
+        if ($weapon->checkAmmoMagazine) return 'limited ammunition';
+        if ($this->flag($weapon, 'missileArray')) {
+            if (!($weapon instanceof MissileLauncher)) return 'limited ammunition';
+            if (count($this->modes($weapon)) == 0) return 'out of ammunition';
+        }
+        if (!$this->portedSpecial($weapon)) return 'special hit calculation'; //stage T9 (M3-M5): unless it is one PORTED_SPECIAL names
         if (count($weapon->getFixedFireControlModes()) > 0) return 'fixed fire control';
 
         if ($weapon->isDestroyed()) return 'destroyed';
@@ -218,13 +271,195 @@ class AIView
         if ($weapon->firedOnTurn($this->turn) || count($this->ordersThisTurn($weapon)) > 0) return 'already has an order this turn';
         if (!$this->loaded($weapon)) return 'not loaded';
 
-        //weaponManager.checkConflictingFireOrder: an exclusive weapon on the same craft has an order
+        //weaponManager.checkConflictingFireOrder: on the same craft (or ship) a weapon of the same kind - direct or ballistic - has an
+        //order, and one of the two is exclusive (stage T9: both ways, as the page asks it; it was only "the other is exclusive")
         foreach (($fighter !== null ? $fighter->systems : $unit->systems) as $other) {
-            if ($other === $weapon || !($other instanceof Weapon) || !$other->exclusive || $other->ballistic) continue;
+            if ($other === $weapon || !($other instanceof Weapon) || (bool)$other->ballistic !== (bool)$weapon->ballistic) continue;
+            if (!$other->exclusive && !$weapon->exclusive) continue;
             if (count($this->ordersThisTurn($other)) > 0) return 'an exclusive weapon is firing';
         }
 
         return null;
+    }
+
+    /* Stage T9: weaponBlock's reasons that mean the bot never fires that KIND of weapon (principle P4) - not this turn's state of it
+       (lost, off, reloading, empty, already firing). */
+    const NEVER_FIRED = array('compound weapon', 'pre-firing weapon', 'hex-targeted', 'split shots', 'boarding', 'special arcs',
+        'special targeting', 'linked firing', 'exclusive weapon', 'support weapon', 'overload / sustained fire', 'limited ammunition',
+        'special hit calculation', 'fixed fire control');
+
+    /* Does the bot fire this kind of weapon at all, in the phase that is its own (direct fire or ballistic)? Posture::usableGuns asks it
+       (stage T9): a unit whose guns are all of kinds it never fires - Antimatter Converters, Gravity Nets, Point Pulsars - cannot fight,
+       for surrender, jumping out and the last stand. */
+    public function firesKind($unit, Weapon $weapon, $fighter = null)
+    {
+        $kept = $this->ballistics;
+        $this->ballistics = (bool)$weapon->ballistic;
+        try {
+            $why = $this->weaponBlock($unit, $weapon, $fighter);
+        } finally {
+            $this->ballistics = $kept;
+        }
+        return !in_array($why, self::NEVER_FIRED, true);
+    }
+
+    /* Stage T9 - the Missing systems M3 / M4 / M5 (plan 10.10): the weapons whose page-side SPECIAL hit or range calculation the bot has
+       ported, by class (instanceof), and which of the two it may carry. weaponBlock leaves every other weapon with either flag alone.
+         - AntimatterWeapon (M3 the Antiproton Defender, M4 the Antimatter Converter; the Vree's Antiproton Gun, Antimatter Cannon and
+           Antimatter Torpedo): its RANGE penalty is its own - none / regular / double brackets, and the range itself doubled for no lock
+           (doubleRangeIfNoLock). AntimatterWeapon::calculateRangePenalty (server) and antimatter.js calculateSpecialRangePenalty (page) are
+           a mirror pair; the bot prices every shot with the server's own calculateHitBase, and fireOracle.js holds every pairing's chance
+           to the page's. Its DAMAGE grows with the roll (rollScaled). The Converter's brackets (0 / 999) make its penalty the ordinary one
+           at every range (the user, 2026-11-23: it "doesn't actually use the specialHitChanceCalculation ... in practice").
+         - PointPulsar (M5): its special HIT modifier (pulse.js calculateSpecialHitChanceMod) is +4 for a CALLED shot at a fighter only -
+           the called-shot penalty undone, as the server's calculateHitBase does; the bot never calls a shot, so for it the formula is the
+           plain one. */
+    const PORTED_SPECIAL = array('AntimatterWeapon' => 'range', 'PointPulsar' => 'hit');
+
+    //No special calculation the page asks of $weapon (the flags as the page has them - flag()), or only the kind PORTED_SPECIAL names for its class.
+    private function portedSpecial(Weapon $weapon)
+    {
+        $hit = $this->flag($weapon, 'specialHitChanceCalculation') || $this->flag($weapon, 'specialHitChanceCalculationArray');
+        $range = $this->flag($weapon, 'specialRangeCalculation') || $this->flag($weapon, 'specialRangeCalculationArray');
+        if (!$hit && !$range) return true;
+        foreach (self::PORTED_SPECIAL as $class => $kind) {
+            if ($weapon instanceof $class) return !($hit && $kind !== 'hit') && !($range && $kind !== 'range');
+        }
+        return false;
+    }
+
+    /* Stage T9 (M3-M5): does $weapon's damage grow with how far the hit roll beats its need? Every AntimatterWeapon: X = (needed - rolled)
+       / 5, rounded down, at most maxX, less 2 for each Reduced Damage critical (getX), and the damage its dmgEquation of X - the Converter's
+       4X+2, the Defender's X+8. Its minDamage..maxDamage says nothing about a shot: the Converter's maxDamage 82 is "a reasonable maximum"
+       for X = 20, so the plain mid-point (42) priced a 40% shot at almost three times what it does (16). See rollDamage(). */
+    public static function rollScaled(Weapon $weapon)
+    {
+        return $weapon instanceof AntimatterWeapon;
+    }
+
+    /* What one hit of a rollScaled() weapon does on average, before armour, when it needs $needed percent (interception already taken
+       off - the figure Weapon::fire rolls against): the weapon's own getDamage over every d100 roll that hits, 1 to $needed (100 at most),
+       in its current mode. A need over 100 hits on any roll and still raises X. Remembered per weapon, mode and need. */
+    private function rollDamage(Weapon $weapon, $needed)
+    {
+        $needed = (int)floor($needed);
+        $key = spl_object_id($weapon) . ':' . (int)$weapon->firingMode . ':' . $needed;
+        if (!isset($this->rolledDamage[$key])) {
+            $order = new FireOrder(-1, 'normal', 0, 0, $weapon->id, -1, $this->turn, (int)$weapon->firingMode, 0, 0, 1, 0, 0, null, null, null);
+            $order->needed = $needed;
+            $hits = min(100, $needed);
+            $sum = 0;
+            if ($hits < 1) {
+                $order->rolled = $needed; //no roll hits: X = 0, for a figure that is never multiplied by more than nothing
+                $sum = $weapon->getDamage($order);
+                $hits = 1;
+            } else {
+                for ($rolled = 1; $rolled <= $hits; $rolled++) {
+                    $order->rolled = $rolled;
+                    $sum += $weapon->getDamage($order);
+                }
+            }
+            $this->rolledDamage[$key] = $sum / $hits;
+        }
+        return $this->rolledDamage[$key];
+    }
+
+    // ------------------------------------------------------------------ stage T9, M8: the Ballistic Torpedo
+
+    /* Is $weapon a BALLISTIC TORPEDO launcher (Centauri; the Kirishiac Phased Gravitic Torpedo extends it)? It holds up to `normalload`
+       torpedoes, one more each turn it does not fire, and splits its shots BY DEFAULT: each click on a unit launches one of them
+       (BallisticTorpedo.doMultipleFireOrders - one 'ballistic' order, one shot, the weapon's type for its damage class) until every
+       torpedo held has an order (checkFinished). The server then resolves those at a SHIP as one volley per launcher (Saturation Mode:
+       BallisticTorpedo::beforeFiringOrderResolution merges them BEFORE interception - Firing::prepareFiring, then automateIntercept - so
+       one roll and one interception, and 1 + one more for every `grouping` the roll beats the need by land, up to the number fired),
+       and at a FLIGHT as one order and roll each, at a fighter of its own (a called shot whose fighter is gone falls back to the
+       ordinary allocation - FighterFlight::getHitSystem - so a torpedo is wasted only on a flight with nobody left). */
+    public static function isTorpedo(Weapon $weapon)
+    {
+        return $weapon instanceof BallisticTorpedo;
+    }
+
+    //The torpedoes a launcher holds now - what the page lets it launch (checkFinished: an order each, up to turnsloaded).
+    public function torpedoes(Weapon $weapon)
+    {
+        return max(0, (int)$weapon->turnsloaded);
+    }
+
+    /* How many torpedoes of a launcher holding $held the bot sends at $target in a turn, at most (the user's ruling, 2026-11-23: "2-3
+       torpedoes at one or two ships, or 3-6 at a fighter flight ... Easy and Normal may simply fire 1-3 a turn at one target, Hard can
+       consider splitting a bit more"): AIConfig::TORPEDO_SHIP_VOLLEY at ships, the level's 'torpedoFlightVolley' at a flight - and no
+       more than the flight has craft left (each torpedo meets a fighter of its own) - per launcher (the user, 2026-11-23: "launchers shouldn't
+       work together. As long as each individual launcher doesn't launch more torpedoes than a fighter flights has that's fine"). */
+    public function torpedoCap($target, $held)
+    {
+        if ($target instanceof FighterFlight) {
+            $craft = 0;
+            foreach ($target->systems as $fighter) {
+                if ($fighter instanceof Fighter && !$fighter->isDestroyed()) $craft++;
+            }
+            return max(0, min((int)$held, (int)$this->skill('torpedoFlightVolley'), $craft));
+        }
+        return max(0, min((int)$held, AIConfig::TORPEDO_SHIP_VOLLEY));
+    }
+
+    /* $count torpedoes of launcher $weapon of $unit at $target this turn, as the page launches them (one click each) and the server
+       resolves them (isTorpedo): a shot() whose 'orders' = $count (the rows posted, 'shots' 1 each), 'pulses' = the most that land on
+       one roll ($count at a ship, 1 at a flight), 'merged' = one order to the server's interception (a ship), and 'damage' the whole
+       volley's. Null where the page would launch none (shot()'s tests - the weapon's own mode, its arc at launch, range, line of
+       sight, fire control) or the launcher does not hold $count. The weapon is LEFT IN its mode; answers are remembered as shot()'s. */
+    public function torpedoShot($unit, Weapon $weapon, $target, $count)
+    {
+        $mode = (int)$weapon->firingMode;
+        $key = 'torpedo:' . $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id . ':' . (int)$count . $this->jinkKey($target);
+        if (!array_key_exists($key, $this->shots)) {
+            $this->refusal = null;
+            $shot = null;
+            if (!self::isTorpedo($weapon) || $count < 1 || $count > $this->torpedoes($weapon)) $this->refuse('unloaded');
+            else {
+                $flight = ($target instanceof FighterFlight);
+                $shot = $this->work($unit, $weapon, $target, $mode, true, $flight ? 1 : (int)$count);
+                if ($shot !== null) $shot = self::asVolley($shot, $target, (int)$count);
+            }
+            $this->shots[$key] = $shot;
+            $this->why[$key] = $this->refusal;
+        }
+        return $this->shots[$key];
+    }
+
+    //A torpedo shot priced at one roll of its 'pulses' (price()), made the whole volley of $count (torpedoShot).
+    private static function asVolley(array $shot, $target, $count)
+    {
+        $flight = ($target instanceof FighterFlight);
+        $shot['orders'] = $count;
+        $shot['shots'] = 1;
+        $shot['pulses'] = $flight ? 1 : $count;
+        $shot['merged'] = !$flight;
+        if ($flight) $shot['damage'] *= $count; //an order and a roll each
+        return $shot;
+    }
+
+    /* Would BallisticDecider launch $weapon of $unit this turn (weaponBlock in its ballistic form)? EWDecider asks it of a ship's torpedo
+       launchers in Initial Orders, before the launches are planned. */
+    public function launcherNow($unit, Weapon $weapon)
+    {
+        if (!$weapon->ballistic) return false;
+        $was = $this->ballistics;
+        $this->ballistics = true;
+        try {
+            return $this->unitBlock($unit) === null && $this->weaponBlock($unit, $weapon, null) === null;
+        } finally {
+            $this->ballistics = $was;
+        }
+    }
+
+    /* What a torpedo volley of $weapon of $shooter launched NOW should do to $target (stage T9, M8 - the user: torpedoes "backed by 1 or 2
+       OEW"): the volley the bot would send there (torpedoCap), from the launch hex, priced as estimate() prices a gun - the real hit
+       formula with the EW the ship carries at the time of asking, uncached - with the page's launch tests (arc as the ship stands now -
+       a launch has no Movement before it - range, line of sight, fire control). No interception. 0 where nothing could be launched. */
+    public function torpedoEstimate($shooter, Weapon $weapon, $target)
+    {
+        if (!self::isTorpedo($weapon)) return 0;
+        return $this->launchValue($shooter, $weapon, $target, $this->turn, $this->torpedoes($weapon), true);
     }
 
     /* A MISSILE RACK fed from an Ammunition Magazine (AmmoMissileRackS and everything built on it,
@@ -240,7 +475,12 @@ class AIView
         if ($weapon->isOfflineOnTurn($this->turn)) return 'offline';
         if ($weapon->stowed) return 'stowed';
         if ($weapon->hasRamProw()) return 'ramming prow';
-        if ($weapon->exclusive || $weapon->linkedFiringGroup !== null) return 'linked firing';
+        if ($weapon->exclusive) return 'exclusive weapon';
+        /* A firing link (weaponManager.getLinkedFiringBlock). The SAME-TARGET kind (no spread: the Thunderbolt's and the Armed
+           Missile Shuttle's twin racks - both missiles of one craft at one unit) is kept by BallisticDecider (linkKey); before
+           stage T6a it was refused here, and the Thunderbolts of game 4774 never launched a missile. An angular spread (the Vree
+           turrets) is not modelled. */
+        if ($weapon->linkedFiringGroup !== null && $weapon->linkedFiringSpread !== null) return 'linked firing';
         if ($weapon->firedOnTurn($this->turn) || count($this->ordersThisTurn($weapon)) > 0) return 'already has an order this turn';
         if (!$this->loaded($weapon)) return 'not loaded';
         if (count($this->modes($weapon)) == 0) return 'no round the bot uses';
@@ -299,6 +539,29 @@ class AIView
         return $orders;
     }
 
+    /* Stage T9, enabler E1 (TACTICAL_AI_PLAN.md 10.10): does $weapon split its shots in $mode? The page sends a splitting mode
+       through the weapon's own doMultipleFireOrders (weaponManager.targetShip) - an order a click, each at a unit of its own: the
+       Twin Array family's 'Split' - and every other mode through its plain loop, an order a gun, all at the unit clicked. A weapon
+       with a per-mode list splits as the list says (the page's updateFiringModeData: a mode the list leaves out does not split);
+       one without it splits in every mode or in none.
+       The user's ruling of 2026-11-23: "Split Weapons like Twin Arrays ... almost always fire all their shots at the same target in
+       practice using Firing Mode 1" - so the bot orders a weapon in its plain modes only (modes()), and a weapon with none (the
+       Ballistic Torpedo, the slicers) stays left alone (weaponBlock). Hard's own split: splitShot() and FireDecider::splitGuns. */
+    public function splitsIn(Weapon $weapon, $mode)
+    {
+        if (!empty($weapon->canSplitShotsArray)) return !empty($weapon->canSplitShotsArray[(int)$mode]);
+        return (bool)$weapon->canSplitShots;
+    }
+
+    //Has $weapon a firing mode that does not split its shots (splitsIn)?
+    public function plainMode(Weapon $weapon)
+    {
+        foreach (array_keys($weapon->firingModes) as $mode) {
+            if (!$this->splitsIn($weapon, (int)$mode)) return true;
+        }
+        return false;
+    }
+
     //The firing modes of a weapon the bot will consider.
     public function modes(Weapon $weapon)
     {
@@ -309,8 +572,22 @@ class AIView
             }
             return $modes;
         }
+        /* Stage T9 (E2): an OLD missile rack (MissileLauncher - its rounds in missileArray, a mode each): on a flight only a mode with a
+           round left (the page's checkOutOfAmmo; a fighter rack's fire() spends one or fizzles - so a fighter rack on anything else is
+           counted too); on a ship every mode (the page asks no count, the server keeps none). */
+        if ($weapon instanceof MissileLauncher) {
+            $counted = ($weapon instanceof FighterMissileRack) || ($weapon->getUnit() instanceof FighterFlight);
+            foreach (array_keys($weapon->firingModes) as $mode) {
+                $missile = isset($weapon->missileArray[$mode]) ? $weapon->missileArray[$mode] : null;
+                if ($missile === null || ($counted && (int)$missile->amount <= 0)) continue;
+                $modes[] = (int)$mode;
+            }
+            return $modes;
+        }
         foreach (array_keys($weapon->firingModes) as $mode) {
             $mode = (int)$mode;
+            //stage T9 (E1): never a splitting mode - see splitsIn(); a Ballistic Torpedo splits in every mode, and that split is ported (M8)
+            if ($this->splitsIn($weapon, $mode) && !self::isTorpedo($weapon)) continue;
             $type = isset($weapon->damageTypeArray[$mode]) ? $weapon->damageTypeArray[$mode] : $weapon->damageType;
             //⚠️ see the header: with officers aboard, pricing a Piercing shot may spend an Expert Gunner's bonus
             if (TacGamedata::$officersPresent && $type === 'Piercing') continue;
@@ -332,10 +609,16 @@ class AIView
        The weapon is LEFT IN $mode. Answers are remembered for the life of the view. */
     public function shot($unit, Weapon $weapon, $target, $mode)
     {
-        $key = $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id;
+        $key = $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id . $this->jinkKey($target);
         if (!array_key_exists($key, $this->shots)) {
             $this->refusal = null;
-            $this->shots[$key] = $this->work($unit, $weapon, $target, (int)$mode);
+            if (self::isTorpedo($weapon)) {
+                //stage T9 (M8): a Ballistic Torpedo's shot is ONE torpedo - one click on the page (torpedoShot)
+                $one = $this->work($unit, $weapon, $target, (int)$mode, true, 1);
+                $this->shots[$key] = ($one !== null) ? self::asVolley($one, $target, 1) : null;
+            } else {
+                $this->shots[$key] = $this->work($unit, $weapon, $target, (int)$mode);
+            }
             $this->why[$key] = $this->refusal;
         }
         if ($this->shots[$key] !== null && (int)$weapon->firingMode !== (int)$mode) $weapon->changeFiringMode((int)$mode);
@@ -348,8 +631,17 @@ class AIView
        there is a shot, or it was never asked. */
     public function why($unit, Weapon $weapon, $target, $mode)
     {
-        $key = $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id;
+        $key = $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id . $this->jinkKey($target);
         return isset($this->why[$key]) ? $this->why[$key] : null;
+    }
+
+    /* (2026-11-26) A flight's jinking this turn, as a cache-key suffix ('' for anything else): BallisticDecider asks the same pairing
+       with a flight jinking (the jinking it would likely take once it sees the launches) - shot() must not answer from the plain one. */
+    private function jinkKey($target)
+    {
+        if (!($target instanceof FighterFlight)) return '';
+        $jink = Movement::getJinking($target, $this->turn);
+        return ($jink > 0) ? ':j' . $jink : '';
     }
 
     private function refuse($reason)
@@ -358,13 +650,184 @@ class AIView
         return null;
     }
 
-    private function work($unit, Weapon $weapon, $target, $mode)
+    /* Stage T9, enabler E1 - Hard's split (the skill 'splitShots'): ONE gun of $weapon in its splitting $mode at $target - the order
+       one click makes on the page (the Twin Array family's doMultipleFireOrders: one order, one shot, damage class 'Sweeping'), priced
+       as shot() prices a volley: 'orders' 1, 'damage' one gun's share. Null where the page would make no such order, or for a weapon
+       whose page split the bot has not ported (SPLIT_FAMILIES). The weapon is LEFT IN $mode; answers are remembered as shot()'s. */
+    public function splitShot($unit, Weapon $weapon, $target, $mode)
+    {
+        $key = 'split:' . $unit->id . ':' . $weapon->id . ':' . $mode . ':' . $target->id;
+        if (!array_key_exists($key, $this->shots)) {
+            $this->refusal = null;
+            $shot = null;
+            if (!in_array(get_class($weapon), self::SPLIT_FAMILIES, true) || !$this->splitsIn($weapon, (int)$mode)) $this->refuse('mode');
+            else $shot = $this->work($unit, $weapon, $target, (int)$mode, true);
+            if ($shot !== null) {
+                $guns = max(1, $shot['orders']);
+                $shot['damage'] = $shot['damage'] / $guns;
+                $shot['orders'] = 1;
+                $shot['shots'] = 1;
+                $shot['damageclass'] = 'Sweeping';
+            }
+            $this->shots[$key] = $shot;
+            $this->why[$key] = $this->refusal;
+        }
+        if ($this->shots[$key] !== null && (int)$weapon->firingMode !== (int)$mode) $weapon->changeFiringMode((int)$mode);
+        return $this->shots[$key];
+    }
+
+    /* Stage T9 (the user's note 4 - AREA-EFFECT weapons): can $weapon of $unit be launched at $hex now, as weaponManager.targetHex takes
+       it, and what would the page make of it? Only the weapons of AIConfig::AOE_WEAPONS (an Energy Mine: ballistic, hex-targeted - the
+       page's plain loop, one order a gun, no unit, the hex in x / y). The page's tests: Initial Orders (a ballistic), the unit able to
+       fire, the weapon whole, loaded and switched on, no order on it this turn (the bot never re-aims one), the hex inside its arc, no
+       blocked hex in the line, within its range (0 = any). Null when it cannot; else array('mode', 'orders', 'shots', 'damageclass').
+       ⚠️ The page's targetHex ENDS the whole click on a blocked line - for the bot that is simply no launch at that hex. */
+    public function hexShot($unit, Weapon $weapon, OffsetCoordinate $hex)
+    {
+        if (!$this->ballistics || !$weapon->ballistic || !$weapon->hextarget || $weapon->autoFireOnly) return null;
+        if (!AoEDecider::isAoe($weapon) || $this->unitBlock($unit) !== null) return null;
+        if ($weapon->isDestroyed() || $weapon->isOfflineOnTurn($this->turn) || !$this->loaded($weapon)) return null;
+        if ($weapon->firedOnTurn($this->turn) || count($this->ordersThisTurn($weapon)) > 0) return null;
+        if ($weapon->splitArcs || $this->flag($weapon, 'specialArcs')) return null; //the page asks such a weapon itself (isPosOnSpecialArc)
+        if (!$this->onArcHex($unit, $weapon, $hex)) return null;
+        $from = $unit->getHexPos();
+        if (!$weapon->ignoresLoS && count($this->blocked) > 0 && Mathlib::isLoSBlocked($from, $hex, $this->blocked)) return null;
+        if ($weapon->range != 0 && $from->distanceTo($hex) > $weapon->range) return null;
+        $type = isset($weapon->data['Weapon type']) ? (string)$weapon->data['Weapon type'] : (string)$weapon->weaponClass;
+        return array('mode' => (int)$weapon->firingMode, 'orders' => max(1, (int)$weapon->guns), 'shots' => (int)$weapon->defaultShots, 'damageclass' => strtolower($type));
+    }
+
+    /* Stage T9, M6 - the GRAVITY NET (Pre-Firing). A player fires one in TWO clicks, both ported here and judged by fireOracle.js
+       (replayNets):
+         1. the unit (weaponManager.targetShip -> GravityNet.doMultipleFireOrders): one 'prefiring' order at it, damage class
+            'gravitic', the note 'Split' - netShot();
+         2. the hex to move it to (weaponManager.targetHex -> GravityNet.doMultipleHexFireOrders): a second 'prefiring' order at no
+            unit, the hex in x / y, damage class 'gravNetMoveHex' - netHex().
+       netShot: the page's tests for the first click - Pre-Firing, the net whole, switched on, loaded and without an order this turn,
+       the unit able to fire (unitBlock - stricter than the page, as everywhere), the target an ENEMY - or, with $allies (Hard's skill
+       'netAllies' - the user, 2026-11-24), a FRIENDLY unit too, as the page lets a player net one (a canTargetAll weapon: a click on a
+       friendly unit targets it - PhaseStrategy / gamedata.canTargetAlly), never the net's own ship - not a mine nor Enormous
+       (doMultipleFireOrders), the fire control for its size, a clear line, the arc, the range, and a chance of at least 1. Null when the
+       page would make no order; else array('chance' => percent, 'distance' => hexes). The chance is the engine's own (GravityNet::
+       calculateHitBase: -15 at a gravitic or Ancient unit, a friend too; at a friend the bot holds no lock on, the no-lock penalty). Why
+       it is null: why() is not kept for it - $this->refusal holds the last reason (netWhy()). */
+    public function netShot($unit, Weapon $net, $target, $allies = false)
+    {
+        $this->refusal = null;
+        if ((int)$this->gamedata->phase !== 5 || !($net instanceof GravityNet) || $net->ballistic) return $this->refuse('mode');
+        if ($this->unitBlock($unit) !== null) return $this->refuse('unit');
+        if ($net->isDestroyed() || $net->isOfflineOnTurn($this->turn) || $net->stowed || !$this->loaded($net)) return $this->refuse('unloaded');
+        if ($net->firedOnTurn($this->turn) || count($this->ordersThisTurn($net)) > 0) return $this->refuse('ordered');
+
+        if ($target->id === $unit->id || ($target->team == $unit->team && !$allies)) return $this->refuse('target');
+        if (!empty($target->mine) || (!($target instanceof FighterFlight) && (int)$target->shipSizeClass > 3)) return $this->refuse('target');
+
+        $fc = $net->fireControl;
+        if ($target instanceof FighterFlight) {
+            if (!isset($fc[0])) return $this->refuse('fc');
+        } else if ($target->shipSizeClass < 2) {
+            if (!isset($fc[1])) return $this->refuse('fc');
+        } else if (!isset($fc[2])) {
+            return $this->refuse('fc');
+        }
+
+        $from = $unit->getHexPos();
+        $to = $target->getHexPos();
+        if (!$net->ignoresLoS && count($this->blocked) > 0 && Mathlib::isLoSBlocked($from, $to, $this->blocked)) return $this->refuse('los');
+        if (!$this->onArc($unit, $net, $target)) return $this->refuse('arc');
+        $distance = $from->distanceTo($to);
+        if (!$this->inRange($unit, $net, $target, $distance)) return $this->refuse('range');
+
+        $order = new FireOrder(-1, 'prefiring', $unit->id, $target->id, $net->id, -1, $this->turn, $net->firingMode, 0, 0, 1, 0, 0, null, null, 'gravitic');
+        $answers = $this->hitBase($net, $unit, $target, $order);
+        if (count($answers) == 0) return $this->refuse('edge');
+        $chance = 0;
+        foreach ($answers as $answer) $chance += $answer['weight'] * $answer['needed'];
+        $chance = (int)round($chance);
+        if ($chance < 1) return $this->refuse('chance');
+        return array('chance' => $chance, 'distance' => $distance);
+    }
+
+    //Why the last netShot() answered null: 'mode', 'unit', 'unloaded', 'ordered', 'target', 'fc', 'los', 'arc', 'range', 'edge' or 'chance'.
+    public function netWhy()
+    {
+        return $this->refusal;
+    }
+
+    /* The second click: may the net, its first order at $target, move it to $hex? weaponManager.targetHex's tests - the hex inside the
+       net's arc from the shooter (isPosOnWeaponArc), the line from the shooter to it clear (a blocked one ENDS the page's click: no
+       order), within the net's range (0 = any) - then GravityNet.validateTargetMoveHex: no further from the target than the net's Move
+       Distance (netReach), the line from the target to it clear, and not itself a blocked hex. The page asks nothing of the map's edge
+       or of other units there; the decider keeps to the map itself. */
+    public function netHex($unit, Weapon $net, $target, OffsetCoordinate $hex)
+    {
+        if (!$this->onArcHex($unit, $net, $hex)) return false;
+        $from = $unit->getHexPos();
+        if (!$net->ignoresLoS && count($this->blocked) > 0 && Mathlib::isLoSBlocked($from, $hex, $this->blocked)) return false;
+        if ($net->range != 0 && $from->distanceTo($hex) > $net->range) return false;
+
+        $at = $target->getHexPos();
+        if ($at->distanceTo($hex) > $this->netReach($net)) return false;
+        foreach ($this->blocked as $blocked) {
+            if ((int)$blocked->q === (int)$hex->q && (int)$blocked->r === (int)$hex->r) return false;
+        }
+        if (count($this->blocked) > 0 && Mathlib::isLoSBlocked($at, $hex, $this->blocked)) return false;
+        return true;
+    }
+
+    /* How far this turn's roll lets the net move a unit: its Move Distance (the d6 the server rolls for each net in the Movement phase -
+       GravityNet::generateIndividualNotes - and shows from Pre-Firing on: onIndividualNotesLoaded). 0 when there is none this turn. */
+    public function netReach(Weapon $net)
+    {
+        return is_numeric($net->moveDistance) ? max(0, (int)$net->moveDistance) : 0;
+    }
+
+    /* Stage T9, M7 - the PULSAR MINE (the Narn G'Karith; the JaStat base): the damage ONE of its attacks should do to a craft of
+       $flight. It fires by itself (autoFireOnly - nobody aims it): after Movement, at every enemy craft that was within its 2 hexes and
+       its arc at any moment of the craft's own move - judged from where the mine's ship stood then, as the units move in initiative order
+       (PulsarMine::checkForValidTargets) - one order a craft, called at it, up to 18 a mine (createFireOrders). Priced here as the engine
+       will price that order; its range penalty is 0 and it ignores jinking, so where either unit stands does not change it. Range, arc
+       and the 18 are the caller's (ShipDecider). 0 when the flight has no craft left or the shot cannot be priced. */
+    public function pulsarAttack($ship, Weapon $mine, $flight)
+    {
+        if (!($flight instanceof FighterFlight) || !isset($mine->fireControl[0])) return 0;
+        $craft = null;
+        foreach ($flight->systems as $fighter) {
+            if ($fighter instanceof Fighter && !$fighter->isDestroyed()) {
+                $craft = $fighter;
+                break;
+            }
+        }
+        if ($craft === null) return 0;
+
+        $order = new FireOrder(-1, 'prefiring', $ship->id, $flight->id, $mine->id, $craft->id, $this->turn, 1, 0, 0, 1, 0, 0, 0, 0, $mine->weaponClass, -1);
+        try {
+            $answers = $this->hitBase($mine, $ship, $flight, $order);
+        } catch (Throwable $e) {
+            return 0;
+        }
+        $total = 0;
+        foreach ($answers as $answer) {
+            $chance = max(0, min(100, $answer['needed']));
+            if ($chance > 0) $total += $answer['weight'] * $chance / 100 * $this->damagePerHit($mine, $ship, $flight, $answer['loc'], 0, $answer['needed']);
+        }
+        return $total;
+    }
+
+    /* The weapons whose page split splitShot() is a port of - by EXACT class, as the page picks a system's prototype by its class:
+       the Twin Array, the Heavy Array, the Quad Array (mode 5) and the Quad Particle Beam share one doMultipleFireOrders shape (one
+       order a click, one shot, 'Sweeping', until every gun has one). Not the Unreliable Twin Array: its page prototype is a plain
+       Particle's, so a click in its Split mode makes no order at all. */
+    const SPLIT_FAMILIES = array('TwinArray', 'HeavyArray', 'QuadArray', 'QuadParticleBeam');
+
+    //$pulses: price() it at that many pulses at most on one roll (stage T9, M8 - a torpedo volley); null for the weapon's own figure
+    private function work($unit, Weapon $weapon, $target, $mode, $split = false, $pulses = null)
     {
         if (!isset($weapon->firingModes[$mode])) return $this->refuse('mode');
         if ((int)$weapon->firingMode !== $mode) $weapon->changeFiringMode($mode);
 
-        //what a mode may turn the weapon into
-        if ($weapon->hextarget || $weapon->autoFireOnly || $weapon->canSplitShots || (bool)$weapon->ballistic !== $this->ballistics) return $this->refuse('mode');
+        //what a mode may turn the weapon into (a splitting mode only for splitShot)
+        if ($weapon->hextarget || $weapon->autoFireOnly || (bool)$weapon->canSplitShots !== $split || (bool)$weapon->ballistic !== $this->ballistics) return $this->refuse('mode');
         if (!$this->loaded($weapon)) return $this->refuse('unloaded');
         if ($weapon->guns < 1) return $this->refuse('mode');
 
@@ -395,7 +858,7 @@ class AIView
         //checkIsInRange: a young race's ballistic cannot be launched at a stealth flight more than 5 hexes off (here: nobody's)
         if ($this->ballistics && $flightTarget && $distance > 5 && $target->getSystemByName('Stealth')) return $this->refuse('range');
 
-        $shot = $this->price($unit, $weapon, $target, $mode, $distance, $this->ballistics);
+        $shot = $this->price($unit, $weapon, $target, $mode, $distance, $this->ballistics, $pulses);
         if ($shot === null) return $this->refuse('edge'); //a launch the engine would price on a die (hitBase)
         //the page makes no order for a direct shot that cannot hit; it would launch such a ballistic, the bot never does
         if ($shot['chance'] < 1) return $this->refuse('chance');
@@ -405,7 +868,7 @@ class AIView
     /* The real formula, on an order that exists only here - the shot shot() describes, legality
        aside. Null when it cannot be priced without a die (hitBase). 'perHit' is what one hit of the
        likeliest section does, for re-pricing the shot at a lower chance (damageAfter). */
-    private function price($unit, Weapon $weapon, $target, $mode, $distance, $ballistic)
+    private function price($unit, Weapon $weapon, $target, $mode, $distance, $ballistic, $pulses = null)
     {
         $order = new FireOrder(-1, $ballistic ? 'ballistic' : 'normal', $unit->id, $target->id, $weapon->id, -1, $this->turn, $mode, 0, 0, $weapon->defaultShots, 0, 0, null, null, null);
         $answers = $this->hitBase($weapon, $unit, $target, $order);
@@ -414,19 +877,21 @@ class AIView
         $expected = 0;
         $hitLoc = null;
         $perHit = 0;
+        $needed = 0;
         $likeliest = -1;
         foreach ($answers as $answer) {
-            $hit = $this->damagePerHit($weapon, $unit, $target, $answer['loc'], $distance);
+            $hit = $this->damagePerHit($weapon, $unit, $target, $answer['loc'], $distance, $answer['needed']);
             $chance += $answer['weight'] * $answer['needed'];
-            $expected += $answer['weight'] * $this->atChance($weapon, $hit, $answer['needed']);
+            $expected += $answer['weight'] * $this->atChance($weapon, $hit, $answer['needed'], $pulses);
             if ($answer['weight'] > $likeliest) {
                 $likeliest = $answer['weight'];
                 $hitLoc = $answer['loc'];
                 $perHit = $hit;
+                $needed = $answer['needed'];
             }
         }
 
-        return array(
+        $shot = array(
             'mode' => $mode,
             'chance' => (int)round($chance),
             'orders' => (int)$weapon->guns,
@@ -434,30 +899,44 @@ class AIView
             'damageclass' => strtolower((string)$weapon->weaponClass),
             'damage' => $expected,
             'perHit' => $perHit,
+            'needed' => $needed, //stage T9 (M3-M5): the likeliest entry's need, perHit's - a rollScaled weapon's hit is worth less at a lower one (damageAfter)
             'hitLoc' => $hitLoc,
             'distance' => $distance,
             'edge' => $this->onEdge($unit, $target)
         );
+        if ($pulses !== null) $shot['pulses'] = (int)$pulses;
+        return $shot;
     }
 
     /* A missile of the bot's own already on its way this turn (a ballistic order of Initial Orders,
        read in the Fire phase): what it should do where its target now stands, priced as shot()
        prices a launch - from its launch hex. Null when it cannot be priced without a die. */
-    public function launched($unit, Weapon $weapon, $target, $mode)
+    public function launched($unit, Weapon $weapon, $target, $mode, $count = 1)
     {
         if ((int)$weapon->firingMode !== (int)$mode) $weapon->changeFiringMode((int)$mode);
         $distance = $unit->getHexPos()->distanceTo($target->getHexPos());
-        return $this->price($unit, $weapon, $target, (int)$mode, $distance, true);
+        if (!self::isTorpedo($weapon)) return $this->price($unit, $weapon, $target, (int)$mode, $distance, true);
+        //stage T9 (M8): $count torpedoes of one launcher at $target - one volley at a ship, a roll each at a flight (isTorpedo)
+        $flight = ($target instanceof FighterFlight);
+        $shot = $this->price($unit, $weapon, $target, (int)$mode, $distance, true, $flight ? 1 : max(1, (int)$count));
+        return ($shot !== null) ? self::asVolley($shot, $target, max(1, (int)$count)) : null;
     }
 
     /* What ONE gun of a planned shot should do once interception has taken $intercept points of
-       chance off it (InterceptModel). The weapon is put in the shot's mode. */
+       chance off it (InterceptModel). The weapon is put in the shot's mode.
+       Stage T9: a rollScaled weapon's hit is worth less at the lower need (rollDamage: perHit moved by the drop in its mean - armour as
+       it was, a Raking one's rakes as they were); a shot with 'pulses' (a torpedo volley, one order to the server when 'merged') lands
+       that many at most. */
     public function damageAfter(array $shot, Weapon $weapon, $intercept)
     {
         if ((int)$weapon->firingMode !== (int)$shot['mode']) $weapon->changeFiringMode((int)$shot['mode']);
         $chance = $shot['chance'] - $intercept;
         if ($chance <= 0) return 0;
-        return $this->atChance($weapon, $shot['perHit'], $chance) / max(1, (int)$weapon->guns);
+        $perHit = $shot['perHit'];
+        if ($intercept > 0 && self::rollScaled($weapon) && isset($shot['needed'])) {
+            $perHit = max(0.5, $perHit + $this->rollDamage($weapon, $shot['needed'] - $intercept) - $this->rollDamage($weapon, $shot['needed']));
+        }
+        return $this->atChance($weapon, $perHit, $chance, isset($shot['pulses']) ? $shot['pulses'] : null) / max(1, (int)$weapon->guns);
     }
 
     /* Does the shooter sit exactly on a line between two of the target's sections or profiles
@@ -554,6 +1033,10 @@ class AIView
 
         $valid = array();
         $bearing = $this->launchBearing($weapon, $shooter, $target, $order);
+        /* Stage T8: a whole-degree bearing that only one entry of the table holds is never rolled for - known without filling the
+           table (asked for every hit chance the bot prices; the arcs of a unit's table do not change in a decision). */
+        //(the bearing as it is - 360 included, which the engine gives for dead ahead and which isInArc need not read as 0)
+        if ((float)$bearing == floor((float)$bearing) && $bearing >= 0 && $bearing <= 360 && !$this->overlapAt($target, (int)$bearing)) return array();
         foreach ($target->getLocations() as $loc) {
             if (Mathlib::isInArc($bearing, $loc['min'], $loc['max'])) $valid[] = $loc;
         }
@@ -568,6 +1051,22 @@ class AIView
             if ($structure->getRemainingHealth() - $expected > 0) $live[] = $loc;
         }
         return $live;
+    }
+
+    /* Do two or more entries of $target's hit table hold this whole bearing (Mathlib::isInArc, the test rolledSections makes)? Only
+       around a line between two sections. Remembered per unit and bearing for the view (the arcs of a table do not change in it). */
+    private function overlapAt($target, $bearing)
+    {
+        $id = (int)$target->id;
+        if (!isset($this->overlaps[$id][$bearing])) {
+            if (!isset($this->overlaps[$id])) $this->overlaps[$id] = array('locations' => $target->getLocations());
+            $holding = 0;
+            foreach ($this->overlaps[$id]['locations'] as $loc) {
+                if (Mathlib::isInArc($bearing, $loc['min'], $loc['max'])) $holding++;
+            }
+            $this->overlaps[$id][$bearing] = ($holding >= 2);
+        }
+        return $this->overlaps[$id][$bearing];
     }
 
     //The bearing the engine picks a section by: the shooter's, or a ballistic's launch hex's.
@@ -628,9 +1127,54 @@ class AIView
        ahead and then fails an arc that starts at 0. */
     public function onArc($unit, Weapon $weapon, $target)
     {
-        $start = $weapon->startArc;
-        $end = $weapon->endArc;
+        return $this->inArcAt($unit, $weapon, round(Mathlib::getCompassHeadingOfShip($unit, $target)));
+    }
 
+    /* Stage T9 (area-effect weapons): weaponManager.isPosOnWeaponArc - the same arc, at the compass heading of a HEX's centre from
+       the unit (mathlib.getCompassHeadingOfPoint; the page rounds it in isInArc as onArc does). */
+    public function onArcHex($unit, Weapon $weapon, OffsetCoordinate $hex)
+    {
+        return $this->inArcAt($unit, $weapon, round(Mathlib::getCompassHeadingOfPoint(Mathlib::hexCoToPixel($unit->getHexPos()), Mathlib::hexCoToPixel($hex))));
+    }
+
+    /* Is the (rounded) compass $heading inside $weapon's arc, turned by $unit's facing - shipManager.systems.getArcs + mathlib.isInArc.
+       Stage T9, M10: a SPLIT-ARC mount (the Centauri Primus's forward Twin Arrays, 240-300 and 60-120 at once) bears in EVERY one of its
+       arcs - weaponManager.isOnWeaponArcMultiple / isPosOnWeaponArc over shipManager.systems.getMultipleArcs (each arc mirrored on its own
+       by a roll); the live startArc/endArc is only the first of them. */
+    private function inArcAt($unit, Weapon $weapon, $heading)
+    {
+        foreach (self::arcsOf($weapon) as $arc) {
+            if ($this->wedgeHolds($unit, $arc[0], $arc[1], $heading)) return true;
+        }
+        return false;
+    }
+
+    //The arcs a mount holds at once: its split list (Weapon::$startArcArray keyed from 0 when $splitArcs), else its one live arc.
+    public static function arcsOf(Weapon $weapon)
+    {
+        if ($weapon->splitArcs && !empty($weapon->startArcArray) && !empty($weapon->endArcArray)) {
+            $arcs = array();
+            foreach ($weapon->startArcArray as $i => $start) {
+                if (!isset($weapon->endArcArray[$i])) continue; //getMultipleArcs skips an unmatched pair
+                $arcs[] = array($start, $weapon->endArcArray[$i]);
+            }
+            if (count($arcs) > 0) return $arcs;
+        }
+        return array(array($weapon->startArc, $weapon->endArc));
+    }
+
+    //A key for "guns alike in arc" (the deciders count alike guns once): the live arc, and a split mount's every arc.
+    public static function arcKey(Weapon $weapon)
+    {
+        $key = $weapon->startArc . '|' . $weapon->endArc;
+        if (!$weapon->splitArcs) return $key;
+        foreach (self::arcsOf($weapon) as $arc) $key .= '|' . $arc[0] . '-' . $arc[1];
+        return $key;
+    }
+
+    //One wedge, $start..$end of the unit's own frame, at compass $heading - getArcs (a roll mirrors it) + isInArc.
+    private function wedgeHolds($unit, $start, $end, $heading)
+    {
         $length = ($start > $end) ? 360 - $start + $end : $end - $start;
         $fullCircle = ($start === $end || $start == $end || $length >= 360);
         if (!$fullCircle && Movement::isRolled($unit)) {
@@ -642,8 +1186,6 @@ class AIView
         $facing = $unit->getFacingAngle();
         $start = self::addToDirection($start, $facing);
         $end = self::addToDirection($end, $facing);
-
-        $heading = round(Mathlib::getCompassHeadingOfShip($unit, $target));
 
         if ($start == $end) return true;
         if ($heading == 0 && ($start == 360 || $end == 360)) return true;
@@ -683,19 +1225,21 @@ class AIView
         return $distance <= $range;
     }
 
-    //What a volley at $chance percent should do: every gun, every shot (or pulse) of it, after armour and range.
-    private function expected(Weapon $weapon, $unit, $target, $chance, $hitLoc, $distance)
+    /* What a volley at $chance percent should do: every gun, every shot (or pulse) of it, after armour and range. $needed: the need
+       before it was clipped to 0..100, for a rollScaled weapon's hit (stage T9); $pulses: atChance's. */
+    private function expected(Weapon $weapon, $unit, $target, $chance, $hitLoc, $distance, $needed = null, $pulses = null)
     {
-        return $this->atChance($weapon, $this->damagePerHit($weapon, $unit, $target, $hitLoc, $distance), $chance);
+        return $this->atChance($weapon, $this->damagePerHit($weapon, $unit, $target, $hitLoc, $distance, $needed), $chance, $pulses);
     }
 
-    //The same, given what one hit does: every gun, every shot (or pulse) at $chance percent. The weapon's mode is the shot's.
-    private function atChance(Weapon $weapon, $perShot, $chance)
+    /* The same, given what one hit does: every gun, every shot (or pulse) at $chance percent. The weapon's mode is the shot's.
+       $pulses: the most pulses one roll lands, when that is not the weapon's own maxpulses (stage T9, M8 - a torpedo volley). */
+    private function atChance(Weapon $weapon, $perShot, $chance, $pulses = null)
     {
         $expected = 0;
         if ($weapon->damageType === 'Pulse') {
             //one roll; each further pulse needs the roll to be `grouping` lower
-            $expected = $perShot * $this->expectedPulses($weapon, $chance);
+            $expected = $perShot * $this->expectedPulses($weapon, $chance, $pulses);
         } else {
             $shots = max(1, (int)$weapon->defaultShots);
             for ($i = 0; $i < $shots; $i++) {
@@ -708,14 +1252,29 @@ class AIView
     /* What one hit is worth: the mode's average damage, less what the range takes off it (a
        plasma weapon's rangeDamagePenalty - Weapon::getDamageMod), less the armour it meets. An
        estimate for ranking, in the spirit of BaseShip::setExpectedDamage - not a simulation. */
-    private function damagePerHit(Weapon $weapon, $unit, $target, $hitLoc, $distance = 0)
+    private function damagePerHit(Weapon $weapon, $unit, $target, $hitLoc, $distance = 0, $needed = null)
     {
         $average = ($weapon->minDamage + $weapon->maxDamage) / 2;
         if ($weapon->maxDamage <= 0) return 1; //no damage of its own: an effect weapon, counted as a token
+        //stage T9 (M3-M5): a weapon whose damage grows with the roll, at the need it is fired at (rollDamage), not its range's mid-point
+        if ($needed !== null && self::rollScaled($weapon)) $average = $this->rollDamage($weapon, $needed);
 
         if ($weapon->rangeDamagePenalty > 0 && $distance > 0) {
             $factor = (TacGamedata::$nebulaPresent && $weapon->weaponClass === 'Plasma') ? 2 : 1; //NEBULA_PLAN.md #11
             $average = max(0, $average - round($distance * $weapon->rangeDamagePenalty * $factor));
+        }
+
+        /* Stage T9 (the user, 2026-11-23: an EM Shield "reduces potential hit chances and damage so possibly needs considered for gauging
+           incoming damage from enemies"): the hit chance has always counted a target's shields - it is the server's own formula - and now
+           the damage they take off each hit does too, as Weapon's damage step takes it (getDamageMod: the strongest defence of each type,
+           on arc from where the shooter stands). Asked only of a target carrying a Shield-type defence, so a decision pays nothing for the
+           rest (an EA ship's Interceptors are defences too, of another type, and take nothing off). */
+        if ($this->shielded($target)) {
+            try {
+                $average = max(0, $average - $target->getDamageMod($unit, null, $this->turn, $weapon));
+            } catch (Throwable $e) {
+                //as before stage T9: no reduction
+            }
         }
 
         $armour = 0;
@@ -741,11 +1300,32 @@ class AIView
         return max(0.5, $average - $armour);
     }
 
-    //Pulses expected from one pulse shot: 1 on a hit, +1 for each `grouping` the roll beats the need by.
-    private function expectedPulses(Weapon $weapon, $chance)
+    //Does $target carry a Shield-type defence (a Shield, an EM Shield, a fighter's shield...)? Remembered per unit for the view's life.
+    private function shielded($target)
+    {
+        $key = (int)$target->id;
+        if (!isset($this->shieldedUnits[$key])) {
+            $systems = $target->systems;
+            if ($target instanceof FighterFlight) {
+                $sample = $target->getSampleFighter();
+                $systems = $sample ? $sample->systems : array();
+            }
+            $this->shieldedUnits[$key] = false;
+            foreach ($systems as $system) {
+                if ($system instanceof DefensiveSystem && $system->getDefensiveType() === 'Shield') {
+                    $this->shieldedUnits[$key] = true;
+                    break;
+                }
+            }
+        }
+        return $this->shieldedUnits[$key];
+    }
+
+    //Pulses expected from one pulse shot: 1 on a hit, +1 for each `grouping` the roll beats the need by - $pulses at most (the weapon's maxpulses when null).
+    private function expectedPulses(Weapon $weapon, $chance, $pulses = null)
     {
         $chance = max(0, min(100, $chance));
-        $max = max(1, (int)$weapon->maxpulses);
+        $max = max(1, (int)($pulses !== null ? $pulses : $weapon->maxpulses));
         $grouping = (float)$weapon->grouping;
         if ($grouping <= 0) return $chance / 100 * max(1, min($max, (int)$weapon->defaultShots));
 
@@ -767,9 +1347,13 @@ class AIView
         return $cost * max(0, min(100, (float)$unit->calculateCombatValue())) / 100;
     }
 
-    /* The damage that would finish a unit. A flight: every surviving craft. A ship: what is left
-       of its primary structure - the box whose loss destroys it. */
-    public function healthLeft($unit)
+    /* The damage that would finish a unit. A flight: every surviving craft. A ship: what is left of its primary structure -
+       the box whose loss destroys it - and, at a level with the skill 'sectionHealth' (stage T5f; the user's ruling on game
+       4774), the structure of the section a hit goes through first. From $shooter's side when that is given (the sections
+       its bearing hits, shared out by profile as the engine picks among them), else the mean of the outer sections. A
+       destroyed section adds nothing: a hit there goes into the primary. Without the skill - Easy - the primary alone, which
+       made a flight value its shots at a ship about twice too high and left guns unfired at a ship "dead on paper". */
+    public function healthLeft($unit, $shooter = null)
     {
         $left = 0;
         if ($unit instanceof FighterFlight) {
@@ -779,8 +1363,42 @@ class AIView
         } else {
             $primary = $unit->getStructureSystem(0);
             if ($primary) $left = $primary->getRemainingHealth();
+            if ($this->skill('sectionHealth')) {
+                $left += ($shooter === null) ? $this->outerStructure($unit) : $this->sectionStructureAt($unit, $unit->getBearingOnUnit($shooter));
+            }
         }
         return max(1, $left);
+    }
+
+    //The mean of what is left of a ship's outer sections' structure, a destroyed one counting 0.
+    private function outerStructure($unit)
+    {
+        $sum = 0;
+        $count = 0;
+        foreach ($unit->systems as $system) {
+            if (!($system instanceof Structure) || (int)$system->location === 0) continue;
+            $count++;
+            if (!$system->isDestroyed()) $sum += $system->getRemainingHealth();
+        }
+        return ($count > 0) ? $sum / $count : 0;
+    }
+
+    /* The outer structure a hit from $bearing (degrees from the ship's facing) goes through: the entries of its hit table
+       whose arc holds the bearing, shared out by profile (exposureAt's choice), each its section's structure left - 0 for a
+       destroyed section, or for an entry the primary takes itself. */
+    private function sectionStructureAt($unit, $bearing)
+    {
+        $weights = 0;
+        $total = 0;
+        foreach ($unit->getLocations() as $loc) {
+            if (!Mathlib::isInArc($bearing, $loc['min'], $loc['max'])) continue;
+            $profile = max(1, (float)$loc['profile']);
+            $weights += $profile;
+            if ((int)$loc['loc'] === 0) continue;
+            $structure = $unit->getStructureSystem($loc['loc']);
+            if ($structure && !$structure->isDestroyed()) $total += $profile * $structure->getRemainingHealth();
+        }
+        return ($weights > 0) ? $total / $weights : $this->outerStructure($unit);
     }
 
     /* How dangerous an enemy is to this fleet where it stands: the most each of its plain guns
@@ -817,8 +1435,41 @@ class AIView
     public function exposure($unit, $shooter)
     {
         if ($unit instanceof FighterFlight) return 1.0;
+        return $this->exposureAt($unit, $unit->getBearingOnUnit($shooter));
+    }
 
-        $bearing = $unit->getBearingOnUnit($shooter);
+    /* For an enemy that has yet to move this turn (user, 2026-11-19: an enemy moving after the ship is MORE dangerous - it
+       can "line up better shots / hit a damaged section"). The section it meets leans from the one facing it now towards
+       the ship's worst, by how much of the gap its speed can close: fully when it is within its own speed. */
+    public function exposureUnmoved($unit, $shooter)
+    {
+        if ($unit instanceof FighterFlight) return 1.0;
+        $now = $this->exposure($unit, $shooter);
+        $last = $shooter->getLastMovement();
+        $speed = $last ? max(0, (int)$last->speed) : 0;
+        $distance = $unit->getHexPos()->distanceTo($shooter->getHexPos());
+        $reach = ($distance <= 0) ? 1.0 : min(1.0, $speed / $distance);
+        return $now + $reach * max(0, $this->worstExposure($unit) - $now);
+    }
+
+    //The worst exposure any bearing gives the unit (sampled every 15 degrees - each section, each line between two). Its damage, not its facing, decides it.
+    public function worstExposure($unit)
+    {
+        if ($unit instanceof FighterFlight) return 1.0;
+        $key = (int)$unit->id;
+        if (!isset($this->worst[$key])) {
+            $worst = 1.0;
+            for ($bearing = 0; $bearing < 360; $bearing += 15) $worst = max($worst, $this->exposureAt($unit, $bearing));
+            $this->worst[$key] = $worst;
+        }
+        return $this->worst[$key];
+    }
+
+    //exposure(), for a hit from $bearing - degrees relative to the unit's facing (a drifting field's, say: Hazards).
+    public function exposureAt($unit, $bearing)
+    {
+        if ($unit instanceof FighterFlight) return 1.0;
+
         $weights = 0;
         $total = 0;
         $dead = false;
@@ -879,18 +1530,43 @@ class AIView
     public function launchEstimate($shooter, Weapon $weapon, $target)
     {
         if (!$weapon->ballistic) return 0;
+        //stage T9 (M8): a torpedo launcher holds one more next turn if it does not launch now, up to its normal load
+        $held = self::isTorpedo($weapon) ? min((int)$weapon->getNormalLoad(), $this->torpedoes($weapon) + 1) : 0;
+        return $this->launchValue($shooter, $weapon, $target, $this->turn + 1, $held, false);
+    }
+
+    /* launchEstimate()'s and torpedoEstimate()'s pricing: a launch of $weapon at $target dated $turn (Weapon::getFiringHex then takes the
+       last row of the turn before it as the launch hex), the arc as the shooter stands, the hit formula with the EW on the board. A torpedo
+       launcher holding $held is priced as the volley the bot would send (torpedoCap). $los: ask the page's line-of-sight test too (the
+       launch-now estimate does; the next-turn one never did). */
+    private function launchValue($shooter, Weapon $weapon, $target, $turn, $held, $los)
+    {
         if (TacGamedata::$officersPresent && $weapon->damageType === 'Piercing') return 0;
+
+        $count = self::isTorpedo($weapon) ? $this->torpedoCap($target, $held) : 1;
+        if ($count < 1) return 0;
+        $pulses = self::isTorpedo($weapon) ? (($target instanceof FighterFlight) ? 1 : $count) : null;
 
         $fc = $weapon->fireControl;
         $index = ($target instanceof FighterFlight) ? 0 : (($target->shipSizeClass < 2) ? 1 : 2);
         if (!isset($fc[$index])) return 0;
 
-        $distance = $shooter->getHexPos()->distanceTo($target->getHexPos());
-        if ($distance > 0 && !$this->onArc($shooter, $weapon, $target)) return 0;
+        /* A launch NOW is from where the ship began the turn (getFiringHex: the last row of the turn before) - EWDecider prices its split
+           with the bot's ships stood a turn straight on, which a launch in Initial Orders never sees. Next turn's is from where it stands. */
+        $from = $shooter->getHexPos();
+        $heading = null;
+        if ((int)$turn === $this->turn) {
+            $row = $shooter->getLastTurnMovement($turn);
+            if ($row && $row->position) $from = new OffsetCoordinate($row->position);
+            $heading = round(Mathlib::getCompassHeadingOfPoint(Mathlib::hexCoToPixel($from), Mathlib::hexCoToPixel($target->getHexPos())));
+        }
+        $distance = $from->distanceTo($target->getHexPos());
+        if ($distance > 0 && !($heading !== null ? $this->inArcAt($shooter, $weapon, $heading) : $this->onArc($shooter, $weapon, $target))) return 0;
         if (!$this->inRange($shooter, $weapon, $target, $distance)) return 0;
         if ($target instanceof FighterFlight && $distance > 5 && $target->getSystemByName('Stealth')) return 0;
+        if ($los && !$weapon->ignoresLoS && count($this->blocked) > 0 && Mathlib::isLoSBlocked($from, $target->getHexPos(), $this->blocked)) return 0;
 
-        $order = new FireOrder(-1, 'ballistic', $shooter->id, $target->id, $weapon->id, -1, $this->turn + 1, $weapon->firingMode, 0, 0, $weapon->defaultShots, 0, 0, null, null, null);
+        $order = new FireOrder(-1, 'ballistic', $shooter->id, $target->id, $weapon->id, -1, $turn, $weapon->firingMode, 0, 0, $weapon->defaultShots, 0, 0, null, null, null);
         try {
             $answers = $this->hitBase($weapon, $shooter, $target, $order);
         } catch (Throwable $e) {
@@ -900,8 +1576,10 @@ class AIView
         $total = 0;
         foreach ($answers as $answer) {
             $chance = max(0, min(100, $answer['needed']));
-            if ($chance > 0) $total += $answer['weight'] * $this->expected($weapon, $shooter, $target, $chance, $answer['loc'], $distance);
+            if ($chance > 0) $total += $answer['weight'] * $this->expected($weapon, $shooter, $target, $chance, $answer['loc'], $distance, $answer['needed'], $pulses);
         }
+        //a torpedo volley at a flight: an order and a roll each (isTorpedo)
+        if ($pulses === 1) $total *= $count;
         return $total;
     }
 
@@ -920,33 +1598,113 @@ class AIView
        question Initial Orders asks (EWDecider): a facing changes in Movement, a distance much less. */
     public function estimate($shooter, Weapon $weapon, $target, $needArc = true)
     {
-        //⚠️ see the header: with officers aboard, pricing a Piercing shot may spend an Expert Gunner's bonus
-        if (TacGamedata::$officersPresent && $weapon->damageType === 'Piercing') return 0;
-
-        $fc = $weapon->fireControl;
-        $index = ($target instanceof FighterFlight) ? 0 : (($target->shipSizeClass < 2) ? 1 : 2);
-        if (!isset($fc[$index])) return 0;
-
-        $distance = $shooter->getHexPos()->distanceTo($target->getHexPos());
-        if ($weapon->range != 0 && $distance > $weapon->range) return 0;
-        if ($needArc && !$this->onArc($shooter, $weapon, $target)) return 0;
-
-        $order = new FireOrder(-1, 'normal', $shooter->id, $target->id, $weapon->id, -1, $this->turn, $weapon->firingMode, 0, 0, $weapon->defaultShots, 0, 0, null, null, null);
-        try {
-            $answers = $this->hitBase($weapon, $shooter, $target, $order);
-        } catch (Throwable $e) {
-            return 0;
-        }
+        $found = $this->hitAnswers($shooter, $weapon, $target, $needArc);
+        if ($found === null) return 0;
+        list($answers, $distance) = $found;
 
         $total = 0;
         foreach ($answers as $answer) {
             $chance = max(0, min(100, $answer['needed']));
-            if ($chance > 0) $total += $answer['weight'] * $this->expected($weapon, $shooter, $target, $chance, $answer['loc'], $distance);
+            if ($chance > 0) $total += $answer['weight'] * $this->expected($weapon, $shooter, $target, $chance, $answer['loc'], $distance, $answer['needed']);
         }
         return $total;
     }
 
+    /* The chance to hit $target with $weapon from where $shooter stands now - the hit table's entries weighed as estimate() weighs
+       them; 0 where estimate() finds no shot at all. Stage T6g: a flight that must fire this turn (FlightDecider) needs a place
+       where a gun of it reaches FireDecider's floor, which an expected damage above 0 does not say. (shot() cannot answer this:
+       it is cached by unit, gun and target, not by where the unit stands.) */
+    public function chanceOf($shooter, Weapon $weapon, $target, $needArc = true)
+    {
+        $found = $this->hitAnswers($shooter, $weapon, $target, $needArc);
+        if ($found === null) return 0;
+        $chance = 0;
+        $weights = 0;
+        foreach ($found[0] as $answer) {
+            $chance += $answer['weight'] * max(0, min(100, $answer['needed']));
+            $weights += $answer['weight'];
+        }
+        return ($weights > 0) ? $chance / $weights : 0;
+    }
+
+    //estimate()'s and chanceOf()'s tests and the server's hit table for the pairing: array(answers, distance), or null for no shot.
+    private function hitAnswers($shooter, Weapon $weapon, $target, $needArc)
+    {
+        //⚠️ see the header: with officers aboard, pricing a Piercing shot may spend an Expert Gunner's bonus
+        if (TacGamedata::$officersPresent && $weapon->damageType === 'Piercing') return null;
+
+        $fc = $weapon->fireControl;
+        $index = ($target instanceof FighterFlight) ? 0 : (($target->shipSizeClass < 2) ? 1 : 2);
+        if (!isset($fc[$index])) return null;
+
+        $distance = $shooter->getHexPos()->distanceTo($target->getHexPos());
+        if ($weapon->range != 0 && $distance > $weapon->range) return null;
+        if ($needArc && !$this->onArc($shooter, $weapon, $target)) return null;
+
+        $order = new FireOrder(-1, 'normal', $shooter->id, $target->id, $weapon->id, -1, $this->turn, $weapon->firingMode, 0, 0, $weapon->defaultShots, 0, 0, null, null, null);
+        try {
+            return array($this->hitBase($weapon, $shooter, $target, $order), $distance);
+        } catch (Throwable $e) {
+            return null;
+        }
+    }
+
     // ------------------------------------------------------------------ next turn
+
+    /* Has $unit made its move this turn, as the bot moving now can tell (2026-11-26, local game 6197)? A unit that cannot move; one
+       with a movement row of this turn; or - in the Movement phase - one AHEAD of the bot's active unit in the initiative order. That
+       last test is the fix: a unit that keeps its speed and course (a parked Bin'Tak at speed 0) sends NO rows - its dummy 'end' row
+       is only written when the phase ends (MovementGamePhase::advance) - so until then the row test calls it yet to move, and the
+       bot weighed five parked dreadnoughts as five that could still turn their guns anywhere: it stood off all game. Units move
+       lowest initiative first: one at a time in TacGamedata::sortShips order, or a bracket at a time (SimultaneousMovementRule -
+       whenever the active units are a list); a unit active now, or in the active bracket, has not moved yet for all the bot can tell
+       (it plots "simultaneously"). $mover: the bot's unit asking (default: its active unit, mover()). */
+    public function hasMoved($unit, $mover = null)
+    {
+        if (!empty($unit->base) || !empty($unit->smallBase) || !empty($unit->osat) || !empty($unit->mine)) return true;
+        if ($unit->getLastTurnMoved() >= $this->turn) return true;
+        if ((int)$this->gamedata->phase !== 2) return false;
+        if ($mover === null) $mover = $this->mover();
+        if ($mover === null || (int)$unit->id === (int)$mover->id) return false;
+        $active = $this->gamedata->activeship;
+        if (is_array($active)) {
+            if (in_array((int)$unit->id, array_map('intval', $active), true)) return false;
+            return (int)$unit->iniative < (int)$mover->iniative;
+        }
+        if ((int)$unit->id === (int)$active) return false;
+        return TacGamedata::sortShips($unit, $mover) < 0;
+    }
+
+    /* The row a decider stands a unit in BEFORE its plan's end row, or null (2026-11-26, live game 7857 turn 4: the Blue Aurora
+       flight jumped the Red Aurora in its hex - judged to fire 41 - and then had no gun on arc). Two units in one hex take their
+       bearing from where the one moving later came from: the hex before its last (BaseShip::getPreviousCoPos, from
+       mathlib::getCompassHeadingOfShip). A decider's single stand-in row skipped the path, so that hex read as the turn's START and
+       the arcs were judged from the wrong side. Only when an enemy of $units stands in the plan's end hex (elsewhere the previous hex
+       changes nothing) and the plan entered it from a hex of its own path (one hex in: the start, as the rows already say). */
+    public function enteredFrom(array $plan, array $units)
+    {
+        $path = isset($plan['path']) ? $plan['path'] : array();
+        if (count($path) < 2) return null;
+        $q = (int)$plan['position']->q;
+        $r = (int)$plan['position']->r;
+        foreach ($units as $unit) {
+            $at = $unit->getHexPos();
+            if ((int)$at->q !== $q || (int)$at->r !== $r) continue;
+            return new MovementOrder(-1, 'move', $path[count($path) - 2], 0, 0, $plan['speed'], $plan['heading'], $plan['facing'], false, $this->turn, 0, 0);
+        }
+        return null;
+    }
+
+    //The bot's unit that holds the Movement phase's activation now (the first, when the activation is a bracket), or null.
+    public function mover()
+    {
+        $active = $this->gamedata->activeship;
+        $ids = is_array($active) ? array_map('intval', $active) : array((int)$active);
+        foreach ($this->myUnits() as $unit) {
+            if (in_array((int)$unit->id, $ids, true)) return $unit;
+        }
+        return null;
+    }
 
     /* A unit one turn straight on from where it stands, as a movement row - or null for one that
        will not move. The guess a player makes about a board he cannot see yet, and what a bot's
@@ -963,16 +1721,20 @@ class AIView
         return new MovementOrder(-1, 'move', $position, 0, 0, $last->speed, $last->heading, $last->facing, false, $turn, 0, 0);
     }
 
+    /* Stage T5f-7: unit id => MovementOrder - where an enemy ship yet to move is FORECAST to end this turn (EnemyForecast, the
+       level's skill 'forecast'), set by MoveDecider for its decision. atFireTime() stands it there instead of straight on. */
+    public $forecast = array();
+
     /* Run $work with the board as it should stand at THIS turn's Fire phase, as seen from the
        Movement phase: a unit that has moved this turn where it ended, any other (but $except) where
-       flying straight on takes it. Put back afterwards, whatever happens; only estimate() may be
-       asked inside. */
+       flying straight on takes it - or, an enemy ship with a forecast, where it is forecast to end
+       (stage T5f-7). Put back afterwards, whatever happens; only estimate() may be asked inside. */
     public function atFireTime(callable $work, array $except = array())
     {
         $moved = array();
         foreach (array_merge($this->myUnits(), $this->enemies()) as $unit) {
-            if (in_array((int)$unit->id, $except, true) || $unit->getLastTurnMoved() >= $this->turn) continue;
-            $row = self::straightOn($unit, $this->turn);
+            if (in_array((int)$unit->id, $except, true) || $this->hasMoved($unit)) continue; //(2026-11-26: hasMoved, not the row test)
+            $row = isset($this->forecast[(int)$unit->id]) ? $this->forecast[(int)$unit->id] : self::straightOn($unit, $this->turn);
             if ($row === null) continue;
             $unit->movement[] = $row;
             $moved[] = $unit;

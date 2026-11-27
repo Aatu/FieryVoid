@@ -1,5 +1,5 @@
 <?php
-class LacannReeva extends OSAT
+class LacannaReeva extends OSAT
 {
 
 	function __construct($id, $userid, $name,  $slot)
@@ -11,7 +11,7 @@ class LacannReeva extends OSAT
         $this->faction = "Yolu Confederation (reevaluated)";
 	      	$this->variantOf = "Lashanna Agitator OSAT";
 	       	$this->occurence = "common";
-		$this->phpclass = "LacannaReev";
+		$this->phpclass = "LacannaReeva";
 		$this->shipClass = "Lacanna Cutter OSAT";
 		$this->imagePath = "img/ships/YoluLashanna.png";
 		$this->canvasSize = 80;

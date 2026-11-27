@@ -159,10 +159,12 @@ body {
    fadeIn animates opacity UP to 1, so it does not compound.
    z-index: above the icons it labels (#shipMovementUI, 7000) and the thrust panel (#thrustUIContainer,
    7002). It was 1000, under both, which the old opaque label mostly hid by standing clear of the
-   icons; the see-through fill made it show. */
+   icons; the see-through fill made it show.
+   7010 -> 10013 (2026-11-21): the thrust panel moved to 10012, one above the ship card, when the card
+   was lifted over the ship windows (10010, shipTooltip.css); this keeps its place above both. */
 .fv-movetooltip {
     position: absolute;
-    z-index: 7010;
+    z-index: 10013;
     padding: 4px 6px;
     font-family: arial;
     font-size: 12px;

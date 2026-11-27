@@ -89,9 +89,10 @@ class AIOrderBuilder
     /* One fire order, in the shape weaponManager.targetShip builds it. A weapon with several guns
        posts one of these per gun. The page sends the strings "null" for the hex of a shot aimed
        at a unit, and so does this. */
-    public static function fire($shooterid, $targetid, $weaponid, $turn, $firingMode, $shots, $damageclass, $type = 'normal')
+    public static function fire($shooterid, $targetid, $weaponid, $turn, $firingMode, $shots, $damageclass, $type = 'normal', $notes = null)
     {
-        return array(
+        //$notes: what the page writes on the order beside the rest - 'Split' on a split-shot weapon's split orders (stage T9, E1), else none
+        $order = array(
             'id' => -1,
             'type' => $type,
             'shooterid' => (int)$shooterid,
@@ -105,6 +106,18 @@ class AIOrderBuilder
             'y' => 'null',
             'damageclass' => $damageclass
         );
+        if ($notes !== null) $order['notes'] = $notes;
+        return $order;
+    }
+
+    /* A jump point declared with a Jump Engine (stage T6c), as weaponManager.createJumpPointOrder builds it: a ballistic order at
+       no unit, the hex in x / y, and the FACING of the vortex's mouth in the firing mode (mode = facing + 1). */
+    public static function jumpPoint($shooterid, $weaponid, $turn, $facing, OffsetCoordinate $hex, $shots, $damageclass)
+    {
+        $order = self::fire($shooterid, -1, $weaponid, $turn, (int)$facing + 1, $shots, $damageclass, 'ballistic');
+        $order['x'] = (int)$hex->q;
+        $order['y'] = (int)$hex->r;
+        return $order;
     }
 
     //The entries -> the ship array a Phase::process() takes.

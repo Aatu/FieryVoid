@@ -9,8 +9,8 @@
  * FIGHTER FLIGHTS (stage T4) go where FlightDecider sends them - strike, intercept or escort -
  * among the plans ShipMover finds for them.
  *
- * Units ShipMover does not plot for (Hunter-Killers, gravitic hulls, a ship carrying another...)
- * keep the fallback's rows: straight on.
+ * Units ShipMover does not plot for (Hunter-Killers, bases, Mindrider drives, a ship carrying
+ * another...) keep the fallback's rows: straight on. Gravitic hulls are plotted since stage T5d.
  *
  * choose() below is the T1b rule - hold the course unless that flies into terrain or off the map -
  * and is what a decider falls back on when it has no plan to choose from.
@@ -27,54 +27,160 @@ class MoveDecider
        against "the bot before stage T5"): nothing in the game sets it. */
     public static $plainFor = array();
 
-    //The bot's Movement entries, one per unit it owns. $seat is its DBManager::getCpuSeats row.
-    public static function orders(TacGamedata $gamedata, $botId, array $seat)
+    /* Stage T8 - a Movement submission decided over SEVERAL requests (AIConfig::BUDGET_SECONDS): unit id => rows, every unit of this
+       activation decided so far (the ones handed in as $resume and the ones decided now) - and the ids of those still to decide,
+       when the request's $deadline came first (empty = complete: the entries can be submitted). TacticalAI keeps $decided in
+       tac_ai_state between requests. */
+    public static $decided = array();
+    public static $pending = array();
+    //Harness override of AIConfig::MOVE_SUBMISSION_SECONDS (null = AIConfig's). Nothing in a game sets it.
+    public static $submissionSeconds = null;
+
+    /* The bot's Movement entries, one per unit it owns. $seat is its DBManager::getCpuSeats row.
+       Stage T8: $resume - unit id => rows decided by an earlier request in this same activation (stood where they go, not decided
+       again); $deadline - a microtime() past which no further unit is begun once one has been decided in this call (null = none).
+       Units are given CPU time out of the submission's AIConfig::MOVE_SUBMISSION_SECONDS as they come (ShipDecider::$share). */
+    public static function orders(TacGamedata $gamedata, $botId, array $seat, array $resume = array(), $deadline = null)
     {
         $gamedata->prepareForPlayer(); //the mask a human in this seat plays behind
         self::$lastSummary = null;
+        self::$decided = array();
+        self::$pending = array();
         FlightDecider::reset();
         ShipDecider::reset();
-        $view = new AIView($gamedata, $botId);
+        JumpDecider::reset();
+        //The seat's level and seed (stage T5f): the view answers what the bot is able to do (AIView::skill) for every decider.
+        $view = new AIView($gamedata, $botId, AIConfig::seatLevel($seat), AIConfig::seatSeed($seat));
 
         $active = array();
         foreach ($gamedata->getMyActiveShips() as $ship) $active[$ship->id] = true;
+        //Stage T8: the submission's CPU time, from here (the forecast inside it) - when there is a decision budget at all
+        $clockEnd = ShipDecider::budgetOn() ? AIConfig::cpuSeconds() + ((self::$submissionSeconds === null) ? AIConfig::MOVE_SUBMISSION_SECONDS : (float)self::$submissionSeconds) : null;
+        $left = 0;
+        foreach (array_keys($active) as $id) if (!isset($resume[$id])) $left++;
 
-        $blocked = self::blockedKeys($gamedata);
-        $bounds = self::mapBounds($gamedata);
+        //The board (stage T5c): terrain, drifting fields, meteor swarms, the mines this bot can see.
+        $hazards = new Hazards($view);
+        //Stage T5f-7: where each enemy ship yet to move will end (the level's skill 'forecast') - every unit decided below sees it there
+        $view->forecast = EnemyForecast::forView($view, $hazards);
+        //Hard (stage T5f-3): the one enemy ship the fleet's heavy guns go for together.
+        if ((float)$view->skill('fleetFocus') > 0) $view->focus = self::focusTarget($view);
 
         $entries = array();
         $flights = 0;
-        foreach (AIFallback::ownUnits($gamedata, $botId) as $ship) {
-            $entry = AIOrderBuilder::entry($ship);
+        $decidedNow = 0;
+        try {
+            foreach (AIFallback::ownUnits($gamedata, $botId) as $ship) {
+                $entry = AIOrderBuilder::entry($ship);
 
-            if (isset($active[$ship->id])) {
-                $mover = ShipMover::forShip($ship, $gamedata);
-                if ($mover !== null && $mover->isFlight()) {
-                    $entry['movement'] = FlightDecider::rows($view, $mover, $ship, $blocked, $bounds);
-                    $flights++;
-                } else if ($mover !== null && in_array((int)$botId, self::$plainFor, true)) {
-                    $entry['movement'] = self::choose($mover, $blocked, $bounds);
-                } else if ($mover !== null) {
-                    $entry['movement'] = ShipDecider::rows($view, $mover, $ship, $blocked, $bounds);
-                } else {
-                    $entry['movement'] = AIFallback::straightRows($ship, $gamedata);
+                if (isset($active[$ship->id])) {
+                    $id = (int)$ship->id;
+                    if (isset($resume[$id])) {
+                        $entry['movement'] = $resume[$id]; //decided by an earlier request of this activation
+                    } else if ($deadline !== null && $decidedNow > 0 && microtime(true) >= $deadline) {
+                        self::$pending[] = $id; //this request's time is spent: the next one decides it
+                        $entries[] = $entry;
+                        continue;
+                    } else {
+                        if ($clockEnd !== null) { //its share of what is left of the submission's CPU time
+                            $share = min(AIConfig::MOVE_DECISION_SECONDS, max(AIConfig::MOVE_UNIT_FLOOR_SECONDS, ($clockEnd - AIConfig::cpuSeconds()) / max(1, $left)));
+                            ShipDecider::$share = $share;
+                            FlightDecider::$share = $share;
+                        }
+                        $entry['movement'] = self::unitRows($view, $gamedata, $botId, $ship, $hazards, $flights);
+                        $decidedNow++;
+                        $left--;
+                    }
+                    self::$decided[$id] = $entry['movement'];
+                    /* Units of the bot that move in the same activation (simultaneous movement) are
+                       decided one after another: each later one sees this one where it is going. */
+                    self::standAtEnd($ship, $entry['movement'], $gamedata->turn);
                 }
-                /* Units of the bot that move in the same activation (simultaneous movement) are
-                   decided one after another: each later one sees this one where it is going. */
-                self::standAtEnd($ship, $entry['movement'], $gamedata->turn);
-            }
 
-            $entries[] = $entry;
+                $entries[] = $entry;
+            }
+        } finally {
+            ShipDecider::$share = null;
+            FlightDecider::$share = null;
         }
 
-        $parts = ShipDecider::$last;
+        $parts = array_merge(ShipDecider::$last, JumpDecider::$last);
         if ($flights > 0) {
             $f = FlightDecider::$last;
-            $parts[] = $flights . ' flights: ' . $f['strike'] . ' striking, ' . $f['intercept'] . ' intercepting, ' . $f['escort'] . ' escorting; ' . $f['jinking'] . ' jinking';
+            $parts[] = $flights . ' flights: ' . $f['strike'] . ' striking, ' . $f['intercept'] . ' intercepting, ' . $f['escort'] . ' escorting'
+                . ($f['hunt'] > 0 ? ', ' . $f['hunt'] . ' hunting to ram (' . $f['ramming'] . ' into a quarry\'s hex)' : '') . '; ' . $f['jinking'] . ' jinking'
+                . ($f['searched'] > 0 ? '; ' . $f['found'] . ' of ' . $f['searched'] . ' less covered places reached' : '')
+                . ($f['forced'] > 0 ? '; ' . $f['forced'] . ' MUST FIRE this turn (no shot for ' . (AIConfig::FLIGHT_MAX_IDLE_TURNS - 1) . ' turns, the side down to its fighters)' : '');
         }
+        if (count($parts) > 0 && $hazards->describe() !== '') $parts[] = 'board: ' . $hazards->describe();
+        if (count($parts) > 0 && count(EnemyForecast::$last) > 0) {
+            $turning = 0;
+            $failed = array();
+            foreach (EnemyForecast::$last as $f) {
+                if (isset($f['error'])) $failed[] = $f['error'];
+                else if (count(array_diff($f['actions'], array(ShipMover::MOVE))) > 0) $turning++;
+            }
+            $parts[] = 'forecast: ' . count(EnemyForecast::$last) . ' enemy ships yet to move, ' . $turning . ' of them manoeuvring'
+                . (count($failed) ? '; NOT FORECAST (straight on): ' . implode('; ', $failed) : '');
+        }
+        if (count($resume) > 0) $parts[] = count($resume) . ' units decided in earlier requests of this activation';
         if (count($parts) > 0) self::$lastSummary = implode(' | ', $parts);
 
         return $entries;
+    }
+
+    //One active unit's rows (orders()' loop): a flight by FlightDecider, a ship by ShipDecider - or JumpDecider when it is leaving.
+    private static function unitRows(AIView $view, TacGamedata $gamedata, $botId, $ship, Hazards $hazards, &$flights)
+    {
+        /* Stage T9, M2 (the user, 2026-11-24): an Uncontrolled Hunter-Killer flight (ELINT jamming, a control-node shortfall) is the
+           server's - AutomatedMovement plots its seek when this activation is committed, whatever is posted for it - so the bot posts
+           nothing for it, as the page does (movement.js isMovementReady). */
+        if (!empty($ship->remoteControl) && AutomatedMovement::isUnderAutomatedControl($ship, $gamedata)) return array();
+        $mover = ShipMover::forShip($ship, $gamedata);
+        if ($mover !== null && $mover->isFlight()) {
+            $flights++;
+            return FlightDecider::rows($view, $mover, $ship, $hazards);
+        }
+        if ($mover !== null && in_array((int)$botId, self::$plainFor, true)) return self::choose($mover, $hazards->blocked, $hazards->bounds);
+        if ($mover === null) return AIFallback::straightRows($ship, $gamedata);
+
+        /* Stage T6c - a ship leaving the battle through its own jump point: on the turn it forms, into its hex through
+           its mouth; the turn after, standing in it, out (JumpDecider). Anything else, or a jump that no longer works: as usual. */
+        $jump = JumpDecider::pending($view, $ship);
+        if ($jump !== null && $jump['open']) $rows = JumpDecider::jumpOutRows($mover, $ship, $jump);
+        else if ($jump !== null) $rows = JumpDecider::approachRows($view, $mover, $ship, $hazards, $jump);
+        else $rows = JumpDecider::brakeRows($view, $mover, $ship, $hazards); //too fast to reach a jump point this turn
+        return ($rows !== null) ? $rows : ShipDecider::rows($view, $mover, $ship, $hazards);
+    }
+
+    /* HARD's fleet focus (stage T5f-3; the user's note 5 on game 4750: "it is more effective to concentrate a fleet's heavy
+       firepower to try and take down an enemy ship rather than spread damage"). The enemy SHIP the fleet's heavy guns could most
+       nearly finish where the units stand - every heavy gun's expected damage at it, arcs not asked (facings change in
+       Movement), over what finishing it takes, no more than all of it, times what it is worth. As damage goes in, the same
+       target scores higher, so the choice holds from turn to turn. Null when no heavy gun reaches an enemy ship. */
+    private static function focusTarget(AIView $view)
+    {
+        $heavy = array();
+        foreach ($view->myUnits() as $unit) {
+            if ($unit instanceof FighterFlight) continue;
+            foreach ($view->mounts($unit) as $mount) {
+                if ($view->plainGun($mount['weapon']) && FireDecider::isHeavy($mount['weapon'])) $heavy[] = array($unit, $mount['weapon']);
+            }
+        }
+        $best = null;
+        $bestScore = 0;
+        foreach ($view->enemies() as $enemy) {
+            if ($enemy instanceof FighterFlight || !empty($enemy->mine)) continue;
+            $damage = 0;
+            foreach ($heavy as $gun) $damage += $view->estimate($gun[0], $gun[1], $enemy, false);
+            if ($damage <= 0) continue;
+            $score = min(1, $damage / $view->healthLeft($enemy)) * $view->value($enemy);
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $best = (int)$enemy->id;
+            }
+        }
+        return $best;
     }
 
     //Put a unit at the end of the rows just decided for it, for the decisions that follow (the load is thrown away after).
@@ -87,14 +193,16 @@ class MoveDecider
     }
 
     /* The part of score() that is about the board, not the plan's manoeuvres: a blocked hex entered,
-       ending off the map, and the same on next turn's straight continuation. 0 = nothing wrong. */
+       ending off the map, and the same on next turn's straight continuation. 0 = nothing wrong. The T1b
+       rule's own (choose()); the T5 deciders ask Hazards, which reproduces this and prices what else is
+       on the board. */
     public static function hazard(array $path, OffsetCoordinate $end, $heading, $speed, array $blocked, $bounds)
     {
         $score = 0;
         foreach ($path as $hex) {
             if (isset($blocked[$hex->q . ',' . $hex->r])) $score += AIConfig::MOVE_COST_BLOCKED;
         }
-        $over = self::hexesOffMap($end, $bounds);
+        $over = Hazards::hexesOffMap($end, $bounds);
         if ($over > 0) $score += AIConfig::MOVE_COST_OFF_MAP + $over * AIConfig::MOVE_COST_PER_HEX_OVER;
 
         $ahead = $end;
@@ -104,7 +212,7 @@ class MoveDecider
             if (isset($blocked[$ahead->q . ',' . $ahead->r])) $aheadBlocked = true;
         }
         if ($aheadBlocked) $score += AIConfig::MOVE_COST_NEXT_TURN;
-        $score += self::hexesOffMap($ahead, $bounds) * AIConfig::MOVE_COST_PER_HEX_OVER;
+        $score += Hazards::hexesOffMap($ahead, $bounds) * AIConfig::MOVE_COST_PER_HEX_OVER;
         return $score;
     }
 
@@ -153,30 +261,4 @@ class MoveDecider
         return $score;
     }
 
-    //How far past the map's edge a hex lies (0 = on the map).
-    private static function hexesOffMap(OffsetCoordinate $hex, $bounds)
-    {
-        if ($bounds === null) return 0;
-        return max(0, abs($hex->q) - $bounds[0]) + max(0, abs($hex->r) - $bounds[1]);
-    }
-
-    //Terrain and Enormous units, as the game itself lists them (TacGamedata::setBlockedHexes).
-    private static function blockedKeys(TacGamedata $gamedata)
-    {
-        $keys = array();
-        foreach ($gamedata->blockedHexes ?: array() as $hex) {
-            $offset = new OffsetCoordinate($hex);
-            $keys[$offset->q . ',' . $offset->r] = true;
-        }
-        return $keys;
-    }
-
-    //Half the map's width and height in hexes (the bounds terrain is laid out within), or null for an unlimited map.
-    private static function mapBounds(TacGamedata $gamedata)
-    {
-        $width = 0;
-        $height = 0;
-        if (sscanf((string)$gamedata->gamespace, '%dx%d', $width, $height) !== 2 || $width <= 0 || $height <= 0) return null;
-        return array(intdiv($width, 2), intdiv($height, 2));
-    }
 }

@@ -4,6 +4,5 @@
 # is the record of known ship-data debt. Adding a line to it in a PR means
 # that PR added a known-broken ship entry - review it, do not rubber-stamp it.
 # Format:  check<TAB>ship<TAB>where<TAB>message
-hangar	federationDreadnought	source/server/model/ships/terranFederation/federationDreadnought.php	$fighters declares 6 boxes but the hangar bays hold 4 - populateInitialHangarUsage silently drops the excess
-hangar	federationHeavyCruiser	source/server/model/ships/terranFederation/federationHeavyCruiser.php	$fighters declares 6 boxes but the hangar bays hold 4 - populateInitialHangarUsage silently drops the excess
-hitchart	MakarDeskoronRefit	location 2, roll 8	no system named "Light X-Ray Laser " on location 2 - every hit here is silently rerouted to Structure
+hitchart	KlingonDaSpu	location 2, roll 10	no system named "Disruptor Cannon" on location 2 - every hit here is silently rerouted to Structure
+hitchart	KlingonVonTalkBoP	location 0, roll 11	no system named "Micro Jump System" on location 0 - every hit here is silently rerouted to Structure

@@ -259,10 +259,16 @@ window.createGame = {
 
         if (!data) return;
 
-        //CPU opponent: the slot's "CPU player" tick (printed only when the feature is on for this player)
+        //CPU opponent: the slot's "CPU player" tick (printed only when the feature is on for this player) - and, while it is
+        //ticked, its level (TACTICAL_AI_PLAN.md stage T8; the server seats the slot at it: AISeats::seatMarkedSlots)
         if (inputname == "cpu") {
             if (input.is(":checked")) data.cpu = true;
             else delete data.cpu;
+            slot.find(".cg-cpu-level").prop("hidden", !data.cpu).val(data.cpuLevel || createGame.CPU_DEFAULT_LEVEL);
+            return;
+        }
+        if (inputname == "cpuLevel") {
+            data.cpuLevel = value;
             return;
         }
 
@@ -1379,10 +1385,11 @@ window.createGame = {
         slot.find("[name='depheight']").val(data.depheight);
         slot.find("[name='depavailable']").val(data.depavailable);
 
-        //CPU opponent: never on slot 1 (the creator's own seat), never in a ladder game
+        //CPU opponent: never on slot 1 (the creator's own seat), never in a ladder game - and its level shown only while ticked
         const cpuAllowed = data.id != 1 && !createGame.rules.ladder;
-        if (!cpuAllowed) delete data.cpu;
+        if (!cpuAllowed) { delete data.cpu; delete data.cpuLevel; }
         slot.find(".cg-slot-cpu").toggle(cpuAllowed).find("[name='cpu']").prop("checked", !!data.cpu);
+        slot.find(".cg-cpu-level").prop("hidden", !data.cpu).val(data.cpuLevel || createGame.CPU_DEFAULT_LEVEL);
     },
 
     createNewSlot: function createNewSlot(e, explicitDefaults) {
@@ -1509,6 +1516,9 @@ window.createGame = {
        as the next team. Its zone is the source's own, overlapping it until moved (Add Team
        does the same with Team 1's or Team 2's zone). */
     slotFields: ["name", "points", "depx", "depy", "deptype", "depwidth", "depheight", "depavailable"],
+    //CPU opponent (TACTICAL_AI_PLAN.md stage T8): a CPU slot's levels - AIConfig::LEVELS / DEFAULT_LEVEL, as the slot template prints them
+    CPU_LEVELS: ["easy", "normal", "hard"],
+    CPU_DEFAULT_LEVEL: "normal",
 
     copySlotData: function copySlotData(source, team, id) {
         const copy = { id: id, team: team };
@@ -1959,6 +1969,12 @@ window.createGame = {
         return html;
     },
 
+    //"Easy" / "Normal" / "Hard" - a CPU slot's level as the slot's picker shows it (the default when none was picked)
+    cpuLevelName: function cpuLevelName(level) {
+        const name = createGame.CPU_LEVELS.indexOf(level) >= 0 ? level : createGame.CPU_DEFAULT_LEVEL;
+        return name.charAt(0).toUpperCase() + name.slice(1);
+    },
+
     summaryTeams: function summaryTeams() {
         const esc = scenarioCard.escapeHtml;
         const teams = createGame.getTeamIds();
@@ -1970,7 +1986,7 @@ window.createGame = {
             const rows = slots.map(function (slot) {
                 let meta = (unlimited || slot.points == -1) ? "Unlimited" : esc(slot.points) + " pts";
                 if (parseInt(slot.depavailable, 10) > 1) meta += " &middot; deploys turn " + esc(slot.depavailable);
-                if (slot.cpu) meta += " &middot; CPU player";
+                if (slot.cpu) meta += " &middot; CPU player (" + esc(createGame.cpuLevelName(slot.cpuLevel)) + ")";
                 return '<li><span class="cg-sum-slot-name">' + esc(slot.name) + '</span><span class="cg-sum-slot-meta">' + meta + "</span></li>";
             }).join("");
 
@@ -2060,7 +2076,16 @@ window.createGame = {
             terrain: terrain,
             scenario: createGame.readScenario(),
             map: { template: $("#mapDimensionsSelect").val(), width: createGame.gamespace_data.width, height: createGame.gamespace_data.height },
-            slots: createGame.slots.map(slot => createGame.copySlotData(slot, slot.team, slot.id))
+            slots: createGame.slots.map(function (slot) {
+                const copy = createGame.copySlotData(slot, slot.team, slot.id);
+                //CPU opponent: the slot's "CPU player" tick and its level (TACTICAL_AI_PLAN.md stage T8 - the user, 2026-11-22: Save
+                //Settings forgot the tick). Kept here rather than in slotFields, which Copy Slot / Copy Team also copy.
+                if (slot.cpu) {
+                    copy.cpu = true;
+                    copy.cpuLevel = slot.cpuLevel || createGame.CPU_DEFAULT_LEVEL;
+                }
+                return copy;
+            })
         };
     },
 
@@ -2188,15 +2213,23 @@ window.createGame = {
             return isNaN(n) ? fallback : n;
         };
 
+        //CPU opponent: a saved CPU tick comes back only where this page offers the tick (the feature on for this player);
+        //setSlotData then drops it again on slot 1 and in a ladder game, as it does a tick made by hand.
+        const cpuOffered = $(".cg-slot-cpu").length > 0;
         const slots = saved.filter(slot => slot && typeof slot === "object")
             .sort((a, b) => int(a.id, 0) - int(b.id, 0))
             .map(function (slot, i) {
-                return {
+                const out = {
                     id: i + 1, team: int(slot.team, 0), name: String(slot.name == null ? "" : slot.name),
                     points: int(slot.points, 0), depx: int(slot.depx, 0), depy: int(slot.depy, 0), deptype: "box",
                     depwidth: int(slot.depwidth, 0), depheight: int(slot.depheight, 0),
                     depavailable: Math.max(1, int(slot.depavailable, 1))
                 };
+                if (slot.cpu === true && cpuOffered) {
+                    out.cpu = true;
+                    out.cpuLevel = createGame.CPU_LEVELS.indexOf(slot.cpuLevel) >= 0 ? slot.cpuLevel : createGame.CPU_DEFAULT_LEVEL;
+                }
+                return out;
             });
 
         const teams = new Set(slots.map(slot => slot.team));

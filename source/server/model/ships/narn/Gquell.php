@@ -16,7 +16,7 @@ class Gquell extends BaseShip{
 	    $this->isd = 2245;
  		$this->unofficial = true; //custom design, intended to provie Narn with EMine-free mainline options
 
-	    $this->notes = 'Custom no-EMine variant.';
+	    $this->notes = 'Custom variant w/o E-Mines.';
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

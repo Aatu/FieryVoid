@@ -6,7 +6,7 @@ class ProtectorateRogata extends HeavyCombatVessel{
 
         $this->pointCost = 585;
         $this->faction = "Minbari Protectorate";
-        $this->phpclass = "Rogata";
+        $this->phpclass = "ProtectorateRogata";
         $this->imagePath = "img/ships/rogata.png";
         $this->shipClass = "Rogata Tug";
         $this->gravitic = true;

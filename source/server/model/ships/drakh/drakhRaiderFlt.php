@@ -65,7 +65,7 @@ class DrakhRaiderFlt extends FighterFlight{
         public function getInitiativebonus($gamedata){
 	    $iniBonus = parent::getInitiativebonus($gamedata);
             //may be boosted by  Raider Controller...
-	    $iniBonus += DrakhRaiderController::getIniBonus($this);
+	    $iniBonus += DrakhRaiderController::getIniBonus($this, $gamedata);
             return $iniBonus;
         }	
     
